@@ -7,22 +7,124 @@
  */
 
 import React, { Component } from "react";
-import { ScrollView, StatusBar, Text, View } from "react-native";
+import { ScrollView, StatusBar, Text, View, StyleSheet} from "react-native";
 import tw from "twrnc";
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { Image } from "@rneui/themed";
 
 class HomeScreen extends Component {
     render() {
+        let s=StyleSheet.create({
+            borderColor: "#2F3A79",
+            borderWidth: 10,
+            borderRadius: 15,
+            backgroundColor: "#fff",
+            overlayColor: "#ffffff",
+            marginBottom:2
+        })
         return (
-            <ScrollView style={tw.style('w-full','h-full','bg-white')}>
-                <View style={tw.style('flex','flex-row')}>
+            <ScrollView style={tw.style("w-full", "h-full", "bg-white")}>
+                <View style={tw.style("flex", "flex-row", "my-5", "mx-5",'justify-around',"flex-wrap")}>
                     <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/Map.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>Map</Text>
+                    </View>
 
+                    <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/UMNews.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>UM News</Text>
+                    </View>
+
+                    <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/Scholarship.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>Whole Person</Text>
                     </View>
                 </View>
+
+                <View style={tw.style("flex", "flex-row", "my-5", "mx-5",'justify-around',"flex-wrap")}>
+                    <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/Calendar.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>Calendar</Text>
+                    </View>
+
+                    <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/AddDrop.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>Add/Drop</Text>
+                    </View>
+
+                    <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/SIW.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>SIW</Text>
+                    </View>
+                </View>
+
+                <View style={tw.style("flex", "flex-row", "my-5", "mx-5",'justify-around',"flex-wrap")}>
+                    <View>
+                        <View style={s}>
+                            <Image
+                                source={require("./static/img/What2Reg.png")}
+                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+                        </View>
+                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>What2Reg</Text>
+                    </View>
+
+                    <View>
+                        <View style={{
+                            borderColor: "#fff",
+                            borderWidth: 10,
+                            borderRadius: 15,
+                            backgroundColor: "#fff",
+                            overlayColor: "#ffffff",
+                            marginBottom:5
+                        }}>
+                            <View
+                                style={tw.style("w-17", "h-17")} />
+                        </View>
+                    </View>
+
+                    <View>
+                        <View style={{
+                            borderColor: "#fff",
+                            borderWidth: 10,
+                            borderRadius: 15,
+                            backgroundColor: "#fff",
+                            overlayColor: "#ffffff",
+                            marginBottom:5
+                        }}>
+                            <View
+                                style={tw.style("w-17", "h-17")} />
+                        </View>
+                    </View>
+                </View>
+
+
             </ScrollView>
         );
     }
