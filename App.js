@@ -6,107 +6,110 @@
  * @flow strict-local
  */
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, { Component } from "react";
+import { Text, View } from "react-native";
+import tw from "twrnc";
+import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+class HomeScreen extends Component {
+    render() {
+        return (
+            <View>
+                <Text>
+                    Home
+                </Text>
+            </View>
+        );
+    }
+}
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+class BusScreen extends Component {
+    render() {
+        return (
+            <View>
+                <Text>
+                    Bus
+                </Text>
+            </View>
+        );
+    }
+}
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+class BBSScreen extends Component {
+    render() {
+        return (
+            <View>
+                <Text>
+                    BBS
+                </Text>
+            </View>
+        );
+    }
+}
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+class UserScreen extends Component {
+    render() {
+        return (
+            <View>
+                <Text>
+                    Me
+                </Text>
+            </View>
+        );
+    }
+}
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+const Tab = createBottomTabNavigator();
+
+function tabBar(){
+    return (
+        <View style={tw.}>
+            <Ionicons name={iconName} size={25} color={'#2F3A79'} />
+            <Text>Home</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+    )
+}
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+function App() {
+    return (
+        <SafeAreaProvider>
+            <NavigationContainer>
+                <Tab.Navigator screenOptions={
+                    (
+                        { route },
+                    ) => {
+                        return {
+                            tabBarIcon: (focused, color, size) => {
+                                let iconName;
+
+                                if (route.name === 'Home') {
+                                    iconName = focused
+                                        ? 'home'
+                                        : 'home-outline';
+                                } else if (route.name === 'BBS') {
+                                    iconName = focused ? 'ios-list-box' : 'ios-list';
+                                }
+
+                                // You can return any component that you like here!
+                                return <Ionicons name={iconName} size={25} color={'#2F3A79'} />;
+                            },
+                            tabBarActiveTintColor: '#2F3A79',
+                            tabBarInactiveTintColor: 'black',
+                        };
+                    }
+                }>
+                    <Tab.Screen name="Home" component={HomeScreen} />
+                    <Tab.Screen name="Bus" component={BusScreen} />
+                    <Tab.Screen name="BBS" component={BBSScreen} />
+                    <Tab.Screen name="Me" component={UserScreen} />
+                </Tab.Navigator>
+            </NavigationContainer>
+        </SafeAreaProvider>
+    );
+}
+
 
 export default App;
