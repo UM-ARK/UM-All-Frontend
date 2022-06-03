@@ -197,7 +197,7 @@ function HomeScreen() {
 // 1. 從https://campusloop.cmdo.um.edu.mo返回HTML數據
 // 2. 解析HTML數據，得到巴士到站的數組
 function getBusData(){
-    return 
+    return
 }
 // 巴士報站頁 - 畫面佈局與渲染
 function BusScreen() {
@@ -238,7 +238,7 @@ function BusScreen() {
                 <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
                 {/* 右下箭頭 */}
                 <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
-                
+
                 {/* 站點原點標誌 */}
                 <Image source={dotImg} style={[s.dotSize, {}]} />
                 <Image source={dotImg} style={[s.dotSize, {}]} />
@@ -258,21 +258,8 @@ function BusScreen() {
     )
 }
 
-=======
-class BusScreen extends Component {
-    render() {
-        return (
-            <View>
-                <Text>
-                    Bus
-                </Text>
-            </View>
-        );
-    }
-}
 
 const NewsStack = createNativeStackNavigator();
->>>>>>> Stashed changes
 
 class NewsScreen extends Component {
     render() {
