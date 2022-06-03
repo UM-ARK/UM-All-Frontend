@@ -7,7 +7,7 @@
  */
 // RN直屬庫
 import React, { Component } from "react";
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { ScrollView, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View, ImageBackground } from "react-native";
 // RN第三方庫
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
@@ -199,11 +199,30 @@ function getBusData(){
 }
 // 巴士報站頁 - 畫面佈局與渲染
 function BusScreen() {
+    // 樣式代碼
+    let s = StyleSheet.create({
+        container: {
+            flex: 1,
+            flexDirection: "column"
+        },
+        image: {
+            flex: 1,
+            resizeMode: "cover",
+            justifyContent: "center"
+        },
+        text: {
+            color: "#ff006a",
+            fontSize: 42,
+            fontWeight: "bold",
+            textAlign: "center",
+            background: "#000000a0"
+        }
+    });
     return (
-        <View>
-            <Text>
-                Bus
-            </Text>
+        <View style={s.container}>
+            <ImageBackground source={require('./static/img/Bus/bus_route.png')} style={s.image}>
+                <Text style={s.text}>Inside Text Test</Text>
+            </ImageBackground>
         </View>
     )
 }
