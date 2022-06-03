@@ -192,7 +192,6 @@ function HomeScreen() {
 
 }
 
-<<<<<<< Updated upstream
 // TODO:爬蟲？
 // 1. 從https://campusloop.cmdo.um.edu.mo返回HTML數據
 // 2. 解析HTML數據，得到巴士到站的數組
