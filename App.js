@@ -21,6 +21,7 @@ import { Image } from "@rneui/themed";
 
 // 本地引用
 import { Map } from "./view/Home/Map";
+import { News, NewsComponent } from "./view/Home/News";
 
 
 // 所有功能圖標頁
@@ -191,6 +192,7 @@ function HomeScreen() {
 
 }
 
+<<<<<<< Updated upstream
 // TODO:爬蟲？
 // 1. 從https://campusloop.cmdo.um.edu.mo返回HTML數據
 // 2. 解析HTML數據，得到巴士到站的數組
@@ -256,15 +258,40 @@ function BusScreen() {
     )
 }
 
-
-class NewsScreen extends Component {
+=======
+class BusScreen extends Component {
     render() {
         return (
             <View>
                 <Text>
-                    News
+                    Bus
                 </Text>
             </View>
+        );
+    }
+}
+
+const NewsStack = createNativeStackNavigator();
+>>>>>>> Stashed changes
+
+class NewsScreen extends Component {
+    render() {
+        return (
+            <NewsStack.Navigator >
+                <NewsStack.Screen name="NewsHome" component={News} options={
+                    {
+                        title:'UM News',
+                        headerStyle:{
+                            backgroundColor:'#2F3A79'
+                        },
+                        headerTintColor:'#fff'
+                    }
+                }/>
+                <HomeStack.Screen name="Detail" component={NewsComponent} options={{
+                    headerShown:false
+                }
+                }/>
+            </NewsStack.Navigator>
         );
     }
 }
@@ -357,6 +384,7 @@ function App() {
                         headerTitleStyle: {
                             fontWeight: "bold",
                         },
+                        headerShown:false
                     }} />
                     <Tab.Screen name="Me" component={UserScreen} options={{
                         headerStyle: {
