@@ -20,7 +20,7 @@
 1. 指定自己的賬號和郵箱（GitHub username）
 
 git config --global user.name "yyyyyyounger"
-git config --global user.email "1049825685@qq.com"
+git config --global user.email "xxxxx@xx.com"
 
 2. git add -A 或者使用 `git add .`
 

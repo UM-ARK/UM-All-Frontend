@@ -1,3 +1,3 @@
 git add .
 
-git commit -m ":pencil: 不再上傳gitCommit.sh的更新"
+git commit -m ":pencil: 修改README說明"
