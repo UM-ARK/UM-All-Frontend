@@ -5,19 +5,25 @@
  * @format
  * @flow strict-local
  */
-
+// RN直屬庫
 import React, { Component } from "react";
 import { ScrollView, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
-import tw from "twrnc";
+// RN第三方庫
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Image } from "@rneui/themed";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+// 第三方庫
+import tw from "twrnc";
+import { Image } from "@rneui/themed";
+
+// 本地引用
 import { Map } from "./view/Home/Map";
 
 
+// 所有功能圖標頁
 class HomeFuncScreen extends Component {
     constructor(props) {
         super(props);
@@ -184,20 +190,24 @@ function HomeScreen() {
     );
 
 }
+
+// TODO:爬蟲？
+// 1. 從https://campusloop.cmdo.um.edu.mo返回HTML數據
+// 2. 解析HTML數據，得到巴士到站的數組
 function getBusData(){
     return 
 }
-class BusScreen extends Component {
-    render() {
-        return (
-            <View>
-                <Text>
-                    Bus
-                </Text>
-            </View>
-        );
-    }
+// 巴士報站頁 - 畫面佈局與渲染
+function BusScreen() {
+    return (
+        <View>
+            <Text>
+                Bus
+            </Text>
+        </View>
+    )
 }
+
 
 class NewsScreen extends Component {
     render() {
