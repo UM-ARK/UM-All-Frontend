@@ -1,3 +1,3 @@
 git add .
 
-git commit -m ":sparkles: 導入巴士報站頁圖片"
+git commit -m ":sparkles: 對巴士報站頁進行簡單佈局"

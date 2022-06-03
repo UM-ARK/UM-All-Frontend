@@ -199,29 +199,58 @@ function getBusData(){
 }
 // 巴士報站頁 - 畫面佈局與渲染
 function BusScreen() {
+    let busRouteImg = require('./static/img/Bus/bus_route.png')
+    let arrowImg = require('./static/img/Bus/direction_left.png')
+    let dotImg = require('./static/img/Bus/loc_dot.png')
     // 樣式代碼
     let s = StyleSheet.create({
         container: {
             flex: 1,
             flexDirection: "column"
         },
-        image: {
+        bgImg: {
             flex: 1,
             resizeMode: "cover",
             justifyContent: "center"
         },
-        text: {
-            color: "#ff006a",
-            fontSize: 42,
-            fontWeight: "bold",
-            textAlign: "center",
-            background: "#000000a0"
-        }
+        arrowSize: {
+            width:35,
+            height:35,
+            resizeMode:"contain",
+        },
+        dotSize: {
+            width:21,
+            height:21,
+            resizeMode:"contain"
+        },
     });
     return (
         <View style={s.container}>
-            <ImageBackground source={require('./static/img/Bus/bus_route.png')} style={s.image}>
-                <Text style={s.text}>Inside Text Test</Text>
+            <ImageBackground source={ busRouteImg } style={s.bgImg}>
+
+                {/* 右上箭頭 */}
+                <Image source={arrowImg} style={s.arrowSize} />
+                {/* 左上箭頭 */}
+                <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
+                {/* 左下箭頭 */}
+                <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
+                {/* 右下箭頭 */}
+                <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
+                
+                {/* 站點原點標誌 */}
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+                <Image source={dotImg} style={[s.dotSize, {}]} />
+
+                {/* TODO:確認所有站點的絕對位置 */}
+                {/* TODO:如果不止一輛巴士的情況 */}
+                {/* 巴士圖標 */}
+                <Ionicons name={"bus"} size={30} color={"#2F3A79"} style={{}}/>
             </ImageBackground>
         </View>
     )
@@ -317,6 +346,8 @@ function App() {
                         headerTitleStyle: {
                             fontWeight: "bold",
                         },
+                        // headerShown設置是否顯示頂部欄
+                        headerShown:false
                     }} />
                     <Tab.Screen name="News" component={NewsScreen} options={{
                         headerStyle: {
