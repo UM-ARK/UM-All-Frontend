@@ -1,3 +1,3 @@
 git add .
 
-git commit -m ":sparkles: 對巴士報站頁進行簡單佈局"
+git commit -m ":pencil: 不再上傳gitCommit.sh的更新"
