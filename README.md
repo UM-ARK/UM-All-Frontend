@@ -19,10 +19,10 @@
 ### 基本的push
 1. 指定自己的賬號和郵箱（GitHub username）
 
-git config --global user.name "yyyyyyounger"
+git config --global user.name "your GitHub username"
 git config --global user.email "xxxxx@xx.com"
 
-2. git add -A 或者使用 `git add .`
+2. 添加修改到暫存區 `git add -A`
 
 3. 說說修改了什麼
 

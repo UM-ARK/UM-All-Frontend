@@ -63,4 +63,4 @@ buck-out/
 /.idea
 
 # 忽略commit腳本文件
-gitCommit.sh
+/gitCommit.sh
