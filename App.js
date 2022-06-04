@@ -7,7 +7,16 @@
  */
 // RN直屬庫
 import React, { Component } from "react";
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View, ImageBackground } from "react-native";
+import {
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableWithoutFeedback,
+    View,
+    ImageBackground,
+    ActivityIndicator,
+} from "react-native";
 // RN第三方庫
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
@@ -53,6 +62,14 @@ class HomeFuncScreen extends Component {
                         <TouchableWithoutFeedback onPress={this.goToMapScreen}>
                             <View style={s}>
                                 <Image
+                                    placeholderStyle={{
+                                        backgroundColor: "#2F3A79",
+                                    }}
+                                    PlaceholderContent={
+                                        <View>
+                                            <ActivityIndicator color={"#fff"} />
+                                        </View>
+                                    }
                                     source={require("./static/img/Map.png")}
                                     style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                             </View>
@@ -63,6 +80,14 @@ class HomeFuncScreen extends Component {
                     <View>
                         <View style={s}>
                             <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
                                 source={require("./static/img/UMNews.png")}
                                 style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                         </View>
@@ -71,6 +96,14 @@ class HomeFuncScreen extends Component {
                     <View>
                         <View style={s}>
                             <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
                                 source={require("./static/img/Scholarship.png")}
                                 style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                         </View>
@@ -92,6 +125,14 @@ class HomeFuncScreen extends Component {
                     <View>
                         <View style={s}>
                             <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
                                 source={require("./static/img/Calendar.png")}
                                 style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                         </View>
@@ -101,6 +142,14 @@ class HomeFuncScreen extends Component {
                     <View>
                         <View style={s}>
                             <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
                                 source={require("./static/img/AddDrop.png")}
                                 style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                         </View>
@@ -110,6 +159,14 @@ class HomeFuncScreen extends Component {
                     <View>
                         <View style={s}>
                             <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
                                 source={require("./static/img/SIW.png")}
                                 style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                         </View>
@@ -121,6 +178,14 @@ class HomeFuncScreen extends Component {
                     <View>
                         <View style={s}>
                             <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
                                 source={require("./static/img/What2Reg.png")}
                                 style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
                         </View>
