@@ -192,12 +192,13 @@ function HomeScreen() {
 
 }
 
-// TODO:爬蟲？
+// TODO:爬蟲與解析HTML
 // 1. 從https://campusloop.cmdo.um.edu.mo返回HTML數據
 // 2. 解析HTML數據，得到巴士到站的數組
 function getBusData(){
     return
 }
+
 // 巴士報站頁 - 畫面佈局與渲染
 function BusScreen() {
     let busRouteImg = require('./static/img/Bus/bus_route.png')
@@ -252,6 +253,33 @@ function BusScreen() {
                 {/* TODO:如果不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
                 <Ionicons name={"bus"} size={30} color={"#2F3A79"} style={{}}/>
+
+                {/* 巴士站點文字 */}
+                <View style={tw.style("border-2", "border-blue-900", "w-23.5")}>
+                    <Text style={tw.style("text-base")}>E4 劉少榮樓</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-23.5")}>
+                    <Text style={tw.style("text-base")}>N2 大學會堂</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-20")}>
+                    <Text style={tw.style("text-base")}>N6 行政樓</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-25.5")}>
+                    <Text style={tw.style("text-base")}>E11 科技學院</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-30")}>
+                    <Text style={tw.style("text-base")}>E21 人文社科樓</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-22")}>
+                    <Text style={tw.style("text-base")}>E32 法學院</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-46.5")}>
+                    <Text style={tw.style("text-base")}>S4 研究生宿舍南四座(終)</Text>
+                </View>
+                <View style={tw.style("border-2", "border-blue-900", "w-38")}>
+                    <Text style={tw.style("text-base")}>PGH 研究生宿舍(起)</Text>
+                </View>
+                
             </ImageBackground>
         </View>
     )
