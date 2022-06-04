@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableWithoutFeedback, View } from "react-native";
 import tw from "twrnc";
 import { Image } from "@rneui/themed";
 
@@ -35,47 +35,55 @@ class NewsCard extends Component{
         this.state= {
             news: props.news,
             isFirst: props.isFirst,
+            date:new Date(props.news.common.publishDate)
         }
+        this.goToDetails=this.goToDetails.bind(this)
     }
 
+    goToDetails=()=>{
 
+    }
     render() {
         if (this.state.news.details.length > 0) {
             return (
                 <SafeAreaView>
-                    <View style={tw.style("my-2", "mx-5", "flex", "flex-row", "justify-between", "items-center")}>
-                        <View style={{
-                            width: "70%",
-                            marginRight: 8,
-                        }}>
-                            <Text style={tw.style("text-black", "text-sm")}>
-                                {this.state.news.details[1].title}
-                            </Text>
-                            <Text>
-                                {this.state.news.details[0].title}
-                            </Text>
-                        </View>
-                        <View style={tw.style("flex-1", "max-w-xs")}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                transition={true}
-                                source={{ uri: this.state.news.common.imageUrls[0].replace('http','https') }}
-                                style={{
-                                    aspectRatio: 1,
-                                    width: "100%",
-                                    borderRadius:5
-                                }}
+                    <TouchableWithoutFeedback onPress={this.goToDetails}>
+                        <View style={tw.style("my-2", "mx-5", "flex", "flex-row", "justify-between", "items-center")}>
+                            <View style={{
+                                width: "70%",
+                                marginRight: 8,
+                            }}>
+                                <Text style={tw.style("text-black", "text-sm")}>
+                                    {this.state.news.details[1].title}
+                                </Text>
+                                <Text>
+                                    {this.state.news.details[0].title}
+                                </Text>
+                                <Text style={tw.style('mt-1','text-xs')}>{this.state.date.getFullYear()+'/'+this.state.date.getMonth()+'/'+this.state.date.getDate()}</Text>
+                            </View>
+                            <View style={tw.style("flex-1", "max-w-xs")}>
+                                <Image
+                                    placeholderStyle={{
+                                        backgroundColor: "#2F3A79",
+                                    }}
+                                    PlaceholderContent={
+                                        <View>
+                                            <ActivityIndicator color={"#fff"} />
+                                            <Text style={tw.style('text-white')}>Loading...</Text>
+                                        </View>
+                                    }
+                                    transition={true}
+                                    source={{ uri: this.state.news.common.imageUrls[0].replace('http','https') }}
+                                    style={{
+                                        aspectRatio: 1,
+                                        width: "100%",
+                                        borderRadius:2
+                                    }}
 
-                            />
+                                />
+                            </View>
                         </View>
-                    </View>
+                    </TouchableWithoutFeedback>
                 </SafeAreaView>
 
             );
@@ -116,7 +124,9 @@ export class News extends Component{
         }
         let l = [];
         for (let i = 0; i < 50; i++) {
-            l.push(<NewsCard news={this.state.news[i]} isFirst={i == 0} />);
+            if (this.state.news[i].details.length > 0){
+                l.push(<NewsCard news={this.state.news[i]} isFirst={i == 0} />);
+            }
         }
         this.setState({
             newsList: l,
