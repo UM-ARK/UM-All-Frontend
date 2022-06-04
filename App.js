@@ -230,56 +230,82 @@ function BusScreen() {
         <View style={s.container}>
             <ImageBackground source={ busRouteImg } style={s.bgImg}>
 
-                {/* 右上箭頭 */}
-                <Image source={arrowImg} style={s.arrowSize} />
-                {/* 左上箭頭 */}
-                <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
-                {/* 左下箭頭 */}
-                <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
-                {/* 右下箭頭 */}
-                <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
-
-                {/* 站點原點標誌 */}
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-                <Image source={dotImg} style={[s.dotSize, {}]} />
-
                 {/* TODO:確認所有站點的絕對位置 */}
                 {/* TODO:如果不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
                 <Ionicons name={"bus"} size={30} color={"#2F3A79"} style={{}}/>
 
-                {/* 巴士站點文字 */}
-                <View style={tw.style("border-2", "border-blue-900", "w-23.5")}>
-                    <Text style={tw.style("text-base")}>E4 劉少榮樓</Text>
+                {/* 右上箭頭 */}
+                <View style={ {position: 'absolute', left: 310, top: 25,} }>
+                    <Image source={arrowImg} style={s.arrowSize} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-23.5")}>
-                    <Text style={tw.style("text-base")}>N2 大學會堂</Text>
+                {/* 左上箭頭 */}
+                <View style={ {position: 'absolute', left: 45, top: 140,} }>
+                    <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-20")}>
-                    <Text style={tw.style("text-base")}>N6 行政樓</Text>
+                {/* 左下箭頭 */}
+                <View style={ {position: 'absolute', left: 45, top: 610,} }>
+                    <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-25.5")}>
-                    <Text style={tw.style("text-base")}>E11 科技學院</Text>
+                {/* 右下箭頭 */}
+                <View style={ {position: 'absolute', left: 315, top: 610,} }>
+                    <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-30")}>
-                    <Text style={tw.style("text-base")}>E21 人文社科樓</Text>
+
+                {/* 站點圓點標誌 */}
+                {/* PGH */}
+                <View style={ {position: 'absolute', left: 310, top: 570,} }>
+                    <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-22")}>
-                    <Text style={tw.style("text-base")}>E32 法學院</Text>
+                <View style={ {position: 'absolute', left: 310, top: 360,} }>
+                    <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-46.5")}>
-                    <Text style={tw.style("text-base")}>S4 研究生宿舍南四座(終)</Text>
+                <View style={ {position: 'absolute', left: 310, top: 80,} }>
+                    <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={tw.style("border-2", "border-blue-900", "w-38")}>
-                    <Text style={tw.style("text-base")}>PGH 研究生宿舍(起)</Text>
+                <View style={ {position: 'absolute', left: 145, top: 120,} }>
+                    <Image source={dotImg} style={s.dotSize} />
+                </View>
+                <View style={ {position: 'absolute', left: 62, top: 250,} }>
+                    <Image source={dotImg} style={s.dotSize} />
+                </View>
+                <View style={ {position: 'absolute', left: 62, top: 330,} }>
+                    <Image source={dotImg} style={s.dotSize} />
+                </View>
+                <View style={ {position: 'absolute', left: 62, top: 510,} }>
+                    <Image source={dotImg} style={s.dotSize} />
+                </View>
+                {/* S4 */}
+                <View style={ {position: 'absolute', left: 250, top: 602,} }>
+                    <Image source={dotImg} style={s.dotSize} />
                 </View>
                 
+                {/* 巴士站點文字 */}
+                <View style={[tw.style("border-2", "border-blue-900", "w-38"), {position: 'absolute', left: 310, top: 570,}]}>
+                    <Text style={tw.style("text-base")}>PGH 研究生宿舍(起)</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-23.5"), {position: 'absolute', left: 210, top: 355,}]}>
+                    <Text style={tw.style("text-base")}>E4 劉少榮樓</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-23.5"), {position: 'absolute', left: 210, top: 75,}]}>
+                    <Text style={tw.style("text-base")}>N2 大學會堂</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-20"), {position: 'absolute', left: 170, top: 115,}]}>
+                    <Text style={tw.style("text-base")}>N6 行政樓</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-25.5"), {position: 'absolute', left: 85, top: 245,}]}>
+                    <Text style={tw.style("text-base")}>E11 科技學院</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-30"), {position: 'absolute', left: 85, top: 325,}]}>
+                    <Text style={tw.style("text-base")}>E21 人文社科樓</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-22"), {position: 'absolute', left: 85, top: 505,}]}>
+                    <Text style={tw.style("text-base")}>E32 法學院</Text>
+                </View>
+                <View style={[tw.style("border-2", "border-blue-900", "w-46.5"), {position: 'absolute', left: 120, top: 620,}]}>
+                    <Text style={tw.style("text-base")}>S4 研究生宿舍南四座(終)</Text>
+                </View>
+
             </ImageBackground>
         </View>
     )
