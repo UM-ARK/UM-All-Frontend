@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from "react-native";
 import tw from "twrnc";
+import { Image } from "@rneui/themed";
 
 function getNewsData(){
     return fetch('https://api.data.um.edu.mo/service/media/news/v1.0.0/all',{
@@ -31,24 +32,56 @@ export class NewsComponent extends Component{
 class NewsCard extends Component{
     constructor(props) {
         super(props);
-        this.state={
-            news:props.news
+        this.state= {
+            news: props.news,
+            isFirst: props.isFirst,
         }
     }
 
 
     render() {
-        if (this.state.news.details[0].title!=undefined){
-            return(
-                <View>
-                    <Text>
-                        {this.state.news.details[0].title}
-                    </Text>
-                </View>
-            )
-        }
-        else {
-            return (<View></View>)
+        if (this.state.news.details.length > 0) {
+            return (
+                <SafeAreaView>
+                    <View style={tw.style("my-2", "mx-5", "flex", "flex-row", "justify-between", "items-center")}>
+                        <View style={{
+                            width: "70%",
+                            marginRight: 8,
+                        }}>
+                            <Text style={tw.style("text-black", "text-sm")}>
+                                {this.state.news.details[1].title}
+                            </Text>
+                            <Text>
+                                {this.state.news.details[0].title}
+                            </Text>
+                        </View>
+                        <View style={tw.style("flex-1", "max-w-xs")}>
+                            <Image
+                                placeholderStyle={{
+                                    backgroundColor: "#2F3A79",
+                                }}
+                                PlaceholderContent={
+                                    <View>
+                                        <ActivityIndicator color={"#fff"} />
+                                    </View>
+                                }
+                                transition={true}
+                                source={{ uri: this.state.news.common.imageUrls[0].replace('http','https') }}
+                                style={{
+                                    aspectRatio: 1,
+                                    width: "100%",
+                                    borderRadius:5
+                                }}
+
+                            />
+                        </View>
+                    </View>
+                </SafeAreaView>
+
+            );
+
+        } else {
+            return (<View></View>);
         }
     }
 }
@@ -56,10 +89,10 @@ class NewsCard extends Component{
 export class News extends Component{
     constructor(props) {
         super(props);
-        this.state={
-            news:[],
-            isLoading:true,
-            newsList:[]
+        this.state= {
+            news: [],
+            isLoading: true,
+            newsList: [],
         }
 
 
@@ -81,13 +114,13 @@ export class News extends Component{
         } finally {
             this.setState({ isLoading: false });
         }
-        let l=[]
-        for (let i = 0; i < 15; i++) {
-            l.push(<NewsCard news={this.state.news[i]}></NewsCard>)
+        let l = [];
+        for (let i = 0; i < 50; i++) {
+            l.push(<NewsCard news={this.state.news[i]} isFirst={i == 0} />);
         }
         this.setState({
-            newsList:l
-        })
+            newsList: l,
+        });
     }
     componentDidMount() {
         this.getData();
@@ -99,7 +132,7 @@ export class News extends Component{
         return(
             <ScrollView style={tw.style("w-full", "h-full", "bg-white")}>
                 {this.state.isLoading ?
-                    <ActivityIndicator></ActivityIndicator>
+                    <ActivityIndicator style={tw.style("mt-30")} color={"#2F3A79"} size="large" />
                     :
                     (this.state.newsList)
 
