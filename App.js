@@ -281,7 +281,7 @@ function BusScreen() {
                 </View>
                 
                 {/* 巴士站點文字 */}
-                <View style={[tw.style("border-2", "border-blue-900", "w-38"), {position: 'absolute', left: 310, top: 570,}]}>
+                <View style={[tw.style("border-2", "border-blue-900", "w-38"), {position: 'absolute', left: 155, top: 565,}]}>
                     <Text style={tw.style("text-base")}>PGH 研究生宿舍(起)</Text>
                 </View>
                 <View style={[tw.style("border-2", "border-blue-900", "w-23.5"), {position: 'absolute', left: 210, top: 355,}]}>
