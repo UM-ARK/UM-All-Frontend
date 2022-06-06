@@ -6,13 +6,14 @@
  * @flow strict-local
  */
 // RN直屬庫
-import React, { Component } from "react";
+import React, { Component, useEffect, useState } from "react";
 import {
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
     TouchableWithoutFeedback,
+    TouchableOpacity,
     View,
     ImageBackground,
     ActivityIndicator,
@@ -27,6 +28,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // 第三方庫
 import tw from "twrnc";
 import { Image } from "@rneui/themed";
+var DomParser = require('react-native-html-parser').DOMParser   // 用於解析Campus Bus的HTML
 
 // 本地引用
 import { Map } from "./view/Home/Map";
@@ -257,11 +259,80 @@ function HomeScreen() {
 
 }
 
-// TODO:爬蟲與解析HTML
-// 1. 從https://campusloop.cmdo.um.edu.mo返回HTML數據
-// 2. 解析HTML數據，得到巴士到站的數組
-function getBusData(){
-    return
+// 爬蟲campus Bus
+function fetchBusInfo(){
+    // 訪問campusloop網站
+    fetch('https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo')
+    .then(response => response.text())
+    .then(text => {
+        // 拿到campusloop的HTML
+        getBusData(text)
+    })
+    .catch((error) => console.error(error))
+}
+
+// 解析campus Bus的HTML
+function getBusData(busInfoHtml){
+    // 使用第三方插件react-native-html-parser，以使用DomParser（為了懶寫代碼，複用Vue寫的解析邏輯）
+    // https://bestofreactjs.com/repo/g6ling-react-native-html-parser-react-native-utilities
+    let doc = new DomParser().parseFromString(busInfoHtml,'text/html')
+
+    // 主要的巴士資訊都存放在span內
+    var mainInfo    = doc.getElementsByTagName('span');
+    var busInfoArr  = new Array();
+    var pathInfoArr = new Array();
+    // 無車服務時只有0~2的下標為busInfo，有車服務時，0~3的下標都是busInfo
+    let infoIndex = mainInfo.length==12 ? 3 : 2;
+
+    for (let i = 0; i < mainInfo.length; i++) {
+        let text = mainInfo[i].textContent;
+        if (i<=infoIndex) {
+            busInfoArr.push(text)
+        } else{
+            pathInfoArr.push(text)
+        }
+    }
+    console.log("busInfoArr為:",    busInfoArr);
+    console.log("pathInfoArr為:",   pathInfoArr);
+
+    // 車輛和站點都在class=main的div標籤內
+    var arriveInfoBuffer    = doc.getElementsByClassName('left', false);
+    // console.log("巴士到達資訊HTML節點形式:",arriveInfoBuffer);
+
+    // 將節點文字數據存入Array，後續直接以車牌判斷巴士到達位置
+    var arriveInfoArr = []
+
+    // 解析巴士到站數據
+    for (let i = 0; i<arriveInfoBuffer.length; i++){
+        let item = arriveInfoBuffer[i].textContent
+        // 刪除字符串內的\t \n
+        arriveInfoArr.push(  item.replace(/[\t\n]/g,"")  )
+    }
+    // 0：PGH 站點
+    // 1：PGH ~ E4 路上
+    // 2：E4 站點，以此類推
+    // 15：S4 下方的虛無站
+    console.log("巴士到站狀態數組為:",arriveInfoArr);
+
+    // 存入data，給html調用
+    // that.busInfoArr 	= busInfoArr;
+    // that.pathInfoArr 	= pathInfoArr;
+    // that.arriveInfoArr 	= arriveInfoArr;
+
+    // 判斷目前有無巴士
+    let haveBus = false
+    for (let i = 0; i<arriveInfoArr.length; i++){
+        let item = arriveInfoArr[i];
+        // TODO:判斷車到哪
+        if (item.length > 0){ haveBus = true;  break; }
+    }
+    console.log(haveBus?'有巴士':'無巴士');
+
+    // 如果沒有Bus，則觸發彈窗提醒
+    if (!haveBus) {
+        console.log('現在沒有巴士喔~');
+    }
+
 }
 
 // 巴士報站頁 - 畫面佈局與渲染
@@ -269,6 +340,16 @@ function BusScreen() {
     let busRouteImg = require('./static/img/Bus/bus_route.png')
     let arrowImg = require('./static/img/Bus/direction_left.png')
     let dotImg = require('./static/img/Bus/loc_dot.png')
+
+    const [count, setCount] = useState(0);
+    const onPress = () => setCount(prevCount => prevCount + 1);
+
+    // 組件加到DOM前觸發
+    // 函數式組件的生命週期觸發，參考：https://betterprogramming.pub/react-component-lifecycle-methods-with-react-hooks-efcd04987805
+    useEffect(() => {
+        fetchBusInfo();
+    });
+
     // 樣式代碼
     let s = StyleSheet.create({
         container: {
@@ -294,8 +375,20 @@ function BusScreen() {
     return (
         <View style={s.container}>
             <ImageBackground source={ busRouteImg } style={s.bgImg}>
+                <Text>Count: {count}</Text>
+                <TouchableOpacity
+                    style={{
+                        alignItems: "center",
+                        backgroundColor: "#DDDDDD",
+                        padding: 10
+                    }}
+                    onPress={onPress}
+                >
+                    <Text>Press Here</Text>
+                </TouchableOpacity>
 
-                {/* TODO:確認所有站點的絕對位置 */}
+
+                {/* TODO:使用絕對位置在不同分辨率下的問題 */}
                 {/* TODO:如果不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
                 <Ionicons name={"bus"} size={30} color={"#2F3A79"} style={{}}/>
