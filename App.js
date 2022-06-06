@@ -259,14 +259,18 @@ function HomeScreen() {
 
 }
 
+// TODO:有兩輛車的情況，不急做
 // 爬蟲campus Bus
 function fetchBusInfo(){
     // 訪問campusloop網站
     fetch('https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo')
     .then(response => response.text())
     .then(text => {
-        // 拿到campusloop的HTML
-        getBusData(text)
+        // text為campusloop的HTML
+        // busInfo為解析後的object類型數據，包含運行資訊和Bus到站資訊
+        // TODO:如果沒有Bus，則觸發提醒
+        let busInfo = getBusData(text)
+        console.log( busInfo );
     })
     .catch((error) => console.error(error))
 }
@@ -280,72 +284,68 @@ function getBusData(busInfoHtml){
     // 主要的巴士資訊都存放在span內
     var mainInfo    = doc.getElementsByTagName('span');
     var busInfoArr  = new Array();
-    var pathInfoArr = new Array();
-    // 無車服務時只有0~2的下標為busInfo，有車服務時，0~3的下標都是busInfo
-    let infoIndex = mainInfo.length==12 ? 3 : 2;
 
+    // 到站時車牌屬於span（13個span）。未到站時車牌屬於div（12個span）
+    // 無車服務時只有0~2的下標為busInfo（11個span）。有車服務時，0~3的下標都是busInfo（至少12個span）
+    let infoIndex = mainInfo.length>=12 ? 3 : 2;
+
+    // 分隔車輛運行資訊
     for (let i = 0; i < mainInfo.length; i++) {
         let text = mainInfo[i].textContent;
         if (i<=infoIndex) {
             busInfoArr.push(text)
-        } else{
-            pathInfoArr.push(text)
-        }
+        } else {break}
     }
-    console.log("busInfoArr為:",    busInfoArr);
-    console.log("pathInfoArr為:",   pathInfoArr);
+    // console.log("busInfoArr為:",    busInfoArr);
 
     // 車輛和站點都在class=main的div標籤內
     var arriveInfoBuffer    = doc.getElementsByClassName('left', false);
     // console.log("巴士到達資訊HTML節點形式:",arriveInfoBuffer);
 
-    // 將節點文字數據存入Array，後續直接以車牌判斷巴士到達位置
+    // 將節點文字數據存入Array，用於以車牌判斷巴士到達位置
     var arriveInfoArr = []
-
     // 解析巴士到站數據
     for (let i = 0; i<arriveInfoBuffer.length; i++){
         let item = arriveInfoBuffer[i].textContent
         // 刪除字符串內的\t \n
         arriveInfoArr.push(  item.replace(/[\t\n]/g,"")  )
     }
-    // 0：PGH 站點
+    // index 0：PGH 站點
     // 1：PGH ~ E4 路上
     // 2：E4 站點，以此類推
     // 15：S4 下方的虛無站
-    console.log("巴士到站狀態數組為:",arriveInfoArr);
-
-    // 存入data，給html調用
-    // that.busInfoArr 	= busInfoArr;
-    // that.pathInfoArr 	= pathInfoArr;
-    // that.arriveInfoArr 	= arriveInfoArr;
+    // console.log("巴士到站狀態數組為:",arriveInfoArr);
 
     // 判斷目前有無巴士
-    let haveBus = false
+    let busPositionArr = []
     for (let i = 0; i<arriveInfoArr.length; i++){
         let item = arriveInfoArr[i];
-        // TODO:判斷車到哪
-        if (item.length > 0){ haveBus = true;  break; }
+        if (item.length > 0){
+            busPositionArr.push({
+                number: item,
+                index:  i
+            })
+        }
     }
-    console.log(haveBus?'有巴士':'無巴士');
+    // console.log("Bus車牌、位置總數據：",busPositionArr);
 
-    // 如果沒有Bus，則觸發彈窗提醒
-    if (!haveBus) {
-        console.log('現在沒有巴士喔~');
-    }
-
+    // console.log('\n\n\n');
+    return ({
+        busInfoArr,
+        busPositionArr
+    })
 }
 
 // 巴士報站頁 - 畫面佈局與渲染
 function BusScreen() {
     let busRouteImg = require('./static/img/Bus/bus_route.png')
-    let arrowImg = require('./static/img/Bus/direction_left.png')
-    let dotImg = require('./static/img/Bus/loc_dot.png')
+    let arrowImg    = require('./static/img/Bus/direction_left.png')
+    let dotImg      = require('./static/img/Bus/loc_dot.png')
 
-    const [count, setCount] = useState(0);
-    const onPress = () => setCount(prevCount => prevCount + 1);
-
-    // 組件加到DOM前觸發
+    // TODO:點按刷新時重新訪問campus bus網站獲取數據
+    // BUG: useEffect會在每一次頁面渲染（刷新）時再次調用，嘗試使用其他生命週期函數
     // 函數式組件的生命週期觸發，參考：https://betterprogramming.pub/react-component-lifecycle-methods-with-react-hooks-efcd04987805
+    // 組件加到DOM前觸發
     useEffect(() => {
         fetchBusInfo();
     });
@@ -371,27 +371,46 @@ function BusScreen() {
             height:21,
             resizeMode:"contain"
         },
+        // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
+        s0: {  position: 'absolute', left: 335, top: 565  },    // PGH
+        s1: {  position: 'absolute', left: 335, top: 450  },    // PGH ~ E4
+        s2: {  position: 'absolute', left: 335, top: 353  },    // E4
+        s3: {  position: 'absolute', left: 335, top: 200  },    // E4 ~ N2
+        s4: {  position: 'absolute', left: 335, top: 75  },     // N2
+        s5: {  position: 'absolute', left: 160, top: 15  },     // N2 ~ N6
+        s6: {  position: 'absolute', left: 115, top: 115  },    // N6
+        s7: {  position: 'absolute', left: 35, top: 180  },     // N6 ~ E11
+        s8: {  position: 'absolute', left: 35, top: 243  },     // E11
+        s9: {  position: 'absolute', left: 35, top: 290  },     // E11 ~ E21
+        s10: {  position: 'absolute', left: 35, top: 325  },    // N21
+        s11: {  position: 'absolute', left: 35, top: 420  },    // N21 ~ E32
+        s12: {  position: 'absolute', left: 35, top: 500  },    // E32
+        s13: {  position: 'absolute', left: 80, top: 575  },    // E32 ~ S4
+        s14: {  position: 'absolute', left: 245, top: 575  },   // s4
+        s15: {  position: 'absolute', left: 275, top: 575  },   // s4 ~ PGH
     });
+
     return (
         <View style={s.container}>
             <ImageBackground source={ busRouteImg } style={s.bgImg}>
-                <Text>Count: {count}</Text>
                 <TouchableOpacity
                     style={{
+                        position: 'absolute', top: 20,
                         alignItems: "center",
                         backgroundColor: "#DDDDDD",
                         padding: 10
                     }}
-                    onPress={onPress}
+                    onPress={fetchBusInfo}
                 >
-                    <Text>Press Here</Text>
+                    <Text>Refresh</Text>
                 </TouchableOpacity>
-
 
                 {/* TODO:使用絕對位置在不同分辨率下的問題 */}
                 {/* TODO:如果不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
-                <Ionicons name={"bus"} size={30} color={"#2F3A79"} style={{}}/>
+                <View style={s.s2}>
+                    <Ionicons name={"bus"} size={30} color={"#2F3A79"} />
+                </View>
 
                 {/* 右上箭頭 */}
                 <View style={ {position: 'absolute', left: 310, top: 25,} }>
