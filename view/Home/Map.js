@@ -8,11 +8,6 @@ import { WebView } from 'react-native-webview';
 export class Map extends Component{
     render() {
         return (
-            // <View>
-            //     <Text>
-            //         Map
-            //     </Text>
-            // </View>
             <WebView 
                 source={{ uri:'https://maps.um.edu.mo/' }} 
             />
