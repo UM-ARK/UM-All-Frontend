@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableWithoutFeedback, View } from "react-native";
 import tw from "twrnc";
 import { Image } from "@rneui/themed";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import WebView from "react-native-webview";
+import { Tab, TabView } from '@rneui/themed';
 
 function getNewsData(){
     return fetch('https://api.data.um.edu.mo/service/media/news/v1.0.0/all',{
@@ -18,16 +21,71 @@ function getNewsData(){
 }
 
 export class NewsComponent extends Component{
+    constructor(props) {
+        super(props);
+        const { route } = props;
+        this.state={
+            news:route.params.news,
+            langLocation:0
+        }
+        let a=1
+    }
+    setIndex=(e)=>{
+        this.setState({
+            langLocation:e
+        })
+    }
     render() {
         return (
-            <View>
-                <Text>
-                    News Detail
-                </Text>
+            <View style={{
+                flex: 1,
+                paddingHorizontal:5,
+                backgroundColor:'#fff'
+            }}>
+                <SafeAreaView>
+                    <View  style={tw.style( "bg-white",'pb-3')}>
+                        <View style={tw.style('mt-5','mx-2')}>
+                            <Text style={tw.style("text-black", "text-xl")}>
+                                {this.state.news.details[1].title}
+                            </Text>
+                            <Text style={tw.style( "text-base")}>
+                                {this.state.news.details[0].title}
+                            </Text>
+                        </View>
+
+                    </View>
+                </SafeAreaView>
+                <View style={tw.style('mx-2','flex','flex-row')}>
+                    <TouchableWithoutFeedback>
+                        <View>
+                            <Text>
+                                {this.state.news.details[0].locale}
+                            </Text>
+                        </View>
+                    </TouchableWithoutFeedback>
+
+                    <TouchableWithoutFeedback>
+                        <View>
+                            <Text>
+                                {this.state.news.details[1].locale}
+                            </Text>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </View>
+                <WebView
+                    source={{
+                        html:'<meta name="viewport" content="width=device-width, initial-scale=1">'+this.state.news.details[this.state.langLocation].content
+                    }}
+                    style={{flex: 1}}
+                />
+
             </View>
+
         )
     }
 }
+
+
 
 class NewsCard extends Component{
     constructor(props) {
@@ -41,7 +99,10 @@ class NewsCard extends Component{
     }
 
     goToDetails=()=>{
-
+        const navigation=this.props.navigation
+        navigation.navigate ('NewsDetail',{
+            news:this.state.news
+        })
     }
     render() {
         if (this.state.news.details.length > 0) {
@@ -93,6 +154,11 @@ class NewsCard extends Component{
         }
     }
 }
+function GetNewsCard(props){
+    const route = useRoute();
+    const navigation = useNavigation();
+    return <NewsCard {...props} route={route} navigation={navigation}/>;
+}
 
 export class News extends Component{
     constructor(props) {
@@ -125,7 +191,7 @@ export class News extends Component{
         let l = [];
         for (let i = 0; i < 50; i++) {
             if (this.state.news[i].details.length > 0){
-                l.push(<NewsCard news={this.state.news[i]} isFirst={i == 0} />);
+                l.push(<GetNewsCard news={this.state.news[i]} isFirst={i == 0} />);
             }
         }
         this.setState({

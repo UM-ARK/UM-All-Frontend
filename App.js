@@ -456,7 +456,7 @@ function BusScreen() {
                 <View style={ {position: 'absolute', left: 250, top: 602,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                
+
                 {/* 巴士站點文字 */}
                 <View style={[tw.style("border-2", "border-blue-900", "w-38"), {position: 'absolute', left: 155, top: 565,}]}>
                     <Text style={tw.style("text-base")}>PGH 研究生宿舍(起)</Text>
@@ -504,7 +504,7 @@ class NewsScreen extends Component {
                         headerTintColor:'#fff'
                     }
                 }/>
-                <HomeStack.Screen name="Detail" component={NewsComponent} options={{
+                <HomeStack.Screen name="NewsDetail" component={NewsComponent} options={{
                     headerShown:false
                 }
                 }/>
