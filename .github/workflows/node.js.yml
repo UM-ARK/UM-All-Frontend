@@ -1,7 +1,4 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: Node.js CI
+name: Feature branch checks
 
 on:
   push:
@@ -10,37 +7,117 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  setup:
+    name: Setup code and environment needed for linting, translations and tests
     runs-on: ubuntu-latest
-
+    timeout-minutes: 5
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    
-    - uses: actions/setup-node@master
-    - uses: c-hive/gha-yarn-cache@v1
-    - name: Install node modules
-      run: |
-        yarn install
-    - name: Run test
-      run: |
-        yarn test-ci
-    - name: Cache Gradle Wrapper
-      uses: actions/cache@v2
-      with:
-        path: ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: Cache private assets
+        uses: actions/cache@v3
+        id: cache-private-assets
+        with:
+          path: |
+            .private-assets
+            assets/fonts
+          key: private-assets
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.CSS_ASSETS_SSH_PRIVATE_KEY }}
+      - name: Install private assets if cache not present
+        shell: bash
+        run: .github/install_private_assets.sh
+        if: steps.cache-private-assets.outputs.cache-hit != 'true'
+      - name: Set up Node environment
+        uses: actions/setup-node@v2
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: yarn-${{ hashFiles('yarn.lock') }}
+      - name: Install node modules if cache not present
+        run: yarn install --immutable
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
 
-    - name: Cache Gradle Dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-caches-
-    - name: Make Gradlew Executable
-      run: cd android && chmod +x ./gradlew
+  lint:
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 5
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: Restore private assets from cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .private-assets
+            assets/fonts
+          key: private-assets
+      - name: Restore node modules from cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: yarn-${{ hashFiles('yarn.lock') }}
+      - run: mkdir -p ~/reports
+      - name: Lint
+        run: yarn lint:ci
+      - name: Prettier
+        run: yarn prettier
+      - name: Upload linting report
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: ~/reports/eslint.xml
 
-    - name: Build Android App Bundle
-      run: |
-        cd android && ./gradlew bundleRelease --no-daemon
+  i18n:
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 5
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: Restore private assets from cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .private-assets
+            assets/fonts
+          key: private-assets
+      - name: Restore node modules from cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: yarn-${{ hashFiles('yarn.lock') }}
+      - name: Check Swedish translations
+        run: yarn test:i18n 'sv-SE'
+
+  test:
+    runs-on: macos-latest
+    needs: setup
+    timeout-minutes: 20
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: Restore private assets from cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .private-assets
+            assets/fonts
+          key: private-assets
+      - name: Restore node modules from cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: yarn-${{ hashFiles('yarn.lock') }}
+      - name: Run tests with JUnit as reporter
+        run: yarn test:coverage
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+      - name: Upload Jest JUnit test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: jest-test-results
+          path: ./reports/junit/junit.xml
