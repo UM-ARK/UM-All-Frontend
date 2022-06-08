@@ -239,36 +239,21 @@ class AllFuncScreenCompo extends Component {
                         <Text style={tw.style("text-center", "text-black", "text-sm", "mb-2")}>What2Reg</Text>
                     </View>
 
-                    <View>
-                        <View style={{
-                            borderColor: "#fff",
-                            borderWidth: 4,
-                            borderRadius: 8,
-                            backgroundColor: "#fff",
-                            overlayColor: "#ffffff",
-                            marginBottom:5
-                        }}>
-                            <View
-                                style={tw.style("w-17", "h-17")} />
-                        </View>
-                    </View>
-
-                    <View>
-                        <View style={{
-                            borderColor: "#fff",
-                            borderWidth: 4,
-                            borderRadius: 8,
-                            backgroundColor: "#fff",
-                            overlayColor: "#ffffff",
-                            marginBottom:5
-                        }}>
-                            <View
-                                style={tw.style("w-17", "h-17")} />
-                        </View>
-                    </View>
+                    {/*<View>*/}
+                    {/*    <View style={{*/}
+                    {/*        borderColor: "#fff",*/}
+                    {/*        borderWidth: 4,*/}
+                    {/*        borderRadius: 8,*/}
+                    {/*        backgroundColor: "#fff",*/}
+                    {/*        overlayColor: "#ffffff",*/}
+                    {/*        marginBottom:5*/}
+                    {/*    }}>*/}
+                    {/*        <View*/}
+                    {/*            style={tw.style("w-17", "h-17")} />*/}
+                    {/*    </View>*/}
+                    {/*</View>*/}
 
                     {/* Bus圖標渲染 */}
-                    {/* TODO: Bug對齊問題 */}
                     <View>
                         <TouchableWithoutFeedback onPress={this.goToBusScreen}>
                             <View style={s}>
@@ -285,6 +270,22 @@ class AllFuncScreenCompo extends Component {
                         </TouchableWithoutFeedback>
                         <Text style={tw.style("text-center", "text-black", "text-sm", "mb-1")}>Bus報站</Text>
                     </View>
+
+                    <View>
+                        <View style={{
+                            borderColor: "#fff",
+                            borderWidth: 4,
+                            borderRadius: 8,
+                            backgroundColor: "#fff",
+                            overlayColor: "#ffffff",
+                            marginBottom:5
+                        }}>
+                            <View
+                                style={tw.style("w-17", "h-17")} />
+                        </View>
+                    </View>
+
+
 
                 </View>
 
@@ -370,7 +371,7 @@ function App() {
                                     iconName = focused ? "albums"   : "albums-outline";
                                 } else if (route.name === "Message") {
                                     iconName = focused ? "pulse"    : "pulse-outline";
-                                } 
+                                }
 
                                 // You can return any component that you like here!
                                 return <Ionicons name={iconName} size={size} color={color} />;
