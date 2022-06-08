@@ -392,7 +392,9 @@ function App() {
                             }
                         };
                     }
-                }>
+                }
+                               initialRouteName={'Home'}
+                >
                     <Tab.Screen name="News" component={NewsScreen} options={{
                         headerStyle: {
                             backgroundColor: "#2F3A79",
