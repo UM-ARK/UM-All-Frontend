@@ -8,25 +8,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 var DomParser = require('react-native-html-parser').DOMParser
 
 
-// TODO:有兩輛車的情況，不急做
-// 爬蟲campus Bus
-function fetchBusInfo(){
-    // 訪問campusloop網站
-    fetch('https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo')
-    .then(response => response.text())
-    .then(text => {
-        // text為campusloop的HTML
-        // busInfo為解析後的object類型數據，包含運行資訊和Bus到站資訊
-        // TODO:如果沒有Bus，則觸發提醒
-        let busInfo = getBusData(text)
-        console.log( "匯總的busInfo為",busInfo );
-        busInfo.busPositionArr.map( function(item,idx){
-            console.log("正在運行的巴士"+idx,"\t為",item);
-        })
-    })
-    .catch((error) => console.error(error))
-}
-
 // 解析campus Bus的HTML
 function getBusData(busInfoHtml){
     // 使用第三方插件react-native-html-parser，以使用DomParser（為了懶寫代碼，複用Vue寫的解析邏輯）
@@ -90,17 +71,38 @@ function getBusData(busInfoHtml){
 
 // 巴士報站頁 - 畫面佈局與渲染
 function BusScreen() {
+    // useState用法, https://blog.csdn.net/wu_xianqiang/article/details/105181044
+    // 鉤子用法useEffect，https://www.ruanyifeng.com/blog/2020/09/react-hooks-useeffect-tutorial.html
     let busRouteImg = require('../../static/img/Bus/bus_route.png')
     let arrowImg    = require('../../static/img/Bus/direction_left.png')
     let dotImg      = require('../../static/img/Bus/loc_dot.png')
-
+    let [data, setData] = useState( {    busPositionArr:[{index:0}]    } )  // 設定初始化數據
     // TODO:點按刷新時重新訪問campus bus網站獲取數據
     // BUG: useEffect會在每一次頁面渲染（刷新）時再次調用，嘗試使用其他生命週期函數
     // 函數式組件的生命週期觸發，參考：https://betterprogramming.pub/react-component-lifecycle-methods-with-react-hooks-efcd04987805
-    // 組件加到DOM前觸發
+    // 組件渲染後 再次渲染時觸發
     useEffect(() => {
         fetchBusInfo();
-    });
+    }, []);             // 尾部數組為空，則在初次渲染時執行一次
+
+    // TODO:有兩輛車的情況，不急做
+    // 爬蟲campus Bus
+    function fetchBusInfo(){
+        
+        // 訪問campusloop網站
+        fetch('https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo', {method: "GET"})
+        .then(res  => res.text())
+        .then(text => getBusData(text) )
+        .then(result  => {
+            console.log("result為",result);
+            console.log("busInfo為",result.busInfoArr);
+            console.log("busPositionArr為",result.busPositionArr[0]);
+            // TODO:如果沒有Bus，則觸發提醒
+            setData( result )
+        })
+
+        .catch((error) => console.error(error))
+    }
 
     // 樣式代碼
     let s = StyleSheet.create({
@@ -141,10 +143,30 @@ function BusScreen() {
         s14: {  position: 'absolute', left: 245, top: 575  },   // s4
         s15: {  position: 'absolute', left: 275, top: 575  },   // s4 ~ PGH
     });
+    let busStyleArr = [
+        // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
+        {  position: 'absolute', left: 335, top: 565  },    // PGH
+        {  position: 'absolute', left: 335, top: 450  },    // PGH ~ E4
+        {  position: 'absolute', left: 335, top: 353  },    // E4
+        {  position: 'absolute', left: 335, top: 200  },    // E4 ~ N2
+        {  position: 'absolute', left: 335, top: 75  },     // N2
+        {  position: 'absolute', left: 160, top: 15  },     // N2 ~ N6
+        {  position: 'absolute', left: 115, top: 115  },    // N6
+        {  position: 'absolute', left: 35, top: 180  },     // N6 ~ E11
+        {  position: 'absolute', left: 35, top: 243  },     // E11
+        {  position: 'absolute', left: 35, top: 290  },     // E11 ~ E21
+        {  position: 'absolute', left: 35, top: 325  },     // N21
+        {  position: 'absolute', left: 35, top: 420  },     // N21 ~ E32
+        {  position: 'absolute', left: 35, top: 500  },     // E32
+        {  position: 'absolute', left: 80, top: 575  },     // E32 ~ S4
+        {  position: 'absolute', left: 245, top: 575  },    // s4
+        {  position: 'absolute', left: 275, top: 575  },    // s4 ~ PGH
+    ]
 
     return (
         <View style={s.container}>
             <ImageBackground source={ busRouteImg } style={s.bgImg}>
+                {/* 刷新按鈕 */}
                 <TouchableOpacity
                     style={{
                         position: 'absolute', top: 20,
@@ -157,10 +179,12 @@ function BusScreen() {
                     <Text>Refresh</Text>
                 </TouchableOpacity>
 
-                {/* TODO:使用絕對位置在不同分辨率下的問題 */}
+                {/* <Text>{data.busInfoArr}</Text> */}
+
+                {/* TODO:使用絕對位置在不同分辨率下的問題，尋找適配方法，像素單位等 */}
                 {/* TODO:如果不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
-                <View style={s.s2}>
+                <View style={  busStyleArr[ data.busPositionArr[0].index ]  }>
                     <Ionicons name={"bus"} size={30} color={"#2F3A79"} />
                 </View>
 
