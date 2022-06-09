@@ -27,7 +27,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // 第三方庫
 import tw from "twrnc";
-import { Image } from "@rneui/themed";
 
 // 本地引用
 import { Map }  from "./view/Home/Map";
@@ -39,8 +38,8 @@ const HomeStack = createNativeStackNavigator();
 
 function HomeScreen() {
     return (
-        <View>
-            <Text style={{ fontSize: 60, }}> Home Page </Text>
+        <View style={tw.style("w-full", "h-full", "bg-white")}>
+
         </View>
     );
 }
@@ -72,66 +71,66 @@ function AllFuncScreen() {
 const academic_features_list=[
     {
         name: 'SIW',
-        icon:'briefcase'
+        icon:'briefcase-outline'
     },
     {
         name: 'Moodle',
-        icon:'school'
+        icon:'school-outline'
     },
     {
         name: 'Date',
-        icon:'calendar'
+        icon:'calendar-outline'
     },
     {
         name: 'WP',
-        icon:'person'
+        icon:'person-outline'
     },
     {
         name: 'AskReg',
-        icon:'bookmarks'
+        icon:'bookmarks-outline'
     },
 ]
 const public_features_list=[
     {
-        name: 'Resource',
-        icon:'cube'
+        name: 'WTF',
+        icon:'cube-outline'
     },
     {
         name: 'Bus',
-        icon:'bus'
+        icon:'bus-outline'
     },
     {
         name: 'Repair',
-        icon:'hammer'
+        icon:'hammer-outline'
     },
 ]
 
 const life_features_list=[
     {
         name: 'BBS',
-        icon:'golf'
+        icon:'golf-outline'
     },
     {
         name: 'Menu',
-        icon:'fast-food'
+        icon:'fast-food-outline'
     },
     {
         name: 'Bug',
-        icon:'bug'
+        icon:'bug-outline'
     },
 ]
 const FeatureItem=({item_name,item_icon})=>{
     let size = {
-        fontSize:14
+        fontSize:12
     };
     if  (item_name.length > 6) {
         size = {
-            fontSize:12.5
+            fontSize:12
         };
     }
     return (
-        <View style={[tw.style('mx-6','py-3')]}>
-            <Ionicons name={item_icon} size={50} color={'#2F3A79'}/>
+        <View style={[tw.style('mx-4','py-3')]}>
+            <Ionicons name={item_icon} size={35} color={'#2F3A79'}/>
             <View style={tw.style('w-full')}>
                 <Text style={[tw.style('text-center','text-black'),size]}>{item_name}</Text>
             </View>
