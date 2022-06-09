@@ -11,6 +11,8 @@
   * [基本的push](#基本的push)
   * [分支的複製與合併](#分支的複製與合併)
 
+---
+
 ## 環境安裝與運行模擬器
 
 ### Android環境 [Install](https://reactnative.dev/docs/environment-setup)
