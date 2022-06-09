@@ -16,7 +16,7 @@ import {
     TouchableOpacity,
     View,
     ImageBackground,
-    ActivityIndicator,
+    ActivityIndicator, FlatList,
 } from "react-native";
 // RN第三方庫
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
@@ -50,7 +50,7 @@ function AllFuncScreen() {
     return (
         <HomeStack.Navigator >
             <HomeStack.Screen name="HomeFunc" component={AllFuncScreenCompo} options={ {
-                    title:'UM ALL',
+                    title:'Features',
                     headerStyle:{
                         backgroundColor:'#2F3A79'
                     },
@@ -69,6 +69,75 @@ function AllFuncScreen() {
         </HomeStack.Navigator>
     );
 }
+const academic_features_list=[
+    {
+        name: 'SIW',
+        icon:'briefcase'
+    },
+    {
+        name: 'Moodle',
+        icon:'school'
+    },
+    {
+        name: 'Date',
+        icon:'calendar'
+    },
+    {
+        name: 'WP',
+        icon:'person'
+    },
+    {
+        name: 'SIW',
+        icon:'bookmarks'
+    },
+]
+const public_features_list=[
+    {
+        name: 'Resource',
+        icon:'cube'
+    },
+    {
+        name: 'Bus',
+        icon:'bus'
+    },
+    {
+        name: 'Repair',
+        icon:'hammer'
+    },
+]
+
+const life_features_list=[
+    {
+        name: 'BBS',
+        icon:'golf'
+    },
+    {
+        name: 'Menu',
+        icon:'fast-food'
+    },
+    {
+        name: 'Bug',
+        icon:'bug'
+    },
+]
+const FeatureItem=({item_name,item_icon})=>{
+    let size = {
+        fontSize:14
+    };
+    if  (item_name.length > 6) {
+        size = {
+            fontSize:12.5
+        };
+    }
+    return (
+        <View style={tw.style('mx-4','py-3')}>
+            <Ionicons name={item_icon} size={50} color={'#2F3A79'} />
+            <View style={tw.style('w-full')}>
+                <Text style={[tw.style('text-center','text-black'),size]}>{item_name}</Text>
+            </View>
+        </View>
+    )
+}
 class AllFuncScreenCompo extends Component {
     constructor(props) {
         super(props);
@@ -85,7 +154,6 @@ class AllFuncScreenCompo extends Component {
         const navigation = this.props.navigation;
         navigation.navigate ('Bus')
     }
-
     render() {
         let s = StyleSheet.create({
             borderColor: "#2F3A79",
@@ -95,211 +163,42 @@ class AllFuncScreenCompo extends Component {
             overlayColor: "#ffffff",
             marginBottom: 2,
         });
+
         return (
-            <ScrollView style={tw.style("w-full", "h-full", "bg-white")}>
-                {/* 第一行圖標 */}
-                <View style={tw.style("flex", "flex-row", "mb-2", "mx-5", "justify-around", "flex-wrap",'mt-4')}>
-                    {/* Map圖標渲染 */}
-                    <View>
-                        <TouchableWithoutFeedback onPress={this.goToMapScreen}>
-                            <View style={s}>
-                                <Image
-                                    placeholderStyle={{
-                                        backgroundColor: "#2F3A79",
-                                    }}
-                                    PlaceholderContent={
-                                        <View>
-                                            <ActivityIndicator color={"#fff"} />
-                                        </View>
-                                    }
-                                    source={require("./static/img/Map.png")}
-                                    style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                            </View>
-                        </TouchableWithoutFeedback>
-                        <Text style={tw.style("text-center", "text-black", "text-sm", "mb-1")}>Map</Text>
-                    </View>
-
-                    {/* UM News圖標渲染 */}
-                    <View>
-                        <View style={s}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                source={require("./static/img/UMNews.png")}
-                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
+            <View style={tw.style("w-full", "h-full", "bg-white")}>
+                <View >
+                    <Text style={tw.style('text-gray-500','text-sm','px-3','py-1')}>
+                        ACADEMIC
+                    </Text>
+                    <View style={tw.style('border-t','border-slate-300','border-b')}>
+                        <View style={tw.style('flex','flex-row','flex-wrap')}>
+                            {academic_features_list.map(item=><FeatureItem item_name={item.name} item_icon={item.icon}/>)}
                         </View>
-                        <Text style={tw.style("text-center", "text-black", "text-sm", "mb-1")}>UM News</Text>
-                    </View>
-
-                    {/* Whole圖標渲染 */}
-                    <View>
-                        <View style={s}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                source={require("./static/img/Scholarship.png")}
-                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                        </View>
-                        <Text style={tw.style("text-center", "text-black", "text-xs", "mb-1")}>Whole Person</Text>
-                    </View>
-
-                    {/*<View>*/}
-                    {/*    <View style={s}>*/}
-                    {/*        <Image*/}
-                    {/*            source={require("./static/img/Scholarship.png")}*/}
-                    {/*            style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />*/}
-                    {/*    </View>*/}
-                    {/*    <Text style={tw.style("text-center", "text-black", "text-sm", "mb-1")}>Whole Person</Text>*/}
-                    {/*</View>*/}
-
-                </View>
-
-                {/* 第二行圖標 */}
-                <View style={tw.style("flex", "flex-row", "my-2", "mx-5", "justify-around", "flex-wrap")}>
-                    <View>
-                        <View style={s}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                source={require("./static/img/Calendar.png")}
-                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                        </View>
-                        <Text style={tw.style("text-center", "text-black", "text-sm", "mb-2")}>Calendar</Text>
-                    </View>
-
-                    <View>
-                        <View style={s}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                source={require("./static/img/AddDrop.png")}
-                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                        </View>
-                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>Add/Drop</Text>
-                    </View>
-
-                    <View>
-                        <View style={s}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                source={require("./static/img/SIW.png")}
-                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                        </View>
-                        <Text style={tw.style("text-center", "text-black", "text-sm",'mb-2')}>SIW</Text>
                     </View>
                 </View>
 
-                {/* 第三行圖標 */}
-                <View style={tw.style("flex", "flex-row", "my-2", "mx-5", "justify-around", "flex-wrap")}>
-                    <View>
-                        <View style={s}>
-                            <Image
-                                placeholderStyle={{
-                                    backgroundColor: "#2F3A79",
-                                }}
-                                PlaceholderContent={
-                                    <View>
-                                        <ActivityIndicator color={"#fff"} />
-                                    </View>
-                                }
-                                source={require("./static/img/What2Reg.png")}
-                                style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                        </View>
-                        <Text style={tw.style("text-center", "text-black", "text-sm", "mb-2")}>What2Reg</Text>
-                    </View>
-
-                    {/*<View>*/}
-                    {/*    <View style={{*/}
-                    {/*        borderColor: "#fff",*/}
-                    {/*        borderWidth: 4,*/}
-                    {/*        borderRadius: 8,*/}
-                    {/*        backgroundColor: "#fff",*/}
-                    {/*        overlayColor: "#ffffff",*/}
-                    {/*        marginBottom:5*/}
-                    {/*    }}>*/}
-                    {/*        <View*/}
-                    {/*            style={tw.style("w-17", "h-17")} />*/}
-                    {/*    </View>*/}
-                    {/*</View>*/}
-
-                    {/* Bus圖標渲染 */}
-                    <View>
-                        <TouchableWithoutFeedback onPress={this.goToBusScreen}>
-                            <View style={s}>
-                                <Image
-                                    placeholderStyle={{  backgroundColor: "#2F3A79",  }}
-                                    PlaceholderContent={
-                                        <View>
-                                            <ActivityIndicator color={"#fff"} />
-                                        </View>
-                                    }
-                                    source={require("./static/img/Bus/bus-outline.png")}
-                                    style={tw.style("w-17", "h-17")} imageStyle={{ borderRadius: 50 }} />
-                            </View>
-                        </TouchableWithoutFeedback>
-                        <Text style={tw.style("text-center", "text-black", "text-sm", "mb-1")}>Bus報站</Text>
-                    </View>
-
-                    <View>
-                        <View style={{
-                            borderColor: "#fff",
-                            borderWidth: 4,
-                            borderRadius: 8,
-                            backgroundColor: "#fff",
-                            overlayColor: "#ffffff",
-                            marginBottom:5
-                        }}>
-                            <View
-                                style={tw.style("w-17", "h-17")} />
+                <View >
+                    <Text style={tw.style('text-gray-500','text-sm','px-3','py-1')}>
+                        PUBLIC
+                    </Text>
+                    <View style={tw.style('border-t','border-slate-300','border-b')}>
+                        <View style={tw.style('flex','flex-row','flex-wrap')}>
+                            {public_features_list.map(item=><FeatureItem item_name={item.name} item_icon={item.icon}/>)}
                         </View>
                     </View>
-
-
-
                 </View>
 
-                {/* Login By UMID 提示 */}
-                <View style={tw.style('rounded-full','w-60','mx-auto','pt-40')}>
-                    <View style={{
-                        backgroundColor: "#2F3A79",
-                        borderRadius: 100,
-                        paddingVertical:3
-                    }}>
-                        <Text style={tw.style('text-white','text-center','text-xl')}>Login by UM ID 😍</Text>
+                <View >
+                    <Text style={tw.style('text-gray-500','text-sm','px-3','py-1')}>
+                        LIFE
+                    </Text>
+                    <View style={tw.style('border-t','border-slate-300','border-b')}>
+                        <View style={tw.style('flex','flex-row','flex-wrap')}>
+                            {life_features_list.map(item=><FeatureItem item_name={item.name} item_icon={item.icon}/>)}
+                        </View>
                     </View>
                 </View>
-            </ScrollView>
+            </View>
         );
     }
 }
@@ -415,6 +314,7 @@ function App() {
                         headerTitleStyle: {
                             fontWeight: 'bold',
                         },
+                        title:'Features',
                     }}/>
                     {/* TODO:主頁 */}
                     <Tab.Screen name="Home" component={HomeScreen} options={{
