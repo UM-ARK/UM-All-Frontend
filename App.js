@@ -87,7 +87,7 @@ const academic_features_list=[
         icon:'person'
     },
     {
-        name: 'SIW',
+        name: 'AskReg',
         icon:'bookmarks'
     },
 ]
@@ -130,8 +130,8 @@ const FeatureItem=({item_name,item_icon})=>{
         };
     }
     return (
-        <View style={tw.style('mx-4','py-3')}>
-            <Ionicons name={item_icon} size={50} color={'#2F3A79'} />
+        <View style={[tw.style('mx-6','py-3')]}>
+            <Ionicons name={item_icon} size={50} color={'#2F3A79'}/>
             <View style={tw.style('w-full')}>
                 <Text style={[tw.style('text-center','text-black'),size]}>{item_name}</Text>
             </View>
