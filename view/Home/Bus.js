@@ -82,20 +82,23 @@ function BusScreen() {
     // 組件渲染後 再次渲染時觸發
     useEffect(() => {
         fetchBusInfo();
-    }, []);             // 尾部數組為空，則在初次渲染時執行一次
+    }, []);             // 尾部數組為空，則只在初次渲染時執行一次
 
     // TODO:有兩輛車的情況，不急做
     // 爬蟲campus Bus
     function fetchBusInfo(){
-        
         // 訪問campusloop網站
         fetch('https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo', {method: "GET"})
         .then(res  => res.text())
         .then(text => getBusData(text) )
         .then(result  => {
-            console.log("result為",result);
-            console.log("busInfoArr為",result.busInfoArr);
-            console.log("busPositionArr為",result.busPositionArr[0]);
+            console.log("爬蟲後的result為", result);
+            // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
+            result.busInfoArr.shift()       // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
+            console.log("busInfoArr為", result.busInfoArr);
+
+            {/* TODO:不止一輛巴士的情況 */}
+            console.log("busPositionArr為", result.busPositionArr[0]);
             // TODO:如果沒有Bus，則觸發提醒
             setData( result )
         })
@@ -171,15 +174,20 @@ function BusScreen() {
                     paddingLeft:20,
                     paddingRight:20,
                 }}>
-                    <Text>{data.busInfoArr[2]}</Text>
-                    <Text>{data.busInfoArr[1]}</Text>
+                    {/* 渲染數組，並換行 */}
+                    {
+                        data.busInfoArr.map((item)=>{
+                            return <Text>{item}</Text>
+                        })
+                    }
                 </View>
 
                 {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
                 {/* TODO:使用絕對位置在不同分辨率下的問題，尋找適配方法，像素單位等 */}
-                {/* TODO:如果不止一輛巴士的情況 */}
+                {/* TODO:無Bus的情況，連busPositionArr都為空(undefined)，應隱藏Bus圖標 */}
+                {/* TODO:不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
-                <View style={  busStyleArr[ data.busPositionArr[0].index ]  }>
+                <View style={  busStyleArr[  (data.busPositionArr.length>0) ? (data.busPositionArr[0].index) : 0 ]  }>
                     <Ionicons name={"bus"} size={30} color={"#2F3A79"} />
                 </View>
 
