@@ -77,7 +77,6 @@ function BusScreen() {
     let arrowImg    = require('../../static/img/Bus/direction_left.png')
     let dotImg      = require('../../static/img/Bus/loc_dot.png')
     let [data, setData] = useState( {    busPositionArr:[{index:0}]    } )  // 設定初始化數據
-    // TODO:點按刷新時重新訪問campus bus網站獲取數據
     // BUG: useEffect會在每一次頁面渲染（刷新）時再次調用，嘗試使用其他生命週期函數
     // 函數式組件的生命週期觸發，參考：https://betterprogramming.pub/react-component-lifecycle-methods-with-react-hooks-efcd04987805
     // 組件渲染後 再次渲染時觸發
@@ -95,7 +94,7 @@ function BusScreen() {
         .then(text => getBusData(text) )
         .then(result  => {
             console.log("result為",result);
-            console.log("busInfo為",result.busInfoArr);
+            console.log("busInfoArr為",result.busInfoArr);
             console.log("busPositionArr為",result.busPositionArr[0]);
             // TODO:如果沒有Bus，則觸發提醒
             setData( result )
@@ -125,23 +124,6 @@ function BusScreen() {
             height:21,
             resizeMode:"contain"
         },
-        // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-        s0: {  position: 'absolute', left: 335, top: 565  },    // PGH
-        s1: {  position: 'absolute', left: 335, top: 450  },    // PGH ~ E4
-        s2: {  position: 'absolute', left: 335, top: 353  },    // E4
-        s3: {  position: 'absolute', left: 335, top: 200  },    // E4 ~ N2
-        s4: {  position: 'absolute', left: 335, top: 75  },     // N2
-        s5: {  position: 'absolute', left: 160, top: 15  },     // N2 ~ N6
-        s6: {  position: 'absolute', left: 115, top: 115  },    // N6
-        s7: {  position: 'absolute', left: 35, top: 180  },     // N6 ~ E11
-        s8: {  position: 'absolute', left: 35, top: 243  },     // E11
-        s9: {  position: 'absolute', left: 35, top: 290  },     // E11 ~ E21
-        s10: {  position: 'absolute', left: 35, top: 325  },    // N21
-        s11: {  position: 'absolute', left: 35, top: 420  },    // N21 ~ E32
-        s12: {  position: 'absolute', left: 35, top: 500  },    // E32
-        s13: {  position: 'absolute', left: 80, top: 575  },    // E32 ~ S4
-        s14: {  position: 'absolute', left: 245, top: 575  },   // s4
-        s15: {  position: 'absolute', left: 275, top: 575  },   // s4 ~ PGH
     });
     let busStyleArr = [
         // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
@@ -169,7 +151,7 @@ function BusScreen() {
                 {/* 刷新按鈕 */}
                 <TouchableOpacity
                     style={{
-                        position: 'absolute', top: 20,
+                        position: 'absolute', top:400, right:150,
                         alignItems: "center",
                         backgroundColor: "#DDDDDD",
                         padding: 10
@@ -179,8 +161,21 @@ function BusScreen() {
                     <Text>Refresh</Text>
                 </TouchableOpacity>
 
-                {/* <Text>{data.busInfoArr}</Text> */}
+                {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
+                {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
+                {/* Bus運行信息的渲染 */}
+                <View style={{
+                    position:"absolute",  top:5,  left:5,
+                    backgroundColor:"#d1d1d1",
+                    borderRadius:20,
+                    paddingLeft:20,
+                    paddingRight:20,
+                }}>
+                    <Text>{data.busInfoArr[2]}</Text>
+                    <Text>{data.busInfoArr[1]}</Text>
+                </View>
 
+                {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
                 {/* TODO:使用絕對位置在不同分辨率下的問題，尋找適配方法，像素單位等 */}
                 {/* TODO:如果不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
