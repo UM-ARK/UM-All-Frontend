@@ -1,6 +1,17 @@
 # UM ALL - Frontend - Public
 
-## RN使用方法（在模擬器中）
+## 內容
+- [環境安裝與運行模擬器](#環境安裝與運行模擬器)
+  * [Android環境安裝](#android環境-install)
+  * [IOS環境安裝](ios環境-install)
+- [開發本倉庫項目準備-MacOS](#開發本倉庫項目準備)
+  * [安裝及運行流程](#安裝及運行流程)
+  * [故障排除](#故障排除)
+- [使用Git的方法](#git方法)
+  * [基本的push](#基本的push)
+  * [分支的複製與合併](#分支的複製與合併)
+
+## 環境安裝與運行模擬器
 
 ### Android環境 [Install](https://reactnative.dev/docs/environment-setup)
 1. 確保自己是 `Android11` 的模擬器環境（其他安卓版本尚未測試）
@@ -31,6 +42,44 @@ npx react-native run-ios
 ```
 > `npx`指令會從線上找最新的包去執行，不要求有相關的包在本地。[詳細](https://www.reddit.com/r/reactnative/comments/hmqvcm/why_is_npx_react_native_preferred_over_installing/)
 
+---
+
+## 開發本倉庫項目準備
+> 在Mac M1系統下複製開發項目的代碼和運行模擬器
+### 安裝及運行流程
+1. 去複製倉庫的代碼到本地
+```console
+git clone <repo:link>
+```
+2. 安裝android模擬器需要的依賴包
+```console
+cd android
+npm i or npm install
+```
+3. 運行android模擬器
+```console
+npx react-native run-android
+```
+4. 安裝ios模擬器需要的依賴包
+```console
+cd ios
+pod install
+```
+5. 運行ios模擬器
+```console
+npx react-native run-ios
+```
+### 故障排除
+1. Android檔案權限報錯-`Error: spawn ./gradlew EACCES`
+```console
+cd android
+chmod +x ./gradlew
+xattr -l ./gradlew
+```
+3. IOS運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
+```console
+npx react-native unlink react-native-vector-icons
+```
 ---
 
 ## Git方法
