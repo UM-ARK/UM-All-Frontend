@@ -17,20 +17,25 @@ import {
     View,
     ImageBackground,
     Image,
-    ActivityIndicator, FlatList,
+    ActivityIndicator, 
+    FlatList, 
+    Dimensions, 
 } from "react-native";
+
 // RN第三方庫
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Swiper from "react-native-swiper";               // 輪播圖
 
 // 第三方庫
 import tw from "twrnc";
 
 // 本地引用
 import { Map }  from "./view/Home/Map";
+import SwiperTest      from "./view/Home/SwiperTest";   // 首頁輪播圖測試
 import Bus      from "./view/Home/Bus";
 import { News, NewsComponent } from "./view/Home/News";
 import MyPage from "./view/Home/MePage";
@@ -39,6 +44,13 @@ import MyPage from "./view/Home/MePage";
 const HomeStack = createNativeStackNavigator();
 
 function HomeScreen() {
+    let styles = StyleSheet.create({
+        swiper: {},
+        img: {
+            width: Dimensions.get('window').width,
+            height: 200,
+        }
+    });
     return (
         <View style={tw.style("w-full", "h-full", "bg-white")}>
 
@@ -463,8 +475,8 @@ function App() {
                         },
                         title:'Features',
                     }}/>
-                    {/* TODO:主頁 */}
-                    <Tab.Screen name="Home" component={HomeScreen} options={{
+                    {/* TODO:主頁，6.11改為輪播圖測試 */}
+                    <Tab.Screen name="Home" component={SwiperTest} options={{
                         headerShown: false,
                         headerStyle: {
                             backgroundColor: '#2F3A79',
