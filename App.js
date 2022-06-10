@@ -16,6 +16,7 @@ import {
     TouchableOpacity,
     View,
     ImageBackground,
+    Image,
     ActivityIndicator, FlatList,
 } from "react-native";
 // RN第三方庫
@@ -32,6 +33,7 @@ import tw from "twrnc";
 import { Map }  from "./view/Home/Map";
 import Bus      from "./view/Home/Bus";
 import { News, NewsComponent } from "./view/Home/News";
+import MyPage from "./view/Home/MePage";
 
 
 const HomeStack = createNativeStackNavigator();
@@ -234,16 +236,162 @@ class NewsScreen extends Component {
     }
 }
 
-class UserScreen extends Component {
-    render() {
-        return (
-            <View>
-                <Text>
-                    Me
-                </Text>
+//个人信息页
+function MePage() {
+    return (
+        <View style={{
+            height: '100%',
+            alignItems: 'center',
+            backgroundColor: '#BFD0DA',
+        }}>
+            <View style={{
+            height: '18%',
+            width: '95%',
+            backgroundColor: 'white',
+            marginTop: '5%',
+            padding: 12,
+            elevation: 5,
+            borderRadius: 10,
+            shadowColor: '#303133',
+            }}>
+                <View style={{
+                       height: '65%',
+                       width: '70%',
+                       marginLeft: '6%',
+                       marginTop: '7%',
+                       flexDirection: 'row',
+                       justifyContent: 'center',
+                       //alignItems: 'center',
+                   }}>
+                    <Image source={require("./UMARK_Assets/testphoto.png")} style={{
+                           height: 80,
+                           width: 80,
+                           marginTop: '-6%',
+                           borderRadius: 120,
+                           flexDirection: 'row',
+                           justifyContent: 'center',
+                       }}/>
+                    <View style={{                                           
+                           justifyContent: 'center',
+                           //alignItems: 'center',
+                           marginTop: '0%',
+                           marginLeft: '5%',
+                       }}>
+                    <Text style={{
+                               color: '#909399',
+                               fontSize: 20,
+                           }}>{'TestName'}</Text>
+                    <Text style={{
+                               color: '#909399',
+                               fontSize: 20,
+                           }}>{'Student ID: DC038281'}</Text>
+                    </View>
+                    </View>
             </View>
-        );
-    }
+            <View style={{
+                   height: '10%',
+                   width: '95%',
+                   padding: 10,
+                   marginTop: '5%',
+                   elevation: 5,
+                   borderRadius: 10,
+                   shadowColor: '#303133',
+                   backgroundColor: 'white',
+               }}>
+                <ScrollView style={{
+                       height: 100,
+                       overflow: 'scroll',
+                   }}>
+                    <View style={{
+                        height: 48,
+                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                       }}>
+                        <Text style={{fontSize:22,alignItems: 'center',color:'black'}}>{'UMPass Settings'}</Text>
+                    </View>
+                   </ScrollView>
+            </View>
+            <View style={{
+                   height: '30%',
+                   width: '95%',
+                   padding: 10,
+                   marginTop: '5%',
+                   elevation: 5,
+                   borderRadius: 10,
+                   shadowColor: '#303133',
+                   backgroundColor: 'white',
+               }}>
+                <ScrollView style={{
+                       height: 100,
+                       overflow: 'scroll',
+                   }}>
+                    <View style={{
+                        height: 60,
+                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                       }}>
+                        <Text style={{fontSize:22,alignItems: 'center',color:'black'}}>{'Favorites'}</Text>
+                    </View>
+                       <View style={{
+                           width: '90%',
+                           height: 1,
+                           alignSelf:'center',
+                           opacity: 0.5,
+                           backgroundColor: '#606266',
+                       }} />
+                         <View style={{
+                        height: 60,
+                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                       }}>
+                        <Text style={{color:'black',fontSize:22,alignItems: 'center',}}>{'General'}</Text>
+                    </View>
+                       <View style={{
+                           width: '90%',
+                           height: 1,
+                           alignSelf:'center',
+                           opacity: 0.5,
+                           backgroundColor: '#606266',
+                       }} />
+                        <View style={{
+                        height: 60,
+                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                       }}>
+                        <Text style={{fontSize:22,alignItems: 'center',color:'black'}}>{'General Settings'}</Text>
+                    </View>
+                   </ScrollView>
+            </View>
+            <View style={{
+                   height: '10%',
+                   width: '95%',
+                   padding: 10,
+                   marginTop: '5%',
+                   elevation: 5,
+                   borderRadius: 10,
+                   shadowColor: '#303133',
+                   backgroundColor: 'white',
+               }}>
+                <ScrollView style={{
+                       height: 100,
+                       overflow: 'scroll',
+                   }}>
+                    <View style={{
+                        height: 48,
+                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                       }}>
+                        <Text style={{fontSize:22,alignItems: 'center',color:'black'}}>{'About us'}</Text>
+                    </View>
+                   </ScrollView>
+            </View>
+        </View>
+    );
 }
 
 const Tab = createBottomTabNavigator();
@@ -338,7 +486,7 @@ function App() {
                         // headerShown設置是否顯示頂部欄
                         headerShown:false
                     }} />
-                    <Tab.Screen name="Me" component={UserScreen} options={{
+                    <Tab.Screen name="Me" component={MePage} options={{
                         headerStyle: {
                             backgroundColor: '#2F3A79',
                         },
