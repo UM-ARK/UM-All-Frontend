@@ -14,6 +14,7 @@ import {
     Text,
     View,
     Image,
+    TouchableOpacity,
 } from "react-native";
 
 // RN第三方庫
