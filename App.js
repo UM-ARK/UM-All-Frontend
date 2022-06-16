@@ -21,23 +21,23 @@ import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaCon
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // 第三方庫
 import tw from "twrnc";
 
 // 本地頁面引用
-import HomeScreen   from "./view/tabbarPages/home";
-import MesgScreen   from "./view/tabbarPages/message";
-import MePage       from "./view/tabbarPages/me";
-import NewsScreen   from "./view/tabbarPages/news";
-import AllFuncScreen   from "./view/tabbarPages/features";
+import HomeScreen       from "./view/tabbarPages/home";
+import MesgScreen       from "./view/tabbarPages/message";
+import MePage           from "./view/tabbarPages/me";
+import NewsScreen       from "./view/tabbarPages/news";
+import AllFuncScreen    from "./view/tabbarPages/features";
 
-import Map          from "./view/Features/Map";
-import Bus          from "./view/Features/Bus";
+import Map              from "./view/Features/Map";
+import Bus              from "./view/Features/Bus";
 
 // 本地工具引用
-import {pxToDp} from './utils/stylesKits'   // 動態適配設計稿單位
+import {pxToDp}         from './utils/stylesKits'   // 動態適配設計稿單位
+
 
 const Tab = createBottomTabNavigator();
 function App() {
@@ -45,7 +45,8 @@ function App() {
         <SafeAreaProvider style={{ backgroundColor: "#2F3A79" }}>
             <StatusBar barStyle="light-content" backgroundColor="#2F3A79" />
             <NavigationContainer>
-                <Tab.Navigator screenOptions={
+                <Tab.Navigator 
+                screenOptions={
                     (  { route },  ) => {
                         return {
                             tabBarIcon: ({ focused, color, size }) => {
@@ -83,7 +84,8 @@ function App() {
                         };
                     }
                 }
-                               initialRouteName={'Home'}
+                // 設定默認打開的Tabbar
+                initialRouteName={'Home'}
                 >
                     <Tab.Screen name="News" component={NewsScreen} options={{
                         headerStyle: {

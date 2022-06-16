@@ -3,11 +3,15 @@ import {
     StyleSheet,
     Text,
     View,
+    Button,
 } from "react-native";
 
 // 本地頁面引用
 import Map          from "../../Features/Map";
 import Bus          from "../../Features/Bus";
+
+// 本地工具引用
+import {pxToDp} from '../../../utils/stylesKits'
 
 // 第三方庫引用
 import tw from "twrnc";
@@ -39,8 +43,8 @@ const academic_features_list=[
 ]
 const public_features_list=[
     {
-        name: 'WTF',
-        icon:'cube-outline'
+        name: 'Map',
+        icon:'map-outline'
     },
     {
         name: 'Bus',
@@ -49,6 +53,10 @@ const public_features_list=[
     {
         name: 'Repair',
         icon:'hammer-outline'
+    },
+    {
+        name: 'WTF',
+        icon:'cube-outline'
     },
 ]
 const life_features_list=[
@@ -66,7 +74,8 @@ const life_features_list=[
     },
 ]
 
-const FeatureItem=({item_name,item_icon})=>{
+// TODO: 默認dp單位修改為pxToDp(長度)
+const FeatureItem=({item_name,item_icon,item_navigation})=>{
     let size = {
         fontSize:12
     };
@@ -84,6 +93,7 @@ const FeatureItem=({item_name,item_icon})=>{
         </View>
     )
 }
+
 class AllFuncScreenCompo extends Component {
     constructor(props) {
         super(props);
@@ -100,6 +110,7 @@ class AllFuncScreenCompo extends Component {
         const navigation = this.props.navigation;
         navigation.navigate ('Bus')
     }
+
     render() {
         let s = StyleSheet.create({
             borderColor: "#2F3A79",
@@ -112,6 +123,7 @@ class AllFuncScreenCompo extends Component {
 
         return (
             <View style={tw.style("w-full", "h-full", "bg-white")}>
+                {/* Academic圖標分類 */}
                 <View >
                     <Text style={tw.style('text-gray-500','text-sm','px-3','py-1')}>
                         ACADEMIC
@@ -123,6 +135,7 @@ class AllFuncScreenCompo extends Component {
                     </View>
                 </View>
 
+                {/* Public圖標分類 */}
                 <View >
                     <Text style={tw.style('text-gray-500','text-sm','px-3','py-1')}>
                         PUBLIC
@@ -134,6 +147,7 @@ class AllFuncScreenCompo extends Component {
                     </View>
                 </View>
 
+                {/* Life圖標分類 */}
                 <View >
                     <Text style={tw.style('text-gray-500','text-sm','px-3','py-1')}>
                         LIFE
@@ -144,6 +158,11 @@ class AllFuncScreenCompo extends Component {
                         </View>
                     </View>
                 </View>
+
+                {/* 跳轉測試 */}
+                <Text>{"\n\n\n\n"}</Text>
+                <Button onPress={()=>this.props.navigation.navigate('Bus')} title="Bus"></Button>
+                <Button onPress={()=>this.props.navigation.navigate('Map')} title="Map"></Button>
             </View>
         );
     }
@@ -157,21 +176,13 @@ function AllFuncScreen() {
         <FeatureStack.Navigator >
             <FeatureStack.Screen name="HomeFunc" component={AllFuncScreenCompo} options={ {
                     title:'Features',
-                    headerStyle:{
-                        backgroundColor:'#2F3A79'
-                    },
+                    headerStyle:{ backgroundColor:'#2F3A79' },
                     headerTintColor:'#fff'
             } }/>
 
             {/* 跳轉頁面的路由 */}
-            <FeatureStack.Screen name="Map" component={Map} options={{
-                    headerShown:false
-                }
-            }/>
-            <FeatureStack.Screen name="Bus" component={Bus} options={{
-                    headerShown:false
-                }
-            }/>
+            <FeatureStack.Screen name="Map" component={Map} options={{headerShown:false}} />
+            <FeatureStack.Screen name="Bus" component={Bus} options={{headerShown:false}} />
         </FeatureStack.Navigator>
     );
 }
