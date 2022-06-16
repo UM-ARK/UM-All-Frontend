@@ -28,24 +28,16 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import tw from "twrnc";
 
 // 本地引用
-import { Map }  from "./view/Home/Map";
-import Bus      from "./view/Home/Bus";
+import HomeScreen   from "./view/tabbarPages/home";
+import MesgScreen   from "./view/tabbarPages/message";
+import MePage       from "./view/tabbarPages/me";
+
+import Map          from "./view/Home/Map";
+import Bus          from "./view/Home/Bus";
 import { News, NewsComponent } from "./view/Home/News";
-import MyPage from "./view/Home/MePage";
 
 
 const HomeStack = createNativeStackNavigator();
-
-class HomeScreen extends Component {
-    state = {  } 
-    render() { 
-        return (
-            <View>
-                <Text>主頁展示</Text>
-            </View>
-        );
-    }
-}
 
 // 所有功能圖標頁
 function AllFuncScreen() {
@@ -205,17 +197,8 @@ class AllFuncScreenCompo extends Component {
     }
 }
 
-// 信息頁
-function MesgScreen() {
-    return (
-        <View>
-            <Text style={{ fontSize: 60, }}>Message Page</Text>
-        </View>
-    );
-}
-
+// 創建News頁的路由導航
 const NewsStack = createNativeStackNavigator();
-
 class NewsScreen extends Component {
     render() {
         return (
@@ -237,171 +220,6 @@ class NewsScreen extends Component {
     }
 }
 
-//个人信息页
-function MePage() {
-    return (
-        <View style={{
-            height: '100%',
-            alignItems: 'center',
-            backgroundColor: '#BFD0DA',
-        }}>
-            <View style={{
-            height: '20%',
-            width: '95%',
-            backgroundColor: 'white',
-            marginTop: '5%',
-            padding: 12,
-            elevation: 5,
-            borderRadius: 10,
-            shadowColor: '#303133',
-            alignItems: 'center',
-            justifyContent: 'center',
-            }}>
-                <View style={{
-                       height: '100%',
-                       width: '100%',
-                       marginLeft: '6%',
-                       flexDirection: 'row',
-                       alignItems: 'center',
-                   }}>
-                    {/*点击头像可以绑定更换头像*/}
-                    <TouchableOpacity activeOpacity={0.5} >
-                        <Image source={require("./UMARK_Assets/testphoto.png")} style={{
-                           height: 80,
-                           width: 80,
-                       }}/>
-                    </TouchableOpacity>
-                    <View style={{
-                        height: '100%',
-                        width: '100%',
-                        justifyContent: 'center',
-                    }}>                    
-                        <Text style={{
-                               color: '#909399',
-                               fontSize: 20,
-                               marginLeft: '6%',
-                           }}>{'UM All account name'}</Text>
-                        <Text style={{
-                               color: '#909399',
-                               fontSize: 20,
-                               marginLeft: '6%',
-                           }}>{'UM ID: DC038281'}</Text>
-                    </View>
-                    </View>
-            </View>
-            <TouchableOpacity activeOpacity={0.5} style={{
-                   height: '10%',
-                   width: '95%',
-                   padding: 10,
-                   marginTop: '8%',
-                   elevation: 5,
-                   borderRadius: 10,
-                   shadowColor: '#303133',
-                   backgroundColor: 'white',
-                   justifyContent: 'center',
-               }}>
-            <View>
-                    <View style={{
-                        height: 48,
-                        marginLeft: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                       }}>
-                        <Text style={{fontSize:22,alignItems: 'center',color:'black',marginLeft: '3%'}}>{'UMPass Settings'}</Text>
-                    </View>
-            </View>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.5} style={{
-                   height: '10%',
-                   width: '95%',
-                   padding: 10,
-                   marginTop: '8%',
-                   elevation: 5,
-                   borderRadius: 10,
-                   shadowColor: '#303133',
-                   backgroundColor: 'white',
-                   justifyContent: 'center',
-               }}>
-            <View>
-                    <View style={{
-                        height: 48,
-                        marginLeft: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                       }}>
-                        <Text style={{fontSize:22,alignItems: 'center',color:'black',marginLeft: '3%'}}>{'Favorites'}</Text>
-                    </View>
-            </View>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.5} style={{
-                   height: '10%',
-                   width: '95%',
-                   padding: 10,
-                   marginTop: '2%',
-                   elevation: 5,
-                   borderRadius: 10,
-                   shadowColor: '#303133',
-                   backgroundColor: 'white',
-                   justifyContent: 'center',
-               }}>
-            <View>
-                    <View style={{
-                        height: 48,
-                        marginLeft: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                       }}>
-                        <Text style={{fontSize:22,alignItems: 'center',color:'black',marginLeft: '3%'}}>{'QR Code'}</Text>
-                    </View>
-            </View>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.5} style={{
-                   height: '10%',
-                   width: '95%',
-                   padding: 10,
-                   marginTop: '2%',
-                   elevation: 5,
-                   borderRadius: 10,
-                   shadowColor: '#303133',
-                   backgroundColor: 'white',
-                   justifyContent: 'center',
-               }}>
-            <View>
-                    <View style={{
-                        height: 48,
-                        marginLeft: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                       }}>
-                        <Text style={{fontSize:22,alignItems: 'center',color:'black',marginLeft: '3%'}}>{'General Settings'}</Text>
-                    </View>
-            </View>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.5} style={{
-                   height: '10%',
-                   width: '95%',
-                   padding: 10,
-                   marginTop: '8%',
-                   elevation: 5,
-                   borderRadius: 10,
-                   shadowColor: '#303133',
-                   backgroundColor: 'white',
-                   justifyContent: 'center',
-               }}>
-            <View>
-                    <View style={{
-                        height: 48,
-                        marginLeft: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                       }}>
-                        <Text style={{fontSize:22,alignItems: 'center',color:'black',marginLeft: '3%'}}>{'About us'}</Text>
-                    </View>
-            </View>
-            </TouchableOpacity>
-        </View>
-    );
-}
 
 const Tab = createBottomTabNavigator();
 
@@ -509,6 +327,5 @@ function App() {
         </SafeAreaProvider>
     );
 }
-
 
 export default App;
