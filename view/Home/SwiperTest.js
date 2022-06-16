@@ -1,12 +1,17 @@
-import React, { Component } from 'react'
-import { Text, View, Image, Dimensions } from 'react-native'
+import React, { Component, useEffect } from 'react'
+import { Text, View, Image, Dimensions, PixelRatio, StatusBar } from 'react-native'
 import Swiper from 'react-native-swiper'    // 庫來源：https://github.com/leecade/react-native-swiper
+// 在Swiper內添加removeClippedSubviews={false} 防閃屏
 
 const { width } = Dimensions.get('window')
 const { height } = Dimensions.get('window')
+let pr = PixelRatio.get()
 
 
 const styles = {
+    container: {
+        flex:1
+    },
     wrapper: {},
     slide: {
         flex: 1,
@@ -44,41 +49,45 @@ const renderPagination = (index, total, context) => {
 }
 
 function SwiperTest() {
+    useEffect(()=>{
+        console.log("當前默認單位1dp為",pr,"個px");
+    }, [])
     return (
-        <Swiper
-            style={styles.wrapper}
-            renderPagination={renderPagination}
-            loop={false}
-        >
-            <View
-            style={styles.slide}
-            title={
-                <Text numberOfLines={1}>Aussie tourist dies at Bali hotel</Text>
-            }
+        <View style={styles.container}>
+            <StatusBar backgroundColor={"transparent"} translucent={true}/>
+            <Swiper
+                style={styles.wrapper}
+                // renderPagination={renderPagination}
+                showsButtons = {true}
+                paginationStyle={{
+                    position: 'absolute',
+                    // right: 5,
+                    top: 150,
+                    // marginTop: '10'
+                }}
+                autoplay={true}
+                removeClippedSubviews={false}
             >
-            <Image style={styles.image} source={require('./img/1.jpg')} />
+                <View style={styles.slide}>
+                    <Image style={styles.image} source={require('./img/1.jpg')} />
+                </View>
+                <View style={styles.slide}>
+                    <Image style={styles.image} source={require('./img/2.jpg')} />
+                </View>
+                <View style={styles.slide}>
+                    <Image style={styles.image} source={require('./img/3.jpg')} />
+                </View>
+                <View style={styles.slide}>
+                    <Image style={styles.image} source={require('./img/4.jpg')} />
+                </View>
+            </Swiper>
+
+            {/* 臨時佔位，用於其他內容 */}
+            <View style={{ flex:3 }}>
+                <Text style={{paddingTop:100}}>Test String</Text>
             </View>
-            <View
-            style={styles.slide}
-            title={<Text numberOfLines={1}>Big lie behind Nine’s new show</Text>}
-            >
-            <Image style={styles.image} source={require('./img/2.jpg')} />
-            </View>
-            <View
-            style={styles.slide}
-            title={<Text numberOfLines={1}>Why Stone split from Garfield</Text>}
-            >
-            <Image style={styles.image} source={require('./img/3.jpg')} />
-            </View>
-            <View
-            style={styles.slide}
-            title={
-                <Text numberOfLines={1}>Learn from Kim K to land that job</Text>
-            }
-            >
-            <Image style={styles.image} source={require('./img/4.jpg')} />
-            </View>
-        </Swiper>
+
+        </View>
     )
 }
 

@@ -69,87 +69,91 @@ function getBusData(busInfoHtml){
     })
 }
 
-// 巴士報站頁 - 畫面佈局與渲染
-function BusScreen() {
-    // useState用法, https://blog.csdn.net/wu_xianqiang/article/details/105181044
-    // 鉤子用法useEffect，https://www.ruanyifeng.com/blog/2020/09/react-hooks-useeffect-tutorial.html
-    let busRouteImg = require('../../static/img/Bus/bus_route.png')
-    let arrowImg    = require('../../static/img/Bus/direction_left.png')
-    let dotImg      = require('../../static/img/Bus/loc_dot.png')
-    let [data, setData] = useState( {    busPositionArr:[{index:0}]    } )  // 設定初始化數據
-    // BUG: useEffect會在每一次頁面渲染（刷新）時再次調用，嘗試使用其他生命週期函數
-    // 函數式組件的生命週期觸發，參考：https://betterprogramming.pub/react-component-lifecycle-methods-with-react-hooks-efcd04987805
-    // 組件渲染後 再次渲染時觸發
-    useEffect(() => {
-        fetchBusInfo();
-    }, []);             // 尾部數組為空，則只在初次渲染時執行一次
+let busRouteImg = require('../../static/img/Bus/bus_route.png')
+let arrowImg    = require('../../static/img/Bus/direction_left.png')
+let dotImg      = require('../../static/img/Bus/loc_dot.png')
 
+// 樣式代碼
+let s = StyleSheet.create({
+    container: {
+        flex: 1,
+        flexDirection: "column"
+    },
+    bgImg: {
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "center"
+    },
+    arrowSize: {
+        width:35,
+        height:35,
+        resizeMode:"contain",
+    },
+    dotSize: {
+        width:21,
+        height:21,
+        resizeMode:"contain"
+    },
+})
+let busStyleArr = [
+    // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
+    {  position: 'absolute', left: 335, top: 565  },    // PGH
+    {  position: 'absolute', left: 335, top: 450  },    // PGH ~ E4
+    {  position: 'absolute', left: 335, top: 353  },    // E4
+    {  position: 'absolute', left: 335, top: 200  },    // E4 ~ N2
+    {  position: 'absolute', left: 335, top: 75  },     // N2
+    {  position: 'absolute', left: 160, top: 15  },     // N2 ~ N6
+    {  position: 'absolute', left: 115, top: 115  },    // N6
+    {  position: 'absolute', left: 35, top: 180  },     // N6 ~ E11
+    {  position: 'absolute', left: 35, top: 243  },     // E11
+    {  position: 'absolute', left: 35, top: 290  },     // E11 ~ E21
+    {  position: 'absolute', left: 35, top: 325  },     // N21
+    {  position: 'absolute', left: 35, top: 420  },     // N21 ~ E32
+    {  position: 'absolute', left: 35, top: 500  },     // E32
+    {  position: 'absolute', left: 80, top: 575  },     // E32 ~ S4
+    {  position: 'absolute', left: 245, top: 575  },    // s4
+    {  position: 'absolute', left: 275, top: 575  },    // s4 ~ PGH
+]
+
+// 巴士報站頁 - 畫面佈局與渲染
+class BusScreen extends Component {
     // TODO:有兩輛車的情況，不急做
     // 爬蟲campus Bus
-    function fetchBusInfo(){
+    fetchBusInfo=()=>{
         // 訪問campusloop網站
         fetch('https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo', {method: "GET"})
         .then(res  => res.text())
         .then(text => getBusData(text) )
         .then(result  => {
-            console.log("爬蟲後的result為", result);
+            // console.log("爬蟲後的result為", result);
             // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
             result.busInfoArr.shift()       // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
             console.log("busInfoArr為", result.busInfoArr);
-
             {/* TODO:不止一輛巴士的情況 */}
             console.log("busPositionArr為", result.busPositionArr[0]);
+
             // TODO:如果沒有Bus，則觸發提醒
-            setData( result )
+            this.setState({
+                busInfoArr      : result.busInfoArr,
+                busPositionArr  : result.busPositionArr,
+            });
         })
 
         .catch((error) => console.error(error))
     }
+    
+    state = {
+        busPositionArr:[{index:0}]
+    }
 
-    // 樣式代碼
-    let s = StyleSheet.create({
-        container: {
-            flex: 1,
-            flexDirection: "column"
-        },
-        bgImg: {
-            flex: 1,
-            resizeMode: "cover",
-            justifyContent: "center"
-        },
-        arrowSize: {
-            width:35,
-            height:35,
-            resizeMode:"contain",
-        },
-        dotSize: {
-            width:21,
-            height:21,
-            resizeMode:"contain"
-        },
-    });
-    let busStyleArr = [
-        // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-        {  position: 'absolute', left: 335, top: 565  },    // PGH
-        {  position: 'absolute', left: 335, top: 450  },    // PGH ~ E4
-        {  position: 'absolute', left: 335, top: 353  },    // E4
-        {  position: 'absolute', left: 335, top: 200  },    // E4 ~ N2
-        {  position: 'absolute', left: 335, top: 75  },     // N2
-        {  position: 'absolute', left: 160, top: 15  },     // N2 ~ N6
-        {  position: 'absolute', left: 115, top: 115  },    // N6
-        {  position: 'absolute', left: 35, top: 180  },     // N6 ~ E11
-        {  position: 'absolute', left: 35, top: 243  },     // E11
-        {  position: 'absolute', left: 35, top: 290  },     // E11 ~ E21
-        {  position: 'absolute', left: 35, top: 325  },     // N21
-        {  position: 'absolute', left: 35, top: 420  },     // N21 ~ E32
-        {  position: 'absolute', left: 35, top: 500  },     // E32
-        {  position: 'absolute', left: 80, top: 575  },     // E32 ~ S4
-        {  position: 'absolute', left: 245, top: 575  },    // s4
-        {  position: 'absolute', left: 275, top: 575  },    // s4 ~ PGH
-    ]
+    constructor(){
+        super();
+        this.fetchBusInfo();
+    }
 
-    return (
-        <View style={s.container}>
+    render() { 
+        return (
+            <View style={s.container}>
             <ImageBackground source={ busRouteImg } style={s.bgImg}>
                 {/* 刷新按鈕 */}
                 <TouchableOpacity
@@ -159,7 +163,7 @@ function BusScreen() {
                         backgroundColor: "#DDDDDD",
                         padding: 10
                     }}
-                    onPress={fetchBusInfo}
+                    onPress={this.fetchBusInfo}
                 >
                     <Text>Refresh</Text>
                 </TouchableOpacity>
@@ -174,12 +178,7 @@ function BusScreen() {
                     paddingLeft:20,
                     paddingRight:20,
                 }}>
-                    {/* 渲染數組，並換行 */}
-                    {
-                        data.busInfoArr.map((item)=>{
-                            return <Text>{item}</Text>
-                        })
-                    }
+                    <Text>{this.state.busInfoArr}</Text>
                 </View>
 
                 {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
@@ -187,7 +186,7 @@ function BusScreen() {
                 {/* TODO:無Bus的情況，連busPositionArr都為空(undefined)，應隱藏Bus圖標 */}
                 {/* TODO:不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
-                <View style={  busStyleArr[  (data.busPositionArr.length>0) ? (data.busPositionArr[0].index) : 0 ]  }>
+                <View style={  busStyleArr[  (this.state.busPositionArr.length>0) ? (this.state.busPositionArr[0].index) : 0 ]  }>
                     <Ionicons name={"bus"} size={30} color={"#2F3A79"} />
                 </View>
 
@@ -263,9 +262,9 @@ function BusScreen() {
                 </View>
 
             </ImageBackground>
-        </View>
-    )
+            </View>
+        );
+    }
 }
-
 
 export default BusScreen;
