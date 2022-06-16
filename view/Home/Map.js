@@ -5,7 +5,7 @@ import React, { Component } from "react";
 import { Text, View } from "react-native";
 import { WebView } from 'react-native-webview';
 
-export class Map extends Component{
+class Map extends Component{
     render() {
         return (
             <WebView 
@@ -14,3 +14,5 @@ export class Map extends Component{
         )
     }
 }
+
+export default Map;
