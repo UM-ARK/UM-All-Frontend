@@ -3,9 +3,10 @@ import { Text, View, TouchableOpacity, StyleSheet, ImageBackground, Image } from
 
 import tw from "twrnc";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
 // 用於解析Campus Bus的HTML
 var DomParser = require('react-native-html-parser').DOMParser
+// 引入本地工具
+import {pxToDp} from '../../utils/stylesKits'
 
 
 // 解析campus Bus的HTML
@@ -69,52 +70,6 @@ function getBusData(busInfoHtml){
     })
 }
 
-let busRouteImg = require('../../static/img/Bus/bus_route.png')
-let arrowImg    = require('../../static/img/Bus/direction_left.png')
-let dotImg      = require('../../static/img/Bus/loc_dot.png')
-
-// 樣式代碼
-let s = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: "column"
-    },
-    bgImg: {
-        flex: 1,
-        resizeMode: "cover",
-        justifyContent: "center"
-    },
-    arrowSize: {
-        width:35,
-        height:35,
-        resizeMode:"contain",
-    },
-    dotSize: {
-        width:21,
-        height:21,
-        resizeMode:"contain"
-    },
-})
-let busStyleArr = [
-    // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-    {  position: 'absolute', left: 335, top: 565  },    // PGH
-    {  position: 'absolute', left: 335, top: 450  },    // PGH ~ E4
-    {  position: 'absolute', left: 335, top: 353  },    // E4
-    {  position: 'absolute', left: 335, top: 200  },    // E4 ~ N2
-    {  position: 'absolute', left: 335, top: 75  },     // N2
-    {  position: 'absolute', left: 160, top: 15  },     // N2 ~ N6
-    {  position: 'absolute', left: 115, top: 115  },    // N6
-    {  position: 'absolute', left: 35, top: 180  },     // N6 ~ E11
-    {  position: 'absolute', left: 35, top: 243  },     // E11
-    {  position: 'absolute', left: 35, top: 290  },     // E11 ~ E21
-    {  position: 'absolute', left: 35, top: 325  },     // N21
-    {  position: 'absolute', left: 35, top: 420  },     // N21 ~ E32
-    {  position: 'absolute', left: 35, top: 500  },     // E32
-    {  position: 'absolute', left: 80, top: 575  },     // E32 ~ S4
-    {  position: 'absolute', left: 245, top: 575  },    // s4
-    {  position: 'absolute', left: 275, top: 575  },    // s4 ~ PGH
-]
-
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
     // TODO:有兩輛車的情況，不急做
@@ -141,9 +96,10 @@ class BusScreen extends Component {
 
         .catch((error) => console.error(error))
     }
-    
+
     state = {
-        busPositionArr:[{index:0}]
+        busPositionArr:[{index:0}],
+        busInfoArr:['']
     }
 
     constructor(){
@@ -151,17 +107,73 @@ class BusScreen extends Component {
         this.fetchBusInfo();
     }
 
-    render() { 
+    render() {
+        let busRouteImg = require('../../static/img/Bus/bus_route.png')
+        let arrowImg    = require('../../static/img/Bus/direction_left.png')
+        let dotImg      = require('../../static/img/Bus/loc_dot.png')
+        let stopImgArr  = [
+            require('../../static/img/Bus/stopImg/PGH.jpg'),
+            require('../../static/img/Bus/stopImg/E4.jpg'),
+            require('../../static/img/Bus/stopImg/N2.jpg'),
+            require('../../static/img/Bus/stopImg/N6.jpg'),
+            require('../../static/img/Bus/stopImg/E11.jpg'),
+            require('../../static/img/Bus/stopImg/E21.jpg'),
+            require('../../static/img/Bus/stopImg/E32.jpg'),
+            require('../../static/img/Bus/stopImg/S4.jpg'),
+        ]
+        // 樣式代碼
+        let s = StyleSheet.create({
+            container: {
+                flex: 1,
+                flexDirection: "column"
+            },
+            bgImg: {
+                flex: 1,
+                resizeMode: "cover",
+                justifyContent: "center"
+            },
+            arrowSize: {
+                width:pxToDp(35),
+                height:pxToDp(35),
+                resizeMode:"contain",
+            },
+            dotSize: {
+                width:pxToDp(21),
+                height:pxToDp(21),
+                resizeMode:"contain"
+            },
+        })
+        let busStyleArr = [
+            // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
+            {  position: 'absolute', left: pxToDp(320), top: pxToDp(540)  },    // PGH
+            {  position: 'absolute', left: pxToDp(320), top: pxToDp(450)  },    // PGH ~ E4
+            {  position: 'absolute', left: pxToDp(320), top: pxToDp(340)  },    // E4
+            {  position: 'absolute', left: pxToDp(320), top: pxToDp(200)  },    // E4 ~ N2
+            {  position: 'absolute', left: pxToDp(320), top: pxToDp(70)  },     // N2
+            {  position: 'absolute', left: pxToDp(160), top: pxToDp(60)  },     // N2 ~ N6
+            {  position: 'absolute', left: pxToDp(105), top: pxToDp(110)  },    // N6
+            {  position: 'absolute', left: pxToDp(80),  top: pxToDp(170)  },    // N6 ~ E11
+            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(235)  },    // E11
+            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(270)  },    // E11 ~ E21
+            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(310)  },    // N21
+            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(400)  },    // N21 ~ E32
+            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(485)  },    // E32
+            {  position: 'absolute', left: pxToDp(80),  top: pxToDp(550)  },    // E32 ~ S4
+            {  position: 'absolute', left: pxToDp(235), top: pxToDp(545)  },    // s4
+            {  position: 'absolute', left: pxToDp(290), top: pxToDp(590)  },    // s4 ~ PGH
+        ]
+
         return (
             <View style={s.container}>
             <ImageBackground source={ busRouteImg } style={s.bgImg}>
                 {/* 刷新按鈕 */}
                 <TouchableOpacity
                     style={{
-                        position: 'absolute', top:400, right:150,
+                        position: 'absolute', top:pxToDp(400), right:pxToDp(150),
                         alignItems: "center",
                         backgroundColor: "#DDDDDD",
-                        padding: 10
+                        padding: 10,
+                        borderRadius: 10,
                     }}
                     onPress={this.fetchBusInfo}
                 >
@@ -178,7 +190,7 @@ class BusScreen extends Component {
                     paddingLeft:20,
                     paddingRight:20,
                 }}>
-                    <Text>{this.state.busInfoArr}</Text>
+                    { this.state.busInfoArr.map((item)=><Text>{item}</Text>) }
                 </View>
 
                 {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
@@ -187,23 +199,23 @@ class BusScreen extends Component {
                 {/* TODO:不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
                 <View style={  busStyleArr[  (this.state.busPositionArr.length>0) ? (this.state.busPositionArr[0].index) : 0 ]  }>
-                    <Ionicons name={"bus"} size={30} color={"#2F3A79"} />
+                    <Ionicons name={"bus"} size={pxToDp(30)} color={"#2F3A79"} />
                 </View>
 
                 {/* 右上箭頭 */}
-                <View style={ {position: 'absolute', left: 310, top: 25,} }>
+                <View style={ {position: 'absolute', left: pxToDp(290), top: pxToDp(25),} }>
                     <Image source={arrowImg} style={s.arrowSize} />
                 </View>
                 {/* 左上箭頭 */}
-                <View style={ {position: 'absolute', left: 45, top: 140,} }>
+                <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(140),} }>
                     <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
                 </View>
                 {/* 左下箭頭 */}
-                <View style={ {position: 'absolute', left: 45, top: 610,} }>
+                <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(580),} }>
                     <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
                 </View>
                 {/* 右下箭頭 */}
-                <View style={ {position: 'absolute', left: 315, top: 610,} }>
+                <View style={ {position: 'absolute', left: pxToDp(300), top: pxToDp(580),} }>
                     <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
                 </View>
 
