@@ -1,5 +1,5 @@
 import React, { Component, useEffect } from 'react'
-import { Text, View, Image, Dimensions, PixelRatio } from 'react-native'
+import { Text, View, Image, Dimensions, PixelRatio, StatusBar } from 'react-native'
 import Swiper from 'react-native-swiper'    // 庫來源：https://github.com/leecade/react-native-swiper
 // 在Swiper內添加removeClippedSubviews={false} 防閃屏
 
@@ -54,6 +54,7 @@ function SwiperTest() {
     }, [])
     return (
         <View style={styles.container}>
+            <StatusBar backgroundColor={"transparent"} translucent={true}/>
             <Swiper
                 style={styles.wrapper}
                 // renderPagination={renderPagination}
