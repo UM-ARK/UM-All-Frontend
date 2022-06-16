@@ -3,15 +3,11 @@ import {
     StyleSheet,
     Text,
     View,
-    Button,
 } from "react-native";
 
 // 本地頁面引用
 import Map          from "../../Features/Map";
 import Bus          from "../../Features/Bus";
-
-// 本地工具引用
-import {pxToDp} from '../../../utils/stylesKits'
 
 // 第三方庫引用
 import tw from "twrnc";
@@ -112,14 +108,14 @@ class AllFuncScreenCompo extends Component {
     }
 
     render() {
-        let s = StyleSheet.create({
-            borderColor: "#2F3A79",
-            borderWidth: 4,
-            borderRadius: 8,
-            backgroundColor: "#fff",
-            overlayColor: "#ffffff",
-            marginBottom: 2,
-        });
+        // let s = StyleSheet.create({
+        //     borderColor: "#2F3A79",
+        //     borderWidth: 4,
+        //     borderRadius: 8,
+        //     backgroundColor: "#fff",
+        //     overlayColor: "#ffffff",
+        //     marginBottom: 2,
+        // });
 
         return (
             <View style={tw.style("w-full", "h-full", "bg-white")}>
@@ -158,11 +154,6 @@ class AllFuncScreenCompo extends Component {
                         </View>
                     </View>
                 </View>
-
-                {/* 跳轉測試 */}
-                <Text>{"\n\n\n\n"}</Text>
-                <Button onPress={()=>this.props.navigation.navigate('Bus')} title="Bus"></Button>
-                <Button onPress={()=>this.props.navigation.navigate('Map')} title="Map"></Button>
             </View>
         );
     }

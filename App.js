@@ -1,43 +1,18 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-// RN直屬庫
-import React, { Component } from "react";
+import React  from "react";
 import {
-    ScrollView,
     StatusBar,
-    Text,
-    View,
-    Image,
-    TouchableOpacity,
 } from "react-native";
 
-// RN第三方庫
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-// 第三方庫
-import tw from "twrnc";
-
-// 本地頁面引用
 import HomeScreen       from "./view/tabbarPages/home";
 import MesgScreen       from "./view/tabbarPages/message";
 import MePage           from "./view/tabbarPages/me";
 import NewsScreen       from "./view/tabbarPages/news";
 import AllFuncScreen    from "./view/tabbarPages/features";
-
-import Map              from "./view/Features/Map";
-import Bus              from "./view/Features/Bus";
-
-// 本地工具引用
-import {pxToDp}         from './utils/stylesKits'   // 動態適配設計稿單位
-
 
 const Tab = createBottomTabNavigator();
 function App() {
@@ -45,7 +20,7 @@ function App() {
         <SafeAreaProvider style={{ backgroundColor: "#2F3A79" }}>
             <StatusBar barStyle="light-content" backgroundColor="#2F3A79" />
             <NavigationContainer>
-                <Tab.Navigator 
+                <Tab.Navigator
                 screenOptions={
                     (  { route },  ) => {
                         return {
