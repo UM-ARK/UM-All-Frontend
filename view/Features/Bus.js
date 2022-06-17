@@ -1,13 +1,17 @@
 import React, { Component, useEffect, useState } from "react";
-import { Text, View, TouchableOpacity, StyleSheet, ImageBackground, Image } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 
 import tw from "twrnc";
 import Ionicons from "react-native-vector-icons/Ionicons";
+// 彈出層文檔：https://github.com/react-native-modal/react-native-modal
+import Modal from "react-native-modal";
 // 用於解析Campus Bus的HTML
 var DomParser = require('react-native-html-parser').DOMParser
 // 引入本地工具
 import {pxToDp} from '../../utils/stylesKits'
 
+// 定義主題顏色
+const themeColor = '#2f3a79'
 
 // 解析campus Bus的HTML
 function getBusData(busInfoHtml){
@@ -91,19 +95,53 @@ class BusScreen extends Component {
             this.setState({
                 busInfoArr      : result.busInfoArr,
                 busPositionArr  : result.busPositionArr,
-            });
+                haveBus         : (result.busPositionArr.length > 0 ? true : false)
+            })
+            if (this.state.busPositionArr.length==0) {
+                alert('當前沒有巴士~')
+            }
         })
 
         .catch((error) => console.error(error))
     }
 
+    // 巴士站點文字渲染
+    busStopText=(left, top, text, index )=>{
+        return (
+            <TouchableOpacity onPress={this.toggleModal.bind(this,index)}
+            // TODO: 兩輛巴士情況的到站標識
+            style={{ borderColor:themeColor, 
+            borderRadius:pxToDp(20), borderWidth:pxToDp(2), 
+            position: 'absolute', left:pxToDp(left), top:pxToDp(top), 
+            justifyContent:'space-around', alignItems:'center', 
+            paddingLeft:pxToDp(5), paddingRight:pxToDp(5), paddingTop:pxToDp(2), paddingBottom:pxToDp(2), }}>
+                <Text style={{color:themeColor}} >{text}</Text>
+            </TouchableOpacity>
+        )
+    }
+
+    // 控制彈出層打開 or 關閉
+    toggleModal = (index) => {
+        this.setState({
+            isModalVisible:!this.state.isModalVisible,
+            clickStopIndex:index,
+        });
+    }
+
     state = {
         busPositionArr:[{index:0}],
-        busInfoArr:['']
+        busInfoArr:[''],
+        // 彈出層默認關閉
+        isModalVisible:false,
+        // 彈出層內容
+        modalContent:['text', 'stopImage', 'busName'],
+        // 點擊站點的數組索引
+        clickStopIndex:0,
     }
 
     constructor(){
         super();
+        // 打開Bus頁時直接請求巴士報站的數據
         this.fetchBusInfo();
     }
 
@@ -127,11 +165,6 @@ class BusScreen extends Component {
                 flex: 1,
                 flexDirection: "column"
             },
-            bgImg: {
-                flex: 1,
-                resizeMode: "cover",
-                justifyContent: "center"
-            },
             arrowSize: {
                 width:pxToDp(35),
                 height:pxToDp(35),
@@ -145,27 +178,41 @@ class BusScreen extends Component {
         })
         let busStyleArr = [
             // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-            {  position: 'absolute', left: pxToDp(320), top: pxToDp(540)  },    // PGH
-            {  position: 'absolute', left: pxToDp(320), top: pxToDp(450)  },    // PGH ~ E4
-            {  position: 'absolute', left: pxToDp(320), top: pxToDp(340)  },    // E4
-            {  position: 'absolute', left: pxToDp(320), top: pxToDp(200)  },    // E4 ~ N2
-            {  position: 'absolute', left: pxToDp(320), top: pxToDp(70)  },     // N2
-            {  position: 'absolute', left: pxToDp(160), top: pxToDp(60)  },     // N2 ~ N6
-            {  position: 'absolute', left: pxToDp(105), top: pxToDp(110)  },    // N6
-            {  position: 'absolute', left: pxToDp(80),  top: pxToDp(170)  },    // N6 ~ E11
-            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(235)  },    // E11
-            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(270)  },    // E11 ~ E21
-            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(310)  },    // N21
-            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(400)  },    // N21 ~ E32
-            {  position: 'absolute', left: pxToDp(25),  top: pxToDp(485)  },    // E32
-            {  position: 'absolute', left: pxToDp(80),  top: pxToDp(550)  },    // E32 ~ S4
-            {  position: 'absolute', left: pxToDp(235), top: pxToDp(545)  },    // s4
-            {  position: 'absolute', left: pxToDp(290), top: pxToDp(590)  },    // s4 ~ PGH
+            {  position: 'absolute', left: pxToDp(328), top: pxToDp(540)  },    // PGH
+            {  position: 'absolute', left: pxToDp(328), top: pxToDp(450)  },    // PGH ~ E4
+            {  position: 'absolute', left: pxToDp(328), top: pxToDp(340)  },    // E4
+            {  position: 'absolute', left: pxToDp(328), top: pxToDp(200)  },    // E4 ~ N2
+            {  position: 'absolute', left: pxToDp(328), top: pxToDp(70)  },     // N2
+            {  position: 'absolute', left: pxToDp(160), top: pxToDp(65)  },     // N2 ~ N6
+            {  position: 'absolute', left: pxToDp(110), top: pxToDp(110)  },    // N6
+            {  position: 'absolute', left: pxToDp(80),  top: pxToDp(180)  },    // N6 ~ E11
+            {  position: 'absolute', left: pxToDp(30),  top: pxToDp(235)  },    // E11
+            {  position: 'absolute', left: pxToDp(30),  top: pxToDp(270)  },    // E11 ~ E21
+            {  position: 'absolute', left: pxToDp(30),  top: pxToDp(310)  },    // N21
+            {  position: 'absolute', left: pxToDp(30),  top: pxToDp(400)  },    // N21 ~ E32
+            {  position: 'absolute', left: pxToDp(30),  top: pxToDp(483)  },    // E32
+            {  position: 'absolute', left: pxToDp(80),  top: pxToDp(570)  },    // E32 ~ S4
+            {  position: 'absolute', left: pxToDp(235), top: pxToDp(570)  },    // s4
+            {  position: 'absolute', left: pxToDp(280), top: pxToDp(570)  },    // s4 ~ PGH
         ]
 
         return (
-            <View style={s.container}>
-            <ImageBackground source={ busRouteImg } style={s.bgImg}>
+            <ScrollView style={s.container}>
+                {/* 背景的Bus路線圖 */}
+                <Image source={ busRouteImg } style={{width:pxToDp(390), height:pxToDp(670), paddingTop:pxToDp(0)}}/>
+                {/* 彈出層 - 展示站點圖片 */}
+                <Modal isVisible={this.state.isModalVisible} onBackdropPress={this.toggleModal.bind(this,this.state.clickStopIndex)}
+                animationIn='zoomIn' animationOut='zoomOut' animationInTiming={500} animationOutTiming={500}
+                backdropOpacity={0.4} backdropTransitionOutTiming={500} >
+                    <View style={{ justifyContent:'center', alignItems:'center' }}>
+                        {/* 關閉圖標 - 引導用戶點擊背景關閉彈出層 */}
+                        <TouchableOpacity style={{paddingBottom:pxToDp(10), paddingLeft:pxToDp(280)}} onPress={this.toggleModal.bind(this,this.state.clickStopIndex)}>
+                            <Ionicons name={"close-circle"} size={pxToDp(50)} color={themeColor} />
+                        </TouchableOpacity>
+                        <Image source={stopImgArr[this.state.clickStopIndex]} 
+                        style={{height:"60%",}} resizeMode='contain' />
+                    </View>
+                </Modal>
                 {/* 刷新按鈕 */}
                 <TouchableOpacity
                     style={{
@@ -184,11 +231,11 @@ class BusScreen extends Component {
                 {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
                 {/* Bus運行信息的渲染 */}
                 <View style={{
-                    position:"absolute",  top:5,  left:5,
-                    backgroundColor:"#d1d1d1",
-                    borderRadius:20,
-                    paddingLeft:20,
-                    paddingRight:20,
+                    width:pxToDp(130), height:pxToDp(100),
+                    position:"absolute", top:pxToDp(5), left:pxToDp(5),
+                    backgroundColor:"#d1d1d1", borderRadius:pxToDp(20),
+                    paddingLeft:pxToDp(10), paddingRight:pxToDp(10), paddingTop:pxToDp(3), paddingBottom:pxToDp(3),
+                    overflow:'hidden'
                 }}>
                     { this.state.busInfoArr.map((item)=><Text>{item}</Text>) }
                 </View>
@@ -199,11 +246,11 @@ class BusScreen extends Component {
                 {/* TODO:不止一輛巴士的情況 */}
                 {/* 巴士圖標 */}
                 <View style={  busStyleArr[  (this.state.busPositionArr.length>0) ? (this.state.busPositionArr[0].index) : 0 ]  }>
-                    <Ionicons name={"bus"} size={pxToDp(30)} color={"#2F3A79"} />
+                    <Ionicons name={"bus"} size={pxToDp(30)} color={themeColor} />
                 </View>
 
                 {/* 右上箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(290), top: pxToDp(25),} }>
+                <View style={ {position: 'absolute', left: pxToDp(310), top: pxToDp(25),} }>
                     <Image source={arrowImg} style={s.arrowSize} />
                 </View>
                 {/* 左上箭頭 */}
@@ -211,70 +258,54 @@ class BusScreen extends Component {
                     <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
                 </View>
                 {/* 左下箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(580),} }>
+                <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(600),} }>
                     <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
                 </View>
                 {/* 右下箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(300), top: pxToDp(580),} }>
+                <View style={ {position: 'absolute', left: pxToDp(310), top: pxToDp(600),} }>
                     <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
                 </View>
 
-                {/* 站點圓點標誌 */}
+                {/* 站點圓點圖標 */}
                 {/* PGH */}
-                <View style={ {position: 'absolute', left: 310, top: 570,} }>
+                <View style={ {position: 'absolute', left: 322, top: 570,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={ {position: 'absolute', left: 310, top: 360,} }>
+                <View style={ {position: 'absolute', left: 322, top: 360,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={ {position: 'absolute', left: 310, top: 80,} }>
+                <View style={ {position: 'absolute', left: 322, top: 80,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={ {position: 'absolute', left: 145, top: 120,} }>
+                <View style={ {position: 'absolute', left: 151, top: 120,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={ {position: 'absolute', left: 62, top: 250,} }>
+                <View style={ {position: 'absolute', left: 65, top: 250,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={ {position: 'absolute', left: 62, top: 330,} }>
+                <View style={ {position: 'absolute', left: 65, top: 330,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
-                <View style={ {position: 'absolute', left: 62, top: 510,} }>
+                <View style={ {position: 'absolute', left: 65, top: 510,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
                 {/* S4 */}
-                <View style={ {position: 'absolute', left: 250, top: 602,} }>
+                <View style={ {position: 'absolute', left: 250, top: 630,} }>
                     <Image source={dotImg} style={s.dotSize} />
                 </View>
 
                 {/* 巴士站點文字 */}
-                <View style={[tw.style("border-2", "border-blue-900", "w-38"), {position: 'absolute', left: 155, top: 565,}]}>
-                    <Text style={tw.style("text-base")}>PGH 研究生宿舍(起)</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-23.5"), {position: 'absolute', left: 210, top: 355,}]}>
-                    <Text style={tw.style("text-base")}>E4 劉少榮樓</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-23.5"), {position: 'absolute', left: 210, top: 75,}]}>
-                    <Text style={tw.style("text-base")}>N2 大學會堂</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-20"), {position: 'absolute', left: 170, top: 115,}]}>
-                    <Text style={tw.style("text-base")}>N6 行政樓</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-25.5"), {position: 'absolute', left: 85, top: 245,}]}>
-                    <Text style={tw.style("text-base")}>E11 科技學院</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-30"), {position: 'absolute', left: 85, top: 325,}]}>
-                    <Text style={tw.style("text-base")}>E21 人文社科樓</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-22"), {position: 'absolute', left: 85, top: 505,}]}>
-                    <Text style={tw.style("text-base")}>E32 法學院</Text>
-                </View>
-                <View style={[tw.style("border-2", "border-blue-900", "w-46.5"), {position: 'absolute', left: 120, top: 620,}]}>
-                    <Text style={tw.style("text-base")}>S4 研究生宿舍南四座(終)</Text>
-                </View>
+                {/* TODO: 修改單位為pxToDp */}
+                {this.busStopText(168,  542,    'PGH 研究生宿舍(起)',      0)}
+                {this.busStopText(218,  341,    'E4 劉少榮樓',             1)}
+                {this.busStopText(216,  75,     'N2 大學會堂',             2)}
+                {this.busStopText(168,  112,    'N6 行政樓',               3)}
+                {this.busStopText(85,   236,    'E11 科技學院',            4)}
+                {this.busStopText(85,   313,    'E21 人文社科樓',          5)}
+                {this.busStopText(85,   485,    'E32 法學院',              6)}
+                {this.busStopText(120,  625,    'S4 研究生宿舍南四座(終)',  7)}
 
-            </ImageBackground>
-            </View>
+            </ScrollView>
         );
     }
 }
