@@ -115,6 +115,7 @@ function App() {
                         headerTitleStyle: {
                             fontWeight: 'bold',
                         },
+                        headerShown:false
                     }}/>
                 </Tab.Navigator>
             </NavigationContainer>
