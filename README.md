@@ -3,16 +3,16 @@
 ## 內容
 - [環境安裝與運行模擬器](#環境安裝與運行模擬器)
   * [Android環境安裝](#android環境-install)
-  * [IOS環境安裝](ios環境-install)
+  * [IOS環境安裝](#ios環境-install)
 - [開發本倉庫項目準備-MacOS](#開發本倉庫項目準備)
   * [安裝及運行流程](#安裝及運行流程)
   * [故障排除](#故障排除)
 - [使用Git的方法](#git方法)
-  * [基本的push](#基本的push)
-  * [分支的複製與合併](#分支的複製與合併)
+- [使用的第三方庫](#該項目使用的第三方庫)
 
 ---
 
+&nbsp;
 ## 環境安裝與運行模擬器
 
 ### Android環境 [Install](https://reactnative.dev/docs/environment-setup)
@@ -25,6 +25,7 @@
 
 ---
 
+&nbsp;
 ### IOS環境 [Install](https://reactnative.dev/docs/environment-setup)
 > 基於React Native CLI下的安裝流程
 1. 先安裝`node`包，方便之後使用指令`npm`和`npx`
@@ -49,6 +50,7 @@ npx react-native run-ios
 
 ---
 
+&nbsp;
 ## 開發本倉庫項目準備
 > 在Mac M1系統下複製開發項目的代碼和運行模擬器
 ### 安裝及運行流程
@@ -87,37 +89,28 @@ npx react-native unlink react-native-vector-icons
 ```
 ---
 
+&nbsp;
 ## Git方法
-### 基本的push
-1. 指定自己的賬號和郵箱（GitHub username）
+推薦使用[GitHub Desktop](https://desktop.github.com/)。
 
-git config --global user.name "your GitHub username"
-git config --global user.email "xxxxx@xx.com"
-
-2. 添加修改到暫存區 `git add -A`
-
-3. 說說修改了什麼
-
-
-git commit -m ":art: 修改了主頁的文本顯示"
-```
-<!-- 可以先在bash中指定遠端倉庫origin分支的地址 -->
-<!-- 下方會選擇push到origin分支，也就是遠端的master分支 -->
-git remote add origin  https://github.com/xxxxxx/xxxxx
-```
-4. push上遠程倉庫
-
-git push `剛定義的遠端倉庫名` `選擇push本地哪一個分支`
-
-
-
-### 分支的複製與合併
-1. 複製使用 `git checkout -b newBranchName`
-2. 使用 `git checkout branchName` 可以切換到branchName分支
-3. 如果要把分支B的新修改合併到原分支A，先切換到分支A。需要先在分支B add和commit，然後切換回分支A，使用 `git merge B`進行合併分支
-4. 如需delete分支B，使用 `git branch -d B`即可。 
-5. 使用 `git reset --hard HEAD^` 回滾代碼到上一個版本
-6. 使用 `git log` 命令，查看分支提交历史，确认需要回退的版本
-7. 使用 `git reset --hard commit_id`命令，可以回退到commit_id的版本
+基礎教程：[廖雪峰的Git教程](https://www.liaoxuefeng.com/wiki/896043488029600)。
 
 ---
+
+&nbsp;
+## 該項目使用的第三方庫
+### 正在使用
+請查看 `./package.json` 文件
+
+### 觀望 / 測試中
+1. [圖片滑動展示](https://github.com/callstack/react-native-pager-view)
+1. [仿Twitter開App動畫](https://github.com/fabio-alss-freitas/react-native-animated-splash-screen)
+1. [日期選擇器1](https://github.com/mmazzarolo/react-native-modal-datetime-picker)
+1. [日期選擇器2](https://github.com/wix/react-native-calendars)
+1. [可折疊組件](https://github.com/oblador/react-native-collapsible)
+1. [圖片查看器（日常點擊圖片實現放大）](https://github.com/ascoders/react-native-image-viewer)
+1. [底部彈出選擇](https://github.com/osdnk/react-native-reanimated-bottom-sheet)
+1. [頂部彈窗，可以用來做消息提示，僅限app內](https://github.com/calintamas/react-native-toast-message)
+1. [頂部彈窗，有上滑隱藏手勢](https://github.com/testshallpass/react-native-dropdownalert)
+1. [通知推送組件，應該用來給本機推送消息](https://github.com/wix/react-native-notifications)
+1. [二維碼掃描組件](https://github.com/moaazsidat/react-native-qrcode-scanner)
