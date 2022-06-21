@@ -6,12 +6,16 @@ import {
     View,
 } from "react-native";
 
+import TopNav from '../../../components/TopNav';
+
 class MesgScreen extends Component {
     state = {  } 
     render() { 
         return (
             <View>
-                <Text style={{ fontSize: 60, }}>Message Page</Text>
+                <TopNav title='提醒'/>
+
+                <Text style={{ fontSize: 30, }}>Message Page</Text>
             </View>
         );
     }
