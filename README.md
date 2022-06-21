@@ -4,6 +4,7 @@
 - [環境安裝與運行模擬器](#環境安裝與運行模擬器)
   * [Android環境安裝](#android環境-install)
   * [IOS環境安裝](#ios環境-install)
+  * [使用Debugger](#使用Debugger)
 - [開發本倉庫項目準備-MacOS](#開發本倉庫項目準備)
   * [安裝及運行流程](#安裝及運行流程)
   * [故障排除](#故障排除)
@@ -47,6 +48,16 @@ npx react-native init <project-name>
 npx react-native run-ios
 ```
 > `npx`指令會從線上找最新的包去執行，不要求有相關的包在本地。[詳細](https://www.reddit.com/r/reactnative/comments/hmqvcm/why_is_npx_react_native_preferred_over_installing/)
+
+---
+
+&nbsp;
+### 使用Debugger
+
+當需要log出對象或者數組時，有Chrome的Web Debugger肯定更好用。
+舊版的項目可以在Metro的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看log。
+新版項目因為使用了組件react-native-reanimated導致不支持遠程調試，現在需要使用[Flipper](https://fbflipper.com/).
+下載Flipper後，Mac和Windows可能還要安裝一兩個工具，比如Windows要安裝OpenSSL，參考：https://www.cnblogs.com/dingshaohua/p/12271280.html
 
 ---
 
