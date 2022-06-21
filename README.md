@@ -114,3 +114,4 @@ npx react-native unlink react-native-vector-icons
 1. [頂部彈窗，有上滑隱藏手勢](https://github.com/testshallpass/react-native-dropdownalert)
 1. [通知推送組件，應該用來給本機推送消息](https://github.com/wix/react-native-notifications)
 1. [二維碼掃描組件](https://github.com/moaazsidat/react-native-qrcode-scanner)
+1. 全局數據：mobx-react和mobx
