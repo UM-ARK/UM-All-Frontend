@@ -19,10 +19,12 @@
 ### Android環境 [Install](https://reactnative.dev/docs/environment-setup)
 1. 確保自己是 `Android11` 的模擬器環境（其他安卓版本尚未測試）
 2. 本地運行指令 `npm i` 安裝依賴的npm包
-3. 敲入 `react-native run-android` 運行吧~
+3. 敲入 `react-native run-android` or `npm run android` or `yarn android` 運行吧~
 
 已知BUG:
 1. 如果遇到`react-native-vector-icons/xxxx`圖標錯誤顯示(正方形框裡面是X)，需要參考文檔 `https://github.com/oblador/react-native-vector-icons#android` 進行修復。
+2. 如果在使用Flipper後，再次運行項目而不運行Flipper，Metro命令行提示無連接設備。則需要重啟模擬器，並在另一個RN項目run一次（正常來講另外的項目會成功運行），再回本項目不使用Flipper地run。
+3. 如果在安裝npm包或刪除本地文件時出現卡頓或提示正在使用中，需要在任務管理器停止所有 `Java SE xxxx` 字樣的進程，即可恢復npm的運作。
 
 ---
 
