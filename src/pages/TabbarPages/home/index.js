@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import Ionicons from "react-native-vector-icons/Ionicons";
 
+// 本地工具
+import {COLOR_DIY} from '../../../utils/uiMap'
+import TopNav from '../../../components/TopNav';
 
 export default class HomeScreen extends Component {
 
@@ -46,10 +49,11 @@ export default class HomeScreen extends Component {
     render () {
         const { entries, activeSlide } = this.state;
         return (
-            <View>
-                <StatusBar barStyle="dark-content" backgroundColor="#f2f2f2" />
+            <View style={{flex:1, backgroundColor:'#F5F5F7', }}>
+                <StatusBar barStyle="dark-content" backgroundColor="#F5F5F7" />
+                <TopNav title='UM ALL'/>
 
-                <Text>主頁內容xxxxxxxxxxxx</Text>
+                {/* <Text>主頁內容xxxxxxxxxxxx</Text> */}
 
                 {/* 搜索框組件 */}
 
@@ -57,9 +61,14 @@ export default class HomeScreen extends Component {
                 {/* 輪播圖組件 */}
                 
                 
-                <Button title='跳轉所有服務頁' onPress={this.handleNaviMe}></Button>
                 <Text>{'\n'}</Text>
-                <Button title='跳轉測試頁' onPress={()=>this.props.navigation.navigate('TestScreen')}></Button>
+                <Text>{'\n'}</Text>
+                <Text>{'\n'}</Text>
+                <Text>{'\n'}</Text>
+                <Text>{'\n'}</Text>
+                <Button title='跳轉所有服務頁' color={COLOR_DIY.themeColor} onPress={this.handleNaviMe} ></Button>
+                <Text>{'\n'}</Text>
+                <Button title='跳轉測試頁' color={COLOR_DIY.themeColor} onPress={()=>this.props.navigation.navigate('TestScreen')}></Button>
             </View>
         );
     }

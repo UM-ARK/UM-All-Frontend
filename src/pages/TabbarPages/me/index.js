@@ -8,6 +8,9 @@ import {
     ScrollView,
 } from 'react-native';
 
+// 本地工具
+import {COLOR_DIY} from '../../../utils/uiMap'
+
 //个人信息页
 function MePage() {
     return (
@@ -22,7 +25,7 @@ function MePage() {
                     height: '13%',
                     width: '100%',
                     alignItems: 'center',
-                    backgroundColor: '#2F3A79',
+                    backgroundColor: COLOR_DIY.themeColor,
                 }}>
                 {/*点击头像可以绑定更换头像*/}
                 <TouchableOpacity activeOpacity={0.5}>
@@ -300,7 +303,7 @@ function MePage() {
                     elevation: 5,
                     borderRadius: 10,
                     shadowColor: '#303133',
-                    backgroundColor: '#2F3A79',
+                    backgroundColor: COLOR_DIY.themeColor,
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}>
