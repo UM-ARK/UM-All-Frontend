@@ -31,7 +31,7 @@ class Nav extends Component {
                 <Stack.Screen name="Tabbar"         component={Tabbar} options={{headerShown:false}}/>
                 <Stack.Screen name="HomeScreen"     component={HomeScreen} />
                 <Stack.Screen name="FeaturesScreen" component={FeaturesScreen} />
-                <Stack.Screen name="MeScreen"       component={MeScreen} />
+                <Stack.Screen name="MeScreen"       component={MeScreen} options={{headerStatusBarHeight:0}}/>
                 <Stack.Screen name="TestScreen"     component={TestScreen} options={{title:'測試頁'}}/>
 
             </Stack.Navigator>
