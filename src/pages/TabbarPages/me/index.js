@@ -4,12 +4,9 @@ import {
     View,
     Image,
     TouchableOpacity,
-    ActivityIndicator,
     ScrollView,
     StatusBar,
 } from 'react-native';
-
-import {Header} from 'react-native-elements';
 
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap'
@@ -18,34 +15,33 @@ import {pxToDp} from '../../../utils/stylesKits'
 //个人信息页
 function MePage() {
     return (
-        <View
-            style={{
-                height: '100%',
-                alignItems: 'center',
-                backgroundColor: 'f4f7fd',
-            }}>
-                <StatusBar translucent={true} />
+        <View style={{ flex:1, backgroundColor: '#f4f7fd' }}>
+        <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
+        <ScrollView>
+            {/* 個人信息欄 */}
             <View
-                style={{
-                    height: pxToDp(135),
-                    width: '100%',
-                    flexDirection:'row',
-                    alignItems: 'center',
-                    backgroundColor: 'white',
-                }}>
-                {/*点击头像可以绑定更换头像*/}
+            style={{
+                height: pxToDp(135),
+                width: '100%',
+                flexDirection:'row',
+                alignItems: 'center',
+                backgroundColor: 'white',
+                marginTop: pxToDp(20)
+            }}>
+                {/* TODO: 致敬微信的交互，點擊整塊個人信息欄都會跳轉個人信息設置頁 */}
+                {/* 頭像 */}
                 <TouchableOpacity activeOpacity={0.5}>
-                        <Image
-                            source={require('./icon/testphoto.png')}
-                            style={{
-                                height:pxToDp(70),
-                                width:pxToDp(70),
-                                borderRadius:pxToDp(70),
-                                position:'absolute',
-                                top:pxToDp(-23),
-                                left:pxToDp(20),
-                            }}
-                        />
+                    <Image
+                        source={require('./icon/testphoto.png')}
+                        style={{
+                            height:pxToDp(70),
+                            width:pxToDp(70),
+                            borderRadius:pxToDp(70),
+                            position:'absolute',
+                            top:pxToDp(-23),
+                            left:pxToDp(20),
+                        }}
+                    />
                 </TouchableOpacity>
                 <View style={{
                     marginLeft:pxToDp(10),
@@ -105,6 +101,7 @@ function MePage() {
                             }}/>
                 </TouchableOpacity>
             </View>
+            {/* UM PASS 設置 */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
@@ -115,43 +112,43 @@ function MePage() {
                     backgroundColor: 'white',
                     justifyContent: 'center',
                 }}>
-                <View>
-                    <View
+                <View
+                    style={{
+                        height: 48,
+                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                    <Image 
+                        source={require('./icon/umsetting.png')}
                         style={{
-                            height: 48,
-                            marginLeft: 10,
-                            flexDirection: 'row',
+                            width:pxToDp(25), 
+                            height:pxToDp(25), 
+                            position:'absolute',
+                            left:pxToDp(0),
+                        }}/>
+                    <Text
+                        style={{
+                            fontSize: 20,
                             alignItems: 'center',
+                            color: 'black',
+                            position:'absolute',
+                            left:pxToDp(40),
                         }}>
-                        <Image 
-                            source={require('./icon/umsetting.png')}
-                            style={{
-                                width:pxToDp(25), 
-                                height:pxToDp(25), 
-                                position:'absolute',
-                                left:pxToDp(0),
-                            }}/>
-                        <Text
-                            style={{
-                                fontSize: 20,
-                                alignItems: 'center',
-                                color: 'black',
-                                position:'absolute',
-                                left:pxToDp(40),
-                            }}>
-                            {'UMPass Settings'}
-                        </Text>
-                        <Image 
-                            source={require('./icon/jiantou.png')}
-                            style={{
-                                width:pxToDp(10), 
-                                height:pxToDp(10), 
-                                position:'absolute',
-                                right:pxToDp(12),
-                            }}/>
-                    </View>
+                        {'UMPass Settings'}
+                    </Text>
+                    <Image 
+                    source={require('./icon/jiantou.png')}
+                    style={{
+                        width:pxToDp(10), 
+                        height:pxToDp(10), 
+                        position:'absolute',
+                        right:pxToDp(12),
+                    }}/>
                 </View>
             </TouchableOpacity>
+
+            {/* UM Pass 過期提示 */}
             <Text
                 style={{
                     fontSize: 15,
@@ -163,6 +160,8 @@ function MePage() {
                 }}>
                 {'Dual Authentication Remains: 14 Days'}
             </Text>
+
+            {/* Notifications 設置 */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
@@ -210,6 +209,8 @@ function MePage() {
                     </View>
                 </View>
             </TouchableOpacity>
+
+            {/* Your Reminder */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
@@ -257,6 +258,8 @@ function MePage() {
                     </View>
                 </View>
             </TouchableOpacity>
+
+            {/* QR Code */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
@@ -304,6 +307,8 @@ function MePage() {
                     </View>
                 </View>
             </TouchableOpacity>
+
+            {/* Settings 欄 */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
@@ -351,6 +356,8 @@ function MePage() {
                     </View>
                 </View>
             </TouchableOpacity>
+
+            {/* 關於我們 入口 */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
@@ -398,6 +405,8 @@ function MePage() {
                     </View>
                 </View>
             </TouchableOpacity>
+
+        </ScrollView>
         </View>
     );
 }
