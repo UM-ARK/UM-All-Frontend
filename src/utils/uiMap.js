@@ -13,4 +13,14 @@ export const COLOR_DIY = {
     white:'#F5F5F5',
     // 全局背景白色
     bg_color:'#F5F5F7',
+
+    // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
+    viewShadow:{
+        shadowColor: '#000',
+        shadowOffset: {width: 1, height: 1},
+        shadowOpacity: 0.4,
+        shadowRadius: 3,
+        // 適用於Android
+        elevation: 10,
+    }
 }
