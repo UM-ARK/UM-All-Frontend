@@ -6,7 +6,10 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     ScrollView,
+    StatusBar,
 } from 'react-native';
+
+import {Header} from 'react-native-elements';
 
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap'
@@ -21,245 +24,94 @@ function MePage() {
                 alignItems: 'center',
                 backgroundColor: 'f4f7fd',
             }}>
+                <StatusBar translucent={true} />
             <View
                 style={{
-                    height: '13%',
+                    height: pxToDp(135),
                     width: '100%',
+                    flexDirection:'row',
                     alignItems: 'center',
-                    backgroundColor: COLOR_DIY.themeColor,
+                    backgroundColor: 'white',
                 }}>
                 {/*点击头像可以绑定更换头像*/}
                 <TouchableOpacity activeOpacity={0.5}>
-                    <View
-                        style={{
-                            height: 85,
-                            width: 85,
-                            borderRadius: 85,
-                            backgroundColor: 'white',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginTop: '8%',
-                        }}>
                         <Image
                             source={require('./icon/testphoto.png')}
                             style={{
-                                height: 80,
-                                width: 80,
-                                borderRadius: 80,
+                                height:pxToDp(70),
+                                width:pxToDp(70),
+                                borderRadius:pxToDp(70),
+                                position:'absolute',
+                                top:pxToDp(-23),
+                                left:pxToDp(20),
                             }}
                         />
-                    </View>
                 </TouchableOpacity>
+                <View style={{
+                    marginLeft:pxToDp(10),
+                    height:pxToDp(80),
+                    position:'absolute',
+                    top:pxToDp(47),
+                    left:pxToDp(95),}}>
                 <Text
                     style={{
                         color: 'black',
-                        fontSize: 30,
-                        marginTop: '1%',
-                        fontWeight: '700',
+                        fontSize: 25,
+                        fontWeight: '600',
                     }}>
                     {'Nick Name'}
+                </Text>
+                <View style={{
+                    flexDirection:'row',
+                }}>
+                <Text
+                    style={{
+                        color: '#909399',
+                        fontSize: 20,
+                    }}>
+                    {'FST'}
                 </Text>
                 <Text
                     style={{
                         color: '#909399',
                         fontSize: 20,
                     }}>
-                    {'UM ID: DC038281'}
+                    {'  |  '}
                 </Text>
-            </View>
-            <View
-                style={{
-                    width: '100%',
-                    height: '15%',
-                }}></View>
-            <View
-                style={{
-                    width: '100%',
-                    height: '20%',
-                    flexDirection: 'row',
-                    //alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                {/*图标需要合适的素材*/}
-                <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '100%',
-                        width: '28%',
-                        elevation: 5,
-                        borderRadius: 10,
-                        shadowColor: '#303133',
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                    <View
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        <Image
-                            source={require('./icon/Verified.png')}
-                            style={{
-                                height: 80,
-                                width: 80,
-                                borderRadius: 80,
-                            }}
-                        />
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '600',
-                                marginTop: '5%',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'black',
-                            }}>
-                            {'UMPass'}
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '600',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'black',
-                            }}>
-                            {'Settings'}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '100%',
-                        width: '28%',
-                        elevation: 5,
-                        borderRadius: 10,
-                        shadowColor: '#303133',
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginLeft: '3%',
-                    }}>
-                    <View
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        <Image
-                            source={require('./icon/Timer.png')}
-                            style={{
-                                height: 80,
-                                width: 80,
-                                borderRadius: 80,
-                            }}
-                        />
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '600',
-                                marginTop: '5%',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'black',
-                            }}>
-                            {'Deadline'}
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '600',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'black',
-                            }}>
-                            {'Reminder'}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '100%',
-                        width: '28%',
-                        elevation: 5,
-                        borderRadius: 10,
-                        shadowColor: '#303133',
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginLeft: '3%',
-                    }}>
-                    <View
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        <Image
-                            source={require('./icon/Cogwheel.png')}
-                            style={{
-                                height: 80,
-                                width: 80,
-                                borderRadius: 80,
-                            }}
-                        />
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '600',
-                                marginTop: '5%',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'black',
-                            }}>
-                            {'General'}
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '600',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'black',
-                            }}>
-                            {'Settings'}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-            <View
-                style={{
-                    height: '26%',
-                    width: '90%',
-                    padding: 10,
-                    marginTop: '4%',
-                    elevation: 5,
-                    borderRadius: 10,
-                    shadowColor: '#303133',
-                    backgroundColor: 'white',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
                 <Text
                     style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'black',
+                        color: '#909399',
+                        fontSize: 20,
                     }}>
-                    这里打算放课程表
+                    {'CKLC'}
                 </Text>
+                </View>
+                </View>
+                <TouchableOpacity style={{
+                    width:pxToDp(20),
+                    height:pxToDp(20),
+                    position: 'absolute',
+                    right:pxToDp(35),
+                    top:pxToDp(70)
+                    }}>
+                <Image source={require('./icon/report.png')} style={{width:pxToDp(20),height:pxToDp(20)}}/>
+                <Image source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                top:pxToDp(6),
+                                right:pxToDp(-15),
+                            }}/>
+                </TouchableOpacity>
             </View>
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '8%',
-                    width: '90%',
+                    height: '7%',
+                    width: '100%',
                     padding: 10,
-                    marginTop: '4%',
-                    elevation: 5,
-                    borderRadius: 10,
-                    shadowColor: '#303133',
+                    marginTop:pxToDp(0.8),
                     backgroundColor: 'white',
                     justifyContent: 'center',
                 }}>
@@ -271,15 +123,32 @@ function MePage() {
                             flexDirection: 'row',
                             alignItems: 'center',
                         }}>
+                        <Image 
+                            source={require('./icon/umsetting.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(0),
+                            }}/>
                         <Text
                             style={{
-                                fontSize: 22,
+                                fontSize: 20,
                                 alignItems: 'center',
                                 color: 'black',
-                                marginLeft: '3%',
+                                position:'absolute',
+                                left:pxToDp(40),
                             }}>
-                            {'About us'}
+                            {'UMPass Settings'}
                         </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -287,7 +156,7 @@ function MePage() {
                 style={{
                     fontSize: 15,
                     fontWeight: '600',
-                    marginTop: '4%',
+                    marginTop: '2%',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#909399',
@@ -297,32 +166,236 @@ function MePage() {
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '6%',
-                    width: '40%',
+                    height: '7%',
+                    width: '100%',
                     padding: 10,
-                    marginTop: '2%',
-                    elevation: 5,
-                    borderRadius: 10,
-                    shadowColor: '#303133',
-                    backgroundColor: COLOR_DIY.themeColor,
+                    marginTop: '5%',
+                    backgroundColor: 'white',
                     justifyContent: 'center',
-                    alignItems: 'center',
                 }}>
-                <View
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                    <Text
+                <View>
+                    <View
                         style={{
-                            fontSize: 18,
-                            fontWeight: '700',
+                            height: 48,
+                            marginLeft: 10,
+                            flexDirection: 'row',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
                         }}>
-                        {'Log Out'}
-                    </Text>
+                        <Image 
+                            source={require('./icon/notification.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(0),
+                            }}/>
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                alignItems: 'center',
+                                color: 'black',
+                                position:'absolute',
+                                left:pxToDp(40),
+                            }}>
+                            {'Notifications'}
+                        </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                    height: '7%',
+                    width: '100%',
+                    padding: 10,
+                    backgroundColor: 'white',
+                    justifyContent: 'center',
+                    marginTop:pxToDp(0.8),
+                }}>
+                <View>
+                    <View
+                        style={{
+                            height: 48,
+                            marginLeft: 10,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Image 
+                            source={require('./icon/reminder.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(0),
+                            }}/>
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                alignItems: 'center',
+                                color: 'black',
+                                position:'absolute',
+                                left:pxToDp(40),
+                            }}>
+                            {'Your Reminder'}
+                        </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                    height: '7%',
+                    width: '100%',
+                    padding: 10,
+                    backgroundColor: 'white',
+                    justifyContent: 'center',
+                    marginTop:pxToDp(0.8),
+                }}>
+                <View>
+                    <View
+                        style={{
+                            height: 48,
+                            marginLeft: 10,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Image 
+                            source={require('./icon/qrcode.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(0),
+                            }}/>
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                alignItems: 'center',
+                                color: 'black',
+                                position:'absolute',
+                                left:pxToDp(40),
+                            }}>
+                            {'QR Code'}
+                        </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                    height: '7%',
+                    width: '100%',
+                    padding: 10,
+                    marginTop: '4%',
+                    backgroundColor: 'white',
+                    justifyContent: 'center',
+                }}>
+                <View>
+                    <View
+                        style={{
+                            height: 48,
+                            marginLeft: 10,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Image 
+                            source={require('./icon/settings.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(0),
+                            }}/>
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                alignItems: 'center',
+                                color: 'black',
+                                position:'absolute',
+                                left:pxToDp(40),
+                            }}>
+                            {'Settings'}
+                        </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                    height: '7%',
+                    width: '100%',
+                    padding: 10,
+                    backgroundColor: 'white',
+                    justifyContent: 'center',
+                    marginTop:pxToDp(0.8),
+                }}>
+                <View>
+                    <View
+                        style={{
+                            height: 48,
+                            marginLeft: 10,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Image 
+                            source={require('./icon/contactus.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(0),
+                            }}/>
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                alignItems: 'center',
+                                color: 'black',
+                                position:'absolute',
+                                left:pxToDp(40),
+                            }}>
+                            {'About us'}
+                        </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
+                    </View>
                 </View>
             </TouchableOpacity>
         </View>
