@@ -10,6 +10,7 @@ import {
 
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap'
+import {pxToDp} from '../../../utils/stylesKits'
 
 //个人信息页
 function MePage() {
