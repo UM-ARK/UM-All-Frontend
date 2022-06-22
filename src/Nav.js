@@ -9,9 +9,6 @@ import {COLOR_DIY} from './utils/uiMap';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
-import HomeScreen from './pages/TabbarPages/home';
-import FeaturesScreen from './pages/TabbarPages/features';
-import MeScreen from './pages/TabbarPages/me';
 
 import TestScreen from '../test/test'
 
@@ -29,11 +26,8 @@ class Nav extends Component {
                 screenOptions={{ headerShown:false }}
                 >
                 <Stack.Screen name="Tabbar"         component={Tabbar} options={{headerShown:false}}/>
-                <Stack.Screen name="HomeScreen"     component={HomeScreen} />
-                <Stack.Screen name="FeaturesScreen" component={FeaturesScreen} />
-                <Stack.Screen name="MeScreen"       component={MeScreen} />
-                <Stack.Screen name="TestScreen"     component={TestScreen} options={{title:'測試頁'}}/>
 
+                <Stack.Screen name="TestScreen"     component={TestScreen} />
             </Stack.Navigator>
         </NavigationContainer>
         );
