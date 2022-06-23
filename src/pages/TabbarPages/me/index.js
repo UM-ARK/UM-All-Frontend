@@ -12,12 +12,27 @@ import {
 import {COLOR_DIY} from '../../../utils/uiMap'
 import {pxToDp} from '../../../utils/stylesKits'
 
+import {Header} from 'react-native-elements'; // 4.0 Beta版
+
 //个人信息页
-function MePage() {
-    return (
-        <View style={{ flex:1, backgroundColor: '#f4f7fd' }}>
-        <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
+class MeScreen extends Component {
+    state = {
+        focus:true,
+    } 
+
+    componentDidMount() {
+        this.setHeaderColor = this.props.navigation.addListener('focus', () => {
+            this.setState({ focus:true });
+            // console.log('focus');
+        })
+    }
+
+    render() {
+        return (
+        <View style={{ flex:1, backgroundColor:COLOR_DIY.meScreenColor.bg_color }}>
+        <Header backgroundColor={COLOR_DIY.meScreenColor.card_color} statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}} />
         <ScrollView>
+            {/* TODO: 選項欄的顏色改為：COLOR_DIY.meScreenColor.card_color */}
             {/* 個人信息欄 */}
             <View
             style={{
@@ -25,8 +40,7 @@ function MePage() {
                 width: '100%',
                 flexDirection:'row',
                 alignItems: 'center',
-                backgroundColor: 'white',
-                marginTop: pxToDp(20)
+                backgroundColor: COLOR_DIY.meScreenColor.card_color,
             }}>
                 {/* TODO: 致敬微信的交互，點擊整塊個人信息欄都會跳轉個人信息設置頁 */}
                 {/* 頭像 */}
@@ -101,6 +115,7 @@ function MePage() {
                             }}/>
                 </TouchableOpacity>
             </View>
+            {/* TODO: UMPass Setting 集成進Setting選項 */}
             {/* UM PASS 設置 */}
             <TouchableOpacity
                 activeOpacity={0.5}
@@ -408,7 +423,8 @@ function MePage() {
 
         </ScrollView>
         </View>
-    );
+        );
+    }
 }
 
-export default MePage;
+export default MeScreen;

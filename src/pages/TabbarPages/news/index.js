@@ -9,17 +9,17 @@ import {Header} from 'react-native-elements'; // 4.0 Beta版
 class NewsScreen extends Component {
     render() {
         return (
-            <View>
+            <View style={{backgroundColor:COLOR_DIY.bg_color}}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     centerComponent={{
                         text: '資訊',
                         style: {
                             color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(20),
+                            fontSize: pxToDp(15),
                         },
                     }}
-                    statusBarProps={{backgroundColor:COLOR_DIY.bg_color, barStyle:'dark-content'}}
+                    statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
                 />
                 <Text>新聞頁</Text>
             </View>

@@ -13,20 +13,27 @@ import {Header} from 'react-native-elements'; // 4.0 Beta版
 
 class MesgScreen extends Component {
     state = {  } 
+
+    componentDidMount() {
+        this.setHeaderColor = this.props.navigation.addListener('focus', () => {
+            this.setState({ focus:true });
+        })
+    }
+
     render() { 
         return (
-            <View>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    centerComponent={{
-                        text: '提醒',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(20),
-                        },
-                    }}
-                    statusBarProps={{backgroundColor:COLOR_DIY.bg_color, barStyle:'dark-content'}}
-                />
+            <View style={{backgroundColor:COLOR_DIY.bg_color}}>
+            <Header
+                backgroundColor={COLOR_DIY.bg_color}
+                centerComponent={{
+                    text: '提醒',
+                    style: {
+                        color: COLOR_DIY.black.main,
+                        fontSize: pxToDp(15),
+                    },
+                }}
+                statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
+            />
 
                 <Text style={{ fontSize: 30, }}>Message Page</Text>
             </View>
