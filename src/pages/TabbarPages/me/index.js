@@ -16,16 +16,7 @@ import {Header} from 'react-native-elements'; // 4.0 Beta版
 
 //个人信息页
 class MeScreen extends Component {
-    state = {
-        focus:true,
-    } 
-
-    componentDidMount() {
-        this.setHeaderColor = this.props.navigation.addListener('focus', () => {
-            this.setState({ focus:true });
-            // console.log('focus');
-        })
-    }
+    state = {} 
 
     render() {
         return (
@@ -76,21 +67,21 @@ class MeScreen extends Component {
                 }}>
                 <Text
                     style={{
-                        color: '#909399',
+                        color: COLOR_DIY.black.second,
                         fontSize: 20,
                     }}>
                     {'FST'}
                 </Text>
                 <Text
                     style={{
-                        color: '#909399',
+                        color: COLOR_DIY.black.third,
                         fontSize: 20,
                     }}>
                     {'  |  '}
                 </Text>
                 <Text
                     style={{
-                        color: '#909399',
+                        color: COLOR_DIY.black.second,
                         fontSize: 20,
                     }}>
                     {'CKLC'}
@@ -171,7 +162,8 @@ class MeScreen extends Component {
                     marginTop: '2%',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#909399',
+                    color: COLOR_DIY.black.third,
+                    marginLeft:pxToDp(15)
                 }}>
                 {'Dual Authentication Remains: 14 Days'}
             </Text>

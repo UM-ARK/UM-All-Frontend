@@ -14,7 +14,7 @@ export const COLOR_DIY = {
     // 全局背景白色(偏灰)
     bg_color:'#F5F5F7',
     meScreenColor:{
-        bg_color:'#f7f7f7',
+        bg_color:'#ededed',
         card_color:'white',
     },
 
