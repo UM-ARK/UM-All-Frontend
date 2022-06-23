@@ -2,15 +2,15 @@ import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
 // 本地引用
-import HomeScreen from './pages/TabbarPages/home';
-import FeaturesScreen from './pages/TabbarPages/features';
-import NewsScreen from './pages/TabbarPages/news';
-import MessageScreen from './pages/TabbarPages/message';
-import MeScreen from './pages/TabbarPages/me';
+import HomeScreen       from './pages/TabbarPages/home';
+import FeaturesScreen   from './pages/TabbarPages/features';
+import NewsScreen       from './pages/TabbarPages/news';
+import MessageScreen    from './pages/TabbarPages/message';
+import MeScreen         from './pages/TabbarPages/me';
 
 // 本地工具
-import {pxToDp}     from './utils/stylesKits';
-import {COLOR_DIY}  from './utils/uiMap';
+import {pxToDp}         from './utils/stylesKits';
+import {COLOR_DIY}      from './utils/uiMap';
 
 // 第三方庫
 import Icon from 'react-native-vector-icons/Feather';

@@ -74,7 +74,7 @@ export default class HomeScreen extends Component {
                         fontSize: pxToDp(15),
                     },
                 }}
-                statusBarProps={{backgroundColor:COLOR_DIY.bg_color, barStyle:'dark-content'}}
+                statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
             />
             <ScrollView>
                 {/* 1.0 輪播圖組件 開始 */}
