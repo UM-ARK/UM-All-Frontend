@@ -13,20 +13,27 @@ import {COLOR_DIY} from '../../../../utils/uiMap'
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
-let colors = [
-    COLOR_DIY.themeColor,
-    COLOR_DIY.themeColor,
-    COLOR_DIY.themeColor,
-    COLOR_DIY.themeColor,
-    COLOR_DIY.themeColor,
-    COLOR_DIY.themeColor,
-];
+let colors = [ COLOR_DIY.themeColor, ];
 
 function ScrollImage(props) {
     const progressValue = useSharedValue(0);
     const {imageData} = props;
-    // imageData.map()
 
+    // 以接收的圖像數據，調整圓點數量
+    let numDiff = imageData.length - colors.length;
+    if (numDiff > 0) {
+        for (let i = 0; i<numDiff; i++) {
+            colors.push( COLOR_DIY.themeColor )
+            // console.log(colors);
+        }
+    }
+    else if (numDiff < 0) {
+        for (let i = 0; i<numDiff; i++) {
+            colors.pop( COLOR_DIY.themeColor )
+        }
+    }
+
+    // 輪播圖渲染
     return (
         <View style={{ alignItems:'center', width:PAGE_WIDTH, marginTop:pxToDp(-10) }} >
         {/* 1.0 輪播圖組件 開始 */}
@@ -102,6 +109,7 @@ function ScrollImage(props) {
     );
 }
 
+// 圓點渲染
 const PaginationItem: React.FC<{
     index: number;
     backgroundColor: string;
