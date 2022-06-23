@@ -30,7 +30,7 @@ class Index extends Component {
                             fontSize: pxToDp(15),
                         },
                     }}
-                    statusBarProps={{backgroundColor:COLOR_DIY.bg_color, barStyle:'dark-content'}}
+                    statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
                 />
 
                 {/* 1.0 吸頂分類標籤 開始 */}
