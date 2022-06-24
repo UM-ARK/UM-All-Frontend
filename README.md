@@ -96,9 +96,16 @@ cd android
 chmod +x ./gradlew
 xattr -l ./gradlew
 ```
-3. IOS運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
+2.iOS实机调试报错-`Signing for XXX requires a development team. Select a development team in the Signing and Cap Editor`
+请尝试在Xcode中双击Pods，然后在Targets中选择React-Core-AccessibilityResources，找到Singing中的Development Team进行选择。仅在UMAllWhite中选择Development Team无效
+
+3.iOS实机调试报错-`module map file not found`
+请在Xcode选择项目时选择UMAllWhite.xcworkspace打开，不要选择UMAllWhite.xcodeproj
+
+4. IOS運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
 ```console
 npx react-native unlink react-native-vector-icons
+本条已经尝试修复，需要后续测试
 ```
 ---
 
