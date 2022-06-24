@@ -121,10 +121,10 @@ npx react-native unlink react-native-vector-icons
 1. [日期選擇器1](https://github.com/mmazzarolo/react-native-modal-datetime-picker)
 1. [日期選擇器2](https://github.com/wix/react-native-calendars)
 1. [可折疊組件](https://github.com/oblador/react-native-collapsible)
-1. [圖片查看器（日常點擊圖片實現放大）](https://github.com/ascoders/react-native-image-viewer)
 1. [底部彈出選擇](https://github.com/osdnk/react-native-reanimated-bottom-sheet)
 1. [頂部彈窗，可以用來做消息提示，僅限app內](https://github.com/calintamas/react-native-toast-message)
 1. [頂部彈窗，有上滑隱藏手勢](https://github.com/testshallpass/react-native-dropdownalert)
 1. [通知推送組件，應該用來給本機推送消息](https://github.com/wix/react-native-notifications)
 1. [二維碼掃描組件](https://github.com/moaazsidat/react-native-qrcode-scanner)
 1. 全局數據：mobx-react和mobx
+1. 數據緩存：lodash（memoize可以使用緩存加載）
