@@ -21,19 +21,21 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import ModalBottom from './modalTest'
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { width: PAGE_WIDTH} = Dimensions.get('window');
+const { height:PAGE_HEIGHT } = Dimensions.get('screen');
 
 
 const images = [
     {
-        url: 'https://avatars2.githubusercontent.com/u/7970947?v=3&s=460',
+        url: 'https://info.umsu.org.mo/storage/activity_covers/images/13a5158b6a890818615af9bcff8bc81b.png',
     },
     {
-        url: 'http://img.netbian.com/file/2021/0615/small7afca70a01630451d1c474fd318df5c01623728557.jpg',
+        url: 'https://info.umsu.org.mo/storage/activity_covers/images/c8049bf0ebd8ea081e75f1c1573631f2.png',
     },
     {
-        url: 'http://img.netbian.com/file/2021/0527/small2998966e25f9370d55e4672ade1013dc1622123475.jpg',
+        url: 'https://www.cpsumsu.org/_announcement/CPSUMSU_Web_Crawler_Workshop2022/poster.jpg',
     },
 ];
 
@@ -43,19 +45,27 @@ class TestScreen extends Component {
     // this.context === this.props.navigation
 
     state = {
-        isModalVisible : false,
-        imagesIndex : 0,
+        isModalVisible       : false,
+        imagesIndex          : 0,
+        isModalBottomVisible : true,
     }
 
-    tiggerModal = (index) => {
+    // 打開和關閉顯示照片的彈出層
+    tiggerModal = () => {
         this.setState({
             isModalVisible:!this.state.isModalVisible,
+        });
+    }
+    // 打開圖片數組內的某張圖片
+    handleOpenImage = (index) => {
+        this.setState({
             imagesIndex:index,
+            isModalVisible:true
         });
     }
     
     render() {
-        const {isModalVisible, imagesIndex} = this.state;
+        const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
 
         return (
             <View style={{flex: 1, backgroundColor:COLOR_DIY.bg_color}}>
@@ -80,31 +90,47 @@ class TestScreen extends Component {
                     statusBarProps={{backgroundColor:COLOR_DIY.bg_color, barStyle:'dark-content'}}
                 />
 
-                <Modal isVisible={isModalVisible} statusBarTranslucent={true} style={{margin:0}} >
+                {/* 彈出層展示圖片查看器 */}
+                <Modal 
+                    isVisible={isModalVisible} 
+                    statusBarTranslucent
+                    style={{margin:0, paddingLeft:pxToDp(16), paddingRight:pxToDp(16)}}
+                    deviceHeight={PAGE_HEIGHT}
+                    backdropColor={'black'}
+                    backdropOpacity={0.85}
+                    onBackButtonPress={this.tiggerModal}
+                    onBackdropPress={this.tiggerModal}
+                >
                     <ImageViewer 
+                        backgroundColor={'transparent'}
+                        useNativeDriver={true}
                         imageUrls={images}
                         // 打開的imageUrls的索引
                         index={imagesIndex}
+                        // 注釋掉renderIndicator屬性則 默認會有頁數顯示
+                        renderIndicator={()=>null}
                         onClick={this.tiggerModal}
+                        doubleClickInterval={300}
                         enableSwipeDown={true}
                         onSwipeDown={this.tiggerModal}
-                        menuContext={{ saveToLocal: '保存圖片', cancel: '取消' }} 
-                        onSave={() => alert("點擊了保存圖片")}
+                        // 自定義長按菜單
+                        menus={({cancel,_}) => <ModalBottom cancel={cancel}></ModalBottom> }
                     />
                 </Modal>
+
 
                 {/* 圖片展示 */}
                 <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                     {
                         images.map(({url}, index)=> 
-                            <TouchableOpacity onPress={this.tiggerModal.bind(this,index)}>
+                            <TouchableOpacity onPress={()=>this.handleOpenImage(index)}>
                                 <Image source={{uri:url}} style={{width:100, height:100}} ></Image>
                             </TouchableOpacity>
                         )
                     }
                 </View>
 
-                <Button title='打開圖片' onPress={this.tiggerModal.bind(this,0)}></Button>
+                <Button title='打開圖片' onPress={this.tiggerModal}></Button>
             </View>
         );
     }
