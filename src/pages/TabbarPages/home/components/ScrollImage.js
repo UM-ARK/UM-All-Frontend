@@ -7,6 +7,7 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
 } from 'react-native-reanimated';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 import {pxToDp} from '../../../../utils/stylesKits'
 import {COLOR_DIY} from '../../../../utils/uiMap'
@@ -14,6 +15,8 @@ import {COLOR_DIY} from '../../../../utils/uiMap'
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
 let colors = [ COLOR_DIY.themeColor, ];
+
+
 
 function ScrollImage(props) {
     const progressValue = useSharedValue(0);
@@ -31,6 +34,14 @@ function ScrollImage(props) {
         for (let i = 0; i<numDiff; i++) {
             colors.pop( COLOR_DIY.themeColor )
         }
+    }
+
+    // 點擊圖片事件
+    function handleOnClickImage (item,index) {
+        // 2022.06.24 方案：直接跳轉相關頁面、廣告web
+        // console.log(item);
+        // console.log(index);
+        alert(`點擊了 “${item.title}” 的跳轉鏈接`)
     }
 
     // 輪播圖渲染
@@ -51,10 +62,10 @@ function ScrollImage(props) {
                     parallaxScrollingOffset: 100,
                 }}
                 data={imageData}
-                renderItem={({item}) => (
+                renderItem={({item,index}) => (
                     <View style={{ flex: 1 }}>
                         {/* 1.1 圖片展示 開始 */}
-                        <View style={{
+                        <TouchableWithoutFeedback style={{
                             borderRadius: pxToDp(20),
                             borderWidth:pxToDp(2),
                             borderColor:COLOR_DIY.black.third,
@@ -63,14 +74,14 @@ function ScrollImage(props) {
                             height:"95%",
                             // 添加陰影
                             ...COLOR_DIY.viewShadow, 
-                        }}>
+                        }} onPress={()=>handleOnClickImage(item,index)}>
                             <Image 
                                 resizeMode='cover'
                                 style={{ width:"100%", height:"100%"}}
                                 source={{uri:item.uri}}
                             >
                             </Image>
-                        </View>
+                        </TouchableWithoutFeedback>
                         {/* 1.1 圖片展示 結束 */}
 
                         {/* 1.2 圖片說明 開始 */}
@@ -83,7 +94,8 @@ function ScrollImage(props) {
                     </View>
                 )}
             />
-            
+
+            {/* 圓點下標標識 */}
             <View style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
@@ -103,7 +115,6 @@ function ScrollImage(props) {
                     );
                 })}
             </View>
-
         {/* 1.0 輪播圖組件 結束 */}
         </View>
     );
