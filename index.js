@@ -1,10 +1,10 @@
 import 'react-native-gesture-handler';
-import {AppRegistry} from 'react-native';
+import {AppRegistry, LogBox} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 
 // 關閉模擬器內的黃色警告
-console.ignoredYellowBox = ['Warning: BackAndroid is deprecated. Please use BackHandler instead.','source.uri should not be an empty string','Invalid props.style key'];
-console.disableYellowBox = true;
+LogBox.ignoreLogs(['Warning: ...']);    // Ignore log notification by message
+LogBox.ignoreAllLogs();                 // Ignore all log notifications
 
 AppRegistry.registerComponent(appName, () => App);
