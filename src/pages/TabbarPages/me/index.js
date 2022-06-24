@@ -25,9 +25,9 @@ class MeScreen extends Component {
         <ScrollView>
             {/* TODO: 選項欄的顏色改為：COLOR_DIY.meScreenColor.card_color */}
             {/* 個人信息欄 */}
-            <View
+            <TouchableOpacity
             style={{
-                height: pxToDp(135),
+                height: pxToDp(120),
                 width: '100%',
                 flexDirection:'row',
                 alignItems: 'center',
@@ -35,7 +35,6 @@ class MeScreen extends Component {
             }}>
                 {/* TODO: 致敬微信的交互，點擊整塊個人信息欄都會跳轉個人信息設置頁 */}
                 {/* 頭像 */}
-                <TouchableOpacity activeOpacity={0.5}>
                     <Image
                         source={require('./icon/testphoto.png')}
                         style={{
@@ -43,16 +42,15 @@ class MeScreen extends Component {
                             width:pxToDp(70),
                             borderRadius:pxToDp(70),
                             position:'absolute',
-                            top:pxToDp(-23),
+                            top:pxToDp(20),
                             left:pxToDp(20),
                         }}
                     />
-                </TouchableOpacity>
                 <View style={{
                     marginLeft:pxToDp(10),
                     height:pxToDp(80),
                     position:'absolute',
-                    top:pxToDp(47),
+                    top:pxToDp(22),
                     left:pxToDp(95),}}>
                 <Text
                     style={{
@@ -88,14 +86,14 @@ class MeScreen extends Component {
                 </Text>
                 </View>
                 </View>
-                <TouchableOpacity style={{
+                <View style={{
                     width:pxToDp(20),
                     height:pxToDp(20),
                     position: 'absolute',
                     right:pxToDp(35),
-                    top:pxToDp(70)
+                    top:pxToDp(45)
                     }}>
-                <Image source={require('./icon/report.png')} style={{width:pxToDp(20),height:pxToDp(20)}}/>
+                <Image source={require('./icon/report.png')} style={{marginLeft:pxToDp(5),width:pxToDp(20),height:pxToDp(20)}}/>
                 <Image source={require('./icon/jiantou.png')}
                             style={{
                                 width:pxToDp(10), 
@@ -104,14 +102,14 @@ class MeScreen extends Component {
                                 top:pxToDp(6),
                                 right:pxToDp(-15),
                             }}/>
-                </TouchableOpacity>
-            </View>
+                </View>
+            </TouchableOpacity>
             {/* TODO: UMPass Setting 集成進Setting選項 */}
             {/* UM PASS 設置 */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '7%',
+                    height: '8%',
                     width: '100%',
                     padding: 10,
                     marginTop:pxToDp(0.8),
@@ -131,15 +129,15 @@ class MeScreen extends Component {
                             width:pxToDp(25), 
                             height:pxToDp(25), 
                             position:'absolute',
-                            left:pxToDp(0),
+                            left:pxToDp(-5),
                         }}/>
                     <Text
                         style={{
-                            fontSize: 20,
+                            fontSize: 18,
                             alignItems: 'center',
                             color: 'black',
                             position:'absolute',
-                            left:pxToDp(40),
+                            left:pxToDp(30),
                         }}>
                         {'UMPass Settings'}
                     </Text>
@@ -155,6 +153,9 @@ class MeScreen extends Component {
             </TouchableOpacity>
 
             {/* UM Pass 過期提示 */}
+            <View style={{
+                alignItems:'center',
+                }}>
             <Text
                 style={{
                     fontSize: 15,
@@ -167,12 +168,13 @@ class MeScreen extends Component {
                 }}>
                 {'Dual Authentication Remains: 14 Days'}
             </Text>
+            </View>
 
             {/* Notifications 設置 */}
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '7%',
+                    height: '8%',
                     width: '100%',
                     padding: 10,
                     marginTop: '5%',
@@ -188,22 +190,22 @@ class MeScreen extends Component {
                             alignItems: 'center',
                         }}>
                         <Image 
-                            source={require('./icon/notification.png')}
+                            source={require('./icon/favorites.png')}
                             style={{
                                 width:pxToDp(25), 
                                 height:pxToDp(25), 
                                 position:'absolute',
-                                left:pxToDp(0),
+                                left:pxToDp(-5),
                             }}/>
                         <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: 18,
                                 alignItems: 'center',
                                 color: 'black',
                                 position:'absolute',
-                                left:pxToDp(40),
+                                left:pxToDp(30),
                             }}>
-                            {'Notifications'}
+                            {'Favorties'}
                         </Text>
                         <Image 
                             source={require('./icon/jiantou.png')}
@@ -221,7 +223,56 @@ class MeScreen extends Component {
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '7%',
+                    height: '8%',
+                    width: '100%',
+                    padding: 10,
+                    backgroundColor: 'white',
+                    justifyContent: 'center',
+                    marginTop:pxToDp(0.8),
+                }}>
+                <View>
+                    <View
+                        style={{
+                            height: 48,
+                            marginLeft: 10,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Image 
+                            source={require('./icon/notification.png')}
+                            style={{
+                                width:pxToDp(25), 
+                                height:pxToDp(25), 
+                                position:'absolute',
+                                left:pxToDp(-5),
+                            }}/>
+                        <Text
+                            style={{
+                                fontSize: 18,
+                                alignItems: 'center',
+                                color: 'black',
+                                position:'absolute',
+                                left:pxToDp(30),
+                            }}>
+                            {'Notifications'}
+                        </Text>
+                        <Image 
+                            source={require('./icon/jiantou.png')}
+                            style={{
+                                width:pxToDp(10), 
+                                height:pxToDp(10), 
+                                position:'absolute',
+                                right:pxToDp(12),
+                            }}/>
+                    </View>
+                </View>
+            </TouchableOpacity>
+
+            {/* QR Code */}
+            <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                    height: '8%',
                     width: '100%',
                     padding: 10,
                     backgroundColor: 'white',
@@ -242,66 +293,17 @@ class MeScreen extends Component {
                                 width:pxToDp(25), 
                                 height:pxToDp(25), 
                                 position:'absolute',
-                                left:pxToDp(0),
+                                left:pxToDp(-5),
                             }}/>
                         <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: 18,
                                 alignItems: 'center',
                                 color: 'black',
                                 position:'absolute',
-                                left:pxToDp(40),
+                                left:pxToDp(30),
                             }}>
-                            {'Your Reminder'}
-                        </Text>
-                        <Image 
-                            source={require('./icon/jiantou.png')}
-                            style={{
-                                width:pxToDp(10), 
-                                height:pxToDp(10), 
-                                position:'absolute',
-                                right:pxToDp(12),
-                            }}/>
-                    </View>
-                </View>
-            </TouchableOpacity>
-
-            {/* QR Code */}
-            <TouchableOpacity
-                activeOpacity={0.5}
-                style={{
-                    height: '7%',
-                    width: '100%',
-                    padding: 10,
-                    backgroundColor: 'white',
-                    justifyContent: 'center',
-                    marginTop:pxToDp(0.8),
-                }}>
-                <View>
-                    <View
-                        style={{
-                            height: 48,
-                            marginLeft: 10,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        <Image 
-                            source={require('./icon/qrcode.png')}
-                            style={{
-                                width:pxToDp(25), 
-                                height:pxToDp(25), 
-                                position:'absolute',
-                                left:pxToDp(0),
-                            }}/>
-                        <Text
-                            style={{
-                                fontSize: 20,
-                                alignItems: 'center',
-                                color: 'black',
-                                position:'absolute',
-                                left:pxToDp(40),
-                            }}>
-                            {'QR Code'}
+                            {'Reminders'}
                         </Text>
                         <Image 
                             source={require('./icon/jiantou.png')}
@@ -319,7 +321,7 @@ class MeScreen extends Component {
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '7%',
+                    height: '8%',
                     width: '100%',
                     padding: 10,
                     marginTop: '4%',
@@ -340,15 +342,15 @@ class MeScreen extends Component {
                                 width:pxToDp(25), 
                                 height:pxToDp(25), 
                                 position:'absolute',
-                                left:pxToDp(0),
+                                left:pxToDp(-5),
                             }}/>
                         <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: 18,
                                 alignItems: 'center',
                                 color: 'black',
                                 position:'absolute',
-                                left:pxToDp(40),
+                                left:pxToDp(30),
                             }}>
                             {'Settings'}
                         </Text>
@@ -368,7 +370,7 @@ class MeScreen extends Component {
             <TouchableOpacity
                 activeOpacity={0.5}
                 style={{
-                    height: '7%',
+                    height: '8%',
                     width: '100%',
                     padding: 10,
                     backgroundColor: 'white',
@@ -389,17 +391,17 @@ class MeScreen extends Component {
                                 width:pxToDp(25), 
                                 height:pxToDp(25), 
                                 position:'absolute',
-                                left:pxToDp(0),
+                                left:pxToDp(-5),
                             }}/>
                         <Text
                             style={{
-                                fontSize: 20,
+                                fontSize: 18,
                                 alignItems: 'center',
                                 color: 'black',
                                 position:'absolute',
-                                left:pxToDp(40),
+                                left:pxToDp(30),
                             }}>
-                            {'About us'}
+                            {'Contact us'}
                         </Text>
                         <Image 
                             source={require('./icon/jiantou.png')}
