@@ -71,7 +71,7 @@ export default class HomeScreen extends Component {
             },
             {
                 icon_name:'book-outline',
-                function_name:'UMMoodle'
+                function_name:'Moodle'
             },
             {
                 icon_name:'md-bus-outline',
@@ -84,7 +84,7 @@ export default class HomeScreen extends Component {
         return(
           <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
               <Ionicons name={icon_name} size={pxToDp(24)} color={COLOR_DIY.themeColor}></Ionicons>
-              <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{function_name}</Text>
+              <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>{function_name}</Text>
           </TouchableOpacity>
         )
     }
@@ -119,18 +119,21 @@ export default class HomeScreen extends Component {
                     flex:1,
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
-                    margin:pxToDp(15),
+                    marginHorizontal:pxToDp(15),
+                    // marginVertical:pxToDp(5),
                     // 增加陰影
+                    marginBottom:pxToDp(5),
+                    marginTop:pxToDp(10),
                     ...COLOR_DIY.viewShadow
                 }}>
                     {/* 2.1 卡片標題 */}
                     <TouchableOpacity style={{
                         flexDirection:'row', justifyContent:'space-between', alignItems:'center',
-                        padding:pxToDp(12), }} activeOpacity={0.6}
+                        paddingVertical:pxToDp(10), paddingHorizontal:pxToDp(10)}} activeOpacity={0.6}
                         onPress={()=>this.props.navigation.jumpTo('FeaturesTabbar')}
                     >
-                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>查看更多</Text>
-                        <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>查看更多</Text>
+                        <Ionicons name='chevron-forward-outline' size={pxToDp(14)} color={COLOR_DIY.black.main}></Ionicons>
                     </TouchableOpacity>
                     {/* 2.2 卡片內容 */}
                     <View style={{
@@ -152,33 +155,38 @@ export default class HomeScreen extends Component {
                     flex:1,
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
-                    margin:pxToDp(15),
-                    marginTop:pxToDp(5),
+                    marginHorizontal:pxToDp(15),
+                    marginVertical:pxToDp(5),
                     // 增加陰影
                     ...COLOR_DIY.viewShadow
                 }}>
                     {/* 3.1 卡片標題 */}
                     <TouchableOpacity
-                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}
+                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',paddingTop:pxToDp(10),
+                        paddingHorizontal:pxToDp(10)}}
                     activeOpacity={0.6}
                     onPress={()=>alert('未綁定跳轉路由')}
                     >
-                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>我的追蹤</Text>
-                        <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>我的追蹤</Text>
+                        <Ionicons name='chevron-forward-outline' size={pxToDp(14)} color={COLOR_DIY.black.main}></Ionicons>
                     </TouchableOpacity>
                     {/* 3.2 卡片內容 */}
-                    <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(0), flexDirection:'row'}}>
+                    <View style={{justifyContent:'space-between', alignItems:'flex-start', marginHorizontal:pxToDp(10), marginBottom:pxToDp(10), flexDirection:'column'}}>
                         {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>MATH1003 (002)</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.third}}>地點：E22-4012</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.third}}>時間：8:30 - 9:15</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.third}}>講者：Michael</Text>
+                        <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column', marginVertical:pxToDp(5)}}>
+                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>MATH1003 (002)</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>地點：E22-4012</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>時間：8:30 - 9:15</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>講者：Michael</Text>
                         </TouchableOpacity>
+                        {/* 分割線 */}
+                        <View style={{justifyContent:'center', alignItems:'center', width:'100%', marginTop:pxToDp(5), marginBottom:pxToDp(5)}}>
+                            <Divider style={{width:"100%"}} color={COLOR_DIY.black.second} />
+                        </View>
                         <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>爬蟲工作坊</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.third}}>地點：E6-G007</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.third}}>時間：10:30 - 11:30</Text>
+                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>爬蟲工作坊</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>地點：E6-G007</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>時間：10:30 - 11:30</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -190,34 +198,34 @@ export default class HomeScreen extends Component {
                     flex:1,
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
-                    margin:pxToDp(15),
-                    marginTop:pxToDp(5),
+                    marginHorizontal:pxToDp(15),
+                    marginVertical:pxToDp(5),
                     // 增加陰影
                     ...COLOR_DIY.viewShadow
                 }}>
                     {/* 4.1 卡片標題 */}
                     <TouchableOpacity
-                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}
+                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', paddingHorizontal:pxToDp(10),paddingVertical:pxToDp(10)}}
                     activeOpacity={0.6}
                     onPress={()=>this.props.navigation.jumpTo('NewsTabbar')}
                     >
-                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>UM 資訊</Text>
-                        <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>UM 資訊</Text>
+                        <Ionicons name='chevron-forward-outline' size={pxToDp(14)} color={COLOR_DIY.black.main}></Ionicons>
                     </TouchableOpacity>
                     {/* 4.2 卡片內容 */}
                     <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(0), flexDirection:'column'}}>
                         {/* 文字 */}
                         <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>Temporarily Closure of the UM Campus</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>澳大校園暫停對外開放</Text>
+                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>Temporarily Closure of the UM Campus</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>澳大校園暫停對外開放</Text>
                         </TouchableOpacity>
                         {/* 分割線 */}
                         <View style={{justifyContent:'center', alignItems:'center', width:'100%', marginTop:pxToDp(5), marginBottom:pxToDp(5)}}>
-                            <Divider style={{width:"90%"}} color={COLOR_DIY.black.second} />
+                            <Divider style={{width:"100%"}} color={COLOR_DIY.black.second} />
                         </View>
                         <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>UM study imrpoves performance of formalde...</Text>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>澳大最新研究提高甲醛檢測靈敏度</Text>
+                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>UM study imrpoves performance of formalde...</Text>
+                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>澳大最新研究提高甲醛檢測靈敏度</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
