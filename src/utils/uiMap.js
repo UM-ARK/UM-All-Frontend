@@ -3,7 +3,7 @@ export const COLOR_DIY = {
     // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
     black:{
         // 最高層級，類似大標題
-        main    :'#212121',
+        main    :'#000',
         // 次標題
         second  :'#666666',
         // 次次標題
