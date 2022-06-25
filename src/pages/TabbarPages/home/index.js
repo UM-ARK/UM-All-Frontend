@@ -54,7 +54,40 @@ export default class HomeScreen extends Component {
                 uri: 'https://www.cpsumsu.org/_announcement/Game_Design_Workshop2022/img/poster.jpg',
             },
         ],
+
+        functionArray:[
+            {
+                icon_name:'calendar-outline',
+                onPress:"",// a function
+                function_name:'校曆'
+            },
+            {
+                icon_name:'paw-outline',
+                function_name:'澳大論壇'
+            },
+            {
+                icon_name:'file-tray-full-outline',
+                function_name:'選咩課'
+            },
+            {
+                icon_name:'book-outline',
+                function_name:'UMMoodle'
+            },
+            {
+                icon_name:'md-bus-outline',
+                function_name:'校園巴士'
+            },
+      ]
     };
+
+    GetFunctionIcon(icon_name,function_name){
+        return(
+          <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
+              <Ionicons name={icon_name} size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
+              <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>{function_name}</Text>
+          </TouchableOpacity>
+        )
+    }
 
     constructor(props){
         super(props);
@@ -81,9 +114,9 @@ export default class HomeScreen extends Component {
                 <ScrollImage imageData={carouselImagesArr}></ScrollImage>
 
                 {/* 2.0 快捷功能入口卡片 開始 */}
-                <View 
+                <View
                 style={{
-                    flex:1, 
+                    flex:1,
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
                     margin:pxToDp(15),
@@ -92,11 +125,11 @@ export default class HomeScreen extends Component {
                 }}>
                     {/* 2.1 卡片標題 */}
                     <TouchableOpacity style={{
-                        flexDirection:'row', justifyContent:'space-between', alignItems:'center', 
+                        flexDirection:'row', justifyContent:'space-between', alignItems:'center',
                         padding:pxToDp(12), }} activeOpacity={0.6}
                         onPress={()=>this.props.navigation.jumpTo('FeaturesTabbar')}
                     >
-                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>查看更多</Text>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>查看更多</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
                     </TouchableOpacity>
                     {/* 2.2 卡片內容 */}
@@ -104,34 +137,39 @@ export default class HomeScreen extends Component {
                         justifyContent:'space-between', alignItems:'flex-start', flexDirection:'row',
                         margin:pxToDp(10), marginTop:pxToDp(0), }}>
                         {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='calendar-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>校曆</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='paw-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>澳大論壇</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='file-tray-full-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>選咩課</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='book-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
-                            <Text style={{fontSize:pxToDp(14), color:COLOR_DIY.black.second}}>UMMoodle</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='md-bus-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>校園巴士</Text>
-                        </TouchableOpacity>
+                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
+                        {/*    <Ionicons name='calendar-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
+                        {/*    <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>校曆</Text>*/}
+                        {/*</TouchableOpacity>*/}
+                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
+                        {/*    <Ionicons name='paw-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
+                        {/*    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>澳大論壇</Text>*/}
+                        {/*</TouchableOpacity>*/}
+                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
+                        {/*    <Ionicons name='file-tray-full-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
+                        {/*    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>選咩課</Text>*/}
+                        {/*</TouchableOpacity>*/}
+                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
+                        {/*    <Ionicons name='book-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
+                        {/*    <Text style={{fontSize:pxToDp(14), color:COLOR_DIY.black.second}}>UMMoodle</Text>*/}
+                        {/*</TouchableOpacity>*/}
+                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
+                        {/*    <Ionicons name='md-bus-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
+                        {/*    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>校園巴士</Text>*/}
+                        {/*</TouchableOpacity>*/}
+                        {this.state.functionArray.map(
+                          (fn)=>
+                            this.GetFunctionIcon(fn.icon_name,fn.function_name)
+                        )}
+
                     </View>
                 </View>
                 {/* 2.0 快捷功能入口卡片 結束 */}
 
                 {/* 3.0 我的追蹤卡片 開始 */}
-                <View 
+                <View
                 style={{
-                    flex:1, 
+                    flex:1,
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
                     margin:pxToDp(15),
@@ -140,8 +178,8 @@ export default class HomeScreen extends Component {
                     ...COLOR_DIY.viewShadow
                 }}>
                     {/* 3.1 卡片標題 */}
-                    <TouchableOpacity 
-                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}} 
+                    <TouchableOpacity
+                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}
                     activeOpacity={0.6}
                     onPress={()=>alert('未綁定跳轉路由')}
                     >
@@ -167,9 +205,9 @@ export default class HomeScreen extends Component {
                 {/* 3.0 我的追蹤卡片 結束 */}
 
                 {/* 4.0 新聞資訊卡片 開始 */}
-                <View 
+                <View
                 style={{
-                    flex:1, 
+                    flex:1,
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
                     margin:pxToDp(15),
@@ -178,8 +216,8 @@ export default class HomeScreen extends Component {
                     ...COLOR_DIY.viewShadow
                 }}>
                     {/* 4.1 卡片標題 */}
-                    <TouchableOpacity 
-                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}} 
+                    <TouchableOpacity
+                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}
                     activeOpacity={0.6}
                     onPress={()=>this.props.navigation.jumpTo('NewsTabbar')}
                     >
