@@ -77,9 +77,8 @@ export default class HomeScreen extends Component {
                 statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
             />
             <ScrollView>
-                {/* 1.0 輪播圖組件 開始 */}
+                {/* 1.0 輪播圖組件 */}
                 <ScrollImage imageData={carouselImagesArr}></ScrollImage>
-                {/* 1.0 輪播圖組件 結束 */}
 
                 {/* 2.0 快捷功能入口卡片 開始 */}
                 <View 
@@ -92,20 +91,18 @@ export default class HomeScreen extends Component {
                     ...COLOR_DIY.viewShadow
                 }}>
                     {/* 2.1 卡片標題 */}
-                    <TouchableOpacity 
-                    style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}} 
-                    activeOpacity={0.6}
-                    onPress={()=>this.props.navigation.jumpTo('FeaturesTabbar')}
+                    <TouchableOpacity style={{
+                        flexDirection:'row', justifyContent:'space-between', alignItems:'center', 
+                        padding:pxToDp(12), }} activeOpacity={0.6}
+                        onPress={()=>this.props.navigation.jumpTo('FeaturesTabbar')}
                     >
                         <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>查看更多</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
                     </TouchableOpacity>
-                    {/* 2.2 標題分割線 */}
-                    <View style={{justifyContent:'center', alignItems:'center'}}>
-                        <Divider style={{width:"90%"}} color={COLOR_DIY.black.second} />
-                    </View>
-                    {/* 2.3 卡片內容 */}
-                    <View style={{justifyContent:'space-between', alignItems:'flex-start', margin:pxToDp(10), flexDirection:'row'}}>
+                    {/* 2.2 卡片內容 */}
+                    <View style={{
+                        justifyContent:'space-between', alignItems:'flex-start', flexDirection:'row',
+                        margin:pxToDp(10), marginTop:pxToDp(0), }}>
                         {/* 服務圖標與文字 */}
                         <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
                             <Ionicons name='calendar-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
@@ -151,12 +148,8 @@ export default class HomeScreen extends Component {
                         <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>我的追蹤</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
                     </TouchableOpacity>
-                    {/* 3.2 標題分割線 */}
-                    <View style={{justifyContent:'center', alignItems:'center'}}>
-                        <Divider style={{width:"90%"}} color={COLOR_DIY.black.second} />
-                    </View>
-                    {/* 3.3 卡片內容 */}
-                    <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), flexDirection:'row'}}>
+                    {/* 3.2 卡片內容 */}
+                    <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(0), flexDirection:'row'}}>
                         {/* 服務圖標與文字 */}
                         <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
                             <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>MATH1003 (002)</Text>
@@ -193,12 +186,8 @@ export default class HomeScreen extends Component {
                         <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>UM 資訊</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(20)} color={COLOR_DIY.black.second}></Ionicons>
                     </TouchableOpacity>
-                    {/* 4.2 標題分割線 */}
-                    <View style={{justifyContent:'center', alignItems:'center'}}>
-                        <Divider style={{width:"90%"}} color={COLOR_DIY.black.second} />
-                    </View>
-                    {/* 4.3 卡片內容 */}
-                    <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), flexDirection:'column'}}>
+                    {/* 4.2 卡片內容 */}
+                    <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(0), flexDirection:'column'}}>
                         {/* 文字 */}
                         <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
                             <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>Temporarily Closure of the UM Campus</Text>

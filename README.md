@@ -172,4 +172,6 @@ npx react-native unlink react-native-vector-icons
 1. [多選、搜索組件1](https://github.com/renrizzolo/react-native-sectioned-multi-select)
 1. [多選、搜索組件2](https://github.com/toystars/react-native-multiple-select)
 1. [標籤輸入組件，可用於社團創建活動時選擇](https://github.com/jimmybengtsson/react-native-tags-input)
+1. [浮动按钮1](https://github.com/mastermoo/react-native-action-button)
+1. [浮动按钮2](https://github.com/santomegonzalo/react-native-floating-action)
 

@@ -25,6 +25,6 @@ export const COLOR_DIY = {
         shadowOpacity: 0.4,
         shadowRadius: 3,
         // 適用於Android
-        elevation: 10,
+        elevation: 5,
     }
 }
