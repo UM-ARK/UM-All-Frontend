@@ -83,8 +83,8 @@ export default class HomeScreen extends Component {
     GetFunctionIcon(icon_name,function_name){
         return(
           <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-              <Ionicons name={icon_name} size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>
-              <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>{function_name}</Text>
+              <Ionicons name={icon_name} size={pxToDp(24)} color={COLOR_DIY.themeColor}></Ionicons>
+              <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{function_name}</Text>
           </TouchableOpacity>
         )
     }
@@ -137,26 +137,6 @@ export default class HomeScreen extends Component {
                         justifyContent:'space-between', alignItems:'flex-start', flexDirection:'row',
                         margin:pxToDp(10), marginTop:pxToDp(0), }}>
                         {/* 服務圖標與文字 */}
-                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
-                        {/*    <Ionicons name='calendar-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
-                        {/*    <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>校曆</Text>*/}
-                        {/*</TouchableOpacity>*/}
-                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
-                        {/*    <Ionicons name='paw-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
-                        {/*    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>澳大論壇</Text>*/}
-                        {/*</TouchableOpacity>*/}
-                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
-                        {/*    <Ionicons name='file-tray-full-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
-                        {/*    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>選咩課</Text>*/}
-                        {/*</TouchableOpacity>*/}
-                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
-                        {/*    <Ionicons name='book-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
-                        {/*    <Text style={{fontSize:pxToDp(14), color:COLOR_DIY.black.second}}>UMMoodle</Text>*/}
-                        {/*</TouchableOpacity>*/}
-                        {/*<TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>*/}
-                        {/*    <Ionicons name='md-bus-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor}></Ionicons>*/}
-                        {/*    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.second}}>校園巴士</Text>*/}
-                        {/*</TouchableOpacity>*/}
                         {this.state.functionArray.map(
                           (fn)=>
                             this.GetFunctionIcon(fn.icon_name,fn.function_name)
