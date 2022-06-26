@@ -5,6 +5,7 @@
   * [Android環境安裝](#android環境-install)
   * [IOS環境安裝](#ios環境-install)
   * [使用Debugger](#使用Debugger)
+  * [已知問題](#已知問題)
 - [開發本倉庫項目準備-MacOS](#開發本倉庫項目準備)
   * [安裝及運行流程](#安裝及運行流程)
   * [故障排除](#故障排除)
@@ -18,7 +19,7 @@
 
 ### Android環境 [Install](https://reactnative.dev/docs/environment-setup)
 1. 確保自己是 `Android11` 的模擬器環境（其他安卓版本尚未測試）
-2. 本地運行指令 `npm i` 安裝依賴的npm包
+2. 本地運行指令 `npm i --legacy-peer-deps` 安裝依賴的npm包
 3. 敲入 `react-native run-android` or `npm run android` or `yarn android` 運行吧~
 
 已知BUG:
@@ -60,6 +61,18 @@ npx react-native run-ios
 舊版的項目可以在Metro的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看log。
 新版項目因為使用了組件react-native-reanimated導致不支持遠程調試，現在需要使用[Flipper](https://fbflipper.com/).
 下載Flipper後，Mac和Windows可能還要安裝一兩個工具，比如Windows要安裝OpenSSL，參考：https://www.cnblogs.com/dingshaohua/p/12271280.html
+
+---
+
+&nbsp;
+### 已知問題
+2022.06.26更新：
+因為某些包的npm和yarn兼容性問題，安裝依賴的指令有所改變：
+
+1. 如果你是新clone請使用 `npm i --legacy-peer-deps` 安裝依賴。
+2. 如果你是已有倉庫，建議把 `node_modules` 刪除後再使用 `npm i --legacy-peer-deps` 安裝依賴。
+3. 此指令適用於大多數npm報ERROR的情況。
+4. 如需update包，可以使用 `npm info 包名` 先查看需要版本，再在package.json裡修改版本號，`npm i --legacy-peer-deps`。
 
 ---
 
