@@ -185,13 +185,6 @@ class Index extends Component {
                 <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}>
                     <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>{title}</Text>
                 </View>
-                {/*<View style={{justifyContent:'space-between', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>*/}
-                {/*    {fn_list.map((fn)=>{*/}
-                {/*        return(*/}
-                {/*            this.GetFunctionButton(fn)*/}
-                {/*        )*/}
-                {/*    })}*/}
-                {/*</View>*/}
                 <FlatGrid
                     itemDimension={50}
                     data={fn_list}
