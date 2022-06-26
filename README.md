@@ -176,4 +176,13 @@ npx react-native unlink react-native-vector-icons
 1. [浮动按钮1](https://github.com/mastermoo/react-native-action-button)
 1. [浮动按钮2](https://github.com/santomegonzalo/react-native-floating-action)
 1. [隨分類跳轉對應tab](https://github.com/bogoslavskiy/react-native-tabs-section-list)
+1. [聊天UI](https://github.com/FaridSafi/react-native-gifted-chat)
+1. [滑塊組件](https://github.com/leecade/react-native-swiper)
+1. [啟動屏](https://github.com/crazycodeboy/react-native-splash-screen)
+1. [首次使用的引導頁](https://github.com/FuYaoDe/react-native-app-intro)
+1. [加載優化 - 毛玻璃狀態到加載完成](https://github.com/mrousavy/react-native-blurhash)
+1. [毛玻璃效果1](https://github.com/Kureev/react-native-blur)
+1. [毛玻璃效果2](https://github.com/voronianski/react-native-effects-view)
+1. [跟手的彈窗](https://github.com/oblador/react-native-lightbox)
+1. [活動tab改分頁](https://openbase.com/js/react-native-tab-view)
 
