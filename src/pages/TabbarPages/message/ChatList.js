@@ -16,15 +16,18 @@ import {certificate} from '../../../static/icon/iconSvg';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import SvgUri from 'react-native-svg-uri'
+import { SpringScrollView } from "react-native-spring-scrollview";
 
 
 // 每個聊天item的高度
 const CHAT_ITEM_HEIGHT = pxToDp(78);
 // 頭像標籤大小，使用的SVG貌似不是像素單位
 const AVATOR_RIGHT_ICON_SIZE = pxToDp(20);
-const listData = Array(10)
+
+// 造出模擬數據的數組
+const listData = Array(8)
 .fill("")
-.map((_, i) => ({ key: `${i}`, text: `item #${i}` }));
+.map((_, i) => ({ key: `${i}`, text: `巴巴托斯` }));
 
 class ChatList extends Component {
     state = {
@@ -37,6 +40,8 @@ class ChatList extends Component {
             <SwipeListView
                 style={{backgroundColor:bg_color}}
                 data={this.state.listViewData}
+                previewRowKey={'0'}
+                previewDuration={500}
                 renderItem={ (data, rowMap) => {
                     return(
                     <View style={{ margin:5, marginLeft:10, marginRight:10 }}>
@@ -67,20 +72,20 @@ class ChatList extends Component {
                                 {/* TODO: 展示有多少信息未讀 */}
                                 {/* 未讀信息標籤 */}
                                 <View style={[styles.rightTopIconPosition, styles.unread]}>
-                                    <Text style={{ color:'white', fontSize:pxToDp(12), fontWeight:'700'}}>1</Text>
+                                    <Text style={{ color:'white', fontSize:pxToDp(12), fontWeight:'700'}}>6</Text>
                                 </View>
                             </View>
 
                             {/* 名字 & 簡略消息內容 */}
                             {/* TODO: 不同消息類型在這裡的顯示 */}
                             {/* TODO: 文本消息過長則顯示... */}
-                            <View style={{marginLeft:pxToDp(10), flexDirection:'column'}}>
+                            <View style={{marginLeft:pxToDp(10), flexDirection:'column', justifyContent:'center'}}>
                                 {/* 名字 */}
-                                <Text style={{color:black.main, fontSize:pxToDp(19)}}>I am {data.item.text}</Text>
+                                <Text style={{color:black.main, fontSize:pxToDp(14)}}>{data.item.text}</Text>
 
                                 {/* 消息內容 */}
-                                <View>
-                                    <Text style={{color:black.second, fontSize:pxToDp(12)}}>你若困于无风之地，我必为你奏响高天之歌</Text>
+                                <View style={{marginTop:pxToDp(5)}}>
+                                    <Text style={{color:black.second, fontSize:pxToDp(10)}}>你若困于无风之地，我必为你奏响高天之歌。</Text>
                                 </View>
                             </View>
                         </View>
@@ -106,7 +111,7 @@ class ChatList extends Component {
                                 backgroundColor:'#ff9500',
                             }]}
                             activeOpacity={0.7} underlayColor={'#dfe6e9'}
-                            onPress={()=>console.log('')}
+                            onPress={()=>console.log('點擊事件')}
                             >
                                 <Text style={styles.rightButtonText}>置頂</Text>
                             </TouchableHighlight>
@@ -124,7 +129,9 @@ class ChatList extends Component {
                     </View>
                 )}
                 // 在所有項目的末尾渲染，防止tabbar遮擋
-                ListFooterComponent={()=> <View style={{marginBottom:pxToDp(220)}}></View>}
+                ListFooterComponent={()=> (
+                    <View style={{marginBottom:pxToDp(100)}}></View>
+                )}
                 // 關閉右滑手勢，即左側不能打開
                 disableRightSwipe
                 // 設置右側可打開的值，右側是負，左側是正
@@ -133,6 +140,8 @@ class ChatList extends Component {
                 closeOnRowBeginSwipe={true}
                 previewOpenValue={-40}
                 previewOpenDelay={3000}
+                // 禁用這個容器的滾動，使用外層SpringScrollView進行彈性滾動
+                scrollEnabled={false}
             />
         );
     }
