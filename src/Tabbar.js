@@ -35,7 +35,7 @@ class Index extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors        : COLOR_DIY.white,
                     tabBarBackground    : COLOR_DIY.white,
-                    floating            : true,
+                    // floating            : true,
                     horizontalPadding   : pxToDp(10),
                 }}
                 initialRouteName={'HomeTabbar'}>
