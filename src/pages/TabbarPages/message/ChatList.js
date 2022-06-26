@@ -37,7 +37,8 @@ class ChatList extends Component {
             <SwipeListView
                 style={{backgroundColor:bg_color}}
                 data={this.state.listViewData}
-                renderItem={ (data, rowMap) => (
+                renderItem={ (data, rowMap) => {
+                    return(
                     <View style={{ margin:5, marginLeft:10, marginRight:10 }}>
                     <TouchableHighlight style={styles.chatItemBorder}
                         activeOpacity={0.7} underlayColor={'#dfe6e9'} onPress={()=>alert('跳轉提醒詳情頁')} >
@@ -91,7 +92,7 @@ class ChatList extends Component {
                     </View>
                     </TouchableHighlight>
                     </View>
-                )}
+                )}}
                 renderHiddenItem={ (data, rowMap) => (
                     <View style={{ flex:1, flexDirection:'row', backgroundColor:bg_color, justifyContent:'space-between', alignItems:'center',  
                         padding:pxToDp(5), paddingRight:pxToDp(0), margin:pxToDp(11), 
@@ -122,10 +123,16 @@ class ChatList extends Component {
                         </View>
                     </View>
                 )}
+                // 在所有項目的末尾渲染，防止tabbar遮擋
+                ListFooterComponent={()=> <View style={{marginBottom:pxToDp(220)}}></View>}
                 // 關閉右滑手勢，即左側不能打開
                 disableRightSwipe
                 // 設置右側可打開的值，右側是負，左側是正
                 rightOpenValue={-pxToDp(142)}
+                // 当一行开始滑动打开时，关闭打开的行
+                closeOnRowBeginSwipe={true}
+                previewOpenValue={-40}
+                previewOpenDelay={3000}
             />
         );
     }

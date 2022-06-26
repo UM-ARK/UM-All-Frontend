@@ -91,32 +91,24 @@ class MesgScreen extends Component {
             </View>
 
             {/* 2 消息內容 */}
-            <ScrollView style={{marginTop:pxToDp(5), backgroundColor:bg_color}}>
+            {/* 條件渲染，參考：https://segmentfault.com/a/1190000025135870 */}
+            {(() => {
+                switch (tagIndex) {
+                    case 0:
+                    return (
+                        <View>
+                            <ChatList></ChatList>
+                        </View>
+                    )
+                    case 1:
+                    return <Text style={{ fontSize: 30, }}>官方通告</Text>
+                    case 2:
+                    return <Text style={{ fontSize: 30, }}>活動訊息</Text>
+                    case 3:
+                    return <Text style={{ fontSize: 30, }}>Deadline 提醒</Text>
+                }
+            })()}
 
-                {/* 條件渲染，參考：https://segmentfault.com/a/1190000025135870 */}
-                {(() => {
-                    switch (tagIndex) {
-                        case 0:
-                        return (
-                            <View>
-                                {/* <Text style={{ fontSize: 30, }}>全部訊息</Text> */}
-                                <ChatList></ChatList>
-                            </View>
-                        )
-                        case 1:
-                        return <Text style={{ fontSize: 30, }}>官方通告</Text>
-                        case 2:
-                        return <Text style={{ fontSize: 30, }}>活動訊息</Text>
-                        case 3:
-                        return <Text style={{ fontSize: 30, }}>Deadline 提醒</Text>
-                    }
-                })()}
-
-
-                <Text>{'\n'}</Text>
-                <Text>{'\n'}</Text>
-                <Text>{'\n'}</Text>
-            </ScrollView>
             </View>
         );
     }
