@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import ScrollImage from './components/ScrollImage';
+import tw from 'twrnc';
 
 import {Header, Divider} from 'react-native-elements'; // 4.0 Beta版
 import {PageControl, Card} from 'react-native-ui-lib';
@@ -57,41 +58,182 @@ export default class HomeScreen extends Component {
 
         functionArray:[
             {
-                icon_name:'calendar-outline',
+                icon_name:'calendar',
                 onPress:"",// a function
                 function_name:'校曆'
             },
             {
-                icon_name:'paw-outline',
+                icon_name:'compass',
                 function_name:'澳大論壇'
             },
             {
-                icon_name:'file-tray-full-outline',
+                icon_name:'file-tray-full',
                 function_name:'選咩課'
             },
             {
-                icon_name:'book-outline',
+                icon_name:'book',
                 function_name:'Moodle'
             },
             {
-                icon_name:'md-bus-outline',
+                icon_name:'bus',
                 function_name:'校園巴士'
             },
-      ]
+            // {
+            //     icon_name: 'thermometer',
+            //     function_name: '防疫要求'
+            // }
+      ],
+        activityInfo:[
+            {
+                title:"MATH1003(002)",
+                info:[
+                    [
+                        {
+                            type:0,  //tag
+                            content:"@"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"E22-4012"
+                        }
+                    ],
+                    [
+                        {
+                            type:0,  //tag
+                            content:"from"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"8:30"
+                        },
+                        {
+                            type:0,  //tag
+                            content:"to"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"9:30"
+                        },
+                    ],
+                    [
+                        {
+                            type:0,  //tag
+                            content:"by"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"Michael"
+                        }
+                    ]
+                ]
+            },
+            {
+                title:"爬虫工作坊",
+                info:[
+                    [
+                        {
+                            type:0,  //tag
+                            content:"@"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"E6-G007"
+                        }
+                    ],
+                    [
+                        {
+                            type:0,  //tag
+                            content:"from"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"10:30"
+                        },
+                        {
+                            type:0,  //tag
+                            content:"to"
+                        },
+                        {
+                            type:1,  //tag
+                            content:"11:30"
+                        },
+                    ],
+                ]
+            }
+        ]
     };
-
+    constructor(props){
+        super(props);
+    }
     GetFunctionIcon(icon_name,function_name){
         return(
           <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-              <Ionicons name={icon_name} size={pxToDp(24)} color={COLOR_DIY.themeColor}></Ionicons>
-              <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>{function_name}</Text>
+              <Ionicons name={icon_name} size={pxToDp(35)} color={COLOR_DIY.themeColor}></Ionicons>
+              <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{function_name}</Text>
           </TouchableOpacity>
         )
     }
 
-    constructor(props){
-        super(props);
+    GetSubActivityInfoTag(content){
+        return(
+          <View style={{
+              borderColor:COLOR_DIY.themeColor,
+              borderWidth:pxToDp(1),
+              // backgroundColor:COLOR_DIY.themeColor,
+              paddingHorizontal:pxToDp(3),
+              borderRadius:pxToDp(6),
+              paddingVertical:pxToDp(0)
+          }}>
+              <Text style={{
+                  fontSize:pxToDp(11),
+                  color:COLOR_DIY.themeColor,
+              }}>
+                  {content}
+              </Text>
+          </View>
+        )
     }
+
+    GetSubActivityInfoContent(content){
+        return(
+            <Text style={{
+                marginHorizontal:pxToDp(4),
+                fontSize:pxToDp(12),
+                paddingVertical:pxToDp(0),
+                color:COLOR_DIY.black.second
+            }}>
+                {content}
+            </Text>
+        )
+    }
+
+
+    GetActivityInfoCard(content){
+        return(
+            <TouchableOpacity style={{ marginVertical:pxToDp(5)}}>
+                <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>{content.title}</Text>
+                {content.info.map((line)=>{
+                    return(
+                        <View style={[{marginVertical:pxToDp(1)},tw.style('flex','flex-row')]}>
+                            {line.map((subcontent)=>{
+                                if (subcontent.type==0){
+                                    return(
+                                        this.GetSubActivityInfoTag(subcontent.content)
+                                    )
+                                }
+                                else {
+                                    return (
+                                        this.GetSubActivityInfoContent(subcontent.content)
+                                    )
+                                }
+                            })}
+                        </View>
+                    )
+                })}
+            </TouchableOpacity>
+        )
+    }
+
 
     render() {
         const {carouselImagesArr} = this.state;
@@ -122,7 +264,7 @@ export default class HomeScreen extends Component {
                     marginHorizontal:pxToDp(15),
                     // marginVertical:pxToDp(5),
                     // 增加陰影
-                    marginBottom:pxToDp(5),
+                    marginBottom:pxToDp(8),
                     marginTop:pxToDp(10),
                     ...COLOR_DIY.viewShadow
                 }}>
@@ -132,7 +274,7 @@ export default class HomeScreen extends Component {
                         paddingVertical:pxToDp(10), paddingHorizontal:pxToDp(10)}} activeOpacity={0.6}
                         onPress={()=>this.props.navigation.jumpTo('FeaturesTabbar')}
                     >
-                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>查看更多</Text>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main,fontWeight:'bold'}} >查看更多</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(14)} color={COLOR_DIY.black.main}></Ionicons>
                     </TouchableOpacity>
                     {/* 2.2 卡片內容 */}
@@ -156,7 +298,7 @@ export default class HomeScreen extends Component {
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
                     marginHorizontal:pxToDp(15),
-                    marginVertical:pxToDp(5),
+                    marginVertical:pxToDp(8),
                     // 增加陰影
                     ...COLOR_DIY.viewShadow
                 }}>
@@ -167,27 +309,19 @@ export default class HomeScreen extends Component {
                     activeOpacity={0.6}
                     onPress={()=>alert('未綁定跳轉路由')}
                     >
-                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>我的追蹤</Text>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main,fontWeight:'bold'}}>我的追蹤</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(14)} color={COLOR_DIY.black.main}></Ionicons>
                     </TouchableOpacity>
                     {/* 3.2 卡片內容 */}
-                    <View style={{justifyContent:'space-between', alignItems:'flex-start', marginHorizontal:pxToDp(10), marginBottom:pxToDp(10), flexDirection:'column'}}>
+                    <View style={{marginHorizontal:pxToDp(10), marginBottom:pxToDp(10)}}>
                         {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column', marginVertical:pxToDp(5)}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>MATH1003 (002)</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>地點：E22-4012</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>時間：8:30 - 9:15</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>講者：Michael</Text>
-                        </TouchableOpacity>
-                        {/* 分割線 */}
-                        <View style={{justifyContent:'center', alignItems:'center', width:'100%', marginTop:pxToDp(5), marginBottom:pxToDp(5)}}>
-                            <Divider style={{width:"100%"}} color={COLOR_DIY.black.second} />
-                        </View>
-                        <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>爬蟲工作坊</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>地點：E6-G007</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>時間：10:30 - 11:30</Text>
-                        </TouchableOpacity>
+                        {
+                            this.state.activityInfo.map((activity)=>{
+                                return(
+                                    this.GetActivityInfoCard(activity)
+                                )
+                            })
+                        }
                     </View>
                 </View>
                 {/* 3.0 我的追蹤卡片 結束 */}
@@ -199,7 +333,7 @@ export default class HomeScreen extends Component {
                     backgroundColor:COLOR_DIY.bg_color,
                     borderRadius:pxToDp(10),
                     marginHorizontal:pxToDp(15),
-                    marginVertical:pxToDp(5),
+                    marginVertical:pxToDp(8),
                     // 增加陰影
                     ...COLOR_DIY.viewShadow
                 }}>
@@ -209,7 +343,7 @@ export default class HomeScreen extends Component {
                     activeOpacity={0.6}
                     onPress={()=>this.props.navigation.jumpTo('NewsTabbar')}
                     >
-                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main}}>UM 資訊</Text>
+                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main,fontWeight:'bold'}}>UM 資訊</Text>
                         <Ionicons name='chevron-forward-outline' size={pxToDp(14)} color={COLOR_DIY.black.main}></Ionicons>
                     </TouchableOpacity>
                     {/* 4.2 卡片內容 */}
