@@ -5,6 +5,7 @@ import {COLOR_DIY} from '../../../utils/uiMap'
 import {pxToDp} from '../../../utils/stylesKits'
 import {Header} from 'react-native-elements'; // 4.0 Beta版
 
+// 可以嘗試使用粘性標題組件：react-native-sticky-parallax-header
 
 class NewsScreen extends Component {
     render() {

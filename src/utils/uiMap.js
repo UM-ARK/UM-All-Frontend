@@ -13,9 +13,16 @@ export const COLOR_DIY = {
     white:'#F5F5F5',
     // 全局背景白色(偏灰)
     bg_color:'#F5F5F7',
+
+    // 我的頁顏色
     meScreenColor:{
         bg_color:'#ededed',
         card_color:'white',
+    },
+
+    // 提醒頁顏色
+    messageScreenColor:{
+        bg_color:'#fbfbfb'
     },
 
     // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
