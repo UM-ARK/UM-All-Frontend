@@ -5,9 +5,9 @@ export const COLOR_DIY = {
         // 最高層級，類似大標題
         main    :'#000',
         // 次標題
-        second  :'#666666',
+        second  :'#212121',
         // 次次標題
-        third   :'#9E9E9E',
+        third   :'#666666',
     },
     // 當想用純白，或其他顏色背景，白色文字時用white的色值
     white:'#F5F5F5',
