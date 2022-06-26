@@ -14,10 +14,213 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { FlatGrid } from 'react-native-super-grid';
+
+const iconTypes={
+    ionicons:'ionicons',
+    materialCommunityIcons:'MaterialCommunityIcons'
+}
 
 class Index extends Component {
-    state = {  } 
-    render() { 
+    state = {
+        functionArr:[
+            {
+                title:"校园服务",
+                fn:[
+                    {
+                        icon_type:iconTypes.ionicons,
+                        icon_name:"bus",
+                        fn_name:"校园巴士",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.ionicons,
+                        icon_name:"calendar",
+                        fn_name:"校曆",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"map",
+                        fn_name:"校園地圖",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"car-brake-parking",
+                        fn_name:"車位",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.ionicons,
+                        icon_name:"logo-dropbox",
+                        fn_name:"資源借用",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"monitor",
+                        fn_name:"電腦預約",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"file-cabinet",
+                        fn_name:"儲物箱",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"hammer-wrench",
+                        fn_name:"維修預約",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"printer-check",
+                        fn_name:"打印",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"basketball",
+                        fn_name:"體育預訂",
+                        go_where:"",// a function
+                    },
+                ]
+            },
+            {
+                title:"生活小幫手",
+                fn:[
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"coffee",
+                        fn_name:"澳大論壇",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"face-mask",
+                        fn_name:"防疫要求",
+                        go_where:"",// a function
+                    },
+                ]
+            },
+            {
+                title:"課業 & 發展",
+                fn:[
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"school",
+                        fn_name:"Moodle",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"book",
+                        fn_name:"選咩課",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"eye-plus",
+                        fn_name:"預選課",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"bank-plus",
+                        fn_name:"Add/Drop",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        // icon_name:"account-star",
+                        icon_name:"cow",
+                        fn_name:"全人發展",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"ab-testing",
+                        fn_name:"成績",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"counter",
+                        fn_name:"學分",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"dolphin",
+                        fn_name:"交流",
+                        go_where:"",// a function
+                    },
+                    {
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"currency-usd",
+                        fn_name:"獎學金",
+                        go_where:"",// a function
+                    },
+                ]
+            },
+
+        ]
+    }
+
+    GetFunctionCard(title,fn_list){
+        return(
+            <View
+                style={{
+                    flex:1,
+                    backgroundColor:COLOR_DIY.bg_color,
+                    borderRadius:pxToDp(10),
+                    margin:pxToDp(15),
+                    marginTop:pxToDp(5),
+                    // 增加陰影
+                    ...COLOR_DIY.viewShadow
+                }}>
+                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}>
+                    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>{title}</Text>
+                </View>
+                {/*<View style={{justifyContent:'space-between', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>*/}
+                {/*    {fn_list.map((fn)=>{*/}
+                {/*        return(*/}
+                {/*            this.GetFunctionButton(fn)*/}
+                {/*        )*/}
+                {/*    })}*/}
+                {/*</View>*/}
+                <FlatGrid
+                    itemDimension={50}
+                    data={fn_list}
+                    // staticDimension={300}
+                    // fixed
+                    spacing={10}
+                    renderItem={({ item }) => {
+                            let icon=null
+                            if (item.icon_type=="ionicons"){
+                                icon=<Ionicons name={item.icon_name} size={pxToDp(30)} color={COLOR_DIY.themeColor} />
+                            }
+                            if (item.icon_type=='MaterialCommunityIcons'){
+                                icon=
+                                    <MaterialCommunityIcons name={item.icon_name} size={pxToDp(30)} color={COLOR_DIY.themeColor} />
+                            }
+                            return(
+                                <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
+                                    {icon}
+                                    <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{item.fn_name}</Text>
+                                </TouchableOpacity>
+                            )
+                        }
+                    }
+                />
+            </View>
+        )
+    }
+
+    render() {
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
             <ScrollView>
@@ -37,169 +240,12 @@ class Index extends Component {
                 {/* TODO: 吸頂分類選擇 */}
                 {/* 1.0 吸頂分類標籤 結束 */}
 
-                {/* 2.0 分類 - 校園服務 */}
-                <View 
-                style={{
-                    flex:1, 
-                    backgroundColor:COLOR_DIY.bg_color,
-                    borderRadius:pxToDp(10),
-                    margin:pxToDp(15),
-                    marginTop:pxToDp(5),
-                    // 增加陰影
-                    ...COLOR_DIY.viewShadow
-                }}>
-                    {/* 2.1 卡片標題 */}
-                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}>
-                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>校園服務</Text>
-                    </View>
-                    {/* 2.2 卡片內容 - 第1行 */}
-                    <View style={{justifyContent:'space-between', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>
-                        {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='md-bus-sharp' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>校園巴士</Text>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='md-calendar' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>校曆</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='map' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>校園地圖</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialIcons name='local-parking' size={pxToDp(33)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>車位</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='md-logo-dropbox' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>資源借用</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {/* 2.2 卡片內容 - 第2行 */}
-                    <View style={{justifyContent:'space-between', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>
-                        {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialIcons name='monitor' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>電腦預約</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialCommunityIcons name='file-cabinet' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>儲物箱租借</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialCommunityIcons name='hammer-wrench' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>維修預約</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='print' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>打印</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialIcons name='sports-handball' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>體育預訂</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* 3.0 分類 - 生活小幫手 */}
-                <View 
-                style={{
-                    flex:1, 
-                    backgroundColor:COLOR_DIY.bg_color,
-                    borderRadius:pxToDp(10),
-                    margin:pxToDp(15),
-                    marginTop:pxToDp(5),
-                    // 增加陰影
-                    ...COLOR_DIY.viewShadow
-                }}>
-                    {/* 3.1 卡片標題 */}
-                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}>
-                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>生活小幫手</Text>
-                    </View>
-                    {/* 3.2 卡片內容 - 第1行 */}
-                    <View style={{justifyContent:'flex-start', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>
-                        {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='paw-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>澳大論壇</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={{marginLeft:pxToDp(15), justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialCommunityIcons name='face-mask' size={pxToDp(31)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>防疫要求</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* 4.0 分類 - 課業與發展 */}
-                <View 
-                style={{
-                    flex:1, 
-                    backgroundColor:COLOR_DIY.bg_color,
-                    borderRadius:pxToDp(10),
-                    margin:pxToDp(15),
-                    marginTop:pxToDp(5),
-                    // 增加陰影
-                    ...COLOR_DIY.viewShadow
-                }}>
-                    {/* 4.1 卡片標題 */}
-                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}>
-                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>課業 & 發展</Text>
-                    </View>
-                    {/* 4.2 卡片內容 - 第1行 */}
-                    <View style={{justifyContent:'space-between', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>
-                        {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='book-outline' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>UMMoodle</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='file-tray-full' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>選咩課</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialCommunityIcons name='google-classroom' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>預選課</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialCommunityIcons name='plus-minus-variant' size={pxToDp(31)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>Add/Drop</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <MaterialCommunityIcons name='human-male-board-poll' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>全人發展</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {/* 4.2 卡片內容 - 第2行 */}
-                    <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(5), flexDirection:'row'}}>
-                        {/* 服務圖標與文字 */}
-                        <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <Ionicons name='newspaper-sharp' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>成績</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{marginLeft:pxToDp(15), justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <FontAwesome name='graduation-cap' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>學分</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{marginLeft:pxToDp(15), justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <FontAwesome name='send' size={pxToDp(30)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>交流</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{marginLeft:pxToDp(15), justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-                            <FontAwesome name='dollar' size={pxToDp(31)} color={COLOR_DIY.themeColor} />
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>獎學金</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                {this.state.functionArr.map((fn_card)=>{
+                    return(
+                        this.GetFunctionCard(fn_card.title,fn_card.fn)
+                    )
+                })}
 
                 <Text>{'\n'}</Text>
                 <Text>{'\n'}</Text>
