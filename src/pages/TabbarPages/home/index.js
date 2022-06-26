@@ -55,7 +55,6 @@ export default class HomeScreen extends Component {
                 uri: 'https://www.cpsumsu.org/_announcement/Game_Design_Workshop2022/img/poster.jpg',
             },
         ],
-
         functionArray:[
             {
                 icon_name:'calendar',
@@ -160,7 +159,17 @@ export default class HomeScreen extends Component {
                     ],
                 ]
             }
-        ]
+        ],
+        newsArr:[
+            {
+                en:"Temporarily Closure of the UM Campus",
+                zh_cn:'澳大校園暫停對外開放'
+            },
+            {
+                en:"UM study imrpoves performance of formalde...",
+                zh_cn:'澳大最新研究提高甲醛檢測靈敏度'
+            },
+        ],
     };
     constructor(props){
         super(props);
@@ -349,18 +358,32 @@ export default class HomeScreen extends Component {
                     {/* 4.2 卡片內容 */}
                     <View style={{justifyContent:'space-around', alignItems:'flex-start', margin:pxToDp(10), marginTop:pxToDp(0), flexDirection:'column'}}>
                         {/* 文字 */}
-                        <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>Temporarily Closure of the UM Campus</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>澳大校園暫停對外開放</Text>
-                        </TouchableOpacity>
+                        {this.state.newsArr.map((news)=>{
+                            if (this.state.newsArr.indexOf(news)!=this.state.newsArr.length-1){
+                                return (
+                                        [<TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
+                                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>{news.en}</Text>
+                                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{news.zh_cn}</Text>
+                                        </TouchableOpacity>,
+                                        <View style={{justifyContent:'center', alignItems:'center', width:'100%', marginTop:pxToDp(5), marginBottom:pxToDp(5)}}>
+                                            <Divider style={{width:"100%"}} color={COLOR_DIY.black.second} />
+                                        </View>]
+                                )
+                            }
+                            else {
+                                return (
+                                    <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
+                                        <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>{news.en}</Text>
+                                        <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{news.zh_cn}</Text>
+                                    </TouchableOpacity>
+
+                                )
+                            }
+
+                        })}
+
                         {/* 分割線 */}
-                        <View style={{justifyContent:'center', alignItems:'center', width:'100%', marginTop:pxToDp(5), marginBottom:pxToDp(5)}}>
-                            <Divider style={{width:"100%"}} color={COLOR_DIY.black.second} />
-                        </View>
-                        <TouchableOpacity style={{justifyContent:'flex-start', flexDirection:'column'}}>
-                            <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main}}>UM study imrpoves performance of formalde...</Text>
-                            <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>澳大最新研究提高甲醛檢測靈敏度</Text>
-                        </TouchableOpacity>
+
                     </View>
                 </View>
                 {/* 4.0 新聞資訊卡片 結束 */}
