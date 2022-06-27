@@ -17,12 +17,13 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import SvgUri from 'react-native-svg-uri'
 import { SpringScrollView } from "react-native-spring-scrollview";
+import fontSize from "twrnc/dist/esm/resolve/font-size";
 
 
 // 每個聊天item的高度
-const CHAT_ITEM_HEIGHT = pxToDp(78);
+const CHAT_ITEM_HEIGHT = pxToDp(60);
 // 頭像標籤大小，使用的SVG貌似不是像素單位
-const AVATOR_RIGHT_ICON_SIZE = pxToDp(20);
+const AVATOR_RIGHT_ICON_SIZE = pxToDp(18);
 
 // 造出模擬數據的數組
 const listData = Array(8)
@@ -30,19 +31,69 @@ const listData = Array(8)
 .map((_, i) => ({ key: `${i}`, text: `巴巴托斯` }));
 
 class ChatList extends Component {
-    state = {
-        listViewData:listData
+
+    constructor(props) {
+        super(props);
+        let res=[]
+        for (let i = 0; i < this.props.data.length; i++) {
+            if (this.props.data[i].type==this.props.tag){
+                res.push(this.props.data[i])
+                // console.log(this.props.tag)
+            }
+        }
+        console.log("props tag",props.tag)
+        if (this.props.tag==0){
+            res=this.props.data
+        }
+        this.state={
+            showData:res,
+            data:this.props.data,
+            tagIndex:this.props.tag,
+        }
     }
 
+    componentWillUpdate=(nextProps)=>{
+        if (nextProps!=this.props){
+            let res=[]
+            for (let i = 0; i < nextProps.data.length; i++) {
+                if (nextProps.data[i].type==nextProps.tag){
+                    res.push(nextProps.data[i])
+                    // console.log(this.props.tag)
+                }
+            }
+            console.log("props will update tag",nextProps.tag)
+            if (nextProps.tag==0){
+                res=nextProps.data
+            }
+            this.setState({
+                showData:res,
+                data:nextProps.data,
+                tagIndex:nextProps.tag,
+            })
+        }
+
+    }
+
+    GetUnderNumber(message_history){
+        let n=0
+        for (let i = 0; i <message_history.length; i++) {
+            if(message_history[i].unread==1){
+                n+=1
+            }
+        }
+        return n
+    }
     render() {
+        console.log("render tag",this.state.tagIndex)
         const {bg_color, black, white, themeColor} = COLOR_DIY;
         return (
             <SwipeListView
                 style={{backgroundColor:bg_color}}
-                data={this.state.listViewData}
+                data={this.state.showData}
                 previewRowKey={'0'}
                 previewDuration={500}
                 renderItem={ (data, rowMap) => {
+                    // console.log(data)
                     return(
                     <View style={{ margin:5, marginLeft:10, marginRight:10 }}>
                     <TouchableHighlight style={styles.chatItemBorder}
@@ -51,17 +102,17 @@ class ChatList extends Component {
                     <View style={{
                         alignItems:'center', justifyContent:'space-between',  flexDirection:'row',
                         backgroundColor:COLOR_DIY.messageScreenColor.bg_color,
-                        height:CHAT_ITEM_HEIGHT, 
+                        height:CHAT_ITEM_HEIGHT,
                     }}>
                         {/* 靠左元素 */}
                         <View style={{marginLeft:pxToDp(15), flexDirection:'row', width:'80%', overflow:'hidden'}}>
                             {/* 頭像 */}
-                            <View style={{width:pxToDp(50), height:pxToDp(52)}}>
+                            <View style={{width:pxToDp(42), height:pxToDp(44)}}>
                                 <Image
-                                source={ {uri:'https://i03piccdn.sogoucdn.com/a04373145d4b4341'} } 
+                                source={ {uri:data.item.user.avatar_url} }
                                 style={{
                                     resizeMode:'cover', borderRadius:pxToDp(50),
-                                    width:pxToDp(48), height:pxToDp(48),
+                                    width:pxToDp(40), height:pxToDp(40),
                                 }} />
                                 {/* 頭像掛件 / 用戶標籤 */}
                                 {/* TODO: 按用戶組展示不同的標籤 */}
@@ -72,7 +123,7 @@ class ChatList extends Component {
                                 {/* TODO: 展示有多少信息未讀 */}
                                 {/* 未讀信息標籤 */}
                                 <View style={[styles.rightTopIconPosition, styles.unread]}>
-                                    <Text style={{ color:'white', fontSize:pxToDp(12), fontWeight:'700'}}>6</Text>
+                                    <Text style={{ color:'white', fontSize:pxToDp(10), fontWeight:'700',paddingHorizontal:pxToDp(4)}}>{this.GetUnderNumber(data.item.message_history)}</Text>
                                 </View>
                             </View>
 
@@ -81,26 +132,27 @@ class ChatList extends Component {
                             {/* TODO: 文本消息過長則顯示... */}
                             <View style={{marginLeft:pxToDp(10), flexDirection:'column', justifyContent:'center'}}>
                                 {/* 名字 */}
-                                <Text style={{color:black.main, fontSize:pxToDp(14)}}>{data.item.text}</Text>
+                                <Text style={{color:black.main, fontSize:pxToDp(14)}}>{data.item.user.name}</Text>
 
                                 {/* 消息內容 */}
                                 <View style={{marginTop:pxToDp(5)}}>
-                                    <Text style={{color:black.second, fontSize:pxToDp(10)}}>你若困于无风之地，我必为你奏响高天之歌。</Text>
+                                    <Text style={{color:black.second, fontSize:pxToDp(10)}}>{data.item.message_history[0].content}</Text>
                                 </View>
                             </View>
                         </View>
 
                         {/* 靠右元素 - 圖標點擊提示 */}
                         <View style={{marginRight:pxToDp(20), }}>
-                            <Ionicons name="chevron-forward-outline" color={black.second} size={pxToDp(20)}></Ionicons>
+                            {/*<Ionicons name="chevron-forward-outline" color={black.second} size={pxToDp(20)}></Ionicons>*/}
+                            <Text style={{fontSize:pxToDp(10)}}>{data.item.message_history[0].time}</Text>
                         </View>
                     </View>
                     </TouchableHighlight>
                     </View>
                 )}}
                 renderHiddenItem={ (data, rowMap) => (
-                    <View style={{ flex:1, flexDirection:'row', backgroundColor:bg_color, justifyContent:'space-between', alignItems:'center',  
-                        padding:pxToDp(5), paddingRight:pxToDp(0), margin:pxToDp(11), 
+                    <View style={{ flex:1, flexDirection:'row', backgroundColor:bg_color, justifyContent:'space-between', alignItems:'center',
+                        padding:pxToDp(5), paddingRight:pxToDp(0), margin:pxToDp(11),
                         }}>
                         {/* 左邊按鈕位置 */}
                         <View></View>
@@ -159,7 +211,7 @@ const styles = StyleSheet.create({
         fontSize:pxToDp(13),
     },
     chatItemBorder:{
-        borderRadius:pxToDp(15), 
+        borderRadius:pxToDp(15),
         overflow:'hidden',
         // 些許陰影
         shadowColor: '#000',
@@ -172,20 +224,20 @@ const styles = StyleSheet.create({
     // 頭像標籤位置
     // 右下角認證標籤
     rightBottomIconPosition:{
-        position:'absolute', 
-        right:0, 
+        position:'absolute',
+        right:0,
         bottom:-pxToDp(1)
     },
     // 右上角消息提示
     rightTopIconPosition:{
-        position:'absolute', 
-        right:0, 
+        position:'absolute',
+        right:0,
         top:0
     },
     // 未讀信息標籤樣式
     unread:{
-        width:pxToDp(18),
-        height:pxToDp(18),
+        // minWidth:pxToDp(15),
+        height:pxToDp(15),
         justifyContent:'center',
         alignItems:'center',
         backgroundColor:'red',
