@@ -83,6 +83,17 @@ class ChatList extends Component {
         }
         return n
     }
+
+    ShowRedPointWithNumber(data){
+        if (this.GetUnderNumber(data.item.message_history)>0){
+            return(
+                <View style={[styles.rightTopIconPosition, styles.unread]}>
+                    <Text style={{ color:'white', fontSize:pxToDp(10), fontWeight:'700',paddingHorizontal:pxToDp(4)}}>{this.GetUnderNumber(data.item.message_history)}</Text>
+                </View>
+            )
+        }
+
+    }
     render() {
         console.log("render tag",this.state.tagIndex)
         const {bg_color, black, white, themeColor} = COLOR_DIY;
@@ -122,9 +133,10 @@ class ChatList extends Component {
                                 </View>
                                 {/* TODO: 展示有多少信息未讀 */}
                                 {/* 未讀信息標籤 */}
-                                <View style={[styles.rightTopIconPosition, styles.unread]}>
-                                    <Text style={{ color:'white', fontSize:pxToDp(10), fontWeight:'700',paddingHorizontal:pxToDp(4)}}>{this.GetUnderNumber(data.item.message_history)}</Text>
-                                </View>
+                                {/*<View style={[styles.rightTopIconPosition, styles.unread]}>*/}
+                                {/*    <Text style={{ color:'white', fontSize:pxToDp(10), fontWeight:'700',paddingHorizontal:pxToDp(4)}}>{this.GetUnderNumber(data.item.message_history)}</Text>*/}
+                                {/*</View>*/}
+                                {this.ShowRedPointWithNumber(data)}
                             </View>
 
                             {/* 名字 & 簡略消息內容 */}
