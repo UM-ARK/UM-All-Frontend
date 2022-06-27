@@ -149,9 +149,10 @@ class ClubPage extends Component {
                     // 每個項目的間距
                     spacing={pxToDp(15)}
                     renderItem={({item,index}) => {
-                        // console.log(index);
+                        // item是每一項數組的數據
+                        // index是每一項的數組下標
                         return (
-                            <View style={{justifyContent: 'flex-end',}}>
+                            <View style={{flex:1}}>
                                 <ClubCard data={item} index={index}></ClubCard>
                             </View>
                         )
