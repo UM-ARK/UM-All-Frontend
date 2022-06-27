@@ -130,7 +130,7 @@ class Index extends Component {
                     {
                         icon_type:iconTypes.materialCommunityIcons,
                         icon_name:"bank-plus",
-                        fn_name:"Add/Drop",
+                        fn_name:"Add Drop",
                         go_where:"",// a function
                     },
                     {
