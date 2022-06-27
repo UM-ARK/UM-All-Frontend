@@ -13,6 +13,7 @@ import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
 import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
+import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
 
 import SportFacility from './pages/Features/SportFacility';
 
@@ -35,6 +36,7 @@ class Nav extends Component {
 
                 {/* 資訊頁 */}
                 <Stack.Screen name="ClubDetail"     component={ClubDetail} />
+                <Stack.Screen name="EventDetail"     component={EventDetail} />
 
                 {/* 我的頁 */}
                 {/* 設置頁 */}
