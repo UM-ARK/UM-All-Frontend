@@ -12,6 +12,10 @@ import Tabbar from './Tabbar';
 import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
 import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
 
+import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
+
+import SportFacility from './pages/Features/SportFacility';
+
 import TestScreen from '../test/test'
 
 // 創建一個頁面導航棧
@@ -29,11 +33,19 @@ class Nav extends Component {
                 >
                 <Stack.Screen name="Tabbar"         component={Tabbar} options={{headerShown:false}}/>
 
+                {/* 資訊頁 */}
+                <Stack.Screen name="ClubDetail"     component={ClubDetail} />
+
                 {/* 我的頁 */}
+                {/* 設置頁 */}
                 <Stack.Screen name="MeSetting"     component={MeSetting} />
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
 
-                {/* 設置頁 */}
+                {/* 服務頁 */}
+                {/* 體育設施 */}
+                <Stack.Screen name="SportFacility"     component={SportFacility} />
+
+                {/* 測試頁 */}
                 <Stack.Screen name="TestScreen"     component={TestScreen} />
             </Stack.Navigator>
         </NavigationContainer>

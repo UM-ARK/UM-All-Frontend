@@ -74,6 +74,10 @@ npx react-native run-ios
 3. 此指令適用於大多數npm報ERROR的情況。
 4. 如需update包，可以使用 `npm info 包名` 先查看需要版本，再在package.json裡修改版本號，`npm i --legacy-peer-deps`。
 
+2022.06.28更新：
+加入linear-gradient，在android配置了若干項，如IOS編譯出錯則應該前往github頁查看文檔再進行安裝。
+1. 可能的隱患：更改了此文件`android\app\src\main\java\com\umallwhite\MainApplication.java`路徑上存在現版本的項目名`umallwhite`，如果項目更名後發現報錯，需來這裡修改代碼。
+
 ---
 
 &nbsp;
@@ -165,6 +169,7 @@ npx react-native unlink react-native-vector-icons
 1. [骨架屏](https://github.com/danilowoz/react-content-loader)
 1. [進度條、旋轉等待](https://github.com/oblador/react-native-progress)
 1. [鍵盤輸入自動向上頂](https://github.com/APSL/react-native-keyboard-aware-scroll-view)
+1. [有分section的滾屏](https://bolan9999.github.io/react-native-largelist/#/zh-cn/V3/GettingStart)
 1. [排版字體樣式](https://github.com/hectahertz/react-native-typography)
 1. [分頁組件，感覺可用於新聞頁](https://github.com/garrettmac/react-native-pagination)
 1. [阴影效果](https://github.com/hoanglam10499/react-native-drop-shadow)
@@ -193,9 +198,6 @@ npx react-native unlink react-native-vector-icons
 1. [滑塊組件](https://github.com/leecade/react-native-swiper)
 1. [啟動屏](https://github.com/crazycodeboy/react-native-splash-screen)
 1. [首次使用的引導頁](https://github.com/FuYaoDe/react-native-app-intro)
-1. [加載優化 - 毛玻璃狀態到加載完成](https://github.com/mrousavy/react-native-blurhash)
-1. [毛玻璃效果1](https://github.com/Kureev/react-native-blur)
-1. [毛玻璃效果2](https://github.com/voronianski/react-native-effects-view)
 1. [跟手的彈窗](https://github.com/oblador/react-native-lightbox)
 1. [活動tab改分頁](https://openbase.com/js/react-native-tab-view)
 
