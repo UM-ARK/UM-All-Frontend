@@ -28,14 +28,14 @@ class Index extends Component {
                 title:"校园服务",
                 fn:[
                     {
-                        icon_type:iconTypes.ionicons,
-                        icon_name:"bus",
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"bus-stop",
                         fn_name:"校园巴士",
                         go_where:"",// a function
                     },
                     {
-                        icon_type:iconTypes.ionicons,
-                        icon_name:"calendar",
+                        icon_type:iconTypes.materialCommunityIcons,
+                        icon_name:"calendar-today",
                         fn_name:"校曆",
                         go_where:"",// a function
                     },
@@ -59,13 +59,13 @@ class Index extends Component {
                     },
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"monitor",
+                        icon_name:"console-network",
                         fn_name:"電腦預約",
                         go_where:"",// a function
                     },
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"file-cabinet",
+                        icon_name:"door-closed-lock",
                         fn_name:"儲物箱",
                         go_where:"",// a function
                     },
@@ -94,7 +94,7 @@ class Index extends Component {
                 fn:[
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"coffee",
+                        icon_name:"coffee-outline",
                         fn_name:"澳大論壇",
                         go_where:"",// a function
                     },
@@ -111,13 +111,13 @@ class Index extends Component {
                 fn:[
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"school",
+                        icon_name:"alpha-m-circle-outline",
                         fn_name:"Moodle",
                         go_where:"",// a function
                     },
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"book",
+                        icon_name:"database-search",
                         fn_name:"選咩課",
                         go_where:"",// a function
                     },
@@ -160,7 +160,7 @@ class Index extends Component {
                     },
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"currency-usd",
+                        icon_name:"emoticon-cool-outline",
                         fn_name:"獎學金",
                         go_where:"",// a function
                     },
