@@ -186,7 +186,7 @@ class Index extends Component {
                     <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>{title}</Text>
                 </View>
                 <FlatGrid
-                    itemDimension={50}
+                    itemDimension={60}
                     data={fn_list}
                     // staticDimension={300}
                     // fixed
