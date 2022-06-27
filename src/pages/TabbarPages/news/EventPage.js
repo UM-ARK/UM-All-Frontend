@@ -7,8 +7,8 @@ import {pxToDp} from '../../../utils/stylesKits'
 import EventCard from './components/EventCard';
 
 import { SpringScrollView } from "react-native-spring-scrollview";
-import {NormalRefresh} from "react-native-spring-scrollview/NormalRefresh";
-import {WithLastDateHeader} from "react-native-spring-scrollview/Customize";
+// import {NormalRefresh} from "react-native-spring-scrollview/NormalRefresh";
+import {WithLastDateHeader, WithLastDateFooter} from "react-native-spring-scrollview/Customize";
 
 
 const {width:PAGE_WIDTH} = Dimensions.get('window');
@@ -78,28 +78,45 @@ dataList = [
 ]
 
 class EventPage extends Component {
-    _scrollView;
     state = {}
 
+    // 社團活動頁下拉刷新事件
     _onRefresh = () => {
+        // 請求服務器數據
         // fetch(...).then(() => {
-        //     this._scrollView.endRefresh();
-        //     this.setState({...});
+            //     this._scrollView.endRefresh();
+            //     this.setState({...});
+            //     this._scrollView.endRefresh();
         // })
         console.log('觸發刷新');
+        // 停止更新動畫
         this._scrollView.endRefresh();
     };
 
     render() {
         return (
             <SpringScrollView directionalLockEnabled={true} showsHorizontalScrollIndicator={false}
-            ref={(ref) => (this._scrollView = ref)}
-            onRefresh={this._onRefresh}
-            refreshHeader={WithLastDateHeader}
+                ref={(ref) => (this._scrollView = ref)}
+                onRefresh={this._onRefresh}
+                // 組件自帶的下拉刷新動畫組件
+                refreshHeader={WithLastDateHeader}
+                // 組件自帶的上拉加載動畫組件
+                loadingFooter={WithLastDateFooter}
+                // 數據是否加載完成
+                allLoaded={this.state.allLoaded}
+                onLoading={()=>{
+                    // fetch(...).then(()=>{
+                    //     this._scrollView.endLoading();
+                    //     this.setState({allLoaded:true, ...});
+                    // }).catch();
+                    console.log('上拉加載更多');
+                    this.setState({allLoaded:true});
+                    this._scrollView.endLoading();
+                }}
             >
             <View style={{flex:1, flexDirection:'row', backgroundColor:COLOR_DIY.bg_color, justifyContent:'space-around'}}>
                 {/* 左側的列 放置雙數下標的圖片 從0開始 */}
-                <View style={{...s.columnContainer, marginLeft:pxToDp(10)}}>
+                <View style={{marginLeft:pxToDp(10)}}>
                     <EventCard data={dataList[0]} style={s.cardContainer}></EventCard>
                     <EventCard data={dataList[2]} style={s.cardContainer}></EventCard>
                     <EventCard data={dataList[4]} style={s.cardContainer}></EventCard>
@@ -108,7 +125,7 @@ class EventPage extends Component {
                 </View>
 
                 {/* 右側的列 放置單數下標的圖片 */}
-                <View style={{...s.columnContainer, marginRight:pxToDp(10)}}>
+                <View style={{marginRight:pxToDp(10), marginTop:pxToDp(50)}}>
                     {/* <View style={{height:pxToDp(80), width:'100%'}}>
                         <Text>點擊卡片可以看到更詳細的說明哦~</Text>
                     </View> */}
@@ -127,11 +144,6 @@ class EventPage extends Component {
 }
 
 const s = StyleSheet.create({
-    // 列容器的樣式
-    columnContainer:{
-        // flex:1,
-        // alignItems:'center',
-    },
     // 活動卡片
     cardContainer:{
         marginTop:pxToDp(15)
