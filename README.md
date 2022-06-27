@@ -74,6 +74,10 @@ npx react-native run-ios
 3. 此指令適用於大多數npm報ERROR的情況。
 4. 如需update包，可以使用 `npm info 包名` 先查看需要版本，再在package.json裡修改版本號，`npm i --legacy-peer-deps`。
 
+2022.06.28更新：
+加入linear-gradient，在android配置了若干項，如IOS編譯出錯則應該前往github頁查看文檔再進行安裝。
+1. 可能的隱患：更改了此文件`android\app\src\main\java\com\umallwhite\MainApplication.java`路徑上存在現版本的項目名`umallwhite`，如果項目更名後發現報錯，需來這裡修改代碼。
+
 ---
 
 &nbsp;
