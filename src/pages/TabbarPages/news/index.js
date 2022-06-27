@@ -5,12 +5,15 @@ import {COLOR_DIY} from '../../../utils/uiMap'
 import {pxToDp} from '../../../utils/stylesKits'
 import {Header} from 'react-native-elements'; // 4.0 Beta版
 
+import EventPage from './EventPage'
+import ClubPage from './ClubPage'
+
 // 可以嘗試使用粘性標題組件：react-native-sticky-parallax-header
 
 class NewsScreen extends Component {
     render() {
         return (
-            <View style={{backgroundColor:COLOR_DIY.bg_color}}>
+            <View style={{backgroundColor:COLOR_DIY.bg_color, flex:1}}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     centerComponent={{
@@ -22,7 +25,11 @@ class NewsScreen extends Component {
                     }}
                     statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
                 />
-                <Text>新聞頁</Text>
+                {/* 社團活動 */}
+                {/* <EventPage></EventPage> */}
+
+                {/* 社團大廳 */}
+                {/* <ClubPage></ClubPage> */}
             </View>
         );
     }
