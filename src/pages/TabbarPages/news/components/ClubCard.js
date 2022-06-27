@@ -1,4 +1,3 @@
-// https://i.pinimg.com/564x/16/d6/68/16d668bd5bf00285a7e21899eb4b420f.jpg
 import React, {Component} from 'react';
 import {View, Image, Text, ImageBackground, TouchableOpacity, Dimensions} from 'react-native';
 
@@ -6,27 +5,41 @@ import {COLOR_DIY} from '../../../../utils/uiMap'
 import {pxToDp} from '../../../../utils/stylesKits'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
-
-
-const {width:PAGE_WIDTH}    = Dimensions.get('window');
-const COMPONENT_WIDTH       = PAGE_WIDTH*0.25;
+import {NavigationContext} from '@react-navigation/native'
 
 class EventCard extends Component {
+    // NavigationContext組件可以在非基頁面拿到路由信息
+    // this.context === this.props.navigation 等同效果
+    static contextType = NavigationContext;
+
 	state = {
-        dataList : this.props.data,
+        data : this.props.data,
     }
-    
+
 	render() {
         // 解構this.state數據
-        const {dataList} = this.state;
+        const {data} = this.state;
         // 解構dataList數據
-        const {imgUrl, name, tag} = dataList;
+        const {imgUrl, name, tag} = data;
+        // 當前點擊的數組下標，對應響應的組織
+        const {index} = this.props;
         // 解構全局ui設計顏色
         const {white, black, viewShadow, themeColor} = COLOR_DIY;
         return (
-			<TouchableOpacity style={{...this.props.style}} activeOpacity={0.9} >
-                <View style={{width:pxToDp(COMPONENT_WIDTH), height:pxToDp(COMPONENT_WIDTH/0.8), backgroundColor:white, borderRadius:pxToDp(8),
-                    justifyContent:'space-around', alignItems:'center', padding:pxToDp(10), paddingLeft:pxToDp(4), paddingRight:pxToDp(4), 
+			<TouchableOpacity style={{...this.props.style}} activeOpacity={0.8} 
+                onPress={()=>{
+                    // alert(`進入下標為 ${index} 組織詳情頁`)
+                    this.context.navigate('ClubDetail', {
+                        name,
+                        index,
+                    })
+                }
+            }>
+                <View style={{
+                    backgroundColor:white, borderRadius:pxToDp(8),
+                    justifyContent:'space-around', alignItems:'center', 
+                    marginTop:pxToDp(2),
+                    padding:pxToDp(10), paddingLeft:pxToDp(4), paddingRight:pxToDp(4), 
                     ...viewShadow
                 }}>
                     {/* 社團 / 組織 Logo */}
