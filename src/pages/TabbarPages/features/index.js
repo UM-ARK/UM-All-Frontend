@@ -160,7 +160,7 @@ class Index extends Component {
                     },
                     {
                         icon_type:iconTypes.materialCommunityIcons,
-                        icon_name:"emoticon-cool-outline",
+                        icon_name:"dice-multiple",
                         fn_name:"獎學金",
                         go_where:"",// a function
                     },
@@ -182,8 +182,8 @@ class Index extends Component {
                     // 增加陰影
                     ...COLOR_DIY.viewShadow
                 }}>
-                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:pxToDp(12)}}>
-                    <Text style={{fontSize:pxToDp(15), color:COLOR_DIY.black.main, fontWeight:'bold'}}>{title}</Text>
+                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', paddingHorizontal:pxToDp(12), paddingTop:pxToDp(12)}}>
+                    <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.main, fontWeight:'bold'}}>{title}</Text>
                 </View>
                 <FlatGrid
                     itemDimension={60}
