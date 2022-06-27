@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Dimensions, Text, Image } from 'react-native';
+import { View, Dimensions, Text, Image, ImageBackground } from "react-native";
 import Carousel from 'react-native-reanimated-carousel';
 import Animated, {
     Extrapolate,
@@ -11,6 +11,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 import {pxToDp} from '../../../../utils/stylesKits'
 import {COLOR_DIY} from '../../../../utils/uiMap'
+// import LinearGradient  from "react-native-linear-gradient";
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
@@ -54,7 +55,7 @@ function ScrollImage(props) {
                 height= {pxToDp(180)}
                 loop
                 autoPlay={true}
-                autoPlayInterval={1500}
+                autoPlayInterval={3000}
                 onProgressChange={(_, absoluteProgress) => progressValue.value = absoluteProgress }
                 mode="parallax"
                 modeConfig={{
@@ -66,31 +67,38 @@ function ScrollImage(props) {
                     <View style={{ flex: 1 }}>
                         {/* 1.1 圖片展示 開始 */}
                         <TouchableWithoutFeedback style={{
-                            borderRadius: pxToDp(20),
-                            borderWidth:pxToDp(2),
-                            borderColor:COLOR_DIY.black.third,
+                            borderRadius: pxToDp(10),
                             overflow:'hidden',
-                            width:"100%", 
-                            height:"95%",
+                            width:"100%",
+                            height:"100%",
                             // 添加陰影
-                            ...COLOR_DIY.viewShadow, 
+                            ...COLOR_DIY.viewShadow,
                         }} onPress={()=>handleOnClickImage(item,index)}>
-                            <Image 
-                                resizeMode='cover'
-                                style={{ width:"100%", height:"100%"}}
-                                source={{uri:item.uri}}
-                            >
-                            </Image>
+                            <View style={{ width:"100%", height:"100%"}}>
+                                <ImageBackground
+                                    resizeMode='cover'
+                                    style={{ width:"100%", height:"100%",position:'relative'}}
+                                    source={{uri:item.uri}}
+                                >
+                                    <View style={{
+                                        position:'absolute',
+                                        top:'85%',
+                                        height:'15%',
+                                        width:"100%",
+                                        backgroundColor:COLOR_DIY.themeColor,
+                                    }}>
+                                        <Text style={{
+                                            fontSize:pxToDp(14),
+                                            color: COLOR_DIY.white,
+                                            // width:"100%",
+                                            textAlign:"center",
+                                            textAlignVertical:"center",
+                                            height:"100%"
+                                        }}>{item.title}</Text>
+                                    </View >
+                                </ImageBackground >
+                            </View>
                         </TouchableWithoutFeedback>
-                        {/* 1.1 圖片展示 結束 */}
-
-                        {/* 1.2 圖片說明 開始 */}
-                        <Text style={{
-                            fontSize:pxToDp(18), 
-                            color: COLOR_DIY.black.second, 
-                            marginTop:pxToDp(3), marginLeft:pxToDp(25),
-                        }}>{item.title}</Text>
-                        {/* 1.2 圖片說明 結束 */}
                     </View>
                 )}
             />
