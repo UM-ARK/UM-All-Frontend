@@ -1,11 +1,12 @@
 // https://i.pinimg.com/564x/16/d6/68/16d668bd5bf00285a7e21899eb4b420f.jpg
 import React, {Component} from 'react';
-import {View, Image, Text, ImageBackground, TouchableOpacity} from 'react-native';
+import {View, Text, ImageBackground, TouchableOpacity} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap'
 import {pxToDp} from '../../../../utils/stylesKits'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import {NavigationContext} from '@react-navigation/native'
 
 
 // 時間戳轉時間
@@ -21,11 +22,11 @@ function timeTrans(date){
 }
 
 class EventCard extends Component {
-	state = {}
+	// NavigationContext組件可以在非基頁面拿到路由信息
+    // this.context === this.props.navigation 等同效果
+    static contextType = NavigationContext;
 
-	constructor(props){
-		super(props);
-	}
+	state = {}
 
 	render() {
 		// 解構this.state數據
@@ -33,10 +34,17 @@ class EventCard extends Component {
 		// 解構this.props.data數據
 		const {imgUrl, title, timeStamp, eventID} = this.props.data;
 		// 解構全局ui設計顏色
-		const {white, black, viewShadow, } = COLOR_DIY;
+		const {white, black, viewShadow} = COLOR_DIY;
 
 		return (
-			<TouchableOpacity style={{...this.props.style}} activeOpacity={0.9} onPress={()=>alert(`跳轉eventID為 ${eventID} 的活動詳情頁`)}>
+			<TouchableOpacity style={{...this.props.style}} activeOpacity={0.9} 
+				onPress={()=>{
+					// alert(`跳轉eventID為 ${eventID} 的活動詳情頁`)
+					this.context.navigate('EventDetail', {
+						eventID,
+					})
+				}}
+			>
 				<ImageBackground
 					source={{uri:imgUrl}}
 					style={{width:pxToDp(160), height:pxToDp(230), borderRadius:pxToDp(8), overflow:'hidden', ...viewShadow}}
