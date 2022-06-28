@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 
 import ScrollImage from './components/ScrollImage';
-import tw from 'twrnc';
 
-import {Header, Divider} from 'react-native-elements'; // 4.0 Beta版
+import tw from 'twrnc';
+import {Header, Divider} from '@rneui/themed';
 import {PageControl, Card} from 'react-native-ui-lib';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Carousel from 'react-native-reanimated-carousel';

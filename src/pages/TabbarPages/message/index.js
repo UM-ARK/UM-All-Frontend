@@ -6,7 +6,7 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import ChatCard from './ChatCard';
 
-import {Header} from 'react-native-elements'; // 4.0 Beta版
+import {Header} from '@rneui/themed';
 import {SpringScrollView} from 'react-native-spring-scrollview';
 
 // 模擬服務器請求回來的data
@@ -17,7 +17,6 @@ const messages = [
             id: '1',
             name: '溫迪',
             avatar_url: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
-            type: 'none',
         },
         message_history: [
             {
@@ -40,7 +39,6 @@ const messages = [
             name: '澳大電子通告',
             avatar_url:
                 'http://images.jjl.cn/ugc/2018/1129/20181129152330319.png',
-            type: 'official',
         },
         message_history: [
             {
@@ -62,7 +60,6 @@ const messages = [
             name: '鄭裕彤書院(CYTC)',
             avatar_url:
                 'https://cytc.rc.um.edu.mo/wp-content/uploads/2019/09/CYTC-Logo-2014-Purple-1.png',
-            type: 'college',
         },
         message_history: [
             {
