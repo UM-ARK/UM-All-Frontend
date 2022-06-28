@@ -11,6 +11,7 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap'
 import {pxToDp} from '../../../utils/stylesKits'
+import {MeSetting} from './pages/MeSetting'
 
 import {Header} from 'react-native-elements'; // 4.0 Beta版
 
@@ -32,7 +33,7 @@ class MeScreen extends Component {
                 flexDirection:'row',
                 alignItems: 'center',
                 backgroundColor: COLOR_DIY.meScreenColor.card_color,
-            }}>
+            }} onPress={()=>this.props.navigation.navigate('MeSetting')}>
                 {/* TODO: 致敬微信的交互，點擊整塊個人信息欄都會跳轉個人信息設置頁 */}
                 {/* 頭像 */}
                     <Image
@@ -104,54 +105,6 @@ class MeScreen extends Component {
                             }}/>
                 </View>
             </TouchableOpacity>
-            {/* TODO: UMPass Setting 集成進Setting選項 */}
-            {/* UM PASS 設置 */}
-            <TouchableOpacity
-                activeOpacity={0.5}
-                style={{
-                    height: '8%',
-                    width: '100%',
-                    padding: 10,
-                    marginTop:pxToDp(0.8),
-                    backgroundColor: 'white',
-                    justifyContent: 'center',
-                }}>
-                <View
-                    style={{
-                        height: 48,
-                        marginLeft: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                    <Image 
-                        source={require('./icon/umsetting.png')}
-                        style={{
-                            width:pxToDp(25), 
-                            height:pxToDp(25), 
-                            position:'absolute',
-                            left:pxToDp(-5),
-                        }}/>
-                    <Text
-                        style={{
-                            fontSize: 18,
-                            alignItems: 'center',
-                            color: 'black',
-                            position:'absolute',
-                            left:pxToDp(30),
-                        }}>
-                        {'UMPass Settings'}
-                    </Text>
-                    <Image 
-                    source={require('./icon/jiantou.png')}
-                    style={{
-                        width:pxToDp(10), 
-                        height:pxToDp(10), 
-                        position:'absolute',
-                        right:pxToDp(12),
-                    }}/>
-                </View>
-            </TouchableOpacity>
-
             {/* UM Pass 過期提示 */}
             <View style={{
                 alignItems:'center',
@@ -164,7 +117,6 @@ class MeScreen extends Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: COLOR_DIY.black.third,
-                    marginLeft:pxToDp(15)
                 }}>
                 {'Dual Authentication Remains: 14 Days'}
             </Text>
