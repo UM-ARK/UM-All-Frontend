@@ -11,7 +11,6 @@ import EventPage from './EventPage'
 import ClubPage from './ClubPage'
 import { NewsPage } from "./NewsPage";
 import { SpringScrollView } from "react-native-spring-scrollview";
-import ChatList from "../message/ChatList";
 
 class GetPage extends Component{
     constructor(props) {
