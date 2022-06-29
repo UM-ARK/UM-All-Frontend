@@ -1,5 +1,3 @@
-// 使用WebView組件
-// https://juejin.cn/post/6978299338795532302
 import React, {Component} from 'react';
 import {Text, View, TouchableOpacity} from 'react-native';
 
@@ -10,26 +8,29 @@ import {WebView} from 'react-native-webview';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+const bg_color = '#24417e';
+const font_color = '#d5dbe6';
+
 class Map extends Component {
     render() {
         return (
             <View style={{flex: 1}}>
                 <Header
-                    backgroundColor={'#ffffff'}
+                    backgroundColor={bg_color}
                     leftComponent={
                         <TouchableOpacity
                             onPress={() => this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
                                 size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
+                                color={font_color}
                             />
                         </TouchableOpacity>
                     }
                     centerComponent={{
-                        text: '校園地圖',
+                        text: '澳大獎學金',
                         style: {
-                            color: COLOR_DIY.black.main,
+                            color: font_color,
                             fontSize: pxToDp(15),
                         },
                     }}
@@ -40,7 +41,7 @@ class Map extends Component {
                 />
 
                 <WebView
-                    source={{uri: 'https://maps.um.edu.mo/'}}
+                    source={{uri: 'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant'}}
                     startInLoadingState={true}
                 />
             </View>

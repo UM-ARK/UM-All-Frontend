@@ -18,6 +18,7 @@
     "react": "17.0.2",
     "react-native": "0.68.2",
     "react-native-animated-nav-tab-bar": "^3.1.8",
+    "react-native-fast-image": "^8.5.11",
     "react-native-gesture-handler": "^2.4.2",
     "react-native-html-parser": "^0.1.0",
     "react-native-image-zoom-viewer": "^3.0.1",
@@ -36,7 +37,7 @@
     "react-native-tab-view": "^3.1.1",
     "react-native-ui-lib": "^6.17.2",
     "react-native-vector-icons": "^9.1.0",
-    "react-native-webview": "^11.22.2",
+    "react-native-webview": "^11.22.4",
     "styled-components": "^5.3.5",
     "twrnc": "^3.3.3",
     "xmldom": "^0.6.0"

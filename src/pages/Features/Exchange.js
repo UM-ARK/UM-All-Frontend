@@ -1,5 +1,3 @@
-// 使用WebView組件
-// https://juejin.cn/post/6978299338795532302
 import React, {Component} from 'react';
 import {Text, View, TouchableOpacity} from 'react-native';
 
@@ -10,26 +8,30 @@ import {WebView} from 'react-native-webview';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+const bg_color = '#112a54';
+const font_color = '#ffffff';
+
 class Map extends Component {
     render() {
         return (
             <View style={{flex: 1}}>
                 <Header
-                    backgroundColor={'#ffffff'}
+                    backgroundColor={bg_color}
                     leftComponent={
                         <TouchableOpacity
+                            style={{flexDirection:'column',justifyContent:'center', alignItems:'center'}}
                             onPress={() => this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
                                 size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
+                                color={font_color}
                             />
                         </TouchableOpacity>
                     }
                     centerComponent={{
-                        text: '校園地圖',
+                        text: '澳大交流項目',
                         style: {
-                            color: COLOR_DIY.black.main,
+                            color: font_color,
                             fontSize: pxToDp(15),
                         },
                     }}
@@ -40,7 +42,7 @@ class Map extends Component {
                 />
 
                 <WebView
-                    source={{uri: 'https://maps.um.edu.mo/'}}
+                    source={{uri: 'https://gao.um.edu.mo/mobility/?lang=zh-hant'}}
                     startInLoadingState={true}
                 />
             </View>

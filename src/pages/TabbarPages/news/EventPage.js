@@ -95,7 +95,14 @@ class EventPage extends Component {
         this.state = {
             leftDataList,
             rightDataList,
+            touchDisable:false,
         };
+    }
+
+    componentWillUnmount() {
+        // 如果存在this.timer，则使用clearTimeout清空。
+        // 如果你使用多个timer，那么用多个变量，或者用个数组来保存引用，然后逐个clear
+        this.timer && clearTimeout(this.timer);
     }
 
     // 社團活動頁下拉刷新事件
@@ -115,6 +122,18 @@ class EventPage extends Component {
         return (
             <SpringScrollView
                 directionalLockEnabled={true}
+                onScrollBeginDrag={()=>{
+                    // 清除上一個延時器
+                    this.timer && clearTimeout(this.timer);
+                    this.setState({ touchDisable:true });
+                }}
+                onScrollEndDrag={()=>{
+                    this.setState({ touchDisable:true });
+                    // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
+                    this.timer = setTimeout(() => {
+                        this.setState({ touchDisable:false });
+                    }, 200);
+                }}
                 showsHorizontalScrollIndicator={false}
                 ref={ref => (this._scrollView = ref)}
                 onRefresh={this._onRefresh}
@@ -148,10 +167,13 @@ class EventPage extends Component {
                                 return (
                                     <EventCard
                                         data={item}
-                                        style={s.cardContainer}></EventCard>
+                                        style={s.cardContainer}
+                                        touchDisable={this.state.touchDisable}
+                                    ></EventCard>
                                 );
                             }}
                             keyExtractor={(_, index) => index}
+                            scrollEnabled={false}
                         />
                     </View>
 
@@ -170,10 +192,13 @@ class EventPage extends Component {
                                 return (
                                     <EventCard
                                         data={item}
-                                        style={s.cardContainer}></EventCard>
+                                        style={s.cardContainer}
+                                        touchDisable={this.state.touchDisable}
+                                    ></EventCard>
                                 );
                             }}
                             keyExtractor={(_, index) => index}
+                            scrollEnabled={false}
                         />
                     </View>
                 </View>

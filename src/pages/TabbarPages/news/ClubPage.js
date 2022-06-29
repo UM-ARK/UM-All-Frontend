@@ -134,11 +134,33 @@ const dataList = [
 ];
 
 class ClubPage extends Component {
-    state = {};
+    state = {
+        touchDisable:false,
+    };
+
+    componentWillUnmount() {
+        // 如果存在this.timer，则使用clearTimeout清空。
+        // 如果你使用多个timer，那么用多个变量，或者用个数组来保存引用，然后逐个clear
+        this.timer && clearTimeout(this.timer);
+    }
 
     render() {
         return (
-            <SpringScrollView>
+            <SpringScrollView
+            onScrollBeginDrag={()=>{
+                // 清除上一個延時器
+                this.timer && clearTimeout(this.timer);
+                this.setState({ touchDisable:true });
+            }}
+            onScrollEndDrag={()=>{
+                this.setState({ touchDisable:true });
+                // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
+                this.timer = setTimeout(() => {
+                    this.setState({ touchDisable:false });
+                }, 200);
+            }}
+            directionalLockEnabled={true}
+            >
                 <View style={{flex: 1}}>
                     <FlatGrid
                         style={{flex: 1, marginTop: pxToDp(5)}}
@@ -154,7 +176,9 @@ class ClubPage extends Component {
                                 <View style={{flex: 1}}>
                                     <ClubCard
                                         data={item}
-                                        index={index}></ClubCard>
+                                        index={index}
+                                        touchDisable={this.state.touchDisable}
+                                        ></ClubCard>
                                 </View>
                             );
                         }}

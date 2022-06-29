@@ -1,13 +1,13 @@
 // https://i.pinimg.com/564x/16/d6/68/16d668bd5bf00285a7e21899eb4b420f.jpg
 import React, {Component} from 'react';
-import {View, Text, ImageBackground, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap'
 import {pxToDp} from '../../../../utils/stylesKits'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import {NavigationContext} from '@react-navigation/native'
-
+import FastImage from 'react-native-fast-image'
 
 // 時間戳轉時間
 function timeTrans(date){
@@ -44,11 +44,12 @@ class EventCard extends Component {
 						eventID,
 					})
 				}}
-				onLongPress={()=>alert('長按！！')}
+				disabled={this.props.touchDisable}
 			>
-				<ImageBackground
+				<FastImage
 					source={{uri:imgUrl}}
 					style={{width:pxToDp(160), height:pxToDp(230), borderRadius:pxToDp(8), overflow:'hidden', ...viewShadow}}
+					resizeMode={FastImage.resizeMode.cover}
 				>
 					{/* 標題描述 */}
 					<View style={{backgroundColor:white, position:'absolute', bottom:0, width:'100%', 
@@ -66,7 +67,7 @@ class EventCard extends Component {
 							<Ionicons name="chevron-forward-outline" color={black.third} size={pxToDp(20)}></Ionicons>
 						</View>
 					</View>
-				</ImageBackground>
+				</FastImage>
 			</TouchableOpacity>
 		);
 	}

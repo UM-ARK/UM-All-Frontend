@@ -12,6 +12,7 @@ import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import LinearGradient from 'react-native-linear-gradient';
+import FastImage from 'react-native-fast-image'
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
@@ -81,8 +82,8 @@ function ScrollImage(props) {
                             }}
                             onPress={() => handleOnClickImage(item, index)}>
                             <View style={{width: '100%', height: '100%'}}>
-                                <ImageBackground
-                                    resizeMode="cover"
+                                <FastImage
+                                    resizeMode={FastImage.resizeMode.cover}
                                     style={{
                                         width: '100%',
                                         height: '100%',
@@ -129,7 +130,7 @@ function ScrollImage(props) {
                                             height:"100%"
                                         }}>{item.title}</Text>
                                     </View > */}
-                                </ImageBackground>
+                                </FastImage>
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
