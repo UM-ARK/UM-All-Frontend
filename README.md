@@ -173,7 +173,6 @@ npx react-native unlink react-native-vector-icons
 1. [排版字體樣式](https://github.com/hectahertz/react-native-typography)
 1. [分頁組件，感覺可用於新聞頁](https://github.com/garrettmac/react-native-pagination)
 1. [阴影效果](https://github.com/hoanglam10499/react-native-drop-shadow)
-1. [网格布局](https://github.com/saleel/react-native-super-grid)
 1. [初次應用介紹1](https://github.com/jfilter/react-native-onboarding-swiper)
 1. [初次應用介紹2](https://github.com/xcarpentier/rn-tourguide)
 1. [初次應用介紹3](https://github.com/mohebifar/react-native-copilot)

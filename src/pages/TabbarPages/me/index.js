@@ -13,7 +13,7 @@ import {COLOR_DIY} from '../../../utils/uiMap'
 import {pxToDp} from '../../../utils/stylesKits'
 import {MeSetting} from './pages/MeSetting'
 
-import {Header} from 'react-native-elements'; // 4.0 Beta版
+import {Header} from '@rneui/themed';
 
 //个人信息页
 class MeScreen extends Component {

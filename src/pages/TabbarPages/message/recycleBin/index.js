@@ -6,7 +6,7 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import ChatList from './ChatList';
 
-import {Header} from 'react-native-elements'; // 4.0 Beta版
+import {Header} from '@rneui/themed';
 import {SpringScrollView} from 'react-native-spring-scrollview';
 
 // 模擬服務器請求回來的data

@@ -15,7 +15,7 @@ import { pxToDp } from '../src/utils/stylesKits';
 
 // 文檔：https://github.com/dohooo/react-native-reanimated-carousel/
 import Carousel from 'react-native-reanimated-carousel';
-import {Header} from 'react-native-elements'; // 4.0 Beta版
+import {Header} from '@rneui/themed';
 import {NavigationContext} from '@react-navigation/native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
