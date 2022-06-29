@@ -187,7 +187,8 @@ class EventPage extends Component {
 const s = StyleSheet.create({
     // 活動卡片間距
     cardContainer: {
-        marginTop: pxToDp(15),
+        marginVertical: pxToDp(8),
+        marginHorizontal: pxToDp(10)
     },
 });
 
