@@ -9,25 +9,25 @@ import { WebView } from 'react-native-webview';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
-class SportFacility extends Component{
+class UMWhole extends Component{
     render() {
         return (
             <View style={{flex:1}}>
                 <Header
-                    backgroundColor={COLOR_DIY.bg_color}
+                    backgroundColor={'#1f5288'}
                     leftComponent={
                         <TouchableOpacity onPress={()=>this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
                                 size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
+                                color={COLOR_DIY.white}
                             />
                         </TouchableOpacity>
                     }
                     centerComponent={{
-                        text: 'UM 體育設施',
+                        text: '澳大選咩課',
                         style: {
-                            color: COLOR_DIY.black.main,
+                            color: COLOR_DIY.white,
                             fontSize: pxToDp(15),
                         },
                     }}
@@ -35,7 +35,7 @@ class SportFacility extends Component{
                 />
 
                 <WebView 
-                    source={{ uri:'https://facility.osa.um.edu.mo/sports-facilities/?lang=zh-hant' }} 
+                    source={{ uri:'https://www.umeh.top/' }} 
                     startInLoadingState={true}
                 />
             </View>
@@ -43,4 +43,4 @@ class SportFacility extends Component{
     }
 }
 
-export default SportFacility;
+export default UMWhole;

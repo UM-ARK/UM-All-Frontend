@@ -1,14 +1,9 @@
 import React, {Component} from 'react';
 import {
     ScrollView,
-    Button,
     View,
     Text,
-    Image,
-    ImageBackground,
-    SafeAreaView,
     Dimensions,
-    StyleSheet,
     TouchableOpacity,
 } from 'react-native';
 
@@ -29,6 +24,7 @@ let carouselProgress = 0;
 
 export default class HomeScreen extends Component {
     state = {
+        // 首頁輪播圖數據
         carouselImagesArr: [
             {
                 title: '三月福利',
@@ -55,33 +51,38 @@ export default class HomeScreen extends Component {
                 uri: 'https://www.cpsumsu.org/_announcement/Game_Design_Workshop2022/img/poster.jpg',
             },
         ],
+
+        // 快捷功能入口
         functionArray:[
             {
                 icon_name:'calendar',
-                onPress:"",// a function
-                function_name:'校曆'
+                function_name:'校曆',
+                // 路由跳轉的名字，要在Nav.js先聲明
+                routeName:'',
             },
             {
                 icon_name:'compass',
-                function_name:'澳大論壇'
+                function_name:'澳大論壇',
+                routeName:'UMWhole',
             },
             {
                 icon_name:'file-tray-full',
-                function_name:'選咩課'
+                function_name:'選咩課',
+                routeName:'What2Reg',
             },
             {
                 icon_name:'book',
-                function_name:'Moodle'
+                function_name:'Moodle',
+                routeName:'',
             },
             {
                 icon_name:'bus',
-                function_name:'校園巴士'
+                function_name:'校園巴士',
+                routeName:'',
             },
-            // {
-            //     icon_name: 'thermometer',
-            //     function_name: '防疫要求'
-            // }
-      ],
+        ],
+
+        // 我的追蹤 資訊
         activityInfo:[
             {
                 title:"MATH1003(002)",
@@ -160,6 +161,8 @@ export default class HomeScreen extends Component {
                 ]
             }
         ],
+
+        // 新聞卡片 資訊
         newsArr:[
             {
                 en:"Temporarily Closure of the UM Campus",
@@ -171,15 +174,15 @@ export default class HomeScreen extends Component {
             },
         ],
     };
-    constructor(props){
-        super(props);
-    }
-    GetFunctionIcon(icon_name,function_name){
+
+    // 渲染快捷功能卡片的圖標
+    GetFunctionIcon=(icon_name,function_name,route_name)=>{
         return(
-          <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
-              <Ionicons name={icon_name} size={pxToDp(35)} color={COLOR_DIY.themeColor}></Ionicons>
-              <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{function_name}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={{justifyContent:'center', alignItems:'center', flexDirection:'column'}}
+            onPress={()=>this.props.navigation.navigate(route_name)}>
+                <Ionicons name={icon_name} size={pxToDp(35)} color={COLOR_DIY.themeColor}></Ionicons>
+                <Text style={{fontSize:pxToDp(12), color:COLOR_DIY.black.second}}>{function_name}</Text>
+            </TouchableOpacity>
         )
     }
 
@@ -291,9 +294,8 @@ export default class HomeScreen extends Component {
                         justifyContent:'space-between', alignItems:'flex-start', flexDirection:'row',
                         margin:pxToDp(10), marginTop:pxToDp(0), }}>
                         {/* 服務圖標與文字 */}
-                        {this.state.functionArray.map(
-                          (fn)=>
-                            this.GetFunctionIcon(fn.icon_name,fn.function_name)
+                        {this.state.functionArray.map( (fn)=>
+                            this.GetFunctionIcon(fn.icon_name,fn.function_name,fn.routeName)
                         )}
 
                     </View>

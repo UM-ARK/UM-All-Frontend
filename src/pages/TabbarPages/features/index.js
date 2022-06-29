@@ -11,6 +11,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {FlatGrid} from 'react-native-super-grid';
 
+// 定義組件可使用的icon分類，注意大小寫
 const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
@@ -38,7 +39,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map',
                         fn_name: '校園地圖',
-                        go_where: '', // a function
+                        go_where: 'Map', // a function
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -91,7 +92,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'coffee-outline',
                         fn_name: '澳大論壇',
-                        go_where: '', // a function
+                        go_where: 'UMWhole', // a function
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -114,7 +115,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'database-search',
                         fn_name: '選咩課',
-                        go_where: '', // a function
+                        go_where: 'What2Reg', // a function
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -151,12 +152,171 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dolphin',
                         fn_name: '交流',
-                        go_where: '', // a function
+                        go_where: 'Exchange', // a function
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dice-multiple',
                         fn_name: '獎學金',
+                        go_where: 'Scholarship', // a function
+                    },
+                ],
+            },
+            {
+                title: '學院主頁',
+                fn: [
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '人文',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '工商管理',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '教育',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '健康科學',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '法學',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '科技',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '社會科學',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '人社研',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '物材研',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '中藥研',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '協創研',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '微電研',
+                        go_where: '', // a function
+                    },
+                ],
+            },
+            {
+                title: '書院主頁',
+                fn: [
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'CKPC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'CYTC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'CKLC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'CKYC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'HFPJC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'LCWC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'MLC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'MCMC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'SPC',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: 'SHEAC',
+                        go_where: '', // a function
+                    },
+                ],
+            },
+            {
+                title: '部門主頁',
+                fn: [
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '官網',
+                        go_where: '', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'face-mask',
+                        fn_name: '學務部',
                         go_where: '', // a function
                     },
                 ],
@@ -199,6 +359,7 @@ class Index extends Component {
                     data={fn_list}
                     spacing={pxToDp(10)}
                     renderItem={({item}) => {
+                        let {go_where} = item;
                         // 索引出相關服務的icon
                         let icon = null;
                         if (item.icon_type == 'ionicons') {
@@ -226,7 +387,10 @@ class Index extends Component {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     flexDirection: 'column',
-                                }}>
+                                }}
+                                onPress={()=>this.props.navigation.navigate(go_where)}
+                                // 如果所有Webview都不需要定制，也可以新建專門的Webview.js，傳遞相關參數進行跳轉
+                                >
                                 {icon}
                                 <Text
                                     style={{
@@ -262,10 +426,6 @@ class Index extends Component {
                             barStyle: 'dark-content',
                         }}
                     />
-
-                    {/* 1.0 吸頂分類標籤 開始 */}
-                    {/* TODO: 吸頂分類選擇 */}
-                    {/* 1.0 吸頂分類標籤 結束 */}
 
                     {this.state.functionArr.map(fn_card => {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);

@@ -16,6 +16,11 @@ import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
 
 import SportFacility from './pages/Features/SportFacility';
+import Map from './pages/Features/Map';
+import UMWhole from './pages/Features/UMWhole';
+import What2Reg from './pages/Features/What2Reg';
+import Scholarship from './pages/Features/Scholarship';
+import Exchange from './pages/Features/Exchange';
 
 import TestScreen from '../test/test'
 
@@ -46,6 +51,16 @@ class Nav extends Component {
                 {/* 服務頁 */}
                 {/* 體育設施 */}
                 <Stack.Screen name="SportFacility"     component={SportFacility} />
+                {/* 校園地圖 */}
+                <Stack.Screen name="Map"     component={Map} />
+                {/* 澳大獎學金 */}
+                <Stack.Screen name="Scholarship"     component={Scholarship} />
+                {/* 澳大交流 */}
+                <Stack.Screen name="Exchange"     component={Exchange} />
+                {/* 澳大論壇 */}
+                <Stack.Screen name="UMWhole"     component={UMWhole} />
+                {/* 澳大選咩課 */}
+                <Stack.Screen name="What2Reg"     component={What2Reg} />
 
                 {/* 測試頁 */}
                 <Stack.Screen name="TestScreen"     component={TestScreen} />
