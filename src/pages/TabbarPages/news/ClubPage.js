@@ -14,7 +14,7 @@ import {pxToDp} from '../../../utils/stylesKits';
 import ClubCard from './components/ClubCard';
 
 import {FlatGrid} from 'react-native-super-grid';
-import { SpringScrollView } from "react-native-spring-scrollview";
+import {SpringScrollView} from 'react-native-spring-scrollview';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
@@ -133,7 +133,6 @@ const dataList = [
     },
 ];
 
-
 class ClubPage extends Component {
     state = {};
 
@@ -142,26 +141,31 @@ class ClubPage extends Component {
             <SpringScrollView>
                 <View style={{flex: 1}}>
                     <FlatGrid
-                        style={{flex:1, marginTop:pxToDp(5)}}
+                        style={{flex: 1, marginTop: pxToDp(5)}}
                         // 每个项目的最小宽度或高度（像素）
                         itemDimension={COMPONENT_WIDTH}
                         data={dataList}
                         // 每個項目的間距
                         spacing={pxToDp(15)}
-                        renderItem={({item,index}) => {
+                        renderItem={({item, index}) => {
                             // item是每一項數組的數據
                             // index是每一項的數組下標
                             return (
-                                <View style={{flex:1}}>
-                                    <ClubCard data={item} index={index}></ClubCard>
+                                <View style={{flex: 1}}>
+                                    <ClubCard
+                                        data={item}
+                                        index={index}></ClubCard>
                                 </View>
-                            )
+                            );
                         }}
+                        // 所有項目末尾渲染，防Tabbar遮擋
+                        ListFooterComponent={() => (
+                            <View style={{marginTop: pxToDp(50)}}></View>
+                        )}
                         scrollEnabled={false}
                     />
                 </View>
             </SpringScrollView>
-
         );
     }
 }

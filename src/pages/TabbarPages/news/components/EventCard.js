@@ -44,6 +44,7 @@ class EventCard extends Component {
 						eventID,
 					})
 				}}
+				onLongPress={()=>alert('長按！！')}
 			>
 				<ImageBackground
 					source={{uri:imgUrl}}

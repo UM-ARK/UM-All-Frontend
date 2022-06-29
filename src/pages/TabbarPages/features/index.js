@@ -4,7 +4,7 @@ import {ScrollView, Text, View, TouchableOpacity} from 'react-native';
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 
-import {Header} from 'react-native-elements'; // 4.0 Beta版
+import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

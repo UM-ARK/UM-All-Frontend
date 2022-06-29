@@ -168,7 +168,7 @@ function GetNewsCard(props) {
 
 }
 
-export class NewsPage extends Component {
+export default class NewsPage extends Component {
     constructor(props) {
         super(props);
         this.state = {

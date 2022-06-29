@@ -94,7 +94,7 @@ class ChatCard extends Component {
                                 flexDirection: 'row',
                                 width: '75%',
                             }}>
-                            {/* 1.1 頭像 & 掛件 */}
+                            {/* 1.1 頭像 */}
                             <View
                                 style={{
                                     width: pxToDp(42),
@@ -106,16 +106,6 @@ class ChatCard extends Component {
                                     }}
                                     style={styles.avatarStyle}
                                 />
-                                {/* 頭像掛件 / 組織類型標籤 */}
-                                {/* TODO: 按用戶組展示不同的標籤 */}
-                                {/* 認證標籤 */}
-                                <View style={styles.rightBottomIconPosition}>
-                                    <SvgUri
-                                        svgXmlData={certificate}
-                                        width={AVATOR_RIGHT_ICON_SIZE}
-                                        height={AVATOR_RIGHT_ICON_SIZE}
-                                    />
-                                </View>
                                 {/* 未讀信息紅點標籤 */}
                                 {this.RenderRedPointWithNumber()}
                             </View>
@@ -198,8 +188,8 @@ const styles = StyleSheet.create({
     avatarStyle: {
         resizeMode: 'cover',
         borderRadius: pxToDp(50),
-        width: pxToDp(40),
-        height: pxToDp(40),
+        width: pxToDp(42),
+        height: pxToDp(42),
     },
     // 右下角認證標籤
     rightBottomIconPosition: {
@@ -207,13 +197,13 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: -pxToDp(1),
     },
-    // 右上角消息提示
+    // 右上角紅點消息提示位置
     rightTopIconPosition: {
         position: 'absolute',
         right: 0,
         top: 0,
     },
-    // 未讀信息標籤樣式
+    // 未讀信息紅點標籤樣式
     unread: {
         // minWidth:pxToDp(15),
         height: pxToDp(15),
