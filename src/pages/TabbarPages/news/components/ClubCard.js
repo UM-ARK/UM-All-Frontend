@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
-import {View, Image, Text, ImageBackground, TouchableOpacity, Dimensions} from 'react-native';
+import {View, Image, Text, ImageBackground, Dimensions, TouchableOpacity} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap'
 import {pxToDp} from '../../../../utils/stylesKits'
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import {NavigationContext} from '@react-navigation/native'
+import FastImage from 'react-native-fast-image'
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -33,18 +34,19 @@ class EventCard extends Component {
                         name,
                         index,
                     })
-                }
-            }>
+                }}
+                disabled={this.props.touchDisable}
+            >
                 <View style={{
                     backgroundColor:white, borderRadius:pxToDp(8),
                     justifyContent:'space-around', alignItems:'center', 
                     marginTop:pxToDp(2),
-                    padding:pxToDp(10), paddingLeft:pxToDp(4), paddingRight:pxToDp(4), 
+                    padding:pxToDp(10), paddingHorizontal:pxToDp(4), 
                     ...viewShadow
                 }}>
                     {/* 社團 / 組織 Logo */}
                     <View>
-                        <Image source={{uri:imgUrl}} style={{width:pxToDp(70),height:pxToDp(70), borderRadius:50}} resizeMode={'contain'} />
+                        <FastImage source={{uri:imgUrl}} style={{width:pxToDp(70),height:pxToDp(70), borderRadius:50}} resizeMode={FastImage.resizeMode.contain} />
                     </View>
 
                     {/* 組織名 */}
