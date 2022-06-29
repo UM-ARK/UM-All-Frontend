@@ -11,6 +11,9 @@ import {COLOR_DIY} from './utils/uiMap';
 import Tabbar from './Tabbar';
 import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
 import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
+import AboutUs from './pages/TabbarPages/me/pages/AboutUs'
+import MyFollow from './pages/TabbarPages/me/pages/MyFollow'
+import Reminder from './pages/TabbarPages/me/pages/Reminder'
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
@@ -44,6 +47,9 @@ class Nav extends Component {
                 <Stack.Screen name="EventDetail"     component={EventDetail} />
 
                 {/* 我的頁 */}
+                <Stack.Screen name="AboutUs"        component={AboutUs}/>
+                <Stack.Screen name="MyFollow"        component={MyFollow}/>
+                <Stack.Screen name="Reminder"        component={Reminder}/>
                 {/* 設置頁 */}
                 <Stack.Screen name="MeSetting"     component={MeSetting} />
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
