@@ -63,8 +63,8 @@ class MeSetting extends Component {
                     onPress={() => alert('头像更换')}>
                     <View
                         style={{
-                            height: 48,
-                            marginLeft: 10,
+                            height: pxToDp(48),
+                            marginLeft: pxToDp(10),
                             flexDirection: 'row',
                             alignItems: 'center',
                         }}>
