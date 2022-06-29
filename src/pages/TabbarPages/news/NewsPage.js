@@ -22,13 +22,13 @@ class NewsCard extends Component {
         let bg=null
         if (props.news.common.hasOwnProperty("imageUrls")) {
             pic = (
-                <FastImage
+                <Image
                     placeholderStyle={{
                         backgroundColor: COLOR_DIY.themeColor,
                     }}
                     PlaceholderContent={
                         <View>
-                            <ActivityIndicator color={COLOR_DIY.themeColor} />
+                            <ActivityIndicator color='#fff' />
                             <Text style={tw.style("text-white")}>Loading...</Text>
                         </View>
                     }
@@ -46,7 +46,7 @@ class NewsCard extends Component {
                     <TouchableWithoutFeedback onPress={this.goToDetails} >
                         <View style={[tw.style("my-1","mx-3"),{
                             // width:'100%',
-                            height:pxToDp(250),
+                            height:pxToDp(200),
                             // backgroundColor: COLOR_DIY.bg_color,
                             borderRadius: pxToDp(10),
                             ...COLOR_DIY.viewShadow,
@@ -67,24 +67,68 @@ class NewsCard extends Component {
                                             style={{ width:"100%", height:"100%",position:'relative'}}
                                             source={require('./img/bg.png')}
                                         >
-                                            <View style={{
-                                                position:'absolute',
-                                                top:"60%",
+                                            <FastImage
+                                                resizeMode='cover'
+                                                style={{ width:"100%", height:"100%",position:'relative'}}
+                                                source={require('./img/bg.png')}
+                                            >
+                                                <View style={{
+                                                    position:'absolute',
+                                                    top:pxToDp(10),
+                                                    left:pxToDp(10)
 
-                                            }
-                                            }>
-                                                <Text style={{color:"#fff",...COLOR_DIY.viewShadow}}>
-                                                    {props.news.details[0].title}
-                                                </Text>
-                                            </View>
+                                                }}>
+                                                    <Text style={{
+                                                        color:'#fff',
+                                                        fontSize:16,
+                                                        fontWeight:"bold",
+                                                        ...COLOR_DIY.viewShadow
+                                                    }}>
+                                                        Top Story @ UM
+                                                    </Text>
+                                                </View>
+                                                <View style={{
+                                                    position:'absolute',
+                                                    top:'30%',
+                                                    left:pxToDp(10)
+
+                                                }
+                                                }>
+                                                    <Text style={{color:"#fff",
+                                                        fontWeight:'bold',
+                                                        fontSize:18,
+                                                        marginVertical:pxToDp(3),
+                                                        ...COLOR_DIY.viewShadow}}>
+                                                        {props.news.details[0].title}
+                                                    </Text>
+                                                    <Text style={{color:"#fff",
+                                                        fontWeight:'bold',
+                                                        fontSize:14,
+                                                        ...COLOR_DIY.viewShadow}}>
+                                                        {props.news.details[1].title}
+                                                    </Text>
+                                                </View>
+                                            </FastImage >
                                         </FastImage >
                                     </View>
                                 </FastImage >
 
                             </View>
                         </View>
-
                     </TouchableWithoutFeedback>
+                    <View style={[tw.style('mx-3','flex','flex-row','my-1'),{
+                        paddingHorizontal:pxToDp(10),
+
+                    }]}>
+                        <Text style={{
+                            color:COLOR_DIY.themeColor,
+                            fontSize:15,
+                            fontWeight:"bold",
+                            ...COLOR_DIY.viewShadow
+                        }}>
+                            News @ UM
+                        </Text>
+                    </View>
                 </SafeAreaView>
             )
         }
@@ -119,22 +163,24 @@ class NewsCard extends Component {
                                 style={[tw.style( "pl-3", "flex", "flex-row", "justify-between", "items-center", "mx-3"), {
                                     backgroundColor: COLOR_DIY.bg_color,
                                     borderRadius: pxToDp(10),
-                                    ...COLOR_DIY.viewShadow,
+                                    // ...COLOR_DIY.viewShadow,
                                     marginVertical:pxToDp(3)
                                 }]}>
                                 <View style={{
                                     width: "70%",
+                                    position:'relative'
                                     // marginRight: 8,
                                 }}>
-                                    <Text style={{ color: COLOR_DIY.black.main, fontSize: pxToDp(14) }}>
+                                    <Text style={{ color: COLOR_DIY.black.main, fontSize: pxToDp(15), fontWeight:"bold" }}>
                                         {this.state.news.details[0].title}
                                     </Text>
-                                    <Text style={{ color: COLOR_DIY.black.second, fontSize: pxToDp(13) }}>
+                                    <Text style={{ color: COLOR_DIY.black.second, fontSize: pxToDp(14) }}>
                                         {this.state.news.details[1].title}
                                     </Text>
                                     <Text style={{
                                         color: COLOR_DIY.black.third,
                                         fontSize: pxToDp(10),
+                                        marginTop:pxToDp(10),
                                     }}>{this.state.date.getFullYear() + "/" + this.state.date.getMonth() + "/" + this.state.date.getDate()}</Text>
                                 </View>
                                 <View style={{
