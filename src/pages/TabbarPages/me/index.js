@@ -12,6 +12,11 @@ import {
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import {MeSetting} from './pages/MeSetting';
+import {AppSetting} from './pages/AppSetting'
+import {AboutUs} from './pages/AboutUs'
+import {MyFollow} from './pages/MyFollow'
+import {Reminder} from './pages/Reminder'
+
 
 import {Header} from '@rneui/themed';
 
@@ -159,13 +164,13 @@ class MeScreen extends Component {
                     <TouchableOpacity
                         activeOpacity={0.5}
                         style={{
-                            height: '8%',
+                            height: '11%',
                             width: '100%',
                             padding: 10,
                             marginTop: '5%',
                             backgroundColor: 'white',
                             justifyContent: 'center',
-                        }}>
+                        }} onPress={()=>this.props.navigation.navigate('MyFollow')}>
                         <View>
                             <View
                                 style={{
@@ -191,7 +196,7 @@ class MeScreen extends Component {
                                         position: 'absolute',
                                         left: pxToDp(30),
                                     }}>
-                                    {'Favorties'}
+                                    {'我的追蹤'}
                                 </Text>
                                 <Image
                                     source={require('./icon/jiantou.png')}
@@ -205,69 +210,17 @@ class MeScreen extends Component {
                             </View>
                         </View>
                     </TouchableOpacity>
-
-                    {/* Your Reminder */}
+                    {/* 提醒事項 */}
                     <TouchableOpacity
                         activeOpacity={0.5}
                         style={{
-                            height: '8%',
+                            height: '11%',
                             width: '100%',
                             padding: 10,
                             backgroundColor: 'white',
                             justifyContent: 'center',
                             marginTop: pxToDp(0.8),
-                        }}>
-                        <View>
-                            <View
-                                style={{
-                                    height: 48,
-                                    marginLeft: 10,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                }}>
-                                <Image
-                                    source={require('./icon/notification.png')}
-                                    style={{
-                                        width: pxToDp(25),
-                                        height: pxToDp(25),
-                                        position: 'absolute',
-                                        left: pxToDp(-5),
-                                    }}
-                                />
-                                <Text
-                                    style={{
-                                        fontSize: 18,
-                                        alignItems: 'center',
-                                        color: 'black',
-                                        position: 'absolute',
-                                        left: pxToDp(30),
-                                    }}>
-                                    {'Notifications'}
-                                </Text>
-                                <Image
-                                    source={require('./icon/jiantou.png')}
-                                    style={{
-                                        width: pxToDp(10),
-                                        height: pxToDp(10),
-                                        position: 'absolute',
-                                        right: pxToDp(12),
-                                    }}
-                                />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* QR Code */}
-                    <TouchableOpacity
-                        activeOpacity={0.5}
-                        style={{
-                            height: '8%',
-                            width: '100%',
-                            padding: 10,
-                            backgroundColor: 'white',
-                            justifyContent: 'center',
-                            marginTop: pxToDp(0.8),
-                        }}>
+                        }} onPress={()=>this.props.navigation.navigate('Reminder')}>
                         <View>
                             <View
                                 style={{
@@ -293,7 +246,7 @@ class MeScreen extends Component {
                                         position: 'absolute',
                                         left: pxToDp(30),
                                     }}>
-                                    {'Reminders'}
+                                    {'提醒事項'}
                                 </Text>
                                 <Image
                                     source={require('./icon/jiantou.png')}
@@ -312,13 +265,13 @@ class MeScreen extends Component {
                     <TouchableOpacity
                         activeOpacity={0.5}
                         style={{
-                            height: '8%',
+                            height: '11%',
                             width: '100%',
                             padding: 10,
-                            marginTop: '4%',
+                            marginTop: pxToDp(0.8),
                             backgroundColor: 'white',
                             justifyContent: 'center',
-                        }}>
+                        }} onPress={()=>this.props.navigation.navigate('AppSetting')}>
                         <View
                             style={{
                                 height: 48,
@@ -361,13 +314,13 @@ class MeScreen extends Component {
                     <TouchableOpacity
                         activeOpacity={0.5}
                         style={{
-                            height: '8%',
+                            height: '11%',
                             width: '100%',
                             padding: 10,
                             backgroundColor: 'white',
                             justifyContent: 'center',
-                            marginTop: pxToDp(0.8),
-                        }}>
+                            marginTop: '8%',
+                        }} onPress={()=>this.props.navigation.navigate('AboutUs')}>
                         <View>
                             <View
                                 style={{
