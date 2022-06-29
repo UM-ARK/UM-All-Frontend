@@ -97,9 +97,9 @@ class EventPage extends Component {
 		return (
 			<SpringScrollView directionalLockEnabled={true} showsHorizontalScrollIndicator={false}
 							  ref={(ref) => (this._scrollView = ref)}
-							  onRefresh={this._onRefresh}
-				// 組件自帶的下拉刷新動畫組件
-							  refreshHeader={WithLastDateHeader}
+				// 			  onRefresh={this._onRefresh}
+				// // 組件自帶的下拉刷新動畫組件
+				// 			  refreshHeader={WithLastDateHeader}
 				// 組件自帶的上拉加載動畫組件
 							  loadingFooter={WithLastDateFooter}
 				// 數據是否加載完成

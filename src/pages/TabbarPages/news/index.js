@@ -5,8 +5,6 @@ import {COLOR_DIY} from '../../../utils/uiMap'
 import {pxToDp} from '../../../utils/stylesKits'
 import {Header} from 'react-native-elements'; // 4.0 Beta版
 
-import SegmentedControlTab from "react-native-segmented-control-tab";
-
 import EventPage from './EventPage'
 import ClubPage from './ClubPage'
 import { NewsPage } from "./NewsPage";
@@ -65,11 +63,11 @@ class NewsScreen extends Component{
                     }}
                     statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
                 />
-                <View style={{backgroundColor:COLOR_DIY.bg_color}}>
+                <View style={{backgroundColor:COLOR_DIY.bg_color,paddingBottom:pxToDp(10)}}>
                     <SpringScrollView directionalLockEnabled={true} showsHorizontalScrollIndicator={false} style={{flexDirection:'row'}}>
-                        <View style={{flexDirection:'row',}}>
+                        <View style={{flexDirection:'row',alignItems:"center",justifyContent:'center'}}>
                             {/* 佔位View，用於給SpringScrollView橫向滾動 */}
-                            <View style={{marginLeft:pxToDp(10)}}></View>
+                            {/*<View style={{marginLeft:pxToDp(10)}}></View>*/}
                             {/*{this.GetMessageTab()}*/}
                             {/* 選項1 全部訊息 */}
                             <TouchableOpacity style={{
@@ -105,7 +103,7 @@ class NewsScreen extends Component{
                             </TouchableOpacity>
 
                             {/* 佔位View，用於給SpringScrollView橫向滾動 */}
-                            <View style={{marginLeft:pxToDp(20)}}></View>
+                            {/*<View style={{marginLeft:pxToDp(20)}}></View>*/}
                         </View>
                     </SpringScrollView>
                 </View>
