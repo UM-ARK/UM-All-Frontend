@@ -154,7 +154,6 @@ npx react-native unlink react-native-vector-icons
 1. [通知推送組件，應該用來給本機推送消息](https://github.com/wix/react-native-notifications)
 1. [通知推送組件2](https://github.com/zo0r/react-native-push-notification)
 1. [二維碼掃描組件](https://github.com/moaazsidat/react-native-qrcode-scanner)
-1. [優化image組件性能庫](https://github.com/DylanVann/react-native-fast-image)
 1. 全局數據：mobx-react和mobx
 1. 數據緩存：lodash（memoize可以使用緩存加載）
 1. [本地文件訪問系統](https://github.com/itinance/react-native-fs)
@@ -199,4 +198,5 @@ npx react-native unlink react-native-vector-icons
 1. [首次使用的引導頁](https://github.com/FuYaoDe/react-native-app-intro)
 1. [跟手的彈窗](https://github.com/oblador/react-native-lightbox)
 1. [活動tab改分頁](https://openbase.com/js/react-native-tab-view)
+1. [RN與webview傳輸數據](https://github.com/alinz/react-native-webview-bridge)
 
