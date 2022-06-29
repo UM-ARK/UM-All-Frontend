@@ -13,6 +13,7 @@ import { COLOR_DIY } from "../../../utils/uiMap";
 import { Image } from "@rneui/themed";
 import { pxToDp } from "../../../utils/stylesKits";
 
+import FastImage from 'react-native-fast-image'
 
 class NewsCard extends Component {
     constructor(props) {
@@ -21,7 +22,7 @@ class NewsCard extends Component {
         let bg=null
         if (props.news.common.hasOwnProperty("imageUrls")) {
             pic = (
-                <Image
+                <FastImage
                     placeholderStyle={{
                         backgroundColor: COLOR_DIY.themeColor,
                     }}
@@ -52,7 +53,7 @@ class NewsCard extends Component {
                             overflow:'hidden',
                         }]}>
                             <View style={{ width:"100%", height:"100%",borderRadius: pxToDp(1000),}}>
-                                <ImageBackground
+                                <FastImage
                                     resizeMode='cover'
                                     style={{ width:"100%", height:"100%",position:'relative'}}
                                     source={{uri:props.news.common.imageUrls[0].replace("http", "https")}}
@@ -61,7 +62,7 @@ class NewsCard extends Component {
                                         width:'100%',
                                         height:'100%'
                                     }}>
-                                        <ImageBackground
+                                        <FastImage
                                             resizeMode='cover'
                                             style={{ width:"100%", height:"100%",position:'relative'}}
                                             source={require('./img/bg.png')}
@@ -76,9 +77,9 @@ class NewsCard extends Component {
                                                     {props.news.details[0].title}
                                                 </Text>
                                             </View>
-                                        </ImageBackground >
+                                        </FastImage >
                                     </View>
-                                </ImageBackground >
+                                </FastImage >
 
                             </View>
                         </View>

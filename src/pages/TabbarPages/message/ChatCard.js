@@ -15,6 +15,7 @@ import {certificate} from '../../../static/icon/iconSvg';
 
 import SvgUri from 'react-native-svg-uri';
 import {NavigationContext} from '@react-navigation/native';
+import FastImage from 'react-native-fast-image'
 
 // 頭像右下角 認證標籤大小，使用的SVG貌似不是像素單位
 const AVATOR_RIGHT_ICON_SIZE = pxToDp(18);
@@ -100,7 +101,7 @@ class ChatCard extends Component {
                                     width: pxToDp(42),
                                     height: pxToDp(44),
                                 }}>
-                                <Image
+                                <FastImage
                                     source={{
                                         uri: avatar_url,
                                     }}
