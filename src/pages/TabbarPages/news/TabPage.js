@@ -13,6 +13,7 @@ import NewsPage from './NewsPage';
 import EventPage from './EventPage';
 import ClubPage from './ClubPage';
 import { pxToDp } from "../../../utils/stylesKits";
+import { COLOR_DIY } from "../../../utils/uiMap";
 
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
@@ -62,7 +63,7 @@ const _renderTabBar = props => {
                             borderWidth: 1,
                             borderColor: '#005F95',
                             backgroundColor:
-                                currentTabIndex == i ? '#005F95' : '#fff',
+                                currentTabIndex == i ? '#005F95' : COLOR_DIY.bg_color,
                             paddingHorizontal: 10,
                             paddingVertical: 2,
                             marginVertical: 5,
