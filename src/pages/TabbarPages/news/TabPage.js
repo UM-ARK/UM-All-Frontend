@@ -12,6 +12,7 @@ import {TabView, SceneMap} from 'react-native-tab-view';
 import NewsPage from './NewsPage';
 import EventPage from './EventPage';
 import ClubPage from './ClubPage';
+import { pxToDp } from "../../../utils/stylesKits";
 
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
@@ -36,7 +37,7 @@ const _renderTabBar = props => {
         <View
             style={{
                 flexDirection: 'row',
-                justifyContent: 'space-around',
+                justifyContent: 'center',
             }}>
             {props.navigationState.routes.map((route, i) => {
                 // 定義Tab轉換的動畫 - 半透明未選中文字 - 未使用
@@ -65,6 +66,7 @@ const _renderTabBar = props => {
                             paddingHorizontal: 10,
                             paddingVertical: 2,
                             marginVertical: 5,
+                            marginHorizontal:pxToDp(10),
                         }}
                         onPress={() => props.jumpTo(route.key)}>
                         {/* <Animated.Text
