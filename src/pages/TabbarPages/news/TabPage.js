@@ -29,7 +29,7 @@ const renderScene = SceneMap({
 
 // 自定義頂部Tabbar樣式
 // TODO: Text或者BackgroundColor的切換動畫，讓其更跟手，opacity動畫是組件提供的example可以直接使用到Animated.Text中
-_renderTabBar = props => {
+const _renderTabBar = props => {
     const currentTabIndex = props.navigationState.index;
     const inputRange = props.navigationState.routes.map((x, i) => i);
     return (
