@@ -11,7 +11,8 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
-import {MeScreen} from '../index';
+import {MeScreen} from '../MeScreen';
+import {Logining} from '../index'
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -246,7 +247,7 @@ class AppSetting extends Component {
                         position:'absolute',
                         bottom:pxToDp(40),   
                         alignSelf:'center'                 
-                }} onPress={() => alert('已退出！')}>
+                }} onPress={() => this.props.navigation.navigate('Logining')}>
                     <Text style={{
                         fontSize:20,
                         alignSelf:'center',
