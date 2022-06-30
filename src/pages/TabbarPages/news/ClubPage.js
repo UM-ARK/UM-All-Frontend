@@ -19,6 +19,9 @@ import {SpringScrollView} from 'react-native-spring-scrollview';
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 
+// 防誤觸時間，理論越長越穩
+const PREVENT_TOUCH_TIME = 500;
+
 // 模擬數據庫data
 const dataList = [
     // 學生會
@@ -157,7 +160,7 @@ class ClubPage extends Component {
                 // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
                 this.timer = setTimeout(() => {
                     this.setState({ touchDisable:false });
-                }, 200);
+                }, PREVENT_TOUCH_TIME);
             }}
             directionalLockEnabled={true}
             >

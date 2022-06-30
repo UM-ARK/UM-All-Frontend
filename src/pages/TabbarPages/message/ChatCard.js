@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {
     Text,
     View,
-    TouchableHighlight,
+    TouchableOpacity,
     StyleSheet,
     Image,
     ImageBackground,
@@ -15,7 +15,7 @@ import {certificate} from '../../../static/icon/iconSvg';
 
 import SvgUri from 'react-native-svg-uri';
 import {NavigationContext} from '@react-navigation/native';
-import FastImage from 'react-native-fast-image'
+import FastImage from 'react-native-fast-image';
 
 // 頭像右下角 認證標籤大小，使用的SVG貌似不是像素單位
 const AVATOR_RIGHT_ICON_SIZE = pxToDp(18);
@@ -82,12 +82,10 @@ class ChatCard extends Component {
                     marginLeft: 10,
                     marginRight: 10,
                 }}>
-                <TouchableHighlight
+                <TouchableOpacity
                     style={styles.chatItemBorder}
                     activeOpacity={0.7}
-                    underlayColor={'#dfe6e9'}
-                    onPress={() => alert('跳轉提醒詳情頁')}
-                    onLongPress={() => alert('長按!!!')}>
+                    onPress={() => alert('跳轉提醒詳情頁')}>
                     <View style={styles.infoContainer}>
                         {/* 1.0 靠左元素-頭像/名字等 */}
                         <View
@@ -155,7 +153,7 @@ class ChatCard extends Component {
                         </View>
                         {/* 2.0 靠右元素-消息的時間展示 */}
                     </View>
-                </TouchableHighlight>
+                </TouchableOpacity>
             </View>
         );
     }

@@ -167,6 +167,7 @@ class MesgScreen extends Component {
                             return <ChatCard messages={item}></ChatCard>;
                         }}
                         keyExtractor={(_, index) => index}
+                        scrollEnabled={false}
                     />
                 </SpringScrollView>
             </View>
