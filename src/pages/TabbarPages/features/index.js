@@ -15,6 +15,7 @@ import {FlatGrid} from 'react-native-super-grid';
 const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
+    img:"img"
 };
 
 class Index extends Component {
