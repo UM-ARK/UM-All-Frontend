@@ -53,6 +53,13 @@ class MeScreen extends Component {
                         onPress={() =>
                             this.props.navigation.navigate('MeSetting')
                         }>
+                        <View style={{
+                            height:'100%',
+                            flexDirection:'row',
+                            alignItems:'center',
+                            justifyContent:'center',
+                            marginLeft:pxToDp(20)
+                        }}>
                         {/* 頭像 */}
                         <Image
                             source={require('./icon/testphoto.png')}
@@ -60,19 +67,15 @@ class MeScreen extends Component {
                                 height: pxToDp(70),
                                 width: pxToDp(70),
                                 borderRadius: pxToDp(70),
-                                position: 'absolute',
-                                top: pxToDp(20),
-                                left: pxToDp(20),
                             }}
                         />
                         {/* 暱稱 & 書院 & 學院 展示 */}
                         <View
                             style={{
-                                marginLeft: pxToDp(10),
+                                height:'100%',
+                                marginLeft: pxToDp(20),
                                 height: pxToDp(80),
-                                position: 'absolute',
-                                top: pxToDp(22),
-                                left: pxToDp(95),
+                                justifyContent:'center'
                             }}>
                             {/* 暱稱 Nick Name */}
                             <Text
@@ -109,6 +112,7 @@ class MeScreen extends Component {
                                     }}>
                                     {'CKLC'}
                                 </Text>
+                            </View>
                             </View>
                         </View>
 
