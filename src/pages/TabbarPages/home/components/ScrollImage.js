@@ -12,7 +12,7 @@ import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import LinearGradient from 'react-native-linear-gradient';
-import FastImage from 'react-native-fast-image'
+import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
@@ -87,7 +87,6 @@ function ScrollImage(props) {
                                     style={{
                                         width: '100%',
                                         height: '100%',
-                                        position: 'relative',
                                     }}
                                     source={{uri: item.uri}}>
                                     {/* 1.2 圖片附文字說明展示 開始 */}
@@ -114,22 +113,6 @@ function ScrollImage(props) {
                                             {item.title}
                                         </Text>
                                     </LinearGradient>
-                                    {/* <View style={{
-                                        position:'absolute',
-                                        bottom:0,
-                                        height:'15%',
-                                        width:"100%",
-                                        backgroundColor:COLOR_DIY.themeColor,
-                                    }}>
-                                        <Text style={{
-                                            fontSize:pxToDp(14),
-                                            color: COLOR_DIY.white,
-                                            // width:"100%",
-                                            textAlign:"center",
-                                            textAlignVertical:"center",
-                                            height:"100%"
-                                        }}>{item.title}</Text>
-                                    </View > */}
                                 </FastImage>
                             </View>
                         </TouchableWithoutFeedback>
@@ -142,8 +125,9 @@ function ScrollImage(props) {
                 style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    width: 100,
+                    width: pxToDp(100),
                     alignSelf: 'center',
+                    marginTop:-pxToDp(10)
                 }}>
                 {colors.map((backgroundColor, index) => {
                     return (
