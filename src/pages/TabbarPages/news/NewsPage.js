@@ -37,7 +37,7 @@ class NewsCard extends Component {
                     style={{
                         aspectRatio: 1,
                         width: "100%",
-                        borderRadius: pxToDp(10),
+                        borderRadius: pxToDp(5),
                     }}
                 />
             );
@@ -164,24 +164,44 @@ class NewsCard extends Component {
                                     backgroundColor: COLOR_DIY.bg_color,
                                     borderRadius: pxToDp(10),
                                     // ...COLOR_DIY.viewShadow,
-                                    marginVertical:pxToDp(3)
+                                    marginVertical:pxToDp(1)
                                 }]}>
                                 <View style={{
                                     width: "70%",
-                                    position:'relative'
+                                    position:'relative',
+                                    paddingRight:pxToDp(3)
                                     // marginRight: 8,
                                 }}>
-                                    <Text style={{ color: COLOR_DIY.black.main, fontSize: pxToDp(15), fontWeight:"bold" }}>
+                                    <Text style={{ color: COLOR_DIY.black.main, fontSize: pxToDp(15), fontWeight:"bold" }} numberOfLines={2}>
                                         {this.state.news.details[0].title}
                                     </Text>
-                                    <Text style={{ color: COLOR_DIY.black.second, fontSize: pxToDp(14) }}>
+                                    <Text style={{ color: COLOR_DIY.black.second, fontSize: pxToDp(14) }} numberOfLines={1}>
                                         {this.state.news.details[1].title}
                                     </Text>
-                                    <Text style={{
-                                        color: COLOR_DIY.black.third,
-                                        fontSize: pxToDp(10),
-                                        marginTop:pxToDp(10),
-                                    }}>{this.state.date.getFullYear() + "/" + this.state.date.getMonth() + "/" + this.state.date.getDate()}</Text>
+                                    <View style={[tw.style('flex','flex-row'),{
+                                        paddingTop:pxToDp(10)
+                                    }]}>
+                                        <View style={{
+                                            borderColor:COLOR_DIY.black.third,
+                                            // borderWidth:pxToDp(1),
+                                            // backgroundColor:COLOR_DIY.themeColor,
+                                            paddingHorizontal:pxToDp(2),
+                                            marginRight:pxToDp(2),
+                                            borderRadius:pxToDp(6),
+                                            // paddingVertical:pxToDp(0)
+                                        }}>
+                                            <Text style={{
+                                                fontSize:pxToDp(10),
+                                                color:COLOR_DIY.black.third,
+                                            }}>
+                                                @
+                                            </Text>
+                                        </View>
+                                        <Text style={{
+                                            color: COLOR_DIY.black.third,
+                                            fontSize: pxToDp(10),
+                                        }}>{this.state.date.getMonth() + "-" + this.state.date.getDate()}</Text>
+                                    </View>
                                 </View>
                                 <View style={{
                                     width: "30%",
@@ -192,6 +212,15 @@ class NewsCard extends Component {
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
+                        <View style={[tw.style( "ml-5")]}>
+                            <View style={{
+                                width:'60%',
+                                backgroundColor:COLOR_DIY.themeColor,
+                                height:pxToDp(2)
+                            }}>
+
+                            </View>
+                        </View>
                     </SafeAreaView>
 
                 );
