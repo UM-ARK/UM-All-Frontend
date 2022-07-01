@@ -14,6 +14,11 @@ export const COLOR_DIY = {
     // 全局背景白色(偏灰)
     bg_color:'#F5F5F7',
 
+    // 綠色，用在Toast上
+    success:'#27ae60',
+    warning:'#f39c12',
+    unread:'#f75353',
+
     // 我的頁顏色
     meScreenColor:{
         bg_color:'#ededed',
