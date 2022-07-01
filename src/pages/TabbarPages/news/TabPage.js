@@ -8,10 +8,14 @@ import {
     StyleSheet,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
+import {useToast} from 'native-base';
 
 import NewsPage from './NewsPage';
 import EventPage from './EventPage';
 import ClubPage from './ClubPage';
+
+// 已展示提醒的標識，展示過就不展示了。
+let toastHaveShow = [false, false];
 
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
@@ -92,6 +96,9 @@ _renderTabBar = props => {
 };
 
 export default function TabPage() {
+    // Toast彈出提示組件
+    const toast = useToast();
+
     const layout = useWindowDimensions();
 
     const [index, setIndex] = React.useState(0);
@@ -105,7 +112,23 @@ export default function TabPage() {
         <TabView
             navigationState={{index, routes}}
             renderScene={renderScene}
-            onIndexChange={setIndex}
+            onIndexChange={index => {
+                // 滑到社團活動、社團大廳頁的時候觸發一次Toast提醒可進入詳情頁
+                if (!toastHaveShow[0] && index == 1) {
+                    toastHaveShow[0] = true;
+                    toast.show({
+                        description: '點擊卡片可以查看詳情！',
+                        placement: 'top',
+                    });
+                } else if (!toastHaveShow[1] && index == 2) {
+                    toastHaveShow[1] = true;
+                    toast.show({
+                        description: '社團LOGO，點擊直達！',
+                        placement: 'top',
+                    });
+                }
+                setIndex(index);
+            }}
             initialLayout={{width: layout.width}}
             renderTabBar={props => _renderTabBar(props)}
         />
