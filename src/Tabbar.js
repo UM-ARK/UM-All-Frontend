@@ -21,11 +21,7 @@ import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
 const Tabs = AnimatedTabBarNavigator();
 
 class Index extends Component {
-    state = {};
-
     render() {
-        const {setOptions} = this.props.navigation;
-
         return (
             <Tabs.Navigator
                 tabBarOptions={{
@@ -35,6 +31,7 @@ class Index extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors        : COLOR_DIY.white,
                     tabBarBackground    : COLOR_DIY.white,
+                    // 浮動式Tabbar
                     // floating            : true,
                     horizontalPadding   : pxToDp(10),
                 }}

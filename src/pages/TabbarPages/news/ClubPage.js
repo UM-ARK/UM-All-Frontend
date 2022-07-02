@@ -138,7 +138,7 @@ const dataList = [
 
 class ClubPage extends Component {
     state = {
-        touchDisable:false,
+        touchDisable: false,
     };
 
     componentWillUnmount() {
@@ -150,23 +150,23 @@ class ClubPage extends Component {
     render() {
         return (
             <SpringScrollView
-            onScrollBeginDrag={()=>{
-                // 清除上一個延時器
-                this.timer && clearTimeout(this.timer);
-                this.setState({ touchDisable:true });
-            }}
-            onScrollEndDrag={()=>{
-                this.setState({ touchDisable:true });
-                // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
-                this.timer = setTimeout(() => {
-                    this.setState({ touchDisable:false });
-                }, PREVENT_TOUCH_TIME);
-            }}
-            directionalLockEnabled={true}
-            >
+                onScrollBeginDrag={() => {
+                    // 清除上一個延時器
+                    this.timer && clearTimeout(this.timer);
+                    this.setState({touchDisable: true});
+                }}
+                onScrollEndDrag={() => {
+                    this.setState({touchDisable: true});
+                    // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
+                    this.timer = setTimeout(() => {
+                        this.setState({touchDisable: false});
+                    }, PREVENT_TOUCH_TIME);
+                }}
+                directionalLockEnabled={true}>
                 <View style={{flex: 1}}>
+                    <Text style={{alignSelf:'center', marginTop:pxToDp(10), color:COLOR_DIY.black.third}}>社團卡片 點擊直達</Text>
                     <FlatGrid
-                        style={{flex: 1, marginTop: pxToDp(5)}}
+                        style={{flex: 1}}
                         // 每个项目的最小宽度或高度（像素）
                         itemDimension={COMPONENT_WIDTH}
                         data={dataList}
@@ -180,8 +180,9 @@ class ClubPage extends Component {
                                     <ClubCard
                                         data={item}
                                         index={index}
-                                        touchDisable={this.state.touchDisable}
-                                        ></ClubCard>
+                                        touchDisable={
+                                            this.state.touchDisable
+                                        }></ClubCard>
                                 </View>
                             );
                         }}

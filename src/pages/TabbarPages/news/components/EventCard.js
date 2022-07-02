@@ -1,6 +1,6 @@
 // https://i.pinimg.com/564x/16/d6/68/16d668bd5bf00285a7e21899eb4b420f.jpg
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap'
 import {pxToDp} from '../../../../utils/stylesKits'
@@ -26,26 +26,32 @@ class EventCard extends Component {
     // this.context === this.props.navigation 等同效果
     static contextType = NavigationContext;
 
-	state = {}
+	handleJumpToDetail = () => {
+		this.context.navigate('EventDetail', {
+			data:this.props.data,
+		})
+	}
 
 	render() {
-		// 解構this.state數據
-		const {dataList} = this.state;
 		// 解構this.props.data數據
 		const {imgUrl, title, timeStamp, eventID} = this.props.data;
 		// 解構全局ui設計顏色
 		const {white, black, viewShadow} = COLOR_DIY;
 
+		// 當前時刻時間戳
+		let nowTimeStamp = new Date().getTime();
+		// 活動結束標誌
+		let isFinish = nowTimeStamp > timeStamp;
+
 		return (
 			<TouchableOpacity style={{...this.props.style}} activeOpacity={0.9} 
-				onPress={()=>{
-					// alert(`跳轉eventID為 ${eventID} 的活動詳情頁`)
-					this.context.navigate('EventDetail', {
-						eventID,
-					})
-				}}
+				onPress={this.handleJumpToDetail}
 				disabled={this.props.touchDisable}
 			>
+				{/* 未結束紅點標識 */}
+				{!isFinish &&
+					<View style={{...styles.rightTopIconPosition, ...styles.unFinish, zIndex:9}} />
+				}
 				<FastImage
 					source={{uri:imgUrl}}
 					style={{width:pxToDp(160), height:pxToDp(230), borderRadius:pxToDp(8), overflow:'hidden', ...viewShadow}}
@@ -72,5 +78,22 @@ class EventCard extends Component {
 		);
 	}
 }
+
+const styles = StyleSheet.create({
+	// 右上角紅點提示位置
+    rightTopIconPosition: {
+        position: 'absolute',
+        right: -3,
+        top: -3,
+    },
+    // 紅點標籤樣式
+    unFinish: {
+        height: pxToDp(12),
+		width: pxToDp(12),
+        backgroundColor: COLOR_DIY.unread,
+        borderRadius: 50,
+		...COLOR_DIY.viewShadow
+    },
+})
 
 export default EventCard;
