@@ -21,6 +21,10 @@ import FastImage from 'react-native-fast-image';
 const AVATOR_RIGHT_ICON_SIZE = pxToDp(18);
 
 class ChatCard extends Component {
+    // NavigationContext組件可以在非基頁面拿到路由信息
+    // this.context === this.props.navigation 等同效果
+    static contextType = NavigationContext;
+
     constructor(props) {
         super(props);
         let {message_history} = this.props.messages;
@@ -74,7 +78,7 @@ class ChatCard extends Component {
         // 解構全局UI樣式
         const {bg_color, black, white} = COLOR_DIY;
         // 解構從message的index傳來的用戶頭像、名字信息
-        const {name, avatar_url} = this.props.messages.user;
+        const {_id, name, avatar} = this.props.messages.user;
         return (
             <View
                 style={{
@@ -85,7 +89,7 @@ class ChatCard extends Component {
                 <TouchableOpacity
                     style={styles.chatItemBorder}
                     activeOpacity={0.7}
-                    onPress={() => alert('跳轉提醒詳情頁')}>
+                    onPress={() => this.context.navigate('ChatDetail', {user:this.props.messages.user})}>
                     <View style={styles.infoContainer}>
                         {/* 1.0 靠左元素-頭像/名字等 */}
                         <View
@@ -94,14 +98,10 @@ class ChatCard extends Component {
                                 width: '75%',
                             }}>
                             {/* 1.1 頭像 */}
-                            <View
-                                style={{
-                                    width: pxToDp(42),
-                                    height: pxToDp(44),
-                                }}>
+                            <View>
                                 <FastImage
                                     source={{
-                                        uri: avatar_url,
+                                        uri: avatar,
                                     }}
                                     style={styles.avatarStyle}
                                 />
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
         height: pxToDp(15),
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'red',
+        backgroundColor: COLOR_DIY.unread,
         borderRadius: 50,
     },
 });
