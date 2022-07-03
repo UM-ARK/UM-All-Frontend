@@ -1,303 +1,286 @@
-import React, { Component } from "react";
+import React, {Component} from 'react';
 import {
-    ActivityIndicator,
-    ImageBackground,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableWithoutFeedback,
     View,
-} from "react-native";
-import tw from "twrnc";
-import { COLOR_DIY } from "../../../utils/uiMap";
-import { Image } from "@rneui/themed";
-import { pxToDp } from "../../../utils/stylesKits";
+    Text,
+    VirtualizedList,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+} from 'react-native';
 
-import FastImage from 'react-native-fast-image'
+import NewsCard from './components/NewsCard';
 
-class NewsCard extends Component {
-    constructor(props) {
-        super(props);
-        let pic = null;
-        let bg=null
-        if (props.news.common.hasOwnProperty("imageUrls")) {
-            pic = (
-                <Image
-                    placeholderStyle={{
-                        backgroundColor: COLOR_DIY.themeColor,
-                    }}
-                    PlaceholderContent={
-                        <View>
-                            <ActivityIndicator color='#fff' />
-                            <Text style={tw.style("text-white")}>Loading...</Text>
-                        </View>
-                    }
-                    transition={true}
-                    source={{ uri: props.news.common.imageUrls[0].replace("http", "https") }}
-                    style={{
-                        aspectRatio: 1,
-                        width: "100%",
-                        borderRadius: pxToDp(5),
-                    }}
-                />
-            );
-            bg=(
-                <SafeAreaView>
-                    <TouchableWithoutFeedback onPress={this.goToDetails} >
-                        <View style={[tw.style("my-1","mx-3"),{
-                            // width:'100%',
-                            height:pxToDp(200),
-                            // backgroundColor: COLOR_DIY.bg_color,
-                            borderRadius: pxToDp(10),
-                            ...COLOR_DIY.viewShadow,
-                            overflow:'hidden',
-                        }]}>
-                            <View style={{ width:"100%", height:"100%",borderRadius: pxToDp(1000),}}>
-                                <FastImage
-                                    resizeMode='cover'
-                                    style={{ width:"100%", height:"100%",position:'relative'}}
-                                    source={{uri:props.news.common.imageUrls[0].replace("http", "https")}}
-                                >
-                                    <View style={{
-                                        width:'100%',
-                                        height:'100%'
-                                    }}>
-                                        <FastImage
-                                            resizeMode='cover'
-                                            style={{ width:"100%", height:"100%",position:'relative'}}
-                                            source={require('./img/bg.png')}
-                                        >
-                                            <FastImage
-                                                resizeMode='cover'
-                                                style={{ width:"100%", height:"100%",position:'relative'}}
-                                                source={require('./img/bg.png')}
-                                            >
-                                                <View style={{
-                                                    position:'absolute',
-                                                    top:pxToDp(10),
-                                                    left:pxToDp(10)
+import {COLOR_DIY} from '../../../utils/uiMap';
+import {pxToDp} from '../../../utils/stylesKits';
 
-                                                }}>
-                                                    <Text style={{
-                                                        color:'#fff',
-                                                        fontSize:16,
-                                                        fontWeight:"bold",
-                                                        ...COLOR_DIY.viewShadow
-                                                    }}>
-                                                        Top Story @ UM
-                                                    </Text>
-                                                </View>
-                                                <View style={{
-                                                    position:'absolute',
-                                                    top:'30%',
-                                                    left:pxToDp(10)
+import FastImage from 'react-native-fast-image';
+import Interactable from 'react-native-interactable';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-                                                }
-                                                }>
-                                                    <Text style={{color:"#fff",
-                                                        fontWeight:'bold',
-                                                        fontSize:18,
-                                                        marginVertical:pxToDp(3),
-                                                        ...COLOR_DIY.viewShadow}}>
-                                                        {props.news.details[0].title}
-                                                    </Text>
-                                                    <Text style={{color:"#fff",
-                                                        fontWeight:'bold',
-                                                        fontSize:14,
-                                                        ...COLOR_DIY.viewShadow}}>
-                                                        {props.news.details[1].title}
-                                                    </Text>
-                                                </View>
-                                            </FastImage >
-                                        </FastImage >
-                                    </View>
-                                </FastImage >
+// 整理需要返回的數據給renderItem
+// 此處返回的數據會成為renderItem({item})獲取到的數據。。。
+// 所以data數組需要在這裡引用一下
+const getItem = (data, index) => {
+    // data為VirtualizedList設置的data，index為當前渲染到的下標
+    return data[index];
+};
 
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
-                    <View style={[tw.style('mx-3','flex','flex-row','my-1'),{
-                        paddingHorizontal:pxToDp(10),
+// 返回數據數組的長度
+const getItemCount = data => {
+    return data.length;
+};
 
-                    }]}>
-                        <Text style={{
-                            color:COLOR_DIY.themeColor,
-                            fontSize:15,
-                            fontWeight:"bold",
-                            ...COLOR_DIY.viewShadow
-                        }}>
-                            News @ UM
-                        </Text>
-                    </View>
-                </SafeAreaView>
-            )
-        }
-
-
+class Test extends Component {
+    constructor() {
+        super();
         this.state = {
-            news: props.news,
-            isFirst: props.isFirst,
-            date: new Date(props.news.common.publishDate),
-            pic: pic,
-            bg:bg,
-        };
-        this.goToDetails = this.goToDetails.bind(this);
-        // console.log(props.news.common.imageUrls)
-    }
-
-    goToDetails = () => {
-        // const navigation=this.props.navigation
-        // navigation.navigate ('NewsDetail',{
-        //     news:this.state.news
-        // })
-        return 0;
-    };
-
-    render() {
-        if (this.state.news.details.length > 0) {
-            if (!this.state.isFirst) {
-                return (
-                    <SafeAreaView>
-                        <TouchableWithoutFeedback onPress={this.goToDetails}>
-                            <View
-                                style={[tw.style( "pl-3", "flex", "flex-row", "justify-between", "items-center", "mx-3"), {
-                                    backgroundColor: COLOR_DIY.bg_color,
-                                    borderRadius: pxToDp(10),
-                                    // ...COLOR_DIY.viewShadow,
-                                    marginVertical:pxToDp(1)
-                                }]}>
-                                <View style={{
-                                    width: "70%",
-                                    position:'relative',
-                                    paddingRight:pxToDp(3)
-                                    // marginRight: 8,
-                                }}>
-                                    <Text style={{ color: COLOR_DIY.black.main, fontSize: pxToDp(15), fontWeight:"bold" }} numberOfLines={2}>
-                                        {this.state.news.details[0].title}
-                                    </Text>
-                                    <Text style={{ color: COLOR_DIY.black.second, fontSize: pxToDp(14) }} numberOfLines={1}>
-                                        {this.state.news.details[1].title}
-                                    </Text>
-                                    <View style={[tw.style('flex','flex-row'),{
-                                        paddingTop:pxToDp(10)
-                                    }]}>
-                                        <View style={{
-                                            borderColor:COLOR_DIY.black.third,
-                                            // borderWidth:pxToDp(1),
-                                            // backgroundColor:COLOR_DIY.themeColor,
-                                            paddingHorizontal:pxToDp(2),
-                                            marginRight:pxToDp(2),
-                                            borderRadius:pxToDp(6),
-                                            // paddingVertical:pxToDp(0)
-                                        }}>
-                                            <Text style={{
-                                                fontSize:pxToDp(10),
-                                                color:COLOR_DIY.black.third,
-                                            }}>
-                                                @
-                                            </Text>
-                                        </View>
-                                        <Text style={{
-                                            color: COLOR_DIY.black.third,
-                                            fontSize: pxToDp(10),
-                                        }}>{this.state.date.getMonth() + "-" + this.state.date.getDate()}</Text>
-                                    </View>
-                                </View>
-                                <View style={{
-                                    width: "30%",
-                                    height: "100%",
-                                    borderRadius: pxToDp(10),
-                                }}>
-                                    {this.state.pic}
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                        <View style={[tw.style( "ml-5")]}>
-                            <View style={{
-                                width:'60%',
-                                backgroundColor:COLOR_DIY.themeColor,
-                                height:pxToDp(2)
-                            }}>
-
-                            </View>
-                        </View>
-                    </SafeAreaView>
-
-                );
-            } else {
-                return (
-                    this.state.bg
-                );
-            }
-
-        } else {
-            return (<View></View>);
-        }
-    }
-}
-
-function GetNewsCard(props) {
-    // const route = useRoute();
-    // const navigation = useNavigation();
-    // return <NewsCard {...props} route={route} navigation={navigation}/>;
-    return <NewsCard {...props} />;
-
-}
-
-export default class NewsPage extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            news: [],
             isLoading: true,
             newsList: [],
+            topNews: {},
         };
+
+        // 請求澳大新聞API
+        this.getData();
     }
 
+    // 請求澳大api返回新聞數據
     async getData() {
+        let res = [];
         try {
-            const response = await fetch("https://api.data.um.edu.mo/service/media/news/v1.0.0/all", {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    Authorization: "Bearer 3edfffda-97ce-326a-a0a5-5e876adbf89f",
+            const response = await fetch(
+                'https://api.data.um.edu.mo/service/media/news/v1.0.0/all',
+                {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json',
+                        Authorization:
+                            'Bearer 3edfffda-97ce-326a-a0a5-5e876adbf89f',
+                    },
                 },
-            });
+            );
             const json = await response.json();
-            this.setState({ news: json._embedded });
+            res = json._embedded;
         } catch (error) {
             console.log(error);
         } finally {
-            this.setState({ isLoading: false });
-        }
-        let l = [];
-        for (let i = 0; i < 50; i++) {
-            if (this.state.news[i].details.length > 0) {
-                l.push(<GetNewsCard news={this.state.news[i]} isFirst={i == 0} />);
+            // 頭條指定為當天最新的新聞
+            let topNews = res[0];
+            // 非頭條的新聞渲染進新聞列表
+            let newsList = [];
+            // 指定截取多少條數據，最多100條
+            let numOfNews = 100;
+            for (let i = 1; i < numOfNews; i++) {
+                if (res[i].details.length > 0) {
+                    newsList.push(res[i]);
+                }
             }
+
+            this.setState({
+                newsList,
+                topNews: {
+                    // 發佈日期
+                    publishDate: topNews.common.publishDate,
+                    // 中文標題
+                    title_cn: topNews.details[1].title,
+                    // 英文標題
+                    title_en: topNews.details[0].title,
+                    // 相片數組
+                    imageUrls: topNews.common.imageUrls,
+                },
+                isLoading: false,
+            });
         }
-        this.setState({
-            newsList: l,
-        });
     }
 
-    componentDidMount() {
-        this.getData();
+    // 頭條新聞的渲染
+    renderTopNews = () => {
+        // 解構全局ui設計顏色
+        const {white, black, viewShadow} = COLOR_DIY;
+        const {
+            // 發佈日期
+            publishDate,
+            // 最後更新時間
+            // lastModified,
+            // 中文標題
+            title_cn,
+            // 中文內容
+            content_cn,
+            // 英文標題
+            title_en,
+            // 英文內容
+            content_en,
+            // 相片數組
+            imageUrls,
+        } = this.state.topNews;
 
-    }
+        return (
+            <View
+                style={{
+                    borderRadius: pxToDp(10),
+                    overflow: 'hidden',
+                    marginHorizontal: pxToDp(10),
+                    marginVertical: pxToDp(5),
+                    height: pxToDp(200),
+                    backgroundColor: white,
+                    ...viewShadow,
+                }}>
+                <View style={{width: '100%'}}>
+                    {/* 圖片背景 */}
+                    {this.state.topNews.imageUrls && (
+                        <FastImage
+                            source={{uri: imageUrls[0]}}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                            }}>
+                            {/* 塗上50%透明度的黑，讓白色字體能看清 */}
+                            <View
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: 'rgba(0,0,0,0.5)',
+                                    padding: pxToDp(15),
+                                    justifyContent: 'flex-end',
+                                }}>
+                                {/* Top Story字樣 */}
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: pxToDp(10),
+                                        left: pxToDp(15),
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: white,
+                                            fontWeight: 'bold',
+                                            fontSize: pxToDp(20),
+                                        }}>
+                                        Top Story @ UM
+                                    </Text>
+                                </View>
+
+                                {/* 標題 */}
+                                <View
+                                    style={{
+                                        alignSelf: 'center',
+                                        justifyContent: 'center',
+                                        width: '100%',
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: white,
+                                            fontWeight: 'bold',
+                                            fontSize: pxToDp(18),
+                                        }}>
+                                        {title_en}
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            color: white,
+                                            fontWeight: 'bold',
+                                            fontSize: pxToDp(13),
+                                        }}>
+                                        {title_cn}
+                                    </Text>
+                                </View>
+                            </View>
+                        </FastImage>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
+    // 渲染懸浮可拖動按鈕
+    renderGoTopButton = () => {
+        const {white, black, viewShadow} = COLOR_DIY;
+
+        return (
+            <Interactable.View
+                style={{
+                    zIndex: 999,
+                    position: 'absolute',
+                }}
+                ref="headInstance"
+                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
+                snapPoints={[
+                    {x: -140, y: -250},
+                    {x: 140, y: -250},
+                    {x: -140, y: -120},
+                    {x: 140, y: -120},
+                    {x: -140, y: 0},
+                    {x: 140, y: 0},
+                    {x: -140, y: 120},
+                    {x: 140, y: 120},
+                    {x: -140, y: 250},
+                    {x: 140, y: 250},
+                ]}
+                // 設定初始吸附位置
+                initialPosition={{x: 140, y: 250}}>
+                {/* 懸浮吸附按鈕，回頂箭頭 */}
+                <TouchableWithoutFeedback
+                    onPress={() => {
+                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
+                        this.refs.virtualizedList.scrollToOffset({
+                            x: 0,
+                            y: 0,
+                            duration: 500, // 回頂時間
+                        });
+                    }}>
+                    <View
+                        style={{
+                            width: pxToDp(50),
+                            height: pxToDp(50),
+                            backgroundColor: COLOR_DIY.white,
+                            borderRadius: pxToDp(50),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            ...viewShadow,
+                        }}>
+                        <Ionicons
+                            name={'chevron-up'}
+                            size={pxToDp(40)}
+                            color={black.main}
+                        />
+                    </View>
+                </TouchableWithoutFeedback>
+            </Interactable.View>
+        );
+    };
 
     render() {
+        // 解構全局ui設計顏色
+        const {white, black, viewShadow} = COLOR_DIY;
+
         return (
-            <ScrollView style={[tw.style("w-full"), {
-                backgroundColor: COLOR_DIY.bg_color,
-                // paddingTop:pxToDp(10)
-            }]}>
-                {this.state.isLoading ?
-                    <ActivityIndicator style={tw.style("mt-30")} color={COLOR_DIY.themeColor} size="large" />
-                    :
-                    (this.state.newsList)
-                }
-            </ScrollView>
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
+                {/* 懸浮可拖動按鈕 */}
+                {this.renderGoTopButton()}
+
+                {/* 新聞列表 */}
+                {!this.state.isLoading && (
+                    <VirtualizedList
+                        data={this.state.newsList}
+                        ref={'virtualizedList'}
+                        // 初始渲染的元素，設置為剛好覆蓋屏幕
+                        initialNumToRender={4}
+                        renderItem={({item}) => {
+                            return <NewsCard data={item}></NewsCard>;
+                        }}
+                        // 整理item數據
+                        getItem={getItem}
+                        // 渲染項目數量
+                        getItemCount={getItemCount}
+                        // 列表頭部渲染的組件 - 頭條新聞
+                        ListHeaderComponent={this.renderTopNews}
+                    />
+                )}
+            </View>
         );
     }
 }
+export default Test;
