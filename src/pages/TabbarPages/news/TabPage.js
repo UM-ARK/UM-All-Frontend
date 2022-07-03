@@ -104,7 +104,8 @@ export default function TabPage() {
 
     const layout = useWindowDimensions();
 
-    const [index, setIndex] = React.useState(0);
+    // 默認選項卡
+    const [index, setIndex] = React.useState(1);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
         {key: 'second', title: '社團活動'},
