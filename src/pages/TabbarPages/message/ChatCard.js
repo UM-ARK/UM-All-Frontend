@@ -147,7 +147,7 @@ class ChatCard extends Component {
                                 top: pxToDp(12),
                                 right: pxToDp(12),
                             }}>
-                            <Text style={{fontSize: pxToDp(10)}}>
+                            <Text style={{fontSize: pxToDp(10), color:black.third}}>
                                 {this.state.message.time}
                             </Text>
                         </View>

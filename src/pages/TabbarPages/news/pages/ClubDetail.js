@@ -509,7 +509,7 @@ class ClubDetail extends Component {
                                 marginTop: pxToDp(0),
                             }}>
                             {/* 服務圖標與文字 */}
-                            <Text numberOfLines={3}>{clubData.introText}</Text>
+                            <Text numberOfLines={3} style={{color:black.second}}>{clubData.introText}</Text>
                         </View>
                     </TouchableOpacity>
                     {/* 3.0 簡介 結束 */}
