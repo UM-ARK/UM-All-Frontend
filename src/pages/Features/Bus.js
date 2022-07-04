@@ -7,8 +7,11 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Modal from "react-native-modal";
 // 用於解析Campus Bus的HTML
 var DomParser = require('react-native-html-parser').DOMParser
+import {Header} from '@rneui/themed';
+
 // 引入本地工具
 import {pxToDp} from '../../utils/stylesKits'
+import {COLOR_DIY} from '../../utils/uiMap'
 
 // 定義主題顏色
 const themeColor = '#2f3a79'
@@ -197,115 +200,142 @@ class BusScreen extends Component {
         ]
 
         return (
-            <ScrollView style={s.container}>
-                {/* 背景的Bus路線圖 */}
-                <Image source={ busRouteImg } style={{width:pxToDp(390), height:pxToDp(670), paddingTop:pxToDp(0)}}/>
-                {/* 彈出層 - 展示站點圖片 */}
-                <Modal isVisible={this.state.isModalVisible} onBackdropPress={this.toggleModal.bind(this,this.state.clickStopIndex)}
-                animationIn='zoomIn' animationOut='zoomOut' animationInTiming={500} animationOutTiming={500}
-                backdropOpacity={0.4} backdropTransitionOutTiming={500} >
-                    <View style={{ justifyContent:'center', alignItems:'center' }}>
-                        {/* 關閉圖標 - 引導用戶點擊背景關閉彈出層 */}
-                        <TouchableOpacity style={{paddingBottom:pxToDp(10), paddingLeft:pxToDp(280)}} onPress={this.toggleModal.bind(this,this.state.clickStopIndex)}>
-                            <Ionicons name={"close-circle"} size={pxToDp(50)} color={themeColor} />
+            <View style={{flex:1}}>
+                <Header
+                    backgroundColor={COLOR_DIY.bg_color}
+                    leftComponent={
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.goBack()}>
+                            <Ionicons
+                                name="chevron-back-outline"
+                                size={pxToDp(25)}
+                                color={COLOR_DIY.black.main}
+                            />
                         </TouchableOpacity>
-                        <Image source={stopImgArr[this.state.clickStopIndex]} 
-                        style={{height:"60%",}} resizeMode='contain' />
-                    </View>
-                </Modal>
-                {/* 刷新按鈕 */}
-                <TouchableOpacity
-                    style={{
-                        position: 'absolute', top:pxToDp(400), right:pxToDp(150),
-                        alignItems: "center",
-                        backgroundColor: "#DDDDDD",
-                        padding: 10,
-                        borderRadius: 10,
+                    }
+                    centerComponent={{
+                        text: '校園巴士',
+                        style: {
+                            color: COLOR_DIY.black.main,
+                            fontSize: pxToDp(15),
+                        },
                     }}
-                    onPress={this.fetchBusInfo}
-                >
-                    <Text>Refresh</Text>
-                </TouchableOpacity>
+                    statusBarProps={{
+                        backgroundColor: COLOR_DIY.bg_color,
+                        barStyle: 'dark-content',
+                    }}
+                />
 
-                {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
-                {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
-                {/* Bus運行信息的渲染 */}
-                <View style={{
-                    width:pxToDp(130), height:pxToDp(100),
-                    position:"absolute", top:pxToDp(5), left:pxToDp(5),
-                    backgroundColor:"#d1d1d1", borderRadius:pxToDp(20),
-                    paddingLeft:pxToDp(10), paddingRight:pxToDp(10), paddingTop:pxToDp(3), paddingBottom:pxToDp(3),
-                    overflow:'hidden'
-                }}>
-                    { this.state.busInfoArr.map((item)=><Text>{item}</Text>) }
-                </View>
+                <ScrollView style={s.container}>
+                    {/* 背景的Bus路線圖 */}
+                    <Image source={ busRouteImg } style={{width:pxToDp(390), height:pxToDp(670), paddingTop:pxToDp(0)}}/>
+                    {/* 彈出層 - 展示站點圖片 */}
+                    <Modal isVisible={this.state.isModalVisible} onBackdropPress={this.toggleModal.bind(this,this.state.clickStopIndex)}
+                    animationIn='zoomIn' animationOut='zoomOut' animationInTiming={500} animationOutTiming={500}
+                    backdropOpacity={0.4} backdropTransitionOutTiming={500} >
+                        <View style={{ justifyContent:'center', alignItems:'center' }}>
+                            {/* 關閉圖標 - 引導用戶點擊背景關閉彈出層 */}
+                            <TouchableOpacity style={{paddingBottom:pxToDp(10), paddingLeft:pxToDp(280)}} onPress={this.toggleModal.bind(this,this.state.clickStopIndex)}>
+                                <Ionicons name={"close-circle"} size={pxToDp(50)} color={themeColor} />
+                            </TouchableOpacity>
+                            <Image source={stopImgArr[this.state.clickStopIndex]} 
+                            style={{height:"60%",}} resizeMode='contain' />
+                        </View>
+                    </Modal>
+                    {/* 刷新按鈕 */}
+                    <TouchableOpacity
+                        style={{
+                            position: 'absolute', top:pxToDp(400), right:pxToDp(150),
+                            alignItems: "center",
+                            backgroundColor: "#DDDDDD",
+                            padding: 10,
+                            borderRadius: 10,
+                        }}
+                        onPress={this.fetchBusInfo}
+                    >
+                        <Text>Refresh</Text>
+                    </TouchableOpacity>
 
-                {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
-                {/* TODO:使用絕對位置在不同分辨率下的問題，尋找適配方法，像素單位等 */}
-                {/* TODO:無Bus的情況，連busPositionArr都為空(undefined)，應隱藏Bus圖標 */}
-                {/* TODO:不止一輛巴士的情況 */}
-                {/* 巴士圖標 */}
-                <View style={  busStyleArr[  (this.state.busPositionArr.length>0) ? (this.state.busPositionArr[0].index) : 0 ]  }>
-                    <Ionicons name={"bus"} size={pxToDp(30)} color={themeColor} />
-                </View>
+                    {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
+                    {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
+                    {/* Bus運行信息的渲染 */}
+                    <View style={{
+                        width:pxToDp(130), height:pxToDp(100),
+                        position:"absolute", top:pxToDp(5), left:pxToDp(5),
+                        backgroundColor:"#d1d1d1", borderRadius:pxToDp(20),
+                        paddingLeft:pxToDp(10), paddingRight:pxToDp(10), paddingTop:pxToDp(3), paddingBottom:pxToDp(3),
+                        overflow:'hidden'
+                    }}>
+                        { this.state.busInfoArr.map((item)=><Text>{item}</Text>) }
+                    </View>
 
-                {/* 右上箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(310), top: pxToDp(25),} }>
-                    <Image source={arrowImg} style={s.arrowSize} />
-                </View>
-                {/* 左上箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(140),} }>
-                    <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
-                </View>
-                {/* 左下箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(600),} }>
-                    <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
-                </View>
-                {/* 右下箭頭 */}
-                <View style={ {position: 'absolute', left: pxToDp(310), top: pxToDp(600),} }>
-                    <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
-                </View>
+                    {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
+                    {/* TODO:使用絕對位置在不同分辨率下的問題，尋找適配方法，像素單位等 */}
+                    {/* TODO:無Bus的情況，連busPositionArr都為空(undefined)，應隱藏Bus圖標 */}
+                    {/* TODO:不止一輛巴士的情況 */}
+                    {/* 巴士圖標 */}
+                    <View style={  busStyleArr[  (this.state.busPositionArr.length>0) ? (this.state.busPositionArr[0].index) : 0 ]  }>
+                        <Ionicons name={"bus"} size={pxToDp(30)} color={themeColor} />
+                    </View>
 
-                {/* 站點圓點圖標 */}
-                {/* PGH */}
-                <View style={ {position: 'absolute', left: 322, top: 570,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                <View style={ {position: 'absolute', left: 322, top: 360,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                <View style={ {position: 'absolute', left: 322, top: 80,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                <View style={ {position: 'absolute', left: 151, top: 120,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                <View style={ {position: 'absolute', left: 65, top: 250,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                <View style={ {position: 'absolute', left: 65, top: 330,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                <View style={ {position: 'absolute', left: 65, top: 510,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
-                {/* S4 */}
-                <View style={ {position: 'absolute', left: 250, top: 630,} }>
-                    <Image source={dotImg} style={s.dotSize} />
-                </View>
+                    {/* 右上箭頭 */}
+                    <View style={ {position: 'absolute', left: pxToDp(310), top: pxToDp(25),} }>
+                        <Image source={arrowImg} style={s.arrowSize} />
+                    </View>
+                    {/* 左上箭頭 */}
+                    <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(140),} }>
+                        <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'-90deg'}]} ]} />
+                    </View>
+                    {/* 左下箭頭 */}
+                    <View style={ {position: 'absolute', left: pxToDp(45), top: pxToDp(600),} }>
+                        <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'180deg'}]} ]} />
+                    </View>
+                    {/* 右下箭頭 */}
+                    <View style={ {position: 'absolute', left: pxToDp(310), top: pxToDp(600),} }>
+                        <Image source={arrowImg} style={[s.arrowSize, {transform: [{rotate:'90deg'}]} ]} />
+                    </View>
 
-                {/* 巴士站點文字 */}
-                {/* TODO: 修改單位為pxToDp */}
-                {this.busStopText(168,  542,    'PGH 研究生宿舍(起)',      0)}
-                {this.busStopText(218,  341,    'E4 劉少榮樓',             1)}
-                {this.busStopText(216,  75,     'N2 大學會堂',             2)}
-                {this.busStopText(168,  112,    'N6 行政樓',               3)}
-                {this.busStopText(85,   236,    'E11 科技學院',            4)}
-                {this.busStopText(85,   313,    'E21 人文社科樓',          5)}
-                {this.busStopText(85,   485,    'E32 法學院',              6)}
-                {this.busStopText(120,  625,    'S4 研究生宿舍南四座(終)',  7)}
+                    {/* 站點圓點圖標 */}
+                    {/* PGH */}
+                    <View style={ {position: 'absolute', left: 322, top: 570,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    <View style={ {position: 'absolute', left: 322, top: 360,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    <View style={ {position: 'absolute', left: 322, top: 80,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    <View style={ {position: 'absolute', left: 151, top: 120,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    <View style={ {position: 'absolute', left: 65, top: 250,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    <View style={ {position: 'absolute', left: 65, top: 330,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    <View style={ {position: 'absolute', left: 65, top: 510,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
+                    {/* S4 */}
+                    <View style={ {position: 'absolute', left: 250, top: 630,} }>
+                        <Image source={dotImg} style={s.dotSize} />
+                    </View>
 
-            </ScrollView>
+                    {/* 巴士站點文字 */}
+                    {/* TODO: 修改單位為pxToDp */}
+                    {this.busStopText(168,  542,    'PGH 研究生宿舍(起)',      0)}
+                    {this.busStopText(218,  341,    'E4 劉少榮樓',             1)}
+                    {this.busStopText(216,  75,     'N2 大學會堂',             2)}
+                    {this.busStopText(168,  112,    'N6 行政樓',               3)}
+                    {this.busStopText(85,   236,    'E11 科技學院',            4)}
+                    {this.busStopText(85,   313,    'E21 人文社科樓',          5)}
+                    {this.busStopText(85,   485,    'E32 法學院',              6)}
+                    {this.busStopText(120,  625,    'S4 研究生宿舍南四座(終)',  7)}
+
+                </ScrollView>
+            </View>
         );
     }
 }

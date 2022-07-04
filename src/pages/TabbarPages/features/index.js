@@ -28,7 +28,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bus-stop',
                         fn_name: '校园巴士',
-                        go_where: '', // a function
+                        go_where: 'Bus', // a function
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
