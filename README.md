@@ -3,12 +3,14 @@
 ## 內容
 - [環境安裝與運行模擬器](#環境安裝與運行模擬器)
   * [Android環境安裝](#android環境-install)
-  * [IOS環境安裝](#ios環境-install)
-  * [使用Debugger](#使用Debugger)
+  * [iOS環境安裝](#ios環境-install)
+  * [使用Debugger](#使用debugger)
   * [已知問題](#已知問題)
 - [開發本倉庫項目準備-MacOS](#開發本倉庫項目準備)
   * [安裝及運行流程](#安裝及運行流程)
   * [故障排除](#故障排除)
+    - [Android](#android)
+    - [IOS](#ios)
 - [使用Git的方法](#git方法)
 - [使用的第三方庫](#該項目使用的第三方庫)
 
@@ -30,7 +32,7 @@
 ---
 
 &nbsp;
-### IOS環境 [Install](https://reactnative.dev/docs/environment-setup)
+### iOS環境 [Install](https://reactnative.dev/docs/environment-setup)
 > 基於React Native CLI下的安裝流程
 1. 先安裝`node`包，方便之後使用指令`npm`和`npx`
 ```console
@@ -107,22 +109,34 @@ pod install
 npx react-native run-ios
 ```
 ### 故障排除
+#### Android
 1. Android檔案權限報錯-`Error: spawn ./gradlew EACCES`
 ```console
 cd android
 chmod +x ./gradlew
 xattr -l ./gradlew
 ```
-2.iOS实机调试报错-`Signing for XXX requires a development team. Select a development team in the Signing and Cap Editor`
-请尝试在Xcode中双击Pods，然后在Targets中选择React-Core-AccessibilityResources，找到Singing中的Development Team进行选择。仅在UMAllWhite中选择Development Team无效
 
-3.iOS实机调试报错-`module map file not found`
-请在Xcode选择项目时选择UMAllWhite.xcworkspace打开，不要选择UMAllWhite.xcodeproj
+#### iOS
+1. iOS实机调试报错-`Signing for XXX requires a development team. Select a development team in the Signing and Cap Editor`
+> 请尝试在Xcode中双击Pods，然后在Targets中选择React-Core-AccessibilityResources，找到Singing中的Development Team进行选择。仅在UMAllWhite中选择Development Team无效
 
-4. IOS運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
+2. iOS实机调试报错-`module map file not found`
+> 请在Xcode选择项目时选择UMAllWhite.xcworkspace打开，不要选择UMAllWhite.xcodeproj
+
+3. iOS運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
 ```console
 npx react-native unlink react-native-vector-icons
 本条已经尝试修复，需要后续测试
+```
+
+4. Pod找不到目標工程-`Could not automatically select an Xcode project`
+> 在`ios/Podfile`中加入以下路徑以解決報錯
+```console
+target 'ProjectName' do
+ project './ProjectName.xcodeproj'
+...
+end
 ```
 ---
 
