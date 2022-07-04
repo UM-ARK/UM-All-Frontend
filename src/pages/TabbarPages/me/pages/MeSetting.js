@@ -11,7 +11,6 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
-import {MeScreen} from '../MeScreen';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
