@@ -103,14 +103,46 @@ class ClubDetail extends Component {
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
-                <StatusBar
-                    backgroundColor={'transparent'}
-                    barStyle={'light-content'}
-                    translucent={true}
+                <Header
+                    backgroundColor={COLOR_DIY.bg_color}
+                    leftComponent={
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.goBack()}>
+                            <Ionicons
+                                name="chevron-back-outline"
+                                size={pxToDp(25)}
+                                color={COLOR_DIY.black.main}
+                            />
+                        </TouchableOpacity>
+                    }
+                    centerComponent={{
+                        text: '活動詳情',
+                        style: {
+                            color: COLOR_DIY.black.main,
+                            fontSize: pxToDp(15),
+                        },
+                    }}
+                    statusBarProps={{
+                        backgroundColor: COLOR_DIY.bg_color,
+                        barStyle: 'dark-content',
+                    }}
                 />
 
-                <FastImage source={{uri:imgUrl}} style={{width:'100%', height:'60%'}}></FastImage>
-                <Text style={{alignSelf:'center'}}>{title}</Text>
+                <View style={{alignItems: 'center'}}>
+                    <FastImage
+                        source={{uri: imgUrl}}
+                        style={{
+                            width: '80%',
+                            height: pxToDp(450),
+                            marginTop: pxToDp(30),
+                        }}
+                    />
+
+                    <Text style={{marginTop: pxToDp(10)}}>標題：{title}</Text>
+                    <Text>地點：...</Text>
+                    <Text>時間：...</Text>
+                    <Text>內容：...</Text>
+                </View>
             </View>
         );
     }

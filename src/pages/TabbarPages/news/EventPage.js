@@ -22,6 +22,36 @@ const PREVENT_TOUCH_TIME = 500;
 dataList = [
     {
         // 該活動在數據庫中的id
+        eventID: 8,
+        // 海報鏈接
+        imgUrl: 'https://www.um.edu.mo/wp-content/uploads/2022/06/270879-%E5%85%A8%E7%90%83%E8%A6%96%E9%87%8E%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97-%E4%B8%AD%E8%97%A5%E5%92%8C%E5%A4%A9%E7%84%B6%E7%94%A2%E7%89%A9%E7%9A%84%E5%8D%93%E8%B6%8A%E7%A0%94%E7%A9%B6-%E2%80%93-%E9%9B%BB%E9%87%9D%E6%8A%97%E7%82%8E%E7%9A%84%E7%A5%9E%E7%B6%93%E8%A7%A3%E5%89%96%E5%AD%B8%E5%9F%BA%E7%A4%8E-poster.jpg',
+        // 活動標題
+        title: '全球視野講座系列: 中藥和天然產物的卓越研究 – 電針抗炎的神經解剖學基礎',
+        // 13位毫秒級時間戳
+        timeStamp: 1656482002000,
+    },
+    {
+        // 該活動在數據庫中的id
+        eventID: 7,
+        // 海報鏈接
+        imgUrl: 'https://www.um.edu.mo/wp-content/uploads/2022/06/270706-%E6%99%BA%E6%85%A7%E5%9F%8E%E5%B8%82%E7%89%A9%E8%81%AF%E7%B6%B2%E5%82%91%E5%87%BA%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97%EF%BC%9A%E6%99%BA%E8%83%BD%E5%82%B3%E6%84%9F%E8%88%87%E7%B6%B2%E8%B7%AF%E9%80%9A%E4%BF%A1%E5%B0%88%E9%A1%8C-poster-scaled.jpg',
+        // 活動標題
+        title: '講座：智能傳感與網絡通信',
+        // 13位毫秒級時間戳
+        timeStamp: 1656136402000,
+    },
+    {
+        // 該活動在數據庫中的id
+        eventID: 6,
+        // 海報鏈接
+        imgUrl: 'https://www.um.edu.mo/wp-content/uploads/2022/05/267367-%E5%A4%9A%E5%8A%9F%E8%83%BD%E9%9B%BB%E6%B1%A0%E5%A4%8F%E4%BB%A4%E7%87%9F-2022-poster.jpg',
+        // 活動標題
+        title: '多功能電池夏令營 2022',
+        // 13位毫秒級時間戳
+        timeStamp: 1658210002000,
+    },
+    {
+        // 該活動在數據庫中的id
         eventID: 0,
         // 海報鏈接
         imgUrl: 'https://info.umsu.org.mo/storage/activity_covers/images/7332b858246993976a892b229e5942ab.jpg',
