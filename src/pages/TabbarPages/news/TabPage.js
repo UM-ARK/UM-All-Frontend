@@ -85,7 +85,7 @@ const _renderTabBar = props => {
 export default function TabPage() {
     const layout = useWindowDimensions();
     // 默認選項卡
-    const [index, setIndex] = React.useState(0);
+    const [index, setIndex] = React.useState(1);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
         {key: 'second', title: '活動大廳'},
