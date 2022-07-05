@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
@@ -7,6 +7,7 @@ import {pxToDp} from '../../../../utils/stylesKits';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 // 時間戳轉時間
 function timeTrans(date) {
@@ -59,8 +60,7 @@ class EventCard extends Component {
                         }}
                     />
                 )}
-                <FastImage
-                    source={{uri: imgUrl}}
+                <TouchableOpacity
                     style={{
                         width: pxToDp(160),
                         height: pxToDp(230),
@@ -68,41 +68,49 @@ class EventCard extends Component {
                         overflow: 'hidden',
                         ...viewShadow,
                     }}
-                    resizeMode={FastImage.resizeMode.cover}>
-                    {/* 標題描述 */}
-                    <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={this.handleJumpToDetail}>
+                    <FastImage
+                        source={{uri: imgUrl}}
                         style={{
-                            backgroundColor: white,
-                            position: 'absolute',
-                            bottom: 0,
                             width: '100%',
-                            padding: pxToDp(10),
-                            flexDirection: 'row',
-                            alignItems: 'center',
+                            height: '100%',
                         }}
-                        activeOpacity={0.9}
-                        onPress={this.handleJumpToDetail}
-                        disabled={this.props.touchDisable}>
-                        {/* 標題文字 & 日期 */}
-                        <View style={{width: '90%'}}>
-                            <Text style={{color: black.main}} numberOfLines={3}>
-                                {title}
-                            </Text>
-                            {/* 日期 */}
-                            <Text style={{color: black.third}}>
-                                {timeTrans(timeStamp)}
-                            </Text>
-                        </View>
+                        resizeMode={FastImage.resizeMode.cover}>
+                        {/* 標題描述 */}
+                        <View
+                            style={{
+                                backgroundColor: white,
+                                position: 'absolute',
+                                bottom: 0,
+                                width: '100%',
+                                padding: pxToDp(10),
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            {/* 標題文字 & 日期 */}
+                            <View style={{width: '90%'}}>
+                                <Text
+                                    style={{color: black.main}}
+                                    numberOfLines={3}>
+                                    {title}
+                                </Text>
+                                {/* 日期 */}
+                                <Text style={{color: black.third}}>
+                                    {timeTrans(timeStamp)}
+                                </Text>
+                            </View>
 
-                        {/* 點擊指示圖標 */}
-                        <View>
-                            <Ionicons
-                                name="chevron-forward-outline"
-                                color={black.third}
-                                size={pxToDp(20)}></Ionicons>
+                            {/* 點擊指示圖標 */}
+                            <View>
+                                <Ionicons
+                                    name="chevron-forward-outline"
+                                    color={black.third}
+                                    size={pxToDp(20)}></Ionicons>
+                            </View>
                         </View>
-                    </TouchableOpacity>
-                </FastImage>
+                    </FastImage>
+                </TouchableOpacity>
             </View>
         );
     }

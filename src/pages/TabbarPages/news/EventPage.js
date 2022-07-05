@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet, Dimensions, FlatList} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Dimensions,
+    FlatList,
+    ScrollView,
+} from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
@@ -128,62 +135,23 @@ class EventPage extends Component {
         this.state = {
             leftDataList,
             rightDataList,
-            touchDisable:false,
         };
-    }
-
-    componentWillUnmount() {
-        // 如果存在this.timer，则使用clearTimeout清空。
-        // 如果你使用多个timer，那么用多个变量，或者用个数组来保存引用，然后逐个clear
-        this.timer && clearTimeout(this.timer);
     }
 
     // 社團活動頁下拉刷新事件
     _onRefresh = () => {
         // 請求服務器數據
-        // fetch(...).then(() => {
-        //     this._scrollView.endRefresh();
-        //     this.setState({...});
-        //     this._scrollView.endRefresh();
-        // })
+        // ...
         console.log('觸發刷新');
-        // 停止更新動畫
-        this._scrollView.endRefresh();
     };
 
     render() {
         return (
-            <SpringScrollView
-                directionalLockEnabled={true}
-                onScrollBeginDrag={()=>{
-                    // 清除上一個延時器
-                    this.timer && clearTimeout(this.timer);
-                    this.setState({ touchDisable:true });
-                }}
-                onScrollEndDrag={()=>{
-                    this.setState({ touchDisable:true });
-                    // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
-                    this.timer = setTimeout(() => {
-                        this.setState({ touchDisable:false });
-                    }, PREVENT_TOUCH_TIME);
-                }}
-                showsHorizontalScrollIndicator={false}
-                ref={ref => (this._scrollView = ref)}
-                onRefresh={this._onRefresh}
-                // 組件自帶的下拉刷新動畫組件
-                refreshHeader={WithLastDateHeader}
-                // 組件自帶的上拉加載動畫組件
-                loadingFooter={WithLastDateFooter}
-                // 數據是否加載完成
-                allLoaded={this.state.allLoaded}
-                onLoading={() => {
-                    // fetch(...).then(()=>{
-                    //     this._scrollView.endLoading();
-                    //     this.setState({allLoaded:true, ...});
-                    // }).catch();
-                    console.log('上拉加載更多');
-                    this.setState({allLoaded: true});
-                    this._scrollView.endLoading();
+            <ScrollView
+                onEndReachedThreshold={0.3}
+                // 到底時自動獲取更多
+                onEndReached={() => {
+                    console.log('到底');
                 }}>
                 <View
                     style={{
@@ -200,12 +168,9 @@ class EventPage extends Component {
                                 return (
                                     <EventCard
                                         data={item}
-                                        style={s.cardContainer}
-                                        touchDisable={this.state.touchDisable}
-                                    ></EventCard>
+                                        style={s.cardContainer}></EventCard>
                                 );
                             }}
-                            keyExtractor={(_, index) => index}
                             scrollEnabled={false}
                         />
                     </View>
@@ -216,28 +181,23 @@ class EventPage extends Component {
                             marginRight: pxToDp(10),
                             marginTop: pxToDp(50),
                         }}>
-                        {/* <View style={{height:pxToDp(80), width:'100%'}}>
-							<Text>點擊卡片可以看到更詳細的說明哦~</Text>
-						</View> */}
                         <FlatList
                             data={this.state.rightDataList}
                             renderItem={({item}) => {
                                 return (
                                     <EventCard
                                         data={item}
-                                        style={s.cardContainer}
-                                        touchDisable={this.state.touchDisable}
-                                    ></EventCard>
+                                        style={s.cardContainer}></EventCard>
                                 );
                             }}
-                            keyExtractor={(_, index) => index}
                             scrollEnabled={false}
                         />
                     </View>
+
+                    {/* 防止底部遮擋 */}
+                    <View style={{marginBottom: pxToDp(200)}} />
                 </View>
-                <Text>{'\n'}</Text>
-                <Text>{'\n'}</Text>
-            </SpringScrollView>
+            </ScrollView>
         );
     }
 }
@@ -246,7 +206,7 @@ const s = StyleSheet.create({
     // 活動卡片間距
     cardContainer: {
         marginVertical: pxToDp(8),
-        marginHorizontal: pxToDp(10)
+        marginHorizontal: pxToDp(10),
     },
 });
 
