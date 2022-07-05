@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, Dimensions} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
@@ -8,6 +8,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
 // 時間戳轉時間
 function timeTrans(date) {
@@ -25,6 +28,8 @@ function timeTrans(date) {
         date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
     return M + '/' + D;
 }
+
+const IMAGE_SIZE = pxToDp(PAGE_WIDTH / 2 - 20);
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -62,8 +67,6 @@ class EventCard extends Component {
                 )}
                 <TouchableOpacity
                     style={{
-                        width: pxToDp(160),
-                        height: pxToDp(230),
                         borderRadius: pxToDp(8),
                         overflow: 'hidden',
                         ...viewShadow,
@@ -73,43 +76,40 @@ class EventCard extends Component {
                     <FastImage
                         source={{uri: imgUrl}}
                         style={{
-                            width: '100%',
-                            height: '100%',
+                            width: IMAGE_SIZE,
+                            height: IMAGE_SIZE,
                         }}
-                        resizeMode={FastImage.resizeMode.cover}>
-                        {/* 標題描述 */}
-                        <View
-                            style={{
-                                backgroundColor: white,
-                                position: 'absolute',
-                                bottom: 0,
-                                width: '100%',
-                                padding: pxToDp(10),
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}>
-                            {/* 標題文字 & 日期 */}
-                            <View style={{width: '90%'}}>
-                                <Text
-                                    style={{color: black.main}}
-                                    numberOfLines={3}>
-                                    {title}
-                                </Text>
-                                {/* 日期 */}
-                                <Text style={{color: black.third}}>
-                                    {timeTrans(timeStamp)}
-                                </Text>
-                            </View>
+                        resizeMode={FastImage.resizeMode.cover}
+                    />
 
-                            {/* 點擊指示圖標 */}
-                            <View>
-                                <Ionicons
-                                    name="chevron-forward-outline"
-                                    color={black.third}
-                                    size={pxToDp(20)}></Ionicons>
-                            </View>
+                    {/* 標題描述 */}
+                    <View
+                        style={{
+                            backgroundColor: white,
+                            width: pxToDp(PAGE_WIDTH / 2 - 20),
+                            padding: pxToDp(10),
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        {/* 標題文字 & 日期 */}
+                        <View style={{width: '90%'}}>
+                            <Text style={{color: black.main}} numberOfLines={3}>
+                                {title}
+                            </Text>
+                            {/* 日期 */}
+                            <Text style={{color: black.third}}>
+                                {timeTrans(timeStamp)}
+                            </Text>
                         </View>
-                    </FastImage>
+
+                        {/* 點擊指示圖標 */}
+                        <View>
+                            <Ionicons
+                                name="chevron-forward-outline"
+                                color={black.third}
+                                size={pxToDp(20)}></Ionicons>
+                        </View>
+                    </View>
                 </TouchableOpacity>
             </View>
         );
