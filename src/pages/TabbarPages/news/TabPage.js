@@ -8,16 +8,12 @@ import {
     StyleSheet,
 } from 'react-native';
 import {TabView, SceneMap} from 'react-native-tab-view';
-import {useToast} from 'native-base';
 
 import NewsPage from './NewsPage';
 import EventPage from './EventPage';
 import ClubPage from './ClubPage';
-import { pxToDp } from "../../../utils/stylesKits";
-import { COLOR_DIY } from "../../../utils/uiMap";
-
-// 已展示提醒的標識，展示過就不展示了。
-let toastHaveShow = [false, false];
+import {pxToDp} from '../../../utils/stylesKits';
+import {COLOR_DIY} from '../../../utils/uiMap';
 
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
@@ -49,13 +45,7 @@ const _renderTabBar = props => {
                 const opacity = props.position.interpolate({
                     inputRange,
                     outputRange: inputRange.map(inputIndex =>
-                        inputIndex === i ? 1 : 0.5,
-                    ),
-                });
-                const color = props.position.interpolate({
-                    inputRange,
-                    outputRange: inputRange.map(inputIndex =>
-                        inputIndex === i ? '#fff' : '#005F95',
+                        inputIndex === i ? 1 : 0.6,
                     ),
                 });
 
@@ -63,34 +53,28 @@ const _renderTabBar = props => {
                     <TouchableOpacity
                         style={{
                             alignItems: 'center',
-                            borderRadius: 15,
-                            borderWidth: 1,
-                            borderColor: '#005F95',
-                            backgroundColor:
-                                currentTabIndex == i ? '#005F95' : COLOR_DIY.bg_color,
-                            paddingHorizontal: 10,
-                            paddingVertical: 2,
-                            marginVertical: 5,
-                            marginHorizontal:pxToDp(10),
+                            borderRadius: pxToDp(15),
+                            borderWidth: pxToDp(1),
+                            borderColor: COLOR_DIY.themeColor,
+                            // backgroundColor:
+                            //     currentTabIndex == i
+                            //         ? COLOR_DIY.themeColor
+                            //         : COLOR_DIY.bg_color,
+                            paddingHorizontal: pxToDp(10),
+                            paddingVertical: pxToDp(2),
+                            marginVertical: pxToDp(5),
+                            marginHorizontal: pxToDp(10),
                         }}
                         onPress={() => props.jumpTo(route.key)}>
-                        {/* <Animated.Text
+                        <Animated.Text
                             style={{
-                                // opacity,
-                                color:
-                                    currentTabIndex == i ? '#fff' : '#005F95',
-                                fontSize: 15,
+                                opacity,
+                                // TODO: 使用判斷將會很卡，為了優化，必須使用Animated的方式
+                                color: COLOR_DIY.themeColor,
+                                fontSize: pxToDp(15),
                             }}>
                             {route.title}
-                        </Animated.Text> */}
-                        <Text
-                            style={{
-                                color:
-                                    currentTabIndex == i ? '#fff' : '#005F95',
-                                fontSize: 15,
-                            }}>
-                            {route.title}
-                        </Text>
+                        </Animated.Text>
                     </TouchableOpacity>
                 );
             })}
@@ -99,16 +83,12 @@ const _renderTabBar = props => {
 };
 
 export default function TabPage() {
-    // Toast彈出提示組件
-    const toast = useToast();
-
     const layout = useWindowDimensions();
-
     // 默認選項卡
-    const [index, setIndex] = React.useState(1);
+    const [index, setIndex] = React.useState(0);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
-        {key: 'second', title: '社團活動'},
+        {key: 'second', title: '活動大廳'},
         {key: 'third', title: '社團大廳'},
     ]);
 
@@ -116,23 +96,7 @@ export default function TabPage() {
         <TabView
             navigationState={{index, routes}}
             renderScene={renderScene}
-            onIndexChange={index => {
-                // 滑到社團活動、社團大廳頁的時候觸發一次Toast提醒可進入詳情頁
-                if (!toastHaveShow[0] && index == 1) {
-                    toastHaveShow[0] = true;
-                    toast.show({
-                        description: '點擊卡片可以查看詳情！',
-                        placement: 'top',
-                    });
-                } else if (!toastHaveShow[1] && index == 2) {
-                    toastHaveShow[1] = true;
-                    toast.show({
-                        description: '社團LOGO，點擊直達！',
-                        placement: 'top',
-                    });
-                }
-                setIndex(index);
-            }}
+            onIndexChange={index => setIndex(index)}
             initialLayout={{width: layout.width}}
             renderTabBar={props => _renderTabBar(props)}
         />
