@@ -17,11 +17,6 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
-import {SpringScrollView} from 'react-native-spring-scrollview';
-import {
-    WithLastDateHeader,
-    WithLastDateFooter,
-} from 'react-native-spring-scrollview/Customize';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
