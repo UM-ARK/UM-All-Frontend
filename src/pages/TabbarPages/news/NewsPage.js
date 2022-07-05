@@ -3,8 +3,8 @@ import {
     View,
     Text,
     VirtualizedList,
-    TouchableOpacity,
     TouchableWithoutFeedback,
+    Dimensions,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
@@ -15,6 +15,17 @@ import {pxToDp} from '../../../utils/stylesKits';
 import FastImage from 'react-native-fast-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {NavigationContext} from '@react-navigation/native';
+import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
+import {SpringScrollView} from 'react-native-spring-scrollview';
+import {
+    WithLastDateHeader,
+    WithLastDateFooter,
+} from 'react-native-spring-scrollview/Customize';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -29,7 +40,35 @@ const getItemCount = data => {
     return data.length;
 };
 
-class Test extends Component {
+// loading時的骨架屏
+const MyLoader = props => (
+    <ContentLoader
+        speed={2}
+        width={PAGE_WIDTH}
+        height={pxToDp(84)}
+        viewBox="0 0 476 124"
+        backgroundColor="#ffffff"
+        foregroundColor={COLOR_DIY.themeColor}
+        {...props}>
+        <Rect x="0" y="0" rx="3" ry="3" width="67" height="11" />
+        <Rect x="76" y="0" rx="3" ry="3" width="140" height="11" />
+        <Rect x="127" y="48" rx="3" ry="3" width="53" height="11" />
+        <Rect x="187" y="48" rx="3" ry="3" width="72" height="11" />
+        <Rect x="18" y="48" rx="3" ry="3" width="100" height="11" />
+        <Rect x="0" y="71" rx="3" ry="3" width="37" height="11" />
+        <Rect x="18" y="23" rx="3" ry="3" width="140" height="11" />
+        <Rect x="166" y="23" rx="3" ry="3" width="173" height="11" />
+    </ContentLoader>
+);
+
+// 頭條新聞數據Obj，不要刪掉，作為全局變量給另一個func調用
+let topNews = {};
+
+class NewsPage extends Component {
+    // NavigationContext組件可以在非基頁面拿到路由信息
+    // this.context === this.props.navigation 等同效果
+    static contextType = NavigationContext;
+
     constructor() {
         super();
         this.state = {
@@ -62,13 +101,24 @@ class Test extends Component {
         } catch (error) {
             console.log(error);
         } finally {
-            // 頭條指定為當天最新的新聞
-            let topNews = res[0];
-            // 非頭條的新聞渲染進新聞列表
+            // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
+            let chooseTopNewsIndex = 0;
+            while (true) {
+                if ('imageUrls' in res[chooseTopNewsIndex].common) {
+                    // 有圖
+                    break;
+                } else {
+                    // 沒圖
+                    chooseTopNewsIndex++;
+                }
+            }
+
+            // 頭條指定為當天最新的、有圖的新聞
+            topNews = res[chooseTopNewsIndex];
+            res.splice(chooseTopNewsIndex, 1); // 刪除頭條新聞的數據，剩下的全部渲染到新聞列表
+            // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
             let newsList = [];
-            // 指定截取多少條數據，最多100條
-            let numOfNews = 100;
-            for (let i = 1; i < numOfNews; i++) {
+            for (let i = 0; i < res.length; i++) {
                 if (res[i].details.length > 0) {
                     newsList.push(res[i]);
                 }
@@ -126,64 +176,72 @@ class Test extends Component {
                 <View style={{width: '100%'}}>
                     {/* 圖片背景 */}
                     {this.state.topNews.imageUrls && (
-                        <FastImage
-                            source={{uri: imageUrls[0]}}
-                            style={{
-                                width: '100%',
-                                height: '100%',
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => {
+                                this.context.navigate('NewsDetail', {
+                                    data: topNews,
+                                });
                             }}>
-                            {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                            <View
+                            <FastImage
+                                source={{uri: imageUrls[0]}}
                                 style={{
                                     width: '100%',
                                     height: '100%',
-                                    backgroundColor: 'rgba(0,0,0,0.5)',
-                                    padding: pxToDp(15),
-                                    justifyContent: 'flex-end',
                                 }}>
-                                {/* Top Story字樣 */}
+                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                 <View
                                     style={{
-                                        position: 'absolute',
-                                        top: pxToDp(10),
-                                        left: pxToDp(15),
-                                    }}>
-                                    <Text
-                                        style={{
-                                            color: white,
-                                            fontWeight: 'bold',
-                                            fontSize: pxToDp(20),
-                                        }}>
-                                        Top Story @ UM
-                                    </Text>
-                                </View>
-
-                                {/* 標題 */}
-                                <View
-                                    style={{
-                                        alignSelf: 'center',
-                                        justifyContent: 'center',
                                         width: '100%',
+                                        height: '100%',
+                                        backgroundColor: 'rgba(0,0,0,0.5)',
+                                        padding: pxToDp(15),
+                                        justifyContent: 'flex-end',
                                     }}>
-                                    <Text
+                                    {/* Top Story字樣 */}
+                                    <View
                                         style={{
-                                            color: white,
-                                            fontWeight: 'bold',
-                                            fontSize: pxToDp(18),
+                                            position: 'absolute',
+                                            top: pxToDp(10),
+                                            left: pxToDp(15),
                                         }}>
-                                        {title_en}
-                                    </Text>
-                                    <Text
+                                        <Text
+                                            style={{
+                                                color: white,
+                                                fontWeight: 'bold',
+                                                fontSize: pxToDp(20),
+                                            }}>
+                                            Top Story @ UM
+                                        </Text>
+                                    </View>
+
+                                    {/* 標題 */}
+                                    <View
                                         style={{
-                                            color: white,
-                                            fontWeight: 'bold',
-                                            fontSize: pxToDp(13),
+                                            alignSelf: 'center',
+                                            justifyContent: 'center',
+                                            width: '100%',
                                         }}>
-                                        {title_cn}
-                                    </Text>
+                                        <Text
+                                            style={{
+                                                color: white,
+                                                fontWeight: 'bold',
+                                                fontSize: pxToDp(18),
+                                            }}>
+                                            {title_en}
+                                        </Text>
+                                        <Text
+                                            style={{
+                                                color: white,
+                                                fontWeight: 'bold',
+                                                fontSize: pxToDp(13),
+                                            }}>
+                                            {title_cn}
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
-                        </FastImage>
+                            </FastImage>
+                        </TouchableOpacity>
                     )}
                 </View>
             </View>
@@ -193,7 +251,6 @@ class Test extends Component {
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
         const {white, black, viewShadow} = COLOR_DIY;
-
         return (
             <Interactable.View
                 style={{
@@ -219,6 +276,7 @@ class Test extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
+                        console.log('回頂！！');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.refs.virtualizedList.scrollToOffset({
                             x: 0,
@@ -247,10 +305,20 @@ class Test extends Component {
         );
     };
 
+    // 下拉刷新事件
+    _onRefresh = () => {
+        // 請求澳大新聞API
+        this.setState({isLoading: true});
+        this.getData();
+        console.log('觸發刷新');
+        // 停止更新動畫
+        this._scrollView.endRefresh();
+    };
+
     render() {
         // 解構全局ui設計顏色
         const {white, black, viewShadow} = COLOR_DIY;
-
+        // TODO: 增加 下拉刷新
         return (
             <View
                 style={{
@@ -262,12 +330,24 @@ class Test extends Component {
                 {this.renderGoTopButton()}
 
                 {/* 新聞列表 */}
-                {!this.state.isLoading && (
+                {/* 判斷是否加載中 */}
+                {this.state.isLoading ? (
+                    // 渲染Loading時的骨架屏
+                    <View>
+                        {MyLoader()}
+                        {MyLoader()}
+                        {MyLoader()}
+                        {MyLoader()}
+                        {MyLoader()}
+                        {MyLoader()}
+                    </View>
+                ) : (
+                    // 渲染新聞列表
                     <VirtualizedList
                         data={this.state.newsList}
                         ref={'virtualizedList'}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
-                        initialNumToRender={4}
+                        initialNumToRender={3}
                         renderItem={({item}) => {
                             return <NewsCard data={item}></NewsCard>;
                         }}
@@ -277,10 +357,20 @@ class Test extends Component {
                         getItemCount={getItemCount}
                         // 列表頭部渲染的組件 - 頭條新聞
                         ListHeaderComponent={this.renderTopNews}
+                        // 列表底部渲染，防止Tabbar遮擋
+                        ListFooterComponent={() => (
+                            <View style={{marginTop: pxToDp(200)}}></View>
+                        )}
+                        onRefresh={() => {
+                            // 展示Loading標識
+                            this.setState({isLoading: true});
+                            this.getData();
+                        }}
+                        refreshing={this.state.isLoading}
                     />
                 )}
             </View>
         );
     }
 }
-export default Test;
+export default NewsPage;
