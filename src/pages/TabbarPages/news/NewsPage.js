@@ -1,11 +1,5 @@
 import React, {Component} from 'react';
-import {
-    View,
-    Text,
-    VirtualizedList,
-    TouchableWithoutFeedback,
-    Dimensions,
-} from 'react-native';
+import {View, Text, VirtualizedList, Dimensions} from 'react-native';
 
 import NewsCard from './components/NewsCard';
 
@@ -17,7 +11,10 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -35,24 +32,24 @@ const getItemCount = data => {
     return data.length;
 };
 
+// 渲染幾個骨架屏
+const renderLoader = new Array(parseInt(PAGE_HEIGHT / 200));
+renderLoader.fill(0);
+console.log(renderLoader);
 // loading時的骨架屏
-const MyLoader = props => (
+const NewsLoader = props => (
     <ContentLoader
-        speed={2}
+        viewBox="0 0 400 200"
         width={PAGE_WIDTH}
-        height={pxToDp(84)}
-        viewBox="0 0 476 124"
-        backgroundColor="#ffffff"
-        foregroundColor={COLOR_DIY.themeColor}
+        height={200}
+        title="Loading news..."
         {...props}>
-        <Rect x="0" y="0" rx="3" ry="3" width="67" height="11" />
-        <Rect x="76" y="0" rx="3" ry="3" width="140" height="11" />
-        <Rect x="127" y="48" rx="3" ry="3" width="53" height="11" />
-        <Rect x="187" y="48" rx="3" ry="3" width="72" height="11" />
-        <Rect x="18" y="48" rx="3" ry="3" width="100" height="11" />
-        <Rect x="0" y="71" rx="3" ry="3" width="37" height="11" />
-        <Rect x="18" y="23" rx="3" ry="3" width="140" height="11" />
-        <Rect x="166" y="23" rx="3" ry="3" width="173" height="11" />
+        <Rect x="42.84" y="9.93" rx="5" ry="5" width="143.55" height="86.59" />
+        <Rect x="192.84" y="9.67" rx="0" ry="0" width="148.72" height="12.12" />
+        <Rect x="192.84" y="25.67" rx="0" ry="0" width="89" height="9" />
+        <Rect x="42.84" y="107" rx="5" ry="5" width="143.55" height="86.59" />
+        <Rect x="192.84" y="107" rx="0" ry="0" width="148.72" height="12.12" />
+        <Rect x="192.84" y="123" rx="0" ry="0" width="89" height="9" />
     </ContentLoader>
 );
 
@@ -255,19 +252,19 @@ class NewsPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -140, y: -250},
-                    {x: 140, y: -250},
-                    {x: -140, y: -120},
-                    {x: 140, y: -120},
-                    {x: -140, y: 0},
-                    {x: 140, y: 0},
-                    {x: -140, y: 120},
-                    {x: 140, y: 120},
-                    {x: -140, y: 250},
-                    {x: 140, y: 250},
+                    {x: -pxToDp(140), y: -pxToDp(220)},
+                    {x: pxToDp(140), y: -pxToDp(220)},
+                    {x: -pxToDp(140), y: -pxToDp(120)},
+                    {x: pxToDp(140), y: -pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(0)},
+                    {x: pxToDp(140), y: pxToDp(0)},
+                    {x: -pxToDp(140), y: pxToDp(120)},
+                    {x: pxToDp(140), y: pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(220)},
+                    {x: pxToDp(140), y: pxToDp(220)},
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: 140, y: 250}}>
+                initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -284,10 +281,10 @@ class NewsPage extends Component {
                             width: pxToDp(50),
                             height: pxToDp(50),
                             backgroundColor: COLOR_DIY.white,
+                            backgroundColor: COLOR_DIY.white,
                             borderRadius: pxToDp(50),
                             justifyContent: 'center',
                             alignItems: 'center',
-                            ...viewShadow,
                         }}>
                         <Ionicons
                             name={'chevron-up'}
@@ -312,7 +309,7 @@ class NewsPage extends Component {
 
     render() {
         // 解構全局ui設計顏色
-        const {white, black, viewShadow} = COLOR_DIY;
+        const {white, black, viewShadow, bg_color} = COLOR_DIY;
         // TODO: 增加 下拉刷新
         return (
             <View
@@ -328,13 +325,8 @@ class NewsPage extends Component {
                 {/* 判斷是否加載中 */}
                 {this.state.isLoading ? (
                     // 渲染Loading時的骨架屏
-                    <View>
-                        {MyLoader()}
-                        {MyLoader()}
-                        {MyLoader()}
-                        {MyLoader()}
-                        {MyLoader()}
-                        {MyLoader()}
+                    <View style={{backgroundColor: bg_color, flex: 1}}>
+                        {renderLoader.map(() => NewsLoader())}
                     </View>
                 ) : (
                     // 渲染新聞列表

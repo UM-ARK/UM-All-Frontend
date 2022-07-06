@@ -29,7 +29,7 @@ function timeTrans(date) {
     return M + '/' + D;
 }
 
-const IMAGE_SIZE = pxToDp(PAGE_WIDTH / 2 - 20);
+const IMAGE_SIZE = pxToDp(PAGE_WIDTH / 2 - 30);
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -86,7 +86,7 @@ class EventCard extends Component {
                     <View
                         style={{
                             backgroundColor: white,
-                            width: pxToDp(PAGE_WIDTH / 2 - 20),
+                            width: IMAGE_SIZE,
                             padding: pxToDp(10),
                             flexDirection: 'row',
                             alignItems: 'center',

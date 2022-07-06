@@ -16,11 +16,38 @@ import EventCard from './components/EventCard';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-// 防誤觸時間，理論越長越穩
-const PREVENT_TOUCH_TIME = 500;
+// 渲染幾次骨架屏
+const renderLoader = new Array(parseInt(PAGE_HEIGHT / 150));
+renderLoader.fill(0);
+// Loading時的骨架屏
+const EventsLoader = props => (
+    <ContentLoader
+        width={PAGE_WIDTH}
+        height={150}
+        viewBox="0 0 700 300"
+        backgroundColor="#f5f5f5"
+        foregroundColor="#ccc"
+        {...props}>
+        <Rect x="4" y="8" rx="3" ry="3" width="7" height="288" />
+        <Rect x="6" y="289" rx="3" ry="3" width="669" height="8" />
+        <Rect x="670" y="9" rx="3" ry="3" width="6" height="285" />
+        <Rect x="55" y="42" rx="16" ry="16" width="274" height="216" />
+        <Rect x="412" y="113" rx="3" ry="3" width="102" height="7" />
+        <Rect x="402" y="91" rx="3" ry="3" width="178" height="6" />
+        <Rect x="405" y="139" rx="3" ry="3" width="178" height="6" />
+        <Rect x="416" y="162" rx="3" ry="3" width="102" height="7" />
+        <Rect x="405" y="189" rx="3" ry="3" width="178" height="6" />
+        <Rect x="5" y="8" rx="3" ry="3" width="669" height="7" />
+        <Rect x="406" y="223" rx="14" ry="14" width="72" height="32" />
+        <Rect x="505" y="224" rx="14" ry="14" width="72" height="32" />
+        <Rect x="376" y="41" rx="3" ry="3" width="231" height="29" />
+    </ContentLoader>
+);
 
 // 模擬數據庫data
 dataList = [
@@ -132,6 +159,8 @@ class EventPage extends Component {
         this.state = {
             leftDataList,
             rightDataList,
+            // TODO: 數據加載，要默認True
+            isLoading: false,
         };
     }
 
@@ -147,19 +176,45 @@ class EventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -140, y: -250},
-                    {x: 140, y: -250},
-                    {x: -140, y: -120},
-                    {x: 140, y: -120},
-                    {x: -140, y: 0},
-                    {x: 140, y: 0},
-                    {x: -140, y: 120},
-                    {x: 140, y: 120},
-                    {x: -140, y: 250},
-                    {x: 140, y: 250},
+                    {x: -pxToDp(140), y: -pxToDp(220)},
+                    {x: pxToDp(140), y: -pxToDp(220)},
+                    {x: -pxToDp(140), y: -pxToDp(120)},
+                    {x: pxToDp(140), y: -pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(0)},
+                    {x: pxToDp(140), y: pxToDp(0)},
+                    {x: -pxToDp(140), y: pxToDp(120)},
+                    {x: pxToDp(140), y: pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(220)},
+                    {x: pxToDp(140), y: pxToDp(220)},
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: 140, y: 250}}>
+                initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
+                {/* 懸浮吸附按鈕，刷新 */}
+                <TouchableWithoutFeedback
+                    onPress={() => {
+                        // 刷新頁面，獲取最新數據
+                        console.log('刷新');
+                        this.setState({isLoading: !this.state.isLoading});
+                    }}>
+                    <View
+                        style={{
+                            width: pxToDp(50),
+                            height: pxToDp(50),
+                            backgroundColor: COLOR_DIY.white,
+                            borderRadius: pxToDp(50),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        <Ionicons
+                            name={'refresh-outline'}
+                            size={pxToDp(35)}
+                            color={black.main}
+                        />
+                    </View>
+                </TouchableWithoutFeedback>
+
+                <View style={{marginTop: pxToDp(5)}}></View>
+
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -191,6 +246,51 @@ class EventPage extends Component {
         );
     };
 
+    // 渲染主要內容
+    renderPage = () => {
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    width: '100%',
+                    backgroundColor: COLOR_DIY.bg_color,
+                    justifyContent: 'space-around',
+                }}>
+                {/* 左側的列 放置雙數下標的圖片 從0開始 */}
+                <View>
+                    <FlatList
+                        data={this.state.leftDataList}
+                        renderItem={({item}) => {
+                            return (
+                                <EventCard
+                                    data={item}
+                                    style={s.cardContainer}></EventCard>
+                            );
+                        }}
+                        scrollEnabled={false}
+                    />
+                </View>
+
+                {/* 右側的列 放置單數下標的圖片 */}
+                <View>
+                    <FlatList
+                        data={this.state.rightDataList}
+                        renderItem={({item}) => {
+                            return (
+                                <EventCard
+                                    data={item}
+                                    style={s.cardContainer}></EventCard>
+                            );
+                        }}
+                        scrollEnabled={false}
+                        style={{flex: 1}}
+                    />
+                </View>
+            </View>
+        );
+    };
+
     render() {
         return (
             <View
@@ -202,48 +302,28 @@ class EventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
 
-                {/* 仿瀑布屏展示 */}
-                <ScrollView ref={'scrollView'}>
-                    <View
-                        style={{
-                            flex: 1,
-                            flexDirection: 'row',
-                            backgroundColor: COLOR_DIY.bg_color,
-                            justifyContent: 'space-around',
-                        }}>
-                        {/* 左側的列 放置雙數下標的圖片 從0開始 */}
-                        <View>
-                            <FlatList
-                                data={this.state.leftDataList}
-                                renderItem={({item}) => {
-                                    return (
-                                        <EventCard
-                                            data={item}
-                                            style={s.cardContainer}></EventCard>
-                                    );
-                                }}
-                                scrollEnabled={false}
-                            />
+                <View style={{flex: 1, width: '100%'}}>
+                    {/* 加載狀態渲染骨架屏 */}
+                    {this.state.isLoading ? (
+                        <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: COLOR_DIY.bg_color,
+                                padding: pxToDp(10),
+                            }}>
+                            {renderLoader.map(() => EventsLoader())}
                         </View>
+                    ) : (
+                        <ScrollView ref={'scrollView'} style={{width: '100%'}}>
+                            {/* 仿瀑布屏展示 */}
+                            {/* 渲染主要內容 */}
+                            {this.renderPage()}
 
-                        {/* 右側的列 放置單數下標的圖片 */}
-                        <View>
-                            <FlatList
-                                data={this.state.rightDataList}
-                                renderItem={({item}) => {
-                                    return (
-                                        <EventCard
-                                            data={item}
-                                            style={s.cardContainer}></EventCard>
-                                    );
-                                }}
-                                scrollEnabled={false}
-                            />
-                        </View>
-                    </View>
-                    {/* 防止底部遮擋 */}
-                    <View style={{marginBottom: pxToDp(50)}} />
-                </ScrollView>
+                            {/* 防止底部遮擋 */}
+                            <View style={{marginBottom: pxToDp(50)}} />
+                        </ScrollView>
+                    )}
+                </View>
             </View>
         );
     }
@@ -253,7 +333,7 @@ const s = StyleSheet.create({
     // 活動卡片間距
     cardContainer: {
         marginVertical: pxToDp(6),
-        marginHorizontal: pxToDp(6),
+        marginHorizontal: pxToDp(3),
     },
 });
 
