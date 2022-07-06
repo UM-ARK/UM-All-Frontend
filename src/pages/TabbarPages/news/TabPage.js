@@ -17,6 +17,7 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import { convertAbsoluteToRem } from 'native-base/lib/typescript/theme/v33x-theme/tools';
 import { Dimensions } from 'react-native';
 import { transform } from '@babel/core';
+import ScrollAnimation, { getTranslateX } from './components/ScrollAnimation';
 
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
@@ -43,7 +44,6 @@ const _renderTabBar = props => {
                 flexDirection: 'row',
                 justifyContent: 'center',
             }}>
-                {console.log(props)}
             {props.navigationState.routes.map((route, i) => {
                 // 定義Tab轉換的動畫 - 半透明未選中文字 - 未使用
                 const opacity = props.position.interpolate({
@@ -53,73 +53,7 @@ const _renderTabBar = props => {
                     ),
                 });
 
-                const getTranslateX = (selectedIndex, componentIndex) => {
-                    if(selectedIndex == 0) {
-                        if(componentIndex == 0) {
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [0,100,200],
-                            });
-                        }
-                        else if(componentIndex == 1) {
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [-220,0,200],
-                            });
-                        }
-                        else if(componentIndex == 2) {
-
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [-200,-200,0],
-                            });
-                        }
-                    }
-                    else if(selectedIndex == 1) {
-                        if(componentIndex == 0) {
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [0,60,60],
-                            });
-                        }
-                        else if(componentIndex == 1) {
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [-200,0,100],
-                            });
-                        }
-                        else if(componentIndex == 2) {
-
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [-200,-200,0],
-                            });
-                        }
-                    }
-                    else{ //else if(selectedIndex == 2)
-                        if(componentIndex == 0) {
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [0,200,200],
-                            });
-                        }
-                        else if(componentIndex == 1) {
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [-200,0,100],
-                            });
-                        }
-                        else if(componentIndex == 2) {
-
-                            return props.position.interpolate({
-                                inputRange,
-                                outputRange: [-300,-200,0],
-                            });
-                        }
-                    }
-                }
-
-                const translateX = getTranslateX(props.navigationState.index, i);
+                const translateX = getTranslateX(props.navigationState.index, i, props, inputRange);
 
                 return (
                     <>
@@ -148,21 +82,8 @@ const _renderTabBar = props => {
                                 fontSize: pxToDp(15),
                             }}>
                             {route.title}
-                            {console.log(route.title.length)}
                         </Animated.Text>
-                        <Animated.View style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: 200, //route.title.length * 50,
-                            height: 30,
-                            zIndex: -100,
-                            backgroundColor: 'lightblue',
-                            transform: [{
-                                translateX
-                            }],
-                            // display: props.navigationState.index == i ? '' : 'none',
-                        }}></Animated.View>
+                        <ScrollAnimation translateX={translateX}/>
                     </TouchableOpacity>
                     </>
                 );
