@@ -9,16 +9,19 @@ import {COLOR_DIY} from './utils/uiMap';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
+
+import MeScreen from './pages/TabbarPages/me'
 import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
-import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
-import AboutUs from './pages/TabbarPages/me/pages/AboutUs'
 import MyFollow from './pages/TabbarPages/me/pages/MyFollow'
 import Reminder from './pages/TabbarPages/me/pages/Reminder'
-import MeScreen from './pages/TabbarPages/me/MeScreen'
-import Logining from './pages/TabbarPages/me/index'
+import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
+import AboutUs from './pages/TabbarPages/me/pages/AboutUs'
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
+import NewsDetail from './pages/TabbarPages/news/pages/NewsDetail'
+
+import ChatDetail from './pages/TabbarPages/message/ChatDetail'
 
 import SportFacility from './pages/Features/SportFacility';
 import Map from './pages/Features/Map';
@@ -26,6 +29,7 @@ import UMWhole from './pages/Features/UMWhole';
 import What2Reg from './pages/Features/What2Reg';
 import Scholarship from './pages/Features/Scholarship';
 import Exchange from './pages/Features/Exchange';
+import Bus from './pages/Features/Bus';
 
 import TestScreen from '../test/test'
 
@@ -47,13 +51,17 @@ class Nav extends Component {
                 {/* 資訊頁 */}
                 <Stack.Screen name="ClubDetail"     component={ClubDetail} />
                 <Stack.Screen name="EventDetail"     component={EventDetail} />
+                <Stack.Screen name="NewsDetail"     component={NewsDetail} />
+
+                {/* 信息頁 */}
+                {/* 信息詳情 */}
+                <Stack.Screen name="ChatDetail"         component={ChatDetail}/>
 
                 {/* 我的頁 */}
                 <Stack.Screen name="AboutUs"         component={AboutUs}/>
                 <Stack.Screen name="MyFollow"        component={MyFollow}/>
                 <Stack.Screen name="Reminder"        component={Reminder}/>
                 <Stack.Screen name="MeScreen"        component={MeScreen}/>
-                <Stack.Screen name="Logining"        component={Logining}/>
                 {/* 設置頁 */}
                 <Stack.Screen name="MeSetting"     component={MeSetting} />
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
@@ -71,6 +79,8 @@ class Nav extends Component {
                 <Stack.Screen name="UMWhole"     component={UMWhole} />
                 {/* 澳大選咩課 */}
                 <Stack.Screen name="What2Reg"     component={What2Reg} />
+                {/* 校園巴士報站 */}
+                <Stack.Screen name="Bus"     component={Bus} />
 
                 {/* 測試頁 */}
                 <Stack.Screen name="TestScreen"     component={TestScreen} />

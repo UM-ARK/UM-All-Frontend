@@ -11,8 +11,6 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
-import {MeScreen} from '../MeScreen';
-import {Logining} from '../index'
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -247,7 +245,7 @@ class AppSetting extends Component {
                         position:'absolute',
                         bottom:pxToDp(40),   
                         alignSelf:'center'                 
-                }} onPress={() => this.props.navigation.navigate('Logining')}>
+                }} onPress={() => alert('設置全局登錄狀態為未登錄')}>
                     <Text style={{
                         fontSize:20,
                         alignSelf:'center',

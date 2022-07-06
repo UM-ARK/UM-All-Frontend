@@ -27,8 +27,8 @@ export default class HomeScreen extends Component {
         // 首頁輪播圖數據
         carouselImagesArr: [
             {
-                title: '三月福利',
-                uri: 'https://info.umsu.org.mo/storage/activity_covers/images/7332b858246993976a892b229e5942ab.jpg',
+                title: '澳大對外暫時僅提供有限度服務',
+                uri: 'https://www.um.edu.mo/wp-content/uploads/2022/07/271267-270507-1.jpeg',
             },
             {
                 title: '校園Vlog大賽',
@@ -78,7 +78,7 @@ export default class HomeScreen extends Component {
             {
                 icon_name:'bus',
                 function_name:'校園巴士',
-                routeName:'',
+                routeName:'Bus',
             },
         ],
 

@@ -1,25 +1,86 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet, Dimensions, FlatList} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Dimensions,
+    FlatList,
+    ScrollView,
+    TouchableWithoutFeedback,
+} from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 
 import EventCard from './components/EventCard';
 
-import {SpringScrollView} from 'react-native-spring-scrollview';
-// import {NormalRefresh} from "react-native-spring-scrollview/NormalRefresh";
-import {
-    WithLastDateHeader,
-    WithLastDateFooter,
-} from 'react-native-spring-scrollview/Customize';
+import Interactable from 'react-native-interactable';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-// 防誤觸時間，理論越長越穩
-const PREVENT_TOUCH_TIME = 500;
+// 渲染幾次骨架屏
+const renderLoader = new Array(parseInt(PAGE_HEIGHT / 150));
+renderLoader.fill(0);
+// Loading時的骨架屏
+const EventsLoader = props => (
+    <ContentLoader
+        width={PAGE_WIDTH}
+        height={150}
+        viewBox="0 0 700 300"
+        backgroundColor="#f5f5f5"
+        foregroundColor="#ccc"
+        {...props}>
+        <Rect x="4" y="8" rx="3" ry="3" width="7" height="288" />
+        <Rect x="6" y="289" rx="3" ry="3" width="669" height="8" />
+        <Rect x="670" y="9" rx="3" ry="3" width="6" height="285" />
+        <Rect x="55" y="42" rx="16" ry="16" width="274" height="216" />
+        <Rect x="412" y="113" rx="3" ry="3" width="102" height="7" />
+        <Rect x="402" y="91" rx="3" ry="3" width="178" height="6" />
+        <Rect x="405" y="139" rx="3" ry="3" width="178" height="6" />
+        <Rect x="416" y="162" rx="3" ry="3" width="102" height="7" />
+        <Rect x="405" y="189" rx="3" ry="3" width="178" height="6" />
+        <Rect x="5" y="8" rx="3" ry="3" width="669" height="7" />
+        <Rect x="406" y="223" rx="14" ry="14" width="72" height="32" />
+        <Rect x="505" y="224" rx="14" ry="14" width="72" height="32" />
+        <Rect x="376" y="41" rx="3" ry="3" width="231" height="29" />
+    </ContentLoader>
+);
 
 // 模擬數據庫data
 dataList = [
+    {
+        // 該活動在數據庫中的id
+        eventID: 8,
+        // 海報鏈接
+        imgUrl: 'https://www.um.edu.mo/wp-content/uploads/2022/06/270879-%E5%85%A8%E7%90%83%E8%A6%96%E9%87%8E%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97-%E4%B8%AD%E8%97%A5%E5%92%8C%E5%A4%A9%E7%84%B6%E7%94%A2%E7%89%A9%E7%9A%84%E5%8D%93%E8%B6%8A%E7%A0%94%E7%A9%B6-%E2%80%93-%E9%9B%BB%E9%87%9D%E6%8A%97%E7%82%8E%E7%9A%84%E7%A5%9E%E7%B6%93%E8%A7%A3%E5%89%96%E5%AD%B8%E5%9F%BA%E7%A4%8E-poster.jpg',
+        // 活動標題
+        title: '全球視野講座系列: 中藥和天然產物的卓越研究 – 電針抗炎的神經解剖學基礎',
+        // 13位毫秒級時間戳
+        timeStamp: 1656482002000,
+    },
+    {
+        // 該活動在數據庫中的id
+        eventID: 7,
+        // 海報鏈接
+        imgUrl: 'https://www.um.edu.mo/wp-content/uploads/2022/06/270706-%E6%99%BA%E6%85%A7%E5%9F%8E%E5%B8%82%E7%89%A9%E8%81%AF%E7%B6%B2%E5%82%91%E5%87%BA%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97%EF%BC%9A%E6%99%BA%E8%83%BD%E5%82%B3%E6%84%9F%E8%88%87%E7%B6%B2%E8%B7%AF%E9%80%9A%E4%BF%A1%E5%B0%88%E9%A1%8C-poster-scaled.jpg',
+        // 活動標題
+        title: '講座：智能傳感與網絡通信',
+        // 13位毫秒級時間戳
+        timeStamp: 1656136402000,
+    },
+    {
+        // 該活動在數據庫中的id
+        eventID: 6,
+        // 海報鏈接
+        imgUrl: 'https://www.um.edu.mo/wp-content/uploads/2022/05/267367-%E5%A4%9A%E5%8A%9F%E8%83%BD%E9%9B%BB%E6%B1%A0%E5%A4%8F%E4%BB%A4%E7%87%9F-2022-poster.jpg',
+        // 活動標題
+        title: '多功能電池夏令營 2022',
+        // 13位毫秒級時間戳
+        timeStamp: 1658210002000,
+    },
     {
         // 該活動在數據庫中的id
         eventID: 0,
@@ -98,116 +159,172 @@ class EventPage extends Component {
         this.state = {
             leftDataList,
             rightDataList,
-            touchDisable:false,
+            // TODO: 數據加載，要默認True
+            isLoading: false,
         };
     }
 
-    componentWillUnmount() {
-        // 如果存在this.timer，则使用clearTimeout清空。
-        // 如果你使用多个timer，那么用多个变量，或者用个数组来保存引用，然后逐个clear
-        this.timer && clearTimeout(this.timer);
-    }
+    // 渲染懸浮可拖動按鈕
+    renderGoTopButton = () => {
+        const {white, black, viewShadow} = COLOR_DIY;
+        return (
+            <Interactable.View
+                style={{
+                    zIndex: 999,
+                    position: 'absolute',
+                }}
+                ref="headInstance"
+                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
+                snapPoints={[
+                    {x: -pxToDp(140), y: -pxToDp(220)},
+                    {x: pxToDp(140), y: -pxToDp(220)},
+                    {x: -pxToDp(140), y: -pxToDp(120)},
+                    {x: pxToDp(140), y: -pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(0)},
+                    {x: pxToDp(140), y: pxToDp(0)},
+                    {x: -pxToDp(140), y: pxToDp(120)},
+                    {x: pxToDp(140), y: pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(220)},
+                    {x: pxToDp(140), y: pxToDp(220)},
+                ]}
+                // 設定初始吸附位置
+                initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
+                {/* 懸浮吸附按鈕，刷新 */}
+                <TouchableWithoutFeedback
+                    onPress={() => {
+                        // 刷新頁面，獲取最新數據
+                        console.log('刷新');
+                        this.setState({isLoading: !this.state.isLoading});
+                    }}>
+                    <View
+                        style={{
+                            width: pxToDp(50),
+                            height: pxToDp(50),
+                            backgroundColor: COLOR_DIY.white,
+                            borderRadius: pxToDp(50),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        <Ionicons
+                            name={'refresh-outline'}
+                            size={pxToDp(35)}
+                            color={black.main}
+                        />
+                    </View>
+                </TouchableWithoutFeedback>
 
-    // 社團活動頁下拉刷新事件
-    _onRefresh = () => {
-        // 請求服務器數據
-        // fetch(...).then(() => {
-        //     this._scrollView.endRefresh();
-        //     this.setState({...});
-        //     this._scrollView.endRefresh();
-        // })
-        console.log('觸發刷新');
-        // 停止更新動畫
-        this._scrollView.endRefresh();
+                <View style={{marginTop: pxToDp(5)}}></View>
+
+                {/* 懸浮吸附按鈕，回頂箭頭 */}
+                <TouchableWithoutFeedback
+                    onPress={() => {
+                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
+                        this.refs.scrollView.scrollTo({
+                            x: 0,
+                            y: 0,
+                            duration: 500, // 回頂時間
+                        });
+                    }}>
+                    <View
+                        style={{
+                            width: pxToDp(50),
+                            height: pxToDp(50),
+                            backgroundColor: COLOR_DIY.white,
+                            borderRadius: pxToDp(50),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            ...viewShadow,
+                        }}>
+                        <Ionicons
+                            name={'chevron-up'}
+                            size={pxToDp(40)}
+                            color={black.main}
+                        />
+                    </View>
+                </TouchableWithoutFeedback>
+            </Interactable.View>
+        );
+    };
+
+    // 渲染主要內容
+    renderPage = () => {
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    width: '100%',
+                    backgroundColor: COLOR_DIY.bg_color,
+                    justifyContent: 'space-around',
+                }}>
+                {/* 左側的列 放置雙數下標的圖片 從0開始 */}
+                <View>
+                    <FlatList
+                        data={this.state.leftDataList}
+                        renderItem={({item}) => {
+                            return (
+                                <EventCard
+                                    data={item}
+                                    style={s.cardContainer}></EventCard>
+                            );
+                        }}
+                        scrollEnabled={false}
+                    />
+                </View>
+
+                {/* 右側的列 放置單數下標的圖片 */}
+                <View>
+                    <FlatList
+                        data={this.state.rightDataList}
+                        renderItem={({item}) => {
+                            return (
+                                <EventCard
+                                    data={item}
+                                    style={s.cardContainer}></EventCard>
+                            );
+                        }}
+                        scrollEnabled={false}
+                        style={{flex: 1}}
+                    />
+                </View>
+            </View>
+        );
     };
 
     render() {
         return (
-            <SpringScrollView
-                directionalLockEnabled={true}
-                onScrollBeginDrag={()=>{
-                    // 清除上一個延時器
-                    this.timer && clearTimeout(this.timer);
-                    this.setState({ touchDisable:true });
-                }}
-                onScrollEndDrag={()=>{
-                    this.setState({ touchDisable:true });
-                    // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
-                    this.timer = setTimeout(() => {
-                        this.setState({ touchDisable:false });
-                    }, PREVENT_TOUCH_TIME);
-                }}
-                showsHorizontalScrollIndicator={false}
-                ref={ref => (this._scrollView = ref)}
-                onRefresh={this._onRefresh}
-                // 組件自帶的下拉刷新動畫組件
-                refreshHeader={WithLastDateHeader}
-                // 組件自帶的上拉加載動畫組件
-                loadingFooter={WithLastDateFooter}
-                // 數據是否加載完成
-                allLoaded={this.state.allLoaded}
-                onLoading={() => {
-                    // fetch(...).then(()=>{
-                    //     this._scrollView.endLoading();
-                    //     this.setState({allLoaded:true, ...});
-                    // }).catch();
-                    console.log('上拉加載更多');
-                    this.setState({allLoaded: true});
-                    this._scrollView.endLoading();
+            <View
+                style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}>
-                <View
-                    style={{
-                        flex: 1,
-                        flexDirection: 'row',
-                        backgroundColor: COLOR_DIY.bg_color,
-                        justifyContent: 'space-around',
-                    }}>
-                    {/* 左側的列 放置雙數下標的圖片 從0開始 */}
-                    <View style={{marginLeft: pxToDp(10)}}>
-                        <FlatList
-                            data={this.state.leftDataList}
-                            renderItem={({item}) => {
-                                return (
-                                    <EventCard
-                                        data={item}
-                                        style={s.cardContainer}
-                                        touchDisable={this.state.touchDisable}
-                                    ></EventCard>
-                                );
-                            }}
-                            keyExtractor={(_, index) => index}
-                            scrollEnabled={false}
-                        />
-                    </View>
+                {/* 懸浮可拖動按鈕 */}
+                {this.renderGoTopButton()}
 
-                    {/* 右側的列 放置單數下標的圖片 */}
-                    <View
-                        style={{
-                            marginRight: pxToDp(10),
-                            marginTop: pxToDp(50),
-                        }}>
-                        {/* <View style={{height:pxToDp(80), width:'100%'}}>
-							<Text>點擊卡片可以看到更詳細的說明哦~</Text>
-						</View> */}
-                        <FlatList
-                            data={this.state.rightDataList}
-                            renderItem={({item}) => {
-                                return (
-                                    <EventCard
-                                        data={item}
-                                        style={s.cardContainer}
-                                        touchDisable={this.state.touchDisable}
-                                    ></EventCard>
-                                );
-                            }}
-                            keyExtractor={(_, index) => index}
-                            scrollEnabled={false}
-                        />
-                    </View>
+                <View style={{flex: 1, width: '100%'}}>
+                    {/* 加載狀態渲染骨架屏 */}
+                    {this.state.isLoading ? (
+                        <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: COLOR_DIY.bg_color,
+                                padding: pxToDp(10),
+                            }}>
+                            {renderLoader.map(() => EventsLoader())}
+                        </View>
+                    ) : (
+                        <ScrollView ref={'scrollView'} style={{width: '100%'}}>
+                            {/* 仿瀑布屏展示 */}
+                            {/* 渲染主要內容 */}
+                            {this.renderPage()}
+
+                            {/* 防止底部遮擋 */}
+                            <View style={{marginBottom: pxToDp(50)}} />
+                        </ScrollView>
+                    )}
                 </View>
-                <Text>{'\n'}</Text>
-                <Text>{'\n'}</Text>
-            </SpringScrollView>
+            </View>
         );
     }
 }
@@ -215,8 +332,8 @@ class EventPage extends Component {
 const s = StyleSheet.create({
     // 活動卡片間距
     cardContainer: {
-        marginVertical: pxToDp(8),
-        marginHorizontal: pxToDp(10)
+        marginVertical: pxToDp(6),
+        marginHorizontal: pxToDp(3),
     },
 });
 

@@ -13,6 +13,7 @@ import com.umallwhite.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.BV.LinearGradient.LinearGradientPackage; // 漸變庫需要
+import com.wix.interactable.Interactable; // 拖動手勢庫需要
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -30,6 +31,7 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           packages.add(new LinearGradientPackage());  // 漸變庫安裝需要
+          packages.add(new Interactable());           // 拖動手勢庫需要
           return packages;
         }
 

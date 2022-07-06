@@ -14,7 +14,7 @@ import {pxToDp} from '../../../utils/stylesKits';
 import ClubCard from './components/ClubCard';
 
 import {FlatGrid} from 'react-native-super-grid';
-import {SpringScrollView} from 'react-native-spring-scrollview';
+// import {SpringScrollView} from 'react-native-spring-scrollview';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
@@ -137,10 +137,6 @@ const dataList = [
 ];
 
 class ClubPage extends Component {
-    state = {
-        touchDisable: false,
-    };
-
     componentWillUnmount() {
         // 如果存在this.timer，则使用clearTimeout清空。
         // 如果你使用多个timer，那么用多个变量，或者用个数组来保存引用，然后逐个clear
@@ -149,51 +145,39 @@ class ClubPage extends Component {
 
     render() {
         return (
-            <SpringScrollView
-                onScrollBeginDrag={() => {
-                    // 清除上一個延時器
-                    this.timer && clearTimeout(this.timer);
-                    this.setState({touchDisable: true});
-                }}
-                onScrollEndDrag={() => {
-                    this.setState({touchDisable: true});
-                    // 用戶不滾動屏幕短暫延時再允許點擊卡片跳轉，防止誤觸
-                    this.timer = setTimeout(() => {
-                        this.setState({touchDisable: false});
-                    }, PREVENT_TOUCH_TIME);
-                }}
-                directionalLockEnabled={true}>
-                <View style={{flex: 1}}>
-                    <Text style={{alignSelf:'center', marginTop:pxToDp(10), color:COLOR_DIY.black.third}}>社團卡片 點擊直達</Text>
-                    <FlatGrid
-                        style={{flex: 1}}
-                        // 每个项目的最小宽度或高度（像素）
-                        itemDimension={COMPONENT_WIDTH}
-                        data={dataList}
-                        // 每個項目的間距
-                        spacing={pxToDp(15)}
-                        renderItem={({item, index}) => {
-                            // item是每一項數組的數據
-                            // index是每一項的數組下標
-                            return (
-                                <View style={{flex: 1}}>
-                                    <ClubCard
-                                        data={item}
-                                        index={index}
-                                        touchDisable={
-                                            this.state.touchDisable
-                                        }></ClubCard>
-                                </View>
-                            );
-                        }}
-                        // 所有項目末尾渲染，防Tabbar遮擋
-                        ListFooterComponent={() => (
-                            <View style={{marginTop: pxToDp(50)}}></View>
-                        )}
-                        scrollEnabled={false}
-                    />
-                </View>
-            </SpringScrollView>
+            <View style={{flex: 1}}>
+                <FlatGrid
+                    style={{flex: 1}}
+                    // 每个项目的最小宽度或高度（像素）
+                    itemDimension={COMPONENT_WIDTH}
+                    data={dataList}
+                    // 每個項目的間距
+                    spacing={pxToDp(15)}
+                    renderItem={({item, index}) => {
+                        // item是每一項數組的數據
+                        // index是每一項的數組下標
+                        return (
+                            <View style={{flex: 1}}>
+                                <ClubCard data={item} index={index}></ClubCard>
+                            </View>
+                        );
+                    }}
+                    ListHeaderComponent={() => (
+                        <Text
+                            style={{
+                                alignSelf: 'center',
+                                marginTop: pxToDp(10),
+                                color: COLOR_DIY.black.third,
+                            }}>
+                            社團卡片 點擊直達
+                        </Text>
+                    )}
+                    // 所有項目末尾渲染，防Tabbar遮擋
+                    ListFooterComponent={() => (
+                        <View style={{marginTop: pxToDp(50)}}></View>
+                    )}
+                />
+            </View>
         );
     }
 }

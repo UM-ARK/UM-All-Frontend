@@ -14,30 +14,9 @@ import {SpringScrollView} from 'react-native-spring-scrollview';
 const messages = [
     {
         user: {
-            id: '1',
-            name: '溫迪',
-            avatar_url: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
-        },
-        message_history: [
-            {
-                content: 'fuck u',
-                time: '2022/6/26 2:30',
-                // 消息未讀
-                // 1：true，0：false
-                unread: 1,
-            },
-            {
-                content: 'hahahaha',
-                time: '2022/6/26 1:30',
-                unread: 0,
-            },
-        ],
-    },
-    {
-        user: {
-            id: '0',
+            _id: '0',
             name: '澳大電子通告',
-            avatar_url:
+            avatar:
                 'http://images.jjl.cn/ugc/2018/1129/20181129152330319.png',
         },
         message_history: [
@@ -56,9 +35,9 @@ const messages = [
     },
     {
         user: {
-            id: '3',
+            _id: '3',
             name: '鄭裕彤書院(CYTC)',
-            avatar_url:
+            avatar:
                 'https://cytc.rc.um.edu.mo/wp-content/uploads/2019/09/CYTC-Logo-2014-Purple-1.png',
         },
         message_history: [
@@ -77,51 +56,13 @@ const messages = [
     },
     {
         user: {
-            id: '12312312',
-            name: 'test1',
-            avatar_url: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
+            _id: '4',
+            name: '電腦學會',
+            avatar: 'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
         },
         message_history: [
             {
-                content: 'fuck u',
-                time: '2022/6/26 2:30',
-                unread: 1,
-            },
-            {
-                content: 'hahahaha',
-                time: '2022/6/26 1:30',
-                unread: 1,
-            },
-        ],
-    },
-    {
-        user: {
-            id: '12312312',
-            name: 'test2',
-            avatar_url: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
-        },
-        message_history: [
-            {
-                content: 'fuck u',
-                time: '2022/6/26 2:30',
-                unread: 1,
-            },
-            {
-                content: 'hahahaha',
-                time: '2022/6/26 1:30',
-                unread: 1,
-            },
-        ],
-    },
-    {
-        user: {
-            id: '12312312',
-            name: 'test3',
-            avatar_url: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
-        },
-        message_history: [
-            {
-                content: 'fuck u',
+                content: '遊戲工作坊',
                 time: '2022/6/26 2:30',
                 unread: 1,
             },
