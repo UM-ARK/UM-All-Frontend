@@ -14,6 +14,9 @@ import EventPage from './EventPage';
 import ClubPage from './ClubPage';
 import {pxToDp} from '../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../utils/uiMap';
+import { convertAbsoluteToRem } from 'native-base/lib/typescript/theme/v33x-theme/tools';
+import { Dimensions } from 'react-native';
+import { transform } from '@babel/core';
 
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
@@ -40,6 +43,7 @@ const _renderTabBar = props => {
                 flexDirection: 'row',
                 justifyContent: 'center',
             }}>
+                {console.log(props)}
             {props.navigationState.routes.map((route, i) => {
                 // 定義Tab轉換的動畫 - 半透明未選中文字 - 未使用
                 const opacity = props.position.interpolate({
@@ -49,7 +53,76 @@ const _renderTabBar = props => {
                     ),
                 });
 
+                const getTranslateX = (selectedIndex, componentIndex) => {
+                    if(selectedIndex == 0) {
+                        if(componentIndex == 0) {
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [0,100,200],
+                            });
+                        }
+                        else if(componentIndex == 1) {
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [-220,0,200],
+                            });
+                        }
+                        else if(componentIndex == 2) {
+
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [-200,-200,0],
+                            });
+                        }
+                    }
+                    else if(selectedIndex == 1) {
+                        if(componentIndex == 0) {
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [0,60,60],
+                            });
+                        }
+                        else if(componentIndex == 1) {
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [-200,0,100],
+                            });
+                        }
+                        else if(componentIndex == 2) {
+
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [-200,-200,0],
+                            });
+                        }
+                    }
+                    else{ //else if(selectedIndex == 2)
+                        if(componentIndex == 0) {
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [0,200,200],
+                            });
+                        }
+                        else if(componentIndex == 1) {
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [-200,0,100],
+                            });
+                        }
+                        else if(componentIndex == 2) {
+
+                            return props.position.interpolate({
+                                inputRange,
+                                outputRange: [-300,-200,0],
+                            });
+                        }
+                    }
+                }
+
+                const translateX = getTranslateX(props.navigationState.index, i);
+
                 return (
+                    <>
                     <TouchableOpacity
                         style={{
                             alignItems: 'center',
@@ -64,6 +137,7 @@ const _renderTabBar = props => {
                             paddingVertical: pxToDp(2),
                             marginVertical: pxToDp(5),
                             marginHorizontal: pxToDp(10),
+                            overflow: 'hidden',
                         }}
                         onPress={() => props.jumpTo(route.key)}>
                         <Animated.Text
@@ -74,8 +148,23 @@ const _renderTabBar = props => {
                                 fontSize: pxToDp(15),
                             }}>
                             {route.title}
+                            {console.log(route.title.length)}
                         </Animated.Text>
+                        <Animated.View style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: 200, //route.title.length * 50,
+                            height: 30,
+                            zIndex: -100,
+                            backgroundColor: 'lightblue',
+                            transform: [{
+                                translateX
+                            }],
+                            // display: props.navigationState.index == i ? '' : 'none',
+                        }}></Animated.View>
                     </TouchableOpacity>
+                    </>
                 );
             })}
         </View>
@@ -84,6 +173,8 @@ const _renderTabBar = props => {
 
 export default function TabPage() {
     const layout = useWindowDimensions();
+    const {width, height} = Dimensions.get('screen');
+    const scrollX = React.useRef(new Animated.Value(0)).current;
     // 默認選項卡
     const [index, setIndex] = React.useState(1);
     const [routes] = React.useState([
@@ -99,6 +190,9 @@ export default function TabPage() {
             onIndexChange={index => setIndex(index)}
             initialLayout={{width: layout.width}}
             renderTabBar={props => _renderTabBar(props)}
+            // onScroll={Animated.event(
+            //     [{nativeEvent: {contentOffset: {x: scrollX}}}]
+            // )}
         />
     );
 }
