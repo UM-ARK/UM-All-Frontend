@@ -11,21 +11,20 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../src/utils/uiMap';
-import { pxToDp } from '../src/utils/stylesKits';
+import {pxToDp} from '../src/utils/stylesKits';
 
 // 文檔：https://github.com/dohooo/react-native-reanimated-carousel/
 import Carousel from 'react-native-reanimated-carousel';
 import {Header} from '@rneui/themed';
-import {NavigationContext} from '@react-navigation/native'
+import {NavigationContext} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import ModalBottom from './modalTest'
+import ModalBottom from '../src/components/ModalBottom';
 
-const { width: PAGE_WIDTH} = Dimensions.get('window');
-const { height:PAGE_HEIGHT } = Dimensions.get('screen');
-
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('screen');
 
 const images = [
     {
@@ -39,40 +38,44 @@ const images = [
     },
 ];
 
+import ImageScrollViewer from '../src/components/ImageScrollViewer';
 
 class TestScreen extends Component {
     // static contextType = NavigationContext;
     // this.context === this.props.navigation
 
     state = {
-        isModalVisible       : false,
-        imagesIndex          : 0,
-        isModalBottomVisible : true,
-    }
+        isModalVisible: false,
+        imagesIndex: 0,
+        isModalBottomVisible: true,
+    };
 
     // 打開和關閉顯示照片的彈出層
     tiggerModal = () => {
         this.setState({
-            isModalVisible:!this.state.isModalVisible,
+            isModalVisible: !this.state.isModalVisible,
         });
-    }
+    };
     // 打開圖片數組內的某張圖片
-    handleOpenImage = (index) => {
+    handleOpenImage = index => {
         this.setState({
-            imagesIndex:index,
-            isModalVisible:true
+            imagesIndex: index,
+            isModalVisible: true,
         });
-    }
-    
+    };
+
     render() {
         const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
 
+        console.log(isModalVisible);
+
         return (
-            <View style={{flex: 1, backgroundColor:COLOR_DIY.bg_color}}>
+            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     leftComponent={
-                        <TouchableOpacity onPress={()=>this.props.navigation.goBack()}>
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
                                 size={pxToDp(25)}
@@ -87,50 +90,45 @@ class TestScreen extends Component {
                             fontSize: pxToDp(22),
                         },
                     }}
-                    statusBarProps={{backgroundColor:COLOR_DIY.bg_color, barStyle:'dark-content'}}
+                    statusBarProps={{
+                        backgroundColor: COLOR_DIY.bg_color,
+                        barStyle: 'dark-content',
+                    }}
                 />
 
                 {/* 彈出層展示圖片查看器 */}
-                <Modal 
-                    isVisible={isModalVisible} 
-                    statusBarTranslucent
-                    style={{margin:0, paddingLeft:pxToDp(16), paddingRight:pxToDp(16)}}
-                    deviceHeight={PAGE_HEIGHT}
-                    backdropColor={'black'}
-                    backdropOpacity={0.85}
-                    onBackButtonPress={this.tiggerModal}
-                    onBackdropPress={this.tiggerModal}
-                >
-                    <ImageViewer 
-                        backgroundColor={'transparent'}
-                        useNativeDriver={true}
-                        imageUrls={images}
-                        // 打開的imageUrls的索引
-                        index={imagesIndex}
-                        // 注釋掉renderIndicator屬性則 默認會有頁數顯示
-                        renderIndicator={()=>null}
-                        onClick={this.tiggerModal}
-                        doubleClickInterval={300}
-                        enableSwipeDown={true}
-                        onSwipeDown={this.tiggerModal}
-                        // 自定義長按菜單
-                        menus={({cancel,_}) => <ModalBottom cancel={cancel}></ModalBottom> }
-                    />
-                </Modal>
-
+                <ImageScrollViewer
+                    ref={'imageScrollViewer'}
+                    imageUrls={images}
+                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                />
 
                 {/* 圖片展示 */}
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                    {
-                        images.map(({url}, index)=> 
-                            <TouchableOpacity onPress={()=>this.handleOpenImage(index)}>
-                                <Image source={{uri:url}} style={{width:100, height:100}} ></Image>
-                            </TouchableOpacity>
-                        )
-                    }
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}>
+                    {images.map(({url}, index) => (
+                        <TouchableOpacity
+                            onPress={() =>
+                                this.refs.imageScrollViewer.handleOpenImage(
+                                    index,
+                                )
+                            }>
+                            <Image
+                                source={{uri: url}}
+                                style={{width: 100, height: 100}}></Image>
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
-                <Button title='打開圖片' onPress={this.tiggerModal}></Button>
+                <Button
+                    title="打開圖片"
+                    onPress={() => {
+                        this.refs.imageScrollViewer.tiggerModal();
+                    }}></Button>
             </View>
         );
     }
