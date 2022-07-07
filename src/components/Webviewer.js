@@ -5,9 +5,9 @@ import {Text, View, TouchableOpacity} from 'react-native';
 
 import {COLOR_DIY} from '../utils/uiMap';
 import {pxToDp} from '../utils/stylesKits';
+import IntegratedWebView from './IntegratedWebView';
 import {WHAT_2_REG} from '../utils/pathMap';
 
-import {WebView} from 'react-native-webview';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -34,11 +34,18 @@ class WebViewer extends Component {
             bg_color_diy,
             isBarStyleBlack,
             url,
+            needRefresh: false,
         };
     }
 
+    // 切換Webview刷新標識
+    triggerRefresh = () => {
+        this.setState({needRefresh: !this.state.needRefresh});
+    };
+
     render() {
-        const {url, title, text_color, bg_color_diy, isBarStyleBlack} = this.state;
+        const {url, title, text_color, bg_color_diy, isBarStyleBlack} =
+            this.state;
 
         return (
             <View style={{flex: 1}}>
@@ -61,6 +68,15 @@ class WebViewer extends Component {
                             fontSize: pxToDp(15),
                         },
                     }}
+                    rightComponent={
+                        <TouchableOpacity onPress={() => this.triggerRefresh()}>
+                            <Ionicons
+                                name="refresh"
+                                size={pxToDp(25)}
+                                color={COLOR_DIY.white}
+                            />
+                        </TouchableOpacity>
+                    }
                     statusBarProps={{
                         backgroundColor: 'transparent',
                         barStyle: isBarStyleBlack
@@ -69,7 +85,11 @@ class WebViewer extends Component {
                     }}
                 />
 
-                <WebView source={{uri: url}} startInLoadingState={true} />
+                <IntegratedWebView
+                    source={{uri: url}}
+                    needRefresh={this.state.needRefresh}
+                    triggerRefresh={this.triggerRefresh}
+                />
             </View>
         );
     }
