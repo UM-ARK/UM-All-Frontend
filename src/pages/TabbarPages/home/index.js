@@ -255,7 +255,7 @@ export default class HomeScreen extends Component {
             <Header
                 backgroundColor={COLOR_DIY.bg_color}
                 centerComponent={{
-                    text: '澳大 UM ALL',
+                    text: 'UM ALL',
                     style: {
                         color: COLOR_DIY.black.main,
                         fontSize: pxToDp(15),
