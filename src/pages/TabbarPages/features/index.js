@@ -396,7 +396,7 @@ class Index extends Component {
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_SCHOLARSHIP,
-                            title: '增補選(建議在電腦操作)',
+                            title: '獎學金',
                             // 標題顏色，默認為black.main
                             text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
