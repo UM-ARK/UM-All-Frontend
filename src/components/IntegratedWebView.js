@@ -1,17 +1,20 @@
 import React, { useState, useRef }from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
+import { Text, StyleSheet, Dimensions, Animated, TouchableOpacity } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
-import { TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 const IntegratedWebView = ({source }) => {
+    // 記錄網站加載進度和是否加載完成
     const [progress, setProgress] = useState(0);
     const [isLoaded, setLoaded] = useState(false);
 
+    // 網站能否返回前面的網址
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
 
+    // 動畫的參數設定
     const scrollY = new Animated.Value(0);
     const diffClamp = Animated.diffClamp(scrollY, 0, window.height * 0.08)
     const translateY = diffClamp.interpolate({
@@ -78,17 +81,17 @@ const IntegratedWebView = ({source }) => {
 const NavigationView = ({ onBackPress, onForwardPress, canGoBack, canGoForward, translateY }) => {
 
     return <>
-        {
+        {   // 判斷: 網站能前後跳轉的時候才顯示WebView底部導航欄
             canGoBack || canGoForward ?
             <Animated.View style={[styles.container, {transform: [{translateY: translateY}]}]}>
                 <TouchableOpacity style={styles.button} onPress={onBackPress} disabled={canGoBack ? false : true}>
-                    <Text style={canGoBack ? styles.buttonTitle : styles.disabledButtonTitle}>{"<"}</Text>
+                    <Icon name={'left'} size={22} color={canGoBack ? "black" : "grey"}/>
                 </TouchableOpacity>
                 {/* <TouchableOpacity style={styles.button} onPress={onForwardPress}>
                     <Text style={styles.buttonTitle}>{"O"}</Text>
                 </TouchableOpacity> */}
-                <TouchableOpacity style={styles.button} onPress={onForwardPress}>
-                    <Text style={canGoForward ? styles.buttonTitle : styles.disabledButtonTitle}>{">"}</Text>
+                <TouchableOpacity style={styles.button} onPress={onForwardPress} disabled={canGoForward ? false : true}>
+                    <Icon name={'right'} size={22} color={canGoForward ? "black" : "grey"}/>
                 </TouchableOpacity>
             </Animated.View>
             : null
@@ -96,6 +99,7 @@ const NavigationView = ({ onBackPress, onForwardPress, canGoBack, canGoForward, 
     </>
 }
 
+// 取得手機螢幕的size
 const window = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -110,16 +114,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     button: {
-        paddingBottom: 20,
+        paddingBottom: 10,
     },
-    buttonTitle: {
-        color: 'black',
-        fontSize: 26,
-    },
-    disabledButtonTitle: {
-        color: 'grey',
-        fontSize: 26,
-    }
 })
 
 export default IntegratedWebView;
