@@ -1,22 +1,37 @@
 // 體育設施頁
-import React, { Component } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import React, {Component} from 'react';
+import {Text, View, TouchableOpacity} from 'react-native';
 
-import {COLOR_DIY} from '../../utils/uiMap'
-import {pxToDp} from '../../utils/stylesKits'
+import {COLOR_DIY} from '../../utils/uiMap';
+import {pxToDp} from '../../utils/stylesKits';
 
-import { WebView } from 'react-native-webview';
+import IntegratedWebView from '../../components/IntegratedWebView';
 import {Header} from '@rneui/themed';
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-class UMWhole extends Component{
+class UMWhole extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            progress: 0,
+            // 默認刷新標識
+            needRefresh: false,
+        };
+    }
+
+    // 切換刷新標識
+    triggerRefresh = () => {
+        this.setState({needRefresh: !this.state.needRefresh});
+    };
+
     render() {
         return (
-            <View style={{flex:1}}>
+            <View style={{flex: 1}}>
                 <Header
                     backgroundColor={'#1f5288'}
                     leftComponent={
-                        <TouchableOpacity onPress={()=>this.props.navigation.goBack()}>
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
                                 size={pxToDp(25)}
@@ -31,15 +46,27 @@ class UMWhole extends Component{
                             fontSize: pxToDp(15),
                         },
                     }}
-                    statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
+                    rightComponent={
+                        <TouchableOpacity onPress={() => this.triggerRefresh()}>
+                            <Ionicons
+                                name="refresh"
+                                size={pxToDp(25)}
+                                color={COLOR_DIY.white}
+                            />
+                        </TouchableOpacity>
+                    }
+                    statusBarProps={{
+                        backgroundColor: 'transparent',
+                        barStyle: 'dark-content',
+                    }}
                 />
-
-                <WebView 
-                    source={{ uri:'https://www.umeh.top/' }} 
-                    startInLoadingState={true}
+                <IntegratedWebView
+                    source={{uri: 'https://www.umeh.top/'}}
+                    needRefresh={this.state.needRefresh}
+                    triggerRefresh={this.triggerRefresh}
                 />
             </View>
-        )
+        );
     }
 }
 
