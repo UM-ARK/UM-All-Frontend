@@ -1,3 +1,4 @@
+// 切換動畫
 import React from 'react';
 import {Animated} from 'react-native';
 
