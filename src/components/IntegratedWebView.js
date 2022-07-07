@@ -64,16 +64,20 @@ const IntegratedWebView = ({source }) => {
 
 const NavigationView = ({ onBackPress, onForwardPress, canGoBack, canGoForward }) => {
 
-    return (
-        <View style={styles.container}>
-            <TouchableOpacity onPress={onBackPress} disabled={canGoBack ? false : true}>
-                <Text style={canGoBack ? styles.buttonTitle : styles.disabledButtonTitle}>{"<"}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onForwardPress}>
-                <Text style={canGoBack ? styles.buttonTitle : styles.disabledButtonTitle}>{">"}</Text>
-            </TouchableOpacity>
-        </View>
-    )
+    return <>
+        {
+            canGoBack || canGoForward ?
+            <View style={styles.container}>
+                <TouchableOpacity onPress={onBackPress} disabled={canGoBack ? false : true}>
+                    <Text style={canGoBack ? styles.buttonTitle : styles.disabledButtonTitle}>{"<"}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onForwardPress}>
+                    <Text style={canGoForward ? styles.buttonTitle : styles.disabledButtonTitle}>{">"}</Text>
+                </TouchableOpacity>
+            </View>
+            : null
+        }
+    </>
 }
 
 const window = Dimensions.get('window');
