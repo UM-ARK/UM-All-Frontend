@@ -1,5 +1,5 @@
 import React, { useState, useRef }from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
@@ -11,6 +11,13 @@ const IntegratedWebView = ({source }) => {
 
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
+
+    const scrollY = new Animated.Value(0);
+    const diffClamp = Animated.diffClamp(scrollY, 0, window.height * 0.08)
+    const translateY = diffClamp.interpolate({
+        inputRange: [0, window.height * 0.08],
+        outputRange: [0, (window.height * 0.08)],
+    })
 
     const webViewRef = useRef();
 
@@ -52,29 +59,33 @@ const IntegratedWebView = ({source }) => {
                     setCanGoBack(back);
                     setCanGoForward(forward);
                 }}
+                onScroll={(e) => {
+                    scrollY.setValue(e.nativeEvent.contentOffset.y);
+                }}
             />
             <NavigationView 
                 onBackPress={handleBackPress}
                 onForwardPress={handleForwardPress}
                 canGoBack={canGoBack}
-                canGoForward={canGoForward} />
+                canGoForward={canGoForward}
+                 translateY={translateY}/>
         </>
     );
 };
 
-const NavigationView = ({ onBackPress, onForwardPress, canGoBack, canGoForward }) => {
+const NavigationView = ({ onBackPress, onForwardPress, canGoBack, canGoForward, translateY }) => {
 
     return <>
         {
             canGoBack || canGoForward ?
-            <View style={styles.container}>
-                <TouchableOpacity onPress={onBackPress} disabled={canGoBack ? false : true}>
+            <Animated.View style={[styles.container, {transform: [{translateY: translateY}]}]}>
+                <TouchableOpacity style={styles.button} onPress={onBackPress} disabled={canGoBack ? false : true}>
                     <Text style={canGoBack ? styles.buttonTitle : styles.disabledButtonTitle}>{"<"}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={onForwardPress}>
+                <TouchableOpacity style={styles.button} onPress={onForwardPress}>
                     <Text style={canGoForward ? styles.buttonTitle : styles.disabledButtonTitle}>{">"}</Text>
                 </TouchableOpacity>
-            </View>
+            </Animated.View>
             : null
         }
     </>
@@ -86,12 +97,15 @@ const styles = StyleSheet.create({
     container: {
         position: 'absolute',
         bottom: 0,
-        height: window.height * 0.1,
+        height: window.height * 0.08,
         width: window.width,
-        backgroundColor: 'lightblue',
+        backgroundColor: '#CFD2CF',
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'center',
+    },
+    button: {
+        paddingBottom: 20,
     },
     buttonTitle: {
         color: 'black',
