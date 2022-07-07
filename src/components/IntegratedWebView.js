@@ -62,13 +62,15 @@ const IntegratedWebView = ({source }) => {
                 onScroll={(e) => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}
+                pullToRefreshEnabled={true}
             />
             <NavigationView 
                 onBackPress={handleBackPress}
                 onForwardPress={handleForwardPress}
                 canGoBack={canGoBack}
                 canGoForward={canGoForward}
-                 translateY={translateY}/>
+                translateY={translateY}
+                />
         </>
     );
 };
@@ -82,6 +84,9 @@ const NavigationView = ({ onBackPress, onForwardPress, canGoBack, canGoForward, 
                 <TouchableOpacity style={styles.button} onPress={onBackPress} disabled={canGoBack ? false : true}>
                     <Text style={canGoBack ? styles.buttonTitle : styles.disabledButtonTitle}>{"<"}</Text>
                 </TouchableOpacity>
+                {/* <TouchableOpacity style={styles.button} onPress={onForwardPress}>
+                    <Text style={styles.buttonTitle}>{"O"}</Text>
+                </TouchableOpacity> */}
                 <TouchableOpacity style={styles.button} onPress={onForwardPress}>
                     <Text style={canGoForward ? styles.buttonTitle : styles.disabledButtonTitle}>{">"}</Text>
                 </TouchableOpacity>
