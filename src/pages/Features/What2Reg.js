@@ -5,11 +5,17 @@ import { Text, View, TouchableOpacity } from "react-native";
 import {COLOR_DIY} from '../../utils/uiMap'
 import {pxToDp} from '../../utils/stylesKits'
 
-import { WebView } from 'react-native-webview';
+import IntegratedWebView from '../../components/IntegratedWebView'
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
 class UMWhole extends Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            progress: 0
+        }
+    }
     render() {
         return (
             <View style={{flex:1}}>
@@ -33,11 +39,7 @@ class UMWhole extends Component{
                     }}
                     statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}
                 />
-
-                <WebView 
-                    source={{ uri:'https://www.umeh.top/' }} 
-                    startInLoadingState={true}
-                />
+                <IntegratedWebView source={{ uri:'https://www.umeh.top/' }} />
             </View>
         )
     }
