@@ -23,6 +23,7 @@ import NewsDetail from './pages/TabbarPages/news/pages/NewsDetail'
 
 import ChatDetail from './pages/TabbarPages/message/ChatDetail'
 
+import Webviewer from './components/Webviewer';
 import SportFacility from './pages/Features/SportFacility';
 import Map from './pages/Features/Map';
 import UMWhole from './pages/Features/UMWhole';
@@ -67,6 +68,8 @@ class Nav extends Component {
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
 
                 {/* 服務頁 */}
+                {/* 自定義Webview */}
+                <Stack.Screen name="Webviewer"     component={Webviewer} />
                 {/* 體育設施 */}
                 <Stack.Screen name="SportFacility"     component={SportFacility} />
                 {/* 校園地圖 */}
