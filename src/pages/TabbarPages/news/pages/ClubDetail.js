@@ -3,6 +3,7 @@ import {
     View,
     Text,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     StatusBar,
     Dimensions,
     FlatList,
@@ -10,8 +11,10 @@ import {
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
+import {clubTagMap} from '../../../../utils/clubMap';
 
 import EventCard from '../components/EventCard';
+import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -27,7 +30,6 @@ const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const CLUB_LOGO_SIZE = 80;
 const CLUB_IMAGE_WIDTH = 75;
 const CLUB_IMAGE_HEIGHT = 55;
-
 
 // 渲染Follow按鈕
 // 因需使用Toast的Hook，被迫使用func組件QAQ
@@ -110,16 +112,15 @@ class ClubDetail extends Component {
     constructor(props) {
         super(props);
         // 獲取上級路由傳遞的參數，用於展示頂部標題
-        // const detailRoute = this.props.route.params;
-        const detailRoute = {index: 14, name: '電腦學會'};
-        // console.log(detailRoute);
+        const detailRoute = this.props.route.params;
 
         // 模擬從服務器返回的數據，以detailRoute傳的id或name去請求服務器返回相關組織的數據
         const clubData = {
-            imgUrl: 'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
+            avatarUrl:
+                'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
             name: '電腦學會',
-            tag: '學會',
-            clubId: 1,
+            tag: 'club',
+            clubID: 1,
             // 簡介文字
             introText: `澳門大學學生會電腦學會是以電腦為主題的學會，希望透過活動提升電腦系同學的歸屬感及團體精神。我們亦歡迎所有不同學系的同學，目的是透過舉辦工作坊、踏上IT第一步等等教授同學不同的電腦知識及認識電腦行業的前景。電競也是我們的主打之一，現時電競遊戲是一個十分熱門的話題，我們透過舉辦大大小小的比賽及交流活動等等，如最近所舉辦的澳大電競日從而推廣電競文化，讓不論是有接觸過電競與否的朋友也可以透過活動來認識電競及享受遊戲的樂趣。`,
             // 聯繫方式
@@ -150,90 +151,93 @@ class ClubDetail extends Component {
                     num: 'www.cpsumsu.com',
                 },
             ],
+            // 背景圖片link
+            bgImgUrl:
+                'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
         };
-        // 活動，最多只請求4條
+        // 活動，只請求4條
         // 距離今天越近越靠前
         const event = [
             {
                 eventID: 0,
+                type: 'activity',
                 title: '活動標題可寫在此0',
                 // 封面圖片
-                imgUrl: 'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
+                coverImgUrl:
+                    'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
                 // 該活動相關的圖片
-                relateImageUrl: [
+                relateImgUrl: [
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
                     'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
                 ],
-                // 1:已結束，0:進行中
-                // TODO: 以當刻時間判斷是否過期
-                isFinish: '1',
-                timeStamp: 1658745797000,
+                startTimeStamp: 1658745797000,
+                finishTimeStamp: 1658745797000,
+                link: '',
             },
             {
                 eventID: 0,
                 title: '活動標題可寫在此1',
                 // 封面圖片
-                imgUrl: 'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
+                coverImgUrl:
+                    'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
                 // 該活動相關的圖片
-                relateImageUrl: [
+                relateImgUrl: [
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
                     'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
                 ],
-                // 1:已結束，0:進行中
-                isFinish: '1',
-                timeStamp: 1658745797000,
+                startTimeStamp: 1658745797000,
+                finishTimeStamp: 1658745797000,
+                link: '',
             },
             {
                 eventID: 0,
                 title: '活動標題可寫在此2',
                 // 封面圖片
-                imgUrl: 'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
+                coverImgUrl:
+                    'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
                 // 該活動相關的圖片
-                relateImageUrl: [
+                relateImgUrl: [
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
                     'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
                 ],
-                // 1:已結束，0:進行中
-                isFinish: '1',
-                timeStamp: 1655018688000,
+                startTimeStamp: 1658745797000,
+                finishTimeStamp: 1655018688000,
+                link: '',
             },
             {
                 eventID: 0,
                 title: '活動標題可寫在此2',
                 // 封面圖片
-                imgUrl: 'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
+                coverImgUrl:
+                    'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
                 // 該活動相關的圖片
-                relateImageUrl: [
+                relateImgUrl: [
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
                     'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
                     'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
                 ],
-                // 1:已結束，0:進行中
-                isFinish: '1',
-                timeStamp: 1655018688000,
+                startTimeStamp: 1658745797000,
+                finishTimeStamp: 1655018688000,
+                link: '',
             },
         ];
-
-        // Header的背景圖片
-        const bgImg =
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg';
 
         this.state = {
             detailRoute,
             clubData,
             event,
-            bgImg,
             // 訪問該頁的用戶對該組織的Follow狀態
             isFollow: false,
             // 該用戶是否管理員。社團、APP管理員：true；
             isAdmin: true,
+            imageUrls: clubData.bgImgUrl,
         };
     }
 
@@ -247,13 +251,26 @@ class ClubDetail extends Component {
         // 解耦uiMap的數據
         const {bg_color, white, black, themeColor} = COLOR_DIY;
         // 解構state數據
-        const {detailRoute, clubData, bgImg, isFollow, isAdmin} = this.state;
+        const {detailRoute, clubData, isFollow, isAdmin, event} = this.state;
+        const {bgImgUrl, avatarUrl, name, tag, introText, contact, clubID} =
+            clubData;
+
+        // 解構出“照片”欄的最多4張照片
+        let eventImgUrls = [];
+        event.map(item => {
+            eventImgUrls.push(item.coverImgUrl);
+        });
 
         // 渲染Header前景，社團LOGO，返回按鈕
-        // TODO: 點擊查看大圖
         renderForeground = () => {
             return (
-                <View style={{flex: 1, position: 'relative'}}>
+                <TouchableOpacity
+                    style={{flex: 1, position: 'relative'}}
+                    onPress={() => {
+                        this.setState({imageUrls: bgImgUrl});
+                        this.refs.imageScrollViewer.tiggerModal();
+                    }}
+                    activeOpacity={1}>
                     {/* 返回按鈕 */}
                     <View
                         style={{
@@ -294,7 +311,8 @@ class ClubDetail extends Component {
                     )}
 
                     {/* 白邊，凸顯立體感 */}
-                    <View
+                    <TouchableOpacity
+                        activeOpacity={1}
                         style={{
                             bottom: 0,
                             width: '100%',
@@ -306,25 +324,31 @@ class ClubDetail extends Component {
                         }}
                     />
                     {/* 社團LOGO */}
-                    <View
-                        style={{
-                            position: 'absolute',
-                            bottom: pxToDp(5),
-                            alignSelf: 'center',
-                            width: pxToDp(CLUB_LOGO_SIZE),
-                            height: pxToDp(CLUB_LOGO_SIZE),
-                            borderRadius: 50,
-                            overflow: 'hidden',
-                            ...COLOR_DIY.viewShadow,
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            this.setState({imageUrls: avatarUrl});
+                            this.refs.imageScrollViewer.tiggerModal();
                         }}>
-                        <FastImage
-                            source={{
-                                uri: 'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
-                            }}
-                            style={{width: '100%', height: '100%'}}
-                        />
-                    </View>
-                </View>
+                        <View
+                            style={{
+                                position: 'absolute',
+                                bottom: pxToDp(5),
+                                alignSelf: 'center',
+                                width: pxToDp(CLUB_LOGO_SIZE),
+                                height: pxToDp(CLUB_LOGO_SIZE),
+                                borderRadius: 50,
+                                overflow: 'hidden',
+                                ...COLOR_DIY.viewShadow,
+                            }}>
+                            <FastImage
+                                source={{
+                                    uri: avatarUrl,
+                                }}
+                                style={{width: '100%', height: '100%'}}
+                            />
+                        </View>
+                    </TouchableWithoutFeedback>
+                </TouchableOpacity>
             );
         };
 
@@ -351,10 +375,7 @@ class ClubDetail extends Component {
         // 渲染頁面主要內容
         renderMainContent = () => {
             return (
-                <View
-                    style={{
-                        backgroundColor: bg_color,
-                    }}>
+                <View style={{backgroundColor: bg_color}}>
                     {/* 1.0 社團基本資料 開始 */}
                     <View style={{alignItems: 'center'}}>
                         {/* 建議使用社團名的簡稱 */}
@@ -366,7 +387,7 @@ class ClubDetail extends Component {
                                 marginTop: pxToDp(5),
                             }}
                             numberOfLines={1}>
-                            {clubData.name}
+                            {name}
                         </Text>
                         {/* 社團ID */}
                         <Text
@@ -375,7 +396,7 @@ class ClubDetail extends Component {
                                 fontSize: pxToDp(13),
                                 marginVertical: pxToDp(2),
                             }}>
-                            @000{clubData.clubId}
+                            @000{clubID}
                         </Text>
                         {/* 社團分類 */}
                         <Text
@@ -383,12 +404,12 @@ class ClubDetail extends Component {
                                 color: themeColor,
                                 fontSize: pxToDp(15),
                             }}>
-                            #{clubData.tag}
+                            #{clubTagMap(tag)}
                         </Text>
                     </View>
                     {/* 1.0 社團基本資料 結束 */}
 
-                    {/* Follow按鈕 */}
+                    {/* Follow按鈕 帶Toast */}
                     <RenderFollowButton
                         isFollow={isFollow}
                         // 傳遞修改this.state.isFollow方法
@@ -396,7 +417,7 @@ class ClubDetail extends Component {
                     />
 
                     {/* 2.0 過往照片 開始 */}
-                    <TouchableOpacity
+                    <View
                         style={{
                             backgroundColor: COLOR_DIY.white,
                             borderRadius: pxToDp(10),
@@ -405,11 +426,9 @@ class ClubDetail extends Component {
                             marginBottom: pxToDp(8),
                             marginTop: pxToDp(10),
                             ...COLOR_DIY.viewShadow,
-                        }}
-                        activeOpacity={0.7}
-                        onPress={() => alert('查看更多圖片')}>
+                        }}>
                         {/* 卡片標題 */}
-                        <View
+                        <TouchableOpacity
                             style={{
                                 flexDirection: 'row',
                                 justifyContent: 'space-between',
@@ -417,20 +436,24 @@ class ClubDetail extends Component {
                                 paddingVertical: pxToDp(10),
                                 paddingHorizontal: pxToDp(10),
                             }}
-                            activeOpacity={0.6}>
+                            activeOpacity={0.7}
+                            onPress={() => {
+                                this.setState({imageUrls: eventImgUrls});
+                                this.refs.imageScrollViewer.tiggerModal();
+                            }}>
                             <Text
                                 style={{
                                     fontSize: pxToDp(12),
                                     color: COLOR_DIY.black.main,
                                     fontWeight: 'bold',
                                 }}>
-                                過往照片
+                                照片
                             </Text>
                             <Ionicons
                                 name="chevron-forward-outline"
                                 size={pxToDp(14)}
                                 color={COLOR_DIY.black.main}></Ionicons>
-                        </View>
+                        </TouchableOpacity>
                         {/* 卡片內容 */}
                         <View
                             style={{
@@ -442,25 +465,43 @@ class ClubDetail extends Component {
                             }}>
                             {/* 圖片相冊 最多4張 */}
                             {this.state.event.length > 0 &&
-                                this.state.event.map(item => {
+                                this.state.event.map((item, index) => {
                                     return (
-                                        <FastImage
-                                            source={{
-                                                uri: item.imgUrl,
-                                            }}
+                                        <TouchableOpacity
                                             style={{
                                                 width: pxToDp(CLUB_IMAGE_WIDTH),
                                                 height: pxToDp(
                                                     CLUB_IMAGE_HEIGHT,
                                                 ),
                                                 borderRadius: pxToDp(5),
+                                                overflow: 'hidden',
                                                 ...COLOR_DIY.viewShadow,
                                             }}
-                                        />
+                                            activeOpacity={0.7}
+                                            onPress={() => {
+                                                this.setState({
+                                                    imageUrls: eventImgUrls,
+                                                });
+                                                this.refs.imageScrollViewer.handleOpenImage(
+                                                    index,
+                                                );
+                                            }}>
+                                            <FastImage
+                                                source={{
+                                                    uri: item.coverImgUrl,
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    // borderRadius: pxToDp(5),
+                                                    // ...COLOR_DIY.viewShadow,
+                                                }}
+                                            />
+                                        </TouchableOpacity>
                                     );
                                 })}
                         </View>
-                    </TouchableOpacity>
+                    </View>
                     {/* 2.0 過往照片 結束 */}
 
                     {/* 3.0 簡介 開始 */}
@@ -509,7 +550,11 @@ class ClubDetail extends Component {
                                 marginTop: pxToDp(0),
                             }}>
                             {/* 服務圖標與文字 */}
-                            <Text numberOfLines={3} style={{color:black.second}}>{clubData.introText}</Text>
+                            <Text
+                                numberOfLines={3}
+                                style={{color: black.second}}>
+                                {introText}
+                            </Text>
                         </View>
                     </TouchableOpacity>
                     {/* 3.0 簡介 結束 */}
@@ -559,7 +604,7 @@ class ClubDetail extends Component {
                             }}>
                             {/* 聯繫方式 */}
                             <View>
-                                {clubData.contact.map(item => {
+                                {contact.map(item => {
                                     return (
                                         <View style={{flexDirection: 'row'}}>
                                             {/* 聯繫Type */}
@@ -587,37 +632,32 @@ class ClubDetail extends Component {
                     {/* 4.0 聯繫方式 結束 */}
 
                     {/* 5.0 舉辦的活動 開始 */}
-                    <View>
-                        <FlatList
-                            numColumns={2}
-                            horizontal={false}
-                            columnWrapperStyle={{
-                                justifyContent: 'center',
-                            }}
-                            data={this.state.event}
-                            renderItem={({item}) => {
-                                return (
-                                    <EventCard
-                                        data={item}
-                                        style={{
-                                            marginVertical: pxToDp(8),
-                                            marginHorizontal: pxToDp(10),
-                                        }}
-                                        touchDisable={false}
-                                    />
-                                );
-                            }}
-                            keyExtractor={(_, index) => index}
-                            scrollEnabled={false}
-                            // 在所有項目的末尾渲染，防止手勢白條遮擋
-                            ListFooterComponent={() => (
-                                <View
+                    <FlatList
+                        numColumns={2}
+                        columnWrapperStyle={{
+                            justifyContent: 'center',
+                        }}
+                        data={this.state.event}
+                        renderItem={({item}) => {
+                            return (
+                                <EventCard
+                                    data={item}
                                     style={{
-                                        marginBottom: pxToDp(80),
-                                    }}></View>
-                            )}
-                        />
-                    </View>
+                                        marginVertical: pxToDp(8),
+                                        marginHorizontal: pxToDp(10),
+                                    }}
+                                />
+                            );
+                        }}
+                        scrollEnabled={false}
+                        // 在所有項目的末尾渲染，防止手勢白條遮擋
+                        ListFooterComponent={() => (
+                            <View
+                                style={{
+                                    marginBottom: pxToDp(80),
+                                }}></View>
+                        )}
+                    />
                     {/* 5.0 舉辦的活動 結束 */}
                 </View>
             );
@@ -629,6 +669,14 @@ class ClubDetail extends Component {
                     barStyle="light-content"
                     backgroundColor={'transparent'}
                     translucent={true}
+                />
+
+                {/* 彈出層展示圖片查看器 */}
+                <ImageScrollViewer
+                    ref={'imageScrollViewer'}
+                    imageUrls={this.state.imageUrls}
+                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 <ImageHeaderScrollView
@@ -645,7 +693,7 @@ class ClubDetail extends Component {
                     renderHeader={() => (
                         <FastImage
                             source={{
-                                uri: bgImg,
+                                uri: bgImgUrl,
                             }}
                             style={{width: '100%', height: '100%'}}
                         />
