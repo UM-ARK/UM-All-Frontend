@@ -9,19 +9,18 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
+import Header from '../../../../components/Header';
+
 class About extends Component {
-    state = {  } 
-    render() { 
+    state = {};
+    render() {
         return (
-            <View style={{
-                height:'100%',
-                width:'100%',
-                alignItems:'center',
-                justifyContent:'center'
-            }}>
-                <Text style={{fontSize:20}}>我求求你</Text>
-                <Text style={{fontSize:50}}>Donate</Text>
-                <Text style={{fontSize:20}}>我們一下吧！！！</Text>
+            <View style={{flex: 1}}>
+                <Header title={'關於我們'} />
+
+                <Text style={{fontSize: 20}}>我求求你</Text>
+                <Text style={{fontSize: 50}}>Donate</Text>
+                <Text style={{fontSize: 20}}>我們一下吧！！！</Text>
             </View>
         );
     }

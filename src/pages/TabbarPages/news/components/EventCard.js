@@ -44,14 +44,22 @@ class EventCard extends Component {
 
     render() {
         // 解構this.props.data數據
-        const {imgUrl, title, timeStamp, eventID} = this.props.data;
+        const {
+            coverImgUrl,
+            title,
+            finishTimeStamp,
+            eventID,
+            link,
+            relateImgUrl,
+            type,
+        } = this.props.data;
         // 解構全局ui設計顏色
         const {white, black, viewShadow} = COLOR_DIY;
 
         // 當前時刻時間戳
         let nowTimeStamp = new Date().getTime();
         // 活動結束標誌
-        let isFinish = nowTimeStamp > timeStamp;
+        let isFinish = nowTimeStamp > finishTimeStamp;
 
         return (
             <View style={{...this.props.style}}>
@@ -65,52 +73,56 @@ class EventCard extends Component {
                         }}
                     />
                 )}
-                <TouchableOpacity
-                    style={{
-                        borderRadius: pxToDp(8),
-                        overflow: 'hidden',
-                        ...viewShadow,
-                    }}
-                    activeOpacity={0.9}
-                    onPress={this.handleJumpToDetail}>
-                    <FastImage
-                        source={{uri: imgUrl}}
+                {'coverImgUrl' in this.props.data && (
+                    <TouchableOpacity
                         style={{
-                            width: IMAGE_SIZE,
-                            height: IMAGE_SIZE,
+                            borderRadius: pxToDp(8),
+                            overflow: 'hidden',
+                            ...viewShadow,
                         }}
-                        resizeMode={FastImage.resizeMode.cover}
-                    />
+                        activeOpacity={0.9}
+                        onPress={this.handleJumpToDetail}>
+                        <FastImage
+                            source={{uri: coverImgUrl}}
+                            style={{
+                                width: IMAGE_SIZE,
+                                height: IMAGE_SIZE,
+                            }}
+                            resizeMode={FastImage.resizeMode.cover}
+                        />
 
-                    {/* 標題描述 */}
-                    <View
-                        style={{
-                            backgroundColor: white,
-                            width: IMAGE_SIZE,
-                            padding: pxToDp(10),
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        {/* 標題文字 & 日期 */}
-                        <View style={{width: '90%'}}>
-                            <Text style={{color: black.main}} numberOfLines={3}>
-                                {title}
-                            </Text>
-                            {/* 日期 */}
-                            <Text style={{color: black.third}}>
-                                {timeTrans(timeStamp)}
-                            </Text>
-                        </View>
+                        {/* 標題描述 */}
+                        <View
+                            style={{
+                                backgroundColor: white,
+                                width: IMAGE_SIZE,
+                                padding: pxToDp(10),
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            {/* 標題文字 & 日期 */}
+                            <View style={{width: '90%'}}>
+                                <Text
+                                    style={{color: black.main}}
+                                    numberOfLines={3}>
+                                    {title}
+                                </Text>
+                                {/* 日期 */}
+                                <Text style={{color: black.third}}>
+                                    {timeTrans(finishTimeStamp)}
+                                </Text>
+                            </View>
 
-                        {/* 點擊指示圖標 */}
-                        <View>
-                            <Ionicons
-                                name="chevron-forward-outline"
-                                color={black.third}
-                                size={pxToDp(20)}></Ionicons>
+                            {/* 點擊指示圖標 */}
+                            <View>
+                                <Ionicons
+                                    name="chevron-forward-outline"
+                                    color={black.third}
+                                    size={pxToDp(20)}></Ionicons>
+                            </View>
                         </View>
-                    </View>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                )}
             </View>
         );
     }

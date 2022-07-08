@@ -78,15 +78,15 @@ class AppSetting extends Component {
                             }}>
                             {'通知設置'}
                         </Text>
-                            <Image
-                                source={require('../icon/jiantou.png')}
-                                style={{
-                                    width: pxToDp(10),
-                                    height: pxToDp(10),
-                                    position:'absolute',
-                                    right:pxToDp(12),
-                                }}
-                            />
+                        <Image
+                            source={require('../icon/jiantou.png')}
+                            style={{
+                                width: pxToDp(10),
+                                height: pxToDp(10),
+                                position: 'absolute',
+                                right: pxToDp(12),
+                            }}
+                        />
                     </View>
                 </TouchableOpacity>
                 {/* 語言設置 */}
@@ -118,15 +118,15 @@ class AppSetting extends Component {
                             }}>
                             {'語言設置'}
                         </Text>
-                            <Image
-                                source={require('../icon/jiantou.png')}
-                                style={{
-                                    width: pxToDp(10),
-                                    height: pxToDp(10),
-                                    position:'absolute',
-                                    right:pxToDp(12)
-                                }}
-                            />
+                        <Image
+                            source={require('../icon/jiantou.png')}
+                            style={{
+                                width: pxToDp(10),
+                                height: pxToDp(10),
+                                position: 'absolute',
+                                right: pxToDp(12),
+                            }}
+                        />
                     </View>
                 </TouchableOpacity>
                 {/* 檢察更新 */}
@@ -158,17 +158,17 @@ class AppSetting extends Component {
                             }}>
                             {'檢察更新'}
                         </Text>
-                            <Image
-                                source={require('../icon/jiantou.png')}
-                                style={{
-                                    width: pxToDp(10),
-                                    height: pxToDp(10),
-                                    position:'absolute',
-                                    right:pxToDp(12)
-                                }}
-                            />
+                        <Image
+                            source={require('../icon/jiantou.png')}
+                            style={{
+                                width: pxToDp(10),
+                                height: pxToDp(10),
+                                position: 'absolute',
+                                right: pxToDp(12),
+                            }}
+                        />
                     </View>
-                </TouchableOpacity>               
+                </TouchableOpacity>
                 {/* 隱私設置 */}
                 <TouchableOpacity
                     activeOpacity={0.5}
@@ -218,40 +218,46 @@ class AppSetting extends Component {
                         />
                     </View>
                 </TouchableOpacity>
-                    {/* 隱私條款 */}
-                    <TouchableOpacity onPress={() => alert('閱讀並同意隱私條款')}
+                {/* 隱私條款 */}
+                <TouchableOpacity
+                    onPress={() => alert('閱讀並同意隱私條款')}
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                    <Text
                         style={{
-                            alignItems: 'center',
-                            justifyContent:'center'
+                            fontSize: pxToDp(13),
+                            fontWeight: '600',
+                            marginTop: pxToDp(15),
+                            color: COLOR_DIY.themeColor,
                         }}>
-                        <Text
-                            style={{
-                                fontSize: pxToDp(13),
-                                fontWeight: '600',
-                                marginTop: pxToDp(15),
-                                color:'#005F96',
-                            }}>
-                            {'《隱私信息收集與使用條款》'}
-                        </Text>
-                    </TouchableOpacity>               
-                <TouchableOpacity style={{
+                        {'《隱私信息收集與使用條款》'}
+                    </Text>
+                </TouchableOpacity>
+
+                {/* 登出按鈕 */}
+                <TouchableOpacity
+                    style={{
                         height: '4%',
                         width: '35%',
                         padding: 10,
                         marginTop: '10%',
-                        backgroundColor: '#005F96',
-                        borderRadius:pxToDp(10),
+                        backgroundColor: COLOR_DIY.themeColor,
+                        borderRadius: pxToDp(10),
                         justifyContent: 'center',
-                        position:'absolute',
-                        bottom:pxToDp(40),   
-                        alignSelf:'center'                 
-                }} onPress={() => alert('設置全局登錄狀態為未登錄')}>
-                    <Text style={{
-                        fontSize:20,
-                        alignSelf:'center',
-                        color:'white',
-                        fontWeight:'500'
-                    }}>
+                        position: 'absolute',
+                        bottom: pxToDp(40),
+                        alignSelf: 'center',
+                    }}
+                    onPress={() => alert('設置全局登錄狀態為未登錄')}>
+                    <Text
+                        style={{
+                            fontSize: 20,
+                            alignSelf: 'center',
+                            color: 'white',
+                            fontWeight: '500',
+                        }}>
                         退出登錄
                     </Text>
                 </TouchableOpacity>
