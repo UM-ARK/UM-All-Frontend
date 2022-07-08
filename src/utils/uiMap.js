@@ -10,7 +10,7 @@ export const COLOR_DIY = {
         third   :'#666666',
     },
     // 當想用純白，或其他顏色背景，白色文字時用white的色值
-    white:'#F5F5F5',
+    white:'#fff',
     // 全局背景白色(偏灰)
     bg_color:'#F5F5F7',
 
