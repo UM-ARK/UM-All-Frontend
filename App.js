@@ -5,6 +5,8 @@ import AnimatedSplash from 'react-native-animated-splash-screen';
 
 // 本地引用
 import Nav from './src/Nav';
+import RootStore from './src/mobx';
+import {Provider} from 'mobx-react';
 
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
@@ -31,11 +33,13 @@ class App extends Component {
                 logoHeight={150}
                 logoWidth={150}>
                 <SafeAreaProvider>
-                    <NativeBaseProvider>
-                        <View style={{flex: 1}}>
-                            <Nav></Nav>
-                        </View>
-                    </NativeBaseProvider>
+                    <Provider RootStore={RootStore}>
+                        <NativeBaseProvider>
+                            <View style={{flex: 1}}>
+                                <Nav></Nav>
+                            </View>
+                        </NativeBaseProvider>
+                    </Provider>
                 </SafeAreaProvider>
             </AnimatedSplash>
         );
