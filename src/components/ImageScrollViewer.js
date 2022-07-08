@@ -52,16 +52,23 @@ class ImageScrollViewer extends Component {
         const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
         const {imageUrls} = this.props;
 
+        console.log();
+
+        let imageUrlsObjArr = [];
+        if (typeof imageUrls == 'string') {
+            imageUrlsObjArr.push({url: imageUrls});
+        } else {
+            imageUrls.map(item => {
+                imageUrlsObjArr.push({url: item});
+            });
+        }
+
         return (
             <Modal
                 // 彈出層展示圖片查看器
                 isVisible={isModalVisible}
                 statusBarTranslucent
-                style={{
-                    margin: 0,
-                    paddingLeft: pxToDp(16),
-                    paddingRight: pxToDp(16),
-                }}
+                style={{margin: 0}}
                 deviceHeight={PAGE_HEIGHT}
                 backdropColor={'black'}
                 backdropOpacity={0.85}
@@ -70,7 +77,7 @@ class ImageScrollViewer extends Component {
                 <ImageViewer
                     backgroundColor={'transparent'}
                     useNativeDriver={true}
-                    imageUrls={imageUrls}
+                    imageUrls={imageUrlsObjArr}
                     // 打開的imageUrls的索引
                     index={imagesIndex}
                     // 注釋掉renderIndicator屬性則 默認會有頁數顯示
