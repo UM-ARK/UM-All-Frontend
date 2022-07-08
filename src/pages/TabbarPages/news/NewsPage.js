@@ -15,6 +15,7 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
 } from 'react-native-gesture-handler';
+import axios from 'axios';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -42,7 +43,7 @@ const NewsLoader = props => (
         viewBox="0 0 400 200"
         width={PAGE_WIDTH}
         height={200}
-        title="Loading news..."
+        // title="Loading news..."
         {...props}>
         <Rect x="42.84" y="9.93" rx="5" ry="5" width="143.55" height="86.59" />
         <Rect x="192.84" y="9.67" rx="0" ry="0" width="148.72" height="12.12" />
@@ -75,62 +76,78 @@ class NewsPage extends Component {
 
     // 請求澳大api返回新聞數據
     async getData() {
-        let res = [];
-        try {
-            const response = await fetch(
-                'https://api.data.um.edu.mo/service/media/news/v1.0.0/all',
-                {
-                    method: 'GET',
-                    headers: {
-                        Accept: 'application/json',
-                        Authorization:
-                            'Bearer 3edfffda-97ce-326a-a0a5-5e876adbf89f',
+        axios
+            .get('https://api.data.um.edu.mo/service/media/news/v1.0.0/all', {
+                // 請求頭配置
+                headers: {
+                    Accept: 'application/json',
+                    Authorization:
+                        'Bearer 3edfffda-97ce-326a-a0a5-5e876adbf89f',
+                },
+            })
+            .then(res => {
+                let result = res.data._embedded;
+                // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
+                let chooseTopNewsIndex = 0;
+                while (true) {
+                    if ('imageUrls' in result[chooseTopNewsIndex].common) {
+                        // 有圖
+                        break;
+                    } else {
+                        // 沒圖
+                        chooseTopNewsIndex++;
+                    }
+                }
+
+                // 頭條指定為當天最新的、有圖的新聞
+                topNews = result[chooseTopNewsIndex];
+                result.splice(chooseTopNewsIndex, 1); // 刪除數組中頭條新聞的數據，剩下的全部渲染到新聞列表
+
+                // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
+                let newsList = [];
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i].details.length > 0) {
+                        newsList.push(result[i]);
+                    }
+                }
+
+                // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
+                // 中文標題
+                let title_cn = '';
+                // 英文標題
+                let title_en = '';
+                // 葡文標題
+                let title_pt = '';
+                topNews.details.map(item => {
+                    if (item.locale == 'en_US') {
+                        title_en = item.title;
+                    } else if (item.locale == 'pt_PT') {
+                        title_pt = item.title;
+                    } else if (item.locale == 'zh_TW') {
+                        title_cn = item.title;
+                    }
+                });
+
+                this.setState({
+                    newsList,
+                    topNews: {
+                        // 發佈日期
+                        publishDate: topNews.common.publishDate,
+                        // 中文標題
+                        title_cn,
+                        // 英文標題
+                        title_en,
+                        // 葡文標題
+                        title_pt,
+                        // 相片數組
+                        imageUrls: topNews.common.imageUrls,
                     },
-                },
-            );
-            const json = await response.json();
-            res = json._embedded;
-        } catch (error) {
-            console.log(error);
-        } finally {
-            // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
-            let chooseTopNewsIndex = 0;
-            while (true) {
-                if ('imageUrls' in res[chooseTopNewsIndex].common) {
-                    // 有圖
-                    break;
-                } else {
-                    // 沒圖
-                    chooseTopNewsIndex++;
-                }
-            }
-
-            // 頭條指定為當天最新的、有圖的新聞
-            topNews = res[chooseTopNewsIndex];
-            res.splice(chooseTopNewsIndex, 1); // 刪除頭條新聞的數據，剩下的全部渲染到新聞列表
-            // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
-            let newsList = [];
-            for (let i = 0; i < res.length; i++) {
-                if (res[i].details.length > 0) {
-                    newsList.push(res[i]);
-                }
-            }
-
-            this.setState({
-                newsList,
-                topNews: {
-                    // 發佈日期
-                    publishDate: topNews.common.publishDate,
-                    // 中文標題
-                    title_cn: topNews.details[1].title,
-                    // 英文標題
-                    title_en: topNews.details[0].title,
-                    // 相片數組
-                    imageUrls: topNews.common.imageUrls,
-                },
-                isLoading: false,
+                    isLoading: false,
+                });
+            })
+            .catch(err => {
+                console.error(err);
             });
-        }
     }
 
     // 頭條新聞的渲染
@@ -140,16 +157,12 @@ class NewsPage extends Component {
         const {
             // 發佈日期
             publishDate,
-            // 最後更新時間
-            // lastModified,
             // 中文標題
             title_cn,
-            // 中文內容
-            content_cn,
             // 英文標題
             title_en,
-            // 英文內容
-            content_en,
+            // 葡文標題
+            title_pt,
             // 相片數組
             imageUrls,
         } = this.state.topNews;

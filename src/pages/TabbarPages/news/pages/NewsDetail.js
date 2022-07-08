@@ -10,6 +10,7 @@ import {
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
+import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -46,12 +47,36 @@ function timeTrans(date) {
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+
 class NewsDetail extends Component {
     constructor(props) {
         super(props);
 
         // 獲取上級路由傳遞的參數
         const newsData = this.props.route.params.data;
+
+        // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題、內容
+        // 中文
+        let title_cn = '';
+        let content_cn = '';
+        // 英文
+        let title_en = '';
+        let content_en = '';
+        // 葡文
+        let title_pt = '';
+        let content_pt = '';
+        newsData.details.map(item => {
+            if (item.locale == 'en_US') {
+                title_en = item.title;
+                content_en = item.content;
+            } else if (item.locale == 'pt_PT') {
+                title_pt = item.title;
+                content_pt = item.content;
+            } else if (item.locale == 'zh_TW') {
+                title_cn = item.title;
+                content_cn = item.content;
+            }
+        });
 
         // 存放新聞數據
         this.state = {
@@ -61,15 +86,17 @@ class NewsDetail extends Component {
                 // 最後更新時間
                 lastModified: newsData.lastModified,
                 // 中文標題
-                title_cn: newsData.details[1].title,
-
+                title_cn,
                 // 中文內容
-                content_cn: newsData.details[1].content,
+                content_cn,
                 // 英文標題
-                title_en: newsData.details[0].title,
-
+                title_en,
                 // 英文內容
-                content_en: newsData.details[0].content,
+                content_en,
+                // 葡文標題
+                title_pt,
+                // 葡文內容
+                content_pt,
                 // 相片數組
                 imageUrls: newsData.common.imageUrls,
             },
@@ -93,9 +120,15 @@ class NewsDetail extends Component {
             title_en,
             // 英文內容
             content_en,
+            // 葡文標題
+            title_pt,
+            // 葡文內容
+            content_pt,
             // 相片數組
             imageUrls,
         } = this.state.data;
+
+        // console.log(content_cn);
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
@@ -126,30 +159,60 @@ class NewsDetail extends Component {
 
                 <ScrollView style={{padding: pxToDp(10)}}>
                     {/* 英文標題 */}
-                    <Text
-                        style={{
-                            color: black.main,
-                            fontWeight: 'bold',
-                            fontSize: pxToDp(18),
-                        }}>
-                        {title_en}
-                    </Text>
+                    {title_en.length > 0 && (
+                        <Text
+                            style={{
+                                color: black.main,
+                                fontWeight: 'bold',
+                                fontSize: pxToDp(18),
+                            }}
+                            selectable={true}>
+                            {title_en}
+                        </Text>
+                    )}
                     {/* 中文標題 */}
-                    <Text
-                        style={{
-                            color: black.second,
-                            fontWeight: 'bold',
-                            fontSize: pxToDp(16),
-                        }}>
-                        {title_cn}
-                    </Text>
+                    {title_cn.length > 0 && (
+                        <Text
+                            style={{
+                                color:
+                                    title_en.length > 0
+                                        ? black.second
+                                        : black.main,
+                                fontWeight: 'bold',
+                                fontSize:
+                                    title_en.length > 0
+                                        ? pxToDp(16)
+                                        : pxToDp(18),
+                            }}
+                            selectable={true}>
+                            {title_cn}
+                        </Text>
+                    )}
+                    {/* 葡文標題 */}
+                    {title_pt.length > 0 && (
+                        <Text
+                            style={{
+                                color:
+                                    title_en.length > 0
+                                        ? black.second
+                                        : black.main,
+                                fontWeight: 'bold',
+                                fontSize:
+                                    title_en.length > 0
+                                        ? pxToDp(16)
+                                        : pxToDp(18),
+                            }}
+                            selectable={true}>
+                            {title_pt}
+                        </Text>
+                    )}
                     {/* 日期 */}
                     <Text
                         style={{
                             color: black.third,
                             alignSelf: 'flex-end',
                         }}>
-                        Date: {timeTrans(lastModified)}
+                        Update: {timeTrans(lastModified)}
                     </Text>
 
                     {/* 圖片展示 */}
@@ -165,7 +228,8 @@ class NewsDetail extends Component {
                             // item是每一項數組的數據
                             // index是每一項的數組下標
                             return (
-                                <View
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
                                     style={{
                                         width: COMPONENT_WIDTH,
                                         height: COMPONENT_WIDTH,
@@ -173,6 +237,13 @@ class NewsDetail extends Component {
                                         borderRadius: pxToDp(10),
                                         overflow: 'hidden',
                                         ...viewShadow,
+                                    }}
+                                    // 打開圖片瀏覽大圖
+                                    onPress={() => {
+                                        console.log(imageUrls);
+                                        this.refs.imageScrollViewer.handleOpenImage(
+                                            index,
+                                        );
                                     }}>
                                     <FastImage
                                         source={{uri: item}}
@@ -181,25 +252,64 @@ class NewsDetail extends Component {
                                             height: COMPONENT_WIDTH,
                                         }}
                                     />
-                                </View>
+                                </TouchableOpacity>
                             );
                         }}
                     />
+                    {/* 彈出層展示圖片查看器 */}
+                    <ImageScrollViewer
+                        ref={'imageScrollViewer'}
+                        imageUrls={imageUrls}
+                        // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                        // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                    />
 
                     {/* 中文正文 */}
-                    <Text style={{color: black.second, fontSize: pxToDp(13)}}>
-                        {'\t' + repalceHtmlToText(content_cn)}
-                    </Text>
+                    {content_cn.length > 0 && (
+                        <View>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontSize: pxToDp(13),
+                                }}
+                                selectable={true}>
+                                {'\t' + repalceHtmlToText(content_cn)}
+                            </Text>
 
-                    <View style={{marginTop: pxToDp(50)}} />
+                            <View style={{marginTop: pxToDp(50)}} />
+                        </View>
+                    )}
 
                     {/* 英文正文 */}
-                    <Text style={{color: black.second, fontSize: pxToDp(13)}}>
-                        {'\t' + repalceHtmlToText(content_en)}
-                    </Text>
+                    {content_en.length > 0 && (
+                        <View>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontSize: pxToDp(13),
+                                }}
+                                selectable={true}>
+                                {'\t' + repalceHtmlToText(content_en)}
+                            </Text>
 
-                    <Text>{'\n'}</Text>
-                    <Text>{'\n'}</Text>
+                            <View style={{marginTop: pxToDp(50)}} />
+                        </View>
+                    )}
+
+                    {content_pt.length > 0 && (
+                        <View>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontSize: pxToDp(13),
+                                }}
+                                selectable={true}>
+                                {'\t' + repalceHtmlToText(content_pt)}
+                            </Text>
+                        </View>
+                    )}
+
+                    <View style={{marginBottom: pxToDp(100)}} />
                 </ScrollView>
             </View>
         );
