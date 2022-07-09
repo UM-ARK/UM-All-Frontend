@@ -287,6 +287,7 @@ class ChatCard extends Component {
     renderEventCard = (item) => {
         const window = Dimensions.get('window');
         return (
+            /* 活動卡外框 */
             <View
                 style={{
                     flex: 1,
@@ -297,6 +298,7 @@ class ChatCard extends Component {
                     // 增加陰影
                     ...COLOR_DIY.viewShadow,
                 }}>
+                {/* 包裝相片與相片模糊部件 */} 
                 <View
                     style={{
                         flex: 1,
@@ -321,52 +323,6 @@ class ChatCard extends Component {
                         bgColor={'rgba(200,200,200,0.6)'}
                     >
                         <EventDescription item={{...item, eventDate: timeTrans(item.eventDate)}} />
-                        {/* <View style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}>
-                                <Text
-                                    style={{
-                                        fontSize: pxToDp(16),
-                                        color: "#212121",
-                                        fontWeight: 'bold',
-                                        width: '90%',
-                                    }}
-                                    numberOfLines={1}
-                                >
-                                    {item.title}
-                                </Text>
-                                <Ionicons
-                                    name="chevron-forward-outline"
-                                    size={pxToDp(14)}
-                                    color={COLOR_DIY.black.main}>
-                                </Ionicons>
-                            </View>
-                            <Text
-                                style={{
-                                    fontSize: pxToDp(12),
-                                    color: "#383838",
-                                    fontWeight: 'bold',
-                                    width: '90%'
-                                }}
-                                numberOfLines={2}
-                            >
-                                    {item.text}
-                            </Text>
-                            <Text style={{
-                                width: '100%',
-                                fontSize: pxToDp(10),
-                                color: '#536162',
-                                // color: "#DFDFDE",
-                                fontWeight: '700',
-                                textAlign: 'left',
-                                paddingTop: pxToDp(2),
-                            }}>
-                                {'活動日期: ' + timeTrans(item.eventDate)}
-                            </Text>
-                        </View> */}
                     </BlurViewWrapper>
                 </View>
             </View>
