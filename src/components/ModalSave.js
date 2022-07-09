@@ -11,16 +11,11 @@ import {COLOR_DIY} from '../utils/uiMap';
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
 
-class ModalBottom extends Component {
-    static defaultProps = {
-        style: {},
-    };
-
+class ModalSave extends Component {
     state = {
         isModalBottomVisible: true,
     };
 
-    // 開啟/關閉Modal
     tiggerModal = () => {
         this.setState({isModalBottomVisible: !this.state.isModalBottomVisible});
         this.props.cancel();
@@ -45,20 +40,48 @@ class ModalBottom extends Component {
                 }}>
                 <View
                     style={{
-                        // height: '18%',
+                        height: '18%',
                         width: '100%',
                         backgroundColor: COLOR_DIY.meScreenColor.bg_color,
                         borderTopLeftRadius: pxToDp(15),
                         borderTopRightRadius: pxToDp(15),
                         overflow: 'hidden',
-                        // 可接收樣式覆蓋
-                        ...this.props.style,
                     }}>
-                    {this.props.children}
+                    <View style={{padding: pxToDp(20)}}>
+                        <View
+                            style={{
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: COLOR_DIY.white,
+                                    width: 70,
+                                    height: 70,
+                                    borderRadius: 20,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                                // TODO: 儲存圖片
+                                onPress={() => alert('調用儲存圖片接口')}>
+                                <MaterialIcons
+                                    name="save-alt"
+                                    color={COLOR_DIY.themeColor}
+                                    size={pxToDp(45)}></MaterialIcons>
+                            </TouchableOpacity>
+                            <Text
+                                style={{
+                                    marginTop: pxToDp(2),
+                                    color: COLOR_DIY.themeColor,
+                                }}>
+                                保存圖片
+                            </Text>
+                        </View>
+                    </View>
                 </View>
             </Modal>
         );
     }
 }
 
-export default ModalBottom;
+export default ModalSave;
