@@ -7,12 +7,27 @@ class RootStore {
     // 用戶登錄狀態
     isLogin = false;
     // 是否組織賬號
-    isClubAccount = false;
+    isClub = false;
 
     @action // 行為修飾器
     // 登錄或登出賬號
-    changeLoginState() {
-        this.isLogin = !this.isLogin;
+    loginStd() {
+        this.isLogin = true;
+        this.isClub = false;
+    }
+    logoutStd() {
+        this.isLogin = false;
+        this.isClub = false;
+    }
+
+    // 登錄或登出組織賬號
+    loginClub() {
+        this.isLogin = true;
+        this.isClub = true;
+    }
+    logoutClub() {
+        this.isLogin = false;
+        this.isClub = true;
     }
 }
 
