@@ -9,7 +9,7 @@ const BlurViewWrapper = (props) => {
                 blurRadius={Platform.OS === 'ios' ? props.blurRadius + 5 : props.blurRadius}
                 style={[styles.blurImageStyle, {height: props.blurHeight, width: props.width}]}
             >
-                <View style={{backgroundColor: props.bgColor}}>
+                <View style={{backgroundColor: props.bgColor, height: props.blurHeight}}>
                     {props.children}
                 </View>
             </ImageBackground>
