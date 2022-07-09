@@ -2,6 +2,9 @@
 import React from 'react';
 import {Animated} from 'react-native';
 
+import {COLOR_DIY} from '../utils/uiMap';
+import {pxToDp} from '../utils/stylesKits';
+
 export const getTranslateX = (
     selectedIndex,
     componentIndex,
@@ -70,10 +73,11 @@ const ScrollAnimation = ({translateX}) => {
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                width: 200, //route.title.length * 50,
-                height: 30,
+                width: pxToDp(150), //route.title.length * 50,
+                height: pxToDp(30),
+                borderRadius: pxToDp(10),
                 zIndex: -10,
-                backgroundColor: 'lightblue',
+                backgroundColor: '#aed0ee',
                 transform: [
                     {
                         translateX,
