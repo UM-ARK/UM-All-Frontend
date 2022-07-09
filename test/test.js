@@ -8,6 +8,7 @@ import {
     StatusBar,
     Button,
     Image,
+    ScrollView,
 } from 'react-native';
 
 import {COLOR_DIY} from '../src/utils/uiMap';
@@ -21,7 +22,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import ModalBottom from '../src/components/ModalBottom';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -39,6 +39,7 @@ const images = [
 ];
 
 import ImageScrollViewer from '../src/components/ImageScrollViewer';
+import ModalBottom from '../src/components/ModalBottom';
 
 class TestScreen extends Component {
     // static contextType = NavigationContext;
@@ -48,6 +49,7 @@ class TestScreen extends Component {
         isModalVisible: false,
         imagesIndex: 0,
         isModalBottomVisible: true,
+        isShow: false,
     };
 
     // 打開和關閉顯示照片的彈出層
@@ -64,10 +66,14 @@ class TestScreen extends Component {
         });
     };
 
+    tiggerModalBottom = () => {
+        this.setState({isShow: !this.state.isShow});
+    };
+
     render() {
         const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
 
-        console.log(isModalVisible);
+        console.log(this.state.isShow);
 
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
@@ -129,6 +135,61 @@ class TestScreen extends Component {
                     onPress={() => {
                         this.refs.imageScrollViewer.tiggerModal();
                     }}></Button>
+
+                {/* 展示Modal */}
+                {this.state.isShow && (
+                    <ModalBottom cancel={this.tiggerModalBottom}>
+                        <View
+                            style={{
+                                padding: pxToDp(20),
+                                height: PAGE_HEIGHT * 0.7,
+                            }}>
+                            <ScrollView>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                                <Text>Test</Text>
+                            </ScrollView>
+                        </View>
+                    </ModalBottom>
+                )}
+
+                <Button
+                    title="打開ModalBottom"
+                    onPress={() => this.tiggerModalBottom()}></Button>
             </View>
         );
     }
