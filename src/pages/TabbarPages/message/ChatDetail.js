@@ -213,16 +213,7 @@ class ChatCard extends Component {
     renderMessageTime = timeStamp => {
         let timePhase = timeTrans(timeStamp);
         return (
-            <View
-                style={{
-                    alignSelf: 'center',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#eaeaea',
-                    borderRadius: pxToDp(10),
-                    paddingHorizontal: pxToDp(8),
-                    paddingVertical: pxToDp(2),
-                }}>
+            <View style={styles.timeStampWrap}>
                 <Text style={{color: COLOR_DIY.black.third}}>{timePhase}</Text>
             </View>
         );
@@ -234,32 +225,10 @@ class ChatCard extends Component {
         let titleColor = mapColorByIndex(index);
 
         return (
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: COLOR_DIY.bg_color,
-                    borderRadius: pxToDp(10),
-                    marginHorizontal: pxToDp(15),
-                    marginTop: pxToDp(10),
-                    // 增加陰影
-                    ...COLOR_DIY.viewShadow,
-                }}>
+            <View style={styles.message.container}>
                 {/* 卡片標題 */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        paddingHorizontal: pxToDp(10),
-                        paddingVertical: pxToDp(10),
-                    }}>
-                    <Text
-                        style={{
-                            fontSize: pxToDp(12),
-                            color: titleColor,
-                            fontWeight: 'bold',
-                            width: '90%',
-                        }}
+                <View style={styles.message.titleWrap}>
+                    <Text style={[styles.message.title, {color: titleColor}]}
                         numberOfLines={1}>
                         {item.title}
                     </Text>
@@ -269,14 +238,7 @@ class ChatCard extends Component {
                         color={COLOR_DIY.black.main}></Ionicons>
                 </View>
                 {/* 卡片內容 */}
-                <View
-                    style={{
-                        justifyContent: 'space-around',
-                        alignItems: 'flex-start',
-                        margin: pxToDp(10),
-                        marginTop: pxToDp(0),
-                        flexDirection: 'column',
-                    }}>
+                <View style={styles.message.contentWrap}>
                     {/* 文字 */}
                     <Text style={{color: titleColor}}>{item.text}</Text>
                 </View>
@@ -288,30 +250,16 @@ class ChatCard extends Component {
         const window = Dimensions.get('window');
         return (
             /* 活動卡外框 */
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: COLOR_DIY.bg_color,
-                    borderRadius: pxToDp(10),
-                    marginHorizontal: pxToDp(15),
-                    marginTop: pxToDp(10),
-                    // 增加陰影
-                    ...COLOR_DIY.viewShadow,
-                }}>
+            <View style={styles.event.container}>
                 {/* 包裝相片與相片模糊部件 */} 
-                <View
-                    style={{
-                        flex: 1,
-                        overflow: 'hidden',
-                        borderRadius: pxToDp(10),
-                    }}>
+                <View style={styles.event.imageWrap}>
                     <Image
                         source={{uri: item.url}}
                         style={{
                             flex: 1,
+                            resizeMode: 'cover',
                             width: window.width * 0.92,
                             height: window.height * 0.3,
-                            resizeMode: 'cover',
                         }}
                     />
                     <BlurViewWrapper
@@ -392,21 +340,80 @@ class ChatCard extends Component {
 
                 {/* 回復提醒 */}
                 <View
-                    style={{
-                        marginVertical: pxToDp(10),
-                        borderRadius: pxToDp(20),
-                        marginHorizontal: pxToDp(20),
-                        backgroundColor: COLOR_DIY.white,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingVertical: pxToDp(10),
-                        ...COLOR_DIY.viewShadow,
-                    }}>
+                    style={styles.replyReminder}>
                     <Text>您無需回復此消息</Text>
                 </View>
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    timeStampWrap: {
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#eaeaea',
+        borderRadius: pxToDp(10),
+        paddingHorizontal: pxToDp(8),
+        paddingVertical: pxToDp(2),
+    },
+    message: {
+        container: {
+            flex: 1,
+            backgroundColor: COLOR_DIY.bg_color,
+            borderRadius: pxToDp(10),
+            marginHorizontal: pxToDp(15),
+            marginTop: pxToDp(10),
+            // 增加陰影
+            ...COLOR_DIY.viewShadow,
+        },
+        titleWrap: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: pxToDp(10),
+            paddingVertical: pxToDp(10),
+        },
+        title: {
+            fontSize: pxToDp(12),
+            fontWeight: 'bold',
+            width: '90%',
+        },
+        contentWrap: {
+            justifyContent: 'space-around',
+            alignItems: 'flex-start',
+            margin: pxToDp(10),
+            marginTop: pxToDp(0),
+            flexDirection: 'column',
+        }
+    },
+    event: {
+        container: {
+            flex: 1,
+            backgroundColor: COLOR_DIY.bg_color,
+            borderRadius: pxToDp(10),
+            marginHorizontal: pxToDp(15),
+            marginTop: pxToDp(10),
+            // 增加陰影
+            ...COLOR_DIY.viewShadow,
+        },
+        imageWrap: {
+            flex: 1,
+            overflow: 'hidden',
+            borderRadius: pxToDp(10),
+        }
+    },
+    replyReminder: {
+        marginVertical: pxToDp(10),
+        borderRadius: pxToDp(20),
+        marginHorizontal: pxToDp(20),
+        backgroundColor: COLOR_DIY.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: pxToDp(10),
+        ...COLOR_DIY.viewShadow,
+    }
+});
 
 export default ChatCard;
