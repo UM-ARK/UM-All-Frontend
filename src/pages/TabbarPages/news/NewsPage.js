@@ -168,86 +168,91 @@ class NewsPage extends Component {
         } = this.state.topNews;
 
         return (
-            <View
-                style={{
-                    borderRadius: pxToDp(10),
-                    overflow: 'hidden',
-                    marginHorizontal: pxToDp(10),
-                    marginVertical: pxToDp(5),
-                    height: pxToDp(200),
-                    backgroundColor: white,
-                    ...viewShadow,
-                }}>
-                <View style={{width: '100%'}}>
-                    {/* 圖片背景 */}
-                    {this.state.topNews.imageUrls && (
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => {
-                                this.context.navigate('NewsDetail', {
-                                    data: topNews,
-                                });
-                            }}>
-                            <FastImage
-                                source={{uri: imageUrls[0]}}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
+            <View>
+                <Text style={{color: black.third, alignSelf: 'center'}}>
+                    Data From: data.um.edu.mo
+                </Text>
+                <View
+                    style={{
+                        borderRadius: pxToDp(10),
+                        overflow: 'hidden',
+                        marginHorizontal: pxToDp(10),
+                        marginVertical: pxToDp(5),
+                        height: pxToDp(200),
+                        backgroundColor: white,
+                        ...viewShadow,
+                    }}>
+                    <View style={{width: '100%'}}>
+                        {/* 圖片背景 */}
+                        {this.state.topNews.imageUrls && (
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    this.context.navigate('NewsDetail', {
+                                        data: topNews,
+                                    });
                                 }}>
-                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                                <View
+                                <FastImage
+                                    source={{uri: imageUrls[0]}}
                                     style={{
                                         width: '100%',
                                         height: '100%',
-                                        backgroundColor: 'rgba(0,0,0,0.5)',
-                                        padding: pxToDp(15),
-                                        justifyContent: 'flex-end',
                                     }}>
-                                    {/* Top Story字樣 */}
+                                    {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                     <View
                                         style={{
-                                            position: 'absolute',
-                                            top: pxToDp(10),
-                                            left: pxToDp(15),
-                                        }}>
-                                        <Text
-                                            style={{
-                                                color: white,
-                                                fontWeight: 'bold',
-                                                fontSize: pxToDp(20),
-                                            }}>
-                                            Top Story @ UM
-                                        </Text>
-                                    </View>
-
-                                    {/* 標題 */}
-                                    <View
-                                        style={{
-                                            alignSelf: 'center',
-                                            justifyContent: 'center',
                                             width: '100%',
+                                            height: '100%',
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
+                                            padding: pxToDp(15),
+                                            justifyContent: 'flex-end',
                                         }}>
-                                        <Text
+                                        {/* Top Story字樣 */}
+                                        <View
                                             style={{
-                                                color: white,
-                                                fontWeight: 'bold',
-                                                fontSize: pxToDp(18),
+                                                position: 'absolute',
+                                                top: pxToDp(10),
+                                                left: pxToDp(15),
                                             }}>
-                                            {title_en}
-                                        </Text>
-                                        <Text
+                                            <Text
+                                                style={{
+                                                    color: white,
+                                                    fontWeight: 'bold',
+                                                    fontSize: pxToDp(20),
+                                                }}>
+                                                Top Story @ UM
+                                            </Text>
+                                        </View>
+
+                                        {/* 標題 */}
+                                        <View
                                             style={{
-                                                color: white,
-                                                fontWeight: 'bold',
-                                                fontSize: pxToDp(13),
+                                                alignSelf: 'center',
+                                                justifyContent: 'center',
+                                                width: '100%',
                                             }}>
-                                            {title_cn}
-                                        </Text>
+                                            <Text
+                                                style={{
+                                                    color: white,
+                                                    fontWeight: 'bold',
+                                                    fontSize: pxToDp(18),
+                                                }}>
+                                                {title_en}
+                                            </Text>
+                                            <Text
+                                                style={{
+                                                    color: white,
+                                                    fontWeight: 'bold',
+                                                    fontSize: pxToDp(13),
+                                                }}>
+                                                {title_cn}
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
-                            </FastImage>
-                        </TouchableOpacity>
-                    )}
+                                </FastImage>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
             </View>
         );
@@ -281,8 +286,7 @@ class NewsPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        console.log('回頂！！');
-                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
+                        // // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.refs.virtualizedList.scrollToOffset({
                             x: 0,
                             y: 0,
@@ -308,16 +312,6 @@ class NewsPage extends Component {
                 </TouchableWithoutFeedback>
             </Interactable.View>
         );
-    };
-
-    // 下拉刷新事件
-    _onRefresh = () => {
-        // 請求澳大新聞API
-        this.setState({isLoading: true});
-        this.getData();
-        console.log('觸發刷新');
-        // 停止更新動畫
-        this._scrollView.endRefresh();
     };
 
     render() {
