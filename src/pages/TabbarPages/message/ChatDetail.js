@@ -18,6 +18,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {Dimensions} from 'react-native';
 import BlurViewWrapper from '../../../components/BlurViewWrapper';
+import EventDescription from './EventDescription';
 
 const dataList = [
     {
@@ -319,10 +320,8 @@ class ChatCard extends Component {
                         blurRadius={20}
                         bgColor={'rgba(200,200,200,0.6)'}
                     >
-                        <View style={{
-                                paddingVertical: 10,
-                                paddingHorizontal: 10,
-                            }}>
+                        <EventDescription item={{...item, eventDate: timeTrans(item.eventDate)}} />
+                        {/* <View style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
                             <View style={{
                                 flexDirection: 'row',
                                 justifyContent: 'space-between',
@@ -367,7 +366,7 @@ class ChatCard extends Component {
                             }}>
                                 {'活動日期: ' + timeTrans(item.eventDate)}
                             </Text>
-                        </View>
+                        </View> */}
                     </BlurViewWrapper>
                 </View>
             </View>
