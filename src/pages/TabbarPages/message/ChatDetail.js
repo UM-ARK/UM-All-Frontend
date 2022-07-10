@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     StyleSheet,
     Image,
-    ImageBackground,
     FlatList,
 } from 'react-native';
 
@@ -17,7 +16,16 @@ import FastImage from 'react-native-fast-image';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import {GiftedChat} from 'react-native-gifted-chat';
+import {Dimensions} from 'react-native';
+import BlurViewWrapper from '../../../components/BlurViewWrapper';
+import EventDescription from './EventDescription';
+
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('screen');
+
+// 定義圖片類型的消息寬高
+const IMAGE_CARD_WIDTH = PAGE_WIDTH * 0.92;
+const IMAGE_CARD_HEIGHT = PAGE_HEIGHT * 0.3;
 
 const dataList = [
     {
@@ -80,10 +88,12 @@ const dataList = [
     },
     {
         _id: 4,
-        title: 'Test4',
-        text: '非常舊的消息',
-        type: 'text',
+        title: '澳大開放日將改為線上舉行',
+        text: '澳門大學開放日多年來深受澳門居民歡迎，也吸引不少訪客參與。因應疫情，澳大於1月16日（星期日）舉行的開放日將改為線上進行，澳門和海內外的學生、家長和朋友可於當天上',
+        type: 'event',
+        eventDate: 1656927421000,
         createAt: 1656927421000,
+        url: 'https://www.um.edu.mo/wp-content/uploads/2022/01/259098-1_resized-scaled.jpeg',
         user: {
             _id: 1,
             name: '溫迪',
@@ -91,11 +101,29 @@ const dataList = [
         },
     },
     {
-        _id: 5,
-        title: 'Test5',
-        text: '非常舊的消息',
-        type: 'text',
+        _id: 6,
+        title: '同狗狗玩遊戲',
+        text: '好開心咁同狗狗一齊玩遊戲，仲可以賺墊CS point！這隻17歲的中國冠毛犬24日在「世界最醜狗狗比賽」中擊敗了9名參賽者；這場賽事已有數十年歷史，每年在加州貝塔留瑪',
+        type: 'event',
+        eventDate: 1656927421000,
         createAt: 1656927421000,
+        // url: 'https://images.unsplash.com/photo-1532275672750-588761c76ae8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80',
+        url: 'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
+        user: {
+            _id: 1,
+            name: '溫迪',
+            avatar: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
+        },
+    },
+    {
+        _id: 7,
+        title: '領養代替購買',
+        text: '人確實都是自由可以去選擇領養或是購買，但流浪動物的出現成因的棄養，正正是因為每個購買寵物的人認為自己很自由可以自由選擇各種自己想要規格、品種的商品—犬隻，但卻無法為這個生命負責才導致的，對照前述我們若只聚焦在「棄養」這個行為',
+        type: 'event',
+        eventDate: 1656927421000,
+        createAt: 1656927421000,
+        // url: 'https://images.unsplash.com/photo-1597046902504-dfae3612605f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80',
+        url: 'https://www.cpsumsu.org/image/poster/CPSUMSU_UMEF_2022.png',
         user: {
             _id: 1,
             name: '溫迪',
@@ -182,16 +210,7 @@ class ChatCard extends Component {
     renderMessageTime = timeStamp => {
         let timePhase = timeTrans(timeStamp);
         return (
-            <View
-                style={{
-                    alignSelf: 'center',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#eaeaea',
-                    borderRadius: pxToDp(10),
-                    paddingHorizontal: pxToDp(8),
-                    paddingVertical: pxToDp(2),
-                }}>
+            <View style={styles.timeStampWrap}>
                 <Text style={{color: COLOR_DIY.black.third}}>{timePhase}</Text>
             </View>
         );
@@ -203,32 +222,11 @@ class ChatCard extends Component {
         let titleColor = mapColorByIndex(index);
 
         return (
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: COLOR_DIY.bg_color,
-                    borderRadius: pxToDp(10),
-                    marginHorizontal: pxToDp(15),
-                    marginTop: pxToDp(10),
-                    // 增加陰影
-                    ...COLOR_DIY.viewShadow,
-                }}>
+            <View style={styles.message.container}>
                 {/* 卡片標題 */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        paddingHorizontal: pxToDp(10),
-                        paddingVertical: pxToDp(10),
-                    }}>
+                <View style={styles.message.titleWrap}>
                     <Text
-                        style={{
-                            fontSize: pxToDp(12),
-                            color: titleColor,
-                            fontWeight: 'bold',
-                            width: '90%',
-                        }}
+                        style={[styles.message.title, {color: titleColor}]}
                         numberOfLines={1}>
                         {item.title}
                     </Text>
@@ -238,16 +236,48 @@ class ChatCard extends Component {
                         color={COLOR_DIY.black.main}></Ionicons>
                 </View>
                 {/* 卡片內容 */}
-                <View
-                    style={{
-                        justifyContent: 'space-around',
-                        alignItems: 'flex-start',
-                        margin: pxToDp(10),
-                        marginTop: pxToDp(0),
-                        flexDirection: 'column',
-                    }}>
+                <View style={styles.message.contentWrap}>
                     {/* 文字 */}
                     <Text style={{color: titleColor}}>{item.text}</Text>
+                </View>
+            </View>
+        );
+    };
+
+    renderEventCard = item => {
+        const window = Dimensions.get('window');
+        return (
+            /* 活動卡外框 */
+            <View style={styles.event.container}>
+                {/* 包裝相片與相片模糊部件 */}
+                <View style={styles.event.imageWrap}>
+                    <Image
+                        source={{uri: item.url}}
+                        style={{
+                            flex: 1,
+                            resizeMode: 'cover',
+                            width: IMAGE_CARD_WIDTH,
+                            height: IMAGE_CARD_HEIGHT,
+                        }}
+                    />
+                    <BlurViewWrapper
+                        // 需要虛化圖片的URL
+                        url={item.url}
+                        // 需要虛化的原圖寬高
+                        width={IMAGE_CARD_WIDTH}
+                        height={IMAGE_CARD_HEIGHT}
+                        blurHeight={'35%'}
+                        blurRadius={15}
+                        // 模糊層顏色
+                        bgColor={'rgba(200,200,200,0.5)'}>
+                        <EventDescription
+                            item={{
+                                ...item,
+                                eventDate: timeTrans(item.eventDate),
+                            }}
+                            style={{padding: 10}}
+                        />
+                    </BlurViewWrapper>
                 </View>
             </View>
         );
@@ -264,7 +294,10 @@ class ChatCard extends Component {
                 {this.renderMessageTime(item.createAt)}
 
                 {/* 渲染信息卡片 */}
-                {this.renderMessageCard(item, index)}
+                {item.type === 'text' && this.renderMessageCard(item, index)}
+
+                {/* 渲染活動卡片 */}
+                {item.type === 'event' && this.renderEventCard(item, index)}
             </View>
         );
     };
@@ -312,22 +345,80 @@ class ChatCard extends Component {
                 />
 
                 {/* 回復提醒 */}
-                <View
-                    style={{
-                        marginVertical: pxToDp(10),
-                        borderRadius: pxToDp(20),
-                        marginHorizontal: pxToDp(20),
-                        backgroundColor: COLOR_DIY.white,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingVertical: pxToDp(10),
-                        ...COLOR_DIY.viewShadow,
-                    }}>
+                <View style={styles.replyReminder}>
                     <Text>您無需回復此消息</Text>
                 </View>
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    timeStampWrap: {
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#eaeaea',
+        borderRadius: pxToDp(10),
+        paddingHorizontal: pxToDp(8),
+        paddingVertical: pxToDp(2),
+    },
+    message: {
+        container: {
+            flex: 1,
+            backgroundColor: COLOR_DIY.bg_color,
+            borderRadius: pxToDp(10),
+            marginHorizontal: pxToDp(15),
+            marginTop: pxToDp(10),
+            // 增加陰影
+            ...COLOR_DIY.viewShadow,
+        },
+        titleWrap: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: pxToDp(10),
+            paddingVertical: pxToDp(10),
+        },
+        title: {
+            fontSize: pxToDp(12),
+            fontWeight: 'bold',
+            width: '90%',
+        },
+        contentWrap: {
+            justifyContent: 'space-around',
+            alignItems: 'flex-start',
+            margin: pxToDp(10),
+            marginTop: pxToDp(0),
+            flexDirection: 'column',
+        },
+    },
+    event: {
+        container: {
+            flex: 1,
+            backgroundColor: COLOR_DIY.bg_color,
+            borderRadius: pxToDp(10),
+            marginHorizontal: pxToDp(15),
+            marginTop: pxToDp(10),
+            // 增加陰影
+            ...COLOR_DIY.viewShadow,
+        },
+        imageWrap: {
+            flex: 1,
+            overflow: 'hidden',
+            borderRadius: pxToDp(10),
+        },
+    },
+    replyReminder: {
+        marginVertical: pxToDp(10),
+        borderRadius: pxToDp(20),
+        marginHorizontal: pxToDp(20),
+        backgroundColor: COLOR_DIY.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: pxToDp(10),
+        ...COLOR_DIY.viewShadow,
+    },
+});
 
 export default ChatCard;
