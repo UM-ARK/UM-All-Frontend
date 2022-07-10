@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.BV.LinearGradient.LinearGradientPackage; // 漸變庫需要
 import com.wix.interactable.Interactable; // 拖動手勢庫需要
+import com.reactnativecommunity.cameraroll.CameraRollPackage; // 圖片保存需要
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -32,6 +33,7 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
           packages.add(new LinearGradientPackage());  // 漸變庫安裝需要
           packages.add(new Interactable());           // 拖動手勢庫需要
+          // packages.add(new CameraRollPackage());      // 圖片保存需要
           return packages;
         }
 
