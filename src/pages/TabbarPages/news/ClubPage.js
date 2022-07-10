@@ -152,7 +152,7 @@ class ClubPage extends Component {
                     itemDimension={COMPONENT_WIDTH}
                     data={dataList}
                     // 每個項目的間距
-                    spacing={pxToDp(15)}
+                    spacing={pxToDp(12)}
                     renderItem={({item, index}) => {
                         // item是每一項數組的數據
                         // index是每一項的數組下標
@@ -162,16 +162,6 @@ class ClubPage extends Component {
                             </View>
                         );
                     }}
-                    ListHeaderComponent={() => (
-                        <Text
-                            style={{
-                                alignSelf: 'center',
-                                marginTop: pxToDp(10),
-                                color: COLOR_DIY.black.third,
-                            }}>
-                            社團卡片 點擊直達
-                        </Text>
-                    )}
                     // 所有項目末尾渲染，防Tabbar遮擋
                     ListFooterComponent={() => (
                         <View style={{marginTop: pxToDp(50)}}></View>

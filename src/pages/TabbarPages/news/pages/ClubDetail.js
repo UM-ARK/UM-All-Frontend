@@ -7,6 +7,8 @@ import {
     StatusBar,
     Dimensions,
     FlatList,
+    ScrollView,
+    Alert,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -15,6 +17,7 @@ import {clubTagMap} from '../../../../utils/clubMap';
 
 import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ModalBottom from '../../../../components/ModalBottom';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -247,6 +250,11 @@ class ClubDetail extends Component {
         this.setState({isFollow: !isFollow});
     };
 
+    // 打開/關閉底部Modal
+    tiggerModalBottom = () => {
+        this.setState({isShow: !this.state.isShow});
+    };
+
     render() {
         // 解耦uiMap的數據
         const {bg_color, white, black, themeColor} = COLOR_DIY;
@@ -317,7 +325,7 @@ class ClubDetail extends Component {
                             bottom: 0,
                             width: '100%',
                             height: pxToDp(20),
-                            backgroundColor: white,
+                            backgroundColor: bg_color,
                             position: 'absolute',
                             borderTopLeftRadius: pxToDp(15),
                             borderTopRightRadius: pxToDp(15),
@@ -376,7 +384,7 @@ class ClubDetail extends Component {
         renderMainContent = () => {
             return (
                 <View style={{backgroundColor: bg_color}}>
-                    {/* 1.0 社團基本資料 開始 */}
+                    {/* 1.0 社團基本資料 */}
                     <View style={{alignItems: 'center'}}>
                         {/* 建議使用社團名的簡稱 */}
                         <Text
@@ -407,7 +415,6 @@ class ClubDetail extends Component {
                             #{clubTagMap(tag)}
                         </Text>
                     </View>
-                    {/* 1.0 社團基本資料 結束 */}
 
                     {/* Follow按鈕 帶Toast */}
                     <RenderFollowButton
@@ -416,7 +423,7 @@ class ClubDetail extends Component {
                         handleFollow={this.handleFollow}
                     />
 
-                    {/* 2.0 過往照片 開始 */}
+                    {/* 2.0 過往照片 */}
                     <View
                         style={{
                             backgroundColor: COLOR_DIY.white,
@@ -455,17 +462,17 @@ class ClubDetail extends Component {
                                 color={COLOR_DIY.black.main}></Ionicons>
                         </TouchableOpacity>
                         {/* 卡片內容 */}
-                        <View
-                            style={{
-                                justifyContent: 'space-around',
-                                alignItems: 'flex-start',
-                                flexDirection: 'row',
-                                margin: pxToDp(10),
-                                marginTop: pxToDp(0),
-                            }}>
-                            {/* 圖片相冊 最多4張 */}
-                            {this.state.event.length > 0 &&
-                                this.state.event.map((item, index) => {
+                        {this.state.event.length > 0 && (
+                            <View
+                                style={{
+                                    justifyContent: 'space-around',
+                                    alignItems: 'flex-start',
+                                    flexDirection: 'row',
+                                    margin: pxToDp(10),
+                                    marginTop: pxToDp(0),
+                                }}>
+                                {/* 圖片相冊 最多4張 */}
+                                {this.state.event.map((item, index) => {
                                     return (
                                         <TouchableOpacity
                                             style={{
@@ -487,24 +494,20 @@ class ClubDetail extends Component {
                                                 );
                                             }}>
                                             <FastImage
-                                                source={{
-                                                    uri: item.coverImgUrl,
-                                                }}
+                                                source={{uri: item.coverImgUrl}}
                                                 style={{
                                                     width: '100%',
                                                     height: '100%',
-                                                    // borderRadius: pxToDp(5),
-                                                    // ...COLOR_DIY.viewShadow,
                                                 }}
                                             />
                                         </TouchableOpacity>
                                     );
                                 })}
-                        </View>
+                            </View>
+                        )}
                     </View>
-                    {/* 2.0 過往照片 結束 */}
 
-                    {/* 3.0 簡介 開始 */}
+                    {/* 3.0 簡介 */}
                     <TouchableOpacity
                         style={{
                             backgroundColor: COLOR_DIY.white,
@@ -516,7 +519,11 @@ class ClubDetail extends Component {
                             ...COLOR_DIY.viewShadow,
                         }}
                         activeOpacity={0.7}
-                        onPress={() => alert('查看全部簡介')}>
+                        onPress={() => {
+                            if (introText.length > 0) {
+                                this.tiggerModalBottom();
+                            }
+                        }}>
                         {/* 卡片標題 */}
                         <View
                             style={{
@@ -541,25 +548,26 @@ class ClubDetail extends Component {
                                 color={COLOR_DIY.black.main}></Ionicons>
                         </View>
                         {/* 卡片內容 */}
-                        <View
-                            style={{
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                flexDirection: 'row',
-                                margin: pxToDp(10),
-                                marginTop: pxToDp(0),
-                            }}>
-                            {/* 服務圖標與文字 */}
-                            <Text
-                                numberOfLines={3}
-                                style={{color: black.second}}>
-                                {introText}
-                            </Text>
-                        </View>
+                        {introText.length > 0 && (
+                            <View
+                                style={{
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    flexDirection: 'row',
+                                    margin: pxToDp(10),
+                                    marginTop: pxToDp(0),
+                                }}>
+                                {/* 服務圖標與文字 */}
+                                <Text
+                                    numberOfLines={3}
+                                    style={{color: black.second}}>
+                                    {introText}
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
-                    {/* 3.0 簡介 結束 */}
 
-                    {/* 4.0 聯繫方式 開始 */}
+                    {/* 4.0 聯繫方式 */}
                     <View
                         style={{
                             backgroundColor: COLOR_DIY.white,
@@ -571,7 +579,7 @@ class ClubDetail extends Component {
                             ...COLOR_DIY.viewShadow,
                         }}>
                         {/* 卡片標題 */}
-                        <View
+                        <TouchableOpacity
                             style={{
                                 flexDirection: 'row',
                                 justifyContent: 'space-between',
@@ -579,7 +587,10 @@ class ClubDetail extends Component {
                                 paddingVertical: pxToDp(10),
                                 paddingHorizontal: pxToDp(10),
                             }}
-                            activeOpacity={0.6}>
+                            activeOpacity={0.7}
+                            onPress={() =>
+                                Alert.alert('聯繫方式可以自行複製~')
+                            }>
                             <Text
                                 style={{
                                     fontSize: pxToDp(12),
@@ -592,73 +603,76 @@ class ClubDetail extends Component {
                                 name="chevron-forward-outline"
                                 size={pxToDp(14)}
                                 color={COLOR_DIY.black.main}></Ionicons>
-                        </View>
+                        </TouchableOpacity>
                         {/* 卡片內容 */}
-                        <View
-                            style={{
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                flexDirection: 'row',
-                                margin: pxToDp(10),
-                                marginTop: pxToDp(0),
-                            }}>
-                            {/* 聯繫方式 */}
-                            <View>
-                                {contact.map(item => {
-                                    return (
-                                        <View style={{flexDirection: 'row'}}>
-                                            {/* 聯繫Type */}
-                                            <Text
-                                                style={{
-                                                    color: black.second,
-                                                }}>
-                                                {item.type}:{' '}
-                                            </Text>
-                                            {/* 相關號碼、id */}
-                                            <Text
-                                                style={{
-                                                    color: black.third,
-                                                }}
-                                                // 允許用戶複製
-                                                selectable={true}>
-                                                {item.num}
-                                            </Text>
-                                        </View>
-                                    );
-                                })}
-                            </View>
-                        </View>
-                    </View>
-                    {/* 4.0 聯繫方式 結束 */}
-
-                    {/* 5.0 舉辦的活動 開始 */}
-                    <FlatList
-                        numColumns={2}
-                        columnWrapperStyle={{
-                            justifyContent: 'center',
-                        }}
-                        data={this.state.event}
-                        renderItem={({item}) => {
-                            return (
-                                <EventCard
-                                    data={item}
-                                    style={{
-                                        marginVertical: pxToDp(8),
-                                        marginHorizontal: pxToDp(10),
-                                    }}
-                                />
-                            );
-                        }}
-                        scrollEnabled={false}
-                        // 在所有項目的末尾渲染，防止手勢白條遮擋
-                        ListFooterComponent={() => (
+                        {contact.length > 0 && (
                             <View
                                 style={{
-                                    marginBottom: pxToDp(80),
-                                }}></View>
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    flexDirection: 'row',
+                                    margin: pxToDp(10),
+                                    marginTop: pxToDp(0),
+                                }}>
+                                {/* 聯繫方式 */}
+                                <View>
+                                    {contact.map(item => {
+                                        return (
+                                            <View
+                                                style={{flexDirection: 'row'}}>
+                                                {/* 聯繫Type */}
+                                                <Text
+                                                    style={{
+                                                        color: black.second,
+                                                    }}>
+                                                    {item.type}:{' '}
+                                                </Text>
+                                                {/* 相關號碼、id */}
+                                                <Text
+                                                    style={{
+                                                        color: black.third,
+                                                    }}
+                                                    // 允許用戶複製
+                                                    selectable={true}>
+                                                    {item.num}
+                                                </Text>
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                            </View>
                         )}
-                    />
-                    {/* 5.0 舉辦的活動 結束 */}
+                    </View>
+
+                    {/* 5.0 舉辦的活動 */}
+                    {event.length > 0 && (
+                        <FlatList
+                            numColumns={2}
+                            columnWrapperStyle={{
+                                justifyContent: 'center',
+                            }}
+                            data={this.state.event}
+                            renderItem={({item}) => {
+                                return (
+                                    <EventCard
+                                        data={item}
+                                        style={{
+                                            marginVertical: pxToDp(8),
+                                            marginHorizontal: pxToDp(10),
+                                        }}
+                                    />
+                                );
+                            }}
+                            scrollEnabled={false}
+                            // 在所有項目的末尾渲染，防止手勢白條遮擋
+                            ListFooterComponent={() => (
+                                <View
+                                    style={{
+                                        marginBottom: pxToDp(80),
+                                    }}></View>
+                            )}
+                        />
+                    )}
                 </View>
             );
         };
@@ -678,6 +692,34 @@ class ClubDetail extends Component {
                     // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
                     // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
+
+                {/* 展示需要的信息Modal */}
+                {this.state.isShow && (
+                    <ModalBottom cancel={this.tiggerModalBottom}>
+                        <View
+                            style={{
+                                padding: pxToDp(20),
+                                height: PAGE_HEIGHT * 0.7,
+                            }}>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    fontSize: pxToDp(13),
+                                }}>
+                                簡介
+                            </Text>
+                            <ScrollView style={{marginTop: pxToDp(5)}}>
+                                <Text
+                                    style={{
+                                        color: black.main,
+                                        fontSize: pxToDp(16),
+                                    }}>
+                                    {introText}
+                                </Text>
+                            </ScrollView>
+                        </View>
+                    </ModalBottom>
+                )}
 
                 <ImageHeaderScrollView
                     // 設定透明度

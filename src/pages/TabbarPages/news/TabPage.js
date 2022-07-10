@@ -14,7 +14,9 @@ import EventPage from './EventPage';
 import ClubPage from './ClubPage';
 import {pxToDp} from '../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../utils/uiMap';
-import ScrollAnimation, {getTranslateX} from '../../../components/ScrollAnimation';
+import ScrollAnimation, {
+    getTranslateX,
+} from '../../../components/ScrollAnimation';
 
 import {TabView, SceneMap} from 'react-native-tab-view';
 
@@ -117,8 +119,8 @@ export default function TabPage() {
     const [index, setIndex] = React.useState(1);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
-        {key: 'second', title: '活動大廳'},
-        {key: 'third', title: '社團大廳'},
+        {key: 'second', title: '活動'},
+        {key: 'third', title: '進駐組織'},
     ]);
 
     return (

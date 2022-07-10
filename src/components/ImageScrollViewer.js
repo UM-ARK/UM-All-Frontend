@@ -18,7 +18,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import ModalBottom from './ModalBottom';
+import ModalBottom from './ModalSave';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -51,8 +51,6 @@ class ImageScrollViewer extends Component {
     render() {
         const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
         const {imageUrls} = this.props;
-
-        console.log();
 
         let imageUrlsObjArr = [];
         if (typeof imageUrls == 'string') {

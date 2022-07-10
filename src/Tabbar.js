@@ -2,40 +2,51 @@ import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
 // 本地引用
-import HomeScreen       from './pages/TabbarPages/home';
-import FeaturesScreen   from './pages/TabbarPages/features';
-import NewsScreen       from './pages/TabbarPages/news';
-import MessageScreen    from './pages/TabbarPages/message';
-import MeScreen         from './pages/TabbarPages/me';
+import HomeScreen from './pages/TabbarPages/home';
+import FeaturesScreen from './pages/TabbarPages/features';
+import NewsScreen from './pages/TabbarPages/news';
+import MessageScreen from './pages/TabbarPages/message';
+import MeScreen from './pages/TabbarPages/me';
 
 // 本地工具
-import {pxToDp}         from './utils/stylesKits';
-import {COLOR_DIY}      from './utils/uiMap';
+import {pxToDp} from './utils/stylesKits';
+import {COLOR_DIY} from './utils/uiMap';
 
 // 第三方庫
 import Icon from 'react-native-vector-icons/Feather';
 // 有動畫的tabbar，來源兼文檔：https://github.com/torgeadelin/react-native-animated-nav-tab-bar
 import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
-
+import {inject} from 'mobx-react';
 // 創建Tabbar的路由棧
 const Tabs = AnimatedTabBarNavigator();
 
 class Index extends Component {
+    state = {
+        // 默認為學生賬號
+        isClub: false,
+    };
+
+    constructor(props) {
+        super(props);
+        let globalData = this.props.RootStore;
+        console.log('Tabbar.js首次掛載: RootStore為', globalData);
+    }
+
     render() {
         return (
             <Tabs.Navigator
                 tabBarOptions={{
-                    inactiveTintColor   : COLOR_DIY.black.main,
+                    inactiveTintColor: COLOR_DIY.black.main,
                 }}
                 appearance={{
                     activeTabBackgrounds: COLOR_DIY.themeColor,
-                    activeColors        : COLOR_DIY.white,
-                    tabBarBackground    : COLOR_DIY.white,
+                    activeColors: COLOR_DIY.white,
+                    tabBarBackground: COLOR_DIY.white,
                     // 浮動式Tabbar
                     // floating            : true,
-                    horizontalPadding   : pxToDp(10),
+                    horizontalPadding: pxToDp(10),
                 }}
-                initialRouteName={'HomeTabbar'}>
+                initialRouteName={'NewsTabbar'}>
                 <Tabs.Screen
                     name="NewsTabbar"
                     component={NewsScreen}
@@ -121,4 +132,4 @@ class Index extends Component {
     }
 }
 
-export default Index;
+export default inject('RootStore')(Index);

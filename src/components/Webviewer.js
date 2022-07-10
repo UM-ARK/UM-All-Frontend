@@ -73,7 +73,7 @@ class WebViewer extends Component {
                             <Ionicons
                                 name="refresh"
                                 size={pxToDp(25)}
-                                color={COLOR_DIY.white}
+                                color={text_color}
                             />
                         </TouchableOpacity>
                     }

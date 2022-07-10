@@ -23,7 +23,7 @@ function timeTrans(date) {
         date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
     var s =
         date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-    return M + '/' + D;
+    return M + '-' + D;
 }
 
 class EventCard extends Component {
@@ -41,23 +41,34 @@ class EventCard extends Component {
         let publishDate = newsData.common.publishDate;
         // 最後更新時間
         // let lastModified= newsData.lastModified;
+        // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
         // 中文標題
-        let title_cn = newsData.details[1].title;
+        let title_cn = '';
+        // 英文標題
+        let title_en = '';
+        // 葡文標題
+        let title_pt = '';
+        newsData.details.map(item => {
+            if (item.locale == 'en_US') {
+                title_en = item.title;
+            } else if (item.locale == 'pt_PT') {
+                title_pt = item.title;
+            } else if (item.locale == 'zh_TW') {
+                title_cn = item.title;
+            }
+        });
+        // 中文標題
+        // let title_cn = newsData.details[1].title;
         // 中文內容
         // let content_cn= newsData.details[1].content;
         // 英文標題
-        let title_en = newsData.details[0].title;
+        // let title_en = newsData.details[0].title;
         // 英文內容
         // let content_en= newsData.details[0].content;
         // 相片數組
         // 有時無圖
         let haveImage = 'imageUrls' in newsData.common;
         let imageUrls = haveImage ? newsData.common.imageUrls : '';
-
-        // phase一下新聞的發佈日期
-        let datePhase = new Date(publishDate);
-        // 將其整理為MM-DD的字符串形式
-        let renderDate = datePhase.getMonth() + '-' + datePhase.getDate();
 
         return (
             <TouchableOpacity
@@ -85,21 +96,51 @@ class EventCard extends Component {
                     {/* 標題 */}
                     <View style={{width: haveImage ? '61%' : '100%'}}>
                         {/* 英文 */}
-                        <Text
-                            style={{
-                                fontWeight: 'bold',
-                                color: black.main,
-                                fontSize: pxToDp(14),
-                            }}
-                            numberOfLines={3}>
-                            {title_en}
-                        </Text>
+                        {title_en.length > 0 && (
+                            <Text
+                                style={{
+                                    fontWeight: 'bold',
+                                    color: black.main,
+                                    fontSize: pxToDp(14),
+                                }}
+                                numberOfLines={3}>
+                                {title_en}
+                            </Text>
+                        )}
                         {/* 中文 */}
-                        <Text
-                            style={{fontSize: pxToDp(13), color: black.third}}
-                            numberOfLines={2}>
-                            {title_cn}
-                        </Text>
+                        {title_cn.length > 0 && (
+                            <Text
+                                style={{
+                                    fontSize:
+                                        title_en.length > 0
+                                            ? pxToDp(13)
+                                            : pxToDp(14),
+                                    color:
+                                        title_en.length > 0
+                                            ? black.second
+                                            : black.main,
+                                }}
+                                numberOfLines={2}>
+                                {title_cn}
+                            </Text>
+                        )}
+                        {/* 葡文 */}
+                        {(title_en.length == 0 || title_cn.length == 0) && (
+                            <Text
+                                style={{
+                                    fontSize:
+                                        title_en.length > 0
+                                            ? pxToDp(13)
+                                            : pxToDp(14),
+                                    color:
+                                        title_en.length > 0
+                                            ? black.second
+                                            : black.main,
+                                }}
+                                numberOfLines={2}>
+                                {title_pt}
+                            </Text>
+                        )}
 
                         {/* 佔位 防止標題過長遮擋日期 */}
                         <View style={{marginTop: pxToDp(25)}}></View>
@@ -112,7 +153,7 @@ class EventCard extends Component {
                                 bottom: 0,
                                 color: black.third,
                             }}>
-                            @ {renderDate}
+                            @ {timeTrans(publishDate)}
                         </Text>
                     </View>
 
