@@ -52,8 +52,6 @@ class ImageScrollViewer extends Component {
         const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
         const {imageUrls} = this.props;
 
-        console.log();
-
         let imageUrlsObjArr = [];
         if (typeof imageUrls == 'string') {
             imageUrlsObjArr.push({url: imageUrls});

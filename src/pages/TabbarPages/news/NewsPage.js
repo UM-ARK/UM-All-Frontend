@@ -36,7 +36,6 @@ const getItemCount = data => {
 // 渲染幾個骨架屏
 const renderLoader = new Array(parseInt(PAGE_HEIGHT / 200));
 renderLoader.fill(0);
-console.log(renderLoader);
 // loading時的骨架屏
 const NewsLoader = props => (
     <ContentLoader
