@@ -20,6 +20,13 @@ import {Dimensions} from 'react-native';
 import BlurViewWrapper from '../../../components/BlurViewWrapper';
 import EventDescription from './EventDescription';
 
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('screen');
+
+// 定義圖片類型的消息寬高
+const IMAGE_CARD_WIDTH = PAGE_WIDTH * 0.92;
+const IMAGE_CARD_HEIGHT = PAGE_HEIGHT * 0.3;
+
 const dataList = [
     {
         _id: 0,
@@ -94,25 +101,14 @@ const dataList = [
         },
     },
     {
-        _id: 5,
-        title: 'Test5',
-        text: '非常舊的消息',
-        type: 'text',
-        createAt: 1656927421000,
-        user: {
-            _id: 1,
-            name: '溫迪',
-            avatar: 'https://i03piccdn.sogoucdn.com/a04373145d4b4341',
-        },
-    },
-    {
         _id: 6,
         title: '同狗狗玩遊戲',
         text: '好開心咁同狗狗一齊玩遊戲，仲可以賺墊CS point！這隻17歲的中國冠毛犬24日在「世界最醜狗狗比賽」中擊敗了9名參賽者；這場賽事已有數十年歷史，每年在加州貝塔留瑪',
         type: 'event',
         eventDate: 1656927421000,
         createAt: 1656927421000,
-        url: 'https://images.unsplash.com/photo-1532275672750-588761c76ae8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80',
+        // url: 'https://images.unsplash.com/photo-1532275672750-588761c76ae8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80',
+        url: 'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
         user: {
             _id: 1,
             name: '溫迪',
@@ -126,7 +122,8 @@ const dataList = [
         type: 'event',
         eventDate: 1656927421000,
         createAt: 1656927421000,
-        url: 'https://images.unsplash.com/photo-1597046902504-dfae3612605f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80',
+        // url: 'https://images.unsplash.com/photo-1597046902504-dfae3612605f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80',
+        url: 'https://www.cpsumsu.org/image/poster/CPSUMSU_UMEF_2022.png',
         user: {
             _id: 1,
             name: '溫迪',
@@ -228,7 +225,8 @@ class ChatCard extends Component {
             <View style={styles.message.container}>
                 {/* 卡片標題 */}
                 <View style={styles.message.titleWrap}>
-                    <Text style={[styles.message.title, {color: titleColor}]}
+                    <Text
+                        style={[styles.message.title, {color: titleColor}]}
                         numberOfLines={1}>
                         {item.title}
                     </Text>
@@ -246,31 +244,39 @@ class ChatCard extends Component {
         );
     };
 
-    renderEventCard = (item) => {
+    renderEventCard = item => {
         const window = Dimensions.get('window');
         return (
             /* 活動卡外框 */
             <View style={styles.event.container}>
-                {/* 包裝相片與相片模糊部件 */} 
+                {/* 包裝相片與相片模糊部件 */}
                 <View style={styles.event.imageWrap}>
                     <Image
                         source={{uri: item.url}}
                         style={{
                             flex: 1,
                             resizeMode: 'cover',
-                            width: window.width * 0.92,
-                            height: window.height * 0.3,
+                            width: IMAGE_CARD_WIDTH,
+                            height: IMAGE_CARD_HEIGHT,
                         }}
                     />
                     <BlurViewWrapper
+                        // 需要虛化圖片的URL
                         url={item.url}
-                        width={window.width * 0.92}
-                        height={window.height * 0.3}
-                        blurHeight={window.height * 0.3 * 0.33}
-                        blurRadius={20}
-                        bgColor={'rgba(200,200,200,0.6)'}
-                    >
-                        <EventDescription item={{...item, eventDate: timeTrans(item.eventDate)}} />
+                        // 需要虛化的原圖寬高
+                        width={IMAGE_CARD_WIDTH}
+                        height={IMAGE_CARD_HEIGHT}
+                        blurHeight={'35%'}
+                        blurRadius={15}
+                        // 模糊層顏色
+                        bgColor={'rgba(200,200,200,0.5)'}>
+                        <EventDescription
+                            item={{
+                                ...item,
+                                eventDate: timeTrans(item.eventDate),
+                            }}
+                            style={{padding: 10}}
+                        />
                     </BlurViewWrapper>
                 </View>
             </View>
@@ -339,8 +345,7 @@ class ChatCard extends Component {
                 />
 
                 {/* 回復提醒 */}
-                <View
-                    style={styles.replyReminder}>
+                <View style={styles.replyReminder}>
                     <Text>您無需回復此消息</Text>
                 </View>
             </View>
@@ -386,7 +391,7 @@ const styles = StyleSheet.create({
             margin: pxToDp(10),
             marginTop: pxToDp(0),
             flexDirection: 'column',
-        }
+        },
     },
     event: {
         container: {
@@ -402,7 +407,7 @@ const styles = StyleSheet.create({
             flex: 1,
             overflow: 'hidden',
             borderRadius: pxToDp(10),
-        }
+        },
     },
     replyReminder: {
         marginVertical: pxToDp(10),
@@ -413,7 +418,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: pxToDp(10),
         ...COLOR_DIY.viewShadow,
-    }
+    },
 });
 
 export default ChatCard;
