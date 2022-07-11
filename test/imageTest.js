@@ -8,107 +8,25 @@ import FastImage from 'react-native-fast-image';
 
 import {handleImageDownload, handleImageSelect} from '../src/utils/fileKits';
 
+import ImageSelector from '../src/components/ImageSelector';
+
 IMAGE_URL = 'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg';
 
-class Test extends Component {
+class ImageTest extends Component {
     state = {
-        imageUrl: '',
         imageUrlArr: ['', '', '', ''],
-    };
-
-    // 圖片選擇
-    async handleSelect(index) {
-        let imageUrl = '';
-        try {
-            let result = await handleImageSelect();
-            if (result.didCancel) {
-                console.log('取消選取圖片');
-            } else {
-                console.log('成功選取圖片', result.assets);
-                imageUrl = result.assets[0].uri;
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            // 修改this.state相片數組的值
-            let imageUrlArr = this.state.imageUrlArr;
-            imageUrlArr.splice(index, 1, imageUrl);
-            this.setState({imageUrlArr});
-        }
-    }
-
-    // 圖片刪除
-    handleImageDelete = index => {
-        let imageUrlArr = this.state.imageUrlArr;
-        imageUrlArr.splice(index, 1);
-        imageUrlArr.push('');
-        this.setState({imageUrlArr});
     };
 
     handleDownload = () => {
         handleImageDownload(IMAGE_URL);
     };
 
+    setImageUrlArr = imageUrlArr => {
+        this.setState({imageUrlArr});
+    };
+
     render() {
-        // 渲染圖片選擇器
-        renderImageSelector = index => {
-            // 僅允許點擊相鄰的圖片選擇器
-            let shouldDisable = false;
-            if (index != 0) {
-                if (this.state.imageUrlArr[index - 1] == '') {
-                    shouldDisable = true;
-                }
-            }
-            return (
-                <TouchableOpacity
-                    style={{
-                        width: 160,
-                        height: 100,
-                        backgroundColor: '#f0f0f0',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        margin: 10,
-                        borderRadius: 5,
-                        overflow: 'hidden',
-                    }}
-                    activeOpacity={0.7}
-                    onPress={this.handleSelect.bind(this, index)}
-                    disabled={shouldDisable}>
-                    {/* 刪除圖片按鈕 */}
-                    {this.state.imageUrlArr[index].length > 0 && (
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                zIndex: 9,
-                            }}
-                            onPress={() => this.handleImageDelete(index)}>
-                            <Ionicons
-                                name="close-circle"
-                                size={25}
-                                color={'red'}
-                            />
-                        </TouchableOpacity>
-                    )}
-
-                    {this.state.imageUrlArr[index].length > 0 ? (
-                        <FastImage
-                            source={{uri: this.state.imageUrlArr[index]}}
-                            style={{width: '100%', height: '100%'}}
-                        />
-                    ) : (
-                        <Ionicons
-                            name="camera-outline"
-                            size={25}
-                            color={'black'}
-                        />
-                    )}
-                </TouchableOpacity>
-            );
-        };
-
+        console.log(this.state.imageUrlArr);
         return (
             <View style={{flex: 1}}>
                 <FastImage
@@ -117,12 +35,17 @@ class Test extends Component {
                 />
                 <Button onPress={this.handleDownload} title={'下載圖片'} />
 
-                {this.state.imageUrlArr.map((item, index) =>
-                    renderImageSelector(index),
-                )}
+                {this.state.imageUrlArr.map((item, index) => (
+                    <ImageSelector
+                        index={index}
+                        imageUrlArr={this.state.imageUrlArr}
+                        setImageUrlArr={this.setImageUrlArr.bind(
+                            this,
+                        )}></ImageSelector>
+                ))}
             </View>
         );
     }
 }
 
-export default Test;
+export default ImageTest;
