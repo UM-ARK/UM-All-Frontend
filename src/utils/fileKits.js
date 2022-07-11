@@ -1,6 +1,5 @@
 // 文件操作相關
 import {PermissionsAndroid, Platform, Alert} from 'react-native';
-
 import CameraRoll from '@react-native-community/cameraroll';
 import RNFetchBlob from 'rn-fetch-blob';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
@@ -36,7 +35,7 @@ export async function getPermissionAndroid() {
     }
 }
 
-// 調用儲存圖片API，需傳入圖片URL
+// 儲存圖片API，需傳入圖片URL
 export async function handleImageDownload(IMAGE_URL) {
     // 安卓平台需要請求儲存權限
     if (Platform.OS === 'android') {
@@ -55,14 +54,14 @@ export async function handleImageDownload(IMAGE_URL) {
         .then(res => {
             CameraRoll.save(res.data, 'photo')
                 .then(res => {
-                    console.log('成功儲存圖片', res);
-                    Alert.alert('Save Image Success');
+                    Alert.alert('Saving Image Success!');
                 })
-                .catch(err => console.log(err));
-        });
+                .catch(err => console.error(err));
+        })
+        .catch(err => console.error(err));
 }
 
-// 調用選擇圖片API
+// 選擇圖片API
 export async function handleImageSelect() {
     // 安卓平台需要請求儲存權限
     if (Platform.OS === 'android') {
