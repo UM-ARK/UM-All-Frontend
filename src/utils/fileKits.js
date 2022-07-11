@@ -3,9 +3,10 @@ import {PermissionsAndroid, Platform, Alert} from 'react-native';
 
 import CameraRoll from '@react-native-community/cameraroll';
 import RNFetchBlob from 'rn-fetch-blob';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 // 安卓端請求圖片儲存權限
-async function getPermissionAndroid() {
+export async function getPermissionAndroid() {
     try {
         const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -54,9 +55,29 @@ export async function handleImageDownload(IMAGE_URL) {
         .then(res => {
             CameraRoll.save(res.data, 'photo')
                 .then(res => {
-                    console.log('成功儲存圖片', res)
-                    Alert.alert('Save Image Success')
+                    console.log('成功儲存圖片', res);
+                    Alert.alert('Save Image Success');
                 })
                 .catch(err => console.log(err));
         });
+}
+
+// 調用選擇圖片API
+export async function handleImageSelect() {
+    // 安卓平台需要請求儲存權限
+    if (Platform.OS === 'android') {
+        const granted = await getPermissionAndroid();
+        if (!granted) {
+            return;
+        }
+    }
+
+    let options = {
+        mediaType: 'photo',
+        // 一次選擇一張
+        quality: 1,
+        // includeBase64: true,
+    };
+
+    return await launchImageLibrary(options);
 }
