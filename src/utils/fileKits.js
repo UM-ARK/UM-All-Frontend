@@ -58,7 +58,10 @@ export async function handleImageDownload(IMAGE_URL) {
                 })
                 .catch(err => console.error(err));
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            Alert.alert(err);
+        });
 }
 
 // 選擇圖片API
