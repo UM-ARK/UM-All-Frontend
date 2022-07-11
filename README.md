@@ -21,7 +21,7 @@
 2. 本地運行指令 `npm i --legacy-peer-deps` 安裝依賴的npm包
 3. 敲入 `react-native run-android` or `npm run android` or `yarn android` 運行吧~
 
-在此查看[已知BUG](https://github.com/UM-ARK/UM-All-Frontend/blob/readme-debug-move-to-devlog/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
+在此查看[已知BUG](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
 
 ---
 
@@ -88,8 +88,8 @@ npx react-native run-ios
 ```
 ### 故障排除
 
-在此查看[Android解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/readme-debug-move-to-devlog/debugging_doc.md#android)
-與[iOS解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/readme-debug-move-to-devlog/debugging_doc.md#ios)
+在此查看[Android解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android)
+與[iOS解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#ios)
 
 ---
 
