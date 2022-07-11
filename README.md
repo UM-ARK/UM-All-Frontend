@@ -5,12 +5,9 @@
   * [Android環境安裝](#android環境-install)
   * [iOS環境安裝](#ios環境-install)
   * [使用Debugger](#使用debugger)
-  * [已知問題](#已知問題)
 - [開發本倉庫項目準備-MacOS](#開發本倉庫項目準備)
   * [安裝及運行流程](#安裝及運行流程)
   * [故障排除](#故障排除)
-    - [Android](#android)
-    - [IOS](#ios)
 - [使用Git的方法](#git方法)
 - [使用的第三方庫](#該項目使用的第三方庫)
 
@@ -24,10 +21,7 @@
 2. 本地運行指令 `npm i --legacy-peer-deps` 安裝依賴的npm包
 3. 敲入 `react-native run-android` or `npm run android` or `yarn android` 運行吧~
 
-已知BUG:
-1. 如果遇到`react-native-vector-icons/xxxx`圖標錯誤顯示(正方形框裡面是X)，需要參考文檔 `https://github.com/oblador/react-native-vector-icons#android` 進行修復。
-2. 如果在使用Flipper後，再次運行項目而不運行Flipper，Metro命令行提示無連接設備。則需要重啟模擬器，並在另一個RN項目run一次（正常來講另外的項目會成功運行），再回本項目不使用Flipper地run。
-3. 如果在安裝npm包或刪除本地文件時出現卡頓或提示正在使用中，需要在任務管理器停止所有 `Java SE xxxx` 字樣的進程，即可恢復npm的運作。
+在此查看[已知BUG](https://github.com/UM-ARK/UM-All-Frontend/blob/readme-debug-move-to-devlog/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
 
 ---
 
@@ -67,22 +61,6 @@ npx react-native run-ios
 ---
 
 &nbsp;
-### 已知問題
-2022.06.26更新：
-因為某些包的npm和yarn兼容性問題，安裝依賴的指令有所改變：
-
-1. 如果你是新clone請使用 `npm i --legacy-peer-deps` 安裝依賴。
-2. 如果你是已有倉庫，建議把 `node_modules` 刪除後再使用 `npm i --legacy-peer-deps` 安裝依賴。
-3. 此指令適用於大多數npm報ERROR的情況。
-4. 如需update包，可以使用 `npm info 包名` 先查看需要版本，再在package.json裡修改版本號，`npm i --legacy-peer-deps`。
-
-2022.06.28更新：
-加入linear-gradient，在android配置了若干項，如IOS編譯出錯則應該前往github頁查看文檔再進行安裝。
-1. 可能的隱患：更改了此文件`android\app\src\main\java\com\umallwhite\MainApplication.java`路徑上存在現版本的項目名`umallwhite`，如果項目更名後發現報錯，需來這裡修改代碼。
-
----
-
-&nbsp;
 ## 開發本倉庫項目準備
 > 在Mac M1系統下複製開發項目的代碼和運行模擬器
 ### 安裝及運行流程
@@ -109,35 +87,10 @@ pod install
 npx react-native run-ios
 ```
 ### 故障排除
-#### Android
-1. Android檔案權限報錯-`Error: spawn ./gradlew EACCES`
-```console
-cd android
-chmod +x ./gradlew
-xattr -l ./gradlew
-```
 
-#### iOS
-1. iOS实机调试报错-`Signing for XXX requires a development team. Select a development team in the Signing and Cap Editor`
-> 请尝试在Xcode中双击Pods，然后在Targets中选择React-Core-AccessibilityResources，找到Singing中的Development Team进行选择。仅在UMAllWhite中选择Development Team无效
+在此查看[Android解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/readme-debug-move-to-devlog/debugging_doc.md#android)
+與[iOS解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/readme-debug-move-to-devlog/debugging_doc.md#ios)
 
-2. iOS实机调试报错-`module map file not found`
-> 请在Xcode选择项目时选择UMAllWhite.xcworkspace打开，不要选择UMAllWhite.xcodeproj
-
-3. iOS運行文件報錯-`error React Native CLI uses autolinking for native dependencies`
-```console
-npx react-native unlink react-native-vector-icons
-本条已经尝试修复，需要后续测试
-```
-
-4. Pod找不到目標工程-`Could not automatically select an Xcode project`
-> 在`ios/Podfile`中加入以下路徑以解決報錯
-```console
-target 'ProjectName' do
- project './ProjectName.xcodeproj'
-...
-end
-```
 ---
 
 &nbsp;
