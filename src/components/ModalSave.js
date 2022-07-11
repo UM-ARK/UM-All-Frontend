@@ -7,6 +7,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import {pxToDp} from '../utils/stylesKits';
 import {COLOR_DIY} from '../utils/uiMap';
+import {handleImageDownload} from '../utils/fileKits';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -30,7 +31,6 @@ class ModalSave extends Component {
                 deviceHeight={PAGE_HEIGHT}
                 backdropColor={'black'}
                 backdropOpacity={0.5}
-                // animationIn='zoomIn'    animationOut='zoomOut'
                 onBackButtonPress={this.tiggerModal}
                 onBackdropPress={this.tiggerModal}
                 style={{
@@ -62,8 +62,12 @@ class ModalSave extends Component {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}
-                                // TODO: 儲存圖片
-                                onPress={() => alert('調用儲存圖片接口')}>
+                                onPress={() => {
+                                    handleImageDownload(
+                                        this.props.imageUrl.url,
+                                    );
+                                    this.props.cancel();
+                                }}>
                                 <MaterialIcons
                                     name="save-alt"
                                     color={COLOR_DIY.themeColor}

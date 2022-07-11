@@ -86,7 +86,12 @@ class ImageScrollViewer extends Component {
                     onSwipeDown={this.tiggerModal}
                     // 自定義長按菜單
                     menus={({cancel, _}) => {
-                        return <ModalBottom cancel={cancel}></ModalBottom>;
+                        return (
+                            <ModalBottom
+                                cancel={cancel}
+                                imageUrl={imageUrlsObjArr[imagesIndex]}
+                            />
+                        );
                     }}
                 />
             </Modal>

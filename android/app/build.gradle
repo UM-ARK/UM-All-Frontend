@@ -272,6 +272,8 @@ dependencies {
     // 漸變庫安裝需要
     implementation project(':react-native-linear-gradient')
 
+    implementation project(':@react-native-community_cameraroll')  // https://github.com/react-native-cameraroll/react-native-cameraroll
+
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
     }
