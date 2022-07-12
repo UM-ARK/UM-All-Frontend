@@ -10,6 +10,7 @@ import {COLOR_DIY} from './utils/uiMap';
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
 
+import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin'
 import MeScreen from './pages/TabbarPages/me'
 import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
 import MyFollow from './pages/TabbarPages/me/pages/MyFollow'
@@ -55,6 +56,7 @@ class Nav extends Component {
                 <Stack.Screen name="ChatDetail"         component={ChatDetail}/>
 
                 {/* 我的頁 */}
+                <Stack.Screen name="ClubLogin"         component={ClubLogin}/>
                 <Stack.Screen name="AboutUs"         component={AboutUs}/>
                 <Stack.Screen name="MyFollow"        component={MyFollow}/>
                 <Stack.Screen name="Reminder"        component={Reminder}/>

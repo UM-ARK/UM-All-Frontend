@@ -1,19 +1,12 @@
 import React, {Component} from 'react';
-import {
-    Text,
-    View,
-    Image,
-    TouchableOpacity,
-    ScrollView,
-    StatusBar,
-} from 'react-native';
+import {Text, View, Image, TouchableOpacity, ScrollView} from 'react-native';
 
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 
 // 本Tabbar相關頁面
-import Login from './Login';
+import Login from './pages/Login';
 import MeSetting from './pages/MeSetting';
 import AppSetting from './pages/AppSetting';
 import AboutUs from './pages/AboutUs';
@@ -47,9 +40,17 @@ const optionsInfo = [
 class MeScreen extends Component {
     state = {
         // 是否已登錄
-        isLogin: true,
+        isLogin: false,
         RootStoreChange: true,
     };
+
+    componentDidMount() {
+        // mobx的使用，需要自己加刷新數據標識，調用mobx全局方法後mobx儲存已更新，但this.state未更新，需手動改state更新
+        // this.setState({RootStoreChange: !this.state.RootStoreChange});
+        let globalData = this.props.RootStore;
+        console.log('Me Index.js: RootStore:', globalData);
+        this.setState({isLogin: globalData.isLogin});
+    }
 
     // 渲染個人信息欄
     renderUserInfo = () => {
@@ -214,31 +215,26 @@ class MeScreen extends Component {
         );
     };
 
-    render() {
-        // mobx的使用，需要自己加刷新數據標識，調用mobx全局方法後mobx儲存已更新，但this.state未更新，需手動改state更新
-        // this.setState({RootStoreChange: !this.state.RootStoreChange});
-        console.log("Me Index: RootStore:",this.props.RootStore);
+    handleRootStoreChange = () => {
+        this.setState({RootStoreChange: !this.state.RootStoreChange});
+    };
 
+    render() {
         const {black, white} = COLOR_DIY;
         const {bg_color, card_color} = COLOR_DIY.meScreenColor;
         return (
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: bg_color,
-                }}>
-                <Header
-                    backgroundColor={card_color}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                        translucent: true,
-                    }}
-                />
-
+            <View style={{flex: 1}}>
                 {/* 檢查是否登錄 */}
                 {this.state.isLogin ? (
                     <ScrollView>
+                        <Header
+                            backgroundColor={card_color}
+                            statusBarProps={{
+                                backgroundColor: 'transparent',
+                                barStyle: 'dark-content',
+                                translucent: true,
+                            }}
+                        />
                         {/* 個人信息欄 */}
                         {this.renderUserInfo()}
 
