@@ -274,6 +274,8 @@ dependencies {
 
     implementation project(':@react-native-community_cameraroll')  // https://github.com/react-native-cameraroll/react-native-cameraroll
 
+    implementation project(':react-native-restart') // https://github.com/avishayil/react-native-restart
+
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
     }

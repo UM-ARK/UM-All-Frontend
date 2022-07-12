@@ -8,6 +8,8 @@ class RootStore {
     isLogin = false;
     // 是否組織賬號
     isClub = false;
+    // 用戶緩存信息
+    userInfo = {};
 
     @action // 行為修飾器
     // 登錄或登出賬號
@@ -28,6 +30,9 @@ class RootStore {
     logoutClub() {
         this.isLogin = false;
         this.isClub = true;
+    }
+    setUserInfo(userInfo) {
+        this.userInfo = userInfo;
     }
 }
 

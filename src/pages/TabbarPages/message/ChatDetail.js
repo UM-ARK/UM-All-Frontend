@@ -250,7 +250,10 @@ class ChatCard extends Component {
             /* 活動卡外框 */
             <View style={styles.event.container}>
                 {/* 包裝相片與相片模糊部件 */}
-                <View style={styles.event.imageWrap}>
+                <TouchableOpacity
+                    style={styles.event.imageWrap}
+                    activeOpacity={0.9}
+                    onPress={() => alert('跳轉應用內詳情頁面')}>
                     <Image
                         source={{uri: item.url}}
                         style={{
@@ -278,7 +281,7 @@ class ChatCard extends Component {
                             style={{padding: 10}}
                         />
                     </BlurViewWrapper>
-                </View>
+                </TouchableOpacity>
             </View>
         );
     };
