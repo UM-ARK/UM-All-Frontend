@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 import {NativeBaseProvider} from 'native-base';
 import AnimatedSplash from 'react-native-animated-splash-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -20,6 +21,24 @@ class App extends Component {
         setTimeout(() => {
             this.setState({isLoaded: true});
         }, 1000);
+
+        // 獲取緩存中的用戶數據
+        try {
+            // await AsyncStorage.clear();  // 清除緩存
+            const strUserInfo = await AsyncStorage.getItem('userInfo');
+            const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
+            console.log(userInfo);
+            // 判斷有無登錄token
+            if (userInfo.token) {
+                // 把緩存中的數據存一份到mobx
+                console.log('有登錄token，需存到mobx');
+                RootStore.setUserInfo(userInfo);
+            } else {
+                console.log('無用戶token');
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     render() {

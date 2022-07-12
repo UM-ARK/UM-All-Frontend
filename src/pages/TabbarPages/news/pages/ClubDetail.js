@@ -307,7 +307,7 @@ class ClubDetail extends Component {
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 onPress={() =>
-                                    alert('管理員身份，進入設置資料頁面')
+                                    this.props.navigation.navigate('ClubSetting')
                                 }>
                                 <Ionicons
                                     name="settings-outline"

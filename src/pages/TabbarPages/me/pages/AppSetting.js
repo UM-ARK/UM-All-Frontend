@@ -11,6 +11,7 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
+import {handleLogout} from '../../../../utils/storageKits';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -250,7 +251,7 @@ class AppSetting extends Component {
                         bottom: pxToDp(40),
                         alignSelf: 'center',
                     }}
-                    onPress={() => alert('設置全局登錄狀態為未登錄')}>
+                    onPress={() => handleLogout()}>
                     <Text
                         style={{
                             fontSize: 20,
