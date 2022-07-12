@@ -9,14 +9,11 @@
 import React from 'react';
 import {View, ImageBackground, StyleSheet} from 'react-native';
 
+import {pxToDp, pcHeightToNumHeight} from '../utils/stylesKits';
+
 // 用於判斷blurHeight是int單位還是%單位，從而決定子元素是否按父元素%確定高
 function isHeightPercent(height) {
     return height.indexOf('%') != -1;
-}
-
-// 百分比高度轉父級高度的相對高度
-function percentHeightToheight(percentHeightStr, fatherHeight) {
-    return (percentHeightStr.replace('%', '') / 100) * fatherHeight;
 }
 
 const BlurViewWrapper = props => {
@@ -50,7 +47,7 @@ const BlurViewWrapper = props => {
                         // 判斷輸入的blurHeight是否為%單位
                         // 信息展示的高度應依據實際模糊的高度為準
                         height: isHeightPercent(props.blurHeight)
-                            ? percentHeightToheight(
+                            ? pcHeightToNumHeight(
                                   props.blurHeight,
                                   props.height,
                               )
@@ -85,8 +82,6 @@ const styles = StyleSheet.create({
     blurInfoContainer: {
         width: '100%',
         zIndex: 99,
-        // position: 'absolute',
-        // bottom: 0,
     },
 });
 
