@@ -20,19 +20,26 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 // 有動畫的tabbar，來源兼文檔：https://github.com/torgeadelin/react-native-animated-nav-tab-bar
 import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
 import {inject} from 'mobx-react';
+
 // 創建Tabbar的路由棧
 const Tabs = AnimatedTabBarNavigator();
 
-class Index extends Component {
-    constructor(props) {
-        super(props);
-        let globalData = this.props.RootStore;
-        console.log('Tabbar.js首次掛載: RootStore為', globalData);
+class Tabbar extends Component {
+    state = {
+        isClub: false,
+        isLogin: false,
+    };
 
-        this.state = {
-            isClub: globalData.isClub,
-            isLogin: globalData.isLogin,
-        };
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+
+        if (globalData.userInfo && JSON.stringify(globalData.userInfo) != '{}') {
+            console.log('Tabbar檢測：有token緩存');
+            this.setState({
+                isClub: globalData.userInfo.isClub,
+                isLogin: true,
+            });
+        }
     }
 
     render() {
@@ -164,4 +171,4 @@ class Index extends Component {
     }
 }
 
-export default inject('RootStore')(Index);
+export default inject('RootStore')(Tabbar);

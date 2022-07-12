@@ -45,11 +45,17 @@ class MeScreen extends Component {
     };
 
     componentDidMount() {
-        // mobx的使用，需要自己加刷新數據標識，調用mobx全局方法後mobx儲存已更新，但this.state未更新，需手動改state更新
-        // this.setState({RootStoreChange: !this.state.RootStoreChange});
-        let globalData = this.props.RootStore;
-        console.log('Me Index.js: RootStore:', globalData);
-        this.setState({isLogin: globalData.isLogin});
+        const globalData = this.props.RootStore;
+        if (
+            globalData.userInfo &&
+            JSON.stringify(globalData.userInfo) != '{}'
+        ) {
+            console.log('Me檢測：有token緩存');
+            this.setState({
+                isClub: globalData.userInfo.isClub,
+                isLogin: true,
+            });
+        }
     }
 
     // 渲染個人信息欄

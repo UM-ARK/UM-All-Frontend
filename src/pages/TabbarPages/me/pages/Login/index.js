@@ -15,11 +15,11 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
+import {handleLogin} from '../../../../../utils/storageKits';
 import ClubLogin from './ClubLogin';
 
 import {Header} from '@rneui/themed';
 import {NavigationContext} from '@react-navigation/native';
-import {inject} from 'mobx-react';
 
 class LoginChoose extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -44,6 +44,16 @@ class LoginChoose extends Component {
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}>
+                    <View style={{marginBottom: pxToDp(10)}}>
+                        <Text
+                            style={{
+                                color: COLOR_DIY.black.third,
+                                fontSize: pxToDp(18),
+                            }}>
+                            Welcome To UM ALL!
+                        </Text>
+                    </View>
+
                     {/* 登錄按鈕卡片 */}
                     <View style={{width: '100%', flexDirection: 'row'}}>
                         {/* 個人賬號登錄 */}
@@ -53,7 +63,13 @@ class LoginChoose extends Component {
                                 ...s.roleCardContainer,
                             }}
                             activeOpacity={0.7}
-                            onPress={() => alert('跳轉學生賬號登錄')}>
+                            onPress={() =>
+                                handleLogin({
+                                    isClub: false,
+                                    token: 'student',
+                                })
+                            }>
+                            <Text style={{...s.roleCardText}}>UM PASS</Text>
                             <Text style={{...s.roleCardText}}>
                                 學生個人賬號
                             </Text>
@@ -104,4 +120,4 @@ const s = StyleSheet.create({
     },
 });
 
-export default inject('RootStore')(LoginChoose);
+export default LoginChoose;

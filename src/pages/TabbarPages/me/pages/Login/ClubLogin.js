@@ -14,9 +14,9 @@ import {
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import Header from '../../../../../components/Header';
+import {handleLogin} from '../../../../../utils/storageKits';
 
 import {NavigationContext} from '@react-navigation/native';
-import {inject} from 'mobx-react';
 import {Input, Box, Center, Stack, Icon} from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -100,11 +100,13 @@ class ClubLogin extends Component {
                             justifyContent: 'center',
                             alignSelf: 'center',
                         }}
-                        onPress={() => {
-                            // TODO: 校驗密碼等是否合法，修改登錄狀態
-                            this.props.RootStore.loginClub();
-                            this.context.navigate('Tabbar');
-                        }}>
+                        onPress={() =>
+                            handleLogin({
+                                clubID: 1,
+                                isClub: true,
+                                token: 'test',
+                            })
+                        }>
                         <Text
                             style={{
                                 fontSize: 20,
@@ -130,4 +132,4 @@ class ClubLogin extends Component {
     }
 }
 
-export default inject('RootStore')(ClubLogin);
+export default ClubLogin;
