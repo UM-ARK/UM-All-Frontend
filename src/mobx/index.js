@@ -5,32 +5,32 @@ class RootStore {
     // es7裝飾器語法，observable表示屬性可以全局共享
     @observable
     // 用戶登錄狀態
-    isLogin = false;
+    // isLogin = false;
     // 是否組織賬號
-    isClub = false;
+    // isClub = false;
     // 用戶緩存信息
     userInfo = {};
 
     @action // 行為修飾器
     // 登錄或登出賬號
-    loginStd() {
-        this.isLogin = true;
-        this.isClub = false;
-    }
-    logoutStd() {
-        this.isLogin = false;
-        this.isClub = false;
-    }
+    // loginStd() {
+    //     this.isLogin = true;
+    //     this.isClub = false;
+    // }
+    // logoutStd() {
+    //     this.isLogin = false;
+    //     this.isClub = false;
+    // }
 
-    // 登錄或登出組織賬號
-    loginClub() {
-        this.isLogin = true;
-        this.isClub = true;
-    }
-    logoutClub() {
-        this.isLogin = false;
-        this.isClub = true;
-    }
+    // // 登錄或登出組織賬號
+    // loginClub() {
+    //     this.isLogin = true;
+    //     this.isClub = true;
+    // }
+    // logoutClub() {
+    //     this.isLogin = false;
+    //     this.isClub = true;
+    // }
     setUserInfo(userInfo) {
         this.userInfo = userInfo;
     }

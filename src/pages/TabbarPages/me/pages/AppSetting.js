@@ -12,12 +12,17 @@ import {
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {handleLogout} from '../../../../utils/storageKits';
+import Header from '../../../../components/Header';
 
-import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {Dialog} from '@rneui/themed';
 
 class AppSetting extends Component {
-    state = {};
+    state = {
+        // 退出提示Dialog
+        logoutChoice: false,
+    };
+
     render() {
         return (
             <View
@@ -26,30 +31,7 @@ class AppSetting extends Component {
                     backgroundColor: COLOR_DIY.meScreenColor.bg_color,
                 }}>
                 {/*标题栏*/}
-                <Header
-                    backgroundColor={COLOR_DIY.meScreenColor.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: '設置',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(18),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                    }}
-                />
+                <Header title={'設置'} />
                 {/* 通知設置 */}
                 <TouchableOpacity
                     activeOpacity={0.5}
@@ -240,28 +222,42 @@ class AppSetting extends Component {
                 {/* 登出按鈕 */}
                 <TouchableOpacity
                     style={{
-                        height: '4%',
-                        width: '35%',
-                        padding: 10,
-                        marginTop: '10%',
                         backgroundColor: COLOR_DIY.themeColor,
+                        padding: pxToDp(10),
                         borderRadius: pxToDp(10),
-                        justifyContent: 'center',
                         position: 'absolute',
                         bottom: pxToDp(40),
+                        justifyContent: 'center',
                         alignSelf: 'center',
                     }}
-                    onPress={() => handleLogout()}>
+                    onPress={() => this.setState({logoutChoice: true})}>
                     <Text
                         style={{
-                            fontSize: 20,
-                            alignSelf: 'center',
+                            fontSize: pxToDp(20),
                             color: 'white',
                             fontWeight: '500',
                         }}>
-                        退出登錄
+                        登出賬號
                     </Text>
                 </TouchableOpacity>
+                {/* 登出前提示 */}
+                <Dialog
+                    isVisible={this.state.logoutChoice}
+                    onBackdropPress={() =>
+                        this.setState({logoutChoice: false})
+                    }>
+                    <Dialog.Title title="UM ALL 提示" />
+                    <Text style={{color: COLOR_DIY.black.second}}>
+                        確定要登出賬號嗎？
+                    </Text>
+                    <Dialog.Actions>
+                        <Dialog.Button title="確認" onPress={handleLogout} />
+                        <Dialog.Button
+                            title="取消"
+                            onPress={() => this.setState({logoutChoice: false})}
+                        />
+                    </Dialog.Actions>
+                </Dialog>
             </View>
         );
     }
