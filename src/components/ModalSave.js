@@ -56,9 +56,9 @@ class ModalSave extends Component {
                             <TouchableOpacity
                                 style={{
                                     backgroundColor: COLOR_DIY.white,
-                                    width: 70,
-                                    height: 70,
-                                    borderRadius: 20,
+                                    width: pxToDp(70),
+                                    height: pxToDp(70),
+                                    borderRadius: pxToDp(20),
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}
