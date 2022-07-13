@@ -56,7 +56,7 @@ class Tabbar extends Component {
                     // floating            : true,
                     horizontalPadding: pxToDp(10),
                 }}
-                initialRouteName={'MeTabbar'}>
+                initialRouteName={'HomeTabbar'}>
                 {/* 社團賬號登錄，直接簡潔模式 */}
                 {!this.state.isClub && (
                     <Tabs.Screen
