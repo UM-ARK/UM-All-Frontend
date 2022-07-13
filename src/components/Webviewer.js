@@ -1,15 +1,17 @@
 // 封裝：不用太多自定義的Webview，僅使用navigate跳轉
 // 網址可以參考pathMap.js
 import React, {Component} from 'react';
-import {Text, View, TouchableOpacity} from 'react-native';
+import {Text, View, TouchableOpacity, Linking, StyleSheet} from 'react-native';
 
 import {COLOR_DIY} from '../utils/uiMap';
 import {pxToDp} from '../utils/stylesKits';
 import IntegratedWebView from './IntegratedWebView';
 import {WHAT_2_REG} from '../utils/pathMap';
+import ModalBottom from '../components/ModalBottom';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
 
 class WebViewer extends Component {
     constructor(props) {
@@ -35,12 +37,18 @@ class WebViewer extends Component {
             isBarStyleBlack,
             url,
             needRefresh: false,
+            isShowModal: false,
         };
     }
 
     // 切換Webview刷新標識
     triggerRefresh = () => {
         this.setState({needRefresh: !this.state.needRefresh});
+    };
+
+    // 打開/關閉底部Modal
+    tiggerModalBottom = () => {
+        this.setState({isShowModal: !this.state.isShowModal});
     };
 
     render() {
@@ -55,7 +63,7 @@ class WebViewer extends Component {
                         <TouchableOpacity
                             onPress={() => this.props.navigation.goBack()}>
                             <Ionicons
-                                name="chevron-back-outline"
+                                name="close"
                                 size={pxToDp(25)}
                                 color={text_color}
                             />
@@ -69,9 +77,9 @@ class WebViewer extends Component {
                         },
                     }}
                     rightComponent={
-                        <TouchableOpacity onPress={() => this.triggerRefresh()}>
-                            <Ionicons
-                                name="refresh"
+                        <TouchableOpacity onPress={this.tiggerModalBottom}>
+                            <Feather
+                                name="more-horizontal"
                                 size={pxToDp(25)}
                                 color={text_color}
                             />
@@ -85,6 +93,66 @@ class WebViewer extends Component {
                     }}
                 />
 
+                {this.state.isShowModal && (
+                    <ModalBottom cancel={this.tiggerModalBottom}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-around',
+                                padding: pxToDp(20),
+                                marginBottom: pxToDp(10),
+                            }}>
+                            {url && (
+                                <View
+                                    style={{
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                    <TouchableOpacity
+                                        style={{...s.iconContainer}}
+                                        onPress={() => Linking.openURL(url)}>
+                                        <Ionicons
+                                            name="open-outline"
+                                            size={pxToDp(35)}
+                                            color={COLOR_DIY.black}
+                                        />
+                                    </TouchableOpacity>
+                                    <Text
+                                        style={{
+                                            marginTop: pxToDp(5),
+                                            color: COLOR_DIY.themeColor,
+                                        }}>
+                                        瀏覽器打開
+                                    </Text>
+                                </View>
+                            )}
+
+                            <View
+                                style={{
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                <TouchableOpacity
+                                    style={{...s.iconContainer}}
+                                    onPress={this.triggerRefresh}>
+                                    <Ionicons
+                                        name="refresh"
+                                        size={pxToDp(35)}
+                                        color={COLOR_DIY.black}
+                                    />
+                                </TouchableOpacity>
+                                <Text
+                                    style={{
+                                        marginTop: pxToDp(2),
+                                        color: COLOR_DIY.themeColor,
+                                    }}>
+                                    刷新頁面
+                                </Text>
+                            </View>
+                        </View>
+                    </ModalBottom>
+                )}
+
                 <IntegratedWebView
                     source={{uri: url}}
                     needRefresh={this.state.needRefresh}
@@ -94,5 +162,16 @@ class WebViewer extends Component {
         );
     }
 }
+
+const s = StyleSheet.create({
+    iconContainer: {
+        backgroundColor: COLOR_DIY.white,
+        width: pxToDp(60),
+        height: pxToDp(60),
+        borderRadius: pxToDp(20),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
 
 export default WebViewer;
