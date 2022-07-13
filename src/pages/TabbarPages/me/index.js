@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
-import {Text, View, Image, TouchableOpacity, ScrollView} from 'react-native';
+import {
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    StyleSheet,
+} from 'react-native';
 
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap';
@@ -16,22 +23,27 @@ import Reminder from './pages/Reminder';
 // 第三方庫
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {inject} from 'mobx-react';
 
+const {black, white} = COLOR_DIY;
+const {bg_color, card_color} = COLOR_DIY.meScreenColor;
+
+// 循環渲染選項
 const optionsInfo = [
     {
         title: '我的追蹤',
-        iconPath: require('./icon/favorites.png'),
+        iconPath: 'heart-outline',
         routeName: 'MyFollow',
     },
     {
         title: '設置',
-        iconPath: require('./icon/settings.png'),
+        iconPath: 'settings-outline',
         routeName: 'AppSetting',
     },
     {
         title: '關於我們',
-        iconPath: require('./icon/contactus.png'),
+        iconPath: 'at-circle-outline',
         routeName: 'AboutUs',
     },
 ];
@@ -60,25 +72,17 @@ class MeScreen extends Component {
 
     // 渲染個人信息欄
     renderUserInfo = () => {
-        const {black, white} = COLOR_DIY;
-        const {bg_color, card_color} = COLOR_DIY.meScreenColor;
         return (
             <TouchableOpacity
-                style={{
-                    height: pxToDp(120),
-                    width: '100%',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: card_color,
-                }}
+                style={{...s.personalInfoContainer}}
                 onPress={() => this.props.navigation.navigate('MeSetting')}
-                activeOpacity={0.7}>
+                activeOpacity={0.8}>
                 <View
                     style={{
                         height: '100%',
+                        width: '80%',
                         flexDirection: 'row',
                         alignItems: 'center',
-                        justifyContent: 'center',
                         marginLeft: pxToDp(20),
                     }}>
                     {/* 頭像 */}
@@ -93,20 +97,19 @@ class MeScreen extends Component {
                     {/* 暱稱 & 書院 & 學院 展示 */}
                     <View
                         style={{
-                            height: '100%',
                             marginLeft: pxToDp(20),
-                            height: pxToDp(80),
                             justifyContent: 'center',
                         }}>
                         {/* 暱稱 Nick Name */}
                         <Text
                             style={{
                                 color: 'black',
-                                fontSize: 25,
+                                fontSize: pxToDp(20),
                                 fontWeight: '600',
                             }}>
-                            {'暱稱顯示'}
+                            {'自定義暱稱'}
                         </Text>
+
                         {/* 學院、書院 縮寫展示 */}
                         <View
                             style={{
@@ -115,21 +118,21 @@ class MeScreen extends Component {
                             <Text
                                 style={{
                                     color: black.second,
-                                    fontSize: 20,
+                                    fontSize: pxToDp(13),
                                 }}>
                                 {'FST'}
                             </Text>
                             <Text
                                 style={{
                                     color: black.third,
-                                    fontSize: 20,
+                                    fontSize: pxToDp(13),
                                 }}>
                                 {'  |  '}
                             </Text>
                             <Text
                                 style={{
                                     color: black.second,
-                                    fontSize: 20,
+                                    fontSize: pxToDp(13),
                                 }}>
                                 {'CKLC'}
                             </Text>
@@ -137,32 +140,18 @@ class MeScreen extends Component {
                     </View>
                 </View>
 
-                {/* 右側編輯引導圖標 */}
-                <View
-                    style={{
-                        width: pxToDp(20),
-                        height: pxToDp(20),
-                        position: 'absolute',
-                        right: pxToDp(35),
-                        top: pxToDp(45),
-                    }}>
-                    <Image
-                        source={require('./icon/report.png')}
-                        style={{
-                            marginLeft: pxToDp(5),
-                            width: pxToDp(20),
-                            height: pxToDp(20),
-                        }}
+                {/* 引導編輯圖標 */}
+                <View style={{flexDirection: 'row', right: pxToDp(20)}}>
+                    <MaterialIcons
+                        name={'edit'}
+                        size={pxToDp(16)}
+                        color={black.third}
                     />
-                    <Image
-                        source={require('./icon/jiantou.png')}
-                        style={{
-                            width: pxToDp(10),
-                            height: pxToDp(10),
-                            position: 'absolute',
-                            top: pxToDp(6),
-                            right: pxToDp(-15),
-                        }}
+                    {/* 引導點擊的 > 箭頭 */}
+                    <Ionicons
+                        name="chevron-forward-outline"
+                        color={black.third}
+                        size={pxToDp(16)}
                     />
                 </View>
             </TouchableOpacity>
@@ -174,48 +163,27 @@ class MeScreen extends Component {
         const {title, iconPath, routeName} = optionsInfo[optionsInfoIndex];
         return (
             <TouchableOpacity
-                activeOpacity={0.7}
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    height: pxToDp(45),
-                    width: '100%',
-                    padding: pxToDp(10),
-                    backgroundColor: COLOR_DIY.meScreenColor.card_color,
-                }}
+                style={{...s.optionContainer}}
+                activeOpacity={0.8}
                 onPress={() => this.props.navigation.navigate(routeName)}>
                 {/* 左側flex佈局 */}
                 <View style={{flexDirection: 'row'}}>
                     {/* 選項圖標 */}
-                    <Image
-                        source={iconPath}
-                        style={{
-                            width: pxToDp(25),
-                            height: pxToDp(25),
-                        }}
+                    <Ionicons
+                        name={iconPath}
+                        size={pxToDp(22)}
+                        color={COLOR_DIY.themeColor}
                     />
                     {/* 選項標題 */}
-                    <Text
-                        style={{
-                            fontSize: pxToDp(16),
-                            color: 'black',
-                            marginLeft: pxToDp(10),
-                        }}>
-                        {title}
-                    </Text>
+                    <Text style={{...s.optionTitle}}>{title}</Text>
                 </View>
 
                 {/* 右側flex佈局 */}
                 {/* 引導點擊的 > 箭頭 */}
                 <Ionicons
                     name="chevron-forward-outline"
-                    color={'#c3c3c3'}
+                    color={black.third}
                     size={pxToDp(20)}
-                    style={{
-                        position: 'absolute',
-                        right: pxToDp(10),
-                    }}
                 />
             </TouchableOpacity>
         );
@@ -226,12 +194,11 @@ class MeScreen extends Component {
     };
 
     render() {
-        const {black, white} = COLOR_DIY;
-        const {bg_color, card_color} = COLOR_DIY.meScreenColor;
         return (
             <View style={{flex: 1}}>
                 {/* 檢查是否登錄 */}
                 {this.state.isLogin ? (
+                    // 展示學生個人系統頁面
                     <ScrollView>
                         <Header
                             backgroundColor={card_color}
@@ -244,16 +211,12 @@ class MeScreen extends Component {
                         {/* 個人信息欄 */}
                         {this.renderUserInfo()}
 
-                        {/* 我的追蹤 欄 */}
-                        <View style={{marginTop: pxToDp(10)}} />
-                        {this.renderOptions(0)}
+                        <View style={{marginTop: pxToDp(6)}} />
 
-                        {/* App Settings 欄 */}
-                        {this.renderOptions(1)}
-
-                        {/* 關於我們 欄 */}
-                        <View style={{marginTop: pxToDp(10)}} />
-                        {this.renderOptions(2)}
+                        {/* 渲染選項 */}
+                        {optionsInfo.map((_, index) =>
+                            this.renderOptions(index),
+                        )}
 
                         <View style={{paddingBottom: pxToDp(100)}} />
                     </ScrollView>
@@ -265,5 +228,34 @@ class MeScreen extends Component {
         );
     }
 }
+
+const s = StyleSheet.create({
+    personalInfoContainer: {
+        height: pxToDp(120),
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: COLOR_DIY.meScreenColor.card_color,
+        borderBottomLeftRadius: pxToDp(40),
+        borderBottomRightRadius: pxToDp(40),
+    },
+    optionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: pxToDp(45),
+        padding: pxToDp(10),
+        backgroundColor: COLOR_DIY.meScreenColor.card_color,
+        marginBottom: pxToDp(1),
+        borderRadius: pxToDp(15),
+        marginHorizontal: pxToDp(10),
+        marginVertical: pxToDp(6),
+    },
+    optionTitle: {
+        fontSize: pxToDp(16),
+        color: COLOR_DIY.black.main,
+        marginLeft: pxToDp(10),
+    },
+});
 
 export default inject('RootStore')(MeScreen);
