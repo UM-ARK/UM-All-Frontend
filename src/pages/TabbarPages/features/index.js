@@ -38,6 +38,7 @@ import {
     OF_BASE,
     UM_LIBRARY,
     UM_WHOLE,
+    UM_COURSE_SIMU,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
@@ -332,6 +333,24 @@ class Index extends Component {
                             // import pathMap的鏈接進行跳轉
                             url: UM_ADD_DROP,
                             title: '增補選(建議在電腦操作)',
+                            // 標題顏色，默認為black.main
+                            // text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#1278d1',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
+                    // TODO: 或許可以學習源碼整合成手機端操作
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'clipboard-edit',
+                        fn_name: '課表模擬',
+                        go_where: 'Webview',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_COURSE_SIMU,
+                            title: '課表模擬(建議在電腦操作)',
                             // 標題顏色，默認為black.main
                             // text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
