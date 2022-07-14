@@ -17,7 +17,6 @@ import {COLOR_DIY} from '../../../../utils/uiMap';
 const {black} = COLOR_DIY;
 
 class About extends Component {
-    state = {};
     render() {
         return (
             <View style={{flex: 1}}>
@@ -32,11 +31,17 @@ class About extends Component {
                         />
                     </View>
 
+                    {/* APP標語 */}
                     <View style={{marginTop: pxToDp(20), alignSelf: 'center'}}>
                         <Text
                             style={{fontSize: pxToDp(15), color: black.third}}>
                             致力成為 UMer 人手一個的校園資訊APP！
                         </Text>
+                    </View>
+
+                    {/* 發展時間軸 */}
+                    <View>
+                        
                     </View>
                 </ScrollView>
             </View>
