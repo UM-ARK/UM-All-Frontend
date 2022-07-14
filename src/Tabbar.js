@@ -33,7 +33,10 @@ class Tabbar extends Component {
     componentDidMount() {
         let globalData = this.props.RootStore;
 
-        if (globalData.userInfo && JSON.stringify(globalData.userInfo) != '{}') {
+        if (
+            globalData.userInfo &&
+            JSON.stringify(globalData.userInfo) != '{}'
+        ) {
             console.log('Tabbar檢測：有token緩存');
             this.setState({
                 isClub: globalData.userInfo.isClub,
@@ -43,6 +46,7 @@ class Tabbar extends Component {
     }
 
     render() {
+        const {isClub, isLogin} = this.state;
         return (
             <Tabs.Navigator
                 tabBarOptions={{
@@ -56,9 +60,9 @@ class Tabbar extends Component {
                     // floating            : true,
                     horizontalPadding: pxToDp(10),
                 }}
-                initialRouteName={'HomeTabbar'}>
+                initialRouteName={isClub ? 'MeTabbar' : 'HomeTabbar'}>
                 {/* 社團賬號登錄，直接簡潔模式 */}
-                {!this.state.isClub && (
+                {!isClub && (
                     <Tabs.Screen
                         name="NewsTabbar"
                         component={NewsScreen}
@@ -78,7 +82,7 @@ class Tabbar extends Component {
                         }}
                     />
                 )}
-                {!this.state.isClub && (
+                {!isClub && (
                     <Tabs.Screen
                         name="FeaturesTabbar"
                         component={FeaturesScreen}
@@ -98,7 +102,7 @@ class Tabbar extends Component {
                         }}
                     />
                 )}
-                {!this.state.isClub && (
+                {!isClub && (
                     <Tabs.Screen
                         name="HomeTabbar"
                         component={HomeScreen}
@@ -119,7 +123,7 @@ class Tabbar extends Component {
                     />
                 )}
 
-                {this.state.isLogin && (
+                {isLogin && (
                     <Tabs.Screen
                         name="MessageTabbar"
                         component={MessageScreen}
@@ -139,7 +143,7 @@ class Tabbar extends Component {
                 )}
                 <Tabs.Screen
                     name="MeTabbar"
-                    component={this.state.isClub ? ClubDetail : MeScreen}
+                    component={isClub ? ClubDetail : MeScreen}
                     options={{
                         tabBarIcon: ({focused, color, size}) =>
                             this.state.isClub ? (

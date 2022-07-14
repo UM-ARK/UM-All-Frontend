@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import {pxToDp} from '../../../../utils/stylesKits';
-import {COLOR_DIY} from '../../../../utils/uiMap';
+import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 
 import EventCard from '../components/EventCard';
 import ModalBottom from '../../../../components/ModalBottom';
@@ -79,47 +79,21 @@ function RenderFollowButton(props) {
                     if (!isFollow) {
                         toast.show({
                             placement: 'top',
-                            render: () => {
-                                return (
-                                    <View
-                                        style={{
-                                            backgroundColor: success,
-                                            padding: pxToDp(10),
-                                            borderRadius: pxToDp(10),
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}>
-                                        <Text style={{color: white}}>
-                                            感謝 Follow ！❥(^_-)
-                                        </Text>
-                                        <Text style={{color: white}}>
-                                            有最新動態會提醒您！
-                                        </Text>
-                                    </View>
-                                );
-                            },
+                            render: () => (
+                                <ToastText
+                                    backgroundColor={success}
+                                    text={`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`}
+                                />
+                            ),
                         });
                     }
                     // 選擇Del Follow，展示再見信息，此時isFollow為True
                     else {
                         toast.show({
                             placement: 'top',
-                            render: () => {
-                                return (
-                                    <View
-                                        style={{
-                                            backgroundColor: themeColor,
-                                            padding: pxToDp(10),
-                                            borderRadius: pxToDp(10),
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}>
-                                        <Text style={{color: white}}>
-                                            有緣再見！o(╥﹏╥)o
-                                        </Text>
-                                    </View>
-                                );
-                            },
+                            render: () => (
+                                <ToastText text={`有緣再見！o(╥﹏╥)o`} />
+                            ),
                         });
                     }
                 }

@@ -316,7 +316,6 @@ class NewsPage extends Component {
     render() {
         // 解構全局ui設計顏色
         const {white, black, viewShadow, bg_color} = COLOR_DIY;
-        // TODO: 增加 下拉刷新
         return (
             <View
                 style={{

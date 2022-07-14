@@ -35,7 +35,6 @@ const renderScene = SceneMap({
 });
 
 // 自定義頂部Tabbar樣式
-// TODO: Text或者BackgroundColor的切換動畫，讓其更跟手，opacity動畫是組件提供的example可以直接使用到Animated.Text中
 const _renderTabBar = props => {
     const currentTabIndex = props.navigationState.index;
     const inputRange = props.navigationState.routes.map((x, i) => i);
@@ -98,7 +97,6 @@ const _renderTabBar = props => {
                             </Text>
 
                             {/* 切換Tab的動畫 */}
-                            {/* TODO: 使用themeColor當背景色，選中的Tab用主題色文本用uiMap的white；未選中的背景白色，文本主題色 */}
                             <ScrollAnimation translateX={translateX} />
                         </TouchableOpacity>
                     </>
