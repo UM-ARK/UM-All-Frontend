@@ -7,6 +7,7 @@ import {
     FlatList,
     ScrollView,
     TouchableWithoutFeedback,
+    RefreshControl,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
@@ -20,6 +21,8 @@ import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
+
+const {black, white, themeColor} = COLOR_DIY;
 
 // 渲染幾次骨架屏
 const renderLoader = new Array(parseInt(PAGE_HEIGHT / 150));
@@ -206,9 +209,13 @@ class EventPage extends Component {
         this.state = {
             leftDataList,
             rightDataList,
-            // TODO: 數據加載，要默認True
-            isLoading: false,
+            isLoading: true,
+            isScrollViewLoading: false,
         };
+    }
+
+    componentDidMount() {
+        this.setState({isLoading: false});
     }
 
     // 渲染懸浮可拖動按鈕
@@ -237,7 +244,7 @@ class EventPage extends Component {
                 // 設定初始吸附位置
                 initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
                 {/* 懸浮吸附按鈕，刷新 */}
-                <TouchableWithoutFeedback
+                {/* <TouchableWithoutFeedback
                     onPress={() => {
                         // 刷新頁面，獲取最新數據
                         console.log('刷新');
@@ -258,7 +265,7 @@ class EventPage extends Component {
                             color={black.main}
                         />
                     </View>
-                </TouchableWithoutFeedback>
+                </TouchableWithoutFeedback> */}
 
                 <View style={{marginTop: pxToDp(5)}}></View>
 
@@ -352,16 +359,51 @@ class EventPage extends Component {
                 <View style={{flex: 1, width: '100%'}}>
                     {/* 加載狀態渲染骨架屏 */}
                     {this.state.isLoading ? (
-                        <View
+                        <ScrollView
                             style={{
                                 flex: 1,
                                 backgroundColor: COLOR_DIY.bg_color,
                                 padding: pxToDp(10),
-                            }}>
+                            }}
+                            refreshControl={
+                                <RefreshControl
+                                    colors={[themeColor]}
+                                    tintColor={themeColor}
+                                    refreshing={this.state.isScrollViewLoading}
+                                    onRefresh={() => {
+                                        this.setState({
+                                            isScrollViewLoading: true,
+                                        });
+                                        // TODO: 請求服務器函數
+                                        setTimeout(() => {
+                                            this.setState({
+                                                isScrollViewLoading: false,
+                                            });
+                                        }, 1500);
+                                    }}
+                                />
+                            }>
                             {renderLoader.map(() => EventsLoader())}
-                        </View>
+                        </ScrollView>
                     ) : (
-                        <ScrollView ref={'scrollView'} style={{width: '100%'}}>
+                        <ScrollView
+                            ref={'scrollView'}
+                            style={{width: '100%'}}
+                            refreshControl={
+                                <RefreshControl
+                                    colors={[themeColor]}
+                                    tintColor={themeColor}
+                                    refreshing={this.state.isLoading}
+                                    onRefresh={() => {
+                                        this.setState({isLoading: true});
+                                        setTimeout(() => {
+                                            this.setState({
+                                                isLoading: false,
+                                            });
+                                        }, 1500);
+                                    }}
+                                />
+                            }>
                             {/* 仿瀑布屏展示 */}
                             {/* 渲染主要內容 */}
                             {this.renderPage()}

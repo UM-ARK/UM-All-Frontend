@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
-import {View, Text, VirtualizedList, Dimensions} from 'react-native';
+import {
+    View,
+    Text,
+    VirtualizedList,
+    Dimensions,
+    ScrollView,
+    RefreshControl,
+} from 'react-native';
 
 import NewsCard from './components/NewsCard';
 
@@ -19,6 +26,8 @@ import axios from 'axios';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
+
+const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -65,6 +74,7 @@ class NewsPage extends Component {
         super();
         this.state = {
             isLoading: true,
+            isScrollViewLoading: false,
             newsList: [],
             topNews: {},
         };
@@ -152,7 +162,6 @@ class NewsPage extends Component {
     // 頭條新聞的渲染
     renderTopNews = () => {
         // 解構全局ui設計顏色
-        const {white, black, viewShadow} = COLOR_DIY;
         const {
             // 發佈日期
             publishDate,
@@ -193,10 +202,7 @@ class NewsPage extends Component {
                                 }}>
                                 <FastImage
                                     source={{uri: imageUrls[0]}}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                    }}>
+                                    style={{width: '100%', height: '100%'}}>
                                     {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                     <View
                                         style={{
@@ -235,7 +241,8 @@ class NewsPage extends Component {
                                                     color: white,
                                                     fontWeight: 'bold',
                                                     fontSize: pxToDp(18),
-                                                }}>
+                                                }}
+                                                numberOfLines={4}>
                                                 {title_en}
                                             </Text>
                                             <Text
@@ -315,7 +322,6 @@ class NewsPage extends Component {
 
     render() {
         // 解構全局ui設計顏色
-        const {white, black, viewShadow, bg_color} = COLOR_DIY;
         return (
             <View
                 style={{
@@ -330,9 +336,21 @@ class NewsPage extends Component {
                 {/* 判斷是否加載中 */}
                 {this.state.isLoading ? (
                     // 渲染Loading時的骨架屏
-                    <View style={{backgroundColor: bg_color, flex: 1}}>
+                    <ScrollView
+                        style={{backgroundColor: bg_color}}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isScrollViewLoading}
+                                onRefresh={() => {
+                                    this.setState({isScrollViewLoading: true});
+                                    this.getData();
+                                }}
+                            />
+                        }>
                         {renderLoader.map(() => NewsLoader())}
-                    </View>
+                    </ScrollView>
                 ) : (
                     // 渲染新聞列表
                     <VirtualizedList
@@ -353,12 +371,18 @@ class NewsPage extends Component {
                         ListFooterComponent={() => (
                             <View style={{marginTop: pxToDp(200)}}></View>
                         )}
-                        onRefresh={() => {
-                            // 展示Loading標識
-                            this.setState({isLoading: true});
-                            this.getData();
-                        }}
-                        refreshing={this.state.isLoading}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isLoading}
+                                onRefresh={() => {
+                                    // 展示Loading標識
+                                    this.setState({isLoading: true});
+                                    this.getData();
+                                }}
+                            />
+                        }
                     />
                 )}
             </View>
