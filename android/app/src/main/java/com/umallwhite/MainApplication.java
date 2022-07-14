@@ -2,6 +2,7 @@ package com.umallwhite;
 
 import android.app.Application;
 import android.content.Context;
+import android.webkit.WebView;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.reactnativerestart.RestartPackage;
@@ -66,6 +67,7 @@ public class MainApplication extends Application implements ReactApplication {
     ReactFeatureFlags.useTurboModules = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    WebView.setWebContentsDebuggingEnabled(true);
   }
 
   /**
