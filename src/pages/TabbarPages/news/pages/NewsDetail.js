@@ -78,6 +78,8 @@ class NewsDetail extends Component {
             }
         });
 
+        console.log('NewsData', newsData.details);
+
         // 存放新聞數據
         this.state = {
             data: {
@@ -127,8 +129,6 @@ class NewsDetail extends Component {
             // 相片數組
             imageUrls,
         } = this.state.data;
-
-        // console.log(content_cn);
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
@@ -216,7 +216,6 @@ class NewsDetail extends Component {
                     </Text>
 
                     {/* 圖片展示 */}
-                    {/* TODO: 點擊查看大圖，可以保存 */}
                     <FlatGrid
                         style={{flex: 1, alignSelf: 'center'}}
                         // 每个项目的最小宽度或高度（像素）
@@ -296,6 +295,7 @@ class NewsDetail extends Component {
                         </View>
                     )}
 
+                    {/* 葡文正文 */}
                     {content_pt.length > 0 && (
                         <View>
                             <Text
