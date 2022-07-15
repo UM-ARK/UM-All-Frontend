@@ -10,8 +10,8 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-import {COLOR_DIY} from '../src/utils/uiMap';
-import {pxToDp} from '../src/utils/stylesKits';
+import {COLOR_DIY} from '../utils/uiMap';
+import {pxToDp} from '../utils/stylesKits';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';

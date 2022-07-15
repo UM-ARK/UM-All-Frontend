@@ -12,7 +12,7 @@ import {
 
 import { COLOR_DIY } from '../../../utils/uiMap';
 import { pxToDp } from '../../../utils/stylesKits';
-import DropDown from '../../../../test/dropDown';
+import DropDownPicker from '../../../components/DropDownPicker';
 
 import EventCard from './components/EventCard';
 
@@ -355,7 +355,7 @@ class EventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
                 {/*渲染筛选栏目*/}
-                <DropDown />
+                <DropDownPicker />
                 <View style={{ flex: 1, width: '100%' }}>
                     {/* 加載狀態渲染骨架屏 */}
                     {this.state.isLoading ? (
