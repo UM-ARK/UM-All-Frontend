@@ -18,12 +18,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
+
 class DropDown extends Component {
     //下拉菜单内容
     state = {
         Myfollow: false,
         open: false,
-        value: null,
+        value: 'default',
         items: [
             {label: '最新發佈', value: 'lastest'},
             {label: '最多追蹤', value: 'popular'},
@@ -42,7 +45,7 @@ class DropDown extends Component {
                     height: pxToDp(30),
                     flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'space-around',
+                    justifyContent: 'space-between',
                     marginLeft: pxToDp(30),
                     zIndex: 9,
                 }}>
@@ -61,18 +64,20 @@ class DropDown extends Component {
                         // 默認顯示，TODO: 應該與默認選擇一致
                         placeholder="排序"
                         style={{
-                            marginTop: pxToDp(-10),
-                            width: pxToDp(100),
+                            marginTop: pxToDp(-24),
+                            position:'absolute',
+                            width: pxToDp(110),
                             height: pxToDp(35),
                             borderWidth: 0,
                             backgroundColor: 'transparent',
                             alignSelf: 'flex-start',
-                            marginLeft: pxToDp(20),
+                            marginLeft: pxToDp(10),
                         }}
                         dropDownContainerStyle={{
-                            width: pxToDp(375),
+                            width: PAGE_WIDTH,
+                            position:'absolute',
                             marginLeft: pxToDp(-15),
-                            marginTop: pxToDp(-22),
+                            marginTop: pxToDp(-37),
                             alignSelf: 'flex-start',
                             backgroundColor: COLOR_DIY.bg_color,
                             borderWidth: 0,
@@ -99,6 +104,9 @@ class DropDown extends Component {
                 <TouchableOpacity
                     style={{
                         width: pxToDp(100),
+                        position:'absolute',
+                        marginTop:pxToDp(-10),
+                        marginLeft:pxToDp(148),
                     }}
                     onPress={() =>
                         this.setState({Myfollow: Myfollow ? false : true})
@@ -119,6 +127,9 @@ class DropDown extends Component {
                         flexDirection: 'row',
                         alignItems: 'center',
                         width: pxToDp(100),
+                        position:'absolute',
+                        marginLeft:pxToDp(280),
+                        marginTop:pxToDp(-10),
                     }}
                     onPress={() => alert('打開篩選器')}>
                     <Text
