@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, {Component, useState} from 'react';
 import {
     Text,
     View,
@@ -10,12 +10,12 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-import { COLOR_DIY } from '../src/utils/uiMap';
-import { pxToDp } from '../src/utils/stylesKits';
+import {COLOR_DIY} from '../src/utils/uiMap';
+import {pxToDp} from '../src/utils/stylesKits';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
+import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 class DropDown extends Component {
@@ -23,40 +23,42 @@ class DropDown extends Component {
     state = {
         Myfollow: false,
         open: false,
-        value: 'default',
+        value: null,
         items: [
-            { label: '最新發佈', value: 'lastest' },
-            { label: '最多追蹤', value: 'popular' },
-            { label: '日期升序', value: 'oldest' },
-            { label: '默認排序', value: 'default' },
+            {label: '最新發佈', value: 'lastest'},
+            {label: '最多追蹤', value: 'popular'},
+            {label: '日期升序', value: 'oldest'},
+            {label: '默認排序', value: 'default'},
         ],
-    }
+    };
 
     render() {
-
-        const { open, value, items, Myfollow } = this.state;
+        const {open, value, items, Myfollow} = this.state;
 
         return (
-            <View style={{
-                width: '100%',
-                height: pxToDp(30),
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginLeft: pxToDp(30),
-                zIndex: 1000,
-            }}>
-                <View style={{
-                    marginTop: pxToDp(-3.5),
+            <View
+                style={{
+                    width: '100%',
+                    height: pxToDp(30),
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    marginLeft: pxToDp(30),
+                    zIndex: 9,
                 }}>
+                <View>
                     {/*下拉菜单style*/}
                     <DropDownPicker
                         open={open}
                         value={value}
                         items={items}
-                        setOpen={value => this.setState({ open: value })}
-                        setValue={value => this.setState({ value: value })}
-                        setItems={value => this.setState({ items: value })}
+                        setOpen={() => this.setState({open: !open})}
+                        // 獲取當前選擇的項
+                        onSelectItem={item => {
+                            console.log(item);
+                            this.setState({value: item.value});
+                        }}
+                        // 默認顯示，TODO: 應該與默認選擇一致
                         placeholder="排序"
                         style={{
                             marginTop: pxToDp(-10),
@@ -74,7 +76,8 @@ class DropDown extends Component {
                             alignSelf: 'flex-start',
                             backgroundColor: COLOR_DIY.bg_color,
                             borderWidth: 0,
-                            shadowColor: "#000",
+                            // TODO: 如果需要陰影，可以使用uiMap的viewShadow，還需增加自定義屬性可以直接覆蓋
+                            shadowColor: '#000',
                             shadowOffset: {
                                 width: 0,
                                 height: 8,
@@ -82,39 +85,50 @@ class DropDown extends Component {
                             shadowOpacity: 0.5,
                             shadowRadius: 3.84,
                             elevation: 5,
-                            overflow: 'visible'
+                            overflow: 'visible',
                         }}
                         textStyle={{
-                            fontWeight: "bold",
+                            fontWeight: 'bold',
                             fontSize: pxToDp(13),
-                            color: COLOR_DIY.themeColor
+                            color: COLOR_DIY.themeColor,
                         }}
                     />
                 </View>
+
                 {/*我追踪的活动筛选*/}
-                <TouchableOpacity style={{
-                    width: pxToDp(100),
-                }}
-                    onPress={() => this.setState({ Myfollow: Myfollow ? false : true })}>
-                    <Text style={{
-                        fontWeight: "bold",
-                        fontSize: pxToDp(13),
-                        //color: COLOR_DIY.themeColor,
-                        color: Myfollow ? "#FF8627" : COLOR_DIY.themeColor,
-                    }}>我的追蹤</Text>
+                <TouchableOpacity
+                    style={{
+                        width: pxToDp(100),
+                    }}
+                    onPress={() =>
+                        this.setState({Myfollow: Myfollow ? false : true})
+                    }>
+                    <Text
+                        style={{
+                            fontWeight: 'bold',
+                            fontSize: pxToDp(13),
+                            color: Myfollow ? '#FF8627' : COLOR_DIY.themeColor,
+                        }}>
+                        我的追蹤
+                    </Text>
                 </TouchableOpacity>
+
                 {/*更多筛选的筛选器开关*/}
-                <TouchableOpacity style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    width: pxToDp(100),
-                }}
-                    onPress={() => alert("打開篩選器")}>
-                    <Text style={{
-                        fontWeight: "bold",
-                        fontSize: pxToDp(13),
-                        color: COLOR_DIY.themeColor
-                    }}>篩選 </Text>
+                <TouchableOpacity
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        width: pxToDp(100),
+                    }}
+                    onPress={() => alert('打開篩選器')}>
+                    <Text
+                        style={{
+                            fontWeight: 'bold',
+                            fontSize: pxToDp(13),
+                            color: COLOR_DIY.themeColor,
+                        }}>
+                        篩選{' '}
+                    </Text>
                     <Ionicons
                         name={'md-funnel-outline'}
                         size={pxToDp(10)}
