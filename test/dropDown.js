@@ -19,6 +19,7 @@ import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 class DropDown extends Component {
+    //下拉菜单内容
     state = {
         Myfollow: false,
         open: false,
@@ -48,6 +49,7 @@ class DropDown extends Component {
                 <View style={{
                     marginTop: pxToDp(-3.5),
                 }}>
+                    {/*下拉菜单style*/}
                     <DropDownPicker
                         open={open}
                         value={value}
@@ -89,6 +91,7 @@ class DropDown extends Component {
                         }}
                     />
                 </View>
+                {/*我追踪的活动筛选*/}
                 <TouchableOpacity style={{
                     width: pxToDp(100),
                 }}
@@ -100,6 +103,7 @@ class DropDown extends Component {
                         color: Myfollow ? "#FF8627" : COLOR_DIY.themeColor,
                     }}>我的追蹤</Text>
                 </TouchableOpacity>
+                {/*更多筛选的筛选器开关*/}
                 <TouchableOpacity style={{
                     flexDirection: 'row',
                     alignItems: 'center',
