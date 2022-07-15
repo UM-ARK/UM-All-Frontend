@@ -44,6 +44,7 @@ class WebViewer extends Component {
     // 切換Webview刷新標識
     triggerRefresh = () => {
         this.setState({needRefresh: !this.state.needRefresh});
+        this.setState({isShowModal: false});
     };
 
     // 打開/關閉底部Modal
