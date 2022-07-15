@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component, useState } from 'react';
 import {
     Text,
     View,
@@ -10,17 +10,17 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
+import DropDownPicker from '../../../components/DropDownPicker';
 
 import EventCard from './components/EventCard';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
-
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 const {black, white, themeColor} = COLOR_DIY;
 
@@ -220,7 +220,7 @@ class EventPage extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const {white, black, viewShadow} = COLOR_DIY;
+        const { white, black, viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -230,25 +230,25 @@ class EventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -pxToDp(140), y: -pxToDp(220)},
-                    {x: pxToDp(140), y: -pxToDp(220)},
-                    {x: -pxToDp(140), y: -pxToDp(120)},
-                    {x: pxToDp(140), y: -pxToDp(120)},
-                    {x: -pxToDp(140), y: pxToDp(0)},
-                    {x: pxToDp(140), y: pxToDp(0)},
-                    {x: -pxToDp(140), y: pxToDp(120)},
-                    {x: pxToDp(140), y: pxToDp(120)},
-                    {x: -pxToDp(140), y: pxToDp(220)},
-                    {x: pxToDp(140), y: pxToDp(220)},
+                    { x: -pxToDp(140), y: -pxToDp(220) },
+                    { x: pxToDp(140), y: -pxToDp(220) },
+                    { x: -pxToDp(140), y: -pxToDp(120) },
+                    { x: pxToDp(140), y: -pxToDp(120) },
+                    { x: -pxToDp(140), y: pxToDp(0) },
+                    { x: pxToDp(140), y: pxToDp(0) },
+                    { x: -pxToDp(140), y: pxToDp(120) },
+                    { x: pxToDp(140), y: pxToDp(120) },
+                    { x: -pxToDp(140), y: pxToDp(220) },
+                    { x: pxToDp(140), y: pxToDp(220) },
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
+                initialPosition={{ x: pxToDp(140), y: pxToDp(220) }}>
                 {/* 懸浮吸附按鈕，刷新 */}
                 {/* <TouchableWithoutFeedback
                     onPress={() => {
                         // 刷新頁面，獲取最新數據
                         console.log('刷新');
-                        this.setState({isLoading: !this.state.isLoading});
+                        this.setState({ isLoading: !this.state.isLoading });
                     }}>
                     <View
                         style={{
@@ -267,7 +267,7 @@ class EventPage extends Component {
                     </View>
                 </TouchableWithoutFeedback> */}
 
-                <View style={{marginTop: pxToDp(5)}}></View>
+                <View style={{ marginTop: pxToDp(5) }}></View>
 
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
@@ -315,7 +315,7 @@ class EventPage extends Component {
                 <View>
                     <FlatList
                         data={this.state.leftDataList}
-                        renderItem={({item}) => {
+                        renderItem={({ item }) => {
                             return (
                                 <EventCard
                                     data={item}
@@ -325,12 +325,11 @@ class EventPage extends Component {
                         scrollEnabled={false}
                     />
                 </View>
-
                 {/* 右側的列 放置單數下標的圖片 */}
                 <View>
                     <FlatList
                         data={this.state.rightDataList}
-                        renderItem={({item}) => {
+                        renderItem={({ item }) => {
                             return (
                                 <EventCard
                                     data={item}
@@ -338,7 +337,7 @@ class EventPage extends Component {
                             );
                         }}
                         scrollEnabled={false}
-                        style={{flex: 1}}
+                        style={{ flex: 1 }}
                     />
                 </View>
             </View>
@@ -355,8 +354,9 @@ class EventPage extends Component {
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
-
-                <View style={{flex: 1, width: '100%'}}>
+                {/*渲染筛选栏目*/}
+                <DropDownPicker />
+                <View style={{ flex: 1, width: '100%' }}>
                     {/* 加載狀態渲染骨架屏 */}
                     {this.state.isLoading ? (
                         <ScrollView
@@ -407,9 +407,8 @@ class EventPage extends Component {
                             {/* 仿瀑布屏展示 */}
                             {/* 渲染主要內容 */}
                             {this.renderPage()}
-
                             {/* 防止底部遮擋 */}
-                            <View style={{marginBottom: pxToDp(50)}} />
+                            <View style={{ marginBottom: pxToDp(50) }} />
                         </ScrollView>
                     )}
                 </View>
