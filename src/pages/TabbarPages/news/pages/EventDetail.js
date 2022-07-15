@@ -12,11 +12,12 @@ import {
 } from 'react-native';
 
 import {pxToDp} from '../../../../utils/stylesKits';
-import {COLOR_DIY} from '../../../../utils/uiMap';
+import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 
 import EventCard from '../components/EventCard';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import DialogDIY from '../../../../components/DialogDIY';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
@@ -25,6 +26,7 @@ import {
 } from 'react-native-image-header-scroll-view';
 import FastImage from 'react-native-fast-image';
 import {useToast} from 'native-base';
+import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -70,55 +72,30 @@ function RenderFollowButton(props) {
             }}
             activeOpacity={0.7}
             onPress={() => {
-                setFollow(!isFollow);
                 // 調用修改this.state的isFollow方法
-                props.handleFollow();
-                // 選擇Follow，展示感謝信息，此時isFollow為Flase
-                if (!isFollow) {
-                    toast.show({
-                        placement: 'top',
-                        render: () => {
-                            return (
-                                <View
-                                    style={{
-                                        backgroundColor: success,
-                                        padding: pxToDp(10),
-                                        borderRadius: pxToDp(10),
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text style={{color: white}}>
-                                        感謝 Follow ！❥(^_-)
-                                    </Text>
-                                    <Text style={{color: white}}>
-                                        有最新動態會提醒您！
-                                    </Text>
-                                </View>
-                            );
-                        },
-                    });
-                }
-                // 選擇Del Follow，展示再見信息，此時isFollow為True
-                else {
-                    toast.show({
-                        placement: 'top',
-                        render: () => {
-                            return (
-                                <View
-                                    style={{
-                                        backgroundColor: themeColor,
-                                        padding: pxToDp(10),
-                                        borderRadius: pxToDp(10),
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text style={{color: white}}>
-                                        有緣再見！o(╥﹏╥)o
-                                    </Text>
-                                </View>
-                            );
-                        },
-                    });
+                if (props.handleFollow()) {
+                    setFollow(!isFollow);
+                    // 選擇Follow，展示感謝信息，此時isFollow為Flase
+                    if (!isFollow) {
+                        toast.show({
+                            placement: 'top',
+                            render: () => (
+                                <ToastText
+                                    backgroundColor={success}
+                                    text={`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`}
+                                />
+                            ),
+                        });
+                    }
+                    // 選擇Del Follow，展示再見信息，此時isFollow為True
+                    else {
+                        toast.show({
+                            placement: 'top',
+                            render: () => (
+                                <ToastText text={`有緣再見！o(╥﹏╥)o`} />
+                            ),
+                        });
+                    }
                 }
             }}>
             <Text style={{color: white}}>
@@ -145,21 +122,44 @@ class EventDetail extends Component {
         };
 
         this.state = {
+            isLogin: false,
             // 訪問該頁的用戶對該組織的Follow狀態
             isFollow: false,
             // 該用戶是否管理員。社團、APP管理員：true；
-            isAdmin: true,
+            isAdmin: false,
             ok: false,
             eventData,
             imageUrls: eventData.coverImgUrl,
             clubData,
+            showDialog: false,
         };
+    }
+
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        // 已登錄
+        if (JSON.stringify(globalData.userInfo) != '{}') {
+            // TODO: 判斷是否club和token，展示設置按鈕
+            if (globalData.userInfo.isClub) {
+                this.setState({isAdmin: true});
+            }
+            // Follow按鈕展示提示
+            this.setState({isLogin: true});
+        }
     }
 
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
-        const {isFollow} = this.state;
-        this.setState({isFollow: !isFollow});
+        const {isFollow, isLogin, showDialog} = this.state;
+        // 如果沒有登錄，觸發登錄提示
+        if (!isLogin) {
+            this.setState({showDialog: true});
+            return false;
+        } else {
+            // TODO: 請求數據庫返回是否follow成功
+            this.setState({isFollow: !isFollow});
+            return true;
+        }
     };
 
     // 打開/關閉底部Modal
@@ -424,8 +424,7 @@ class EventDetail extends Component {
                     {/* 舉辦方頭像 */}
                     <TouchableWithoutFeedback
                         onPress={() => {
-                            this.setState({imageUrls: avatarUrl});
-                            this.refs.imageScrollViewer.tiggerModal();
+                            alert('跳轉社團詳情頁');
                         }}>
                         <View
                             style={{
@@ -646,6 +645,19 @@ class EventDetail extends Component {
                     // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
+                {/* 彈出層提示 */}
+                <DialogDIY
+                    showDialog={this.state.showDialog}
+                    text={
+                        'Follow活動可以接收最新消息，需要登錄操作，現在去登錄嗎？'
+                    }
+                    handleConfirm={() => {
+                        this.setState({showDialog: false});
+                        this.props.navigation.navigate('MeTabbar');
+                    }}
+                    handleCancel={() => this.setState({showDialog: false})}
+                />
+
                 <ImageHeaderScrollView
                     // 設定透明度
                     maxOverlayOpacity={0.6}
@@ -691,4 +703,4 @@ const styles = StyleSheet.create({
     infoShowText: {},
 });
 
-export default EventDetail;
+export default inject('RootStore')(EventDetail);

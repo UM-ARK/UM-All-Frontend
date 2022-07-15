@@ -47,7 +47,7 @@ class App extends Component {
             <AnimatedSplash
                 translucent={true}
                 isLoaded={this.state.isLoaded}
-                logoImage={require('./src/static/UMARK_Assets/icons/Home-sk_thin_icons/AppIcons/appstore.png')}
+                logoImage={require('./src/static/img/umallLogo.png')}
                 backgroundColor={'#fff'}
                 logoHeight={150}
                 logoWidth={150}>

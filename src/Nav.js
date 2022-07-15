@@ -11,6 +11,9 @@ import {COLOR_DIY} from './utils/uiMap';
 import Tabbar from './Tabbar';
 
 import ClubSetting from './pages/ClubSystem/CLubSetting'
+import MessageConsole from './pages/ClubSystem/MessageConsole'
+import EventSetting from './pages/ClubSystem/EventSetting'
+import MessageSetting from './pages/ClubSystem/MessageSetting'
 
 import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin'
 import MeScreen from './pages/TabbarPages/me'
@@ -79,6 +82,9 @@ class Nav extends Component {
 
                 {/* 社團系統 */}
                 <Stack.Screen name="ClubSetting"     component={ClubSetting} />
+                <Stack.Screen name="MessageConsole"     component={MessageConsole} />
+                <Stack.Screen name="EventSetting"     component={EventSetting} />
+                <Stack.Screen name="MessageSetting"     component={MessageSetting} />
 
                 {/* 測試頁 */}
                 <Stack.Screen name="TestScreen"     component={TestScreen} />

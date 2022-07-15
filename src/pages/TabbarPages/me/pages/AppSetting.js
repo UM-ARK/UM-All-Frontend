@@ -4,7 +4,7 @@ import {
     View,
     Image,
     TouchableOpacity,
-    ScrollView,
+    StyleSheet,
     StatusBar,
 } from 'react-native';
 
@@ -12,12 +12,60 @@ import {
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {handleLogout} from '../../../../utils/storageKits';
+import Header from '../../../../components/Header';
+import DialogDIY from '../../../../components/DialogDIY';
 
-import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {Dialog} from '@rneui/themed';
+
+const {bg_color} = COLOR_DIY.meScreenColor;
+const {black} = COLOR_DIY;
+
+// 循環渲染選項
+const optionsInfo = [
+    {
+        title: '通知設置',
+        func: '',
+    },
+    {
+        title: '語言設置',
+        func: '',
+    },
+    {
+        title: '檢查更新',
+        func: '',
+    },
+];
 
 class AppSetting extends Component {
-    state = {};
+    state = {
+        // 退出提示Dialog
+        logoutChoice: false,
+    };
+
+    // 渲染對應的選項
+    renderOptions = optionsInfoIndex => {
+        const {title, func} = optionsInfo[optionsInfoIndex];
+        return (
+            <TouchableOpacity
+                activeOpacity={0.8}
+                style={{...s.optionContainer}}
+                onPress={() => alert('TODO: 對應func')}>
+                {/* 左側flex佈局 */}
+                {/* 選項標題 */}
+                <Text style={{...s.optionTitle}}>{title}</Text>
+
+                {/* 右側flex佈局 */}
+                {/* 引導點擊的 > 箭頭 */}
+                <Ionicons
+                    name="chevron-forward-outline"
+                    color={black.third}
+                    size={pxToDp(20)}
+                />
+            </TouchableOpacity>
+        );
+    };
+
     render() {
         return (
             <View
@@ -26,211 +74,57 @@ class AppSetting extends Component {
                     backgroundColor: COLOR_DIY.meScreenColor.bg_color,
                 }}>
                 {/*标题栏*/}
-                <Header
-                    backgroundColor={COLOR_DIY.meScreenColor.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: '設置',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(18),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                    }}
-                />
-                {/* 通知設置 */}
-                <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '7%',
-                        width: '100%',
-                        padding: 10,
-                        marginTop: pxToDp(0.8),
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                    }}
-                    onPress={() => alert('系統消息設置')}>
-                    <View
-                        style={{
-                            height: 48,
-                            marginLeft: 10,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                alignItems: 'center',
-                                color: 'black',
-                                position: 'absolute',
-                                left: pxToDp(0),
-                            }}>
-                            {'通知設置'}
-                        </Text>
-                        <Image
-                            source={require('../icon/jiantou.png')}
-                            style={{
-                                width: pxToDp(10),
-                                height: pxToDp(10),
-                                position: 'absolute',
-                                right: pxToDp(12),
-                            }}
-                        />
-                    </View>
-                </TouchableOpacity>
-                {/* 語言設置 */}
-                <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '7%',
-                        width: '100%',
-                        padding: 10,
-                        marginTop: pxToDp(0.8),
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                    }}
-                    onPress={() => alert('語言設置')}>
-                    <View
-                        style={{
-                            height: 48,
-                            marginLeft: 10,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                alignItems: 'center',
-                                color: 'black',
-                                position: 'absolute',
-                                left: pxToDp(0),
-                            }}>
-                            {'語言設置'}
-                        </Text>
-                        <Image
-                            source={require('../icon/jiantou.png')}
-                            style={{
-                                width: pxToDp(10),
-                                height: pxToDp(10),
-                                position: 'absolute',
-                                right: pxToDp(12),
-                            }}
-                        />
-                    </View>
-                </TouchableOpacity>
-                {/* 檢察更新 */}
-                <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '7%',
-                        width: '100%',
-                        padding: 10,
-                        marginTop: pxToDp(0.8),
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                    }}
-                    onPress={() => alert('檢察更新')}>
-                    <View
-                        style={{
-                            height: 48,
-                            marginLeft: 10,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                alignItems: 'center',
-                                color: 'black',
-                                position: 'absolute',
-                                left: pxToDp(0),
-                            }}>
-                            {'檢察更新'}
-                        </Text>
-                        <Image
-                            source={require('../icon/jiantou.png')}
-                            style={{
-                                width: pxToDp(10),
-                                height: pxToDp(10),
-                                position: 'absolute',
-                                right: pxToDp(12),
-                            }}
-                        />
-                    </View>
-                </TouchableOpacity>
+                <Header title={'APP設置'} />
+
+                {optionsInfo.map((_, index) => this.renderOptions(index))}
+
                 {/* 隱私設置 */}
                 <TouchableOpacity
-                    activeOpacity={0.5}
-                    style={{
-                        height: '7%',
-                        width: '100%',
-                        padding: 10,
-                        marginTop: '10%',
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                    }}
-                    onPress={() => alert('隱私設置')}>
-                    <View
-                        style={{
-                            height: 48,
-                            marginLeft: 10,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
+                    activeOpacity={0.8}
+                    style={{...s.optionContainer, marginTop: pxToDp(20)}}
+                    onPress={() => alert('TODO: 對應func')}>
+                    {/* 左側flex佈局 */}
+                    <View style={{flexDirection: 'row'}}>
                         <Image
                             source={require('../icon/umsetting.png')}
                             style={{
                                 width: pxToDp(25),
                                 height: pxToDp(25),
-                                position: 'absolute',
-                                left: pxToDp(-5),
                             }}
                         />
                         <Text
                             style={{
-                                fontSize: 18,
+                                fontSize: pxToDp(18),
                                 alignItems: 'center',
                                 color: 'black',
-                                position: 'absolute',
-                                left: pxToDp(30),
+                                marginLeft: pxToDp(5),
                             }}>
                             {'隱私設置'}
                         </Text>
-                        <Image
-                            source={require('../icon/jiantou.png')}
-                            style={{
-                                width: pxToDp(10),
-                                height: pxToDp(10),
-                                position: 'absolute',
-                                right: pxToDp(12),
-                            }}
-                        />
                     </View>
+
+                    {/* 右側flex佈局 */}
+                    {/* 引導點擊的 > 箭頭 */}
+                    <Ionicons
+                        name="chevron-forward-outline"
+                        color={black.third}
+                        size={pxToDp(20)}
+                    />
                 </TouchableOpacity>
+
                 {/* 隱私條款 */}
                 <TouchableOpacity
-                    onPress={() => alert('閱讀並同意隱私條款')}
+                    activeOpacity={0.8}
+                    onPress={() => alert('閱讀隱私條款')}
                     style={{
                         alignItems: 'center',
                         justifyContent: 'center',
+                        marginTop: pxToDp(15),
                     }}>
                     <Text
                         style={{
                             fontSize: pxToDp(13),
                             fontWeight: '600',
-                            marginTop: pxToDp(15),
                             color: COLOR_DIY.themeColor,
                         }}>
                         {'《隱私信息收集與使用條款》'}
@@ -239,32 +133,56 @@ class AppSetting extends Component {
 
                 {/* 登出按鈕 */}
                 <TouchableOpacity
+                    activeOpacity={0.8}
                     style={{
-                        height: '4%',
-                        width: '35%',
-                        padding: 10,
-                        marginTop: '10%',
                         backgroundColor: COLOR_DIY.themeColor,
+                        padding: pxToDp(10),
                         borderRadius: pxToDp(10),
-                        justifyContent: 'center',
                         position: 'absolute',
                         bottom: pxToDp(40),
+                        justifyContent: 'center',
                         alignSelf: 'center',
                     }}
-                    onPress={() => handleLogout()}>
+                    onPress={() => this.setState({logoutChoice: true})}>
                     <Text
                         style={{
-                            fontSize: 20,
-                            alignSelf: 'center',
+                            fontSize: pxToDp(20),
                             color: 'white',
                             fontWeight: '500',
                         }}>
-                        退出登錄
+                        登出賬號
                     </Text>
                 </TouchableOpacity>
+                {/* 登出前提示 */}
+                <DialogDIY
+                    showDialog={this.state.logoutChoice}
+                    text={'確定要登出賬號嗎？'}
+                    handleConfirm={handleLogout}
+                    handleCancel={() => this.setState({logoutChoice: false})}
+                />
             </View>
         );
     }
 }
+
+const s = StyleSheet.create({
+    optionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: pxToDp(45),
+        padding: pxToDp(10),
+        backgroundColor: COLOR_DIY.meScreenColor.card_color,
+        marginBottom: pxToDp(1),
+        borderRadius: pxToDp(15),
+        marginHorizontal: pxToDp(10),
+        marginVertical: pxToDp(6),
+    },
+    optionTitle: {
+        fontSize: pxToDp(16),
+        color: COLOR_DIY.black.main,
+        marginLeft: pxToDp(10),
+    },
+});
 
 export default AppSetting;

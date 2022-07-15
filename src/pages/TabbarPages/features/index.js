@@ -38,7 +38,9 @@ import {
     OF_BASE,
     UM_LIBRARY,
     UM_WHOLE,
+    UM_COURSE_SIMU,
 } from '../../../utils/pathMap';
+import DialogDIY from '../../../components/DialogDIY';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -48,8 +50,9 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {FlatGrid} from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
+import {inject} from 'mobx-react';
 
-// 定義組件可使用的icon分類，注意大小寫
+// 定義可使用icon，注意大小寫
 const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
@@ -338,6 +341,24 @@ class Index extends Component {
                             // isBarStyleBlack: false,
                         },
                     },
+                    // TODO: 或許可以學習源碼整合成手機端操作
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'clipboard-edit',
+                        fn_name: '課表模擬',
+                        go_where: 'Webview',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_COURSE_SIMU,
+                            title: '課表模擬(建議在電腦操作)',
+                            // 標題顏色，默認為black.main
+                            // text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#1278d1',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
                     // TODO: 爬蟲還是Webview
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -453,13 +474,13 @@ class Index extends Component {
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_PARK_APPLY,
-                            title: '泊車月票申請',
+                            title: '泊車月票系統',
                             // 標題顏色，默認為black.main
-                            // text_color: '#fff',
+                            text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
+                            bg_color_diy: '#005f96',
                             // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
+                            isBarStyleBlack: false,
                         },
                     },
                     {
@@ -811,7 +832,6 @@ class Index extends Component {
                             // isBarStyleBlack: false,
                         },
                     },
-                    // TODO: 爬蟲
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',
@@ -1015,4 +1035,4 @@ class Index extends Component {
     }
 }
 
-export default Index;
+export default inject('RootStore')(Index);

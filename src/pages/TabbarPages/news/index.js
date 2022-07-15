@@ -6,7 +6,6 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 
 import {Header} from '@rneui/themed';
-import {SpringScrollView} from 'react-native-spring-scrollview';
 
 import TabPage from './TabPage';
 

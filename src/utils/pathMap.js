@@ -46,6 +46,8 @@ export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 export const UM_Moodle = 'https://ummoodle.um.edu.mo/my';
 // 澳大 - UM 預選課
 export const UM_PRE_ENROLMENT = 'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
+// 澳大 - UM 選課模擬系統
+export const UM_COURSE_SIMU = 'https://kchomacau.github.io/timetable';
 // 澳大 - UM Add/Drop
 export const UM_ADD_DROP = 'https://isw.um.edu.mo/siwad';
 // 澳大 - UM 全人發展

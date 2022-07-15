@@ -14,7 +14,6 @@ import {pxToDp} from '../../../utils/stylesKits';
 import ClubCard from './components/ClubCard';
 
 import {FlatGrid} from 'react-native-super-grid';
-// import {SpringScrollView} from 'react-native-spring-scrollview';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;

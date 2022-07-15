@@ -11,13 +11,14 @@ import {
     Alert,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
+import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
 
 import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import ModalBottom from '../../../../components/ModalBottom';
+import DialogDIY from '../../../../components/DialogDIY';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -27,6 +28,7 @@ import {
 } from 'react-native-image-header-scroll-view';
 import FastImage from 'react-native-fast-image';
 import {useToast} from 'native-base';
+import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -53,55 +55,31 @@ function RenderFollowButton(props) {
             }}
             activeOpacity={0.7}
             onPress={() => {
-                setFollow(!isFollow);
                 // 調用修改this.state的isFollow方法
-                props.handleFollow();
-                // 選擇Follow，展示感謝信息，此時isFollow為Flase
-                if (!isFollow) {
-                    toast.show({
-                        placement: 'top',
-                        render: () => {
-                            return (
-                                <View
-                                    style={{
-                                        backgroundColor: success,
-                                        padding: pxToDp(10),
-                                        borderRadius: pxToDp(10),
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text style={{color: white}}>
-                                        感謝 Follow ！❥(^_-)
-                                    </Text>
-                                    <Text style={{color: white}}>
-                                        有最新動態會提醒您！
-                                    </Text>
-                                </View>
-                            );
-                        },
-                    });
-                }
-                // 選擇Del Follow，展示再見信息，此時isFollow為True
-                else {
-                    toast.show({
-                        placement: 'top',
-                        render: () => {
-                            return (
-                                <View
-                                    style={{
-                                        backgroundColor: themeColor,
-                                        padding: pxToDp(10),
-                                        borderRadius: pxToDp(10),
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text style={{color: white}}>
-                                        有緣再見！o(╥﹏╥)o
-                                    </Text>
-                                </View>
-                            );
-                        },
-                    });
+                if (props.handleFollow()) {
+                    setFollow(!isFollow);
+
+                    // 選擇Follow，展示感謝信息，此時isFollow為Flase
+                    if (!isFollow) {
+                        toast.show({
+                            placement: 'top',
+                            render: () => (
+                                <ToastText
+                                    backgroundColor={success}
+                                    text={`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`}
+                                />
+                            ),
+                        });
+                    }
+                    // 選擇Del Follow，展示再見信息，此時isFollow為True
+                    else {
+                        toast.show({
+                            placement: 'top',
+                            render: () => (
+                                <ToastText text={`有緣再見！o(╥﹏╥)o`} />
+                            ),
+                        });
+                    }
                 }
             }}>
             <Text style={{color: white}}>
@@ -238,22 +216,45 @@ class ClubDetail extends Component {
             event,
             // 訪問該頁的用戶對該組織的Follow狀態
             isFollow: false,
-            // 該用戶是否管理員。社團、APP管理員：true；
-            isAdmin: true,
+            // 該用戶是否管理員。社團、APP管理員賬號。
+            isAdmin: false,
+            isLogin: false,
             imageUrls: clubData.bgImgUrl,
+            showDialog: false,
         };
     }
 
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
-        const {isFollow} = this.state;
-        this.setState({isFollow: !isFollow});
+        const {isLogin, showDialog, isFollow} = this.state;
+        // 如果沒有登錄，觸發登錄提示
+        if (!isLogin) {
+            this.setState({showDialog: true});
+            return false;
+        } else {
+            // TODO: 請求數據庫返回是否follow成功
+            this.setState({isFollow: !isFollow});
+            return true;
+        }
     };
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
         this.setState({isShow: !this.state.isShow});
     };
+
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        // 已登錄
+        if (JSON.stringify(globalData.userInfo) != '{}') {
+            // TODO: 判斷是否club和token，展示設置按鈕
+            if (globalData.userInfo.isClub) {
+                this.setState({isAdmin: true});
+            }
+            // Follow按鈕展示提示
+            this.setState({isLogin: true});
+        }
+    }
 
     render() {
         // 解耦uiMap的數據
@@ -280,22 +281,20 @@ class ClubDetail extends Component {
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
-                    <View
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => this.props.navigation.goBack()}
                         style={{
                             position: 'absolute',
                             top: pxToDp(65),
                             left: pxToDp(10),
                         }}>
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={white}
-                            />
-                        </TouchableOpacity>
-                    </View>
+                        <Ionicons
+                            name="chevron-back-outline"
+                            size={pxToDp(25)}
+                            color={white}
+                        />
+                    </TouchableOpacity>
                     {/* 編輯資料按鈕 只有管理員可見 */}
                     {isAdmin && (
                         <View
@@ -307,7 +306,9 @@ class ClubDetail extends Component {
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 onPress={() =>
-                                    this.props.navigation.navigate('ClubSetting')
+                                    this.props.navigation.navigate(
+                                        'ClubSetting',
+                                    )
                                 }>
                                 <Ionicons
                                     name="settings-outline"
@@ -356,26 +357,6 @@ class ClubDetail extends Component {
                             />
                         </View>
                     </TouchableWithoutFeedback>
-                </TouchableOpacity>
-            );
-        };
-
-        // 渲染Follow按鈕，主題色為未Follow，Follow改為灰色
-        renderFollowButton = () => {
-            return (
-                <TouchableOpacity
-                    style={{
-                        marginTop: pxToDp(5),
-                        alignSelf: 'center',
-                        backgroundColor: isFollow ? black.third : themeColor,
-                        padding: pxToDp(10),
-                        borderRadius: pxToDp(15),
-                    }}
-                    activeOpacity={0.7}
-                    onPress={this.handleFollow}>
-                    <Text style={{color: white}}>
-                        {isFollow ? 'Del Follow' : 'Follow Us'}
-                    </Text>
                 </TouchableOpacity>
             );
         };
@@ -693,7 +674,20 @@ class ClubDetail extends Component {
                     // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
-                {/* 展示需要的信息Modal */}
+                {/* 彈出層提示 */}
+                <DialogDIY
+                    showDialog={this.state.showDialog}
+                    text={
+                        'Follow社團可以接收最新消息，需要登錄操作，現在去登錄嗎？'
+                    }
+                    handleConfirm={() => {
+                        this.setState({showDialog: false});
+                        this.props.navigation.navigate('MeTabbar');
+                    }}
+                    handleCancel={() => this.setState({showDialog: false})}
+                />
+
+                {/* 展示簡介的Modal */}
                 {this.state.isShow && (
                     <ModalBottom cancel={this.tiggerModalBottom}>
                         <View
@@ -751,4 +745,4 @@ class ClubDetail extends Component {
     }
 }
 
-export default ClubDetail;
+export default inject('RootStore')(ClubDetail);

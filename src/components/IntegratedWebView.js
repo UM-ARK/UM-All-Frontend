@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
     Text,
     StyleSheet,
@@ -12,6 +12,7 @@ import {pxToDp} from '../utils/stylesKits';
 import {WebView} from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/AntDesign';
+import CookieManager from '@react-native-cookies/cookies';
 
 const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
     // 記錄網站加載進度和是否加載完成
@@ -50,6 +51,18 @@ const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
         triggerRefresh();
     }
 
+    useEffect(() => {
+        console.log('開啟Webview，訪問', source.uri);
+        // 獲取當前頁所有的cookies
+        CookieManager.get(source.uri).then(cookies => {
+            console.log('CookieManager.get =>', cookies);
+        });
+        // 清除所有的cookies
+        // CookieManager.clearAll().then(success => {
+        //     console.log('CookieManager.clearAll =>', success);
+        // });
+    }, []);
+
     return (
         <>
             {
@@ -87,6 +100,10 @@ const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}
                 pullToRefreshEnabled={true}
+                // IOS
+                sharedCookiesEnabled={true}
+                // Android
+                thirdPartyCookiesEnabled={true}
             />
 
             {/* 吸底導航按鈕 */}
