@@ -9,6 +9,7 @@ import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
+import MessageConsole from './pages/ClubSystem/MessageConsole';
 
 // 本地工具
 import {pxToDp} from './utils/stylesKits';
@@ -126,7 +127,7 @@ class Tabbar extends Component {
                 {isLogin && (
                     <Tabs.Screen
                         name="MessageTabbar"
-                        component={MessageScreen}
+                        component={isClub ? MessageConsole : MessageScreen}
                         options={{
                             tabBarIcon: ({focused, color, size}) => (
                                 <Icon
