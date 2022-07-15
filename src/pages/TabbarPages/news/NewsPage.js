@@ -194,7 +194,7 @@ class NewsPage extends Component {
                         {/* 圖片背景 */}
                         {this.state.topNews.imageUrls && (
                             <TouchableOpacity
-                                activeOpacity={0.7}
+                                activeOpacity={0.8}
                                 onPress={() => {
                                     this.context.navigate('NewsDetail', {
                                         data: topNews,
@@ -242,7 +242,7 @@ class NewsPage extends Component {
                                                     fontWeight: 'bold',
                                                     fontSize: pxToDp(18),
                                                 }}
-                                                numberOfLines={4}>
+                                                numberOfLines={3}>
                                                 {title_en}
                                             </Text>
                                             <Text

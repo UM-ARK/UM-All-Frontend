@@ -281,22 +281,20 @@ class ClubDetail extends Component {
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
-                    <View
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => this.props.navigation.goBack()}
                         style={{
                             position: 'absolute',
                             top: pxToDp(65),
                             left: pxToDp(10),
                         }}>
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={white}
-                            />
-                        </TouchableOpacity>
-                    </View>
+                        <Ionicons
+                            name="chevron-back-outline"
+                            size={pxToDp(25)}
+                            color={white}
+                        />
+                    </TouchableOpacity>
                     {/* 編輯資料按鈕 只有管理員可見 */}
                     {isAdmin && (
                         <View
