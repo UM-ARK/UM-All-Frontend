@@ -19,6 +19,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Dimensions} from 'react-native';
 import BlurViewWrapper from '../../../components/BlurViewWrapper';
 import EventDescription from './EventDescription';
+import HyperlinkText from '../../../components/HyperlinkText';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -35,7 +36,9 @@ const dataList = [
         askdhfkqwhekfhweifuhw
         qweflihqwoighqeliurghi3uqrg
         qoweifhjoqwiehfoiwqehf
-        qweoifhqwoiefghqwieopfghpqwuief
+        www.google.com,
+        http://www.google.com,
+        https://www.google.com,
         elrghbnkfejbniuj`,
         type: 'text',
         createAt: 1656927421000,
@@ -238,7 +241,12 @@ class ChatCard extends Component {
                 {/* 卡片內容 */}
                 <View style={styles.message.contentWrap}>
                     {/* 文字 */}
-                    <Text style={{color: titleColor}}>{item.text}</Text>
+                    {/* <Hyperlink linkStyle={{color: COLOR_DIY.themeColor}} onPress={(link)=>console.log(link)}>
+                        <Text style={{color: titleColor}}>{item.text}</Text>
+                    </Hyperlink> */}
+                    <HyperlinkText linkStyle={{color: COLOR_DIY.themeColor}}>
+                        {item.text + '\ndc12345@umac.mo'}
+                    </HyperlinkText>
                 </View>
             </View>
         );
