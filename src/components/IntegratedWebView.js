@@ -40,13 +40,33 @@ const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
     // 點擊後退按鈕觸發
     const handleBackPress = () => {
         webViewRef.current.goBack();
-        console.log("Back");
     };
 
     // 點擊前進按鈕觸發
     const handleForwardPress = () => {
         webViewRef.current.goForward();
     };
+
+    useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+  
+        return () => BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    },[handleBackPress]);
+
+    // useEffect(() => {
+    //     BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    //     return () => BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    //     // Android Only
+    //     // if(Platform.OS == "android") {
+    //     //     // 把安桌端的系統返回鍵連動WebView裡的返回功能
+    //     //     BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    //     // }
+    //     // return () => {
+    //     //     if(Platform.OS == "android") {
+    //     //         BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    //     //     }
+    //     // }
+    // }, []);
 
     // 如果外層組件需要刷新
     if (needRefresh) {
