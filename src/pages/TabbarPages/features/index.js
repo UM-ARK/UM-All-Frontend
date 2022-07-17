@@ -448,23 +448,23 @@ class Index extends Component {
                             // isBarStyleBlack: false,
                         },
                     },
-                    // TODO: 爬蟲
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',
                         fn_name: '失物認領',
-                        go_where: 'Webview',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_LOST_FOUND,
-                            title: '失物認領',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
+                        go_where: 'LostAndFound',
+                        // go_where: 'Webview',
+                        // webview_param: {
+                        //     // import pathMap的鏈接進行跳轉
+                        //     url: UM_LOST_FOUND,
+                        //     title: '失物認領',
+                        //     // 標題顏色，默認為black.main
+                        //     // text_color: '#fff',
+                        //     // 標題背景顏色，默認為bg_color
+                        //     // bg_color_diy: '#23407d',
+                        //     // 狀態欄字體是否黑色，默認true
+                        //     // isBarStyleBlack: false,
+                        // },
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
