@@ -627,6 +627,7 @@ class ClubDetail extends Component {
 
                     {/* 5.0 舉辦的活動 */}
                     {event.length > 0 && (
+                        // {/* TODO: 下拉刷新 */}
                         <FlatList
                             numColumns={2}
                             columnWrapperStyle={{
@@ -650,7 +651,11 @@ class ClubDetail extends Component {
                                 <View
                                     style={{
                                         marginBottom: pxToDp(80),
-                                    }}></View>
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Text>TODO: 查看更多邏輯</Text>
+                                </View>
                             )}
                         />
                     )}
