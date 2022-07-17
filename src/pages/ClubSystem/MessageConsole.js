@@ -4,7 +4,7 @@ import {Text, View, TouchableOpacity, FlatList, ScrollView} from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
 import {pxToDp} from '../../utils/stylesKits';
-import ChatCard from '../TabbarPages/message/ChatCard';
+import ChatCard from './components/ChatCard';
 
 import {Header, SpeedDial} from '@rneui/themed';
 
@@ -14,6 +14,12 @@ class MessageConsole extends Component {
     state = {
         // 打開右下角新建消息類型按鈕
         openOption: false,
+        eventList: [
+            {title: 'asldkfjsadlf'},
+            {title: 'wrehgwterhwrth'},
+            {title: 'asldkfghjfghmrumryumyjsadlf'},
+            {title: 'asldkfjsayukryukryukryukrytukryukyrutkyrukyuktyukytukdlf'},
+        ],
     };
 
     renderFixButton = () => {
@@ -32,21 +38,26 @@ class MessageConsole extends Component {
                     buttonStyle={{backgroundColor: themeColor}}
                     icon={{name: 'event-available', color: white}}
                     title="新增活動"
-                    onPress={() =>
-                        this.props.navigation.navigate('EventSetting')
-                    }
+                    onPress={() => {
+                        this.setState({openOption: false});
+                        this.props.navigation.navigate('EventSetting');
+                    }}
                 />
                 <SpeedDial.Action
                     buttonStyle={{backgroundColor: themeColor}}
                     icon={{name: 'alternate-email', color: white}}
                     title="新增公告"
-                    onPress={() => console.log('Delete Something')}
+                    onPress={() => {
+                        this.setState({openOption: false});
+                        this.props.navigation.navigate('MessageSetting');
+                    }}
                 />
             </SpeedDial>
         );
     };
 
     render() {
+        const {eventList} = this.state;
         return (
             <View style={{backgroundColor: COLOR_DIY.bg_color, flex: 1}}>
                 {/* 頂部標題 */}
@@ -69,9 +80,13 @@ class MessageConsole extends Component {
                 {this.renderFixButton()}
 
                 {/* 消息內容 */}
-                <ScrollView style={{marginTop: pxToDp(5)}}>
-                    <Text>展示歷史推送的公告</Text>
-                </ScrollView>
+                <FlatList
+                    data={eventList}
+                    renderItem={({item, index}) => {
+                        return <ChatCard data={item} index={index}></ChatCard>;
+                    }}
+                    keyExtractor={item => item.id}
+                />
             </View>
         );
     }

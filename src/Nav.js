@@ -3,10 +3,6 @@ import React, {Component} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
-// 本地工具
-import {pxToDp} from './utils/stylesKits';
-import {COLOR_DIY} from './utils/uiMap';
-
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
 
@@ -19,9 +15,9 @@ import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin'
 import MeScreen from './pages/TabbarPages/me'
 import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
 import MyFollow from './pages/TabbarPages/me/pages/MyFollow'
-import Reminder from './pages/TabbarPages/me/pages/Reminder'
 import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
 import AboutUs from './pages/TabbarPages/me/pages/AboutUs'
+import UsualQuestion from './pages/TabbarPages/me/pages/UsualQuestion'
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
@@ -33,6 +29,7 @@ import Webviewer from './components/Webviewer';
 import UMWhole from './pages/Features/UMWhole';
 import What2Reg from './pages/Features/What2Reg';
 import Bus from './pages/Features/Bus';
+import LostAndFound from './pages/Features/LostAndFound';
 
 import TestScreen from '../test/test'
 
@@ -64,8 +61,8 @@ class Nav extends Component {
                 <Stack.Screen name="ClubLogin"         component={ClubLogin}/>
                 <Stack.Screen name="AboutUs"         component={AboutUs}/>
                 <Stack.Screen name="MyFollow"        component={MyFollow}/>
-                <Stack.Screen name="Reminder"        component={Reminder}/>
                 <Stack.Screen name="MeScreen"        component={MeScreen}/>
+                <Stack.Screen name="UsualQuestion"        component={UsualQuestion}/>
                 {/* 設置頁 */}
                 <Stack.Screen name="MeSetting"     component={MeSetting} />
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
@@ -79,6 +76,8 @@ class Nav extends Component {
                 <Stack.Screen name="What2Reg"     component={What2Reg} />
                 {/* 校園巴士報站 */}
                 <Stack.Screen name="Bus"     component={Bus} />
+                {/* 失物招領 */}
+                <Stack.Screen name="LostAndFound"     component={LostAndFound} />
 
                 {/* 社團系統 */}
                 <Stack.Screen name="ClubSetting"     component={ClubSetting} />

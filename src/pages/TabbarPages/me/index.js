@@ -18,7 +18,6 @@ import MeSetting from './pages/MeSetting';
 import AppSetting from './pages/AppSetting';
 import AboutUs from './pages/AboutUs';
 import MyFollow from './pages/MyFollow';
-import Reminder from './pages/Reminder';
 
 // 第三方庫
 import {Header} from '@rneui/themed';
@@ -42,8 +41,13 @@ const optionsInfo = [
         routeName: 'AppSetting',
     },
     {
-        title: '關於我們',
+        title: '常見問題',
         iconPath: 'at-circle-outline',
+        routeName: 'UsualQuestion',
+    },
+    {
+        title: '關於我們',
+        iconPath: 'chatbubbles-outline',
         routeName: 'AboutUs',
     },
 ];

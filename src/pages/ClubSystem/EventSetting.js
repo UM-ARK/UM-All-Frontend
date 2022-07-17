@@ -1,15 +1,23 @@
 import React, {Component} from 'react';
-import {View, Text, Button, ScrollView, StyleSheet} from 'react-native';
+import {
+    View,
+    Text,
+    Button,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+} from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
 import Header from '../../components/Header';
-import {handleLogout} from '../../utils/storageKits';
 import DialogDIY from '../../components/DialogDIY';
+import ImageSelector from '../../components/ImageSelector';
 
-import {Incubator, ExpandableSection} from 'react-native-ui-lib';
+import {Incubator, ExpandableSection, Switch} from 'react-native-ui-lib';
 const {TextField} = Incubator;
 import DatePicker from 'react-native-date-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {FlatGrid} from 'react-native-super-grid';
 
 import {pxToDp} from '../../utils/stylesKits';
 
@@ -45,7 +53,10 @@ class EventSetting extends Component {
         introText: '',
         startDate: new Date(),
         finishDate: new Date(),
+        coverImgUrl: '',
+        relateImgUrl: ['', '', '', ''],
         expanded: false,
+        allowFollow: true,
     };
 
     renderDatePicker = dateType => {
@@ -100,6 +111,16 @@ class EventSetting extends Component {
                 />
             </View>
         );
+    };
+
+    // 設定封面圖片
+    setCoverImgUrl = imageUrl => {
+        this.setState({coverImgUrl: imageUrl[0]});
+    };
+
+    // 設定相關圖片Url
+    setImageUrlArr = imageUrlArr => {
+        this.setState({relateImgUrl: imageUrlArr});
     };
 
     render() {
@@ -210,8 +231,68 @@ class EventSetting extends Component {
                     />
 
                     {/* 封面圖片 */}
+                    <View style={{marginTop: pxToDp(20)}}>
+                        <Text style={styles.inputTitle}>設定封面圖片</Text>
+                        <ImageSelector
+                            index={0}
+                            imageUrlArr={[this.state.coverImgUrl]}
+                            setImageUrlArr={this.setCoverImgUrl.bind(this)}
+                        />
+                    </View>
 
                     {/* 其他圖片 */}
+                    <View style={{marginTop: pxToDp(20)}}>
+                        <Text style={styles.inputTitle}>設定其他圖片</Text>
+                        <FlatGrid
+                            maxItemsPerRow={2}
+                            itemDimension={pxToDp(50)}
+                            spacing={pxToDp(10)}
+                            data={this.state.relateImgUrl}
+                            renderItem={({item, index}) => (
+                                <ImageSelector
+                                    index={index}
+                                    imageUrlArr={this.state.relateImgUrl}
+                                    setImageUrlArr={this.setImageUrlArr.bind(
+                                        this,
+                                    )}
+                                />
+                            )}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    </View>
+
+                    {/* 允許Follow */}
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Text style={styles.inputTitle}>允許Follow</Text>
+                        <Switch
+                            value={this.state.allowFollow}
+                            onValueChange={(allowFollow: boolean) =>
+                                this.setState({allowFollow})
+                            }
+                        />
+                    </View>
+
+                    {/* 發佈按鈕 */}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        // TODO: 校驗信息是否按要求輸入
+                        onPress={() => alert('確定要發佈嗎？')}
+                        style={styles.submitButton}>
+                        <Text style={{...styles.submitButtonText}}>發佈</Text>
+                    </TouchableOpacity>
+                    {/* 刪除按鈕 */}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        // TODO: 校驗信息是否按要求輸入
+                        onPress={() => alert('確定要刪除嗎？')}
+                        style={{
+                            ...styles.submitButton,
+                            backgroundColor: COLOR_DIY.unread,
+                            marginBottom: pxToDp(50),
+                        }}>
+                        <Text style={{...styles.submitButtonText}}>刪除</Text>
+                    </TouchableOpacity>
                 </ScrollView>
             </View>
         );
@@ -222,6 +303,21 @@ const styles = StyleSheet.create({
     inputTitle: {
         color: black.main,
         fontSize: pxToDp(16),
+    },
+    submitButton: {
+        backgroundColor: themeColor,
+        alignItems: 'center',
+        alignSelf: 'center',
+        marginVertical: pxToDp(5),
+        paddingHorizontal: pxToDp(20),
+        paddingVertical: pxToDp(10),
+        borderRadius: pxToDp(10),
+        ...COLOR_DIY.viewShadow,
+    },
+    submitButtonText: {
+        color: white,
+        fontSize: pxToDp(18),
+        fontWeight: '500',
     },
 });
 
