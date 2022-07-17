@@ -16,10 +16,18 @@ import {
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import {handleLogin} from '../../../../../utils/storageKits';
+import IntegratedWebView from '../../../../../components/IntegratedWebView';
+import {UM_Moodle} from '../../../../../utils/pathMap';
+import DialogDIY from '../../../../../components/DialogDIY';
 import ClubLogin from './ClubLogin';
 
 import {Header, CheckBox} from '@rneui/themed';
 import {NavigationContext} from '@react-navigation/native';
+import CookieManager from '@react-native-cookies/cookies';
+import WebView from 'react-native-webview';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const {bg_color, black, themeColor, white} = COLOR_DIY;
 
 class LoginChoose extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -28,6 +36,18 @@ class LoginChoose extends Component {
 
     state = {
         ruleChoice: false,
+        haveAccount: false,
+        showDialog: false,
+        showMoodle: false,
+    };
+
+    handleStdLogin = () => {
+        console.log('學生登錄');
+        // 檢查本地有無學號資料緩存
+        // 有：
+        // 無：
+
+        // 跳轉Moodle登錄，等待用戶退出
     };
 
     render() {
@@ -40,120 +60,191 @@ class LoginChoose extends Component {
                         barStyle: 'dark-content',
                         translucent: true,
                     }}
+                    leftComponent={
+                        this.state.showMoodle && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    this.refs.webRef.reload();
+                                    this.setState({showMoodle: false});
+                                }}>
+                                <Ionicons
+                                    name="chevron-back-outline"
+                                    size={pxToDp(25)}
+                                    color={COLOR_DIY.black.main}
+                                />
+                            </TouchableOpacity>
+                        )
+                    }
                 />
 
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                    <View style={{marginBottom: pxToDp(10)}}>
-                        <Text
-                            style={{
-                                color: COLOR_DIY.black.third,
-                                fontSize: pxToDp(18),
-                            }}>
-                            Welcome To UM ALL!
-                        </Text>
-                    </View>
-
-                    {/* 登錄按鈕卡片 */}
-                    <View style={{width: '100%', flexDirection: 'row'}}>
-                        {/* 個人賬號登錄 */}
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: '#a2d2e2',
-                                ...s.roleCardContainer,
-                            }}
-                            activeOpacity={0.7}
-                            onPress={() =>
-                                handleLogin({
-                                    isClub: false,
-                                    token: 'student',
-                                })
+                {this.state.showMoodle ? (
+                    <WebView
+                        source={{uri: UM_Moodle}}
+                        ref={'webRef'}
+                        startInLoadingState={true}
+                        // TODO: 自動注入賬號密碼
+                        injectedJavaScript={`
+                            document.getElementById("userNameInput").value="dc02581";
+                            document.getElementById("passwordInput").value="4537asdfg0";
+                        `}
+                        onNavigationStateChange={e => {
+                            // SSO密碼輸入頁面e.title為https://websso.....
+                            // 雙重認證頁面e.title為Duo Security
+                            // Moodle頁面e.title為Dashboard
+                            // console.log(e);
+                            // 已登錄到Moodle
+                            if (e.title == 'Dashboard') {
+                                // 獲取Moodle頁所有的cookies
+                                CookieManager.get(UM_Moodle)
+                                    .then(cookies => {
+                                        console.log(
+                                            'CookieManager.get =>',
+                                            cookies,
+                                        );
+                                        // 設定本地緩存，並重啟APP
+                                        handleLogin({
+                                            isClub: false,
+                                            token: 'student',
+                                        });
+                                    })
+                                    .catch(err => alert(err));
+                                this.refs.webRef.injectJavaScript(`
+                                window.location.href = 'https://ummoodle.um.edu.mo/user/profile.php';
+                                `)
                             }
-                            disabled={!this.state.ruleChoice}>
-                            <Text style={{...s.roleCardText}}>UM PASS</Text>
-                            <Text style={{...s.roleCardText}}>
-                                學生個人賬號
+                        }}
+                    />
+                ) : (
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        <View style={{marginBottom: pxToDp(10)}}>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.black.third,
+                                    fontSize: pxToDp(18),
+                                }}>
+                                Welcome To UM ALL!
                             </Text>
-                        </TouchableOpacity>
-                        {/* 社團賬號登錄 */}
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: '#4994c4',
-                                ...s.roleCardContainer,
-                            }}
-                            activeOpacity={0.7}
-                            onPress={() => this.context.navigate('ClubLogin')}
-                            disabled={!this.state.ruleChoice}>
-                            <Text style={{...s.roleCardText}}>
-                                社團/組織賬號
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                        </View>
 
-                    {/* 登錄提示 */}
-                    <View style={{marginTop: pxToDp(10), alignItems: 'center'}}>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}>
-                            {/* 選中圖標 */}
-                            <CheckBox
-                                containerStyle={{
-                                    backgroundColor: 'transparent',
-                                    padding: 0,
-                                }}
-                                checkedIcon="dot-circle-o"
-                                uncheckedIcon="circle-o"
-                                size={pxToDp(20)}
-                                checked={this.state.ruleChoice}
-                                onPress={() =>
-                                    this.setState({
-                                        ruleChoice: !this.state.ruleChoice,
-                                    })
-                                }
-                            />
+                        {/* 登錄按鈕卡片 */}
+                        <View style={{width: '100%', flexDirection: 'row'}}>
+                            {/* 個人賬號登錄 */}
                             <TouchableOpacity
-                                activeOpacity={0.9}
-                                onPress={() =>
-                                    this.setState({
-                                        ruleChoice: !this.state.ruleChoice,
-                                    })
-                                }>
-                                <Text
-                                    style={{
-                                        color: COLOR_DIY.black.third,
-                                        fontSize: pxToDp(13),
-                                    }}>
-                                    我已閱讀且同意遵守
+                                style={{
+                                    backgroundColor: '#a2d2e2',
+                                    ...s.roleCardContainer,
+                                }}
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    this.setState({showDialog: true});
+                                }}
+                                disabled={!this.state.ruleChoice}>
+                                <Text style={{...s.roleCardText}}>UM PASS</Text>
+                                <Text style={{...s.roleCardText}}>
+                                    學生個人賬號
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity>
-                                <Text
-                                    style={{
-                                        color: COLOR_DIY.themeColor,
-                                        fontSize: pxToDp(13),
-                                    }}
-                                    activeOpacity={0.9}
-                                    onPress={() => alert('底部彈出應用協議')}>
-                                    《應用隱私政策與使用條款》
+                            {/* 社團賬號登錄 */}
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: '#4994c4',
+                                    ...s.roleCardContainer,
+                                }}
+                                activeOpacity={0.7}
+                                onPress={() =>
+                                    this.context.navigate('ClubLogin')
+                                }
+                                disabled={!this.state.ruleChoice}>
+                                <Text style={{...s.roleCardText}}>
+                                    社團/組織賬號
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                        <Text
+
+                        {/* 登錄提示 */}
+                        <View
                             style={{
-                                color: COLOR_DIY.black.third,
-                                fontSize: pxToDp(18),
-                                marginTop: pxToDp(5),
+                                marginTop: pxToDp(10),
+                                alignItems: 'center',
                             }}>
-                            請選擇您的角色
-                        </Text>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}>
+                                {/* 選中圖標 */}
+                                <CheckBox
+                                    containerStyle={{
+                                        backgroundColor: 'transparent',
+                                        padding: 0,
+                                    }}
+                                    checkedIcon="dot-circle-o"
+                                    uncheckedIcon="circle-o"
+                                    size={pxToDp(20)}
+                                    checked={this.state.ruleChoice}
+                                    onPress={() =>
+                                        this.setState({
+                                            ruleChoice: !this.state.ruleChoice,
+                                        })
+                                    }
+                                />
+                                <TouchableOpacity
+                                    activeOpacity={0.9}
+                                    onPress={() =>
+                                        this.setState({
+                                            ruleChoice: !this.state.ruleChoice,
+                                        })
+                                    }>
+                                    <Text
+                                        style={{
+                                            color: COLOR_DIY.black.third,
+                                            fontSize: pxToDp(13),
+                                        }}>
+                                        我已閱讀且同意遵守
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity>
+                                    <Text
+                                        style={{
+                                            color: COLOR_DIY.themeColor,
+                                            fontSize: pxToDp(13),
+                                        }}
+                                        activeOpacity={0.9}
+                                        onPress={() =>
+                                            alert('底部彈出應用協議')
+                                        }>
+                                        《應用隱私政策與使用條款》
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.black.third,
+                                    fontSize: pxToDp(18),
+                                    marginTop: pxToDp(5),
+                                }}>
+                                請選擇您的角色
+                            </Text>
+                        </View>
                     </View>
-                </View>
+                )}
+
+                {/* 學生首次登錄提示 */}
+                <DialogDIY
+                    showDialog={this.state.showDialog}
+                    text={
+                        '將跳轉Moodle的UM PASS登錄頁，在登錄完成且看到Moodle界面時即可退出頁面，會自動完成註冊！'
+                    }
+                    handleConfirm={() => {
+                        this.setState({showDialog: false, showMoodle: true});
+                    }}
+                    handleCancel={() => this.setState({showDialog: false})}
+                />
             </View>
         );
     }
