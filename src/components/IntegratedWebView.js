@@ -5,6 +5,7 @@ import {
     Dimensions,
     Animated,
     TouchableOpacity,
+    BackHandler,
 } from 'react-native';
 
 import {pxToDp} from '../utils/stylesKits';
@@ -61,7 +62,30 @@ const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
         // CookieManager.clearAll().then(success => {
         //     console.log('CookieManager.clearAll =>', success);
         // });
+
+        // Android平台返回按鈕監聽
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener(
+                'hardwareBackPress',
+                onAndroidBackPress,
+            );
+            return (): void => {
+                BackHandler.removeEventListener(
+                    'hardwareBackPress',
+                    onAndroidBackPress,
+                );
+            };
+        }
     }, []);
+
+    // Android憑條返回按鈕按下時間
+    const onAndroidBackPress = (): boolean => {
+        if (webViewRef.current) {
+            webViewRef.current.goBack();
+            return true; // prevent default behavior (exit app)
+        }
+        return false;
+    };
 
     return (
         <>
@@ -104,6 +128,7 @@ const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
                 sharedCookiesEnabled={true}
                 // Android
                 thirdPartyCookiesEnabled={true}
+                cacheEnabled={true}
             />
 
             {/* 吸底導航按鈕 */}
