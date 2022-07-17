@@ -6,7 +6,10 @@ import {pxToDp} from '../src/utils/stylesKits';
 
 class Test extends Component {
     async checkToken() {
-        const fcmToken = await messaging().getToken();
+        const fcmToken = await messaging()
+            .getToken()
+            .then(res => console.log('res', res))
+            .catch(err => console.error('err', err));
         if (fcmToken) {
             console.log(fcmToken);
             alert(fcmToken);
