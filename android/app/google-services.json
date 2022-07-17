@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "609812711054",
+    "project_id": "um-all",
+    "storage_bucket": "um-all.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609812711054:android:b34f569a32daa09f092bdf",
+        "android_client_info": {
+          "package_name": "com.umallwhite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "609812711054-0ja4mffatsq9455epgakp75bil2j3c0n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNkDRMxWgXStBqcjoNCMdqD1Egt_KZbUA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "609812711054-0ja4mffatsq9455epgakp75bil2j3c0n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

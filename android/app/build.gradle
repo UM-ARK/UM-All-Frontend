@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.google.gms.google-services'  // Firebase推送
 
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -275,6 +276,12 @@ dependencies {
     implementation project(':@react-native-community_cameraroll')  // https://github.com/react-native-cameraroll/react-native-cameraroll
 
     implementation project(':react-native-restart') // https://github.com/avishayil/react-native-restart
+
+    // Import the Firebase BoM，推送
+    implementation platform('com.google.firebase:firebase-bom:30.2.0')
+    // Add the dependency for the Firebase SDK for Google Analytics
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
