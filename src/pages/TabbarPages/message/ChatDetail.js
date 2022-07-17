@@ -11,9 +11,10 @@ import {
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
+import Header from '../../../components/Header';
 
 import FastImage from 'react-native-fast-image';
-import {Header} from '@rneui/themed';
+// import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {Dimensions} from 'react-native';
@@ -312,30 +313,7 @@ class ChatCard extends Component {
         const {user} = this.props.route.params;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: user.name,
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                    }}
-                />
+                <Header title={user.name} />
 
                 {/* 通知信息的渲染 */}
                 <FlatList
@@ -343,14 +321,12 @@ class ChatCard extends Component {
                     renderItem={({item, index}) =>
                         this.renderMessageItem(item, index)
                     }
+                    ListHeaderComponent={() => (
+                        <View style={{marginTop: pxToDp(50)}} />
+                    )}
                     // 翻轉渲染順序，從下往上
                     inverted={true}
                 />
-
-                {/* 回復提醒 */}
-                <View style={styles.replyReminder}>
-                    <Text>您無需回復此消息</Text>
-                </View>
             </View>
         );
     }
