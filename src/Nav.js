@@ -30,6 +30,7 @@ import UMWhole from './pages/Features/UMWhole';
 import What2Reg from './pages/Features/What2Reg';
 import Bus from './pages/Features/Bus';
 import LostAndFound from './pages/Features/LostAndFound';
+import CarPark from './pages/Features/CarPark';
 
 import TestScreen from '../test/test'
 
@@ -78,6 +79,7 @@ class Nav extends Component {
                 <Stack.Screen name="Bus"     component={Bus} />
                 {/* 失物招領 */}
                 <Stack.Screen name="LostAndFound"     component={LostAndFound} />
+                <Stack.Screen name="CarPark"     component={CarPark} />
 
                 {/* 社團系統 */}
                 <Stack.Screen name="ClubSetting"     component={ClubSetting} />
