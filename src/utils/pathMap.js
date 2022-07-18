@@ -1,7 +1,7 @@
 // 網站地址映射
 
 // TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
-export const BASE_URI = 'https://www.box.com/api';
+export const BASE_URI = 'https://ark.boxz.dev/';
 
 
 

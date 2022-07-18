@@ -128,7 +128,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'car-brake-parking',
                         fn_name: '車位',
-                        go_where: '', // a function
+                        go_where: 'CarPark', // a function
                     },
                     {
                         icon_type: iconTypes.ionicons,
