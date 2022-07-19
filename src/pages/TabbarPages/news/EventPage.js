@@ -88,21 +88,6 @@ dataList = [
     },
     {
         // 該活動在數據庫中的id
-        eventID: 6,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.um.edu.mo/wp-content/uploads/2022/05/267367-%E5%A4%9A%E5%8A%9F%E8%83%BD%E9%9B%BB%E6%B1%A0%E5%A4%8F%E4%BB%A4%E7%87%9F-2022-poster.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '多功能電池夏令營 2022',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1658210002000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
         eventID: 0,
         type: 'activity',
         // 海報鏈接

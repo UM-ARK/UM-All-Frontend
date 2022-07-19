@@ -8,6 +8,7 @@ import {
     ScrollView,
     TouchableWithoutFeedback,
     RefreshControl,
+    VirtualizedList,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
@@ -56,146 +57,15 @@ const EventsLoader = props => (
     </ContentLoader>
 );
 
-// 模擬數據庫data
-dataList = [
-    {
-        // 該活動在數據庫中的id
-        eventID: 8,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.um.edu.mo/wp-content/uploads/2022/06/270879-%E5%85%A8%E7%90%83%E8%A6%96%E9%87%8E%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97-%E4%B8%AD%E8%97%A5%E5%92%8C%E5%A4%A9%E7%84%B6%E7%94%A2%E7%89%A9%E7%9A%84%E5%8D%93%E8%B6%8A%E7%A0%94%E7%A9%B6-%E2%80%93-%E9%9B%BB%E9%87%9D%E6%8A%97%E7%82%8E%E7%9A%84%E7%A5%9E%E7%B6%93%E8%A7%A3%E5%89%96%E5%AD%B8%E5%9F%BA%E7%A4%8E-poster.jpg',
-        relateImgUrl: [
-            'https://www.um.edu.mo/wp-content/uploads/2022/06/270879-%E5%85%A8%E7%90%83%E8%A6%96%E9%87%8E%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97-%E4%B8%AD%E8%97%A5%E5%92%8C%E5%A4%A9%E7%84%B6%E7%94%A2%E7%89%A9%E7%9A%84%E5%8D%93%E8%B6%8A%E7%A0%94%E7%A9%B6-%E2%80%93-%E9%9B%BB%E9%87%9D%E6%8A%97%E7%82%8E%E7%9A%84%E7%A5%9E%E7%B6%93%E8%A7%A3%E5%89%96%E5%AD%B8%E5%9F%BA%E7%A4%8E-poster.jpg',
-        ],
-        // 活動標題
-        title: '全球視野講座系列: 中藥和天然產物的卓越研究 – 電針抗炎的神經解剖學基礎',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1656482002000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 7,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.um.edu.mo/wp-content/uploads/2022/06/270706-%E6%99%BA%E6%85%A7%E5%9F%8E%E5%B8%82%E7%89%A9%E8%81%AF%E7%B6%B2%E5%82%91%E5%87%BA%E8%AC%9B%E5%BA%A7%E7%B3%BB%E5%88%97%EF%BC%9A%E6%99%BA%E8%83%BD%E5%82%B3%E6%84%9F%E8%88%87%E7%B6%B2%E8%B7%AF%E9%80%9A%E4%BF%A1%E5%B0%88%E9%A1%8C-poster-scaled.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '講座：智能傳感與網絡通信',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1656136402000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 6,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.um.edu.mo/wp-content/uploads/2022/05/267367-%E5%A4%9A%E5%8A%9F%E8%83%BD%E9%9B%BB%E6%B1%A0%E5%A4%8F%E4%BB%A4%E7%87%9F-2022-poster.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '多功能電池夏令營 2022',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1658210002000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 0,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://info.umsu.org.mo/storage/activity_covers/images/7332b858246993976a892b229e5942ab.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '3月福利',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 1,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://info.umsu.org.mo/storage/activity_covers/images/13a5158b6a890818615af9bcff8bc81b.png',
-        relateImgUrl: [],
-        // 活動標題
-        title: '校園Vlog大賽',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 2,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://info.umsu.org.mo/storage/activity_covers/images/c8049bf0ebd8ea081e75f1c1573631f2.png',
-        relateImgUrl: [],
-        // 活動標題
-        title: '香水工作坊',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 3,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.cpsumsu.org/_announcement/CPSUMSU_Web_Crawler_Workshop2022/poster.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '網絡爬蟲工作坊',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 4,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.cpsumsu.org/_announcement/CPSUMSU_UMEF2022_postpone/279037122_5018677904858794_5613582783794191615_n.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '澳大電競節2022',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 5,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.cpsumsu.org/_announcement/Game_Design_Workshop2022/img/poster.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '遊戲設計工作坊',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-];
+const getItem = (data, index) => {
+    // data為VirtualizedList設置的data，index為當前渲染到的下標
+    return data[index];
+};
+
+// // 返回數據數組的長度
+const getItemCount = data => {
+    return data.length;
+};
 
 class UMEventPage extends Component {
     constructor() {
@@ -292,9 +162,70 @@ class UMEventPage extends Component {
         );
     };
 
+    // 渲染主要內容
+    renderPage = () => {
+        const {data} = this.state;
+        // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
+        let leftDataList = [];
+        let rightDataList = [];
+        if (data != undefined) {
+            data.map((itm, idx) => {
+                if (idx % 2 == 0) {
+                    leftDataList.push(itm);
+                } else {
+                    rightDataList.push(itm);
+                }
+            });
+        }
+
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    width: '100%',
+                    backgroundColor: COLOR_DIY.bg_color,
+                    justifyContent: 'space-around',
+                }}>
+                {/* 左側的列 放置雙數下標的圖片 從0開始 */}
+                <View>
+                    <FlatList
+                        data={leftDataList}
+                        renderItem={({item}) => {
+                            return (
+                                <UMEventCard
+                                    data={item}
+                                    style={s.cardContainer}
+                                />
+                            );
+                        }}
+                        scrollEnabled={false}
+                    />
+                </View>
+                {/* 右側的列 放置單數下標的圖片 */}
+                <View>
+                    <FlatList
+                        data={rightDataList}
+                        renderItem={({item}) => {
+                            return (
+                                <UMEventCard
+                                    data={item}
+                                    style={s.cardContainer}
+                                />
+                            );
+                        }}
+                        scrollEnabled={false}
+                        style={{flex: 1}}
+                    />
+                </View>
+            </View>
+        );
+    };
+
     render() {
         const {isLoading, data} = this.state;
-        console.log(data);
+        console.log('data', data);
+
         return (
             <View
                 style={{
@@ -305,22 +236,7 @@ class UMEventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
 
-                <ScrollView>
-                    {!isLoading &&
-                        data.length > 0 &&
-                        data.map(item => {
-                            const {common, details, lastModified} = item;
-                            // console.log('common', common);
-                            // console.log('details', details);
-
-                            // 開始時間
-                            let dateFrom = moment
-                                .tz(common.dateFrom, 'Asia/Macau')
-                                .format('MM-DD');
-                            // console.log('dateFrom', dateFrom);
-                            return <UMEventCard data={item} />;
-                        })}
-                </ScrollView>
+                {!isLoading && <ScrollView ref={'scrollView'}>{this.renderPage()}</ScrollView>}
             </View>
         );
     }
