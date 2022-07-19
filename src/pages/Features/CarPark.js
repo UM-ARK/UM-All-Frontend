@@ -13,6 +13,7 @@ import {
 import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import Header from '../../components/Header';
+import {UM_API_CAR_PARK} from '../../utils/pathMap';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -37,24 +38,21 @@ class CarPark extends Component {
             .subtract(30, 'm')
             .format('YYYY-MM-DDTHH:mm:ss');
         axios
-            .get(
-                'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all',
-                {
-                    // 請求頭配置
-                    headers: {
-                        Accept: 'application/json',
-                        Authorization:
-                            'Bearer c9b17308-8579-3672-8a0d-beb483b794bf',
-                    },
-                    params: {
-                        date_from: macauTime,
-                        // TODO: 篩選特定車類型、停車場
-                        // car_park_code: '',
-                        // vehicle_type: '',
-                        // parking_type: '',
-                    },
+            .get(UM_API_CAR_PARK, {
+                // 請求頭配置
+                headers: {
+                    Accept: 'application/json',
+                    Authorization:
+                        'Bearer c9b17308-8579-3672-8a0d-beb483b794bf',
                 },
-            )
+                params: {
+                    date_from: macauTime,
+                    // TODO: 篩選特定車類型、停車場
+                    // car_park_code: '',
+                    // vehicle_type: '',
+                    // parking_type: '',
+                },
+            })
             .then(res => {
                 let result = res.data._embedded;
                 if (result.length >= 10) {
