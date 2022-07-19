@@ -150,7 +150,7 @@ class LostAndFound extends Component {
                             color: themeColor,
                             fontSize: 23,
                             fontWeight: 'bold',
-                            marginLeft: pxToDp(20),
+                            marginLeft: pxToDp(16),
                             marginTop: pxToDp(8),
                         }}>
                         {'物品: '}
@@ -225,21 +225,25 @@ class LostAndFound extends Component {
                     style={{
                         flexDirection: 'row',
                         position: 'absolute',
-                        marginTop: 13,
+                        marginTop: pxToDp(-1),
                         width: pxToDp(150),
                         alignSelf: 'flex-end',
                     }}>
-                    <Text
+                    {/* <Text
                         style={{
                             color: black.third,
+                            marginLeft:pxToDp(22),
+                            fontSize:13,
                         }}>
                         {'參考編號: '}
-                    </Text>
+                    </Text> */}
                     <Text
                         style={{
                             color: black.third,
+                            fontSize:13,
+                            marginLeft:pxToDp(80),
                         }}>
-                        {item.ref}
+                        {item.ref.substr(1,8)}
                     </Text>
                 </View>
             </View>
@@ -309,6 +313,7 @@ class LostAndFound extends Component {
                             flex: 1,
                             justifyContent: 'center',
                             alignItems: 'center',
+                            marginTop:pxToDp(-200),
                         }}>
                         <Loading />
                     </View>
