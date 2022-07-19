@@ -130,11 +130,9 @@ class LostAndFound extends Component {
             <View
                 style={{
                     marginVertical: pxToDp(5),
-                    width: pxToDp(340),
-                    height: pxToDp(200),
+                    marginHorizontal: pxToDp(15),
                     backgroundColor: white,
-                    alignSelf: 'center',
-                    justifyContent: 'space-around',
+                    padding: pxToDp(5),
                     borderRadius: pxToDp(12),
                     ...COLOR_DIY.viewShadow,
                     overflow: 'visible',
@@ -143,14 +141,14 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        marginLeft: pxToDp(5),
+                        marginLeft: pxToDp(4),
                     }}>
                     <Text
                         style={{
                             color: themeColor,
                             fontSize: 23,
                             fontWeight: 'bold',
-                            marginLeft: pxToDp(20),
+                            marginLeft: pxToDp(16),
                             marginTop: pxToDp(8),
                         }}>
                         {'物品: '}
@@ -223,23 +221,18 @@ class LostAndFound extends Component {
                 {/* 參考編號 */}
                 <View
                     style={{
-                        flexDirection: 'row',
                         position: 'absolute',
-                        marginTop: 13,
-                        width: pxToDp(150),
                         alignSelf: 'flex-end',
+                        top: pxToDp(5),
+                        right: pxToDp(10),
                     }}>
                     <Text
                         style={{
                             color: black.third,
+                            fontSize: 13,
+                            marginLeft: pxToDp(80),
                         }}>
-                        {'參考編號: '}
-                    </Text>
-                    <Text
-                        style={{
-                            color: black.third,
-                        }}>
-                        {item.ref}
+                        {item.ref.substr(1, 8)}
                     </Text>
                 </View>
             </View>
@@ -309,6 +302,7 @@ class LostAndFound extends Component {
                             flex: 1,
                             justifyContent: 'center',
                             alignItems: 'center',
+                            marginTop: pxToDp(-200),
                         }}>
                         <Loading />
                     </View>

@@ -17,13 +17,14 @@ class Loading extends Component {
                     alignItems: 'center',
                     ...COLOR_DIY.viewShadow,
                     overflow: 'visible',
+                    justifyContent:'space-between',
                 }}>
                 <Text
                     style={{
                         fontSize: pxToDp(20),
                         fontWeight: '600',
                         color: themeColor,
-                        marginTop: pxToDp(10),
+                        marginTop: pxToDp(2),
                     }}>
                     Data is loading
                 </Text>
@@ -32,10 +33,13 @@ class Loading extends Component {
                         fontSize: pxToDp(15),
                         fontWeight: '600',
                         color: themeColor,
+                        marginTop:pxToDp(3),
                     }}>
                     Please wait
                 </Text>
-                <ActivityIndicator size="large" color={themeColor} />
+                <ActivityIndicator size="large" color={themeColor} style={{
+                    marginTop:pxToDp(10),
+                }}/>
             </View>
         );
     }
