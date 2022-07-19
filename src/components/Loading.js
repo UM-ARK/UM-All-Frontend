@@ -1,32 +1,44 @@
-import React, { Component } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import {COLOR_DIY} from '../utils/uiMap'
+import React, {Component} from 'react';
+import {View, Text, ActivityIndicator} from 'react-native';
+
+import {pxToDp} from '../utils/stylesKits';
+import {COLOR_DIY} from '../utils/uiMap';
+const {black, white, themeColor, bg_color} = COLOR_DIY;
 
 class Loading extends Component {
     render() {
         return (
-            <View style={[styles.container, styles.horizontal]}>
-                <ActivityIndicator size='large'
-                color='#52b2e8'/>
-                {/*
-        <ActivityIndicator size="large" />
-        <ActivityIndicator size="small" color="#0000ff" />
-    <ActivityIndicator size="large" color="#00ff00" />*/}
+            <View
+                style={{
+                    paddingHorizontal: pxToDp(20),
+                    paddingVertical: pxToDp(10),
+                    borderRadius: pxToDp(12),
+                    backgroundColor: white,
+                    alignItems: 'center',
+                    ...COLOR_DIY.viewShadow,
+                    overflow: 'visible',
+                }}>
+                <Text
+                    style={{
+                        fontSize: pxToDp(20),
+                        fontWeight: '600',
+                        color: themeColor,
+                        marginTop: pxToDp(10),
+                    }}>
+                    Data is loading
+                </Text>
+                <Text
+                    style={{
+                        fontSize: pxToDp(15),
+                        fontWeight: '600',
+                        color: themeColor,
+                    }}>
+                    Please wait
+                </Text>
+                <ActivityIndicator size="large" color={themeColor} />
             </View>
         );
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center"
-    },
-    horizontal: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        padding: 10
-    }
-});
 
 export default Loading;
