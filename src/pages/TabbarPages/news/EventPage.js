@@ -243,32 +243,6 @@ class EventPage extends Component {
                 ]}
                 // 設定初始吸附位置
                 initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
-                {/* 懸浮吸附按鈕，刷新 */}
-                {/* <TouchableWithoutFeedback
-                    onPress={() => {
-                        // 刷新頁面，獲取最新數據
-                        console.log('刷新');
-                        this.setState({ isLoading: !this.state.isLoading });
-                    }}>
-                    <View
-                        style={{
-                            width: pxToDp(50),
-                            height: pxToDp(50),
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        <Ionicons
-                            name={'refresh-outline'}
-                            size={pxToDp(35)}
-                            color={black.main}
-                        />
-                    </View>
-                </TouchableWithoutFeedback> */}
-
-                {/* <View style={{marginTop: pxToDp(5)}}></View> */}
-
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
