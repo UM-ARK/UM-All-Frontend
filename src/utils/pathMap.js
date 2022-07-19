@@ -14,6 +14,11 @@ export const WHAT_2_REG = 'https://www.umeh.top';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
 
+// 澳大 - API 車位
+export const UM_API_CAR_PARK = 'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
+// 澳大 - API 活動
+export const UM_API_EVENT = 'https://api.data.um.edu.mo/service/media/events/v1.0.0/all';
+
 // 澳大 Webview
 // 澳大 - 環校巴士報站
 export const UM_BUS_LOOP = 'https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo';
