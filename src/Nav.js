@@ -22,6 +22,7 @@ import UsualQuestion from './pages/TabbarPages/me/pages/UsualQuestion'
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
 import NewsDetail from './pages/TabbarPages/news/pages/NewsDetail'
+import UMEventDetail from './pages/TabbarPages/news/pages/UMEventDetail'
 
 import ChatDetail from './pages/TabbarPages/message/ChatDetail'
 
@@ -53,6 +54,7 @@ class Nav extends Component {
                 <Stack.Screen name="ClubDetail"     component={ClubDetail} />
                 <Stack.Screen name="EventDetail"     component={EventDetail} />
                 <Stack.Screen name="NewsDetail"     component={NewsDetail} />
+                <Stack.Screen name="UMEventDetail"     component={UMEventDetail} />
 
                 {/* 信息頁 */}
                 {/* 信息詳情 */}
