@@ -1,11 +1,14 @@
 // 網站地址映射
 
 // TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
-export const BASE_URI = 'https://ark.boxz.dev/';
+export const BASE_URI = 'https://ark.boxz.dev/api/';
 
+export const GET = {
+    CLUB_INFO_ALL: 'get_club_info/all',
+    CLUB_INFO_NUM: 'get_club_info/club_num/?club_num=',
+}
 
-
-
+export const ARK_LETTER_IMG = 'https://ark.boxz.dev/static/logo.png';
 
 
 // Webview 服務
