@@ -16,7 +16,7 @@ import {pxToDp} from '../../../utils/stylesKits';
 import DropDownPicker from '../../../components/DropDownPicker';
 import {UM_API_EVENT} from '../../../utils/pathMap';
 
-import UMEventCard from './components/UMEventCard';
+import NewsCard from './components/NewsCard';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -61,7 +61,6 @@ const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
     return data[index];
 };
-
 // // 返回數據數組的長度
 const getItemCount = data => {
     return data.length;
@@ -135,7 +134,7 @@ class UMEventPage extends Component {
                 <TouchableWithoutFeedback
                     onPress={() => {
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.refs.scrollView.scrollTo({
+                        this.refs.virtualizedList.scrollToOffset({
                             x: 0,
                             y: 0,
                             duration: 500, // 回頂時間
@@ -164,67 +163,48 @@ class UMEventPage extends Component {
 
     // 渲染主要內容
     renderPage = () => {
-        const {data} = this.state;
-        // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
-        let leftDataList = [];
-        let rightDataList = [];
-        if (data != undefined) {
-            data.map((itm, idx) => {
-                if (idx % 2 == 0) {
-                    leftDataList.push(itm);
-                } else {
-                    rightDataList.push(itm);
-                }
-            });
-        }
-
+        const {data, isLoading} = this.state;
         return (
-            <View
-                style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    width: '100%',
-                    backgroundColor: COLOR_DIY.bg_color,
-                    justifyContent: 'space-around',
-                }}>
-                {/* 左側的列 放置雙數下標的圖片 從0開始 */}
-                <View>
-                    <FlatList
-                        data={leftDataList}
-                        renderItem={({item}) => {
-                            return (
-                                <UMEventCard
-                                    data={item}
-                                    style={s.cardContainer}
-                                />
-                            );
+            <VirtualizedList
+                data={data}
+                ref={'virtualizedList'}
+                // 初始渲染的元素，設置為剛好覆蓋屏幕
+                initialNumToRender={4}
+                renderItem={({item}) => {
+                    return <NewsCard data={item} type={'event'}></NewsCard>;
+                }}
+                // 整理item數據
+                getItem={getItem}
+                // 渲染項目數量
+                getItemCount={getItemCount}
+                // 列表頭部渲染的組件 - Data From說明
+                ListHeaderComponent={() => (
+                    <Text style={{color: black.third, alignSelf: 'center'}}>
+                        Data From: data.um.edu.mo
+                    </Text>
+                )}
+                // 列表底部渲染，防止Tabbar遮擋
+                ListFooterComponent={() => (
+                    <View style={{marginBottom: pxToDp(50)}}></View>
+                )}
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={isLoading}
+                        onRefresh={() => {
+                            // 展示Loading標識
+                            this.setState({isLoading: true});
+                            this.getData();
                         }}
-                        scrollEnabled={false}
                     />
-                </View>
-                {/* 右側的列 放置單數下標的圖片 */}
-                <View>
-                    <FlatList
-                        data={rightDataList}
-                        renderItem={({item}) => {
-                            return (
-                                <UMEventCard
-                                    data={item}
-                                    style={s.cardContainer}
-                                />
-                            );
-                        }}
-                        scrollEnabled={false}
-                        style={{flex: 1}}
-                    />
-                </View>
-            </View>
+                }
+            />
         );
     };
 
     render() {
-        const {isLoading, data} = this.state;
-        console.log('data', data);
+        const {isLoading} = this.state;
 
         return (
             <View
@@ -236,7 +216,7 @@ class UMEventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
 
-                {!isLoading && <ScrollView ref={'scrollView'}>{this.renderPage()}</ScrollView>}
+                {!isLoading && this.renderPage()}
             </View>
         );
     }
