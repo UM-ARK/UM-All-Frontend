@@ -16,6 +16,7 @@ import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import {FlatGrid} from 'react-native-super-grid';
+import moment from 'moment-timezone';
 
 // HTML轉純文本
 // TODO: 實用性有限，等待後人開發
@@ -25,23 +26,6 @@ function repalceHtmlToText(str) {
     str = str.replace(/&nbsp;/g, '');
     str = str.replace(/[\r\n]/g, '');
     return str;
-}
-
-// 時間戳轉時間
-function timeTrans(date) {
-    var date = new Date(date);
-    var Y = date.getFullYear();
-    var M =
-        date.getMonth() + 1 < 10
-            ? '0' + (date.getMonth() + 1)
-            : date.getMonth() + 1;
-    var D = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-    var h = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
-    var m =
-        date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    var s =
-        date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-    return Y + '/' + M + '/' + D;
 }
 
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -212,7 +196,10 @@ class NewsDetail extends Component {
                             color: black.third,
                             alignSelf: 'flex-end',
                         }}>
-                        Update: {timeTrans(lastModified)}
+                        Update:{' '}
+                        {moment
+                            .tz(lastModified, 'Asia/Macau')
+                            .format('YYYY/MM/DD')}
                     </Text>
 
                     {/* 圖片展示 */}

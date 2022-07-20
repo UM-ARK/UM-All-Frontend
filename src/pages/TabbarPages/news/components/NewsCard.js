@@ -26,17 +26,18 @@ function timeTrans(date) {
     return M + '-' + D;
 }
 
-class EventCard extends Component {
+// 解構全局ui設計顏色
+const {white, black, viewShadow} = COLOR_DIY;
+
+class NewsCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
     static contextType = NavigationContext;
 
     render() {
-        // 解構全局ui設計顏色
-        const {white, black, viewShadow} = COLOR_DIY;
-
         // 接收NewsPage頁傳來的該卡片需要渲染的信息
         const newsData = this.props.data;
+        let type = this.props.type ? this.props.type : 'news';
         // 發佈日期
         let publishDate = newsData.common.publishDate;
         // 最後更新時間
@@ -57,43 +58,36 @@ class EventCard extends Component {
                 title_cn = item.title;
             }
         });
-        // 中文標題
-        // let title_cn = newsData.details[1].title;
-        // 中文內容
-        // let content_cn= newsData.details[1].content;
-        // 英文標題
-        // let title_en = newsData.details[0].title;
-        // 英文內容
-        // let content_en= newsData.details[0].content;
+
         // 相片數組
-        // 有時無圖
-        let haveImage = 'imageUrls' in newsData.common;
-        let imageUrls = haveImage ? newsData.common.imageUrls : '';
+        let haveImage = undefined;
+        let imageUrls = undefined;
+        // 活動類型
+        if (type == 'event') {
+            haveImage = 'posterUrl' in newsData.common;
+            imageUrls = haveImage ? newsData.common.posterUrl : '';
+        }
+        // 新聞類型
+        // type為news時會有無圖情況
+        else {
+            haveImage = 'imageUrls' in newsData.common;
+            imageUrls = haveImage ? newsData.common.imageUrls : '';
+        }
 
         return (
             <TouchableOpacity
-                style={{
-                    backgroundColor: white,
-                    marginVertical: pxToDp(7),
-                    marginHorizontal: pxToDp(10),
-                    borderRadius: pxToDp(10),
-                    ...viewShadow,
-                }}
-                activeOpacity={0.7}
+                style={styles.newsCardContainer}
+                activeOpacity={0.8}
                 onPress={() => {
-                    console.log(this.props.data.details[1].title);
-                    console.log(newsData.details[1].title);
-                    this.context.navigate('NewsDetail', {data: newsData});
+                    // 跳轉對應新聞的詳情頁
+                    this.context.navigate(
+                        type == 'news' ? 'NewsDetail' : 'UMEventDetail',
+                        {data: newsData},
+                    );
                 }}>
                 {/* 文字居左，圖片居右 */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        padding: pxToDp(10),
-                        paddingVertical: pxToDp(8),
-                    }}>
-                    {/* 標題 */}
+                <View style={styles.newsCardContentContainer}>
+                    {/* 標題，有英文中文則顯示，無則顯示葡文 */}
                     <View style={{width: haveImage ? '61%' : '100%'}}>
                         {/* 英文 */}
                         {title_en.length > 0 && (
@@ -157,7 +151,7 @@ class EventCard extends Component {
                         </Text>
                     </View>
 
-                    {/* 首張配圖 */}
+                    {/* 新聞卡片配圖 */}
                     {haveImage && (
                         <View style={{alignSelf: 'center'}}>
                             <View
@@ -168,11 +162,13 @@ class EventCard extends Component {
                                     backgroundColor: white,
                                 }}>
                                 <FastImage
-                                    source={{uri: imageUrls[0]}}
-                                    style={{
-                                        width: pxToDp(125),
-                                        height: pxToDp(100),
+                                    source={{
+                                        uri:
+                                            type == 'event'
+                                                ? imageUrls
+                                                : imageUrls[0],
                                     }}
+                                    style={styles.newsCardImg}
                                     resizeMode={FastImage.resizeMode.cover}
                                 />
                             </View>
@@ -184,4 +180,24 @@ class EventCard extends Component {
     }
 }
 
-export default EventCard;
+const styles = StyleSheet.create({
+    newsCardContainer: {
+        backgroundColor: white,
+        marginVertical: pxToDp(7),
+        marginHorizontal: pxToDp(10),
+        borderRadius: pxToDp(10),
+        ...viewShadow,
+    },
+    newsCardContentContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: pxToDp(10),
+        paddingVertical: pxToDp(8),
+    },
+    newsCardImg: {
+        width: pxToDp(125),
+        height: pxToDp(100),
+    },
+});
+
+export default NewsCard;

@@ -161,7 +161,6 @@ class NewsPage extends Component {
 
     // 頭條新聞的渲染
     renderTopNews = () => {
-        // 解構全局ui設計顏色
         const {
             // 發佈日期
             publishDate,
