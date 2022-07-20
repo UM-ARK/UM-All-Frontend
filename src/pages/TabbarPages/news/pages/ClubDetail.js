@@ -10,6 +10,7 @@ import {
     ScrollView,
     Alert,
     StyleSheet,
+    RefreshControl,
 } from 'react-native';
 
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
@@ -21,6 +22,8 @@ import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
+import Loading from '../../../../components/Loading';
+import {updateUserInfo} from '../../../../utils/storageKits';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -32,6 +35,7 @@ import FastImage from 'react-native-fast-image';
 import {useToast} from 'native-base';
 import {inject} from 'mobx-react';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor} = COLOR_DIY;
@@ -225,10 +229,23 @@ class ClubDetail extends Component {
 
     constructor(props) {
         super(props);
-        // 獲取上級路由傳遞的參數，得知點擊的club_num
-        const {data: clubData} = this.props.route.params;
-        // 請求對應社團的info
-        this.getData(clubData.club_num);
+        let clubData = undefined;
+        if (!this.props.RootStore.userInfo.isClub) {
+            // 獲取上級路由傳遞的參數，得知點擊的club_num
+            clubData = this.props.route.params.data;
+            // 請求對應社團的info
+            this.getData(clubData.club_num);
+        }
+    }
+
+    // 檢查本地緩存是否已登錄
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        if (globalData.userInfo.isClub) {
+            let clubData = globalData.userInfo.clubData;
+            console.log('setState ClubData', clubData);
+            this.setState({clubData, isLoading: false, isAdmin: true});
+        }
     }
 
     // 獲取指定id的社團信息
@@ -240,6 +257,16 @@ class ClubDetail extends Component {
                 if (json.message == 'success') {
                     let clubData = json.content;
                     this.setState({clubData, isLoading: false});
+
+                    // 如果是社團賬號登錄，則刷新mobx和緩存的數據
+                    if (this.state.isAdmin) {
+                        let clubDataUpdate = {
+                            isClub: true,
+                            clubData,
+                        };
+                        updateUserInfo(clubDataUpdate);
+                        this.props.RootStore.setUserInfo(clubDataUpdate);
+                    }
                 } else {
                     alert('Warning:', message);
                 }
@@ -268,22 +295,10 @@ class ClubDetail extends Component {
         this.setState({isShow: !this.state.isShow});
     };
 
-    componentDidMount() {
-        let globalData = this.props.RootStore;
-        // 已登錄
-        if (JSON.stringify(globalData.userInfo) != '{}') {
-            // TODO: 判斷是否club和token，展示設置按鈕
-            if (globalData.userInfo.isClub) {
-                this.setState({isAdmin: true});
-            }
-            // Follow按鈕展示提示
-            this.setState({isLogin: true});
-        }
-    }
-
     render() {
         // 解構state數據
         const {clubData, isFollow, isAdmin, isLoading} = this.state;
+        console.log('clubData', clubData);
         let logo_url,
             name,
             tag,
@@ -294,7 +309,7 @@ class ClubDetail extends Component {
         // 解構出“照片”欄的最多4張照片
         let eventImgUrls = [];
 
-        // state已接收clubData
+        // 已接收clubData
         if (clubData != undefined) {
             if (
                 'club_photos_list' in clubData &&
@@ -325,20 +340,22 @@ class ClubDetail extends Component {
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => this.props.navigation.goBack()}
-                        style={{
-                            position: 'absolute',
-                            top: pxToDp(65),
-                            left: pxToDp(10),
-                        }}>
-                        <Ionicons
-                            name="chevron-back-outline"
-                            size={pxToDp(25)}
-                            color={white}
-                        />
-                    </TouchableOpacity>
+                    {!isAdmin && (
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => this.props.navigation.goBack()}
+                            style={{
+                                position: 'absolute',
+                                top: pxToDp(65),
+                                left: pxToDp(10),
+                            }}>
+                            <Ionicons
+                                name="chevron-back-outline"
+                                size={pxToDp(25)}
+                                color={white}
+                            />
+                        </TouchableOpacity>
+                    )}
                     {/* 編輯資料按鈕 只有管理員可見 */}
                     {isAdmin && (
                         <View
@@ -352,6 +369,13 @@ class ClubDetail extends Component {
                                 onPress={() =>
                                     this.props.navigation.navigate(
                                         'ClubSetting',
+                                        {
+                                            refresh: this.getData.bind(
+                                                this,
+                                                clubData.club_num,
+                                            ), // 傳遞回調函數
+                                            test: true,
+                                        },
                                     )
                                 }>
                                 <Ionicons
@@ -427,11 +451,13 @@ class ClubDetail extends Component {
                     </View>
 
                     {/* Follow按鈕 帶Toast */}
-                    <RenderFollowButton
-                        isFollow={isFollow}
-                        // 傳遞修改this.state.isFollow方法
-                        handleFollow={this.handleFollow}
-                    />
+                    {!isAdmin && (
+                        <RenderFollowButton
+                            isFollow={isFollow}
+                            // 傳遞修改this.state.isFollow方法
+                            handleFollow={this.handleFollow}
+                        />
+                    )}
 
                     {/* 2.0 照片 */}
                     <View
@@ -671,6 +697,59 @@ class ClubDetail extends Component {
                     translucent={true}
                 />
 
+                {/* 渲染主要內容 */}
+                {!isLoading && clubData ? (
+                    <ImageHeaderScrollView
+                        // 設定透明度
+                        maxOverlayOpacity={0.6}
+                        minOverlayOpacity={0.3}
+                        // 向上滾動的淡出效果
+                        fadeOutForeground
+                        // 收起時的高度
+                        minHeight={pxToDp(140)}
+                        // 打開時的高度
+                        maxHeight={pxToDp(230)}
+                        // 背景內容 - 圖片 - 建議使用橫圖
+                        renderHeader={() => (
+                            <FastImage
+                                source={{
+                                    uri: bgImgUrl,
+                                }}
+                                style={{width: '100%', height: '100%'}}
+                            />
+                        )}
+                        // 前景固定內容
+                        renderTouchableFixedForeground={renderForeground}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isLoading}
+                                progressViewOffset={150}
+                                onRefresh={() => {
+                                    this.setState({isLoading: true});
+                                    this.getData(clubData.club_num);
+                                    console.log('刷新');
+                                }}
+                            />
+                        }>
+                        {/* 主要頁面內容 */}
+                        {renderMainContent()}
+                    </ImageHeaderScrollView>
+                ) : (
+                    // Loading屏幕
+                    <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: bg_color,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                        <Loading />
+                    </View>
+                )}
+
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
@@ -718,34 +797,6 @@ class ClubDetail extends Component {
                             </ScrollView>
                         </View>
                     </ModalBottom>
-                )}
-
-                {!isLoading && clubData && (
-                    <ImageHeaderScrollView
-                        // 設定透明度
-                        maxOverlayOpacity={0.6}
-                        minOverlayOpacity={0.3}
-                        // 向上滾動的淡出效果
-                        fadeOutForeground
-                        // 收起時的高度
-                        minHeight={pxToDp(140)}
-                        // 打開時的高度
-                        maxHeight={pxToDp(230)}
-                        // 背景內容 - 圖片 - 建議使用橫圖
-                        renderHeader={() => (
-                            <FastImage
-                                source={{
-                                    uri: bgImgUrl,
-                                }}
-                                style={{width: '100%', height: '100%'}}
-                            />
-                        )}
-                        // 前景固定內容
-                        renderTouchableFixedForeground={renderForeground}
-                        showsVerticalScrollIndicator={false}>
-                        {/* 主要頁面內容 */}
-                        {renderMainContent()}
-                    </ImageHeaderScrollView>
                 )}
             </View>
         );
