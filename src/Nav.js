@@ -7,6 +7,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import Tabbar from './Tabbar';
 
 import ClubSetting from './pages/ClubSystem/CLubSetting'
+import ClubInfoEdit from './pages/ClubSystem/ClubInfoEdit'
 import MessageConsole from './pages/ClubSystem/MessageConsole'
 import EventSetting from './pages/ClubSystem/EventSetting'
 import MessageSetting from './pages/ClubSystem/MessageSetting'
@@ -85,6 +86,7 @@ class Nav extends Component {
 
                 {/* 社團系統 */}
                 <Stack.Screen name="ClubSetting"     component={ClubSetting} />
+                <Stack.Screen name="ClubInfoEdit"     component={ClubInfoEdit} />
                 <Stack.Screen name="MessageConsole"     component={MessageConsole} />
                 <Stack.Screen name="EventSetting"     component={EventSetting} />
                 <Stack.Screen name="MessageSetting"     component={MessageSetting} />

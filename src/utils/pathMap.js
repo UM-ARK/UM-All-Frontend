@@ -4,8 +4,18 @@
 export const BASE_URI = 'https://ark.boxz.dev/api/';
 
 export const GET = {
+    // 社團登錄
+    CLUB_SIGN_IN: 'club_signin/',
+
+    // 獲取所有社團info
     CLUB_INFO_ALL: 'get_club_info/all',
+    // 按club num獲取社團info
     CLUB_INFO_NUM: 'get_club_info/club_num/?club_num=',
+}
+
+export const POST = {
+    // 修改社團info
+    CLUB_EDIT_INFO : 'edit_club_info/',
 }
 
 export const ARK_LETTER_IMG = 'https://ark.boxz.dev/static/logo.png';
