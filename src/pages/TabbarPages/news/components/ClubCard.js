@@ -20,19 +20,15 @@ class EventCard extends Component {
 
     // 處理點擊跳轉邏輯
     handleJumpToDetail = () => {
-        const {name} = this.state.data;
-        const {index} = this.props;
+        // TODO: 跳轉對應club
         this.context.navigate('ClubDetail', {
-            name,
-            index,
+            data: this.state.data,
         });
     };
 
     render() {
         // 解構this.state.dataList數據
-        const {imgUrl, name, tag} = this.state.data;
-        // 當前點擊的數組下標，對應響應的組織
-        const {index} = this.props;
+        const {logo_url, name, tag} = this.state.data;
         // 解構全局ui設計顏色
         const {white, black, viewShadow, themeColor} = COLOR_DIY;
         return (
@@ -51,7 +47,7 @@ class EventCard extends Component {
                 onPress={this.handleJumpToDetail}>
                 {/* 社團 / 組織 Logo */}
                 <FastImage
-                    source={{uri: imgUrl}}
+                    source={{uri: logo_url}}
                     style={{
                         width: pxToDp(70),
                         height: pxToDp(70),
