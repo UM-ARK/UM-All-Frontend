@@ -2,9 +2,12 @@ import React from 'react';
 import {Text} from 'react-native';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
-import Toast from 'react-native-toast-message';
+import {useToast} from 'native-base';
+import { COLOR_DIY, ToastText } from '../utils/uiMap';
 
 const HyperlinkText = ({children, linkStyle, style}) => {
+    const toast = useToast();
+
     const handleLink = (url, text) => {};
 
     const copyToClipboard = (url, text) => {
@@ -15,9 +18,16 @@ const HyperlinkText = ({children, linkStyle, style}) => {
     };
 
     const showClipedMessage = () => {
-        Toast.show({
-            type: 'info',
-            text1: `Text copied.`,
+        toast.show({
+            title: "Text Copied",
+            placement: "top",
+            duration: 1000,
+            render: () => (
+                <ToastText
+                    backgroundColor={"#748DA6"}
+                    text={"Text Copied"}
+                />
+            )
         });
     };
 
@@ -32,11 +42,6 @@ const HyperlinkText = ({children, linkStyle, style}) => {
                 }}>
                 <Text style={style}>{children}</Text>
             </Hyperlink>
-            <Toast 
-                position="top"
-                topOffset={0}
-                visibilityTime={1000} 
-                />
         </>
     );
 };
