@@ -2,6 +2,7 @@
 
 import RNRestart from 'react-native-restart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CookieManager from '@react-native-cookies/cookies';
 
 import RootStore from '../mobx';
 
@@ -16,7 +17,7 @@ export async function handleLogin(userInfo) {
             })
             .catch(e => console.log(e));
     } catch (e) {
-        console.error(e);
+        alert(e);
     }
 }
 
@@ -24,9 +25,24 @@ export async function handleLogin(userInfo) {
 export async function handleLogout(userInfo) {
     try {
         await AsyncStorage.clear();
+        // 清除所有的cookies
+        await CookieManager.clearAll();
     } catch (e) {
-        console.error(e);
+        alert(e);
     } finally {
         RNRestart.Restart();
+    }
+}
+
+// 更新本地的緩存數據
+export async function updateUserInfo(userInfo) {
+    // userInfo為對象
+    try {
+        const strUserInfo = JSON.stringify(userInfo);
+        await AsyncStorage.setItem('userInfo', strUserInfo).catch(e =>
+            console.log(e),
+        );
+    } catch (e) {
+        alert(e);
     }
 }

@@ -15,52 +15,90 @@ export const getTranslateX = (
         if (componentIndex == 0) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [0, 100, 200],
+                outputRange: [0, 200, 200, 200],
             });
         } else if (componentIndex == 1) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [-220, 0, 200],
+                outputRange: [-180, 0, 200, 300],
             });
         } else if (componentIndex == 2) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [-200, -200, 0],
+                outputRange: [-200, -200, 0, 200],
+            });
+        } else if (componentIndex == 3) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [-300, -200, -200, 0],
             });
         }
     } else if (selectedIndex == 1) {
         if (componentIndex == 0) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [0, 60, 60],
+                outputRange: [0, 60, 60, 200],
             });
         } else if (componentIndex == 1) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [-200, 0, 100],
+                outputRange: [-200, 0, 100, 200],
             });
         } else if (componentIndex == 2) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [-200, -200, 0],
+                outputRange: [-200, -200, 0, 200],
+            });
+        } else if (componentIndex == 3) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [-200, -200, -200, 0],
             });
         }
-    } else {
+    } else if (selectedIndex == 2){
         //else if(selectedIndex == 2)
         if (componentIndex == 0) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [0, 200, 200],
+                outputRange: [0, 200, 200, 400],
             });
         } else if (componentIndex == 1) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [-200, 0, 100],
+                outputRange: [-200, 0, 100, 200],
             });
         } else if (componentIndex == 2) {
             return props.position.interpolate({
                 inputRange,
-                outputRange: [-300, -200, 0],
+                outputRange: [-300, -200, 0, 100],
+            });
+        } else if (componentIndex == 3) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [-300, -200, -180, 0],
+            });
+        }
+    } else if (selectedIndex == 3){
+        //else if(selectedIndex == 2)
+        if (componentIndex == 0) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [0, 400, 400, 400],
+            });
+        } else if (componentIndex == 1) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [-300, 0, 100, 200],
+            });
+        } else if (componentIndex == 2) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [-300, -200, 0, 100],
+            });
+        } else if (componentIndex == 3) {
+            return props.position.interpolate({
+                inputRange,
+                outputRange: [-200, -200, -200, 0],
             });
         }
     }

@@ -9,40 +9,18 @@ import {
 
 import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
-import Header from '../../components/Header';
 import {handleLogout} from '../../utils/storageKits';
 import DialogDIY from '../../components/DialogDIY';
-import ImageSelector from '../../components/ImageSelector';
+import Header from '../../components/Header';
 
-import {FlatGrid} from 'react-native-super-grid';
-import {Incubator, ExpandableSection} from 'react-native-ui-lib';
-const {TextField} = Incubator;
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const {black, themeColor, white} = COLOR_DIY;
-
-const floatingPlaceholderColor = {
-    focus: themeColor,
-    default: black.main,
-};
-const floatingPlaceholderStyle = {fontSize: pxToDp(15)};
 
 class ClubSetting extends Component {
     state = {
         // 退出提示Dialog
         logoutChoice: false,
-        coverImgUrl: '',
-        relateImgUrl: ['', '', '', ''],
-        introText: '',
-    };
-
-    // 設定封面圖片
-    setCoverImgUrl = imageUrl => {
-        this.setState({coverImgUrl: imageUrl[0]});
-    };
-
-    // 設定相關圖片Url
-    setImageUrlArr = imageUrlArr => {
-        this.setState({relateImgUrl: imageUrlArr});
     };
 
     render() {
@@ -51,92 +29,36 @@ class ClubSetting extends Component {
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header title={'社團設置'} />
 
-                <ScrollView
-                    contentContainerStyle={{paddingHorizontal: pxToDp(10)}}>
-                    <View>
-                        <Text>背景圖片修改</Text>
-
-                        <ImageSelector
-                            index={0}
-                            imageUrlArr={[this.state.coverImgUrl]}
-                            setImageUrlArr={this.setCoverImgUrl.bind(this)}
-                        />
-                    </View>
-
-                    <View>
-                        <Text>相關照片修改</Text>
-                        <FlatGrid
-                            maxItemsPerRow={2}
-                            itemDimension={pxToDp(50)}
-                            spacing={pxToDp(10)}
-                            data={this.state.relateImgUrl}
-                            renderItem={({item, index}) => (
-                                <ImageSelector
-                                    index={index}
-                                    imageUrlArr={this.state.relateImgUrl}
-                                    setImageUrlArr={this.setImageUrlArr.bind(
-                                        this,
-                                    )}
-                                />
-                            )}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    </View>
-
-                    <View>
-                        <Text>簡介修改</Text>
-                        <TextField
-                            placeholder={'社團簡介'}
-                            floatingPlaceholder
-                            floatOnFocus
-                            floatingPlaceholderColor={floatingPlaceholderColor}
-                            floatingPlaceholderStyle={floatingPlaceholderStyle}
-                            hint={'e.g. 電腦學會是...'}
-                            dynamicFieldStyle={(context: FieldContextType) => {
-                                return {
-                                    borderBottomWidth: pxToDp(1),
-                                    paddingBottom: pxToDp(4),
-                                    borderColor: context.isFocused
-                                        ? themeColor
-                                        : black.third,
-                                };
-                            }}
-                            color={black.third}
-                            value={this.state.introText}
-                            onChangeText={introText =>
-                                this.setState({introText})
-                            }
-                            showCharCounter
-                            maxLength={500}
-                        />
-                    </View>
-
-                    <View>
-                        <Text>聯繫方式修改</Text>
-                        {/* TODO: 挑選類型，填寫對應號碼 */}
-                        {/* TODO: 文本識別link點擊可跳轉 */}
-                    </View>
-
-                    {/* 確定保存修改 */}
-                    {/* TODO: 社團info Update邏輯 */}
+                <ScrollView>
+                    {/* 社團主頁設置 選項 */}
                     <TouchableOpacity
+                        style={{...styles.optionContainer}}
                         activeOpacity={0.8}
-                        onPress={() => this.setState({logoutChoice: true})}
-                        style={styles.submitButton}>
-                        <Text style={{...styles.submitButtonText}}>
-                            保存修改
+                        onPress={() => {
+                            // 跳轉社團info編輯頁，並傳遞刷新函數
+                            this.props.navigation.navigate('ClubInfoEdit', {
+                                refresh: this.props.route.params.refresh,
+                            });
+                        }}>
+                        {/* 選項標題 */}
+                        <Text style={{...styles.optionTitle}}>
+                            {'主頁信息編輯'}
                         </Text>
+
+                        {/* 右側flex佈局 */}
+                        {/* 引導點擊的 > 箭頭 */}
+                        <Ionicons
+                            name="chevron-forward-outline"
+                            color={black.third}
+                            size={pxToDp(20)}
+                        />
                     </TouchableOpacity>
 
                     {/* 登出賬號 */}
                     <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={() => this.setState({logoutChoice: true})}
-                        style={{
-                            ...styles.submitButton,
-                            backgroundColor: COLOR_DIY.unread,
-                        }}>
+                        style={styles.logoutButton}>
                         <Text style={{...styles.submitButtonText}}>
                             登出賬號
                         </Text>
@@ -156,15 +78,11 @@ class ClubSetting extends Component {
 }
 
 const styles = StyleSheet.create({
-    inputTitle: {
-        color: black.main,
-        fontSize: pxToDp(16),
-    },
-    submitButton: {
-        backgroundColor: themeColor,
+    logoutButton: {
+        backgroundColor: COLOR_DIY.unread,
         alignItems: 'center',
         alignSelf: 'center',
-        marginVertical: pxToDp(5),
+        marginVertical: pxToDp(20),
         paddingHorizontal: pxToDp(20),
         paddingVertical: pxToDp(10),
         borderRadius: pxToDp(10),
@@ -174,6 +92,23 @@ const styles = StyleSheet.create({
         color: white,
         fontSize: pxToDp(18),
         fontWeight: '500',
+    },
+    optionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: pxToDp(45),
+        padding: pxToDp(10),
+        backgroundColor: COLOR_DIY.meScreenColor.card_color,
+        marginBottom: pxToDp(1),
+        borderRadius: pxToDp(15),
+        marginHorizontal: pxToDp(10),
+        marginVertical: pxToDp(6),
+    },
+    optionTitle: {
+        fontSize: pxToDp(16),
+        color: COLOR_DIY.black.main,
+        marginLeft: pxToDp(10),
     },
 });
 export default ClubSetting;

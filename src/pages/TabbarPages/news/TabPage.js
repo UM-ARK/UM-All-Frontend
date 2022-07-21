@@ -12,6 +12,7 @@ import {
 import NewsPage from './NewsPage';
 import EventPage from './EventPage';
 import ClubPage from './ClubPage';
+import UMEventPage from './UMEventPage';
 import {pxToDp} from '../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../utils/uiMap';
 import ScrollAnimation, {
@@ -23,15 +24,18 @@ import {TabView, SceneMap} from 'react-native-tab-view';
 // 第一個Tab渲染的組件
 const FirstRoute = () => <NewsPage />;
 // 第二個Tab渲染的組件
-const SecondRoute = () => <EventPage />;
+const SecondRoute = () => <UMEventPage />;
 // 第三個Tab渲染的組件
-const ThirdRoute = () => <ClubPage />;
+const ThirdRoute = () => <EventPage />;
+// 第四個Tab渲染的組件
+const FourthRoute = () => <ClubPage />;
 
 // 渲染不同Tab場景的路由
 const renderScene = SceneMap({
     first: FirstRoute,
     second: SecondRoute,
     third: ThirdRoute,
+    fourth: FourthRoute,
 });
 
 // 自定義頂部Tabbar樣式
@@ -58,7 +62,7 @@ const _renderTabBar = props => {
                     props.navigationState.index,
                     i,
                     props,
-                    inputRange,
+                    inputRange
                 );
 
                 return (
@@ -114,11 +118,12 @@ export default function TabPage() {
     const scrollX = React.useRef(new Animated.Value(0)).current;
 
     // 默認選項卡
-    const [index, setIndex] = React.useState(1);
+    const [index, setIndex] = React.useState(2);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
-        {key: 'second', title: '活動'},
-        {key: 'third', title: '進駐組織'},
+        {key: 'second', title: '澳大活動'},
+        {key: 'third', title: '組織活動'},
+        {key: 'fourth', title: '進駐組織'},
     ]);
 
     return (

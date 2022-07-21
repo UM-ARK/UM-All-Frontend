@@ -57,7 +57,7 @@ class ImageSelector extends Component {
     };
 
     render() {
-        const {index} = this.props;
+        const {index, imageUrlArr} = this.props;
         // 僅允許點擊相鄰的圖片選擇器
         let shouldDisable = false;
         if (index != 0) {
@@ -82,7 +82,7 @@ class ImageSelector extends Component {
                 disabled={shouldDisable}
                 onPress={this.handleSelect.bind(this, index)}>
                 {/* 刪除圖片按鈕 */}
-                {this.props.imageUrlArr[index].length > 0 && (
+                {imageUrlArr[index].length > 0 && (
                     <TouchableOpacity
                         activeOpacity={0.7}
                         style={{
@@ -100,10 +100,10 @@ class ImageSelector extends Component {
                     </TouchableOpacity>
                 )}
 
-                {/* 未選擇圖片則顯示圖標，選中圖片則顯示圖片 */}
-                {this.props.imageUrlArr[index].length > 0 ? (
+                {/* 未選擇圖片則顯示圖標，選中/已有圖片則顯示圖片 */}
+                {imageUrlArr[index].length > 0 ? (
                     <FastImage
-                        source={{uri: this.props.imageUrlArr[index]}}
+                        source={{uri: imageUrlArr[index]}}
                         style={{width: '100%', height: '100%'}}
                     />
                 ) : (
