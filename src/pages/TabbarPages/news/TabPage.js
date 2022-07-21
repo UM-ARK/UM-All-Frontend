@@ -118,7 +118,7 @@ export default function TabPage() {
     const scrollX = React.useRef(new Animated.Value(0)).current;
 
     // 默認選項卡
-    const [index, setIndex] = React.useState(1);
+    const [index, setIndex] = React.useState(2);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
         {key: 'second', title: '澳大活動'},
