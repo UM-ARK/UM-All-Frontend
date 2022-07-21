@@ -1,20 +1,27 @@
 import React from 'react';
-import {Text} from 'react-native';
+import {Text, Vibration} from 'react-native';
+
+import {useToast} from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {useToast} from 'native-base';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { COLOR_DIY, ToastText } from '../utils/uiMap';
 
 const HyperlinkText = ({children, linkStyle, style}) => {
     const toast = useToast();
 
+    const options = {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false
+      };
+
     const handleLink = (url, text) => {};
 
     const copyToClipboard = (url, text) => {
-        console.log('copying');
         Clipboard.setString(text);
+        Vibration.vibrate(10 * 1000);
+        ReactNativeHapticFeedback.trigger("impactMedium", options);
         showClipedMessage();
-        console.log('copied');
     };
 
     const showClipedMessage = () => {
@@ -35,8 +42,8 @@ const HyperlinkText = ({children, linkStyle, style}) => {
         <>
             <Hyperlink
                 linkStyle={linkStyle}
-                // linkDefault={true}
-                onPress={(url, text) => handleLink(url, text)}
+                linkDefault={true}
+                onPress={() => Vibration.vibrate()}
                 onLongPress={(url, text) => {
                     copyToClipboard(url, text);
                 }}>
