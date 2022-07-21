@@ -33,7 +33,7 @@ const FourthRoute = () => <ClubPage />;
 // 渲染不同Tab場景的路由
 const renderScene = SceneMap({
     first: FirstRoute,
-    // second: SecondRoute,
+    second: SecondRoute,
     third: ThirdRoute,
     fourth: FourthRoute,
 });
@@ -62,7 +62,7 @@ const _renderTabBar = props => {
                     props.navigationState.index,
                     i,
                     props,
-                    inputRange,
+                    inputRange
                 );
 
                 return (
@@ -118,10 +118,10 @@ export default function TabPage() {
     const scrollX = React.useRef(new Animated.Value(0)).current;
 
     // 默認選項卡
-    const [index, setIndex] = React.useState(1);
+    const [index, setIndex] = React.useState(2);
     const [routes] = React.useState([
         {key: 'first', title: '新聞'},
-        // {key: 'second', title: '澳大活動'},
+        {key: 'second', title: '澳大活動'},
         {key: 'third', title: '組織活動'},
         {key: 'fourth', title: '進駐組織'},
     ]);
