@@ -148,8 +148,9 @@ class LostAndFound extends Component {
                             color: themeColor,
                             fontSize: 23,
                             fontWeight: 'bold',
-                            marginLeft: pxToDp(16),
-                            marginTop: pxToDp(8),
+                            paddingLeft: pxToDp(16),
+                            paddingTop: pxToDp(6),
+                            paddingBottom:pxToDp(8),
                         }}>
                         {'物品: '}
                     </Text>
@@ -158,7 +159,8 @@ class LostAndFound extends Component {
                             color: '#FF8627',
                             fontSize: 23,
                             fontWeight: 'bold',
-                            marginTop: pxToDp(8),
+                            paddingTop: pxToDp(6),
+                            paddingBottom:pxToDp(8),
                         }}>
                         {item.title}
                     </Text>
@@ -168,7 +170,8 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        marginLeft: pxToDp(8),
+                        paddingLeft: pxToDp(8),
+                        paddingBottom:pxToDp(5),
                     }}>
                     <Text
                         style={{
@@ -185,7 +188,8 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        marginLeft: pxToDp(8),
+                        paddingLeft: pxToDp(8),
+                        paddingBottom:pxToDp(5),
                         width: pxToDp(260),
                     }}>
                     <Text
@@ -203,9 +207,9 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        marginLeft: pxToDp(8),
+                        paddingLeft: pxToDp(8),
+                        paddingBottom:pxToDp(5),
                         width: pxToDp(260),
-                        marginBottom: pxToDp(6),
                     }}>
                     <Text
                         style={{
