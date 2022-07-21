@@ -1,6 +1,13 @@
-// 信息頁
+// 活動控制台
 import React, {Component} from 'react';
-import {Text, View, TouchableOpacity, FlatList, ScrollView} from 'react-native';
+import {
+    Text,
+    View,
+    TouchableOpacity,
+    FlatList,
+    ScrollView,
+    StyleSheet,
+} from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
 import {pxToDp} from '../../utils/stylesKits';
@@ -8,19 +15,25 @@ import ChatCard from './components/ChatCard';
 
 import {Header, SpeedDial} from '@rneui/themed';
 
-const {bg_color, themeColor, white, viewShadow} = COLOR_DIY;
+const {bg_color, themeColor, white, viewShadow, black} = COLOR_DIY;
 
 class MessageConsole extends Component {
     state = {
         // 打開右下角新建消息類型按鈕
         openOption: false,
-        eventList: [
-            {title: 'asldkfjsadlf'},
-            {title: 'wrehgwterhwrth'},
-            {title: 'asldkfghjfghmrumryumyjsadlf'},
-            {title: 'asldkfjsayukryukryukryukrytukryukyrutkyrukyuktyukytukdlf'},
-        ],
+        eventList: [],
     };
+
+    constructor() {
+        super();
+        this.getData();
+    }
+
+    async getData() {
+        console.log('獲取活動信息');
+
+        // eventList 的子項僅需要title
+    }
 
     renderFixButton = () => {
         const {openOption} = this.state;
@@ -43,7 +56,7 @@ class MessageConsole extends Component {
                         this.props.navigation.navigate('EventSetting');
                     }}
                 />
-                <SpeedDial.Action
+                {/* <SpeedDial.Action
                     buttonStyle={{backgroundColor: themeColor}}
                     icon={{name: 'alternate-email', color: white}}
                     title="新增公告"
@@ -51,8 +64,36 @@ class MessageConsole extends Component {
                         this.setState({openOption: false});
                         this.props.navigation.navigate('MessageSetting');
                     }}
-                />
+                /> */}
             </SpeedDial>
+        );
+    };
+
+    renderAtAllCard = () => {
+        return (
+            <View
+                style={{
+                    marginVertical: pxToDp(5),
+                    marginHorizontal: pxToDp(10),
+                }}>
+                <TouchableOpacity
+                    style={styles.chatItemBorder}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                        alert('按下');
+                    }}>
+                    <View style={styles.infoContainer}>
+                        <Text
+                            style={{
+                                fontSize: pxToDp(14),
+                                color: black.second,
+                            }}
+                            numberOfLines={2}>
+                            {'@ 所有Follow該賬號的用戶'}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
         );
     };
 
@@ -82,6 +123,7 @@ class MessageConsole extends Component {
                 {/* 消息內容 */}
                 <FlatList
                     data={eventList}
+                    ListHeaderComponent={this.renderAtAllCard()}
                     renderItem={({item, index}) => {
                         return <ChatCard data={item} index={index}></ChatCard>;
                     }}
@@ -91,5 +133,30 @@ class MessageConsole extends Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    // 聊天卡片的邊框效果
+    chatItemBorder: {
+        borderRadius: pxToDp(15),
+        overflow: 'hidden',
+        // 些許陰影
+        shadowColor: '#000',
+        shadowOffset: {width: 1, height: 1},
+        shadowOpacity: 0.4,
+        shadowRadius: 2,
+        // 適用於Android
+        elevation: 0.8,
+    },
+    // 內容展示容器
+    infoContainer: {
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        backgroundColor: COLOR_DIY.messageScreenColor.bg_color,
+        // 每個聊天item的高度
+        height: pxToDp(60),
+        paddingHorizontal: pxToDp(15),
+    },
+});
 
 export default MessageConsole;

@@ -7,19 +7,18 @@ import {
     StyleSheet,
     Image,
     FlatList,
+    Dimensions,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import Header from '../../../components/Header';
-
-import FastImage from 'react-native-fast-image';
-// import {Header} from '@rneui/themed';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-import {Dimensions} from 'react-native';
 import BlurViewWrapper from '../../../components/BlurViewWrapper';
 import EventDescription from './EventDescription';
+
+import FastImage from 'react-native-fast-image';
+import {Header} from '@rneui/themed';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -184,8 +183,7 @@ class ChatCard extends Component {
     constructor(props) {
         super(props);
 
-        // 獲取上級頁面傳遞的數據
-        // console.log(this.props.route.params);
+        // console.log('緩存為', this.props.RootStore.userInfo);
 
         const host = {
             // 組織用戶的ID
@@ -313,7 +311,43 @@ class ChatCard extends Component {
         const {user} = this.props.route.params;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
-                <Header title={user.name} />
+                <Header
+                    backgroundColor={COLOR_DIY.bg_color}
+                    leftComponent={
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.goBack()}>
+                            <Ionicons
+                                name="chevron-back-outline"
+                                size={pxToDp(25)}
+                                color={COLOR_DIY.black.main}
+                            />
+                        </TouchableOpacity>
+                    }
+                    centerComponent={{
+                        text: user.name,
+                        style: {
+                            color: COLOR_DIY.black.main,
+                            fontSize: pxToDp(15),
+                        },
+                    }}
+                    // TODO: 僅admin、活動類型顯示設置按鈕
+                    rightComponent={
+                        <TouchableOpacity
+                            onPress={() => {
+                                console.log('點擊設置');
+                            }}>
+                            <Ionicons
+                                name="settings-outline"
+                                size={pxToDp(25)}
+                                color={COLOR_DIY.black.main}
+                            />
+                        </TouchableOpacity>
+                    }
+                    statusBarProps={{
+                        backgroundColor: 'transparent',
+                        barStyle: 'dark-content',
+                    }}
+                />
 
                 {/* 通知信息的渲染 */}
                 <FlatList
@@ -400,4 +434,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ChatCard;
+export default inject('RootStore')(ChatCard);

@@ -9,6 +9,7 @@ import {
 
 import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
+import {handleImageSelect} from '../../utils/fileKits';
 import Header from '../../components/Header';
 import {handleLogout} from '../../utils/storageKits';
 import {BASE_URI, POST} from '../../utils/pathMap';
@@ -20,8 +21,9 @@ import {FlatGrid} from 'react-native-super-grid';
 import {Incubator, ExpandableSection} from 'react-native-ui-lib';
 const {TextField} = Incubator;
 import {inject} from 'mobx-react';
-import qs from 'qs';
 import axios from 'axios';
+import FastImage from 'react-native-fast-image';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const {black, themeColor, white, bg_color} = COLOR_DIY;
 
@@ -31,57 +33,135 @@ const floatingPlaceholderColor = {
 };
 const floatingPlaceholderStyle = {fontSize: pxToDp(15)};
 
+let add_club_photos = [];
+let del_club_photos = [];
+
 class ClubInfoEdit extends Component {
     state = {
         // 確定提交Dialog
         submitChoice: false,
         imageUrlArr: ['', '', '', '', ''],
         introTextInput: '',
+        contactInput: [
+            {type: 'Wechat', num: ''},
+            {type: 'Email', num: ''},
+            {type: 'Phone', num: ''},
+            {type: 'IG', num: ''},
+            {type: 'Facebook', num: ''},
+            {type: 'Website', num: ''},
+        ],
         clubData: this.props.RootStore.userInfo.clubData,
         isLoading: true,
     };
 
-    // 設定圖片Url
-    setImageUrlArr = imageUrlArr => {
+    // 圖片選擇
+    async handleSelect(index) {
+        let imageUrl = '';
+        let imageObj = {};
+        try {
+            let selectResult = await handleImageSelect();
+            if (!selectResult.didCancel) {
+                console.log('selectResult', selectResult.assets[0]);
+                imageObj = selectResult.assets[0];
+                imageUrl = imageObj.uri;
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            // 修改this.state相片數組的值
+            let imageUrlArr = this.state.imageUrlArr;
+            imageUrlArr.splice(index, 1, imageUrl);
+            add_club_photos.push(imageObj);
+            this.setState({imageUrlArr});
+        }
+    }
+
+    // 圖片刪除
+    handleImageDelete = (index, needDelete) => {
+        let imageUrlArr = this.state.imageUrlArr;
+        if (
+            needDelete &&
+            index + 1 <= this.state.clubData.club_photos_list.length
+        ) {
+            // console.log('需刪已儲存數組');
+            del_club_photos.push(imageUrlArr[index]);
+        } else {
+            // console.log('需刪除add數組');
+            let indexOfAddArray = add_club_photos.indexOf(imageUrlArr[index]);
+            add_club_photos.splice(indexOfAddArray, 1);
+        }
+        imageUrlArr.splice(index, 1);
+        imageUrlArr.push('');
         this.setState({imageUrlArr});
     };
 
     componentDidMount() {
-        const {clubData} = this.state;
+        console.log('componentDidMount');
+        const {clubData, imageUrlArr} = this.state;
         if ('intro' in clubData) {
             this.setState({introTextInput: clubData.intro});
         }
-        // TODO: 新增、刪除照片
-        // if ('club_photos_list' in clubData) {
-        //     this.setState({imageUrlArr: clubData.club_photos_list});
-        // }
+        // 渲染服務器已存的照片
+        if (
+            'club_photos_list' in clubData &&
+            clubData.club_photos_list.length > 0
+        ) {
+            let imgArr = clubData.club_photos_list;
+            // 不夠5張則補充
+            if (imgArr.length < 5) {
+                let pushArr = new Array(5 - imgArr.length).fill('');
+                let arr = JSON.parse(JSON.stringify(imgArr));
+                arr.push(...pushArr);
+                this.setState({imageUrlArr: arr});
+            }
+        }
         this.setState({isLoading: false});
     }
 
     // 上傳資料到服務器
     postNewInfo = async () => {
-        const {introTextInput, clubData} = this.state;
+        const {introTextInput, clubData, contactInput} = this.state;
         this.setState({isLoading: true, submitChoice: false});
-        let data = {
-            intro: introTextInput,
-            // 無輸入時要寫'[]'字符串形式
-            contact: '[]',
-            del_club_photos: '[]',
-        };
-        await axios({
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            method: 'post',
-            url: BASE_URI + POST.CLUB_EDIT_INFO,
-            data: qs.stringify(data),
-        })
+
+        let data = new FormData();
+        data.append('intro', introTextInput);
+        if (contactInput.length > 0) {
+            data.append('contact', JSON.stringify(contactInput));
+        } else {
+            data.append('contact', '[]');
+        }
+        // 上傳圖片，form data類型上傳數組需要逐個加入
+        if (add_club_photos.length > 0) {
+            add_club_photos.map(item => {
+                data.append('add_club_photos', {
+                    name: item.fileName,
+                    type: item.type,
+                    uri:
+                        Platform.OS === 'android'
+                            ? item.uri
+                            : item.uri.replace('file://', ''),
+                });
+            });
+        } else {
+            data.append('add_club_photos', '[]');
+        }
+        if (del_club_photos.length > 0) {
+            data.append('del_club_photos', JSON.stringify(del_club_photos));
+        } else {
+            data.append('del_club_photos', '[]');
+        }
+
+        await axios
+            .post(BASE_URI + POST.CLUB_EDIT_INFO, data, {
+                headers: {
+                    'Content-Type': `multipart/form-data`,
+                },
+            })
             .then(res => {
                 console.log(res.data);
                 let json = eval('(' + res.data + ')');
                 // 上傳成功
                 if (json.message == 'success') {
-                    console.log(json);
                     alert('上傳成功');
                     // 返回上一頁面，重新請求數據
                     this.props.route.params.refresh();
@@ -93,8 +173,117 @@ class ClubInfoEdit extends Component {
                 }
             })
             .catch(err => {
-                alert('Warning', err);
+                console.log('err', err);
+                alert('Warning' + err + '');
             });
+    };
+
+    renderImageSelectorItem = index => {
+        const {imageUrlArr, clubData} = this.state;
+
+        // 服務器照片庫無數據，del數組留空[]，所有選圖都加入add數組
+        let needDelete =
+            'club_photos_list' in clubData &&
+            clubData.club_photos_list.length == 0
+                ? false
+                : true;
+
+        // 僅允許點擊相鄰的圖片選擇器
+        let shouldDisable = false;
+        if (index != 0) {
+            if (imageUrlArr[index - 1] == '') {
+                shouldDisable = true;
+            }
+        }
+
+        return (
+            <TouchableOpacity
+                style={styles.imgSelectorContainer}
+                activeOpacity={0.7}
+                disabled={shouldDisable}
+                // 選擇圖片
+                onPress={() => this.handleSelect(index)}>
+                {/* 刪除圖片按鈕 */}
+                {imageUrlArr[index].length > 0 && (
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={styles.imgDeleteButton}
+                        onPress={() =>
+                            this.handleImageDelete(index, needDelete)
+                        }>
+                        <Ionicons
+                            name="close-circle"
+                            size={pxToDp(25)}
+                            color={COLOR_DIY.unread}
+                        />
+                    </TouchableOpacity>
+                )}
+
+                {/* 未選擇圖片則顯示圖標，選中/已有圖片則顯示圖片 */}
+                {imageUrlArr[index].length > 0 ? (
+                    <FastImage
+                        source={{uri: imageUrlArr[index]}}
+                        style={{width: '100%', height: '100%'}}
+                    />
+                ) : (
+                    <Ionicons
+                        name="camera-outline"
+                        size={pxToDp(25)}
+                        color={COLOR_DIY.black.main}
+                    />
+                )}
+            </TouchableOpacity>
+        );
+    };
+
+    renderContactInput = (item, index) => {
+        return (
+            <TextField
+                placeholder={item.type}
+                floatingPlaceholder
+                floatOnFocus
+                floatingPlaceholderColor={floatingPlaceholderColor}
+                floatingPlaceholderStyle={floatingPlaceholderStyle}
+                dynamicFieldStyle={(context: FieldContextType) => {
+                    return {
+                        borderBottomWidth: pxToDp(1),
+                        paddingBottom: pxToDp(4),
+                        borderColor: context.isFocused
+                            ? themeColor
+                            : black.third,
+                    };
+                }}
+                color={black.third}
+                value={item.num}
+                onChangeText={input => {
+                    let contactInput = this.state.contactInput;
+                    let obj = {type: item.type, num: input};
+                    contactInput.splice(index, 1, obj);
+                    this.setState({contactInput});
+                }}
+            />
+        );
+    };
+
+    // 渲染圖片選擇
+    renderImageSelector = () => {
+        const {imageUrlArr} = this.state;
+
+        return (
+            <View>
+                <FlatGrid
+                    maxItemsPerRow={2}
+                    itemDimension={pxToDp(50)}
+                    spacing={pxToDp(10)}
+                    data={imageUrlArr}
+                    renderItem={({_, index}) =>
+                        this.renderImageSelectorItem(index)
+                    }
+                    showsVerticalScrollIndicator={false}
+                    scrollEnabled={false}
+                />
+            </View>
+        );
     };
 
     render() {
@@ -108,30 +297,16 @@ class ClubInfoEdit extends Component {
                         contentContainerStyle={{paddingHorizontal: pxToDp(10)}}>
                         {/* 圖片修改 */}
                         <View>
-                            <Text>照片修改</Text>
-                            <Text>首張圖片將作為主頁背景圖</Text>
-                            <FlatGrid
-                                maxItemsPerRow={2}
-                                itemDimension={pxToDp(50)}
-                                spacing={pxToDp(10)}
-                                data={this.state.imageUrlArr}
-                                renderItem={({item, index}) => (
-                                    <ImageSelector
-                                        index={index}
-                                        imageUrlArr={this.state.imageUrlArr}
-                                        setImageUrlArr={this.setImageUrlArr.bind(
-                                            this,
-                                        )}
-                                    />
-                                )}
-                                showsVerticalScrollIndicator={false}
-                                scrollEnabled={false}
-                            />
+                            <Text style={styles.title}>照片修改</Text>
+                            <Text style={{color: black.third}}>
+                                *首張圖片將作為主頁背景圖
+                            </Text>
+                            {this.renderImageSelector()}
                         </View>
 
                         {/* 簡介 */}
                         <View>
-                            <Text>簡介修改</Text>
+                            <Text style={styles.title}>簡介修改</Text>
                             <TextField
                                 placeholder={'社團簡介'}
                                 floatingPlaceholder
@@ -166,9 +341,12 @@ class ClubInfoEdit extends Component {
 
                         {/* 聯繫方式 */}
                         <View>
-                            <Text>聯繫方式修改</Text>
+                            <Text style={styles.title}>聯繫方式修改</Text>
                             {/* TODO: 挑選類型，填寫對應號碼 */}
                             {/* TODO: 文本識別link點擊可跳轉 */}
+                            {this.state.contactInput.map((item, index) =>
+                                this.renderContactInput(item, index),
+                            )}
                         </View>
 
                         {/* TODO: */}
@@ -207,6 +385,11 @@ class ClubInfoEdit extends Component {
 }
 
 const styles = StyleSheet.create({
+    title: {
+        alignSelf: 'center',
+        color: black.main,
+        fontSize: pxToDp(18),
+    },
     inputTitle: {
         color: black.main,
         fontSize: pxToDp(16),
@@ -215,7 +398,7 @@ const styles = StyleSheet.create({
         backgroundColor: themeColor,
         alignItems: 'center',
         alignSelf: 'center',
-        marginVertical: pxToDp(5),
+        marginVertical: pxToDp(40),
         paddingHorizontal: pxToDp(20),
         paddingVertical: pxToDp(10),
         borderRadius: pxToDp(10),
@@ -225,6 +408,23 @@ const styles = StyleSheet.create({
         color: white,
         fontSize: pxToDp(18),
         fontWeight: '500',
+    },
+
+    // 圖片選擇器
+    imgDeleteButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        zIndex: 9,
+    },
+    imgSelectorContainer: {
+        width: pxToDp(160),
+        height: pxToDp(100),
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: pxToDp(5),
+        overflow: 'hidden',
     },
 });
 

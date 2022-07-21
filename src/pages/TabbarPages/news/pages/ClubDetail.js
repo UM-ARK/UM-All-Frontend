@@ -35,16 +35,15 @@ import FastImage from 'react-native-fast-image';
 import {useToast} from 'native-base';
 import {inject} from 'mobx-react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 解構uiMap的數據
-const {bg_color, white, black, themeColor} = COLOR_DIY;
+const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const CLUB_LOGO_SIZE = 80;
-const CLUB_IMAGE_WIDTH = 75;
-const CLUB_IMAGE_HEIGHT = 55;
+const CLUB_LOGO_SIZE = pxToDp(80);
+const CLUB_IMAGE_WIDTH = pxToDp(75);
+const CLUB_IMAGE_HEIGHT = pxToDp(55);
 
 // 渲染Follow按鈕
 // 因需使用Toast的Hook，被迫使用func組件QAQ
@@ -243,7 +242,7 @@ class ClubDetail extends Component {
         let globalData = this.props.RootStore;
         if (globalData.userInfo.isClub) {
             let clubData = globalData.userInfo.clubData;
-            console.log('setState ClubData', clubData);
+            // console.log('setState ClubData', clubData);
             this.setState({clubData, isLoading: false, isAdmin: true});
         }
     }
@@ -295,6 +294,20 @@ class ClubDetail extends Component {
         this.setState({isShow: !this.state.isShow});
     };
 
+    // 下拉刷新組件
+    renderRefreshCompo = () => (
+        <RefreshControl
+            colors={[themeColor]}
+            tintColor={themeColor}
+            refreshing={this.state.isLoading}
+            progressViewOffset={150}
+            onRefresh={() => {
+                this.setState({isLoading: true});
+                this.getData(this.state.clubData.club_num);
+            }}
+        />
+    );
+
     render() {
         // 解構state數據
         const {clubData, isFollow, isAdmin, isLoading} = this.state;
@@ -326,6 +339,7 @@ class ClubDetail extends Component {
             tag = clubData.tag;
             club_num = clubData.club_num;
             intro = clubData.intro;
+            contact = clubData.contact;
         }
 
         // 渲染Header前景，社團LOGO，返回按鈕
@@ -335,7 +349,16 @@ class ClubDetail extends Component {
                     style={{flex: 1, position: 'relative'}}
                     onPress={() => {
                         // 查看背景圖片大圖
-                        this.setState({imageUrls: bgImgUrl});
+                        if (
+                            'club_photos_list' in clubData &&
+                            clubData.club_photos_list.length > 0
+                        ) {
+                            this.setState({
+                                imageUrls: clubData.club_photos_list,
+                            });
+                        } else {
+                            this.setState({imageUrls: bgImgUrl});
+                        }
                         this.refs.imageScrollViewer.tiggerModal();
                     }}
                     activeOpacity={1}>
@@ -460,26 +483,19 @@ class ClubDetail extends Component {
                     )}
 
                     {/* 2.0 照片 */}
-                    <View
-                        style={{
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(10),
-                            marginHorizontal: pxToDp(15),
-                            // 增加陰影
-                            marginBottom: pxToDp(8),
-                            marginTop: pxToDp(10),
-                            ...COLOR_DIY.viewShadow,
-                        }}>
+                    <View style={styles.cardContainer}>
                         {/* 卡片標題 */}
                         <TouchableOpacity
-                            style={{...styles.cardTitleContainer}}
+                            style={styles.cardTitleContainer}
                             activeOpacity={0.8}
                             onPress={() => {
                                 if (
                                     'club_photos_list' in clubData &&
                                     clubData.club_photos_list.length > 0
                                 ) {
-                                    this.setState({imageUrls: eventImgUrls});
+                                    this.setState({
+                                        imageUrls: clubData.club_photos_list,
+                                    });
                                     this.refs.imageScrollViewer.tiggerModal();
                                 }
                             }}>
@@ -501,56 +517,43 @@ class ClubDetail extends Component {
                                         marginTop: pxToDp(0),
                                     }}>
                                     {/* 圖片相冊 最多4張 */}
-                                    {this.state.event.map((item, index) => {
-                                        return (
-                                            <TouchableOpacity
-                                                style={{
-                                                    width: pxToDp(
-                                                        CLUB_IMAGE_WIDTH,
-                                                    ),
-                                                    height: pxToDp(
-                                                        CLUB_IMAGE_HEIGHT,
-                                                    ),
-                                                    borderRadius: pxToDp(5),
-                                                    overflow: 'hidden',
-                                                    ...COLOR_DIY.viewShadow,
-                                                }}
-                                                activeOpacity={0.7}
-                                                onPress={() => {
-                                                    this.setState({
-                                                        imageUrls: eventImgUrls,
-                                                    });
-                                                    this.refs.imageScrollViewer.handleOpenImage(
-                                                        index,
-                                                    );
-                                                }}>
-                                                <FastImage
-                                                    source={{
-                                                        uri: item.coverImgUrl,
-                                                    }}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                    }}
-                                                />
-                                            </TouchableOpacity>
-                                        );
-                                    })}
+                                    {clubData.club_photos_list.map(
+                                        (item, index) => {
+                                            if (index != 0) {
+                                                return (
+                                                    <TouchableOpacity
+                                                        style={
+                                                            styles.imageContainer
+                                                        }
+                                                        activeOpacity={0.7}
+                                                        onPress={() => {
+                                                            this.setState({
+                                                                imageUrls:
+                                                                    clubData.club_photos_list,
+                                                            });
+                                                            this.refs.imageScrollViewer.handleOpenImage(
+                                                                index,
+                                                            );
+                                                        }}>
+                                                        <FastImage
+                                                            source={{uri: item}}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                            }}
+                                                        />
+                                                    </TouchableOpacity>
+                                                );
+                                            }
+                                        },
+                                    )}
                                 </View>
                             )}
                     </View>
 
                     {/* 3.0 簡介 */}
                     <TouchableOpacity
-                        style={{
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(10),
-                            marginHorizontal: pxToDp(15),
-                            // 增加陰影
-                            marginBottom: pxToDp(8),
-                            marginTop: pxToDp(10),
-                            ...COLOR_DIY.viewShadow,
-                        }}
+                        style={styles.cardContainer}
                         activeOpacity={0.8}
                         onPress={() => {
                             if (intro != undefined && intro.length > 0) {
@@ -586,19 +589,10 @@ class ClubDetail extends Component {
                     </TouchableOpacity>
 
                     {/* 4.0 聯繫方式 */}
-                    <View
-                        style={{
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(10),
-                            marginHorizontal: pxToDp(15),
-                            // 增加陰影
-                            marginBottom: pxToDp(8),
-                            marginTop: pxToDp(10),
-                            ...COLOR_DIY.viewShadow,
-                        }}>
+                    <View style={styles.cardContainer}>
                         {/* 卡片標題 */}
                         <TouchableOpacity
-                            style={{...styles.cardTitleContainer}}
+                            style={styles.cardTitleContainer}
                             activeOpacity={0.7}
                             onPress={() =>
                                 Alert.alert('聯繫方式可以自行複製~')
@@ -622,27 +616,31 @@ class ClubDetail extends Component {
                                 {/* 聯繫方式 */}
                                 <View>
                                     {contact.map(item => {
-                                        return (
-                                            <View
-                                                style={{flexDirection: 'row'}}>
-                                                {/* 聯繫Type */}
-                                                <Text
+                                        if (item.num.length > 0) {
+                                            return (
+                                                <View
                                                     style={{
-                                                        color: black.second,
+                                                        flexDirection: 'row',
                                                     }}>
-                                                    {item.type}:{' '}
-                                                </Text>
-                                                {/* 相關號碼、id */}
-                                                <Text
-                                                    style={{
-                                                        color: black.third,
-                                                    }}
-                                                    // 允許用戶複製
-                                                    selectable={true}>
-                                                    {item.num}
-                                                </Text>
-                                            </View>
-                                        );
+                                                    {/* 聯繫Type */}
+                                                    <Text
+                                                        style={{
+                                                            color: black.second,
+                                                        }}>
+                                                        {item.type}:{' '}
+                                                    </Text>
+                                                    {/* 相關號碼、id */}
+                                                    <Text
+                                                        style={{
+                                                            color: black.third,
+                                                        }}
+                                                        // 允許用戶複製
+                                                        selectable={true}>
+                                                        {item.num}
+                                                    </Text>
+                                                </View>
+                                            );
+                                        }
                                     })}
                                 </View>
                             </View>
@@ -721,19 +719,7 @@ class ClubDetail extends Component {
                         // 前景固定內容
                         renderTouchableFixedForeground={renderForeground}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={this.state.isLoading}
-                                progressViewOffset={150}
-                                onRefresh={() => {
-                                    this.setState({isLoading: true});
-                                    this.getData(clubData.club_num);
-                                    console.log('刷新');
-                                }}
-                            />
-                        }>
+                        refreshControl={this.renderRefreshCompo()}>
                         {/* 主要頁面內容 */}
                         {renderMainContent()}
                     </ImageHeaderScrollView>
@@ -804,6 +790,15 @@ class ClubDetail extends Component {
 }
 
 const styles = StyleSheet.create({
+    cardContainer: {
+        backgroundColor: COLOR_DIY.white,
+        borderRadius: pxToDp(10),
+        marginHorizontal: pxToDp(15),
+        // 增加陰影
+        marginBottom: pxToDp(8),
+        marginTop: pxToDp(10),
+        ...COLOR_DIY.viewShadow,
+    },
     cardTitleContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -835,6 +830,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         borderTopLeftRadius: pxToDp(15),
         borderTopRightRadius: pxToDp(15),
+    },
+    imageContainer: {
+        width: pxToDp(CLUB_IMAGE_WIDTH),
+        height: pxToDp(CLUB_IMAGE_HEIGHT),
+        borderRadius: pxToDp(5),
+        overflow: 'hidden',
+        ...viewShadow,
     },
 });
 
