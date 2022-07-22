@@ -14,14 +14,11 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import BlurViewWrapper from '../../../components/BlurViewWrapper';
 import EventDescription from './EventDescription';
-import BlurViewWrapper from '../../../components/BlurViewWrapper';
-import EventDescription from './EventDescription';
 import HyperlinkText from '../../../components/HyperlinkText';
 
 import FastImage from 'react-native-fast-image';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Dimensions} from 'react-native';
 import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
@@ -234,7 +231,7 @@ class ChatCard extends Component {
                         selectable={true}
                         style={[styles.message.title, {color: titleColor}]}
                         numberOfLines={1}>
-                            {item.title}
+                        {item.title}
                     </Text>
                     <Ionicons
                         name="chevron-forward-outline"
@@ -247,11 +244,11 @@ class ChatCard extends Component {
                     {/* <Hyperlink linkStyle={{color: COLOR_DIY.themeColor}} onPress={(link)=>console.log(link)}>
                         <Text style={{color: titleColor}}>{item.text}</Text>
                     </Hyperlink> */}
-                    <HyperlinkText 
-                        linkStyle={{color: COLOR_DIY.themeColor}} 
+                    <HyperlinkText
+                        linkStyle={{color: COLOR_DIY.themeColor}}
                         title={item.title}
                         navigation={this.props.navigation}>
-                            {item.text}
+                        {item.text}
                     </HyperlinkText>
                 </View>
             </View>

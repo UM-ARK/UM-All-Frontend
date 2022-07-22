@@ -4,39 +4,36 @@ import {Text, Linking} from 'react-native';
 import {useToast} from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { COLOR_DIY, ToastText } from '../utils/uiMap';
+import {COLOR_DIY, ToastText} from '../utils/uiMap';
 
 const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
     const toast = useToast();
 
     const options = {
         enableVibrateFallback: true,
-        ignoreAndroidSystemSettings: false
-      };
+        ignoreAndroidSystemSettings: false,
+    };
 
     // 定義默認參數
     let webview_param = {
         url: '',
         title: '',
         text_color: '#FFF',
-        // bg_color_diy: '#f8f8f8',
         bg_color_diy: COLOR_DIY.themeColor,
+        isBarStyleBlack: false,
     };
 
     const handleHyperLink = (url, text) => {
-        if(url.includes('mailto:')) {
+        if (url.includes('mailto:')) {
             Linking.openURL(url);
-        }
-        else if(url.includes('http')) { // both for http & https
-            console.log("This is a http");
-            if(navigation) {
+        } else if (url.includes('http')) {
+            // both for http & https
+            console.log('This is a http');
+            if (navigation) {
                 webview_param.url = url;
                 webview_param.title = title ? title : '活動';
 
-                navigation.navigate(
-                    'Webviewer',
-                    webview_param,
-                );
+                navigation.navigate('Webviewer', webview_param);
             }
         }
     };
@@ -48,15 +45,12 @@ const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
 
     const showClipedMessage = () => {
         toast.show({
-            title: "Text Copied",
-            placement: "top",
+            title: 'Text Copied',
+            placement: 'top',
             duration: 1000,
             render: () => (
-                <ToastText
-                    backgroundColor={"#748DA6"}
-                    text={"Text Copied"}
-                />
-            )
+                <ToastText backgroundColor={'#748DA6'} text={'Text Copied'} />
+            ),
         });
     };
 
