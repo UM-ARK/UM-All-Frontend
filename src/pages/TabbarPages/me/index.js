@@ -18,7 +18,6 @@ import MeSetting from './pages/MeSetting';
 import AppSetting from './pages/AppSetting';
 import AboutUs from './pages/AboutUs';
 import MyFollow from './pages/MyFollow';
-import Reminder from './pages/Reminder';
 
 // 第三方庫
 import {Header} from '@rneui/themed';
@@ -42,13 +41,18 @@ const optionsInfo = [
         routeName: 'AppSetting',
     },
     {
-        title: '關於我們',
+        title: '常見問題',
         iconPath: 'at-circle-outline',
+        routeName: 'UsualQuestion',
+    },
+    {
+        title: '關於我們',
+        iconPath: 'chatbubbles-outline',
         routeName: 'AboutUs',
     },
 ];
 
-//个人信息页
+// 學生個人用戶頁
 class MeScreen extends Component {
     state = {
         // 是否已登錄
@@ -73,10 +77,7 @@ class MeScreen extends Component {
     // 渲染個人信息欄
     renderUserInfo = () => {
         return (
-            <TouchableOpacity
-                style={{...s.personalInfoContainer}}
-                onPress={() => this.props.navigation.navigate('MeSetting')}
-                activeOpacity={0.8}>
+            <View style={{...s.personalInfoContainer}}>
                 <View
                     style={{
                         height: '100%',
@@ -94,67 +95,31 @@ class MeScreen extends Component {
                             borderRadius: pxToDp(70),
                         }}
                     />
-                    {/* 暱稱 & 書院 & 學院 展示 */}
+                    {/* 暱稱 學號 展示 */}
                     <View
                         style={{
                             marginLeft: pxToDp(20),
                             justifyContent: 'center',
                         }}>
-                        {/* 暱稱 Nick Name */}
                         <Text
                             style={{
-                                color: 'black',
+                                color: COLOR_DIY.black.second,
                                 fontSize: pxToDp(20),
                                 fontWeight: '600',
                             }}>
-                            {'自定義暱稱'}
+                            {'Moodle的姓名'}
                         </Text>
-
-                        {/* 學院、書院 縮寫展示 */}
-                        <View
+                        <Text
                             style={{
-                                flexDirection: 'row',
+                                color: COLOR_DIY.black.third,
+                                fontSize: pxToDp(16),
+                                // fontWeight: '500',
                             }}>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
-                                }}>
-                                {'FST'}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    fontSize: pxToDp(13),
-                                }}>
-                                {'  |  '}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
-                                }}>
-                                {'CKLC'}
-                            </Text>
-                        </View>
+                            {'dc123456'}
+                        </Text>
                     </View>
                 </View>
-
-                {/* 引導編輯圖標 */}
-                <View style={{flexDirection: 'row', right: pxToDp(20)}}>
-                    <MaterialIcons
-                        name={'edit'}
-                        size={pxToDp(16)}
-                        color={black.third}
-                    />
-                    {/* 引導點擊的 > 箭頭 */}
-                    <Ionicons
-                        name="chevron-forward-outline"
-                        color={black.third}
-                        size={pxToDp(16)}
-                    />
-                </View>
-            </TouchableOpacity>
+            </View>
         );
     };
 

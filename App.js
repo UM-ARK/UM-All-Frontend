@@ -24,12 +24,10 @@ class App extends Component {
 
         // 獲取緩存中的用戶數據
         try {
-            // await AsyncStorage.clear();  // 清除緩存
             const strUserInfo = await AsyncStorage.getItem('userInfo');
             const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
-            console.log(userInfo);
             // 判斷有無登錄token
-            if (userInfo.token) {
+            if (userInfo.token || userInfo.clubData) {
                 // 把緩存中的數據存一份到mobx
                 console.log('有登錄token，需存到mobx');
                 RootStore.setUserInfo(userInfo);

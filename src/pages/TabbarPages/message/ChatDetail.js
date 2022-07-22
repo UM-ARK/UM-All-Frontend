@@ -7,19 +7,22 @@ import {
     StyleSheet,
     Image,
     FlatList,
+    Dimensions,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
+import BlurViewWrapper from '../../../components/BlurViewWrapper';
+import EventDescription from './EventDescription';
+import BlurViewWrapper from '../../../components/BlurViewWrapper';
+import EventDescription from './EventDescription';
+import HyperlinkText from '../../../components/HyperlinkText';
 
 import FastImage from 'react-native-fast-image';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import {Dimensions} from 'react-native';
-import BlurViewWrapper from '../../../components/BlurViewWrapper';
-import EventDescription from './EventDescription';
-import HyperlinkText from '../../../components/HyperlinkText';
+import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -183,8 +186,7 @@ class ChatCard extends Component {
     constructor(props) {
         super(props);
 
-        // 獲取上級頁面傳遞的數據
-        // console.log(this.props.route.params);
+        // console.log('緩存為', this.props.RootStore.userInfo);
 
         const host = {
             // 組織用戶的ID
@@ -202,6 +204,9 @@ class ChatCard extends Component {
                 name: 'React Native',
                 avatar: 'https://placeimg.com/140/140/any',
             },
+            clubData: undefined,
+            isLoading: true,
+            isAdmin: false,
         };
     }
 
@@ -314,6 +319,14 @@ class ChatCard extends Component {
         );
     };
 
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        if (globalData.userInfo.isClub) {
+            let clubData = globalData.userInfo.clubData;
+            this.setState({clubData, isLoading: false, isAdmin: true});
+        }
+    }
+
     render() {
         // 解構全局UI樣式
         const {bg_color, black, white} = COLOR_DIY;
@@ -340,6 +353,28 @@ class ChatCard extends Component {
                             fontSize: pxToDp(15),
                         },
                     }}
+                    // TODO: 僅admin、活動類型顯示設置按鈕
+                    rightComponent={
+                        this.state.isAdmin && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    let params = this.props.route.params;
+                                    this.props.navigation.navigate(
+                                        'sendTo' in params &&
+                                            params.sendTo == 'all'
+                                            ? 'MessageSetting'
+                                            : 'EventSetting',
+                                        {mode: 'edit'},
+                                    );
+                                }}>
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={pxToDp(25)}
+                                    color={COLOR_DIY.black.main}
+                                />
+                            </TouchableOpacity>
+                        )
+                    }
                     statusBarProps={{
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
@@ -352,14 +387,12 @@ class ChatCard extends Component {
                     renderItem={({item, index}) =>
                         this.renderMessageItem(item, index)
                     }
+                    ListHeaderComponent={() => (
+                        <View style={{marginTop: pxToDp(50)}} />
+                    )}
                     // 翻轉渲染順序，從下往上
                     inverted={true}
                 />
-
-                {/* 回復提醒 */}
-                <View style={styles.replyReminder}>
-                    <Text>您無需回復此消息</Text>
-                </View>
             </View>
         );
     }
@@ -433,4 +466,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ChatCard;
+export default inject('RootStore')(ChatCard);

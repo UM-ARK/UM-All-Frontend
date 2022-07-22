@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, {Component, useState} from 'react';
 import {
     Text,
     View,
@@ -10,17 +10,17 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
-import { pxToDp } from '../../../utils/stylesKits';
+import {COLOR_DIY} from '../../../utils/uiMap';
+import {pxToDp} from '../../../utils/stylesKits';
 import DropDownPicker from '../../../components/DropDownPicker';
 
 import EventCard from './components/EventCard';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
+import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
 const {black, white, themeColor} = COLOR_DIY;
 
@@ -84,21 +84,6 @@ dataList = [
         // 13位毫秒級時間戳
         startTimeStamp: 1656482002000,
         finishTimeStamp: 1656136402000,
-        link: '',
-    },
-    {
-        // 該活動在數據庫中的id
-        eventID: 6,
-        type: 'activity',
-        // 海報鏈接
-        coverImgUrl:
-            'https://www.um.edu.mo/wp-content/uploads/2022/05/267367-%E5%A4%9A%E5%8A%9F%E8%83%BD%E9%9B%BB%E6%B1%A0%E5%A4%8F%E4%BB%A4%E7%87%9F-2022-poster.jpg',
-        relateImgUrl: [],
-        // 活動標題
-        title: '多功能電池夏令營 2022',
-        // 13位毫秒級時間戳
-        startTimeStamp: 1656482002000,
-        finishTimeStamp: 1658210002000,
         link: '',
     },
     {
@@ -220,7 +205,7 @@ class EventPage extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
+        const {white, black, viewShadow} = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -230,45 +215,19 @@ class EventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    { x: -pxToDp(140), y: -pxToDp(220) },
-                    { x: pxToDp(140), y: -pxToDp(220) },
-                    { x: -pxToDp(140), y: -pxToDp(120) },
-                    { x: pxToDp(140), y: -pxToDp(120) },
-                    { x: -pxToDp(140), y: pxToDp(0) },
-                    { x: pxToDp(140), y: pxToDp(0) },
-                    { x: -pxToDp(140), y: pxToDp(120) },
-                    { x: pxToDp(140), y: pxToDp(120) },
-                    { x: -pxToDp(140), y: pxToDp(220) },
-                    { x: pxToDp(140), y: pxToDp(220) },
+                    {x: -pxToDp(140), y: -pxToDp(220)},
+                    {x: pxToDp(140), y: -pxToDp(220)},
+                    {x: -pxToDp(140), y: -pxToDp(120)},
+                    {x: pxToDp(140), y: -pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(0)},
+                    {x: pxToDp(140), y: pxToDp(0)},
+                    {x: -pxToDp(140), y: pxToDp(120)},
+                    {x: pxToDp(140), y: pxToDp(120)},
+                    {x: -pxToDp(140), y: pxToDp(220)},
+                    {x: pxToDp(140), y: pxToDp(220)},
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{ x: pxToDp(140), y: pxToDp(220) }}>
-                {/* 懸浮吸附按鈕，刷新 */}
-                {/* <TouchableWithoutFeedback
-                    onPress={() => {
-                        // 刷新頁面，獲取最新數據
-                        console.log('刷新');
-                        this.setState({ isLoading: !this.state.isLoading });
-                    }}>
-                    <View
-                        style={{
-                            width: pxToDp(50),
-                            height: pxToDp(50),
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        <Ionicons
-                            name={'refresh-outline'}
-                            size={pxToDp(35)}
-                            color={black.main}
-                        />
-                    </View>
-                </TouchableWithoutFeedback> */}
-
-                <View style={{ marginTop: pxToDp(5) }}></View>
-
+                initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -315,7 +274,7 @@ class EventPage extends Component {
                 <View>
                     <FlatList
                         data={this.state.leftDataList}
-                        renderItem={({ item }) => {
+                        renderItem={({item}) => {
                             return (
                                 <EventCard
                                     data={item}
@@ -329,7 +288,7 @@ class EventPage extends Component {
                 <View>
                     <FlatList
                         data={this.state.rightDataList}
-                        renderItem={({ item }) => {
+                        renderItem={({item}) => {
                             return (
                                 <EventCard
                                     data={item}
@@ -337,7 +296,7 @@ class EventPage extends Component {
                             );
                         }}
                         scrollEnabled={false}
-                        style={{ flex: 1 }}
+                        style={{flex: 1}}
                     />
                 </View>
             </View>
@@ -356,10 +315,11 @@ class EventPage extends Component {
                 {this.renderGoTopButton()}
                 {/*渲染筛选栏目*/}
                 <DropDownPicker />
-                <View style={{ flex: 1, width: '100%' }}>
+                <View style={{flex: 1, width: '100%'}}>
                     {/* 加載狀態渲染骨架屏 */}
                     {this.state.isLoading ? (
                         <ScrollView
+                            ref={'scrollView'}
                             style={{
                                 flex: 1,
                                 backgroundColor: COLOR_DIY.bg_color,
@@ -408,7 +368,7 @@ class EventPage extends Component {
                             {/* 渲染主要內容 */}
                             {this.renderPage()}
                             {/* 防止底部遮擋 */}
-                            <View style={{ marginBottom: pxToDp(50) }} />
+                            <View style={{marginBottom: pxToDp(50)}} />
                         </ScrollView>
                     )}
                 </View>

@@ -1,11 +1,24 @@
 // 網站地址映射
 
 // TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
-export const BASE_URI = 'https://www.box.com/api';
+export const BASE_URI = 'https://ark.boxz.dev/api/';
 
+export const GET = {
+    // 社團登錄
+    CLUB_SIGN_IN: 'club_signin/',
 
+    // 獲取所有社團info
+    CLUB_INFO_ALL: 'get_club_info/all',
+    // 按club num獲取社團info
+    CLUB_INFO_NUM: 'get_club_info/club_num/?club_num=',
+}
 
+export const POST = {
+    // 修改社團info
+    CLUB_EDIT_INFO : 'edit_club_info/',
+}
 
+export const ARK_LETTER_IMG = 'https://ark.boxz.dev/static/logo.png';
 
 
 // Webview 服務
@@ -13,6 +26,11 @@ export const BASE_URI = 'https://www.box.com/api';
 export const WHAT_2_REG = 'https://www.umeh.top';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
+
+// 澳大 - API 車位
+export const UM_API_CAR_PARK = 'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
+// 澳大 - API 活動
+export const UM_API_EVENT = 'https://api.data.um.edu.mo/service/media/events/v1.0.0/all';
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站

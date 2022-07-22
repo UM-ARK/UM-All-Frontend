@@ -1,4 +1,4 @@
-// 登錄頁
+// 社團登錄頁
 import React, {Component} from 'react';
 import {
     Text,
@@ -17,12 +17,15 @@ import Header from '../../../../../components/Header';
 import {ToastDIY} from '../../../../../components/ToastDIY';
 import {handleLogin} from '../../../../../utils/storageKits';
 import ModalBottom from '../../../../../components/ModalBottom';
+import {BASE_URI, GET} from '../../../../../utils/pathMap';
 
 import {NavigationContext} from '@react-navigation/native';
 import {Input, Box, Center, Stack, Icon} from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useToast} from 'native-base';
+import axios from 'axios';
+import qs from 'qs';
 
 // 存入臨時變量，準備提交後端驗證
 let accountPassword = {
@@ -82,7 +85,7 @@ const NBTextInput = () => {
 // 渲染登錄按鈕，帶Toast提示
 function RenderLoginButton(props) {
     const toast = useToast();
-    const {unread, white, black} = COLOR_DIY;
+    const {unread, white, black, success} = COLOR_DIY;
 
     handleLoginPress = () => {
         // 賬戶輸入未完成
@@ -97,14 +100,60 @@ function RenderLoginButton(props) {
                 ),
             });
         } else {
-            // TODO: 發送賬號密碼到服務器進行校驗
-            handleLogin({
-                clubID: 1,
-                isClub: true,
-                token: 'test',
-            });
+            clubSignIn();
         }
     };
+
+    // 發送賬號密碼到服務器進行校驗
+    async function clubSignIn() {
+        let data = {
+            account: accountPassword.account + '',
+            password: accountPassword.password + '',
+        };
+        await axios({
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            method: 'post',
+            url: BASE_URI + GET.CLUB_SIGN_IN,
+            data: qs.stringify(data),
+        })
+            .then(res => {
+                let json = eval('(' + res.data + ')');
+                console.log(json);
+                // 登錄成功
+                if (json.message == 'success') {
+                    toast.show({
+                        placement: 'top',
+                        render: () => (
+                            <ToastText
+                                backgroundColor={success}
+                                text={`Welcome Back ~\n━(*｀∀´*)ノ!`}
+                            />
+                        ),
+                    });
+                    handleLogin({
+                        isClub: true,
+                        clubData: json.content,
+                    });
+                }
+                // 登錄失敗
+                else {
+                    toast.show({
+                        placement: 'top',
+                        render: () => (
+                            <ToastText
+                                backgroundColor={unread}
+                                text={`賬號或密碼錯誤\n登錄失敗！`}
+                            />
+                        ),
+                    });
+                }
+            })
+            .catch(err => {
+                alert('Warning', err);
+            });
+    }
 
     return (
         <TouchableOpacity

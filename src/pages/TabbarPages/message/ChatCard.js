@@ -82,14 +82,17 @@ class ChatCard extends Component {
         return (
             <View
                 style={{
-                    margin: 5,
-                    marginLeft: 10,
-                    marginRight: 10,
+                    marginVertical: pxToDp(5),
+                    marginHorizontal: pxToDp(10),
                 }}>
                 <TouchableOpacity
                     style={styles.chatItemBorder}
-                    activeOpacity={0.7}
-                    onPress={() => this.context.navigate('ChatDetail', {user:this.props.messages.user})}>
+                    activeOpacity={0.8}
+                    onPress={() =>
+                        this.context.navigate('ChatDetail', {
+                            user: this.props.messages.user,
+                        })
+                    }>
                     <View style={styles.infoContainer}>
                         {/* 1.0 靠左元素-頭像/名字等 */}
                         <View
@@ -147,7 +150,11 @@ class ChatCard extends Component {
                                 top: pxToDp(12),
                                 right: pxToDp(12),
                             }}>
-                            <Text style={{fontSize: pxToDp(10), color:black.third}}>
+                            <Text
+                                style={{
+                                    fontSize: pxToDp(10),
+                                    color: black.third,
+                                }}>
                                 {this.state.message.time}
                             </Text>
                         </View>
