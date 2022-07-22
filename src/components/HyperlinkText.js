@@ -1,13 +1,12 @@
 import React from 'react';
-import {Text, Vibration} from 'react-native';
+import {Text, Linking} from 'react-native';
 
 import {useToast} from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { COLOR_DIY, ToastText } from '../utils/uiMap';
 
-const HyperlinkText = ({children, linkStyle, style}) => {
+const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
     const toast = useToast();
 
     const options = {
@@ -15,12 +14,35 @@ const HyperlinkText = ({children, linkStyle, style}) => {
         ignoreAndroidSystemSettings: false
       };
 
-    const handleLink = (url, text) => {};
+    // 定義默認參數
+    let webview_param = {
+        url: '',
+        title: '',
+        text_color: '#FFF',
+        // bg_color_diy: '#f8f8f8',
+        bg_color_diy: COLOR_DIY.themeColor,
+    };
+
+    const handleHyperLink = (url, text) => {
+        if(url.includes('mailto:')) {
+            Linking.openURL(url);
+        }
+        else if(url.includes('http')) { // both for http & https
+            console.log("This is a http");
+            if(navigation) {
+                webview_param.url = url;
+                webview_param.title = title ? title : '活動';
+
+                navigation.navigate(
+                    'Webviewer',
+                    webview_param,
+                );
+            }
+        }
+    };
 
     const copyToClipboard = (url, text) => {
         Clipboard.setString(text);
-        Vibration.vibrate(10 * 1000);
-        ReactNativeHapticFeedback.trigger("impactMedium", options);
         showClipedMessage();
     };
 
@@ -42,11 +64,9 @@ const HyperlinkText = ({children, linkStyle, style}) => {
         <>
             <Hyperlink
                 linkStyle={linkStyle}
-                linkDefault={true}
-                onPress={() => Vibration.vibrate()}
-                onLongPress={(url, text) => {
-                    copyToClipboard(url, text);
-                }}>
+                linkDefault={false}
+                onPress={(url, text) => handleHyperLink(url, text)}
+                onLongPress={(url, text) => copyToClipboard(url, text)}>
                 <Text style={style}>{children}</Text>
             </Hyperlink>
         </>

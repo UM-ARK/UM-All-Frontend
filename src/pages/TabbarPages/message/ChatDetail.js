@@ -31,15 +31,9 @@ const IMAGE_CARD_HEIGHT = PAGE_HEIGHT * 0.3;
 const dataList = [
     {
         _id: 0,
-        title: 'Test0',
-        text: `最新的消息
-        askdhfkqwhekfhweifuhw
-        qweflihqwoighqeliurghi3uqrg
-        qoweifhjoqwiehfoiwqehf
-        www.google.com,
-        http://www.google.com,
-        https://www.google.com,
-        elrghbnkfejbniuj`,
+        title: '教師專業發展半天工作坊：科研及學術探究為本的教與學',
+        text: `歡迎瀏覽CTLE網頁以了解更多活動詳情:https://www.um.edu.mo/zh-hant/event/53806/
+\nFor more detail contact: prs.media@um.edu.mo`,
         type: 'text',
         createAt: 1656927421000,
         user: {
@@ -50,13 +44,8 @@ const dataList = [
     },
     {
         _id: 1,
-        title: 'Test1',
-        text: `舊的的消息
-        welrfgjbweoihbrwt
-        bertlikbhwroithe
-        yrhrtwehrtewbrtwe
-        brewbrewbertbrettb
-        rebretbrtb`,
+        title: '澳大學生獲全國英語辯論總決賽亞軍',
+        text: `澳門大學英語辯論隊在第24屆“外研社•國才杯”全國大學生英語辯論賽決賽，與400多支內地著名高校如北京大學、北京語言大學、上海外國語大學等的辯論隊同場較量。澳大英辯隊力壓眾多院校榮獲亞軍，更獲得全場第一最佳辯手、全場第三最佳辯手和全國三等獎的榮譽。 https://www.um.edu.mo/zh-hant/news-and-press-releases/presss-release/detail/53851/`,
         type: 'text',
         createAt: 1656927421000,
         user: {
@@ -67,8 +56,16 @@ const dataList = [
     },
     {
         _id: 2,
-        title: 'Test2',
-        text: '非常舊的消息',
+        title: 'Teaching Arrangement for the 1st Semester',
+        text: `Please refer to the Registry’s webpage for details about the 1st Notice of Teaching Arrangement for the 1st Semester of Academic Year 2022/2023.
+
+https://reg.um.edu.mo/current-students/enrolment-and-examinations/notices/
+        
+Should you have any further queries, please feel free to contact us at email: registry@um.edu.mo or tel.: 8822 4007 during office hours.
+        
+Thank you for your attention.
+        
+Registry`,
         type: 'text',
         createAt: 1656927421000,
         user: {
@@ -229,9 +226,10 @@ class ChatCard extends Component {
                 {/* 卡片標題 */}
                 <View style={styles.message.titleWrap}>
                     <Text
+                        selectable={true}
                         style={[styles.message.title, {color: titleColor}]}
                         numberOfLines={1}>
-                        {item.title}
+                            {item.title}
                     </Text>
                     <Ionicons
                         name="chevron-forward-outline"
@@ -244,8 +242,11 @@ class ChatCard extends Component {
                     {/* <Hyperlink linkStyle={{color: COLOR_DIY.themeColor}} onPress={(link)=>console.log(link)}>
                         <Text style={{color: titleColor}}>{item.text}</Text>
                     </Hyperlink> */}
-                    <HyperlinkText linkStyle={{color: COLOR_DIY.themeColor}}>
-                        {item.text + '\ndc12345@umac.mo'}
+                    <HyperlinkText 
+                        linkStyle={{color: COLOR_DIY.themeColor}} 
+                        title={item.title}
+                        navigation={this.props.navigation}>
+                            {item.text}
                     </HyperlinkText>
                 </View>
             </View>
