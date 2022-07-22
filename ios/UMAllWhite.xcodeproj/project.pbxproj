@@ -631,6 +631,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 635MA6KRLL;
 				ENABLE_BITCODE = NO;
@@ -658,6 +659,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 635MA6KRLL;
 				INFOPLIST_FILE = UMAllWhite/Info.plist;
@@ -670,7 +673,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = um;
+				PRODUCT_BUNDLE_IDENTIFIER = um.all;
 				PRODUCT_NAME = UMAllWhite;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
