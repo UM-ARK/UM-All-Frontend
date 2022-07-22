@@ -53,10 +53,12 @@ class MessageConsole extends Component {
                     title="新增活動"
                     onPress={() => {
                         this.setState({openOption: false});
-                        this.props.navigation.navigate('EventSetting');
+                        this.props.navigation.navigate('EventSetting', {
+                            mode: 'create',
+                        });
                     }}
                 />
-                {/* <SpeedDial.Action
+                <SpeedDial.Action
                     buttonStyle={{backgroundColor: themeColor}}
                     icon={{name: 'alternate-email', color: white}}
                     title="新增公告"
@@ -64,7 +66,7 @@ class MessageConsole extends Component {
                         this.setState({openOption: false});
                         this.props.navigation.navigate('MessageSetting');
                     }}
-                /> */}
+                />
             </SpeedDial>
         );
     };
@@ -80,7 +82,10 @@ class MessageConsole extends Component {
                     style={styles.chatItemBorder}
                     activeOpacity={0.8}
                     onPress={() => {
-                        alert('按下');
+                        this.props.navigation.navigate('ChatDetail', {
+                            user: {name: 'test'},
+                            sendTo: 'all',
+                        });
                     }}>
                     <View style={styles.infoContainer}>
                         <Text
