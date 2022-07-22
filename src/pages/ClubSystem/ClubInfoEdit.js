@@ -5,6 +5,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
+    TextInput,
 } from 'react-native';
 
 import {pxToDp} from '../../utils/stylesKits';
@@ -52,6 +53,11 @@ class ClubInfoEdit extends Component {
         ],
         clubData: this.props.RootStore.userInfo.clubData,
         isLoading: true,
+        // 文本輸入框顏色
+        borderColor: black.third,
+        titleColor: black.main,
+        expanded1: false,
+        expanded2: false,
     };
 
     // 圖片選擇
@@ -114,6 +120,9 @@ class ClubInfoEdit extends Component {
                 arr.push(...pushArr);
                 this.setState({imageUrlArr: arr});
             }
+        }
+        if ('contact' in clubData) {
+            this.setState({contactInput: clubData.contact});
         }
         this.setState({isLoading: false});
     }
@@ -265,6 +274,115 @@ class ClubInfoEdit extends Component {
         );
     };
 
+    renderTextArea = () => {
+        return (
+            <TextInput
+                multiline={true}
+                numberOfLines={8}
+                style={{
+                    ...styles.inputArea,
+                    borderColor: this.state.borderColor,
+                    color: this.state.borderColor,
+                }}
+                maxLength={500}
+                value={this.state.introTextInput}
+                onChangeText={introTextInput => this.setState({introTextInput})}
+                onBlur={() => {
+                    console.log('失焦');
+                    this.setState({
+                        borderColor: black.third,
+                        titleColor: black.main,
+                    });
+                }}
+                onFocus={() => {
+                    console.log('聚焦');
+                    this.setState({
+                        borderColor: themeColor,
+                        titleColor: themeColor,
+                    });
+                }}
+            />
+        );
+    };
+
+    renderExpandHeader1 = () => {
+        return (
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                }}>
+                <Text
+                    style={{
+                        ...styles.title,
+                        color: this.state.titleColor,
+                    }}>
+                    {'簡介修改 '}
+                </Text>
+                <Ionicons
+                    name={this.state.expanded1 ? 'chevron-up' : 'chevron-down'}
+                    size={pxToDp(20)}
+                    color={this.state.titleColor}
+                />
+            </View>
+        );
+    };
+    renderExpandHeader2 = () => {
+        return (
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                }}>
+                <Text
+                    style={{
+                        ...styles.title,
+                        color: this.state.titleColor,
+                    }}>
+                    {'聯繫方式修改 '}
+                </Text>
+                <Ionicons
+                    name={this.state.expanded2 ? 'chevron-up' : 'chevron-down'}
+                    size={pxToDp(20)}
+                    color={this.state.titleColor}
+                />
+            </View>
+        );
+    };
+    // 簡介
+    renderExpandSection1 = () => {
+        return (
+            <ExpandableSection
+                expanded={this.state.expanded1}
+                sectionHeader={this.renderExpandHeader1()}
+                onPress={() => {
+                    this.setState({
+                        expanded1: !this.state.expanded1,
+                    });
+                }}>
+                {this.renderTextArea()}
+            </ExpandableSection>
+        );
+    };
+    // 聯繫方式
+    renderExpandSection2 = () => {
+        return (
+            <ExpandableSection
+                expanded={this.state.expanded2}
+                sectionHeader={this.renderExpandHeader2()}
+                onPress={() => {
+                    this.setState({
+                        expanded2: !this.state.expanded2,
+                    });
+                }}>
+                {/* TODO: 文本識別link點擊可跳轉 */}
+                {this.state.contactInput.map((item, index) =>
+                    this.renderContactInput(item, index),
+                )}
+            </ExpandableSection>
+        );
+    };
+
     // 渲染圖片選擇
     renderImageSelector = () => {
         const {imageUrlArr} = this.state;
@@ -305,51 +423,13 @@ class ClubInfoEdit extends Component {
                         </View>
 
                         {/* 簡介 */}
-                        <View>
-                            <Text style={styles.title}>簡介修改</Text>
-                            <TextField
-                                placeholder={'社團簡介'}
-                                floatingPlaceholder
-                                floatOnFocus
-                                floatingPlaceholderColor={
-                                    floatingPlaceholderColor
-                                }
-                                floatingPlaceholderStyle={
-                                    floatingPlaceholderStyle
-                                }
-                                hint={'e.g. 電腦學會是...'}
-                                dynamicFieldStyle={(
-                                    context: FieldContextType,
-                                ) => {
-                                    return {
-                                        borderBottomWidth: pxToDp(1),
-                                        paddingBottom: pxToDp(4),
-                                        borderColor: context.isFocused
-                                            ? themeColor
-                                            : black.third,
-                                    };
-                                }}
-                                color={black.third}
-                                value={this.state.introTextInput}
-                                onChangeText={introTextInput =>
-                                    this.setState({introTextInput})
-                                }
-                                showCharCounter
-                                maxLength={500}
-                            />
-                        </View>
+                        <View>{this.renderExpandSection1()}</View>
 
                         {/* 聯繫方式 */}
-                        <View>
-                            <Text style={styles.title}>聯繫方式修改</Text>
-                            {/* TODO: 挑選類型，填寫對應號碼 */}
-                            {/* TODO: 文本識別link點擊可跳轉 */}
-                            {this.state.contactInput.map((item, index) =>
-                                this.renderContactInput(item, index),
-                            )}
+                        <View style={{marginTop: pxToDp(20)}}>
+                            {this.renderExpandSection2()}
                         </View>
 
-                        {/* TODO: */}
                         {/* 保存修改 */}
                         <TouchableOpacity
                             activeOpacity={0.8}
@@ -393,6 +473,16 @@ const styles = StyleSheet.create({
     inputTitle: {
         color: black.main,
         fontSize: pxToDp(16),
+    },
+    inputArea: {
+        textAlignVertical: 'top',
+        borderWidth: pxToDp(1),
+        paddingVertical: pxToDp(10),
+        paddingHorizontal: pxToDp(15),
+        borderRadius: pxToDp(10),
+        ...COLOR_DIY.viewShadow,
+        backgroundColor: bg_color,
+        fontSize: pxToDp(15),
     },
     submitButton: {
         backgroundColor: themeColor,
