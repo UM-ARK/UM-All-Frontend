@@ -59,6 +59,12 @@ class EventSetting extends Component {
         allowFollow: true,
     };
 
+    componentDidMount() {
+        // 檢查是create活動還是edit活動
+        let mode = this.props.route.params.mode;
+        console.log(mode);
+    }
+
     renderDatePicker = dateType => {
         // 結構對應state的屬性名字，賦值給局部變量date
         let {[dateType]: date} = this.state;

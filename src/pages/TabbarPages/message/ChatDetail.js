@@ -201,6 +201,9 @@ class ChatCard extends Component {
                 name: 'React Native',
                 avatar: 'https://placeimg.com/140/140/any',
             },
+            clubData: undefined,
+            isLoading: true,
+            isAdmin: false,
         };
     }
 
@@ -304,6 +307,14 @@ class ChatCard extends Component {
         );
     };
 
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        if (globalData.userInfo.isClub) {
+            let clubData = globalData.userInfo.clubData;
+            this.setState({clubData, isLoading: false, isAdmin: true});
+        }
+    }
+
     render() {
         // 解構全局UI樣式
         const {bg_color, black, white} = COLOR_DIY;
@@ -332,16 +343,25 @@ class ChatCard extends Component {
                     }}
                     // TODO: 僅admin、活動類型顯示設置按鈕
                     rightComponent={
-                        <TouchableOpacity
-                            onPress={() => {
-                                console.log('點擊設置');
-                            }}>
-                            <Ionicons
-                                name="settings-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
+                        this.state.isAdmin && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    let params = this.props.route.params;
+                                    this.props.navigation.navigate(
+                                        'sendTo' in params &&
+                                            params.sendTo == 'all'
+                                            ? 'MessageSetting'
+                                            : 'EventSetting',
+                                        {mode: 'edit'},
+                                    );
+                                }}>
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={pxToDp(25)}
+                                    color={COLOR_DIY.black.main}
+                                />
+                            </TouchableOpacity>
+                        )
                     }
                     statusBarProps={{
                         backgroundColor: 'transparent',

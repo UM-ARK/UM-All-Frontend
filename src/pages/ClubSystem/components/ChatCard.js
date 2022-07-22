@@ -29,7 +29,7 @@ class ChatCard extends Component {
                     activeOpacity={0.8}
                     // TODO: 跳轉歷史消息詳情
                     onPress={() => {
-                        alert('按下' + this.props.index);
+                        this.context.navigate('ChatDetail');
                     }}>
                     <View style={styles.infoContainer}>
                         <Text
