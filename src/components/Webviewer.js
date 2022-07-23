@@ -115,7 +115,7 @@ class WebViewer extends Component {
                                         <Ionicons
                                             name="open-outline"
                                             size={pxToDp(35)}
-                                            color={COLOR_DIY.black}
+                                            color={COLOR_DIY.black.second}
                                         />
                                     </TouchableOpacity>
                                     <Text
@@ -139,7 +139,7 @@ class WebViewer extends Component {
                                     <Ionicons
                                         name="refresh"
                                         size={pxToDp(35)}
-                                        color={COLOR_DIY.black}
+                                        color={COLOR_DIY.black.second}
                                     />
                                 </TouchableOpacity>
                                 <Text
