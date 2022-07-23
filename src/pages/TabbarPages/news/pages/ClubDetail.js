@@ -428,6 +428,7 @@ class ClubDetail extends Component {
                             <FastImage
                                 source={{
                                     uri: logo_url,
+                                    cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
                                 resizeMode={FastImage.resizeMode.contain}
@@ -539,7 +540,12 @@ class ClubDetail extends Component {
                                                             );
                                                         }}>
                                                         <FastImage
-                                                            source={{uri: item}}
+                                                            source={{
+                                                                uri: item,
+                                                                cache: FastImage
+                                                                    .cacheControl
+                                                                    .web,
+                                                            }}
                                                             style={{
                                                                 width: '100%',
                                                                 height: '100%',
@@ -714,6 +720,7 @@ class ClubDetail extends Component {
                             <FastImage
                                 source={{
                                     uri: bgImgUrl,
+                                    cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
                             />

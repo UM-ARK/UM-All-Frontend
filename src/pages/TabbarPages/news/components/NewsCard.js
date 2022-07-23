@@ -167,6 +167,7 @@ class NewsCard extends Component {
                                             type == 'event'
                                                 ? imageUrls
                                                 : imageUrls[0],
+                                        cache: FastImage.cacheControl.web,
                                     }}
                                     style={styles.newsCardImg}
                                     resizeMode={FastImage.resizeMode.cover}

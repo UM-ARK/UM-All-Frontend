@@ -30,7 +30,7 @@ class ImageTest extends Component {
         return (
             <View style={{flex: 1}}>
                 <FastImage
-                    source={{uri: IMAGE_URL}}
+                    source={{uri: IMAGE_URL, cache: FastImage.cacheControl.web}}
                     style={{width: '100%', height: '30%'}}
                 />
                 <Button onPress={this.handleDownload} title={'下載圖片'} />

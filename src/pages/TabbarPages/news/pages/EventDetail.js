@@ -416,6 +416,7 @@ class EventDetail extends Component {
                                             clubData == undefined
                                                 ? ''
                                                 : clubData.logo_url,
+                                        cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
                                     resizeMode={FastImage.resizeMode.contain}
@@ -533,6 +534,8 @@ class EventDetail extends Component {
                                         <FastImage
                                             source={{
                                                 uri: item,
+                                                cache: FastImage.cacheControl
+                                                    .web,
                                             }}
                                             style={{
                                                 width: pxToDp(CLUB_IMAGE_WIDTH),
@@ -627,6 +630,7 @@ class EventDetail extends Component {
                         <FastImage
                             source={{
                                 uri: coverImgUrl,
+                                cache: FastImage.cacheControl.web,
                             }}
                             style={{width: '100%', height: '100%'}}
                         />

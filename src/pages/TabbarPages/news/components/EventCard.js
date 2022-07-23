@@ -90,7 +90,10 @@ class EventCard extends Component {
                         activeOpacity={0.9}
                         onPress={this.handleJumpToDetail}>
                         <FastImage
-                            source={{uri: coverImgUrl}}
+                            source={{
+                                uri: coverImgUrl,
+                                cache: FastImage.cacheControl.web,
+                            }}
                             style={{
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,

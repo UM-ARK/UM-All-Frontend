@@ -232,7 +232,10 @@ class NewsDetail extends Component {
                                         );
                                     }}>
                                     <FastImage
-                                        source={{uri: item}}
+                                        source={{
+                                            uri: item,
+                                            cache: FastImage.cacheControl.web,
+                                        }}
                                         style={{
                                             width: COMPONENT_WIDTH,
                                             height: COMPONENT_WIDTH,

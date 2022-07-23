@@ -12,7 +12,6 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 
 import {NavigationContext} from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
 
 const {bg_color, black, white} = COLOR_DIY;
 

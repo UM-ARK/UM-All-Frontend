@@ -200,7 +200,10 @@ class NewsPage extends Component {
                                     });
                                 }}>
                                 <FastImage
-                                    source={{uri: imageUrls[0]}}
+                                    source={{
+                                        uri: imageUrls[0],
+                                        cache: FastImage.cacheControl.web,
+                                    }}
                                     style={{width: '100%', height: '100%'}}>
                                     {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                     <View

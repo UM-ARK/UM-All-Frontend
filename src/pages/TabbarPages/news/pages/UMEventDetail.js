@@ -204,7 +204,10 @@ class UMEventDetail extends Component {
                             this.refs.imageScrollViewer.handleOpenImage(0);
                         }}>
                         <FastImage
-                            source={{uri: imageUrls}}
+                            source={{
+                                uri: imageUrls,
+                                cache: FastImage.cacheControl.web,
+                            }}
                             style={{width: '100%', height: '100%'}}
                         />
                     </TouchableOpacity>
