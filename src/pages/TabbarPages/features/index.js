@@ -39,6 +39,8 @@ import {
     UM_LIBRARY,
     UM_WHOLE,
     UM_COURSE_SIMU,
+    UM_ISW,
+    NEW_INFOG,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
@@ -313,15 +315,8 @@ class Index extends Component {
                         fn_name: '預選課',
                         go_where: 'Webview',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
                             url: UM_PRE_ENROLMENT,
                             title: '預選課(建議在電腦操作)',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#1278d1',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
                         },
                     },
                     {
@@ -330,33 +325,18 @@ class Index extends Component {
                         fn_name: 'Add Drop',
                         go_where: 'Webview',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
                             url: UM_ADD_DROP,
                             title: '增補選(建議在電腦操作)',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#1278d1',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
                         },
                     },
-                    // TODO: 或許可以學習源碼整合成手機端操作
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'clipboard-edit',
                         fn_name: '課表模擬',
                         go_where: 'Webview',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
                             url: UM_COURSE_SIMU,
                             title: '課表模擬(建議在電腦操作)',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#1278d1',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
                         },
                     },
                     // TODO: 爬蟲還是Webview
@@ -367,30 +347,19 @@ class Index extends Component {
                         fn_name: '全人發展',
                         go_where: 'Webview',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
                             url: UM_WHOLE_PERSON,
                             title: '全人發展',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#1278d1',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
                         },
                     },
-                    // TODO: SIW爬蟲
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'ab-testing',
                         fn_name: '成績',
-                        go_where: '', // a function
-                    },
-                    // TODO: SIW爬蟲
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'counter',
-                        fn_name: '學分',
-                        go_where: '', // a function
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_ISW,
+                            title: 'UM ISW',
+                        },
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -398,15 +367,8 @@ class Index extends Component {
                         fn_name: '交流',
                         go_where: 'Webview',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
                             url: UM_EXCHANGE,
                             title: 'UM 交流機會申請',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#1278d1',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
                         },
                     },
                     {
@@ -502,390 +464,24 @@ class Index extends Component {
                     },
                 ],
             },
-            // {
-            //     title: '書院主頁',
-            //     fn: [
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/1_CKPC.png',
-            //             fn_name: 'CKPC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_CKPC,
-            //                 title: 'CKPC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#9e2a2c',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/2_Cheng-Yu-Tung-College_square-1024x1024.png',
-            //             fn_name: 'CYTC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_CYTC,
-            //                 title: 'CYTC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#6f40a3',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/3_Cheong-Kun-Lun-College_square-1024x1024.png',
-            //             fn_name: 'CKLC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_CKLC,
-            //                 title: 'CKLC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#880810',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://rc.um.edu.mo/wp-content/uploads/2020/09/Logo_collection_2-05-1024x1024.png',
-            //             fn_name: 'CKYC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_CKYC,
-            //                 title: 'CKYC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#9bcbeb',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/5_Henry-Fok-Pearl-Jubilee-College_square-1024x1024.png',
-            //             fn_name: 'HFPJC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_HFPJC,
-            //                 title: 'HFPJC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#ed7201',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/6_Lui-Che-Woo-College_square-1024x1024.png',
-            //             fn_name: 'LCWC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_LCWC,
-            //                 title: 'LCWC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#1759a7',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/7_Ma-Man-Kei-and-Lo-Pak-Sam-College_square-1024x1024.png',
-            //             fn_name: 'MLC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_MLC,
-            //                 title: 'MLC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#0f7562',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/8_Moon-Chun-Memorial-College_square-1024x1024.png',
-            //             fn_name: 'MCMC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_MCMC,
-            //                 title: 'MCMC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#f3d54f',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/9_Shiu-Pong-College_square-1024x1024.png',
-            //             fn_name: 'SPC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_SPC,
-            //                 title: 'SPC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#017b34',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.img,
-            //             icon_name:
-            //                 'https://www.um.edu.mo/wp-content/uploads/2020/09/10_Stanley-Ho-East-Asia-College_square-1024x1024.png',
-            //             fn_name: 'SHEAC',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_SHEAC,
-            //                 title: 'SHEAC',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#102e4b',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'file-document-edit',
-            //             fn_name: 'ePortfolio',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: CO_EPORTFOLIO,
-            //                 title: 'ePortfolio',
-            //                 // 標題顏色，默認為black.main
-            //                 // text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 // bg_color_diy: '#23407d',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 // isBarStyleBlack: false,
-            //             },
-            //         },
-            //     ],
-            // },
-            // TODO: 考慮使用另一種列表展示，部門名字太長不方便
-            // {
-            //     title: '部門主頁',
-            //     fn: [
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'web',
-            //             fn_name: '官網',
-            //             go_where: 'Webview',
-            //             webview_param: {
-            //                 // import pathMap的鏈接進行跳轉
-            //                 url: OF_BASE,
-            //                 title: '澳大官網',
-            //                 // 標題顏色，默認為black.main
-            //                 text_color: '#fff',
-            //                 // 標題背景顏色，默認為bg_color
-            //                 bg_color_diy: '#012d56',
-            //                 // 狀態欄字體是否黑色，默認true
-            //                 isBarStyleBlack: false,
-            //             },
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '學務部',
-            //             go_where: '', // a function
-            //         },
-            //     ],
-            // },
-            // {
-            //     title: '學院主頁',
-            //     fn: [
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '人文',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '工商管理',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '教育',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '健康科學',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '法學',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '科技',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '社會科學',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '人社研',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '物材研',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '中藥研',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '協創研',
-            //             go_where: '', // a function
-            //         },
-            //         {
-            //             icon_type: iconTypes.materialCommunityIcons,
-            //             icon_name: 'people',
-            //             fn_name: '微電研',
-            //             go_where: '', // a function
-            //         },
-            //     ],
-            // },
-
             // TODO: 新生推薦
             {
                 title: '新生推薦',
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'coffee-outline',
-                        fn_name: '澳大論壇',
+                        icon_name: 'account-heart',
+                        fn_name: '圖文包',
                         go_where: 'Webview',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_WHOLE,
-                            title: '澳大論壇',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'text-box-check',
-                        fn_name: '失物認領',
-                        go_where: 'Webview',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_LOST_FOUND,
-                            title: '失物認領',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'car-multiple',
-                        fn_name: '泊車月票',
-                        go_where: 'Webview',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_PARK_APPLY,
-                            title: '泊車月票申請',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'human-dolly',
-                        fn_name: '職位空缺',
-                        go_where: 'Webview',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_JOB_SYSTEM,
-                            title: '職位空缺',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
+                            url: NEW_INFOG,
+                            title: '澳大圖文包',
+                            text_color: '#012d56',
+                            bg_color_diy: '#fff',
                         },
                     },
                 ],
             },
-            // 澳大圖文包：https://reg.um.edu.mo/university-almanac/?lang=zh-hant
         ],
     };
 
