@@ -229,7 +229,10 @@ class ClubDetail extends Component {
     constructor(props) {
         super(props);
         let clubData = undefined;
-        if (!this.props.RootStore.userInfo.isClub) {
+        if (
+            !('userInfo' in this.props.RootStore) ||
+            !this.props.RootStore.userInfo.isClub
+        ) {
             // 獲取上級路由傳遞的參數，得知點擊的club_num
             clubData = this.props.route.params.data;
             // 請求對應社團的info
@@ -252,7 +255,7 @@ class ClubDetail extends Component {
         await axios
             .get(BASE_URI + GET.CLUB_INFO_NUM + club_num)
             .then(res => {
-                let json = eval('(' + res.data + ')');
+                let json = res.data;
                 if (json.message == 'success') {
                     let clubData = json.content;
                     this.setState({clubData, isLoading: false});
@@ -267,7 +270,7 @@ class ClubDetail extends Component {
                         this.props.RootStore.setUserInfo(clubDataUpdate);
                     }
                 } else {
-                    alert('Warning:', message);
+                    alert('Warning:', json.message);
                 }
             })
             .catch(err => {
@@ -580,7 +583,7 @@ class ClubDetail extends Component {
                                 }}>
                                 {/* 服務圖標與文字 */}
                                 <Text
-                                    numberOfLines={3}
+                                    numberOfLines={5}
                                     style={{color: black.second}}>
                                     {intro}
                                 </Text>
@@ -649,7 +652,6 @@ class ClubDetail extends Component {
 
                     {/* 5.0 舉辦的活動 */}
                     {event.length > 0 && (
-                        // TODO: 下拉刷新
                         <FlatList
                             numColumns={2}
                             columnWrapperStyle={{
