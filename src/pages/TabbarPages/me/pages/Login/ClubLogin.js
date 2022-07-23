@@ -119,7 +119,7 @@ function RenderLoginButton(props) {
             data: qs.stringify(data),
         })
             .then(res => {
-                let json = eval('(' + res.data + ')');
+                let json = res.data;
                 console.log(json);
                 // 登錄成功
                 if (json.message == 'success') {

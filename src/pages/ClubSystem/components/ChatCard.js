@@ -17,7 +17,12 @@ import FastImage from 'react-native-fast-image';
 const {bg_color, black, white} = COLOR_DIY;
 
 class ChatCard extends Component {
+    // NavigationContext組件可以在非基頁面拿到路由信息
+    // this.context === this.props.navigation 等同效果
+    static contextType = NavigationContext;
+
     render() {
+        let eventData = this.props.data;
         return (
             <View
                 style={{
@@ -29,13 +34,15 @@ class ChatCard extends Component {
                     activeOpacity={0.8}
                     // TODO: 跳轉歷史消息詳情
                     onPress={() => {
-                        this.context.navigate('ChatDetail');
+                        this.context.navigate('ChatDetail', {
+                            _id: eventData._id,
+                        });
                     }}>
                     <View style={styles.infoContainer}>
                         <Text
                             style={{fontSize: pxToDp(14), color: black.second}}
                             numberOfLines={2}>
-                            {this.props.data.title}
+                            {eventData.title}
                         </Text>
                     </View>
                 </TouchableOpacity>

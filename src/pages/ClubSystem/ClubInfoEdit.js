@@ -12,10 +12,8 @@ import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {handleImageSelect} from '../../utils/fileKits';
 import Header from '../../components/Header';
-import {handleLogout} from '../../utils/storageKits';
 import {BASE_URI, POST} from '../../utils/pathMap';
 import DialogDIY from '../../components/DialogDIY';
-import ImageSelector from '../../components/ImageSelector';
 import Loading from '../../components/Loading';
 
 import {FlatGrid} from 'react-native-super-grid';
@@ -102,7 +100,6 @@ class ClubInfoEdit extends Component {
     };
 
     componentDidMount() {
-        console.log('componentDidMount');
         const {clubData, imageUrlArr} = this.state;
         if ('intro' in clubData) {
             this.setState({introTextInput: clubData.intro});
@@ -121,7 +118,7 @@ class ClubInfoEdit extends Component {
                 this.setState({imageUrlArr: arr});
             }
         }
-        if ('contact' in clubData) {
+        if ('contact' in clubData && clubData.contact.length > 0) {
             this.setState({contactInput: clubData.contact});
         }
         this.setState({isLoading: false});
@@ -167,8 +164,7 @@ class ClubInfoEdit extends Component {
                 },
             })
             .then(res => {
-                console.log(res.data);
-                let json = eval('(' + res.data + ')');
+                let json = res.data;
                 // 上傳成功
                 if (json.message == 'success') {
                     alert('上傳成功');

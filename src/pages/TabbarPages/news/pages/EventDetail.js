@@ -13,7 +13,7 @@ import {
 
 import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-
+import {BASE_URI, GET} from '../../../../utils/pathMap';
 import EventCard from '../components/EventCard';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
@@ -27,6 +27,8 @@ import {
 import FastImage from 'react-native-fast-image';
 import {useToast} from 'native-base';
 import {inject} from 'mobx-react';
+import axios from 'axios';
+import moment from 'moment-timezone';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -34,27 +36,13 @@ const CLUB_LOGO_SIZE = 80;
 const CLUB_IMAGE_WIDTH = 75;
 const CLUB_IMAGE_HEIGHT = 55;
 
-// 時間戳轉時間
-function timeTrans(date) {
-    var date = new Date(date);
-    var Y = date.getFullYear();
-    var M =
-        date.getMonth() + 1 < 10
-            ? '0' + (date.getMonth() + 1)
-            : date.getMonth() + 1;
-    var D = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-    var h = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
-    var m =
-        date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    var s =
-        date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-    return M + '/' + D + ', ' + h + ':' + m;
-}
+// 解構uiMap的數據
+const {bg_color, white, black, themeColor} = COLOR_DIY;
 
 // 渲染Follow按鈕
 // 因需使用Toast的Hook，被迫使用func組件QAQ
 function RenderFollowButton(props) {
-    const {white, themeColor, success, black} = COLOR_DIY;
+    const {success, black} = COLOR_DIY;
     let [isFollow, setFollow] = useState(props.isFollow);
 
     const toast = useToast();
@@ -106,46 +94,64 @@ function RenderFollowButton(props) {
 }
 
 class EventDetail extends Component {
-    constructor(props) {
-        super(props);
-        // 獲取上級路由傳遞的參數，展示活動詳情
-        const detailRoute = this.props.route.params;
-
-        // TODO: 通過detailRoute的內容，請求對應活動在服務器儲存的資料
-        // TODO: 從服務器判斷是否有follow
-        let eventData = detailRoute.data;
-        // TODO: Event需綁定相關社團資料
-        let clubData = {
-            clubID: 1,
-            avatarUrl:
-                'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
-        };
-
-        this.state = {
-            isLogin: false,
-            // 訪問該頁的用戶對該組織的Follow狀態
-            isFollow: false,
-            // 該用戶是否管理員。社團、APP管理員：true；
-            isAdmin: false,
-            ok: false,
-            eventData,
-            imageUrls: eventData.coverImgUrl,
-            clubData,
-            showDialog: false,
-        };
-    }
+    state = {
+        isLoading: true,
+        isLogin: false,
+        // 訪問該頁的用戶對該組織的Follow狀態
+        isFollow: false,
+        eventData: undefined,
+        clubData: undefined,
+        imageUrls: '',
+        showDialog: false,
+    };
 
     componentDidMount() {
         let globalData = this.props.RootStore;
         // 已登錄
         if (JSON.stringify(globalData.userInfo) != '{}') {
-            // TODO: 判斷是否club和token，展示設置按鈕
-            if (globalData.userInfo.isClub) {
-                this.setState({isAdmin: true});
-            }
             // Follow按鈕展示提示
             this.setState({isLogin: true});
         }
+
+        // 獲取上級路由傳遞的參數，展示活動詳情
+        const eventData = this.props.route.params.data;
+        this.getClubData(eventData.created_by);
+        // TODO: 通過detailRoute的內容，請求對應活動在服務器儲存的資料
+        // TODO: 從服務器判斷是否有follow
+        console.log('詳情頁的eventData', eventData);
+        this.setState({
+            coverImgUrl: eventData.cover_image_url,
+            title: eventData.title,
+            startTimeStamp: eventData.startdatetime,
+            finishTimeStamp: eventData.enddatetime,
+            type: eventData.type,
+            imageUrls: eventData.cover_image_url,
+            relateImgUrl:
+                eventData.relate_image_url &&
+                eventData.relate_image_url.length > 0
+                    ? eventData.relate_image_url
+                    : [],
+            eventData,
+        });
+    }
+
+    async getClubData(club_num) {
+        console.log('獲取社團的頭像');
+        await axios
+            .get(BASE_URI + GET.CLUB_INFO_NUM + club_num)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    this.setState({clubData: json.content});
+                }
+            })
+            .catch(err => {
+                console.log('err', err);
+            });
+    }
+
+    async getEventData() {
+        console.log('更新活動詳情');
     }
 
     // 點擊Follow按鈕響應事件
@@ -168,22 +174,16 @@ class EventDetail extends Component {
     };
 
     render() {
-        // 解耦uiMap的數據
-        const {bg_color, white, black, themeColor} = COLOR_DIY;
-
         // 解構state數據
         const {
             coverImgUrl,
             title,
             startTimeStamp,
             finishTimeStamp,
-            eventID,
-            link,
-            relateImgUrl,
             type,
-        } = this.state.eventData;
-        const {isFollow, isAdmin} = this.state;
-        const {avatarUrl} = this.state.clubData;
+            relateImgUrl,
+        } = this.state;
+        const {isFollow, isLoading} = this.state;
 
         // 活動基本信息
         renderEventBasicInfo = () => {
@@ -253,7 +253,7 @@ class EventDetail extends Component {
                                     marginHorizontal: pxToDp(5),
                                     color: COLOR_DIY.black.third,
                                 }}>
-                                {timeTrans(startTimeStamp)}
+                                {moment(startTimeStamp).format('MM/DD, HH:mm')}
                             </Text>
                             <View style={{...styles.infoShowContainer}}>
                                 <Text
@@ -269,33 +269,9 @@ class EventDetail extends Component {
                                     marginLeft: pxToDp(5),
                                     color: COLOR_DIY.black.third,
                                 }}>
-                                {timeTrans(finishTimeStamp)}
+                                {moment(finishTimeStamp).format('MM/DD, HH:mm')}
                             </Text>
                         </View>
-
-                        {/* 舉辦方 */}
-                        {/* <View
-                            style={{
-                                flexDirection: 'row',
-                                marginTop: pxToDp(5),
-                            }}>
-                            <View style={{...styles.infoShowContainer}}>
-                                <Text
-                                    style={{
-                                        fontSize: pxToDp(11),
-                                        color: COLOR_DIY.themeColor,
-                                    }}>
-                                    by
-                                </Text>
-                            </View>
-                            <Text
-                                style={{
-                                    marginLeft: pxToDp(5),
-                                    color: COLOR_DIY.black.third,
-                                }}>
-                                {'誰舉辦的'}
-                            </Text>
-                        </View> */}
 
                         {/* 活動tag */}
                         <View style={{marginTop: pxToDp(20)}}>
@@ -347,27 +323,6 @@ class EventDetail extends Component {
                             />
                         </TouchableOpacity>
                     </View>
-                    {/* 編輯資料按鈕 只有管理員可見 */}
-                    {isAdmin && (
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: pxToDp(65),
-                                right: pxToDp(10),
-                            }}>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() =>
-                                    alert('管理員身份，進入設置資料頁面')
-                                }>
-                                <Ionicons
-                                    name="settings-outline"
-                                    size={pxToDp(25)}
-                                    color={white}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    )}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity
@@ -419,18 +374,22 @@ class EventDetail extends Component {
 
         // 渲染頁面主要內容
         renderMainContent = () => {
+            const {relateImgUrl, clubData} = this.state;
             return (
                 <View style={{backgroundColor: bg_color, flex: 1}}>
                     {/* 舉辦方頭像 */}
                     <TouchableWithoutFeedback
-                        onPress={() => {
-                            alert('跳轉社團詳情頁');
-                        }}>
+                        onPress={() =>
+                            this.props.navigation.navigate('ClubDetail', {
+                                data: clubData,
+                            })
+                        }>
                         <View
                             style={{
                                 alignSelf: 'center',
                                 flexDirection: 'row',
                             }}>
+                            {/* 社團名 */}
                             <View style={{justifyContent: 'center'}}>
                                 <View style={{...styles.infoShowContainer}}>
                                     <Text
@@ -446,25 +405,20 @@ class EventDetail extends Component {
                                         alignSelf: 'center',
                                         marginTop: pxToDp(5),
                                     }}>
-                                    電腦學會
+                                    {clubData == undefined ? '' : clubData.name}
                                 </Text>
                             </View>
-
-                            <View
-                                style={{
-                                    width: pxToDp(CLUB_LOGO_SIZE),
-                                    height: pxToDp(CLUB_LOGO_SIZE),
-                                    borderRadius: 50,
-                                    overflow: 'hidden',
-                                    marginVertical: pxToDp(5),
-                                    marginHorizontal: pxToDp(20),
-                                    ...COLOR_DIY.viewShadow,
-                                }}>
+                            {/* 社團Logo */}
+                            <View style={styles.clubLogoContainer}>
                                 <FastImage
                                     source={{
-                                        uri: avatarUrl,
+                                        uri:
+                                            clubData == undefined
+                                                ? ''
+                                                : clubData.logo_url,
                                     }}
                                     style={{width: '100%', height: '100%'}}
+                                    resizeMode={FastImage.resizeMode.contain}
                                 />
                             </View>
                         </View>
@@ -527,7 +481,7 @@ class EventDetail extends Component {
 
                     {/* 2.0 相關照片 開始 */}
                     {/* TODO: 點擊查看大圖 */}
-                    {relateImgUrl.length > 0 && (
+                    {relateImgUrl != undefined && relateImgUrl.length > 0 && (
                         <TouchableOpacity
                             style={{
                                 backgroundColor: COLOR_DIY.white,
@@ -700,7 +654,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    infoShowText: {},
+    clubLogoContainer: {
+        width: pxToDp(CLUB_LOGO_SIZE),
+        height: pxToDp(CLUB_LOGO_SIZE),
+        borderRadius: 50,
+        overflow: 'hidden',
+        marginVertical: pxToDp(5),
+        marginHorizontal: pxToDp(20),
+        backgroundColor: white,
+        ...COLOR_DIY.viewShadow,
+    },
 });
 
 export default inject('RootStore')(EventDetail);

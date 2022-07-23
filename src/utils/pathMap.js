@@ -11,11 +11,22 @@ export const GET = {
     CLUB_INFO_ALL: 'get_club_info/all',
     // 按club num獲取社團info
     CLUB_INFO_NUM: 'get_club_info/club_num/?club_num=',
+
+    // 獲取所有活動
+    EVENT_INFO_ALL: 'get_activity/all',
+    // 按Club num獲取活動列表
+    EVENT_INFO_CLUB_NUM: 'get_activity/club_num/?club_num=',
+    // 按活動id獲取活動列表
+    EVENT_INFO_EVENT_ID: 'get_activity/id/?id=',
 }
 
 export const POST = {
     // 修改社團info
     CLUB_EDIT_INFO : 'edit_club_info/',
+    // 創建活動
+    EVENT_CREATE: 'create_activity/',
+    // 修改活動info
+    EVENT_EDIT: 'edit_activity/',
 }
 
 export const ARK_LETTER_IMG = 'https://ark.boxz.dev/static/logo.png';
@@ -62,6 +73,8 @@ export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 // 學業發展分類
 // 澳大 - UM Moodle
 export const UM_Moodle = 'https://ummoodle.um.edu.mo/my';
+// 澳大 - UM ISW
+export const UM_ISW = 'https://isw.um.edu.mo/siapp/faces/home';
 // 澳大 - UM 預選課
 export const UM_PRE_ENROLMENT = 'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
 // 澳大 - UM 選課模擬系統
@@ -108,3 +121,6 @@ export const CO_SHEAC = 'https://sheac.rc.um.edu.mo';
 
 // 學校行政 - 官網
 export const OF_BASE = 'https://www.um.edu.mo';
+
+// 迎新推薦 - 官網圖文包
+export const NEW_INFOG = 'https://reg.um.edu.mo/infographic/?lang=zh-hant';

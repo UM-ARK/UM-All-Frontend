@@ -8,53 +8,60 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import moment from 'moment-timezone';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-// 時間戳轉時間
-function timeTrans(date) {
-    var date = new Date(date);
-    var Y = date.getFullYear();
-    var M =
-        date.getMonth() + 1 < 10
-            ? '0' + (date.getMonth() + 1)
-            : date.getMonth() + 1;
-    var D = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-    var h = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
-    var m =
-        date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    var s =
-        date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-    return M + '/' + D;
-}
-
 const IMAGE_SIZE = pxToDp(PAGE_WIDTH / 2 - 30);
+
+// 解構全局ui設計顏色
+const {white, black, viewShadow, bg_color} = COLOR_DIY;
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
     static contextType = NavigationContext;
 
+    state = {
+        coverImgUrl: undefined,
+        title: undefined,
+        startTimeStamp: undefined,
+        finishTimeStamp: undefined,
+        link: undefined,
+        relateImgUrl: undefined,
+        type: undefined,
+    };
+
+    componentDidMount() {
+        // 解構this.props.data數據
+        const eventData = this.props.data;
+        this.setState({
+            coverImgUrl: eventData.cover_image_url,
+            title: eventData.title,
+            startTimeStamp: eventData.startdatetime,
+            finishTimeStamp: eventData.enddatetime,
+            type: eventData.type,
+            eventData,
+        });
+    }
+
     handleJumpToDetail = () => {
         this.context.navigate('EventDetail', {
-            data: this.props.data,
+            data: this.state.eventData,
         });
     };
 
     render() {
-        // 解構this.props.data數據
         const {
             coverImgUrl,
             title,
             finishTimeStamp,
-            eventID,
+            startTimeStamp,
             link,
             relateImgUrl,
             type,
-        } = this.props.data;
-        // 解構全局ui設計顏色
-        const {white, black, viewShadow} = COLOR_DIY;
+        } = this.state;
 
         // 當前時刻時間戳
         let nowTimeStamp = new Date().getTime();
@@ -73,7 +80,7 @@ class EventCard extends Component {
                         }}
                     />
                 )}
-                {'coverImgUrl' in this.props.data && (
+                {coverImgUrl && (
                     <TouchableOpacity
                         style={{
                             borderRadius: pxToDp(8),
@@ -109,7 +116,7 @@ class EventCard extends Component {
                                 </Text>
                                 {/* 日期 */}
                                 <Text style={{color: black.third}}>
-                                    {timeTrans(finishTimeStamp)}
+                                    {moment(startTimeStamp).format('MM-DD')}
                                 </Text>
                             </View>
 

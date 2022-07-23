@@ -1,13 +1,5 @@
 import React, {Component} from 'react';
-import {
-    Text,
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    Dimensions,
-    RefreshControl,
-} from 'react-native';
+import {Text, View, Dimensions, RefreshControl} from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
@@ -22,19 +14,6 @@ const {themeColor} = COLOR_DIY;
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
-
-// 防誤觸時間，理論越長越穩
-const PREVENT_TOUCH_TIME = 500;
-
-// 社團信息
-let clubDataList = [];
-// Return Example
-// {
-//     lub_num: 1,
-//     logo_url: 'http://ark.boxz.dev/static/images/club/517b1d4f-1e8f-4215-8a46-2ba5ae80cd05//logo.jpg',
-//     name: '電腦學會',
-//     tag: 'CLUB',
-// }
 
 class ClubPage extends Component {
     constructor() {
@@ -52,8 +31,7 @@ class ClubPage extends Component {
         await axios
             .get(BASE_URI + GET.CLUB_INFO_ALL)
             .then(res => {
-                let result = res.data;
-                let json = eval('(' + result + ')');
+                let json = res.data;
                 if (json.message == 'success') {
                     clubDataList = json.content;
                     this.setState({clubDataList, isLoading: false});
