@@ -7,11 +7,17 @@ import {
     FlatList,
     ScrollView,
     StyleSheet,
+    RefreshControl,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
 import {pxToDp} from '../../utils/stylesKits';
+import Loading from '../../components/Loading';
+import {BASE_URI, GET} from '../../utils/pathMap';
 import ChatCard from './components/ChatCard';
+import axios from 'axios';
+import qs from 'qs';
+import {inject} from 'mobx-react';
 
 import {Header, SpeedDial} from '@rneui/themed';
 
@@ -21,23 +27,35 @@ class MessageConsole extends Component {
     state = {
         // 打開右下角新建消息類型按鈕
         openOption: false,
-        eventList: [],
+        eventData: [],
+        clubData: {},
+        isLoading: true,
     };
 
-    constructor() {
-        super();
-        this.getData();
+    componentDidMount() {
+        let clubData = this.props.RootStore.userInfo.clubData;
+        this.setState({clubData});
+        this.getData(clubData.club_num);
     }
 
-    async getData() {
-        console.log('獲取活動信息');
-
-        // eventList 的子項僅需要title
+    // 獲取指定club num的活動
+    async getData(club_num) {
+        await axios
+            .get(BASE_URI + GET.EVENT_INFO_CLUB_NUM + club_num)
+            .then(res => {
+                let result = res.data;
+                if (result.message == 'success') {
+                    let eventData = result.content;
+                    this.setState({eventData, isLoading: false});
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
     }
 
     renderFixButton = () => {
-        const {openOption} = this.state;
-
+        const {openOption, clubData} = this.state;
         return (
             <SpeedDial
                 isOpen={openOption}
@@ -55,16 +73,8 @@ class MessageConsole extends Component {
                         this.setState({openOption: false});
                         this.props.navigation.navigate('EventSetting', {
                             mode: 'create',
+                            refresh: this.getData.bind(this, clubData.club_num), // 傳遞回調函數
                         });
-                    }}
-                />
-                <SpeedDial.Action
-                    buttonStyle={{backgroundColor: themeColor}}
-                    icon={{name: 'alternate-email', color: white}}
-                    title="新增公告"
-                    onPress={() => {
-                        this.setState({openOption: false});
-                        this.props.navigation.navigate('MessageSetting');
                     }}
                 />
             </SpeedDial>
@@ -83,7 +93,7 @@ class MessageConsole extends Component {
                     activeOpacity={0.8}
                     onPress={() => {
                         this.props.navigation.navigate('ChatDetail', {
-                            user: {name: 'test'},
+                            user: {name: '@ All Followers'},
                             sendTo: 'all',
                         });
                     }}>
@@ -94,7 +104,7 @@ class MessageConsole extends Component {
                                 color: black.second,
                             }}
                             numberOfLines={2}>
-                            {'@ 所有Follow該賬號的用戶'}
+                            {'@ All Followers'}
                         </Text>
                     </View>
                 </TouchableOpacity>
@@ -103,7 +113,7 @@ class MessageConsole extends Component {
     };
 
     render() {
-        const {eventList} = this.state;
+        const {eventData, clubData, isLoading} = this.state;
         return (
             <View style={{backgroundColor: COLOR_DIY.bg_color, flex: 1}}>
                 {/* 頂部標題 */}
@@ -121,19 +131,43 @@ class MessageConsole extends Component {
                         barStyle: 'dark-content',
                     }}
                 />
-
                 {/* 右下角固定按鈕 */}
                 {this.renderFixButton()}
 
                 {/* 消息內容 */}
-                <FlatList
-                    data={eventList}
-                    ListHeaderComponent={this.renderAtAllCard()}
-                    renderItem={({item, index}) => {
-                        return <ChatCard data={item} index={index}></ChatCard>;
-                    }}
-                    keyExtractor={item => item.id}
-                />
+                {!isLoading ? (
+                    <FlatList
+                        data={eventData}
+                        ListHeaderComponent={this.renderAtAllCard()}
+                        renderItem={({item, index}) => {
+                            return (
+                                <ChatCard data={item} index={index}></ChatCard>
+                            );
+                        }}
+                        keyExtractor={item => item.id}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isLoading}
+                                onRefresh={() => {
+                                    // 展示Loading標識
+                                    this.setState({isLoading: true});
+                                    this.getData(clubData.club_num);
+                                }}
+                            />
+                        }
+                    />
+                ) : (
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        <Loading />
+                    </View>
+                )}
             </View>
         );
     }
@@ -164,4 +198,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MessageConsole;
+export default inject('RootStore')(MessageConsole);

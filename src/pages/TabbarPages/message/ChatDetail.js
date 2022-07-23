@@ -12,14 +12,17 @@ import {
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
+import {BASE_URI, GET} from '../../../utils/pathMap';
 import BlurViewWrapper from '../../../components/BlurViewWrapper';
 import EventDescription from './EventDescription';
 import HyperlinkText from '../../../components/HyperlinkText';
+import Header from '../../../components/Header';
 
 import FastImage from 'react-native-fast-image';
-import {Header} from '@rneui/themed';
+import {SpeedDial} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {inject} from 'mobx-react';
+import axios from 'axios';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -27,6 +30,9 @@ const {height: PAGE_HEIGHT} = Dimensions.get('screen');
 // 定義圖片類型的消息寬高
 const IMAGE_CARD_WIDTH = PAGE_WIDTH * 0.92;
 const IMAGE_CARD_HEIGHT = PAGE_HEIGHT * 0.3;
+
+// 解構全局UI樣式
+const {bg_color, black, white, themeColor, viewShadow} = COLOR_DIY;
 
 const dataList = [
     {
@@ -179,12 +185,9 @@ function mapColorByIndex(index) {
     }
 }
 
-class ChatCard extends Component {
+class ChatDetail extends Component {
     constructor(props) {
         super(props);
-
-        // console.log('緩存為', this.props.RootStore.userInfo);
-
         const host = {
             // 組織用戶的ID
             userID: 1,
@@ -204,7 +207,27 @@ class ChatCard extends Component {
             clubData: undefined,
             isLoading: true,
             isAdmin: false,
+            // 打開右下角新建消息類型按鈕
+            openOption: false,
+            eventData: undefined,
         };
+        this.getData();
+    }
+
+    async getData() {
+        let eventID = this.props.route.params._id;
+        await axios
+            .get(BASE_URI + GET.EVENT_INFO_EVENT_ID + eventID)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    let eventData = json.content[0];
+                    this.setState({eventData, isLoading: false});
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
     }
 
     // 渲染該條信息的時間
@@ -316,6 +339,46 @@ class ChatCard extends Component {
         );
     };
 
+    // 渲染右下角按鈕
+    renderFixButton = () => {
+        const {openOption, eventData} = this.state;
+        let params = this.props.route.params;
+        return (
+            <SpeedDial
+                isOpen={openOption}
+                icon={{name: 'settings', color: white}}
+                openIcon={{name: 'close', color: white}}
+                onOpen={() => this.setState({openOption: true})}
+                onClose={() => this.setState({openOption: false})}
+                style={{zIndex: 9}}
+                buttonStyle={{backgroundColor: themeColor}}>
+                {!('sendTo' in params && params.sendTo == 'all') && (
+                    <SpeedDial.Action
+                        title="修改活動內容"
+                        buttonStyle={{backgroundColor: themeColor}}
+                        icon={{name: 'event-available', color: white}}
+                        onPress={() => {
+                            this.setState({openOption: false});
+                            this.props.navigation.navigate('EventSetting', {
+                                mode: 'edit',
+                                eventData,
+                            });
+                        }}
+                    />
+                )}
+                <SpeedDial.Action
+                    title="新增公告"
+                    buttonStyle={{backgroundColor: themeColor}}
+                    icon={{name: 'alternate-email', color: white}}
+                    onPress={() => {
+                        this.setState({openOption: false});
+                        this.props.navigation.navigate('MessageSetting');
+                    }}
+                />
+            </SpeedDial>
+        );
+    };
+
     componentDidMount() {
         let globalData = this.props.RootStore;
         if (globalData.userInfo.isClub) {
@@ -325,71 +388,42 @@ class ChatCard extends Component {
     }
 
     render() {
-        // 解構全局UI樣式
-        const {bg_color, black, white} = COLOR_DIY;
-        // 解構從message的index傳來的用戶頭像、名字信息
-        const {user} = this.props.route.params;
+        const params = this.props.route.params;
+        const {eventData} = this.state;
+        let headerTitle = '';
+        if (
+            !('sendTo' in params && params.sendTo == 'all') &&
+            eventData != undefined
+        ) {
+            headerTitle = eventData.title;
+        } else {
+            headerTitle = '@ All Followers';
+        }
+
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: user.name,
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
-                        },
-                    }}
-                    // TODO: 僅admin、活動類型顯示設置按鈕
-                    rightComponent={
-                        this.state.isAdmin && (
-                            <TouchableOpacity
-                                onPress={() => {
-                                    let params = this.props.route.params;
-                                    this.props.navigation.navigate(
-                                        'sendTo' in params &&
-                                            params.sendTo == 'all'
-                                            ? 'MessageSetting'
-                                            : 'EventSetting',
-                                        {mode: 'edit'},
-                                    );
-                                }}>
-                                <Ionicons
-                                    name="settings-outline"
-                                    size={pxToDp(25)}
-                                    color={COLOR_DIY.black.main}
-                                />
-                            </TouchableOpacity>
-                        )
-                    }
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                    }}
-                />
+                <Header title={headerTitle} />
+
+                {this.state.isAdmin && this.renderFixButton()}
 
                 {/* 通知信息的渲染 */}
-                <FlatList
-                    data={dataList}
-                    renderItem={({item, index}) =>
-                        this.renderMessageItem(item, index)
-                    }
-                    ListHeaderComponent={() => (
-                        <View style={{marginTop: pxToDp(50)}} />
-                    )}
-                    // 翻轉渲染順序，從下往上
-                    inverted={true}
-                />
+                {false && (
+                    <FlatList
+                        data={dataList}
+                        renderItem={({item, index}) =>
+                            this.renderMessageItem(item, index)
+                        }
+                        ListHeaderComponent={() => (
+                            <View style={{marginTop: pxToDp(50)}} />
+                        )}
+                        // 翻轉渲染順序，從下往上
+                        inverted={true}
+                    />
+                )}
+                <View>
+                    {/* TODO: */}
+                    <Text>社團公告歷史記錄，開發中</Text>
+                </View>
             </View>
         );
     }
@@ -463,4 +497,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default inject('RootStore')(ChatCard);
+export default inject('RootStore')(ChatDetail);
