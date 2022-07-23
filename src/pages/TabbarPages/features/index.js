@@ -544,7 +544,10 @@ class Index extends Component {
                         } else if (item.icon_type == 'img') {
                             icon = (
                                 <FastImage
-                                    source={{uri: item.icon_name}}
+                                    source={{
+                                        uri: item.icon_name,
+                                        cache: FastImage.cacheControl.web,
+                                    }}
                                     style={{
                                         height: pxToDp(60),
                                         width: pxToDp(60),

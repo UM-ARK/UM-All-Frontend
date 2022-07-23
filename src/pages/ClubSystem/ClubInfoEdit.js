@@ -227,7 +227,10 @@ class ClubInfoEdit extends Component {
                 {/* 未選擇圖片則顯示圖標，選中/已有圖片則顯示圖片 */}
                 {imageUrlArr[index].length > 0 ? (
                     <FastImage
-                        source={{uri: imageUrlArr[index]}}
+                        source={{
+                            uri: imageUrlArr[index],
+                            cache: FastImage.cacheControl.web,
+                        }}
                         style={{width: '100%', height: '100%'}}
                     />
                 ) : (

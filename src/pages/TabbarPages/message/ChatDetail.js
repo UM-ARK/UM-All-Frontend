@@ -18,7 +18,6 @@ import EventDescription from './EventDescription';
 import HyperlinkText from '../../../components/HyperlinkText';
 import Header from '../../../components/Header';
 
-import FastImage from 'react-native-fast-image';
 import {SpeedDial} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {inject} from 'mobx-react';
@@ -362,6 +361,7 @@ class ChatDetail extends Component {
                             this.props.navigation.navigate('EventSetting', {
                                 mode: 'edit',
                                 eventData,
+                                refresh: this.getData(),
                             });
                         }}
                     />

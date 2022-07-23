@@ -9,6 +9,9 @@ import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 
+// 解構全局ui設計顏色
+const {white, black, viewShadow, themeColor} = COLOR_DIY;
+
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
@@ -27,10 +30,7 @@ class EventCard extends Component {
     };
 
     render() {
-        // 解構this.state.dataList數據
         const {logo_url, name, tag} = this.state.data;
-        // 解構全局ui設計顏色
-        const {white, black, viewShadow, themeColor} = COLOR_DIY;
         return (
             <TouchableOpacity
                 style={{
@@ -47,7 +47,7 @@ class EventCard extends Component {
                 onPress={this.handleJumpToDetail}>
                 {/* 社團 / 組織 Logo */}
                 <FastImage
-                    source={{uri: logo_url}}
+                    source={{uri: logo_url, cache: FastImage.cacheControl.web}}
                     style={{
                         width: pxToDp(70),
                         height: pxToDp(70),

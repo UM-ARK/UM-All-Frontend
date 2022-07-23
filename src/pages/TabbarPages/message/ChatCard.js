@@ -105,6 +105,7 @@ class ChatCard extends Component {
                                 <FastImage
                                     source={{
                                         uri: avatar,
+                                        cache: FastImage.cacheControl.web,
                                     }}
                                     style={styles.avatarStyle}
                                 />

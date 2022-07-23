@@ -88,7 +88,10 @@ function ScrollImage(props) {
                                         width: '100%',
                                         height: '100%',
                                     }}
-                                    source={{uri: item.uri}}>
+                                    source={{
+                                        uri: item.uri,
+                                        cache: FastImage.cacheControl.web,
+                                    }}>
                                     {/* 1.2 圖片附文字說明展示 開始 */}
                                     <LinearGradient
                                         start={{x: 0, y: 0}}
@@ -127,7 +130,7 @@ function ScrollImage(props) {
                     justifyContent: 'space-between',
                     width: pxToDp(100),
                     alignSelf: 'center',
-                    marginTop:-pxToDp(10)
+                    marginTop: -pxToDp(10),
                 }}>
                 {colors.map((backgroundColor, index) => {
                     return (

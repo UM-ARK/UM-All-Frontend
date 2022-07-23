@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">UMAllWhite</string>
+    <!-- 修改APP名稱 -->
+    <string name="app_name">UM ALL</string>
 </resources>

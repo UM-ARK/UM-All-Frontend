@@ -234,7 +234,10 @@ class EventSetting extends Component {
                 {/* 未選擇圖片則顯示圖標，選中/已有圖片則顯示圖片 */}
                 {imageUrlArr[index].length > 0 ? (
                     <FastImage
-                        source={{uri: imageUrlArr[index]}}
+                        source={{
+                            uri: imageUrlArr[index],
+                            cache: FastImage.cacheControl.web,
+                        }}
                         style={{width: '100%', height: '100%'}}
                     />
                 ) : (
@@ -495,7 +498,7 @@ class EventSetting extends Component {
                 if (json.message == 'success') {
                     alert('上傳成功');
                     // 返回上一頁面，重新請求數據
-                    // this.props.route.params.refresh();
+                    this.props.route.params.refresh();
                     this.props.navigation.goBack();
                 }
                 // 上傳失敗
