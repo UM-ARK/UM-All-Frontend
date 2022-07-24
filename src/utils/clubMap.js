@@ -22,7 +22,7 @@ export function clubTagMap(tag) {
             return '商業';
             break;
         default:
-            return '待定';
+            return tag;
             break;
     }
 }

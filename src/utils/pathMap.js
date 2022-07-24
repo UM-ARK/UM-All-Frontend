@@ -21,6 +21,8 @@ export const GET = {
 }
 
 export const POST = {
+    // 學生登錄
+    STD_LOGIN : 'student_signin/',
     // 修改社團info
     CLUB_EDIT_INFO : 'edit_club_info/',
     // 創建活動
