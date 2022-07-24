@@ -42,14 +42,31 @@ class EventCard extends Component {
             startTimeStamp: eventData.startdatetime,
             finishTimeStamp: eventData.enddatetime,
             type: eventData.type,
+            link: eventData.link,
             eventData,
         });
     }
 
     handleJumpToDetail = () => {
-        this.context.navigate('EventDetail', {
-            data: this.state.eventData,
-        });
+        const {type, link, title} = this.state;
+        let webview_param = {
+            // import pathMap的鏈接進行跳轉
+            url: link,
+            title: title,
+            // 標題顏色，默認為black.main
+            // text_color: '#002c55',
+            // 標題背景顏色，默認為bg_color
+            // bg_color_diy: '#fff',
+            // 狀態欄字體是否黑色，默認true
+            // isBarStyleBlack: false,
+        };
+        if (type == 'WEBSITE') {
+            this.context.navigate('Webviewer', webview_param);
+        } else {
+            this.context.navigate('EventDetail', {
+                data: this.state.eventData,
+            });
+        }
     };
 
     render() {
@@ -66,7 +83,7 @@ class EventCard extends Component {
         // 當前時刻時間戳
         let nowTimeStamp = new Date().getTime();
         // 活動結束標誌
-        let isFinish = nowTimeStamp > finishTimeStamp;
+        let isFinish = nowTimeStamp > Date.parse(finishTimeStamp);
 
         return (
             <View style={{...this.props.style}}>
@@ -102,14 +119,7 @@ class EventCard extends Component {
                         />
 
                         {/* 標題描述 */}
-                        <View
-                            style={{
-                                backgroundColor: white,
-                                width: IMAGE_SIZE,
-                                padding: pxToDp(10),
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}>
+                        <View style={styles.title.container}>
                             {/* 標題文字 & 日期 */}
                             <View style={{width: '90%'}}>
                                 <Text
@@ -152,6 +162,15 @@ const styles = StyleSheet.create({
         backgroundColor: COLOR_DIY.unread,
         borderRadius: 50,
         ...COLOR_DIY.viewShadow,
+    },
+    title: {
+        container: {
+            backgroundColor: white,
+            width: IMAGE_SIZE,
+            padding: pxToDp(10),
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
     },
 });
 

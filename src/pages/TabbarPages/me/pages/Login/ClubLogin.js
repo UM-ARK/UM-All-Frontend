@@ -120,7 +120,6 @@ function RenderLoginButton(props) {
         })
             .then(res => {
                 let json = res.data;
-                console.log(json);
                 // 登錄成功
                 if (json.message == 'success') {
                     toast.show({

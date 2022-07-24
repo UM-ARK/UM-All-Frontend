@@ -58,6 +58,7 @@ class MeScreen extends Component {
         // 是否已登錄
         isLogin: false,
         RootStoreChange: true,
+        stdData: undefined,
     };
 
     componentDidMount() {
@@ -68,14 +69,15 @@ class MeScreen extends Component {
         ) {
             console.log('Me檢測：有token緩存');
             this.setState({
-                isClub: globalData.userInfo.isClub,
                 isLogin: true,
+                stdData: globalData.userInfo.stdData,
             });
         }
     }
 
     // 渲染個人信息欄
     renderUserInfo = () => {
+        const {Student_email, icon_url, name, _id} = this.state.stdData;
         return (
             <View style={{...s.personalInfoContainer}}>
                 <View
@@ -88,7 +90,7 @@ class MeScreen extends Component {
                     }}>
                     {/* 頭像 */}
                     <Image
-                        source={require('./icon/testphoto.png')}
+                        source={{uri: icon_url}}
                         style={{
                             height: pxToDp(70),
                             width: pxToDp(70),
@@ -107,7 +109,7 @@ class MeScreen extends Component {
                                 fontSize: pxToDp(20),
                                 fontWeight: '600',
                             }}>
-                            {'Moodle的姓名'}
+                            {name}
                         </Text>
                         <Text
                             style={{
@@ -115,7 +117,7 @@ class MeScreen extends Component {
                                 fontSize: pxToDp(16),
                                 // fontWeight: '500',
                             }}>
-                            {'dc123456'}
+                            {_id}
                         </Text>
                     </View>
                 </View>

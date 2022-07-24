@@ -263,9 +263,6 @@ class ChatDetail extends Component {
                 {/* 卡片內容 */}
                 <View style={styles.message.contentWrap}>
                     {/* 文字 */}
-                    {/* <Hyperlink linkStyle={{color: COLOR_DIY.themeColor}} onPress={(link)=>console.log(link)}>
-                        <Text style={{color: titleColor}}>{item.text}</Text>
-                    </Hyperlink> */}
                     <HyperlinkText
                         linkStyle={{color: COLOR_DIY.themeColor}}
                         title={item.title}
@@ -361,7 +358,7 @@ class ChatDetail extends Component {
                             this.props.navigation.navigate('EventSetting', {
                                 mode: 'edit',
                                 eventData,
-                                refresh: this.getData(),
+                                refresh: this.getData.bind(this),
                             });
                         }}
                     />
@@ -407,7 +404,13 @@ class ChatDetail extends Component {
                 {this.state.isAdmin && this.renderFixButton()}
 
                 {/* 通知信息的渲染 */}
-                {false && (
+                <View>
+                    {/* TODO: */}
+                    <Text style={{color: black.main}}>
+                        公告歷史記錄，開發中
+                    </Text>
+                </View>
+                {true && (
                     <FlatList
                         data={dataList}
                         renderItem={({item, index}) =>
@@ -420,10 +423,6 @@ class ChatDetail extends Component {
                         inverted={true}
                     />
                 )}
-                <View>
-                    {/* TODO: */}
-                    <Text>社團公告歷史記錄，開發中</Text>
-                </View>
             </View>
         );
     }

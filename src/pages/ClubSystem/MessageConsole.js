@@ -40,8 +40,9 @@ class MessageConsole extends Component {
 
     // 獲取指定club num的活動
     async getData(club_num) {
+        let URL = BASE_URI + GET.EVENT_INFO_CLUB_NUM + club_num;
         await axios
-            .get(BASE_URI + GET.EVENT_INFO_CLUB_NUM + club_num)
+            .get(URL)
             .then(res => {
                 let result = res.data;
                 if (result.message == 'success') {
@@ -50,7 +51,7 @@ class MessageConsole extends Component {
                 }
             })
             .catch(err => {
-                console.error(err);
+                console.log('err', err);
             });
     }
 

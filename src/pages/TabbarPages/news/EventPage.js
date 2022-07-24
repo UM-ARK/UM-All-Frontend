@@ -41,7 +41,6 @@ class EventPage extends Component {
 
     async getData() {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
-
         await axios
             .get(URL)
             .then(res => {
@@ -64,6 +63,8 @@ class EventPage extends Component {
                         rightDataList,
                         isLoading: false,
                     });
+                } else {
+                    alert('數據出錯，請聯繫開發者');
                 }
             })
             .catch(err => console.log('err', err));

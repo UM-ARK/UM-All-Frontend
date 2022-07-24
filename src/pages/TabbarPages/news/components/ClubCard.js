@@ -3,6 +3,7 @@ import {View, Image, Text, ImageBackground, Dimensions} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
+import {clubTagMap} from '../../../../utils/clubMap';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
@@ -78,7 +79,7 @@ class EventCard extends Component {
                         fontSize: pxToDp(10),
                         marginTop: pxToDp(5),
                     }}>
-                    #{tag}
+                    #{clubTagMap(tag)}
                 </Text>
             </TouchableOpacity>
         );

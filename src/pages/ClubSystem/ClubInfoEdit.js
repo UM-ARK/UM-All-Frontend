@@ -60,23 +60,35 @@ class ClubInfoEdit extends Component {
 
     // 圖片選擇
     async handleSelect(index) {
+        const {clubData} = this.state;
         let imageUrl = '';
         let imageObj = {};
+        let cancel = true;
         try {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
                 console.log('selectResult', selectResult.assets[0]);
                 imageObj = selectResult.assets[0];
                 imageUrl = imageObj.uri;
+                cancel = false;
+            } else {
+                if (
+                    'club_photos_list' in clubData &&
+                    clubData.club_photos_list.length > 0
+                ) {
+                    imageUrl = clubData.club_photos_list[0];
+                }
             }
         } catch (error) {
             console.log(error);
         } finally {
-            // 修改this.state相片數組的值
-            let imageUrlArr = this.state.imageUrlArr;
-            imageUrlArr.splice(index, 1, imageUrl);
-            add_club_photos.push(imageObj);
-            this.setState({imageUrlArr});
+            if (!cancel) {
+                // 修改this.state相片數組的值
+                let imageUrlArr = this.state.imageUrlArr;
+                imageUrlArr.splice(index, 1, imageUrl);
+                add_club_photos.push(imageObj);
+                this.setState({imageUrlArr});
+            }
         }
     }
 

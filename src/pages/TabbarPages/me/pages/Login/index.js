@@ -16,6 +16,7 @@ import {
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import {handleLogin} from '../../../../../utils/storageKits';
+import {BASE_URI, POST} from '../../../../../utils/pathMap';
 import IntegratedWebView from '../../../../../components/IntegratedWebView';
 import {UM_Moodle} from '../../../../../utils/pathMap';
 import DialogDIY from '../../../../../components/DialogDIY';
@@ -26,6 +27,7 @@ import {NavigationContext} from '@react-navigation/native';
 import CookieManager from '@react-native-cookies/cookies';
 import WebView from 'react-native-webview';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
 
 const {bg_color, black, themeColor, white} = COLOR_DIY;
 
@@ -39,18 +41,37 @@ class LoginChoose extends Component {
         haveAccount: false,
         showDialog: false,
         showMoodle: false,
+        disabledButton: false,
     };
 
-    handleStdLogin = () => {
-        console.log('學生登錄');
-        // 檢查本地有無學號資料緩存
-        // 有：
-        // 無：
-
-        // 跳轉Moodle登錄，等待用戶退出
+    handleStdLogin = async session => {
+        let URL = BASE_URI + POST.STD_LOGIN;
+        let data = new FormData();
+        data.append('cookies', session);
+        await axios
+            .post(URL, data, {
+                headers: {
+                    'Content-Type': `multipart/form-data`,
+                },
+            })
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    console.log('登錄結果', json.content);
+                    // 設定本地緩存，並重啟APP
+                    handleLogin({
+                        isClub: false,
+                        stdData: json.content,
+                    });
+                }
+            })
+            .catch(err => {
+                console.log('err', err);
+            });
     };
 
     render() {
+        const {canGoBack} = this.state;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header
@@ -66,7 +87,8 @@ class LoginChoose extends Component {
                                 onPress={() => {
                                     this.refs.webRef.reload();
                                     this.setState({showMoodle: false});
-                                }}>
+                                }}
+                                disabled={canGoBack}>
                                 <Ionicons
                                     name="chevron-back-outline"
                                     size={pxToDp(25)}
@@ -83,11 +105,12 @@ class LoginChoose extends Component {
                         ref={'webRef'}
                         startInLoadingState={true}
                         // TODO: 自動注入賬號密碼
-                        injectedJavaScript={`
-                            document.getElementById("userNameInput").value="dc02581";
-                            document.getElementById("passwordInput").value="4537asdfg0";
-                        `}
+                        // injectedJavaScript={`
+                        //     document.getElementById("userNameInput").value="dc02581";
+                        //     document.getElementById("passwordInput").value="4537asdfg0";
+                        // `}
                         onNavigationStateChange={e => {
+                            this.setState({canGoBack: true});
                             // SSO密碼輸入頁面e.title為https://websso.....
                             // 雙重認證頁面e.title為Duo Security
                             // Moodle頁面e.title為Dashboard
@@ -101,16 +124,28 @@ class LoginChoose extends Component {
                                             'CookieManager.get =>',
                                             cookies,
                                         );
-                                        // 設定本地緩存，並重啟APP
-                                        handleLogin({
-                                            isClub: false,
-                                            token: 'student',
-                                        });
+                                        if ('MoodleSession' in cookies) {
+                                            alert(
+                                                `Moodle登錄成功，正在註冊UM ALL...\n先不要進行其他操作...`,
+                                            );
+                                            console.log(
+                                                'MoodleSession =>',
+                                                cookies.MoodleSession.value,
+                                            );
+                                            this.handleStdLogin(
+                                                cookies.MoodleSession.value,
+                                            );
+                                        } else {
+                                            alert(
+                                                '無法檢測Moodle登錄狀態，請聯繫開發者',
+                                            );
+                                        }
                                     })
                                     .catch(err => alert(err));
-                                this.refs.webRef.injectJavaScript(`
-                                window.location.href = 'https://ummoodle.um.edu.mo/user/profile.php';
-                                `)
+                                // 跳轉詳情頁
+                                // this.refs.webRef.injectJavaScript(`
+                                // window.location.href = 'https://ummoodle.um.edu.mo/user/profile.php';
+                                // `)
                             }
                         }}
                     />
@@ -238,7 +273,7 @@ class LoginChoose extends Component {
                 <DialogDIY
                     showDialog={this.state.showDialog}
                     text={
-                        '將跳轉Moodle的UM PASS登錄頁，在登錄完成且看到Moodle界面時即可退出頁面，會自動完成註冊！'
+                        '將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！'
                     }
                     handleConfirm={() => {
                         this.setState({showDialog: false, showMoodle: true});
