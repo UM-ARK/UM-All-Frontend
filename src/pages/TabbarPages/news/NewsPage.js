@@ -6,6 +6,7 @@ import {
     Dimensions,
     ScrollView,
     RefreshControl,
+    StyleSheet,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
@@ -179,16 +180,7 @@ class NewsPage extends Component {
                 <Text style={{color: black.third, alignSelf: 'center'}}>
                     Data From: data.um.edu.mo
                 </Text>
-                <View
-                    style={{
-                        borderRadius: pxToDp(10),
-                        overflow: 'hidden',
-                        marginHorizontal: pxToDp(10),
-                        marginVertical: pxToDp(5),
-                        height: pxToDp(200),
-                        backgroundColor: white,
-                        ...viewShadow,
-                    }}>
+                <View style={styles.topNewsContainer}>
                     <View style={{width: '100%'}}>
                         {/* 圖片背景 */}
                         {this.state.topNews.imageUrls && (
@@ -201,32 +193,18 @@ class NewsPage extends Component {
                                 }}>
                                 <FastImage
                                     source={{
-                                        uri: imageUrls[0],
+                                        uri: imageUrls[0].replace(
+                                            'http:',
+                                            'https:',
+                                        ),
                                         cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}>
                                     {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                                    <View
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            backgroundColor: 'rgba(0,0,0,0.5)',
-                                            padding: pxToDp(15),
-                                            justifyContent: 'flex-end',
-                                        }}>
+                                    <View style={styles.topNewsOverlay}>
                                         {/* Top Story字樣 */}
-                                        <View
-                                            style={{
-                                                position: 'absolute',
-                                                top: pxToDp(10),
-                                                left: pxToDp(15),
-                                            }}>
-                                            <Text
-                                                style={{
-                                                    color: white,
-                                                    fontWeight: 'bold',
-                                                    fontSize: pxToDp(20),
-                                                }}>
+                                        <View style={styles.topNewsPosition}>
+                                            <Text style={styles.topNewsText}>
                                                 Top Story @ UM
                                             </Text>
                                         </View>
@@ -391,4 +369,34 @@ class NewsPage extends Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    topNewsContainer: {
+        borderRadius: pxToDp(10),
+        overflow: 'hidden',
+        marginHorizontal: pxToDp(10),
+        marginVertical: pxToDp(5),
+        height: pxToDp(200),
+        backgroundColor: white,
+        ...viewShadow,
+    },
+    topNewsOverlay: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: pxToDp(15),
+        justifyContent: 'flex-end',
+    },
+    topNewsPosition: {
+        position: 'absolute',
+        top: pxToDp(10),
+        left: pxToDp(15),
+    },
+    topNewsText: {
+        color: white,
+        fontWeight: 'bold',
+        fontSize: pxToDp(20),
+    },
+});
+
 export default NewsPage;
