@@ -1,22 +1,27 @@
 import * as React from 'react';
-import {View, Dimensions, Text, Image, ImageBackground} from 'react-native';
-import Carousel from 'react-native-reanimated-carousel';
+import {View, Dimensions, Text, Image, StyleSheet} from 'react-native';
+
+import {pxToDp, pcHeightToNumHeight} from '../../../../utils/stylesKits';
+import {COLOR_DIY} from '../../../../utils/uiMap';
+import BlurViewWrapper from '../../../../components/BlurViewWrapper';
+
 import Animated, {
     Extrapolate,
     interpolate,
     useAnimatedStyle,
     useSharedValue,
 } from 'react-native-reanimated';
+import Carousel from 'react-native-reanimated-carousel';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
-
-import {pxToDp} from '../../../../utils/stylesKits';
-import {COLOR_DIY} from '../../../../utils/uiMap';
 import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
 let colors = [COLOR_DIY.themeColor];
+
+const {white, bg_color, black, viewShadow} = COLOR_DIY;
 
 function ScrollImage(props) {
     const progressValue = useSharedValue(0);
@@ -27,7 +32,6 @@ function ScrollImage(props) {
     if (numDiff > 0) {
         for (let i = 0; i < numDiff; i++) {
             colors.push(COLOR_DIY.themeColor);
-            // console.log(colors);
         }
     } else if (numDiff < 0) {
         for (let i = 0; i < numDiff; i++) {
@@ -49,13 +53,14 @@ function ScrollImage(props) {
             style={{
                 alignItems: 'center',
                 width: PAGE_WIDTH,
-                marginTop: pxToDp(-10),
+                marginVertical: pxToDp(-10),
             }}>
-            {/* 1.0 輪播圖組件 開始 */}
+            {/* 輪播圖組件 */}
+            {/* TODO: 用戶引導 */}
             <Carousel
                 vertical={false}
                 width={PAGE_WIDTH}
-                height={pxToDp(180)}
+                height={pcHeightToNumHeight('45%', PAGE_HEIGHT)}
                 loop
                 autoPlay={true}
                 autoPlayInterval={3000}
@@ -64,88 +69,126 @@ function ScrollImage(props) {
                 }
                 mode="parallax"
                 modeConfig={{
-                    parallaxScrollingScale: 0.79,
-                    parallaxScrollingOffset: 100,
+                    // parallaxScrollingScale: 0.79,
+                    // parallaxScrollingOffset: 100,
+                    parallaxScrollingScale: 0.9,
+                    parallaxScrollingOffset: 30,
                 }}
                 data={imageData}
                 renderItem={({item, index}) => (
                     <View style={{flex: 1}}>
-                        {/* 1.1 圖片展示 */}
+                        {/* 圖片展示 */}
                         <TouchableWithoutFeedback
                             style={{
                                 borderRadius: pxToDp(10),
                                 overflow: 'hidden',
                                 width: '100%',
                                 height: '100%',
-                                // 添加陰影
-                                ...COLOR_DIY.viewShadow,
+                                ...viewShadow,
                             }}
                             onPress={() => handleOnClickImage(item, index)}>
-                            <View style={{width: '100%', height: '100%'}}>
-                                <FastImage
-                                    resizeMode={FastImage.resizeMode.cover}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                    }}
-                                    source={{
-                                        uri: item.uri,
-                                        cache: FastImage.cacheControl.web,
-                                    }}>
-                                    {/* 1.2 圖片附文字說明展示 開始 */}
-                                    <LinearGradient
-                                        start={{x: 0, y: 0}}
-                                        end={{x: 0, y: 0.8}}
-                                        colors={[
-                                            'rgba(255, 255, 255, 0)',
-                                            'rgba(0,0,0,0.7)',
-                                        ]}
+                            {false && (
+                                <View style={{width: '100%', height: '100%'}}>
+                                    <FastImage
+                                        resizeMode={FastImage.resizeMode.cover}
                                         style={{
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            height: '15%',
                                             width: '100%',
-                                            alignItems: 'center',
+                                            height: '100%',
+                                        }}
+                                        source={{
+                                            uri: item.uri,
+                                            cache: FastImage.cacheControl.web,
+                                        }}>
+                                        {/* 1.2 圖片附文字說明展示 開始 */}
+                                        <LinearGradient
+                                            start={{x: 0, y: 0}}
+                                            end={{x: 0, y: 0.8}}
+                                            colors={[
+                                                'rgba(255, 255, 255, 0)',
+                                                'rgba(0,0,0,0.7)',
+                                            ]}
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: 0,
+                                                height: '15%',
+                                                width: '100%',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}>
+                                            <Text
+                                                style={{
+                                                    fontSize: pxToDp(14),
+                                                    color: COLOR_DIY.white,
+                                                }}>
+                                                {item.title}
+                                            </Text>
+                                        </LinearGradient>
+                                    </FastImage>
+                                </View>
+                            )}
+                            <FastImage
+                                source={{
+                                    uri: item.uri.replace('http:', 'https:'),
+                                    cache: FastImage.cacheControl.web,
+                                }}
+                                style={{width: '100%', height: '100%'}}
+                                resizeMode={FastImage.resizeMode.cover}>
+                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
+                                {/* <View style={styles.topNewsOverlay}>
+                                    <View style={styles.topNewsPosition}>
+                                        <Text style={styles.topNewsText}>
+                                            查看詳情
+                                        </Text>
+                                    </View> */}
+
+                                {/* 標題 */}
+                                {/* <View
+                                        style={{
+                                            alignSelf: 'center',
                                             justifyContent: 'center',
+                                            width: '100%',
                                         }}>
                                         <Text
                                             style={{
-                                                fontSize: pxToDp(14),
-                                                color: COLOR_DIY.white,
-                                            }}>
+                                                color: white,
+                                                fontWeight: 'bold',
+                                                fontSize: pxToDp(18),
+                                            }}
+                                            numberOfLines={3}>
                                             {item.title}
                                         </Text>
-                                    </LinearGradient>
-                                </FastImage>
-                            </View>
+                                    </View>
+                                </View> */}
+                            </FastImage>
                         </TouchableWithoutFeedback>
                     </View>
                 )}
             />
 
             {/* 圓點下標標識 */}
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    width: pxToDp(100),
-                    alignSelf: 'center',
-                    marginTop: -pxToDp(10),
-                }}>
-                {colors.map((backgroundColor, index) => {
-                    return (
-                        <PaginationItem
-                            backgroundColor={backgroundColor}
-                            animValue={progressValue}
-                            index={index}
-                            key={index}
-                            isRotate={false}
-                            length={imageData.length}
-                        />
-                    );
-                })}
-            </View>
-            {/* 1.0 輪播圖組件 結束 */}
+            {false && (
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        width: pxToDp(100),
+                        alignSelf: 'center',
+                        marginTop: -pxToDp(10),
+                    }}>
+                    {colors.map((backgroundColor, index) => {
+                        return (
+                            <PaginationItem
+                                backgroundColor={backgroundColor}
+                                animValue={progressValue}
+                                index={index}
+                                key={index}
+                                isRotate={false}
+                                length={imageData.length}
+                            />
+                        );
+                    })}
+                </View>
+            )}
         </View>
     );
 }
@@ -211,5 +254,34 @@ const PaginationItem: React.FC<{
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    topNewsContainer: {
+        borderRadius: pxToDp(10),
+        overflow: 'hidden',
+        marginHorizontal: pxToDp(10),
+        marginVertical: pxToDp(5),
+        height: pxToDp(200),
+        backgroundColor: white,
+        ...viewShadow,
+    },
+    topNewsOverlay: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        padding: pxToDp(15),
+        justifyContent: 'flex-end',
+    },
+    topNewsPosition: {
+        position: 'absolute',
+        top: pxToDp(10),
+        left: pxToDp(15),
+    },
+    topNewsText: {
+        color: white,
+        fontWeight: 'bold',
+        fontSize: pxToDp(20),
+    },
+});
 
 export default ScrollImage;

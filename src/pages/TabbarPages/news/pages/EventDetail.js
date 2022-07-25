@@ -122,6 +122,7 @@ class EventDetail extends Component {
         this.setState({
             coverImgUrl: eventData.cover_image_url,
             title: eventData.title,
+            introduction: eventData.introduction,
             startTimeStamp: eventData.startdatetime,
             finishTimeStamp: eventData.enddatetime,
             type: eventData.type,
@@ -182,6 +183,7 @@ class EventDetail extends Component {
             finishTimeStamp,
             type,
             relateImgUrl,
+            introduction,
         } = this.state;
         const {isFollow, isLoading} = this.state;
 
@@ -234,58 +236,55 @@ class EventDetail extends Component {
                         </View>
 
                         {/* 活動時間 */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginTop: pxToDp(5),
-                            }}>
-                            <View style={{...styles.infoShowContainer}}>
+                        <View style={{marginTop: pxToDp(5)}}>
+                            <View style={{flexDirection: 'row'}}>
+                                <View style={{...styles.infoShowContainer}}>
+                                    <Text
+                                        style={{
+                                            fontSize: pxToDp(11),
+                                            color: COLOR_DIY.themeColor,
+                                        }}>
+                                        from
+                                    </Text>
+                                </View>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(11),
-                                        color: COLOR_DIY.themeColor,
+                                        marginHorizontal: pxToDp(5),
+                                        color: COLOR_DIY.black.third,
                                     }}>
-                                    from
+                                    {moment(startTimeStamp).format(
+                                        'MM/DD, HH:mm',
+                                    )}
                                 </Text>
                             </View>
-                            <Text
+                            <View
                                 style={{
-                                    marginHorizontal: pxToDp(5),
-                                    color: COLOR_DIY.black.third,
+                                    flexDirection: 'row',
+                                    marginTop: pxToDp(5),
                                 }}>
-                                {moment(startTimeStamp).format('MM/DD, HH:mm')}
-                            </Text>
-                            <View style={{...styles.infoShowContainer}}>
+                                <View style={{...styles.infoShowContainer}}>
+                                    <Text
+                                        style={{
+                                            fontSize: pxToDp(11),
+                                            color: COLOR_DIY.themeColor,
+                                        }}>
+                                        to
+                                    </Text>
+                                </View>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(11),
-                                        color: COLOR_DIY.themeColor,
+                                        marginLeft: pxToDp(5),
+                                        color: COLOR_DIY.black.third,
                                     }}>
-                                    to
+                                    {moment(finishTimeStamp).format(
+                                        'MM/DD, HH:mm',
+                                    )}
                                 </Text>
                             </View>
-                            <Text
-                                style={{
-                                    marginLeft: pxToDp(5),
-                                    color: COLOR_DIY.black.third,
-                                }}>
-                                {moment(finishTimeStamp).format('MM/DD, HH:mm')}
-                            </Text>
-                        </View>
-
-                        {/* 活動tag */}
-                        <View style={{marginTop: pxToDp(20)}}>
-                            <Text
-                                style={{
-                                    marginLeft: pxToDp(5),
-                                    color: COLOR_DIY.themeColor,
-                                    fontSize: pxToDp(14),
-                                }}>
-                                {'#' + '活動的tag'}
-                            </Text>
                         </View>
                     </View>
                     {/* Follow按鈕 帶Toast */}
+                    <View style={{alignItems: 'flex-end'}}></View>
                     <RenderFollowButton
                         isFollow={isFollow}
                         // 傳遞修改this.state.isFollow方法
@@ -352,29 +351,10 @@ class EventDetail extends Component {
             );
         };
 
-        // 渲染Follow按鈕，主題色為未Follow，Follow改為灰色
-        renderFollowButton = () => {
-            return (
-                <TouchableOpacity
-                    style={{
-                        marginTop: pxToDp(5),
-                        alignSelf: 'center',
-                        backgroundColor: isFollow ? black.third : themeColor,
-                        padding: pxToDp(10),
-                        borderRadius: pxToDp(15),
-                    }}
-                    activeOpacity={0.7}
-                    onPress={this.handleFollow}>
-                    <Text style={{color: white}}>
-                        {isFollow ? 'Del Follow' : 'Follow Us'}
-                    </Text>
-                </TouchableOpacity>
-            );
-        };
-
         // 渲染頁面主要內容
         renderMainContent = () => {
-            const {relateImgUrl, clubData} = this.state;
+            const {relateImgUrl, clubData, eventData} = this.state;
+            console.log('eventData', eventData);
             return (
                 <View style={{backgroundColor: bg_color, flex: 1}}>
                     {/* 舉辦方頭像 */}
@@ -390,7 +370,11 @@ class EventDetail extends Component {
                                 flexDirection: 'row',
                             }}>
                             {/* 社團名 */}
-                            <View style={{justifyContent: 'center'}}>
+                            <View
+                                style={{
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
                                 <View style={{...styles.infoShowContainer}}>
                                     <Text
                                         style={{
@@ -404,6 +388,7 @@ class EventDetail extends Component {
                                     style={{
                                         alignSelf: 'center',
                                         marginTop: pxToDp(5),
+                                        color: black.third,
                                     }}>
                                     {clubData == undefined ? '' : clubData.name}
                                 </Text>
@@ -425,62 +410,64 @@ class EventDetail extends Component {
                         </View>
                     </TouchableWithoutFeedback>
 
-                    {/* 1.0 詳情介紹 開始 */}
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(10),
-                            marginHorizontal: pxToDp(15),
-                            // 增加陰影
-                            marginBottom: pxToDp(8),
-                            marginTop: pxToDp(10),
-                            ...COLOR_DIY.viewShadow,
-                        }}
-                        activeOpacity={0.7}
-                        onPress={() => this.tiggerModalBottom()}>
-                        {/* 卡片標題 */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingVertical: pxToDp(10),
-                                paddingHorizontal: pxToDp(10),
-                            }}
-                            activeOpacity={0.6}>
-                            <Text
+                    {/* 詳情介紹 */}
+                    {eventData != undefined &&
+                        eventData.introduction.length > 0 && (
+                            <TouchableOpacity
                                 style={{
-                                    fontSize: pxToDp(12),
-                                    color: COLOR_DIY.black.main,
-                                    fontWeight: 'bold',
-                                }}>
-                                詳情
-                            </Text>
-                            <Ionicons
-                                name="chevron-forward-outline"
-                                size={pxToDp(14)}
-                                color={COLOR_DIY.black.main}></Ionicons>
-                        </View>
-                        {/* 卡片內容 */}
-                        <View
-                            style={{
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                flexDirection: 'row',
-                                margin: pxToDp(10),
-                                marginTop: pxToDp(0),
-                            }}>
-                            {/* 服務圖標與文字 */}
-                            <Text
-                                numberOfLines={3}
-                                style={{color: black.second}}>
-                                {'活動詳情bababaldkfjalskdjflksadjflkasjdf'}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                    {/* 1.0 詳情介紹 結束 */}
+                                    backgroundColor: COLOR_DIY.white,
+                                    borderRadius: pxToDp(10),
+                                    marginHorizontal: pxToDp(15),
+                                    // 增加陰影
+                                    marginBottom: pxToDp(8),
+                                    marginTop: pxToDp(10),
+                                    ...COLOR_DIY.viewShadow,
+                                }}
+                                activeOpacity={0.7}
+                                onPress={() => this.tiggerModalBottom()}>
+                                {/* 卡片標題 */}
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        paddingVertical: pxToDp(10),
+                                        paddingHorizontal: pxToDp(10),
+                                    }}
+                                    activeOpacity={0.6}>
+                                    <Text
+                                        style={{
+                                            fontSize: pxToDp(12),
+                                            color: COLOR_DIY.black.main,
+                                            fontWeight: 'bold',
+                                        }}>
+                                        詳情
+                                    </Text>
+                                    <Ionicons
+                                        name="chevron-forward-outline"
+                                        size={pxToDp(14)}
+                                        color={COLOR_DIY.black.main}></Ionicons>
+                                </View>
+                                {/* 卡片內容 */}
+                                <View
+                                    style={{
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
+                                        flexDirection: 'row',
+                                        margin: pxToDp(10),
+                                        marginTop: pxToDp(0),
+                                    }}>
+                                    {/* 文字 */}
+                                    <Text
+                                        numberOfLines={4}
+                                        style={{color: black.second}}>
+                                        {eventData.introduction}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
 
-                    {/* 2.0 相關照片 開始 */}
+                    {/* 相關照片 */}
                     {/* TODO: 點擊查看大圖 */}
                     {relateImgUrl != undefined && relateImgUrl.length > 0 && (
                         <TouchableOpacity
@@ -551,9 +538,6 @@ class EventDetail extends Component {
                             </View>
                         </TouchableOpacity>
                     )}
-                    {/* 2.0 相關照片 結束 */}
-
-                    <View style={{marginBottom: pxToDp(100)}} />
                 </View>
             );
         };
@@ -587,7 +571,7 @@ class EventDetail extends Component {
                                         color: black.main,
                                         fontSize: pxToDp(16),
                                     }}>
-                                    {'活動詳情文字babllalallalal'}
+                                    {introduction}
                                 </Text>
                             </ScrollView>
                         </View>
@@ -640,7 +624,12 @@ class EventDetail extends Component {
                     showsVerticalScrollIndicator={false}>
                     {/* 主要頁面內容 */}
                     {renderMainContent()}
-                    <View style={{height: pxToDp(200)}}></View>
+                    <View
+                        style={{
+                            height: pxToDp(200),
+                            backgroundColor: bg_color,
+                        }}
+                    />
                 </ImageHeaderScrollView>
             </View>
         );
@@ -652,9 +641,9 @@ const styles = StyleSheet.create({
     infoShowContainer: {
         borderColor: COLOR_DIY.themeColor,
         borderWidth: pxToDp(1),
-        paddingHorizontal: pxToDp(3),
-        paddingVertical: pxToDp(0),
-        borderRadius: pxToDp(6),
+        paddingHorizontal: pxToDp(8),
+        paddingVertical: pxToDp(1),
+        borderRadius: pxToDp(10),
         justifyContent: 'center',
         alignItems: 'center',
     },

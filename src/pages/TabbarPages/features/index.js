@@ -61,6 +61,7 @@ const iconTypes = {
     img: 'img',
 };
 
+// TODO: 登錄判斷，登錄才允許使用某些功能
 class Index extends Component {
     state = {
         functionArr: [
@@ -622,7 +623,7 @@ class Index extends Component {
                         barStyle: 'dark-content',
                     }}
                 />
-                <ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false}>
                     {this.state.functionArr.map(fn_card => {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);
                     })}
