@@ -58,9 +58,9 @@ function RenderFollowButton(props) {
             style={{
                 marginTop: pxToDp(5),
                 alignSelf: 'center',
-                backgroundColor: isFollow ? black.third : themeColor,
                 padding: pxToDp(10),
                 borderRadius: pxToDp(15),
+                backgroundColor: isFollow ? black.third : themeColor,
             }}
             activeOpacity={0.7}
             onPress={() => {
@@ -214,7 +214,7 @@ const event = [
 class ClubDetail extends Component {
     state = {
         clubData: undefined,
-        // event,
+        eventData: undefined,
         // 訪問該頁的用戶對該組織的Follow狀態
         isFollow: false,
         // 該用戶是否管理員。社團、APP管理員賬號。
@@ -258,6 +258,7 @@ class ClubDetail extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let clubData = json.content;
+                    this.getEventData(club_num);
                     this.setState({clubData, isLoading: false});
 
                     // 如果是社團賬號登錄，則刷新mobx和緩存的數據
@@ -275,6 +276,28 @@ class ClubDetail extends Component {
             })
             .catch(err => {
                 console.error(err);
+            });
+    }
+
+    // 按組織號碼獲取活動
+    async getEventData(club_num) {
+        let URL = BASE_URI + GET.EVENT_INFO_CLUB_NUM_P;
+        await axios
+            .get(URL, {
+                params: {
+                    club_num,
+                    // 獲取最多5條數據
+                    num_of_item: 5,
+                },
+            })
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    this.setState({eventData: json.content});
+                }
+            })
+            .catch(err => {
+                console.log('err', err);
             });
     }
 
@@ -314,7 +337,6 @@ class ClubDetail extends Component {
     render() {
         // 解構state數據
         const {clubData, isFollow, isAdmin, isLoading} = this.state;
-        console.log('clubData', clubData);
         let logo_url,
             name,
             tag,
@@ -362,7 +384,7 @@ class ClubDetail extends Component {
                         } else {
                             this.setState({imageUrls: bgImgUrl});
                         }
-                        this.refs.imageScrollViewer.tiggerModal();
+                        this.refs.imageScrollViewer.handleOpenImage(0);
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
@@ -441,6 +463,7 @@ class ClubDetail extends Component {
 
         // 渲染頁面主要內容
         renderMainContent = () => {
+            const {eventData, clubData} = this.state;
             return (
                 <View style={{backgroundColor: bg_color}}>
                     {/* 1.0 社團基本資料 */}
@@ -657,13 +680,13 @@ class ClubDetail extends Component {
                     </View>
 
                     {/* 5.0 舉辦的活動 */}
-                    {event.length > 0 && (
+                    {eventData != undefined && eventData.length > 0 && (
                         <FlatList
                             numColumns={2}
                             columnWrapperStyle={{
                                 justifyContent: 'center',
                             }}
-                            data={this.state.event}
+                            data={eventData}
                             renderItem={({item}) => {
                                 return (
                                     <EventCard
@@ -676,27 +699,36 @@ class ClubDetail extends Component {
                                 );
                             }}
                             scrollEnabled={false}
-                            // 在所有項目的末尾渲染，防止手勢白條遮擋
-                            ListFooterComponent={() => (
-                                <View
-                                    style={{
-                                        marginBottom: pxToDp(80),
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text style={{color: 'red'}}>
-                                        TODO: 查看更多活動
-                                    </Text>
-                                </View>
-                            )}
+                            // 在所有項目的末尾渲染
+                            ListFooterComponent={() =>
+                                eventData.length > 4 && (
+                                    <TouchableOpacity
+                                        style={styles.checkMoreButton}
+                                        activeOpacity={0.8}
+                                        onPress={() =>
+                                            this.props.navigation.navigate(
+                                                'AllEvents',
+                                                {clubData},
+                                            )
+                                        }>
+                                        <Text style={{color: white}}>
+                                            查看全部
+                                        </Text>
+                                    </TouchableOpacity>
+                                )
+                            }
                         />
                     )}
+
+                    <View
+                        style={{height: pxToDp(50), backgroundColor: bg_color}}
+                    />
                 </View>
             );
         };
 
         return (
-            <View style={{flex: 1}}>
+            <View style={{flex: 1, backgroundColor: bg_color}}>
                 <StatusBar
                     barStyle="light-content"
                     backgroundColor={'transparent'}
@@ -846,6 +878,13 @@ const styles = StyleSheet.create({
         borderRadius: pxToDp(5),
         overflow: 'hidden',
         ...viewShadow,
+    },
+    checkMoreButton: {
+        marginTop: pxToDp(5),
+        alignSelf: 'center',
+        padding: pxToDp(10),
+        borderRadius: pxToDp(15),
+        backgroundColor: themeColor,
     },
 });
 
