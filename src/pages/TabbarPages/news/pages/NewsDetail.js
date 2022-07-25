@@ -63,7 +63,8 @@ class NewsDetail extends Component {
             }
         });
 
-        console.log('NewsData', newsData.details);
+        let imageUrls = newsData.common.imageUrls;
+        imageUrls = imageUrls.map(item => item.replace('http:', 'https:'));
 
         // 存放新聞數據
         this.state = {
@@ -85,7 +86,7 @@ class NewsDetail extends Component {
                 // 葡文內容
                 content_pt,
                 // 相片數組
-                imageUrls: newsData.common.imageUrls,
+                imageUrls,
             },
         };
     }
@@ -227,7 +228,6 @@ class NewsDetail extends Component {
                                     }}
                                     // 打開圖片瀏覽大圖
                                     onPress={() => {
-                                        console.log(imageUrls);
                                         this.refs.imageScrollViewer.handleOpenImage(
                                             index,
                                         );

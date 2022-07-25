@@ -12,8 +12,9 @@ import {
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import Header from '../../../../components/Header';
 
-import {Header} from '@rneui/themed';
+// import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
@@ -116,7 +117,7 @@ class UMEventDetail extends Component {
                 // 海報
                 imageUrls:
                     'posterUrl' in eventData.common
-                        ? eventData.common.posterUrl
+                        ? eventData.common.posterUrl.replace('http:', 'https:')
                         : '',
             },
         };
@@ -128,30 +129,7 @@ class UMEventDetail extends Component {
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: '活動詳情',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: COLOR_DIY.bg_color,
-                        barStyle: 'dark-content',
-                    }}
-                />
+                <Header title={'活動詳情'} />
 
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer

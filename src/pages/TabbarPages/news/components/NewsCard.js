@@ -8,23 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-
-// 時間戳轉時間
-function timeTrans(date) {
-    var date = new Date(date);
-    var Y = date.getFullYear();
-    var M =
-        date.getMonth() + 1 < 10
-            ? '0' + (date.getMonth() + 1)
-            : date.getMonth() + 1;
-    var D = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-    var h = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
-    var m =
-        date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    var s =
-        date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-    return M + '-' + D;
-}
+import moment from 'moment-timezone';
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow} = COLOR_DIY;
@@ -147,7 +131,7 @@ class NewsCard extends Component {
                                 bottom: 0,
                                 color: black.third,
                             }}>
-                            @ {timeTrans(publishDate)}
+                            @ {moment(publishDate).format('MM-DD')}
                         </Text>
                     </View>
 
@@ -165,8 +149,14 @@ class NewsCard extends Component {
                                     source={{
                                         uri:
                                             type == 'event'
-                                                ? imageUrls
-                                                : imageUrls[0],
+                                                ? imageUrls.replace(
+                                                      'http:',
+                                                      'https:',
+                                                  )
+                                                : imageUrls[0].replace(
+                                                      'http:',
+                                                      'https:',
+                                                  ),
                                         cache: FastImage.cacheControl.web,
                                     }}
                                     style={styles.newsCardImg}
