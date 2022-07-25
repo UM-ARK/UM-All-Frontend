@@ -1,7 +1,6 @@
 import React, { Component, useEffect, useState } from "react";
 import { Text, View, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 
-import tw from "twrnc";
 import Ionicons from "react-native-vector-icons/Ionicons";
 // 彈出層文檔：https://github.com/react-native-modal/react-native-modal
 import Modal from "react-native-modal";
