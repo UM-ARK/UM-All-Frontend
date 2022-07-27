@@ -25,7 +25,8 @@ const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.9;
-const COMPONENT_HEIGHT = PAGE_HEIGHT * 0.5;
+const COMPONENT_HEIGHT = PAGE_HEIGHT * 0.2;
+
 
 class UMEventDetail extends Component {
     constructor(props) {
@@ -38,15 +39,15 @@ class UMEventDetail extends Component {
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題、內容
         //共通内容
         let dateFrom = eventData.common.dateFrom;
-        let dateTo=eventData.common.dateTo;
-        let timeFrom=eventData.common.timeFrom;
-        let timeTo=eventData.common.timeTo;
+        let dateTo = eventData.common.dateTo;
+        let timeFrom = eventData.common.timeFrom;
+        let timeTo = eventData.common.timeTo;
 
         // 中文
         let title_cn = '';
         let category_cn = '';//
         let organiser_cn = '';
-        let coorganiser_cn='';
+        let coorganiser_cn = '';
         let venue_cn = '';
         let content_cn = '';
         let targetAudience_cn = '';
@@ -62,7 +63,7 @@ class UMEventDetail extends Component {
         let title_en = '';
         let category_en = '';
         let organiser_en = '';
-        let coorganiser_en='';
+        let coorganiser_en = '';
         let venue_en = '';
         let content_en = '';
         let targetAudience_en = '';
@@ -78,7 +79,7 @@ class UMEventDetail extends Component {
         let title_pt = '';
         let category_pt = '';
         let organiser_pt = '';
-        let coorganiser_pt='';
+        let coorganiser_pt = '';
         let venue_pt = '';
         let content_pt = '';
         let targetAudience_pt = '';
@@ -96,12 +97,12 @@ class UMEventDetail extends Component {
                 content_en = item.content;
                 speaker_en = item.speakers;
                 organiser_en = item.organizedBys;
-                coorganiser_en=item.coorganizers;
+                coorganiser_en = item.coorganizers;
                 venue_en = item.venues;
                 targetAudience_en = item.targetAudiences;
                 remark_en = item.remark;
                 language_en = item.languages;
-                contactName_en = item.Name;
+                contactName_en = item.contactName;
                 contactPhone_en = item.contactPhone;
                 contactFax_en = item.contactFax;
                 contactMail_en = item.contactEmail;
@@ -110,12 +111,12 @@ class UMEventDetail extends Component {
                 content_pt = item.speakers;
                 speaker_pt = item.contactName;
                 organiser_pt = item.organizedBys;
-                coorganiser_pt=item.coorganizers;
+                coorganiser_pt = item.coorganizers;
                 venue_pt = item.venues;
                 targetAudience_pt = item.targetAudiences;
                 remark_pt = item.remark;
                 language_pt = item.languages;
-                contactName_pt = item.Name;
+                contactName_pt = item.contactName;
                 contactPhone_pt = item.contactPhone;
                 contactFax_pt = item.contactFax;
                 contactMail_pt = item.contactEmail;
@@ -124,12 +125,12 @@ class UMEventDetail extends Component {
                 content_cn = item.content;
                 speaker_cn = item.speakers;
                 organiser_cn = item.organizedBys;
-                coorganiser_cn=item.coorganizers;
+                coorganiser_cn = item.coorganizers;
                 venue_cn = item.venues;
                 targetAudience_cn = item.targetAudiences;
                 remark_cn = item.remark;
                 language_cn = item.languages;
-                contactName_cn = item.Name;
+                contactName_cn = item.contactName;
                 contactPhone_cn = item.contactPhone;
                 contactFax_cn = item.contactFax;
                 contactMail_cn = item.contactEmail;
@@ -296,19 +297,19 @@ class UMEventDetail extends Component {
 
         //用数组存储内容，便于根据语言筛选条件显示
         var title = [title_cn, title_en, title_pt]
-        var category=[category_cn,category_en,category_pt]
-        var organiser=[organiser_cn,organiser_en,organiser_pt]
-        var coorganiser=[coorganiser_cn,coorganiser_en,coorganiser_pt]
-        var venue=[venue_cn,venue_en,venue_pt]
+        var category = [category_cn, category_en, category_pt]
+        var organiser = [organiser_cn, organiser_en, organiser_pt]
+        var coorganiser = [coorganiser_cn, coorganiser_en, coorganiser_pt]
+        var venue = [venue_cn, venue_en, venue_pt]
         var content = [content_cn, content_en, content_pt]
-        var targetAudience=[targetAudience_cn,targetAudience_en,targetAudience_pt]
+        var targetAudience = [targetAudience_cn, targetAudience_en, targetAudience_pt]
         var speaker = [speaker_cn, speaker_en, speaker_pt]
-        var remark=[remark_cn,remark_en,remark_pt]
-        var language=[language_cn,language_en,language_pt]
-        var contactName=[contactName_cn,contactName_en,contactName_pt]
-        var contactPhone=[contactPhone_cn,contactPhone_en,contactPhone_pt]
-        var contactFax=[contactFax_cn,contactFax_en,contactFax_pt]
-        var contactMail=[contactMail_cn,contactMail_en,contactMail_pt]
+        var remark = [remark_cn, remark_en, remark_pt]
+        var language = [language_cn, language_en, language_pt]
+        var contactName = [contactName_cn, contactName_en, contactName_pt]
+        var contactPhone = [contactPhone_cn, contactPhone_en, contactPhone_pt]
+        var contactFax = [contactFax_cn, contactFax_en, contactFax_pt]
+        var contactMail = [contactMail_cn, contactMail_en, contactMail_pt]
 
         return (
             <View style={{ backgroundColor: bg_color, flex: 1 }}>
@@ -362,7 +363,16 @@ class UMEventDetail extends Component {
                     {/* 海報 */}
                     <TouchableOpacity
                         activeOpacity={0.8}
-                        style={styles.imgContainer}
+                        style={{
+                            width: COMPONENT_WIDTH,
+                            height: COMPONENT_HEIGHT,
+                            backgroundColor: bg_color,
+                            borderRadius: pxToDp(10),
+                            overflow: 'hidden',
+                            alignSelf: 'center',
+                            marginVertical: pxToDp(10),
+                            ...viewShadow,
+                        }}
                         // 瀏覽大圖
                         onPress={() => {
                             this.refs.imageScrollViewer.handleOpenImage(0);
@@ -374,52 +384,128 @@ class UMEventDetail extends Component {
                             }}
                             style={{ width: '100%', height: '100%' }}
                         />
+                        <Text>
+                            {COMPONENT_HEIGHT}
+                        </Text>
                     </TouchableOpacity>
-
                     {/* 標題 */}
+                    {/* 部分漢化和排版 */}
                     <Text
                         style={{
-                            color:
-                                title_en.length > 0
-                                    ? black.second
-                                    : black.main,
+                            color: COLOR_DIY.themeColor,
                             fontWeight: 'bold',
-                            fontSize:
-                                title_en.length > 0
-                                    ? pxToDp(16)
-                                    : pxToDp(18),
+                            fontSize: 20,
                         }}
                         selectable={true}>
                         {title[chooseMode]}
                     </Text>
-                    <Text>
-                    {moment(dateFrom).format('MM-DD')} {moment(dateTo).format('MM-DD')} {moment(timeFrom).format('HH:SS')} {moment(timeTo).format('HH:SS')}
-                    </Text>
-                    {/* 詳情 */}
+                    {/* 日期与时间*/}
+                    {/* 如果活動當天結束顯示活動日期，若為多日活動則顯示開始和結束日期 */}
                     <View>
+                        {moment(dateFrom).format('MM-DD') == moment(dateTo).format('MM-DD') ? (
+                            <Text style={{
+                                fontSize: 18,
+                                fontWeight: '700',
+                                color: '#FF8627',
+                            }}>
+                                活動日期：{moment(dateFrom).format('MM-DD')}
+                            </Text>
+                        ) : (
+                            <View>
+                                <Text style={{
+                                    fontSize: 15,
+                                    fontWeight: '700',
+                                    color: '#FF8627',
+                                }}>
+                                    開始日期：{moment(dateFrom).format('MM-DD')}
+                                </Text>
+                                <Text style={{
+                                    fontSize: 15,
+                                    fontWeight: '700',
+                                    color: '#FF8627',
+                                }}>
+                                    結束日期:{moment(dateTo).format('MM-DD')}
+                                </Text>
+                            </View>
+                        )}
+                        {/* 活動時間 */}
+                        <Text style={{
+                            fontSize: 15,
+                            fontWeight: '700',
+                            color: '#FF8627',
+                        }}>
+                            開始時間：{moment(timeFrom).format('HH:SS')}
+                        </Text>
+                        <Text style={{
+                            fontSize: 15,
+                            fontWeight: '700',
+                            color: '#FF8627',
+                        }}>
+                            結束時間：{moment(timeTo).format('HH:SS')}
+                        </Text>
+                    </View>
+                    {/* 詳情 */}
+                    <View style={{
+                        flexDirection: 'column',
+                    }}>
                         <Text
                             style={{
                                 color: black.second,
                                 fontSize: pxToDp(13),
-                            }}
-                            selectable={true}>
-                            {content[chooseMode]}
+                            }}>
+                            詳情：{content[chooseMode]}
                         </Text>
                         <Text>
-                            {speaker[chooseMode]}
+                            講者：{speaker[chooseMode]}
                         </Text>
                         <Text>
-                            {organiser[chooseMode]} {coorganiser[chooseMode]} {venue[chooseMode]} {language[chooseMode]}
+                            主辦單位：{organiser[chooseMode]}
                         </Text>
                         <Text>
-                            {remark[chooseMode]}
+                            協辦單位：{coorganiser[chooseMode]}
                         </Text>
                         <Text>
-                            {targetAudience[chooseMode]}
+                            地點：{venue[chooseMode]}
                         </Text>
                         <Text>
-                            {contactName[chooseMode]} {contactPhone[chooseMode]} {contactFax[chooseMode]} {contactMail[chooseMode]}
+                            語言：{language[chooseMode]}
                         </Text>
+                        <Text>
+                            對象：{targetAudience[chooseMode]}
+                        </Text>
+                        <Text>
+                            備註：{remark[chooseMode]}
+                        </Text>
+                        <View style={{
+                            width:'90%',
+                            backgroundColor:'white',
+                            borderRadius:pxToDp(10),
+                            ...viewShadow,
+                            paddingHorizontal:pxToDp(15),
+                            paddingVertical:pxToDp(15),
+                            marginTop:pxToDp(10),
+                            alignSelf:'center'
+                        }}>
+                            <Text style={{
+                                fontSize:15,
+                                fontWeight:'700',
+                                color:COLOR_DIY.themeColor,
+                            }}>
+                                聯絡人
+                            </Text>
+                            <Text>
+                                名稱：{contactName[chooseMode]}
+                            </Text>
+                            <Text>
+                                電話：{contactPhone[chooseMode]}
+                            </Text>
+                            <Text>
+                                傳真：{contactFax[chooseMode]}
+                            </Text>
+                            <Text>
+                                電郵：{contactMail[chooseMode]}
+                            </Text>
+                        </View>
                         <View style={{ marginTop: pxToDp(50) }} />
                     </View>
 
