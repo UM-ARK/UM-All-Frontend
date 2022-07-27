@@ -151,6 +151,15 @@ function RenderLoginButton(props) {
             })
             .catch(err => {
                 alert('Warning', err);
+                toast.show({
+                    placement: 'top',
+                    render: () => (
+                        <ToastText
+                            backgroundColor={unread}
+                            text={`網絡錯誤！`}
+                        />
+                    ),
+                });
             });
     }
 
@@ -195,7 +204,7 @@ class ClubLogin extends Component {
         return (
             <ModalBottom
                 cancel={() => this.setState({isModalBottomVisible: false})}
-                style={{height: '30%'}}>
+                style={{height: '60%'}}>
                 <ScrollView>
                     <View style={{padding: pxToDp(20)}}>
                         <Text

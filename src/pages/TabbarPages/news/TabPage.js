@@ -46,23 +46,15 @@ const _renderTabBar = props => {
         <View
             style={{
                 flexDirection: 'row',
-                justifyContent: 'center',
+                justifyContent: 'space-around',
             }}>
             {props.navigationState.routes.map((route, i) => {
-                // 定義Tab轉換的動畫 - 半透明未選中文字 - 未使用
-                // const opacity = props.position.interpolate({
-                //     inputRange,
-                //     outputRange: inputRange.map(inputIndex =>
-                //         inputIndex === i ? 1 : 0.6,
-                //     ),
-                // });
-
                 // 定義Tab滑動動畫
                 const translateX = getTranslateX(
                     props.navigationState.index,
                     i,
                     props,
-                    inputRange
+                    inputRange,
                 );
 
                 return (
@@ -76,21 +68,9 @@ const _renderTabBar = props => {
                                 paddingHorizontal: pxToDp(10),
                                 paddingVertical: pxToDp(2),
                                 marginVertical: pxToDp(5),
-                                marginHorizontal: pxToDp(10),
                                 overflow: 'hidden',
                             }}
                             onPress={() => props.jumpTo(route.key)}>
-                            {/* 透明度改變的Text，需配合上方opacity使用 */}
-                            {/* <Animated.Text
-                                style={{
-                                    // 透明動畫
-                                    // opacity,
-                                    color: COLOR_DIY.themeColor,
-                                    fontSize: pxToDp(15),
-                                }}>
-                                {route.title}
-                            </Animated.Text> */}
-
                             {/* Tab文本的樣式 */}
                             <Text
                                 style={{

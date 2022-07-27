@@ -16,6 +16,7 @@ export const GET = {
     EVENT_INFO_ALL: 'get_activity/all',
     // 按Club num獲取活動列表
     EVENT_INFO_CLUB_NUM: 'get_activity/club_num/?club_num=',
+    EVENT_INFO_CLUB_NUM_P: 'get_activity/club_num/',
     // 按活動id獲取活動列表
     EVENT_INFO_EVENT_ID: 'get_activity/id/?id=',
 }

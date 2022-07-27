@@ -28,6 +28,7 @@ import UMEventDetail from './pages/TabbarPages/news/pages/UMEventDetail'
 import ChatDetail from './pages/TabbarPages/message/ChatDetail'
 
 import Webviewer from './components/Webviewer';
+import AllEvents from './pages/Features/AllEvents';
 import UMWhole from './pages/Features/UMWhole';
 import What2Reg from './pages/Features/What2Reg';
 import Bus from './pages/Features/Bus';
@@ -56,6 +57,7 @@ class Nav extends Component {
                 <Stack.Screen name="EventDetail"     component={EventDetail} />
                 <Stack.Screen name="NewsDetail"     component={NewsDetail} />
                 <Stack.Screen name="UMEventDetail"     component={UMEventDetail} />
+                <Stack.Screen name="AllEvents"     component={AllEvents} />
 
                 {/* 信息頁 */}
                 {/* 信息詳情 */}

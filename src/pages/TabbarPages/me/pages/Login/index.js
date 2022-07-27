@@ -17,7 +17,7 @@ import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import {handleLogin} from '../../../../../utils/storageKits';
 import {BASE_URI, POST} from '../../../../../utils/pathMap';
-import IntegratedWebView from '../../../../../components/IntegratedWebView';
+import Webviewer from '../../../../../components/Webviewer';
 import {UM_Moodle} from '../../../../../utils/pathMap';
 import DialogDIY from '../../../../../components/DialogDIY';
 import ClubLogin from './ClubLogin';
@@ -110,13 +110,13 @@ class LoginChoose extends Component {
                         //     document.getElementById("passwordInput").value="4537asdfg0";
                         // `}
                         onNavigationStateChange={e => {
-                            this.setState({canGoBack: true});
                             // SSO密碼輸入頁面e.title為https://websso.....
                             // 雙重認證頁面e.title為Duo Security
                             // Moodle頁面e.title為Dashboard
                             // console.log(e);
                             // 已登錄到Moodle
                             if (e.title == 'Dashboard') {
+                                this.setState({canGoBack: true});
                                 // 獲取Moodle頁所有的cookies
                                 CookieManager.get(UM_Moodle)
                                     .then(cookies => {
@@ -156,13 +156,24 @@ class LoginChoose extends Component {
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}>
-                        <View style={{marginBottom: pxToDp(10)}}>
+                        <View
+                            style={{
+                                alignItems: 'center',
+                                marginBottom: pxToDp(10),
+                            }}>
                             <Text
                                 style={{
                                     color: COLOR_DIY.black.third,
                                     fontSize: pxToDp(18),
                                 }}>
-                                Welcome To UM ALL!
+                                Welcome To UM ALL~
+                            </Text>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.black.third,
+                                    fontSize: pxToDp(18),
+                                }}>
+                                []~(￣▽￣)~*
                             </Text>
                         </View>
 
@@ -243,6 +254,7 @@ class LoginChoose extends Component {
                                         我已閱讀且同意遵守
                                     </Text>
                                 </TouchableOpacity>
+                                {/* TODO: 跳轉用戶協議 */}
                                 <TouchableOpacity>
                                     <Text
                                         style={{
@@ -250,10 +262,25 @@ class LoginChoose extends Component {
                                             fontSize: pxToDp(13),
                                         }}
                                         activeOpacity={0.9}
-                                        onPress={() =>
-                                            alert('底部彈出應用協議')
-                                        }>
-                                        《應用隱私政策與使用條款》
+                                        onPress={() => {
+                                            let webview_param = {
+                                                // import pathMap的鏈接進行跳轉
+                                                url: 'https://umbbs.xyz/d/72/14',
+                                                title: '用戶協議',
+                                                // 標題顏色，默認為black.main
+                                                // text_color: '#002c55',
+                                                // 標題背景顏色，默認為bg_color
+                                                // bg_color_diy: '#fff',
+                                                // 狀態欄字體是否黑色，默認true
+                                                // isBarStyleBlack: false,
+                                            };
+                                            this.context.navigate(
+                                                'Webviewer',
+                                                webview_param,
+                                            );
+                                            alert('未完成!');
+                                        }}>
+                                        《隱私政策與用戶協議》
                                     </Text>
                                 </TouchableOpacity>
                             </View>
