@@ -16,7 +16,7 @@ import {
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
-import {BASE_URI, GET, ARK_LETTER_IMG} from '../../../../utils/pathMap';
+import {BASE_URI, GET, ARK_LETTER_IMG, POST} from '../../../../utils/pathMap';
 
 import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
@@ -35,6 +35,7 @@ import FastImage from 'react-native-fast-image';
 import {useToast} from 'native-base';
 import {inject} from 'mobx-react';
 import axios from 'axios';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
@@ -44,172 +45,6 @@ const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const CLUB_LOGO_SIZE = pxToDp(80);
 const CLUB_IMAGE_WIDTH = pxToDp(75);
 const CLUB_IMAGE_HEIGHT = pxToDp(55);
-
-// 渲染Follow按鈕
-// 因需使用Toast的Hook，被迫使用func組件QAQ
-function RenderFollowButton(props) {
-    const {white, themeColor, success, black} = COLOR_DIY;
-    let [isFollow, setFollow] = useState(props.isFollow);
-
-    const toast = useToast();
-
-    return (
-        <TouchableOpacity
-            style={{
-                marginTop: pxToDp(5),
-                alignSelf: 'center',
-                padding: pxToDp(10),
-                borderRadius: pxToDp(15),
-                backgroundColor: isFollow ? black.third : themeColor,
-            }}
-            activeOpacity={0.7}
-            onPress={() => {
-                // 調用修改this.state的isFollow方法
-                if (props.handleFollow()) {
-                    setFollow(!isFollow);
-
-                    // 選擇Follow，展示感謝信息，此時isFollow為Flase
-                    if (!isFollow) {
-                        toast.show({
-                            placement: 'top',
-                            render: () => (
-                                <ToastText
-                                    backgroundColor={success}
-                                    text={`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`}
-                                />
-                            ),
-                        });
-                    }
-                    // 選擇Del Follow，展示再見信息，此時isFollow為True
-                    else {
-                        toast.show({
-                            placement: 'top',
-                            render: () => (
-                                <ToastText text={`有緣再見！o(╥﹏╥)o`} />
-                            ),
-                        });
-                    }
-                }
-            }}>
-            <Text style={{color: white}}>
-                {isFollow ? 'Del Follow' : 'Follow Us'}
-            </Text>
-        </TouchableOpacity>
-    );
-}
-
-// 模擬從服務器返回的數據，以detailRoute傳的id或name去請求服務器返回相關組織的數據
-// const clubData = {
-//     logo_url:
-//         'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
-//     name: '電腦學會',
-//     tag: 'club',
-//     club_num: 1,
-//     // 簡介文字
-//     introText: `澳門大學學生會電腦學會是以電腦為主題的學會，希望透過活動提升電腦系同學的歸屬感及團體精神。我們亦歡迎所有不同學系的同學，目的是透過舉辦工作坊、踏上IT第一步等等教授同學不同的電腦知識及認識電腦行業的前景。電競也是我們的主打之一，現時電競遊戲是一個十分熱門的話題，我們透過舉辦大大小小的比賽及交流活動等等，如最近所舉辦的澳大電競日從而推廣電競文化，讓不論是有接觸過電競與否的朋友也可以透過活動來認識電競及享受遊戲的樂趣。`,
-//     // 聯繫方式
-//     contact: [
-//         // type會定死，讓社團在設置個人的時候可以選擇性填寫
-//         {
-//             type: 'Wechat',
-//             num: 'abcd1234',
-//         },
-//         {
-//             type: 'Email',
-//             num: 'abcd1234@umac.mo',
-//         },
-//         {
-//             type: 'Phone',
-//             num: '12345678',
-//         },
-//         {
-//             type: 'IG',
-//             num: 'cpsumsu',
-//         },
-//         {
-//             type: 'Facebook',
-//             num: 'cpsumsu',
-//         },
-//         {
-//             type: 'Website',
-//             num: 'www.cpsumsu.com',
-//         },
-//     ],
-//     // 背景圖片link
-//     bgImgUrl:
-//         'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
-// };
-
-// 活動，只請求4條
-// 距離今天越近越靠前
-const event = [
-    {
-        eventID: 0,
-        type: 'activity',
-        title: '活動標題可寫在此0',
-        // 封面圖片
-        coverImgUrl: 'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
-        // 該活動相關的圖片
-        relateImgUrl: [
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
-            'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
-        ],
-        startTimeStamp: 1658745797000,
-        finishTimeStamp: 1658745797000,
-        link: '',
-    },
-    {
-        eventID: 0,
-        title: '活動標題可寫在此1',
-        // 封面圖片
-        coverImgUrl: 'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
-        // 該活動相關的圖片
-        relateImgUrl: [
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
-            'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
-        ],
-        startTimeStamp: 1658745797000,
-        finishTimeStamp: 1658745797000,
-        link: '',
-    },
-    {
-        eventID: 0,
-        title: '活動標題可寫在此2',
-        // 封面圖片
-        coverImgUrl: 'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
-        // 該活動相關的圖片
-        relateImgUrl: [
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
-            'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
-        ],
-        startTimeStamp: 1658745797000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-    {
-        eventID: 0,
-        title: '活動標題可寫在此2',
-        // 封面圖片
-        coverImgUrl:
-            'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
-        // 該活動相關的圖片
-        relateImgUrl: [
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p1.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p2.jpg',
-            'https://www.cpsumsu.org/image/slideshow/slideshow_p3.jpg',
-            'https://www.cpsumsu.org/image/slideshow/%E6%B8%B8%E6%88%B2%E8%A8%AD%E8%A8%88%E5%B7%A5%E4%BD%9C%E5%9D%8A.jpg',
-        ],
-        startTimeStamp: 1658745797000,
-        finishTimeStamp: 1655018688000,
-        link: '',
-    },
-];
 
 class ClubDetail extends Component {
     state = {
@@ -224,8 +59,10 @@ class ClubDetail extends Component {
         imageUrls: ARK_LETTER_IMG,
         showDialog: false,
         isLoading: true,
+        toastColor: themeColor,
     };
 
+    // 由ClubPage跳轉
     constructor(props) {
         super(props);
         let clubData = undefined;
@@ -240,13 +77,17 @@ class ClubDetail extends Component {
         }
     }
 
-    // 檢查本地緩存是否已登錄
+    // 檢查本地緩存
     componentDidMount() {
         let globalData = this.props.RootStore;
-        if (globalData.userInfo.isClub) {
+        if (globalData.userInfo && globalData.userInfo.isClub) {
             let clubData = globalData.userInfo.clubData;
-            // console.log('setState ClubData', clubData);
-            this.setState({clubData, isLoading: false, isAdmin: true});
+            this.setState({isAdmin: true});
+            this.getData(clubData.club_num);
+        }
+        // 已登錄學生賬號
+        if (globalData.userInfo && globalData.userInfo.stdData) {
+            this.setState({isLogin: true});
         }
     }
 
@@ -259,7 +100,11 @@ class ClubDetail extends Component {
                 if (json.message == 'success') {
                     let clubData = json.content;
                     this.getEventData(club_num);
-                    this.setState({clubData, isLoading: false});
+                    this.setState({
+                        clubData,
+                        isLoading: false,
+                        isFollow: clubData.isFollow,
+                    });
 
                     // 如果是社團賬號登錄，則刷新mobx和緩存的數據
                     if (this.state.isAdmin) {
@@ -301,18 +146,99 @@ class ClubDetail extends Component {
             });
     }
 
+    async postAddFollow(club_num) {
+        let URL = BASE_URI + POST.ADD_FOLLOW_CLUB;
+        let data = new FormData();
+        data.append('club', club_num);
+        await axios
+            .post(URL, data, {
+                headers: {
+                    'Content-Type': `multipart/form-data`,
+                },
+            })
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    // 關注成功
+                    this.setState({
+                        toastColor: COLOR_DIY.success,
+                        isFollow: true,
+                    });
+                    this.toast.show(
+                        `感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`,
+                        2000,
+                    );
+                } else if (json.code == '400') {
+                    // json.code=="400" 已經關注
+                    this.setState({toastColor: COLOR_DIY.warning});
+                    this.toast.show(`您已經關注過了~`, 2000);
+                }
+            })
+            .catch(err => {
+                console.log('err', err);
+                alert('錯誤', err.message);
+            });
+    }
+
+    async postDelFollow(club_num) {
+        let URL = BASE_URI + POST.DEL_FOLLOW_CLUB;
+        let data = new FormData();
+        data.append('club', club_num);
+        await axios
+            .post(URL, data, {
+                headers: {
+                    'Content-Type': `multipart/form-data`,
+                },
+            })
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    // del follow成功
+                    this.setState({
+                        toastColor: themeColor,
+                        isFollow: false,
+                    });
+                    this.toast.show(`有緣再見！o(╥﹏╥)o`, 2000);
+                }
+            })
+            .catch(err => {
+                console.log('err', err);
+                alert('錯誤', err.message);
+            });
+    }
+
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
-        const {isLogin, showDialog, isFollow} = this.state;
+        const {isFollow, isLogin, showDialog, clubData} = this.state;
+        let club_num = clubData.club_num;
         // 如果沒有登錄，觸發登錄提示
         if (!isLogin) {
             this.setState({showDialog: true});
-            return false;
         } else {
-            // TODO: 請求數據庫返回是否follow成功
-            this.setState({isFollow: !isFollow});
-            return true;
+            // 未follow，addFollow
+            if (!isFollow) {
+                this.postAddFollow(club_num);
+            } else {
+                this.postDelFollow(club_num);
+            }
         }
+    };
+
+    renderFollowButton = () => {
+        const {isFollow} = this.state;
+        return (
+            <TouchableOpacity
+                style={{
+                    ...styles.followButton,
+                    backgroundColor: isFollow ? black.third : themeColor,
+                }}
+                activeOpacity={0.8}
+                onPress={this.handleFollow}>
+                <Text style={{color: white}}>
+                    {isFollow ? 'Del Follow' : 'Follow'}
+                </Text>
+            </TouchableOpacity>
+        );
     };
 
     // 打開/關閉底部Modal
@@ -326,7 +252,7 @@ class ClubDetail extends Component {
             colors={[themeColor]}
             tintColor={themeColor}
             refreshing={this.state.isLoading}
-            progressViewOffset={150}
+            progressViewOffset={pxToDp(150)}
             onRefresh={() => {
                 this.setState({isLoading: true});
                 this.getData(this.state.clubData.club_num);
@@ -500,14 +426,8 @@ class ClubDetail extends Component {
                         </Text>
                     </View>
 
-                    {/* Follow按鈕 帶Toast */}
-                    {!isAdmin && (
-                        <RenderFollowButton
-                            isFollow={isFollow}
-                            // 傳遞修改this.state.isFollow方法
-                            handleFollow={this.handleFollow}
-                        />
-                    )}
+                    {/* Follow按鈕 */}
+                    {!isAdmin && this.renderFollowButton()}
 
                     {/* 2.0 照片 */}
                     <View style={styles.cardContainer}>
@@ -751,7 +671,7 @@ class ClubDetail extends Component {
                         renderHeader={() => (
                             <FastImage
                                 source={{
-                                    uri: bgImgUrl,
+                                    uri: bgImgUrl.replace('http:', 'https:'),
                                     cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
@@ -825,6 +745,18 @@ class ClubDetail extends Component {
                         </View>
                     </ModalBottom>
                 )}
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: this.state.toastColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }
@@ -885,6 +817,12 @@ const styles = StyleSheet.create({
         padding: pxToDp(10),
         borderRadius: pxToDp(15),
         backgroundColor: themeColor,
+    },
+    followButton: {
+        marginTop: pxToDp(5),
+        alignSelf: 'center',
+        padding: pxToDp(10),
+        borderRadius: pxToDp(12),
     },
 });
 
