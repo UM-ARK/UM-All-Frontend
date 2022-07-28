@@ -11,27 +11,30 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 const {bg_color} = COLOR_DIY.meScreenColor;
 const {black} = COLOR_DIY;
 
-// 循環渲染選項
-const optionsInfo = [
-    {
-        title: '活動',
-        func: '',
-    },
-    {
-        title: '組織/社團',
-        func: '',
-    },
-];
-
 class MyFollow extends Component {
+    state = {
+        // 循環渲染選項
+        optionsInfo: [
+            {
+                title: '活動',
+                func: () => this.props.navigation.navigate('FollowEvent'),
+            },
+            {
+                title: '組織/社團',
+                func: () => this.props.navigation.navigate('FollowClub'),
+            },
+        ],
+    };
     // 渲染對應的選項
     renderOptions = optionsInfoIndex => {
+        const {optionsInfo} = this.state;
         const {title, func} = optionsInfo[optionsInfoIndex];
         return (
             <TouchableOpacity
                 activeOpacity={0.8}
                 style={{...s.optionContainer}}
-                onPress={() => alert('TODO: 對應func')}>
+                onPress={func}
+            >
                 {/* 左側flex佈局 */}
                 {/* 選項標題 */}
                 <Text style={{...s.optionTitle}}>{title}</Text>
@@ -48,6 +51,7 @@ class MyFollow extends Component {
     };
 
     render() {
+        const {optionsInfo} = this.state;
         return (
             <View style={{flex: 1}}>
                 <Header title={'我的追蹤'} />
