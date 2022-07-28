@@ -5,7 +5,6 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import {BASE_URI, GET} from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
-import DropDownPicker from '../../../components/DropDownPicker';
 
 import ClubCard from './components/ClubCard';
 
@@ -30,8 +29,9 @@ class ClubPage extends Component {
 
     // 請求所有社團的info
     async getData() {
+        let URL = BASE_URI + GET.CLUB_INFO_ALL;
         await axios
-            .get(BASE_URI + GET.CLUB_INFO_ALL)
+            .get(URL)
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
@@ -42,7 +42,7 @@ class ClubPage extends Component {
                 }
             })
             .catch(err => {
-                console.error(err);
+                console.log('err', err);
             });
     }
 
@@ -53,7 +53,6 @@ class ClubPage extends Component {
                 {clubDataList != undefined && !isLoading ? (
                     <View style={{flex: 1}}>
                         {/* TODO: 排序、篩選 */}
-                        <DropDownPicker />
                         <FlatGrid
                             style={{flex: 1}}
                             // 每个项目的最小宽度或高度（像素）
