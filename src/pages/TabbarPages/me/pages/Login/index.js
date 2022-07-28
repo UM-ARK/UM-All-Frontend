@@ -107,7 +107,7 @@ class LoginChoose extends Component {
                         // TODO: 自動注入賬號密碼
                         // injectedJavaScript={`
                         //     document.getElementById("userNameInput").value="dc02581";
-                        //     document.getElementById("passwordInput").value="4537asdfg0";
+                        //     document.getElementById("passwordInput").value="";
                         // `}
                         onNavigationStateChange={e => {
                             // SSO密碼輸入頁面e.title為https://websso.....

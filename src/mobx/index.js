@@ -31,6 +31,7 @@ class RootStore {
     //     this.isLogin = false;
     //     this.isClub = true;
     // }
+    // 一般是從緩存存入數據到全局變量
     setUserInfo(userInfo) {
         this.userInfo = userInfo;
     }

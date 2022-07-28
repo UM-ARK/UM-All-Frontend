@@ -13,7 +13,6 @@ import {
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import DropDownPicker from '../../../components/DropDownPicker';
 import {UM_API_EVENT} from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';

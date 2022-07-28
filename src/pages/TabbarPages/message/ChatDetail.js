@@ -220,7 +220,7 @@ class ChatDetail extends Component {
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    let eventData = json.content[0];
+                    let eventData = json.content;
                     this.setState({eventData, isLoading: false});
                 }
             })
@@ -410,7 +410,7 @@ class ChatDetail extends Component {
                         公告歷史記錄，開發中
                     </Text>
                 </View>
-                {true && (
+                {false && (
                     <FlatList
                         data={dataList}
                         renderItem={({item, index}) =>

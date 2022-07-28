@@ -1,4 +1,3 @@
-
 import React, {Component} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 
@@ -29,7 +28,7 @@ class NewsScreen extends Component {
                     }}
                 />
                 {/* 能左右切換的TabPage */}
-                <TabPage></TabPage>
+                <TabPage />
             </View>
         );
     }

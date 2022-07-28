@@ -132,34 +132,8 @@ function ScrollImage(props) {
                                     cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
-                                resizeMode={FastImage.resizeMode.cover}>
-                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                                {/* <View style={styles.topNewsOverlay}>
-                                    <View style={styles.topNewsPosition}>
-                                        <Text style={styles.topNewsText}>
-                                            查看詳情
-                                        </Text>
-                                    </View> */}
-
-                                {/* 標題 */}
-                                {/* <View
-                                        style={{
-                                            alignSelf: 'center',
-                                            justifyContent: 'center',
-                                            width: '100%',
-                                        }}>
-                                        <Text
-                                            style={{
-                                                color: white,
-                                                fontWeight: 'bold',
-                                                fontSize: pxToDp(18),
-                                            }}
-                                            numberOfLines={3}>
-                                            {item.title}
-                                        </Text>
-                                    </View>
-                                </View> */}
-                            </FastImage>
+                                resizeMode={FastImage.resizeMode.cover}
+                            />
                         </TouchableWithoutFeedback>
                     </View>
                 )}

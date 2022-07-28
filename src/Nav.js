@@ -19,6 +19,8 @@ import MyFollow from './pages/TabbarPages/me/pages/MyFollow'
 import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
 import AboutUs from './pages/TabbarPages/me/pages/AboutUs'
 import UsualQuestion from './pages/TabbarPages/me/pages/UsualQuestion'
+import FollowClub from './pages/TabbarPages/me/pages/Follow/FollowClub'
+import FollowEvent from './pages/TabbarPages/me/pages/Follow/FollowEvent'
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail'
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail'
@@ -69,6 +71,8 @@ class Nav extends Component {
                 <Stack.Screen name="MyFollow"        component={MyFollow}/>
                 <Stack.Screen name="MeScreen"        component={MeScreen}/>
                 <Stack.Screen name="UsualQuestion"        component={UsualQuestion}/>
+                <Stack.Screen name="FollowClub"        component={FollowClub}/>
+                <Stack.Screen name="FollowEvent"        component={FollowEvent}/>
                 {/* 設置頁 */}
                 <Stack.Screen name="MeSetting"     component={MeSetting} />
                 <Stack.Screen name="AppSetting"     component={AppSetting} />

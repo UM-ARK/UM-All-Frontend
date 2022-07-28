@@ -1,7 +1,7 @@
 // 網站地址映射
 
 // TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
-export const BASE_URI = 'https://ark.boxz.dev/api/';
+export const BASE_URI = 'https://umall.one/api/';
 
 export const GET = {
     // 社團登錄
@@ -19,6 +19,11 @@ export const GET = {
     EVENT_INFO_CLUB_NUM_P: 'get_activity/club_num/',
     // 按活動id獲取活動列表
     EVENT_INFO_EVENT_ID: 'get_activity/id/?id=',
+
+    // 獲取follow的活動
+    FOLLOW_EVENT: 'get_follow_activity/',
+    // 獲取follow的社團
+    FOLLOW_CLUB: 'get_follow_club/',
 }
 
 export const POST = {
@@ -30,6 +35,15 @@ export const POST = {
     EVENT_CREATE: 'create_activity/',
     // 修改活動info
     EVENT_EDIT: 'edit_activity/',
+
+    // 學生add follow活動
+    ADD_FOLLOW_EVENT: 'student_add_follow_activity/',
+    // del follow活動
+    DEL_FOLLOW_EVENT: 'student_del_follow_activity/',
+    // add follow組織
+    ADD_FOLLOW_CLUB: 'student_add_follow_club/',
+    // del follow組織
+    DEL_FOLLOW_CLUB: 'student_del_follow_club/',
 }
 
 export const ARK_LETTER_IMG = 'https://ark.boxz.dev/static/logo.png';
@@ -90,6 +104,10 @@ export const UM_WHOLE_PERSON = 'https://isw.um.edu.mo/wp/faces/app/stud/MyRecord
 export const UM_EXCHANGE = 'https://isw.um.edu.mo/seas';
 // 澳大 - 獎學金
 export const UM_SCHOLARSHIP = 'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
+// 澳大 - 證明文件
+export const UM_DOCUMENTS = 'https://ops.fo.um.edu.mo/services/?lang=zh-hant';
+
+
 // 澳大 - 失物認領
 export const UM_LOST_FOUND = 'https://um2.umac.mo/apps/com/umlostfound.nsf';
 // 澳大 - 泊車月票
