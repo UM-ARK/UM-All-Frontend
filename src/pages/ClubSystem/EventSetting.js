@@ -25,7 +25,7 @@ import {
     RadioButton,
 } from 'react-native-ui-lib';
 const {TextField} = Incubator;
-import DatePicker from 'react-native-date-picker';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {FlatGrid} from 'react-native-super-grid';
 import axios from 'axios';
@@ -68,6 +68,8 @@ class EventSetting extends Component {
         borderColor: black.main,
         titleColor: black.main,
         expanded1: false,
+        isStartDatePickerVisible: false,
+        isEndDatePickerVisible: false,
     };
 
     componentDidMount() {
@@ -251,60 +253,6 @@ class EventSetting extends Component {
         );
     };
 
-    renderDatePicker = dateType => {
-        // 結構對應state的屬性名字，賦值給局部變量date
-        let {[dateType]: date} = this.state;
-        let title = dateType == 'startDate' ? '活動開始時間:' : '活動結束時間:';
-        let minimumDate = dateType == 'startDate' ? null : this.state.startDate;
-
-        return (
-            <View style={{marginTop: pxToDp(10)}}>
-                <View style={{alignItems: 'center'}}>
-                    <DatePicker
-                        date={date}
-                        onDateChange={date => {
-                            this.setState({[dateType]: date});
-                        }}
-                        androidVariant={'nativeAndroid'}
-                        minuteInterval={5}
-                        // 設置語言位繁體中文
-                        locale={'zh-Hant'}
-                        minimumDate={minimumDate}
-                    />
-                </View>
-            </View>
-        );
-    };
-
-    renderSectionHeader = (title: String, timeText: String) => {
-        return (
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                }}>
-                <Text style={styles.inputTitle}>
-                    {title}
-                    <Text
-                        style={{
-                            fontSize: pxToDp(15),
-                            color: this.state.expanded
-                                ? themeColor
-                                : black.third,
-                        }}>
-                        {timeText}
-                    </Text>
-                </Text>
-                <Ionicons
-                    name={this.state.expanded ? 'chevron-up' : 'chevron-down'}
-                    size={pxToDp(20)}
-                    color={this.state.expanded ? themeColor : black.third}
-                />
-            </View>
-        );
-    };
-
     // 文本輸入框
     renderTextArea = () => {
         return (
@@ -413,7 +361,6 @@ class EventSetting extends Component {
         }
         // 結束日期需比開始日期往後
         isOK = isOK && Date.parse(finishDate) >= Date.parse(startDate);
-        console.log('add_relate_image', add_relate_image);
         return isOK;
     };
 
@@ -482,7 +429,7 @@ class EventSetting extends Component {
         data.append('introduction', introText);
         data.append('can_follow', allowFollow);
 
-        console.log('待上傳data', data);
+        // console.log('待上傳data', data);
 
         let URL =
             BASE_URI + (mode == 'create' ? POST.EVENT_CREATE : POST.EVENT_EDIT);
@@ -656,38 +603,102 @@ class EventSetting extends Component {
 
                         {/* 活動時間 */}
                         <View style={{marginTop: pxToDp(10)}}>
-                            <ExpandableSection
-                                expanded={this.state.expanded}
-                                sectionHeader={this.renderSectionHeader(
-                                    '開始時間:  ',
-                                    moment(this.state.startDate).format(
-                                        'MM-DD, HH:mm',
-                                    ),
-                                )}
+                            <DateTimePickerModal
+                                isVisible={
+                                    this.state.isStartDatePickerVisible ||
+                                    this.state.isEndDatePickerVisible
+                                }
+                                date={this.state.startDate}
+                                mode="datetime"
+                                onConfirm={date => {
+                                    const {
+                                        isStartDatePickerVisible,
+                                        isEndDatePickerVisible,
+                                    } = this.state;
+                                    if (isStartDatePickerVisible) {
+                                        this.setState({
+                                            startDate: date,
+                                            finishDate: date,
+                                            isStartDatePickerVisible: false,
+                                        });
+                                    } else if (isEndDatePickerVisible) {
+                                        this.setState({
+                                            finishDate: date,
+                                            isEndDatePickerVisible: false,
+                                        });
+                                    }
+                                }}
+                                onCancel={() => {
+                                    this.setState({
+                                        isStartDatePickerVisible: false,
+                                        isEndDatePickerVisible: false,
+                                    });
+                                }}
+                            />
+                            {/* 開始時間 */}
+                            <TouchableOpacity
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginTop: pxToDp(10),
+                                }}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    this.setState({
+                                        isStartDatePickerVisible: true,
+                                    });
+                                }}>
+                                <Text style={styles.inputTitle}>
+                                    {'開始時間 *  '}
+                                    <Text
+                                        style={{
+                                            fontSize: pxToDp(15),
+                                            color: black.third,
+                                        }}>
+                                        {moment(this.state.startDate).format(
+                                            'MM-DD, HH:mm',
+                                        )}
+                                    </Text>
+                                </Text>
+                                <Ionicons
+                                    name={'chevron-back-outline'}
+                                    size={pxToDp(20)}
+                                    color={black.third}
+                                />
+                            </TouchableOpacity>
+                            {/* 結束時間 */}
+                            <TouchableOpacity
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginTop: pxToDp(10),
+                                }}
+                                activeOpacity={0.8}
                                 onPress={() =>
                                     this.setState({
-                                        expanded: !this.state.expanded,
+                                        isEndDatePickerVisible: true,
                                     })
                                 }>
-                                {this.renderDatePicker('startDate')}
-                            </ExpandableSection>
-
-                            <View style={{marginTop: pxToDp(10)}} />
-                            <ExpandableSection
-                                expanded={this.state.expanded}
-                                sectionHeader={this.renderSectionHeader(
-                                    '結束時間:  ',
-                                    moment(this.state.finishDate).format(
-                                        'MM-DD, HH:mm',
-                                    ),
-                                )}
-                                onPress={() =>
-                                    this.setState({
-                                        expanded: !this.state.expanded,
-                                    })
-                                }>
-                                {this.renderDatePicker('finishDate')}
-                            </ExpandableSection>
+                                <Text style={styles.inputTitle}>
+                                    {'結束時間 *  '}
+                                    <Text
+                                        style={{
+                                            fontSize: pxToDp(15),
+                                            color: black.third,
+                                        }}>
+                                        {moment(this.state.finishDate).format(
+                                            'MM-DD, HH:mm',
+                                        )}
+                                    </Text>
+                                </Text>
+                                <Ionicons
+                                    name={'chevron-back-outline'}
+                                    size={pxToDp(20)}
+                                    color={black.third}
+                                />
+                            </TouchableOpacity>
                         </View>
 
                         {/* 活動詳情說明 */}
