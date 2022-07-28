@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     View,
     Image,
@@ -9,24 +9,23 @@ import {
     StyleSheet,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
-import { pxToDp } from '../../../../utils/stylesKits';
+import {COLOR_DIY} from '../../../../utils/uiMap';
+import {pxToDp} from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 
 // import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import moment, { lang } from 'moment-timezone';
+import moment, {lang} from 'moment-timezone';
 
 // 解構全局ui設計顏色
-const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
+const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
 
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
-const { width: PAGE_WIDTH } = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const {width: PAGE_WIDTH} = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.9;
 const COMPONENT_HEIGHT = PAGE_HEIGHT * 0.2;
-
 
 class UMEventDetail extends Component {
     constructor(props) {
@@ -45,7 +44,7 @@ class UMEventDetail extends Component {
 
         // 中文
         let title_cn = '';
-        let category_cn = '';//
+        let category_cn = ''; //
         let organiser_cn = '';
         let coorganiser_cn = '';
         let venue_cn = '';
@@ -137,7 +136,7 @@ class UMEventDetail extends Component {
             }
         });
 
-        // TODO: 
+        // TODO:
         // common
         // 海報
         // 有無smartPoint
@@ -230,8 +229,8 @@ class UMEventDetail extends Component {
     }
 
     render() {
-        const { LanguageMode, chooseMode, data, } = this.state;
-        const { imageUrls } = data;
+        const {LanguageMode, chooseMode, data} = this.state;
+        const {imageUrls} = data;
         const {
             //共通内容
             dateFrom,
@@ -296,37 +295,120 @@ class UMEventDetail extends Component {
         }
 
         //用数组存储内容，便于根据语言筛选条件显示
-        var title = [title_cn, title_en, title_pt]
-        var category = [category_cn, category_en, category_pt]
-        var organiser = [organiser_cn, organiser_en, organiser_pt, "主辦單位：", "Organiser: ", "Organizador: "]
-        var coorganiser = [coorganiser_cn, coorganiser_en, coorganiser_pt, "協辦單位：", "Coorganiser: ", "Co-organizador: "]
-        var venue = [venue_cn, venue_en, venue_pt, "地點：", "Venue: ", "Local: "]
-        var content = [content_cn, content_en, content_pt, "詳情：", "Content: "]
-        var targetAudience = [targetAudience_cn, targetAudience_en, targetAudience_pt, "對象：", "Target Audience: ", "Audiência-alvo: "]
-        var speaker = [speaker_cn, speaker_en, speaker_pt, "講者：", "Speaker: ", "Orador: "]
-        var remark = [remark_cn, remark_en, remark_pt, "備註：", "Remark: ", "Observação: "]
-        var language = [language_cn, language_en, language_pt, "語言：", "Language: ", "Língua: "]
-        var contactName = [contactName_cn, contactName_en, contactName_pt, "名稱：", "Name: ", "Nome: "]
-        var contactPhone = [contactPhone_cn, contactPhone_en, contactPhone_pt, "電話：", "Phone: ", "Telefone: "]
-        var contactFax = [contactFax_cn, contactFax_en, contactFax_pt, "傳真：", "Fax: ", "Fax: "]
-        var contactMail = [contactMail_cn, contactMail_en, contactMail_pt, "電郵：", "E-mail: ", "E-mail: "]
-        var date = ["活動日期：", "Date: ", "Data: "]
-        var time = ["活動時間：", "Time: ", "Horário: "]
-        var contact = ["聯絡人", "Contact Person", "Pessoa a Contactar"]
+        var title = [title_cn, title_en, title_pt];
+        var category = [category_cn, category_en, category_pt];
+        var organiser = [
+            organiser_cn,
+            organiser_en,
+            organiser_pt,
+            '主辦單位：',
+            'Organiser: ',
+            'Organizador: ',
+        ];
+        var coorganiser = [
+            coorganiser_cn,
+            coorganiser_en,
+            coorganiser_pt,
+            '協辦單位：',
+            'Coorganiser: ',
+            'Co-organizador: ',
+        ];
+        var venue = [
+            venue_cn,
+            venue_en,
+            venue_pt,
+            '地點：',
+            'Venue: ',
+            'Local: ',
+        ];
+        var content = [
+            content_cn,
+            content_en,
+            content_pt,
+            '詳情：',
+            'Content: ',
+        ];
+        var targetAudience = [
+            targetAudience_cn,
+            targetAudience_en,
+            targetAudience_pt,
+            '對象：',
+            'Target Audience: ',
+            'Audiência-alvo: ',
+        ];
+        var speaker = [
+            speaker_cn,
+            speaker_en,
+            speaker_pt,
+            '講者：',
+            'Speaker: ',
+            'Orador: ',
+        ];
+        var remark = [
+            remark_cn,
+            remark_en,
+            remark_pt,
+            '備註：',
+            'Remark: ',
+            'Observação: ',
+        ];
+        var language = [
+            language_cn,
+            language_en,
+            language_pt,
+            '語言：',
+            'Language: ',
+            'Língua: ',
+        ];
+        var contactName = [
+            contactName_cn,
+            contactName_en,
+            contactName_pt,
+            '名稱：',
+            'Name: ',
+            'Nome: ',
+        ];
+        var contactPhone = [
+            contactPhone_cn,
+            contactPhone_en,
+            contactPhone_pt,
+            '電話：',
+            'Phone: ',
+            'Telefone: ',
+        ];
+        var contactFax = [
+            contactFax_cn,
+            contactFax_en,
+            contactFax_pt,
+            '傳真：',
+            'Fax: ',
+            'Fax: ',
+        ];
+        var contactMail = [
+            contactMail_cn,
+            contactMail_en,
+            contactMail_pt,
+            '電郵：',
+            'E-mail: ',
+            'E-mail: ',
+        ];
+        var date = ['活動日期：', 'Date: ', 'Data: '];
+        var time = ['活動時間：', 'Time: ', 'Horário: '];
+        var contact = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
 
         return (
-            <View style={{ backgroundColor: bg_color, flex: 1 }}>
+            <View style={{backgroundColor: bg_color, flex: 1}}>
                 <Header title={'活動詳情'} />
 
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={imageUrls}
-                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
-                <ScrollView style={{ padding: pxToDp(10) }}>
+                <ScrollView>
                     {/* 文本模式選擇 3語切換 */}
                     <View
                         style={{
@@ -347,7 +429,7 @@ class UMEventDetail extends Component {
                                                     : bg_color,
                                         }}
                                         onPress={() =>
-                                            this.setState({ chooseMode: index })
+                                            this.setState({chooseMode: index})
                                         }>
                                         <Text
                                             style={{
@@ -358,17 +440,19 @@ class UMEventDetail extends Component {
                                             }}>
                                             {item.name}
                                         </Text>
-                                    </TouchableOpacity>);
+                                    </TouchableOpacity>
+                                );
                             }
                         })}
                     </View>
                     {/* 標題 */}
-                    <View style={{
-                        width: '100%',
-                        alignItems: 'center',
-                        paddingHorizontal: pxToDp(10),
-                        marginTop: pxToDp(10),
-                    }}>
+                    <View
+                        style={{
+                            width: '100%',
+                            alignItems: 'center',
+                            paddingHorizontal: pxToDp(10),
+                            marginTop: pxToDp(10),
+                        }}>
                         <Text
                             style={{
                                 color: COLOR_DIY.themeColor,
@@ -401,323 +485,384 @@ class UMEventDetail extends Component {
                                 uri: imageUrls,
                                 cache: FastImage.cacheControl.web,
                             }}
-                            style={{ width: '100%', height: '100%' }}
+                            style={{width: '100%', height: '100%'}}
                         />
                     </TouchableOpacity>
+
                     {/* 日期与时间*/}
                     {/* 如果活動當天結束顯示活動日期，若為多日活動則顯示開始和結束日期 */}
-                    <View style={{
-                        width: COMPONENT_WIDTH,
-                        backgroundColor: 'white',
-                        borderRadius: pxToDp(10),
-                        ...viewShadow,
-                        paddingVertical: pxToDp(15),
-                        marginTop: pxToDp(5),
-                        alignSelf: 'center',
-                        paddingHorizontal:pxToDp(15),
-                    }}>
-                        {moment(dateFrom).format('MM-DD') == moment(dateTo).format('MM-DD') ? (
-                            <Text style={{
-                                fontSize: 18,
-                                fontWeight: '700',
-                                color: '#FF8627',
-                            }}>
-                                {date[chooseMode]}{moment(dateFrom).format('MM-DD')}
-                            </Text>
-                        ) : (
-                            <View>
-                                <Text style={{
+                    <View
+                        style={{
+                            marginTop: pxToDp(5),
+                            marginHorizontal: pxToDp(20),
+                            borderRadius: pxToDp(10),
+                            backgroundColor: 'white',
+                            padding: pxToDp(10),
+                            ...viewShadow,
+                        }}>
+                        {/* 日期 */}
+                        {moment(dateFrom).format('MM-DD') ==
+                        moment(dateTo).format('MM-DD') ? (
+                            <Text
+                                style={{
                                     fontSize: 18,
                                     fontWeight: '700',
                                     color: '#FF8627',
                                 }}>
-                                    {date[chooseMode]}{moment(dateFrom).format('MM-DD')}--{moment(dateTo).format('MM-DD')}
+                                {date[chooseMode]}
+                                {moment(dateFrom).format('MM-DD')}
+                            </Text>
+                        ) : (
+                            <View>
+                                <Text
+                                    style={{
+                                        fontSize: 18,
+                                        fontWeight: '700',
+                                        color: '#FF8627',
+                                    }}>
+                                    {date[chooseMode]}
+                                    {moment(dateFrom).format('MM-DD')}--
+                                    {moment(dateTo).format('MM-DD')}
                                 </Text>
                             </View>
                         )}
-                        {/* 活動時間 */}
-                        <Text style={{
-                            fontSize: 18,
-                            fontWeight: '700',
-                            color: '#FF8627',
-                        }}>
-                            {time[chooseMode]}{moment(timeFrom).format('HH:SS')}--{moment(timeTo).format('HH:SS')}
-                        </Text>
-                        {/*講者*/}
-                        <View style={{
-                            flexDirection: 'row',
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                                backgroundColor:'green'
-                            }}>
-                                {speaker[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                backgroundColor:'red',
-                            }}>
-                                {speaker[chooseMode]}
-                            </Text>
-                        </View>
-                        {/*地點*/}
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {venue[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {venue[chooseMode]}
-                            </Text>
-                        </View>
-                        {/*語言*/}
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {language[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {language[chooseMode]}
-                            </Text>
-                        </View>
-                        {/*對象*/}
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {targetAudience[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {targetAudience[chooseMode]}
-                            </Text>
-                        </View>
-                        {/*主辦單位*/}
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {organiser[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {organiser[chooseMode]}
-                            </Text>
-                        </View>
-                        {/*協辦單位*/}
-                        {coorganiser[chooseMode]=="" ? (
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {coorganiser[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {coorganiser[chooseMode]}
-                            </Text>
-                        </View>):(<View></View>)}
-                        {/*詳情*/}
-                        {content[chooseMode]=="" ? (
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {content[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {content[chooseMode]}
-                            </Text>
-                        </View>):(<View></View>)}
-                        {/*備註*/}
-                        {remark[chooseMode]=="" ? (
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingRight: pxToDp(20),
-                            marginTop:pxToDp(3),
-                        }}>
-                            <Text style={{
-                                color: COLOR_DIY.themeColor,
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}>
-                                {remark[chooseMode + 3]}
-                            </Text>
-                            <Text style={{
-                                color: 'black',
-                                fontSize: 15,
-                                paddingRight: pxToDp(7.5),
-                            }}>
-                                {remark[chooseMode]}
-                            </Text>
-                        </View>):(<View></View>)}
-                    </View>
-                    {/* 聯絡人 */}
-                    <View style={{
-                        flexDirection: 'column',
-                    }}>
-                        <View style={{
-                            width: COMPONENT_WIDTH,
-                            backgroundColor: 'white',
-                            borderRadius: pxToDp(10),
-                            ...viewShadow,
-                            paddingHorizontal: pxToDp(15),
-                            paddingVertical: pxToDp(15),
-                            marginTop: pxToDp(10),
-                            alignSelf: 'center'
-                        }}>
-                            <Text style={{
+                        {/* 時間 */}
+                        <Text
+                            style={{
                                 fontSize: 18,
                                 fontWeight: '700',
                                 color: '#FF8627',
                             }}>
-                                {contact[chooseMode]}
-                            </Text>
-                            <View style={{
+                            {time[chooseMode]}
+                            {moment(timeFrom).format('HH:SS')}--
+                            {moment(timeTo).format('HH:SS')}
+                        </Text>
+                        {/* 講者 */}
+                        <View
+                            style={{
+                                marginTop: pxToDp(3),
                                 flexDirection: 'row',
-                                paddingRight: pxToDp(20),
-                                marginTop:pxToDp(3),
+                                height: 40,
                             }}>
-                                <Text style={{
+                            {/* 文本標題，e.g. 講者： */}
+                            <Text
+                                style={{
                                     color: COLOR_DIY.themeColor,
                                     fontSize: 15,
                                     fontWeight: '500',
                                 }}>
-                                    {contactName[chooseMode + 3]}
+                                {speaker[chooseMode + 3]}
+                                {/* 對應該活動的講者名稱 */}
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
+                                    {speaker[chooseMode]}
                                 </Text>
-                                <Text style={{
+                            </Text>
+                        </View>
+                        {/*地點*/}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                paddingRight: pxToDp(20),
+                                marginTop: pxToDp(3),
+                            }}>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.themeColor,
+                                    fontSize: 15,
+                                    fontWeight: '500',
+                                }}>
+                                {venue[chooseMode + 3]}
+                            </Text>
+                            <Text
+                                style={{
                                     color: 'black',
                                     fontSize: 15,
                                     paddingRight: pxToDp(7.5),
                                 }}>
+                                {venue[chooseMode]}
+                            </Text>
+                        </View>
+                        {/*語言*/}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                paddingRight: pxToDp(20),
+                                marginTop: pxToDp(3),
+                            }}>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.themeColor,
+                                    fontSize: 15,
+                                    fontWeight: '500',
+                                }}>
+                                {language[chooseMode + 3]}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    fontSize: 15,
+                                    paddingRight: pxToDp(7.5),
+                                }}>
+                                {language[chooseMode]}
+                            </Text>
+                        </View>
+                        {/*對象*/}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                paddingRight: pxToDp(20),
+                                marginTop: pxToDp(3),
+                            }}>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.themeColor,
+                                    fontSize: 15,
+                                    fontWeight: '500',
+                                }}>
+                                {targetAudience[chooseMode + 3]}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    fontSize: 15,
+                                    paddingRight: pxToDp(7.5),
+                                }}>
+                                {targetAudience[chooseMode]}
+                            </Text>
+                        </View>
+                        {/*主辦單位*/}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                paddingRight: pxToDp(20),
+                                marginTop: pxToDp(3),
+                            }}>
+                            <Text
+                                style={{
+                                    color: COLOR_DIY.themeColor,
+                                    fontSize: 15,
+                                    fontWeight: '500',
+                                }}>
+                                {organiser[chooseMode + 3]}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    fontSize: 15,
+                                    paddingRight: pxToDp(7.5),
+                                }}>
+                                {organiser[chooseMode]}
+                            </Text>
+                        </View>
+                        {/*協辦單位*/}
+                        {coorganiser[chooseMode] == '' ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
+                                }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
+                                    {coorganiser[chooseMode + 3]}
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
+                                    {coorganiser[chooseMode]}
+                                </Text>
+                            </View>
+                        ) : (
+                            <View></View>
+                        )}
+                        {/*詳情*/}
+                        {content[chooseMode] == '' ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
+                                }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
+                                    {content[chooseMode + 3]}
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
+                                    {content[chooseMode]}
+                                </Text>
+                            </View>
+                        ) : (
+                            <View></View>
+                        )}
+                        {/*備註*/}
+                        {remark[chooseMode] == '' ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
+                                }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
+                                    {remark[chooseMode + 3]}
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
+                                    {remark[chooseMode]}
+                                </Text>
+                            </View>
+                        ) : (
+                            <View></View>
+                        )}
+                    </View>
+
+                    {/* 聯絡人 */}
+                    <View
+                        style={{
+                            flexDirection: 'column',
+                        }}>
+                        <View
+                            style={{
+                                width: COMPONENT_WIDTH,
+                                backgroundColor: 'white',
+                                borderRadius: pxToDp(10),
+                                ...viewShadow,
+                                paddingHorizontal: pxToDp(15),
+                                paddingVertical: pxToDp(15),
+                                marginTop: pxToDp(10),
+                                alignSelf: 'center',
+                            }}>
+                            <Text
+                                style={{
+                                    fontSize: 18,
+                                    fontWeight: '700',
+                                    color: '#FF8627',
+                                }}>
+                                {contact[chooseMode]}
+                            </Text>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
+                                }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
+                                    {contactName[chooseMode + 3]}
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
                                     {contactName[chooseMode]}
                                 </Text>
                             </View>
-                            <View style={{
-                                flexDirection: 'row',
-                                paddingRight: pxToDp(20),
-                                marginTop:pxToDp(3),
-                            }}>
-                                <Text style={{
-                                    color: COLOR_DIY.themeColor,
-                                    fontSize: 15,
-                                    fontWeight: '500',
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
                                 }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
                                     {contactPhone[chooseMode + 3]}
                                 </Text>
-                                <Text style={{
-                                    color: 'black',
-                                    fontSize: 15,
-                                    paddingRight: pxToDp(7.5),
-                                }}>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
                                     {contactPhone[chooseMode]}
                                 </Text>
                             </View>
-                            <View style={{
-                                flexDirection: 'row',
-                                paddingRight: pxToDp(20),
-                                marginTop:pxToDp(3),
-                            }}>
-                                <Text style={{
-                                    color: COLOR_DIY.themeColor,
-                                    fontSize: 15,
-                                    fontWeight: '500',
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
                                 }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
                                     {contactFax[chooseMode + 3]}
                                 </Text>
-                                <Text style={{
-                                    color: 'black',
-                                    fontSize: 15,
-                                    paddingRight: pxToDp(7.5),
-                                }}>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
                                     {contactFax[chooseMode]}
                                 </Text>
                             </View>
-                            <View style={{
-                                flexDirection: 'row',
-                                paddingRight: pxToDp(20),
-                                marginTop:pxToDp(3),
-                            }}>
-                                <Text style={{
-                                    color: COLOR_DIY.themeColor,
-                                    fontSize: 15,
-                                    fontWeight: '500',
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    paddingRight: pxToDp(20),
+                                    marginTop: pxToDp(3),
                                 }}>
+                                <Text
+                                    style={{
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: 15,
+                                        fontWeight: '500',
+                                    }}>
                                     {contactMail[chooseMode + 3]}
                                 </Text>
-                                <Text style={{
-                                    color: 'black',
-                                    fontSize: 15,
-                                    paddingRight: pxToDp(7.5),
-                                }}>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        paddingRight: pxToDp(7.5),
+                                    }}>
                                     {contactMail[chooseMode]}
                                 </Text>
                             </View>
                         </View>
-                        <View style={{ marginTop: pxToDp(50) }} />
+                        <View style={{marginTop: pxToDp(50)}} />
                     </View>
                 </ScrollView>
             </View>
@@ -732,9 +877,7 @@ const styles = StyleSheet.create({
         borderRadius: pxToDp(10),
         ...viewShadow,
     },
-    subtitle: {
-
-    },
+    subtitle: {},
     imgContainer: {
         width: COMPONENT_WIDTH,
         height: COMPONENT_HEIGHT,
