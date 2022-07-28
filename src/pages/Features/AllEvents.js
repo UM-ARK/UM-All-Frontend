@@ -1,13 +1,5 @@
 import React, {Component} from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    StyleSheet,
-    FlatList,
-    ActivityIndicator,
-} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
 
 import Header from '../../components/Header';
 import EventCard from '../TabbarPages/news/components/EventCard';

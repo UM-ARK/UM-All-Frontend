@@ -132,45 +132,12 @@ class AppSetting extends Component {
                     </Text>
                 </TouchableOpacity>
 
-                {/* 清除Web緩存 */}
-                <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={{
-                        backgroundColor: COLOR_DIY.themeColor,
-                        padding: pxToDp(10),
-                        borderRadius: pxToDp(10),
-                        marginVertical: pxToDp(20),
-                        justifyContent: 'center',
-                        alignSelf: 'center',
-                    }}
-                    // TODO: 確認清除提示
-                    onPress={() => {
-                        // 清除所有的cookies
-                        CookieManager.clearAll()
-                            .then(success => {
-                                // TODO: 成功提示
-                                console.log(
-                                    'CookieManager.clearAll =>',
-                                    success,
-                                );
-                            })
-                            .catch(err => alert(err));
-                    }}>
-                    <Text
-                        style={{
-                            fontSize: pxToDp(20),
-                            color: 'white',
-                            fontWeight: '500',
-                        }}>
-                        清除Web緩存
-                    </Text>
-                </TouchableOpacity>
-
                 {/* 登出按鈕 */}
                 <TouchableOpacity
                     activeOpacity={0.8}
                     style={{
-                        backgroundColor: COLOR_DIY.themeColor,
+                        marginTop: pxToDp(10),
+                        backgroundColor: COLOR_DIY.unread,
                         padding: pxToDp(10),
                         borderRadius: pxToDp(10),
                         justifyContent: 'center',

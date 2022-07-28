@@ -41,6 +41,7 @@ import {
     UM_COURSE_SIMU,
     UM_ISW,
     NEW_INFOG,
+    UM_DOCUMENTS,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
@@ -387,6 +388,16 @@ class Index extends Component {
                             bg_color_diy: '#23407d',
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'badge-account',
+                        fn_name: '證明文件',
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_DOCUMENTS,
+                            title: 'UM 證明文件',
                         },
                     },
                 ],

@@ -36,11 +36,6 @@ const optionsInfo = [
         routeName: 'MyFollow',
     },
     {
-        title: '設置',
-        iconPath: 'settings-outline',
-        routeName: 'AppSetting',
-    },
-    {
         title: '常見問題',
         iconPath: 'at-circle-outline',
         routeName: 'UsualQuestion',
@@ -49,6 +44,11 @@ const optionsInfo = [
         title: '關於我們',
         iconPath: 'chatbubbles-outline',
         routeName: 'AboutUs',
+    },
+    {
+        title: '設置',
+        iconPath: 'settings-outline',
+        routeName: 'AppSetting',
     },
 ];
 
@@ -63,10 +63,7 @@ class MeScreen extends Component {
 
     componentDidMount() {
         const globalData = this.props.RootStore;
-        if (
-            globalData.userInfo &&
-            JSON.stringify(globalData.userInfo) != '{}'
-        ) {
+        if (globalData.userInfo && globalData.userInfo.stdData) {
             console.log('Me檢測：有token緩存');
             this.setState({
                 isLogin: true,
