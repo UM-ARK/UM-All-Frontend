@@ -226,6 +226,7 @@ const s = StyleSheet.create({
         width: '100%',
         backgroundColor: COLOR_DIY.bg_color,
         justifyContent: 'space-around',
+        marginTop: pxToDp(5),
     },
     // 活動卡片間距
     cardContainer: {

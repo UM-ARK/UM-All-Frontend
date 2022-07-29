@@ -19,7 +19,6 @@ import NewsCard from './components/NewsCard';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 import axios from 'axios';
 import moment from 'moment-timezone';
 
@@ -27,34 +26,6 @@ const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
 const {black, white, themeColor} = COLOR_DIY;
-
-// 渲染幾次骨架屏
-const renderLoader = new Array(parseInt(PAGE_HEIGHT / 150));
-renderLoader.fill(0);
-// Loading時的骨架屏
-const EventsLoader = props => (
-    <ContentLoader
-        width={PAGE_WIDTH}
-        height={150}
-        viewBox="0 0 700 300"
-        backgroundColor="#f5f5f5"
-        foregroundColor="#ccc"
-        {...props}>
-        <Rect x="4" y="8" rx="3" ry="3" width="7" height="288" />
-        <Rect x="6" y="289" rx="3" ry="3" width="669" height="8" />
-        <Rect x="670" y="9" rx="3" ry="3" width="6" height="285" />
-        <Rect x="55" y="42" rx="16" ry="16" width="274" height="216" />
-        <Rect x="412" y="113" rx="3" ry="3" width="102" height="7" />
-        <Rect x="402" y="91" rx="3" ry="3" width="178" height="6" />
-        <Rect x="405" y="139" rx="3" ry="3" width="178" height="6" />
-        <Rect x="416" y="162" rx="3" ry="3" width="102" height="7" />
-        <Rect x="405" y="189" rx="3" ry="3" width="178" height="6" />
-        <Rect x="5" y="8" rx="3" ry="3" width="669" height="7" />
-        <Rect x="406" y="223" rx="14" ry="14" width="72" height="32" />
-        <Rect x="505" y="224" rx="14" ry="14" width="72" height="32" />
-        <Rect x="376" y="41" rx="3" ry="3" width="231" height="29" />
-    </ContentLoader>
-);
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -71,6 +42,7 @@ class UMEventPage extends Component {
         this.state = {
             data: undefined,
             isLoading: true,
+            isLogin: false,
         };
         this.getData();
     }
@@ -178,7 +150,12 @@ class UMEventPage extends Component {
                 getItemCount={getItemCount}
                 // 列表頭部渲染的組件 - Data From說明
                 ListHeaderComponent={() => (
-                    <Text style={{color: black.third, alignSelf: 'center'}}>
+                    <Text
+                        style={{
+                            color: black.third,
+                            alignSelf: 'center',
+                            marginTop: pxToDp(5),
+                        }}>
                         Data From: data.um.edu.mo
                     </Text>
                 )}

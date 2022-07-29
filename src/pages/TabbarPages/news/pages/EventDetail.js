@@ -642,7 +642,7 @@ class EventDetail extends Component {
                 <DialogDIY
                     showDialog={this.state.showDialog}
                     text={
-                        'Follow活動可以接收最新消息，需要登錄操作，現在去登錄嗎？'
+                        '登錄後能Follow活動和接收最新消息，現在去登錄嗎？'
                     }
                     handleConfirm={() => {
                         this.setState({showDialog: false});

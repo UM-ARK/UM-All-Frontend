@@ -103,6 +103,7 @@ class WebViewer extends Component {
                                 padding: pxToDp(20),
                                 marginBottom: pxToDp(10),
                             }}>
+                            {/* 瀏覽器打開 */}
                             {url && (
                                 <View
                                     style={{
@@ -113,8 +114,8 @@ class WebViewer extends Component {
                                         style={{...s.iconContainer}}
                                         onPress={() => Linking.openURL(url)}>
                                         <Ionicons
-                                            name="open-outline"
-                                            size={pxToDp(35)}
+                                            name="navigate-outline"
+                                            size={pxToDp(30)}
                                             color={COLOR_DIY.black.second}
                                         />
                                     </TouchableOpacity>
@@ -128,6 +129,7 @@ class WebViewer extends Component {
                                 </View>
                             )}
 
+                            {/* 刷新頁面 */}
                             <View
                                 style={{
                                     justifyContent: 'center',
@@ -138,7 +140,7 @@ class WebViewer extends Component {
                                     onPress={this.triggerRefresh}>
                                     <Ionicons
                                         name="refresh"
-                                        size={pxToDp(35)}
+                                        size={pxToDp(30)}
                                         color={COLOR_DIY.black.second}
                                     />
                                 </TouchableOpacity>

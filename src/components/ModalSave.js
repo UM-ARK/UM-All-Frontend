@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {Dimensions, View, Text, Button, TouchableOpacity} from 'react-native';
 
 import Modal from 'react-native-modal';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {pxToDp} from '../utils/stylesKits';
 import {COLOR_DIY} from '../utils/uiMap';
@@ -68,10 +68,10 @@ class ModalSave extends Component {
                                     );
                                     this.props.cancel();
                                 }}>
-                                <MaterialIcons
-                                    name="save-alt"
+                                <Ionicons
+                                    name="images-outline"
                                     color={COLOR_DIY.themeColor}
-                                    size={pxToDp(45)}></MaterialIcons>
+                                    size={pxToDp(30)}></Ionicons>
                             </TouchableOpacity>
                             <Text
                                 style={{

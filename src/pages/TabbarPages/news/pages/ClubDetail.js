@@ -615,6 +615,7 @@ class ClubDetail extends Component {
                                             marginVertical: pxToDp(8),
                                             marginHorizontal: pxToDp(10),
                                         }}
+                                        isLogin={this.state.isLogin}
                                     />
                                 );
                             }}
@@ -708,9 +709,7 @@ class ClubDetail extends Component {
                 {/* 彈出層提示 */}
                 <DialogDIY
                     showDialog={this.state.showDialog}
-                    text={
-                        'Follow社團可以接收最新消息，需要登錄操作，現在去登錄嗎？'
-                    }
+                    text={'登錄後能Follow社團和接收最新消息，現在去登錄嗎？'}
                     handleConfirm={() => {
                         this.setState({showDialog: false});
                         this.props.navigation.navigate('MeTabbar');

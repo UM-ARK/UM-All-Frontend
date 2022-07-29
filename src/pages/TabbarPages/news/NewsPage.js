@@ -176,7 +176,7 @@ class NewsPage extends Component {
         } = this.state.topNews;
 
         return (
-            <View>
+            <View style={{marginTop: pxToDp(5)}}>
                 <Text style={{color: black.third, alignSelf: 'center'}}>
                     Data From: data.um.edu.mo
                 </Text>
@@ -317,7 +317,7 @@ class NewsPage extends Component {
                 {this.state.isLoading ? (
                     // 渲染Loading時的骨架屏
                     <ScrollView
-                        style={{backgroundColor: bg_color}}
+                        contentContainerStyle={{backgroundColor: bg_color}}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}

@@ -12,19 +12,21 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import {UM_WHOLE, WHAT_2_REG} from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
+import ModalBottom from '../../../components/ModalBottom';
 
 import {Header, Divider} from '@rneui/themed';
 import {PageControl, Card} from 'react-native-ui-lib';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Carousel from 'react-native-reanimated-carousel';
 import {FlatGrid} from 'react-native-super-grid';
+import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 let carouselProgress = 0;
 
 const {white, bg_color} = COLOR_DIY;
 
-export default class HomeScreen extends Component {
+class HomeScreen extends Component {
     state = {
         // 首頁輪播圖數據
         carouselImagesArr: [
@@ -91,7 +93,21 @@ export default class HomeScreen extends Component {
                 func: () => this.props.navigation.jumpTo('FeaturesTabbar'),
             },
         ],
+
+        isShowModal: false,
     };
+
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        // 已登錄學生賬號
+        if (globalData.userInfo && globalData.userInfo.stdData) {
+            this.setState({isShowModal: false});
+        } else {
+            setTimeout(() => {
+                this.setState({isShowModal: true});
+            }, 1500);
+        }
+    }
 
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({icon_name, function_name, func}) => {
@@ -115,6 +131,11 @@ export default class HomeScreen extends Component {
                 </Text>
             </TouchableOpacity>
         );
+    };
+
+    // 打開/關閉底部Modal
+    tiggerModalBottom = () => {
+        this.setState({isShowModal: !this.state.isShowModal});
     };
 
     render() {
@@ -196,7 +217,52 @@ export default class HomeScreen extends Component {
 
                     <View style={{marginBottom: pxToDp(50)}} />
                 </ScrollView>
+
+                {/* 彈出提示登錄的Modal */}
+                {this.state.isShowModal && (
+                    <ModalBottom cancel={this.tiggerModalBottom}>
+                        <View
+                            style={{
+                                padding: pxToDp(20),
+                                marginBottom: pxToDp(30),
+                            }}>
+                            <ScrollView
+                                contentContainerStyle={{alignItems: 'center'}}>
+                                <Text style={{fontSize: pxToDp(18)}}>
+                                    歡迎來到UM ALL~
+                                </Text>
+                                <Text style={{fontSize: pxToDp(15)}}>
+                                    後體驗完整功能，現在去嗎？
+                                </Text>
+                                {/* 登錄按鈕 */}
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        marginTop: pxToDp(10),
+                                        backgroundColor: COLOR_DIY.themeColor,
+                                        padding: pxToDp(10),
+                                        borderRadius: pxToDp(10),
+                                        justifyContent: 'center',
+                                        alignSelf: 'center',
+                                    }}
+                                    onPress={() =>
+                                        this.props.navigation.jumpTo('MeTabbar')
+                                    }>
+                                    <Text
+                                        style={{
+                                            fontSize: pxToDp(15),
+                                            color: 'white',
+                                            fontWeight: '500',
+                                        }}>
+                                        現在登錄
+                                    </Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+                        </View>
+                    </ModalBottom>
+                )}
             </View>
         );
     }
 }
+export default inject('RootStore')(HomeScreen);
