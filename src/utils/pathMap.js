@@ -46,7 +46,7 @@ export const POST = {
     DEL_FOLLOW_CLUB: 'student_del_follow_club/',
 }
 
-export const ARK_LETTER_IMG = 'https://ark.boxz.dev/static/logo.png';
+export const ARK_LETTER_IMG = 'https://umall.one/static/logo.png';
 
 
 // Webview 服務
