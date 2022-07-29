@@ -73,6 +73,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bus-stop',
                         fn_name: '校园巴士',
+                        needLogin: false,
                         go_where: 'Bus', // a function
                     },
                     // TODO: 爬蟲
@@ -80,6 +81,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'calendar-today',
                         fn_name: '校曆',
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -97,23 +99,19 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map',
                         fn_name: '校園地圖',
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_MAP,
                             title: 'UM 校園地圖',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#989898',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: 'red',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
                         },
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map-marker-multiple',
                         fn_name: '課室地圖',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -132,12 +130,14 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'car-brake-parking',
                         fn_name: '車位',
+                        needLogin: false,
                         go_where: 'CarPark', // a function
                     },
                     {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'logo-dropbox',
                         fn_name: '資源借用',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -155,6 +155,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'console-network',
                         fn_name: '公共電腦',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -172,6 +173,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'door-closed-lock',
                         fn_name: '儲物箱',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -189,6 +191,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'hammer-wrench',
                         fn_name: '維修預約',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -206,6 +209,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'basketball',
                         fn_name: '體育預訂',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -224,6 +228,7 @@ class Index extends Component {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'library',
                         fn_name: '圖書館',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -241,6 +246,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'passport',
                         fn_name: 'UM Pass',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -259,6 +265,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'view-grid-plus',
                         fn_name: '更多服務',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -281,6 +288,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'alpha-m-circle-outline',
                         fn_name: 'Moodle',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -298,6 +306,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'database-search',
                         fn_name: '選咩課',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -315,6 +324,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'eye-plus',
                         fn_name: '預選課',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_PRE_ENROLMENT,
@@ -325,6 +335,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bank-plus',
                         fn_name: 'Add Drop',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_ADD_DROP,
@@ -335,6 +346,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'clipboard-edit',
                         fn_name: '課表模擬',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_COURSE_SIMU,
@@ -347,6 +359,7 @@ class Index extends Component {
                         // icon_name:"account-star",
                         icon_name: 'cow',
                         fn_name: '全人發展',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_WHOLE_PERSON,
@@ -357,6 +370,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'ab-testing',
                         fn_name: '成績',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_ISW,
@@ -367,6 +381,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dolphin',
                         fn_name: '交流',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_EXCHANGE,
@@ -377,6 +392,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dice-multiple',
                         fn_name: '獎學金',
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -394,6 +410,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'badge-account',
                         fn_name: '證明文件',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_DOCUMENTS,
@@ -409,6 +426,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'coffee-outline',
                         fn_name: '澳大論壇',
+                        needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -426,6 +444,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',
                         fn_name: '失物認領',
+                        needLogin: false,
                         go_where: 'LostAndFound',
                         // go_where: 'Webview',
                         // webview_param: {
@@ -444,6 +463,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'car-multiple',
                         fn_name: '泊車月票',
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -461,6 +481,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'human-dolly',
                         fn_name: '職位空缺',
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -484,6 +505,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'account-heart',
                         fn_name: '圖文包',
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: NEW_INFOG,
@@ -495,7 +517,17 @@ class Index extends Component {
                 ],
             },
         ],
+        isLogin: false,
+        showDialog: false,
     };
+
+    componentDidMount() {
+        let globalData = this.props.RootStore;
+        // 已登錄學生賬號
+        if (globalData.userInfo && globalData.userInfo.stdData) {
+            this.setState({isLogin: true});
+        }
+    }
 
     GetFunctionCard(title, fn_list) {
         // title為分類大標題，fn_list為該分類下有的功能圖標
@@ -568,7 +600,7 @@ class Index extends Component {
                             );
                         }
 
-                        let {go_where, webview_param} = item;
+                        let {go_where, webview_param, needLogin} = item;
                         return (
                             <TouchableOpacity
                                 style={{
@@ -578,18 +610,22 @@ class Index extends Component {
                                 activeOpacity={0.7}
                                 // 跳轉具體頁面
                                 onPress={() => {
-                                    // 跳轉對應本地頁面
-                                    if (go_where != 'Webview') {
-                                        this.props.navigation.navigate(
-                                            go_where,
-                                        );
-                                    }
-                                    // Webview頁面，需附帶跳轉參數
-                                    else {
-                                        this.props.navigation.navigate(
-                                            'Webviewer',
-                                            webview_param,
-                                        );
+                                    if (!needLogin || this.state.isLogin) {
+                                        // 跳轉對應本地頁面
+                                        if (go_where != 'Webview') {
+                                            this.props.navigation.navigate(
+                                                go_where,
+                                            );
+                                        }
+                                        // Webview頁面，需附帶跳轉參數
+                                        else {
+                                            this.props.navigation.navigate(
+                                                'Webviewer',
+                                                webview_param,
+                                            );
+                                        }
+                                    } else {
+                                        this.setState({showDialog: true});
                                     }
                                 }}
                                 // 複製相關網站link
@@ -641,6 +677,17 @@ class Index extends Component {
 
                     <View style={{marginBottom: pxToDp(100)}} />
                 </ScrollView>
+
+                {/* 彈出層提示 */}
+                <DialogDIY
+                    showDialog={this.state.showDialog}
+                    text={`此功能需要登錄後操作，現在去登錄嗎？\n[]~(￣▽￣)~*`}
+                    handleConfirm={() => {
+                        this.setState({showDialog: false});
+                        this.props.navigation.navigate('MeTabbar');
+                    }}
+                    handleCancel={() => this.setState({showDialog: false})}
+                />
             </View>
         );
     }
