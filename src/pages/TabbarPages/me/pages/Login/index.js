@@ -71,7 +71,7 @@ class LoginChoose extends Component {
     };
 
     render() {
-        const {canGoBack} = this.state;
+        const {disabledButton} = this.state;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header
@@ -88,7 +88,7 @@ class LoginChoose extends Component {
                                     this.refs.webRef.reload();
                                     this.setState({showMoodle: false});
                                 }}
-                                disabled={canGoBack}>
+                                disabled={disabledButton}>
                                 <Ionicons
                                     name="chevron-back-outline"
                                     size={pxToDp(25)}
@@ -113,10 +113,9 @@ class LoginChoose extends Component {
                             // SSO密碼輸入頁面e.title為https://websso.....
                             // 雙重認證頁面e.title為Duo Security
                             // Moodle頁面e.title為Dashboard
-                            // console.log(e);
                             // 已登錄到Moodle
-                            if (e.title == 'Dashboard') {
-                                this.setState({canGoBack: true});
+                            if (e.url == 'https://ummoodle.um.edu.mo/my/') {
+                                this.setState({disabledButton: true});
                                 // 獲取Moodle頁所有的cookies
                                 CookieManager.get(UM_Moodle)
                                     .then(cookies => {
@@ -126,7 +125,7 @@ class LoginChoose extends Component {
                                         );
                                         if ('MoodleSession' in cookies) {
                                             alert(
-                                                `Moodle登錄成功，正在註冊UM ALL...\n先不要進行其他操作...`,
+                                                `Moodle登錄成功，正在登錄UM ALL...\n先不要進行其他操作...`,
                                             );
                                             console.log(
                                                 'MoodleSession =>',
