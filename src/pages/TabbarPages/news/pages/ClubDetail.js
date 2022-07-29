@@ -17,6 +17,7 @@ import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
 import {BASE_URI, GET, ARK_LETTER_IMG, POST} from '../../../../utils/pathMap';
+import HyperlinkText from '../../../../components/HyperlinkText';
 
 import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
@@ -582,14 +583,23 @@ class ClubDetail extends Component {
                                                         {item.type}:{' '}
                                                     </Text>
                                                     {/* 相關號碼、id */}
-                                                    <Text
-                                                        style={{
-                                                            color: black.third,
+                                                    <HyperlinkText
+                                                        linkStyle={{
+                                                            color: COLOR_DIY.themeColor,
                                                         }}
-                                                        // 允許用戶複製
-                                                        selectable={true}>
-                                                        {item.num}
-                                                    </Text>
+                                                        navigation={
+                                                            this.props
+                                                                .navigation
+                                                        }>
+                                                        <Text
+                                                            style={{
+                                                                color: black.third,
+                                                            }}
+                                                            // 允許用戶複製
+                                                            selectable={true}>
+                                                            {item.num}
+                                                        </Text>
+                                                    </HyperlinkText>
                                                 </View>
                                             );
                                         }
