@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Image,
@@ -9,21 +9,21 @@ import {
     StyleSheet,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../../utils/uiMap';
+import { pxToDp } from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 
 // import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import moment, {lang} from 'moment-timezone';
+import moment, { lang } from 'moment-timezone';
 
 // 解構全局ui設計顏色
-const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
+const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.9;
 const COMPONENT_HEIGHT = PAGE_HEIGHT * 0.2;
 
@@ -44,9 +44,9 @@ class UMEventDetail extends Component {
 
         // 中文
         let title_cn = '';
-        let category_cn = ''; //
+        let category_cn = ''; //未找到
         let organiser_cn = '';
-        let coorganiser_cn = '';
+        let coorganiser_cn = '1';
         let venue_cn = '';
         let content_cn = '';
         let targetAudience_cn = '';
@@ -229,8 +229,8 @@ class UMEventDetail extends Component {
     }
 
     render() {
-        const {LanguageMode, chooseMode, data} = this.state;
-        const {imageUrls} = data;
+        const { LanguageMode, chooseMode, data } = this.state;
+        const { imageUrls } = data;
         const {
             //共通内容
             dateFrom,
@@ -292,6 +292,17 @@ class UMEventDetail extends Component {
         }
         if (title_pt.length <= 0) {
             LanguageMode[2].available = 0;
+        }
+        //判断协办单位，详情和备注是否存在
+        var available = [1, 1, 1];
+        if (coorganiser_cn == undefined) {
+            available[0] = 0;
+        }
+        if (content_cn == undefined) {
+            available[1] = 0;
+        }
+        if (remark_cn == undefined) {
+            available[2] = 0;
         }
 
         //用数组存储内容，便于根据语言筛选条件显示
@@ -397,15 +408,14 @@ class UMEventDetail extends Component {
         var contact = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
 
         return (
-            <View style={{backgroundColor: bg_color, flex: 1}}>
+            <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header title={'活動詳情'} />
-
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={imageUrls}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 <ScrollView>
@@ -429,7 +439,7 @@ class UMEventDetail extends Component {
                                                     : bg_color,
                                         }}
                                         onPress={() =>
-                                            this.setState({chooseMode: index})
+                                            this.setState({ chooseMode: index })
                                         }>
                                         <Text
                                             style={{
@@ -485,7 +495,7 @@ class UMEventDetail extends Component {
                                 uri: imageUrls,
                                 cache: FastImage.cacheControl.web,
                             }}
-                            style={{width: '100%', height: '100%'}}
+                            style={{ width: '100%', height: '100%' }}
                         />
                     </TouchableOpacity>
 
@@ -497,12 +507,14 @@ class UMEventDetail extends Component {
                             marginHorizontal: pxToDp(20),
                             borderRadius: pxToDp(10),
                             backgroundColor: 'white',
-                            padding: pxToDp(10),
+                            paddingVertical: pxToDp(15),
+                            paddingLeft: pxToDp(15),
+                            paddingRight: pxToDp(30),
                             ...viewShadow,
                         }}>
                         {/* 日期 */}
                         {moment(dateFrom).format('MM-DD') ==
-                        moment(dateTo).format('MM-DD') ? (
+                            moment(dateTo).format('MM-DD') ? (
                             <Text
                                 style={{
                                     fontSize: 18,
@@ -542,7 +554,6 @@ class UMEventDetail extends Component {
                             style={{
                                 marginTop: pxToDp(3),
                                 flexDirection: 'row',
-                                height: 40,
                             }}>
                             {/* 文本標題，e.g. 講者： */}
                             <Text
@@ -557,7 +568,7 @@ class UMEventDetail extends Component {
                                     style={{
                                         color: 'black',
                                         fontSize: 15,
-                                        fontWeight: '500',
+                                        fontWeight: 'normal',
                                     }}>
                                     {speaker[chooseMode]}
                                 </Text>
@@ -614,9 +625,8 @@ class UMEventDetail extends Component {
                         {/*對象*/}
                         <View
                             style={{
-                                flexDirection: 'row',
-                                paddingRight: pxToDp(20),
                                 marginTop: pxToDp(3),
+                                flexDirection: 'row',
                             }}>
                             <Text
                                 style={{
@@ -625,14 +635,14 @@ class UMEventDetail extends Component {
                                     fontWeight: '500',
                                 }}>
                                 {targetAudience[chooseMode + 3]}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: 'black',
-                                    fontSize: 15,
-                                    paddingRight: pxToDp(7.5),
-                                }}>
-                                {targetAudience[chooseMode]}
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        fontSize: 15,
+                                        fontWeight: 'normal',
+                                    }}>
+                                    {targetAudience[chooseMode]}
+                                </Text>
                             </Text>
                         </View>
                         {/*主辦單位*/}
@@ -660,7 +670,7 @@ class UMEventDetail extends Component {
                             </Text>
                         </View>
                         {/*協辦單位*/}
-                        {coorganiser[chooseMode] == '' ? (
+                        {available[0] == 1 ? (
                             <View
                                 style={{
                                     flexDirection: 'row',
@@ -688,11 +698,10 @@ class UMEventDetail extends Component {
                             <View></View>
                         )}
                         {/*詳情*/}
-                        {content[chooseMode] == '' ? (
+                        {available[1] == 1 ? (
                             <View
                                 style={{
                                     flexDirection: 'row',
-                                    paddingRight: pxToDp(20),
                                     marginTop: pxToDp(3),
                                 }}>
                                 <Text
@@ -702,25 +711,24 @@ class UMEventDetail extends Component {
                                         fontWeight: '500',
                                     }}>
                                     {content[chooseMode + 3]}
-                                </Text>
-                                <Text
-                                    style={{
-                                        color: 'black',
-                                        fontSize: 15,
-                                        paddingRight: pxToDp(7.5),
-                                    }}>
-                                    {content[chooseMode]}
+                                    <Text
+                                        style={{
+                                            color: 'black',
+                                            fontSize: 15,
+                                            fontWeight: 'normal',
+                                        }}>
+                                        {content[chooseMode]}
+                                    </Text>
                                 </Text>
                             </View>
                         ) : (
                             <View></View>
                         )}
                         {/*備註*/}
-                        {remark[chooseMode] == '' ? (
+                        {available[2] == 1 ? (
                             <View
                                 style={{
                                     flexDirection: 'row',
-                                    paddingRight: pxToDp(20),
                                     marginTop: pxToDp(3),
                                 }}>
                                 <Text
@@ -730,14 +738,14 @@ class UMEventDetail extends Component {
                                         fontWeight: '500',
                                     }}>
                                     {remark[chooseMode + 3]}
-                                </Text>
-                                <Text
+                                    <Text
                                     style={{
                                         color: 'black',
                                         fontSize: 15,
-                                        paddingRight: pxToDp(7.5),
+                                        fontWeight: 'normal',
                                     }}>
                                     {remark[chooseMode]}
+                                </Text>
                                 </Text>
                             </View>
                         ) : (
@@ -788,6 +796,7 @@ class UMEventDetail extends Component {
                                         color: 'black',
                                         fontSize: 15,
                                         paddingRight: pxToDp(7.5),
+                                        selectable: true,
                                     }}>
                                     {contactName[chooseMode]}
                                 </Text>
@@ -811,6 +820,7 @@ class UMEventDetail extends Component {
                                         color: 'black',
                                         fontSize: 15,
                                         paddingRight: pxToDp(7.5),
+                                        selectable: true,
                                     }}>
                                     {contactPhone[chooseMode]}
                                 </Text>
@@ -834,6 +844,7 @@ class UMEventDetail extends Component {
                                         color: 'black',
                                         fontSize: 15,
                                         paddingRight: pxToDp(7.5),
+                                        selectable: true,
                                     }}>
                                     {contactFax[chooseMode]}
                                 </Text>
@@ -857,12 +868,13 @@ class UMEventDetail extends Component {
                                         color: 'black',
                                         fontSize: 15,
                                         paddingRight: pxToDp(7.5),
+                                        selectable: true,
                                     }}>
                                     {contactMail[chooseMode]}
                                 </Text>
                             </View>
                         </View>
-                        <View style={{marginTop: pxToDp(50)}} />
+                        <View style={{ marginTop: pxToDp(50) }} />
                     </View>
                 </ScrollView>
             </View>
