@@ -56,31 +56,6 @@ export default class HomeScreen extends Component {
 
         // 快捷功能入口
         functionArray: [
-            // {
-            //     icon_name: 'compass',
-            //     function_name: '澳大論壇',
-            //     func: () => {
-            //         let webview_param = {
-            //             url: UM_WHOLE,
-            //             title: '澳大論壇',
-            //         };
-            //         this.props.navigation.navigate('Webviewer', webview_param);
-            //     },
-            // },
-            // {
-            //     icon_name: 'file-tray-full',
-            //     function_name: '選咩課',
-            //     func: () => {
-            //         let webview_param = {
-            //             url: WHAT_2_REG,
-            //             title: '澳大選咩課',
-            //             text_color: '#fff',
-            //             bg_color_diy: '#1e558c',
-            //             isBarStyleBlack: false,
-            //         };
-            //         this.props.navigation.navigate('Webviewer', webview_param);
-            //     },
-            // },
             {
                 icon_name: 'bus',
                 function_name: '校園巴士',
@@ -89,17 +64,26 @@ export default class HomeScreen extends Component {
             {
                 icon_name: 'aperture-sharp',
                 function_name: '最近活動',
-                func: () => this.props.navigation.jumpTo('NewsTabbar'),
+                func: () =>
+                    this.props.navigation.jumpTo('NewsTabbar', {
+                        screen: 'EventPage',
+                    }),
             },
             {
                 icon_name: 'color-wand',
                 function_name: '澳大社團',
-                func: () => this.props.navigation.jumpTo('NewsTabbar'),
+                func: () =>
+                    this.props.navigation.jumpTo('NewsTabbar', {
+                        screen: 'ClubPage',
+                    }),
             },
             {
                 icon_name: 'earth-sharp',
                 function_name: '澳大新聞',
-                func: () => this.props.navigation.jumpTo('NewsTabbar'),
+                func: () =>
+                    this.props.navigation.jumpTo('NewsTabbar', {
+                        screen: 'NewsPage',
+                    }),
             },
             {
                 icon_name: 'grid',
