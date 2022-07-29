@@ -20,6 +20,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Carousel from 'react-native-reanimated-carousel';
 import {FlatGrid} from 'react-native-super-grid';
 import {inject} from 'mobx-react';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 let carouselProgress = 0;
@@ -102,6 +103,7 @@ class HomeScreen extends Component {
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
             this.setState({isShowModal: false});
+            this.toast.show(`Welcome Back~\n[]~(￣▽￣)~*`, 3000);
         } else {
             setTimeout(() => {
                 this.setState({isShowModal: true});
@@ -243,7 +245,7 @@ class HomeScreen extends Component {
                                         fontSize: pxToDp(15),
                                         color: COLOR_DIY.black.third,
                                     }}>
-                                    後體驗完整功能，現在去嗎？
+                                    登錄後體驗完整功能，現在去嗎？
                                 </Text>
                                 {/* 登錄按鈕 */}
                                 <TouchableOpacity
@@ -256,9 +258,12 @@ class HomeScreen extends Component {
                                         justifyContent: 'center',
                                         alignSelf: 'center',
                                     }}
-                                    onPress={() =>
-                                        this.props.navigation.jumpTo('MeTabbar')
-                                    }>
+                                    onPress={() => {
+                                        this.setState({isShowModal: false});
+                                        this.props.navigation.jumpTo(
+                                            'MeTabbar',
+                                        );
+                                    }}>
                                     <Text
                                         style={{
                                             fontSize: pxToDp(15),
@@ -272,6 +277,16 @@ class HomeScreen extends Component {
                         </View>
                     </ModalBottom>
                 )}
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: COLOR_DIY.themeColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }
