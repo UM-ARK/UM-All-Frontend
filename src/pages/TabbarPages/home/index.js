@@ -224,11 +224,13 @@ class HomeScreen extends Component {
                         <View
                             style={{
                                 padding: pxToDp(20),
-                                marginBottom: pxToDp(30),
                                 backgroundColor: COLOR_DIY.white,
                             }}>
                             <ScrollView
-                                contentContainerStyle={{alignItems: 'center'}}>
+                                contentContainerStyle={{
+                                    alignItems: 'center',
+                                    marginBottom: pxToDp(30),
+                                }}>
                                 <Text
                                     style={{
                                         fontSize: pxToDp(18),
