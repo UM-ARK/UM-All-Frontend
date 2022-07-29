@@ -225,13 +225,22 @@ class HomeScreen extends Component {
                             style={{
                                 padding: pxToDp(20),
                                 marginBottom: pxToDp(30),
+                                backgroundColor: COLOR_DIY.white,
                             }}>
                             <ScrollView
                                 contentContainerStyle={{alignItems: 'center'}}>
-                                <Text style={{fontSize: pxToDp(18)}}>
+                                <Text
+                                    style={{
+                                        fontSize: pxToDp(18),
+                                        color: COLOR_DIY.black.third,
+                                    }}>
                                     歡迎來到UM ALL~
                                 </Text>
-                                <Text style={{fontSize: pxToDp(15)}}>
+                                <Text
+                                    style={{
+                                        fontSize: pxToDp(15),
+                                        color: COLOR_DIY.black.third,
+                                    }}>
                                     後體驗完整功能，現在去嗎？
                                 </Text>
                                 {/* 登錄按鈕 */}
