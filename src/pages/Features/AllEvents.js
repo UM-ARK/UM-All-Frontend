@@ -165,6 +165,7 @@ class AllEvents extends Component {
                     justifyContent: 'center',
                     alignItems: 'center',
                     marginTop: pxToDp(10),
+                    marginBottom: pxToDp(50),
                 }}>
                 {noMoreData ? (
                     <View style={{alignItems: 'center'}}>

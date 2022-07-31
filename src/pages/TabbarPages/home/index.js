@@ -281,6 +281,8 @@ class HomeScreen extends Component {
                 {/* Tost */}
                 <Toast
                     ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
                     textStyle={{color: white}}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
