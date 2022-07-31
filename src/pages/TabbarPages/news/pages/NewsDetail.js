@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Image,
@@ -8,15 +8,15 @@ import {
     ScrollView,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../../utils/uiMap';
+import { pxToDp } from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
 
-import {Header} from '@rneui/themed';
+import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import {FlatGrid} from 'react-native-super-grid';
+import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 
 // HTML轉純文本
@@ -29,9 +29,9 @@ function repalceHtmlToText(str) {
     return str;
 }
 
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const COMPONENT_WIDTH = PAGE_WIDTH * 0.85;
 
 class NewsDetail extends Component {
     constructor(props) {
@@ -39,6 +39,7 @@ class NewsDetail extends Component {
 
         // 獲取上級路由傳遞的參數
         const newsData = this.props.route.params.data;
+        console.log('eventData', newsData);
 
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題、內容
         // 中文
@@ -93,7 +94,7 @@ class NewsDetail extends Component {
 
     render() {
         // 解構全局ui設計顏色
-        const {white, black, viewShadow, bg_color} = COLOR_DIY;
+        const { white, black, viewShadow, bg_color } = COLOR_DIY;
         // 結構this.state的新聞數據
         const {
             // 發佈日期
@@ -117,7 +118,7 @@ class NewsDetail extends Component {
         } = this.state.data;
 
         return (
-            <View style={{backgroundColor: bg_color, flex: 1}}>
+            <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     leftComponent={
@@ -143,12 +144,13 @@ class NewsDetail extends Component {
                     }}
                 />
 
-                <ScrollView style={{padding: pxToDp(10)}}>
+                <ScrollView style={{ padding: pxToDp(10) }}>
                     {/* 英文標題 */}
                     {title_en.length > 0 && (
                         <Text
                             style={{
-                                color: black.main,
+                                color: COLOR_DIY.themeColor,
+                                paddingHorizontal: pxToDp(15),
                                 fontWeight: 'bold',
                                 fontSize: pxToDp(18),
                             }}
@@ -162,9 +164,11 @@ class NewsDetail extends Component {
                             style={{
                                 color:
                                     title_en.length > 0
-                                        ? black.second
-                                        : black.main,
+                                        ? COLOR_DIY.secondThemeColor
+                                        : COLOR_DIY.themeColor,
                                 fontWeight: 'bold',
+                                paddingHorizontal: pxToDp(15),
+                                paddingTop: pxToDp(5),
                                 fontSize:
                                     title_en.length > 0
                                         ? pxToDp(16)
@@ -180,9 +184,10 @@ class NewsDetail extends Component {
                             style={{
                                 color:
                                     title_en.length > 0
-                                        ? black.second
-                                        : black.main,
+                                        ? COLOR_DIY.secondThemeColor
+                                        : COLOR_DIY.themeColor,
                                 fontWeight: 'bold',
+                                paddingTop: pxToDp(5),
                                 fontSize:
                                     title_en.length > 0
                                         ? pxToDp(16)
@@ -197,6 +202,7 @@ class NewsDetail extends Component {
                         style={{
                             color: black.third,
                             alignSelf: 'flex-end',
+                            paddingTop: pxToDp(10),
                         }}>
                         Update:{' '}
                         {moment
@@ -206,13 +212,13 @@ class NewsDetail extends Component {
 
                     {/* 圖片展示 */}
                     <FlatGrid
-                        style={{flex: 1, alignSelf: 'center'}}
+                        style={{ flex: 1, alignSelf: 'center' }}
                         // 每个项目的最小宽度或高度（像素）
                         itemDimension={COMPONENT_WIDTH}
                         data={imageUrls}
                         // 每個項目的間距
                         spacing={pxToDp(15)}
-                        renderItem={({item, index}) => {
+                        renderItem={({ item, index }) => {
                             // item是每一項數組的數據
                             // index是每一項的數組下標
                             return (
@@ -220,10 +226,11 @@ class NewsDetail extends Component {
                                     activeOpacity={0.7}
                                     style={{
                                         width: COMPONENT_WIDTH,
-                                        height: COMPONENT_WIDTH,
+                                        height: COMPONENT_WIDTH * 0.5625,
                                         backgroundColor: bg_color,
                                         borderRadius: pxToDp(10),
                                         overflow: 'hidden',
+                                        alignSelf: 'center',
                                         ...viewShadow,
                                     }}
                                     // 打開圖片瀏覽大圖
@@ -239,7 +246,7 @@ class NewsDetail extends Component {
                                         }}
                                         style={{
                                             width: COMPONENT_WIDTH,
-                                            height: COMPONENT_WIDTH,
+                                            height: COMPONENT_WIDTH * 0.5625,
                                         }}
                                     />
                                 </TouchableOpacity>
@@ -250,57 +257,95 @@ class NewsDetail extends Component {
                     <ImageScrollViewer
                         ref={'imageScrollViewer'}
                         imageUrls={imageUrls}
-                        // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                        // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                     />
 
                     {/* 中文正文 */}
                     {content_cn.length > 0 && (
-                        <View>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
+                        <View style={{
+                            marginBottom: pxToDp(5),
+                            marginHorizontal: pxToDp(20),
+                            borderRadius: pxToDp(10),
+                            backgroundColor: white,
+                            paddingHorizontal: pxToDp(15),
+                            paddingVertical: pxToDp(13),
+                            ...viewShadow,
+                        }}>
+                            <HyperlinkText
+                                linkStyle={{
+                                    color: COLOR_DIY.themeColor,
                                 }}
-                                selectable={true}>
-                                {'\t' + repalceHtmlToText(content_cn)}
-                            </Text>
-
-                            <View style={{marginTop: pxToDp(50)}} />
+                                navigation={this.props.navigation}>
+                                <Text
+                                    style={{
+                                        color: black.second,
+                                        fontSize: pxToDp(14),
+                                    }}
+                                    selectable={true}>
+                                    {'\t' + repalceHtmlToText(content_cn)}
+                                </Text>
+                            </HyperlinkText>
                         </View>
                     )}
 
                     {/* 英文正文 */}
                     {content_en.length > 0 && (
-                        <View>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
+                        <View style={{
+                            marginVertical: pxToDp(5),
+                            marginHorizontal: pxToDp(20),
+                            borderRadius: pxToDp(10),
+                            backgroundColor: white,
+                            paddingHorizontal: pxToDp(15),
+                            paddingVertical: pxToDp(13),
+                            ...viewShadow,
+                        }}>
+                            <HyperlinkText
+                                linkStyle={{
+                                    color: COLOR_DIY.themeColor,
                                 }}
-                                selectable={true}>
-                                {'\t' + repalceHtmlToText(content_en)}
-                            </Text>
-
-                            <View style={{marginTop: pxToDp(50)}} />
+                                navigation={this.props.navigation}>
+                                <Text
+                                    style={{
+                                        color: black.second,
+                                        fontSize: pxToDp(14),
+                                    }}
+                                    selectable={true}>
+                                    {'\t' + repalceHtmlToText(content_en)}
+                                </Text>
+                            </HyperlinkText>
                         </View>
                     )}
 
                     {/* 葡文正文 */}
                     {content_pt.length > 0 && (
-                        <View>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
+                        <View style={{
+                            marginVertical: pxToDp(5),
+                            marginHorizontal: pxToDp(20),
+                            borderRadius: pxToDp(10),
+                            backgroundColor: white,
+                            paddingHorizontal: pxToDp(15),
+                            paddingVertical: pxToDp(13),
+                            ...viewShadow,
+                        }}>
+                            <HyperlinkText
+                                linkStyle={{
+                                    color: COLOR_DIY.themeColor,
                                 }}
-                                selectable={true}>
-                                {'\t' + repalceHtmlToText(content_pt)}
-                            </Text>
+                                navigation={this.props.navigation}>
+                                <Text
+                                    style={{
+                                        color: black.second,
+                                        fontSize: pxToDp(14),
+                                    }}
+                                    selectable={true}>
+                                    {'\t' + repalceHtmlToText(content_pt)}
+                                </Text>
+                            </HyperlinkText>
                         </View>
                     )}
 
-                    <View style={{marginBottom: pxToDp(100)}} />
+                    <View style={{ marginBottom: pxToDp(100) }} />
                 </ScrollView>
             </View>
         );

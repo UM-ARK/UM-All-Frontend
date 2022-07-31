@@ -4,6 +4,7 @@ import {pxToDp} from './stylesKits';
 
 export const COLOR_DIY = {
     themeColor: '#005F95',
+    secondThemeColor:'#FF8627',
     // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
     black: {
         // 最高層級，類似大標題

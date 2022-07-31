@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Image,
@@ -9,21 +9,21 @@ import {
     StyleSheet,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../../utils/uiMap';
+import { pxToDp } from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import moment, {lang} from 'moment-timezone';
+import moment, { lang } from 'moment-timezone';
 
 // 解構全局ui設計顏色
-const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
+const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.9;
 
 class UMEventDetail extends Component {
@@ -216,8 +216,8 @@ class UMEventDetail extends Component {
     }
 
     render() {
-        const {LanguageMode, chooseMode, data} = this.state;
-        const {imageUrls} = data;
+        const { LanguageMode, chooseMode, data } = this.state;
+        const { imageUrls } = data;
         const {
             //共通内容
             dateFrom,
@@ -395,14 +395,14 @@ class UMEventDetail extends Component {
         var contact = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
 
         return (
-            <View style={{backgroundColor: bg_color, flex: 1}}>
+            <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header title={'活動詳情'} />
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={imageUrls}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 <ScrollView>
@@ -426,7 +426,7 @@ class UMEventDetail extends Component {
                                                     : bg_color,
                                         }}
                                         onPress={() =>
-                                            this.setState({chooseMode: index})
+                                            this.setState({ chooseMode: index })
                                         }>
                                         <Text
                                             style={{
@@ -447,6 +447,7 @@ class UMEventDetail extends Component {
                         style={{
                             marginHorizontal: pxToDp(10),
                             marginTop: pxToDp(10),
+                            alignItems: 'center',
                         }}>
                         <Text
                             style={{
@@ -471,7 +472,10 @@ class UMEventDetail extends Component {
                                 uri: imageUrls,
                                 cache: FastImage.cacheControl.web,
                             }}
-                            style={{width: '100%', height: '100%'}}
+                            style={{
+                                width: COMPONENT_WIDTH,
+                                height: COMPONENT_WIDTH * 0.5625,
+                            }}
                         />
                     </TouchableOpacity>
 
@@ -480,7 +484,7 @@ class UMEventDetail extends Component {
                         {/* 日期 */}
                         {/* 如果活動當天結束顯示活動日期，若為多日活動則顯示開始和結束日期 */}
                         {moment(dateFrom).format('MM-DD') ==
-                        moment(dateTo).format('MM-DD') ? (
+                            moment(dateTo).format('MM-DD') ? (
                             <Text
                                 style={{
                                     fontSize: pxToDp(18),
@@ -675,7 +679,7 @@ const styles = StyleSheet.create({
     },
     imgContainer: {
         width: COMPONENT_WIDTH,
-        height: COMPONENT_WIDTH,
+        height: COMPONENT_WIDTH * 0.5625,
         backgroundColor: bg_color,
         borderRadius: pxToDp(10),
         overflow: 'hidden',
