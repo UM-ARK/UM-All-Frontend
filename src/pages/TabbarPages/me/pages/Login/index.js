@@ -114,10 +114,10 @@ class LoginChoose extends Component {
                             // 雙重認證頁面e.title為Duo Security
                             // Moodle頁面e.title為Dashboard
                             // 已登錄到Moodle
-                            if (e.url == 'https://ummoodle.um.edu.mo/my/') {
+                            if (e.url == UM_Moodle) {
                                 this.setState({disabledButton: true});
                                 // 獲取Moodle頁所有的cookies
-                                CookieManager.get(UM_Moodle)
+                                CookieManager.get(UM_Moodle, true)
                                     .then(cookies => {
                                         console.log(
                                             'CookieManager.get =>',

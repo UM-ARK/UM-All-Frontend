@@ -89,7 +89,7 @@ export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 
 // 學業發展分類
 // 澳大 - UM Moodle
-export const UM_Moodle = 'https://ummoodle.um.edu.mo/my';
+export const UM_Moodle = 'https://ummoodle.um.edu.mo/my/';
 // 澳大 - UM ISW
 export const UM_ISW = 'https://isw.um.edu.mo/siapp/faces/home';
 // 澳大 - UM 預選課

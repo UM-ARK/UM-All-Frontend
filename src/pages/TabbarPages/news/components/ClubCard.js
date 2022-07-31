@@ -48,7 +48,10 @@ class EventCard extends Component {
                 onPress={this.handleJumpToDetail}>
                 {/* 社團 / 組織 Logo */}
                 <FastImage
-                    source={{uri: logo_url, cache: FastImage.cacheControl.web}}
+                    source={{
+                        uri: logo_url.replace('http:', 'https:'),
+                        cache: FastImage.cacheControl.web,
+                    }}
                     style={{
                         width: pxToDp(70),
                         height: pxToDp(70),

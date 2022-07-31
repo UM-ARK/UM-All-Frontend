@@ -91,13 +91,19 @@ class EventDetail extends Component {
                 if (json.message == 'success') {
                     let eventData = json.content;
                     this.setState({
-                        coverImgUrl: eventData.cover_image_url,
+                        coverImgUrl: eventData.cover_image_url.replace(
+                            'http:',
+                            'https:',
+                        ),
                         title: eventData.title,
                         introduction: eventData.introduction,
                         startTimeStamp: eventData.startdatetime,
                         finishTimeStamp: eventData.enddatetime,
                         type: eventData.type,
-                        imageUrls: eventData.cover_image_url,
+                        imageUrls: eventData.cover_image_url.replace(
+                            'http:',
+                            'https:',
+                        ),
                         relateImgUrl:
                             eventData.relate_image_url &&
                             eventData.relate_image_url.length > 0
@@ -452,7 +458,7 @@ class EventDetail extends Component {
                                         uri:
                                             clubData == undefined
                                                 ? ''
-                                                : clubData.logo_url,
+                                                : clubData.logo_url.replace('http:', 'https:'),
                                         cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
@@ -533,7 +539,7 @@ class EventDetail extends Component {
                                 ...COLOR_DIY.viewShadow,
                             }}
                             activeOpacity={0.7}
-                            onPress={() => alert('查看更多圖片')}>
+                            onPress={() => alert('TODO: 查看更多圖片')}>
                             {/* 卡片標題 */}
                             <View
                                 style={{
@@ -572,7 +578,10 @@ class EventDetail extends Component {
                                     return (
                                         <FastImage
                                             source={{
-                                                uri: item,
+                                                uri: item.replace(
+                                                    'http:',
+                                                    'https:',
+                                                ),
                                                 cache: FastImage.cacheControl
                                                     .web,
                                             }}
@@ -641,9 +650,7 @@ class EventDetail extends Component {
                 {/* Dialog提示登錄 */}
                 <DialogDIY
                     showDialog={this.state.showDialog}
-                    text={
-                        '登錄後能Follow活動和接收最新消息，現在去登錄嗎？'
-                    }
+                    text={'登錄後能Follow活動和接收最新消息，現在去登錄嗎？'}
                     handleConfirm={() => {
                         this.setState({showDialog: false});
                         this.props.navigation.navigate('MeTabbar');
@@ -679,7 +686,7 @@ class EventDetail extends Component {
                         renderHeader={() => (
                             <FastImage
                                 source={{
-                                    uri: coverImgUrl,
+                                    uri: coverImgUrl.replace('http:', 'https:'),
                                     cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}

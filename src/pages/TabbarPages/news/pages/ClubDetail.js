@@ -271,8 +271,6 @@ class ClubDetail extends Component {
             intro,
             contact = undefined;
         let bgImgUrl = ARK_LETTER_IMG;
-        // 解構出“照片”欄的最多4張照片
-        let eventImgUrls = [];
 
         // 已接收clubData
         if (clubData != undefined) {
@@ -281,10 +279,10 @@ class ClubDetail extends Component {
                 clubData.club_photos_list.length > 0
             ) {
                 // 背景圖選擇數組第一張
-                bgImgUrl = clubData.club_photos_list[0];
-                clubData.club_photos_list.map(item => {
-                    eventImgUrls.push(item.coverImgUrl);
-                });
+                bgImgUrl = clubData.club_photos_list[0].replace(
+                    'http:',
+                    'https:',
+                );
             }
             logo_url = clubData.logo_url;
             name = clubData.name;
@@ -376,7 +374,7 @@ class ClubDetail extends Component {
                         <View style={styles.clubLogoContainer}>
                             <FastImage
                                 source={{
-                                    uri: logo_url,
+                                    uri: logo_url.replace('http:', 'https:'),
                                     cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
@@ -485,7 +483,10 @@ class ClubDetail extends Component {
                                                         }}>
                                                         <FastImage
                                                             source={{
-                                                                uri: item,
+                                                                uri: item.replace(
+                                                                    'http:',
+                                                                    'https:',
+                                                                ),
                                                                 cache: FastImage
                                                                     .cacheControl
                                                                     .web,
@@ -617,17 +618,20 @@ class ClubDetail extends Component {
                                 justifyContent: 'center',
                             }}
                             data={eventData}
-                            renderItem={({item}) => {
-                                return (
-                                    <EventCard
-                                        data={item}
-                                        style={{
-                                            marginVertical: pxToDp(8),
-                                            marginHorizontal: pxToDp(10),
-                                        }}
-                                        isLogin={this.state.isLogin}
-                                    />
-                                );
+                            renderItem={({item, index}) => {
+                                console.log(index);
+                                if (index != 4) {
+                                    return (
+                                        <EventCard
+                                            data={item}
+                                            style={{
+                                                marginVertical: pxToDp(8),
+                                                marginHorizontal: pxToDp(10),
+                                            }}
+                                            isLogin={this.state.isLogin}
+                                        />
+                                    );
+                                }
                             }}
                             scrollEnabled={false}
                             // 在所有項目的末尾渲染
