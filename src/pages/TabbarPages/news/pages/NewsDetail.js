@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     Dimensions,
     ScrollView,
+    StyleSheet,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
@@ -32,6 +33,7 @@ function repalceHtmlToText(str) {
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.85;
+const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 class NewsDetail extends Component {
     constructor(props) {
@@ -89,12 +91,32 @@ class NewsDetail extends Component {
                 // 相片數組
                 imageUrls,
             },
+            // 語言模式
+            LanguageMode: [
+                {
+                    locale: 'cn',
+                    available: 1,
+                    name: '中',
+                },
+                {
+                    locale: 'en',
+                    available: 1,
+                    name: 'EN',
+                },
+                {
+                    locale: 'pt',
+                    available: 1,
+                    name: 'PT',
+                },
+            ],
+            chooseMode: 0,
         };
     }
 
     render() {
         // 解構全局ui設計顏色
         const { white, black, viewShadow, bg_color } = COLOR_DIY;
+        const { LanguageMode, chooseMode, data } = this.state;
         // 結構this.state的新聞數據
         const {
             // 發佈日期
@@ -116,6 +138,21 @@ class NewsDetail extends Component {
             // 相片數組
             imageUrls,
         } = this.state.data;
+
+        //判断语言是否存在
+        if (title_cn.length <= 0) {
+            LanguageMode[0].available = 0;
+        }
+        if (title_en.length <= 0) {
+            LanguageMode[1].available = 0;
+        }
+        if (title_pt.length <= 0) {
+            LanguageMode[2].available = 0;
+        }
+
+        //用数组存储内容，便于根据语言筛选条件显示
+        var title = [title_cn, title_en, title_pt];
+        var content = [content_cn, content_en, content_pt];
 
         return (
             <View style={{ backgroundColor: bg_color, flex: 1 }}>
@@ -145,64 +182,63 @@ class NewsDetail extends Component {
                 />
 
                 <ScrollView style={{ padding: pxToDp(10) }}>
-                    {/* 英文標題 */}
-                    {title_en.length > 0 && (
-                        <Text
-                            style={{
-                                color: COLOR_DIY.themeColor,
-                                paddingHorizontal: pxToDp(15),
-                                fontWeight: 'bold',
-                                fontSize: pxToDp(18),
-                            }}
-                            selectable={true}>
-                            {title_en}
-                        </Text>
-                    )}
-                    {/* 中文標題 */}
-                    {title_cn.length > 0 && (
-                        <Text
-                            style={{
-                                color:
-                                    title_en.length > 0
-                                        ? COLOR_DIY.secondThemeColor
-                                        : COLOR_DIY.themeColor,
-                                fontWeight: 'bold',
-                                paddingHorizontal: pxToDp(15),
-                                paddingTop: pxToDp(5),
-                                fontSize:
-                                    title_en.length > 0
-                                        ? pxToDp(16)
-                                        : pxToDp(18),
-                            }}
-                            selectable={true}>
-                            {title_cn}
-                        </Text>
-                    )}
-                    {/* 葡文標題 */}
-                    {title_pt.length > 0 && (
-                        <Text
-                            style={{
-                                color:
-                                    title_en.length > 0
-                                        ? COLOR_DIY.secondThemeColor
-                                        : COLOR_DIY.themeColor,
-                                fontWeight: 'bold',
-                                paddingTop: pxToDp(5),
-                                fontSize:
-                                    title_en.length > 0
-                                        ? pxToDp(16)
-                                        : pxToDp(18),
-                            }}
-                            selectable={true}>
-                            {title_pt}
-                        </Text>
-                    )}
+                    {/* 文本模式選擇 3語切換 */}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-around',
+                        }}>
+                        {LanguageMode.map((item, index) => {
+                            //只渲染存在的语言的按钮
+                            if (item.available == 1) {
+                                return (
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        style={{
+                                            ...styles.languageModeButtonContainer,
+                                            backgroundColor:
+                                                chooseMode == index
+                                                    ? themeColor
+                                                    : bg_color,
+                                        }}
+                                        onPress={() =>
+                                            this.setState({ chooseMode: index })
+                                        }>
+                                        <Text
+                                            style={{
+                                                color:
+                                                    chooseMode == index
+                                                        ? bg_color
+                                                        : themeColor,
+                                            }}>
+                                            {item.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            }
+                        })}
+                    </View>
+                    {/* 大標題 */}
+                    <Text
+                        style={{
+                            color: COLOR_DIY.themeColor,
+                            paddingHorizontal: pxToDp(15),
+                            fontWeight: 'bold',
+                            fontSize: pxToDp(22),
+                            alignSelf: 'center',
+                            marginTop: pxToDp(15),
+                        }}
+                        selectable={true}>
+                        {title[chooseMode]}
+                    </Text>
                     {/* 日期 */}
                     <Text
                         style={{
-                            color: black.third,
+                            color: COLOR_DIY.secondThemeColor,
                             alignSelf: 'flex-end',
                             paddingTop: pxToDp(10),
+                            paddingRight: pxToDp(15),
+                            fontWeight: '700',
                         }}>
                         Update:{' '}
                         {moment
@@ -260,96 +296,78 @@ class NewsDetail extends Component {
                     // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
                     // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                     />
-
-                    {/* 中文正文 */}
-                    {content_cn.length > 0 && (
-                        <View style={{
-                            marginBottom: pxToDp(5),
-                            marginHorizontal: pxToDp(20),
-                            borderRadius: pxToDp(10),
-                            backgroundColor: white,
-                            paddingHorizontal: pxToDp(15),
-                            paddingVertical: pxToDp(13),
-                            ...viewShadow,
-                        }}>
-                            <HyperlinkText
-                                linkStyle={{
-                                    color: COLOR_DIY.themeColor,
+                    {/* 正文 */}
+                    <View style={{
+                        marginBottom: pxToDp(5),
+                        marginHorizontal: pxToDp(20),
+                        borderRadius: pxToDp(10),
+                        backgroundColor: white,
+                        paddingHorizontal: pxToDp(15),
+                        paddingVertical: pxToDp(13),
+                        ...viewShadow,
+                    }}>
+                        <HyperlinkText
+                            linkStyle={{
+                                color: COLOR_DIY.themeColor,
+                            }}
+                            navigation={this.props.navigation}>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontSize: pxToDp(17),
                                 }}
-                                navigation={this.props.navigation}>
-                                <Text
-                                    style={{
-                                        color: black.second,
-                                        fontSize: pxToDp(14),
-                                    }}
-                                    selectable={true}>
-                                    {'\t' + repalceHtmlToText(content_cn)}
-                                </Text>
-                            </HyperlinkText>
-                        </View>
-                    )}
-
-                    {/* 英文正文 */}
-                    {content_en.length > 0 && (
-                        <View style={{
-                            marginVertical: pxToDp(5),
-                            marginHorizontal: pxToDp(20),
-                            borderRadius: pxToDp(10),
-                            backgroundColor: white,
-                            paddingHorizontal: pxToDp(15),
-                            paddingVertical: pxToDp(13),
-                            ...viewShadow,
-                        }}>
-                            <HyperlinkText
-                                linkStyle={{
-                                    color: COLOR_DIY.themeColor,
-                                }}
-                                navigation={this.props.navigation}>
-                                <Text
-                                    style={{
-                                        color: black.second,
-                                        fontSize: pxToDp(14),
-                                    }}
-                                    selectable={true}>
-                                    {'\t' + repalceHtmlToText(content_en)}
-                                </Text>
-                            </HyperlinkText>
-                        </View>
-                    )}
-
-                    {/* 葡文正文 */}
-                    {content_pt.length > 0 && (
-                        <View style={{
-                            marginVertical: pxToDp(5),
-                            marginHorizontal: pxToDp(20),
-                            borderRadius: pxToDp(10),
-                            backgroundColor: white,
-                            paddingHorizontal: pxToDp(15),
-                            paddingVertical: pxToDp(13),
-                            ...viewShadow,
-                        }}>
-                            <HyperlinkText
-                                linkStyle={{
-                                    color: COLOR_DIY.themeColor,
-                                }}
-                                navigation={this.props.navigation}>
-                                <Text
-                                    style={{
-                                        color: black.second,
-                                        fontSize: pxToDp(14),
-                                    }}
-                                    selectable={true}>
-                                    {'\t' + repalceHtmlToText(content_pt)}
-                                </Text>
-                            </HyperlinkText>
-                        </View>
-                    )}
-
+                                selectable={true}>
+                                {'\t' + repalceHtmlToText(content[chooseMode])}
+                            </Text>
+                        </HyperlinkText>
+                    </View>
                     <View style={{ marginBottom: pxToDp(100) }} />
                 </ScrollView>
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    languageModeButtonContainer: {
+        padding: pxToDp(10),
+        marginVertical: pxToDp(5),
+        borderRadius: pxToDp(10),
+        ...viewShadow,
+    },
+    imgContainer: {
+        width: COMPONENT_WIDTH,
+        height: COMPONENT_WIDTH * 0.5625,
+        backgroundColor: bg_color,
+        borderRadius: pxToDp(10),
+        overflow: 'hidden',
+        alignSelf: 'center',
+        marginVertical: pxToDp(10),
+        ...viewShadow,
+    },
+    infoCardContainer: {
+        marginVertical: pxToDp(8),
+        marginHorizontal: pxToDp(20),
+        borderRadius: pxToDp(10),
+        backgroundColor: white,
+        paddingHorizontal: pxToDp(15),
+        paddingVertical: pxToDp(10),
+        ...viewShadow,
+    },
+    contentContainer: {
+        flexDirection: 'row',
+        marginVertical: pxToDp(2),
+    },
+    secondTitle: {
+        color: COLOR_DIY.themeColor,
+        fontSize: pxToDp(15),
+        fontWeight: '600',
+    },
+    content: {
+        color: black.third,
+        fontSize: pxToDp(15),
+        fontWeight: 'normal',
+    },
+});
 
 export default NewsDetail;

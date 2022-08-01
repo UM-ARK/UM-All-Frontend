@@ -63,3 +63,4 @@ buck-out/
 ios/UMAllWhite.xcodeproj/project.pbxproj
 ios/UMAllWhite.xcodeproj/project.pbxproj
 ios/UMAllWhite/Info.plist
+ios/Podfile.lock
