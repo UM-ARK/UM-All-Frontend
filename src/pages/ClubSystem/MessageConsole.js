@@ -8,6 +8,7 @@ import {
     ScrollView,
     StyleSheet,
     RefreshControl,
+    StatusBar,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
@@ -116,20 +117,21 @@ class MessageConsole extends Component {
     render() {
         const {eventData, clubData, isLoading} = this.state;
         return (
-            <View style={{backgroundColor: COLOR_DIY.bg_color, flex: 1}}>
+            <View style={{backgroundColor: bg_color, flex: 1}}>
                 {/* 頂部標題 */}
                 <Header
-                    backgroundColor={COLOR_DIY.bg_color}
+                    backgroundColor={bg_color}
                     centerComponent={{
                         text: '訊息發佈',
                         style: {
-                            color: COLOR_DIY.black.main,
+                            color: black.main,
                             fontSize: pxToDp(15),
                         },
                     }}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
+                        barStyle: 'light-content',
+                        translucent: true,
                     }}
                 />
                 {/* 右下角固定按鈕 */}
@@ -142,7 +144,14 @@ class MessageConsole extends Component {
                         ListHeaderComponent={this.renderAtAllCard()}
                         renderItem={({item, index}) => {
                             return (
-                                <ChatCard data={item} index={index}></ChatCard>
+                                <ChatCard
+                                    data={item}
+                                    index={index}
+                                    refresh={this.getData.bind(
+                                        this,
+                                        clubData.club_num,
+                                    )}
+                                />
                             );
                         }}
                         keyExtractor={item => item.id}

@@ -35,6 +35,7 @@ class ChatCard extends Component {
                     onPress={() => {
                         this.context.navigate('ChatDetail', {
                             _id: eventData._id,
+                            refresh: () => this.props.refresh(),
                         });
                     }}>
                     <View style={styles.infoContainer}>
