@@ -12,7 +12,7 @@ import {
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, GET} from '../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
 
@@ -50,6 +50,8 @@ class EventPage extends Component {
                     let leftDataList = [];
                     let rightDataList = [];
                     eventDataList.map((itm, idx) => {
+                        // 圖片類型服務器返回相對路徑，請記住加上域名
+                        itm.cover_image_url = BASE_HOST + itm.cover_image_url;
                         if (idx % 2 == 0) {
                             leftDataList.push(itm);
                         } else {
@@ -57,7 +59,6 @@ class EventPage extends Component {
                         }
                     });
                     this.setState({
-                        // eventDataList,
                         leftDataList,
                         rightDataList,
                         isLoading: false,
