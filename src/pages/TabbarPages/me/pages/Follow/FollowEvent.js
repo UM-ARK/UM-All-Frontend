@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
 
-import {BASE_URI, GET, POST} from '../../../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET, POST} from '../../../../../utils/pathMap';
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import Header from '../../../../../components/Header';
@@ -39,6 +39,9 @@ class FollowEvent extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let newDataArr = json.content;
+                    newDataArr.map(itm => {
+                        itm.cover_image_url = BASE_HOST + itm.cover_image_url;
+                    });
                     if (newDataArr.length < num_of_item) {
                         this.setState({noMoreData: true});
                     }

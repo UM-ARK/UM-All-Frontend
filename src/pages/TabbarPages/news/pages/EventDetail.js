@@ -13,12 +13,13 @@ import {
 
 import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-import {BASE_URI, GET, POST} from '../../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET, POST} from '../../../../utils/pathMap';
 import EventCard from '../components/EventCard';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
+import Header from '../../../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
@@ -44,6 +45,7 @@ class EventDetail extends Component {
     state = {
         isLoading: true,
         isLogin: false,
+        isClub: false,
         // 訪問該頁的用戶對該組織的Follow狀態
         isFollow: false,
         eventData: undefined,
@@ -56,8 +58,13 @@ class EventDetail extends Component {
     componentDidMount() {
         let globalData = this.props.RootStore;
         // 已登錄
-        if (globalData.userInfo && globalData.userInfo.stdData) {
-            this.setState({isLogin: true});
+        if (globalData.userInfo) {
+            if (globalData.userInfo.stdData) {
+                this.setState({isLogin: true});
+            }
+            if (globalData.userInfo.isClub) {
+                this.setState({isClub: true});
+            }
         }
 
         // 獲取上級路由傳遞的參數，展示活動詳情
@@ -73,7 +80,9 @@ class EventDetail extends Component {
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    this.setState({clubData: json.content});
+                    let clubData = json.content;
+                    clubData.logo_url = BASE_HOST + clubData.logo_url;
+                    this.setState({clubData});
                 }
             })
             .catch(err => {
@@ -90,25 +99,33 @@ class EventDetail extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let eventData = json.content;
+                    eventData.cover_image_url =
+                        BASE_HOST + eventData.cover_image_url;
+                    console.log('eventData', eventData);
+                    if (
+                        eventData.relate_image_url &&
+                        eventData.relate_image_url.length > 0
+                    ) {
+                        let addHostArr = [];
+                        eventData.relate_image_url.map(itm => {
+                            addHostArr.push(BASE_HOST + itm);
+                        });
+                        eventData.relate_image_url = addHostArr;
+                    }
                     this.setState({
-                        coverImgUrl: eventData.cover_image_url.replace(
-                            'http:',
-                            'https:',
-                        ),
+                        coverImgUrl: eventData.cover_image_url,
                         title: eventData.title,
                         introduction: eventData.introduction,
                         startTimeStamp: eventData.startdatetime,
                         finishTimeStamp: eventData.enddatetime,
                         type: eventData.type,
-                        imageUrls: eventData.cover_image_url.replace(
-                            'http:',
-                            'https:',
-                        ),
+                        imageUrls: eventData.cover_image_url,
                         relateImgUrl:
                             eventData.relate_image_url &&
                             eventData.relate_image_url.length > 0
                                 ? eventData.relate_image_url
                                 : [],
+                        location: eventData.location,
                         eventData,
                         isFollow: eventData.isFollow,
                         isLoading: false,
@@ -244,8 +261,11 @@ class EventDetail extends Component {
             type,
             relateImgUrl,
             introduction,
+            location,
             isLoading,
             eventData,
+            imageUrls,
+            isClub,
         } = this.state;
 
         // 活動基本信息
@@ -292,7 +312,7 @@ class EventDetail extends Component {
                                     marginLeft: pxToDp(5),
                                     color: COLOR_DIY.black.third,
                                 }}>
-                                {'活動地點'}
+                                {location}
                             </Text>
                         </View>
 
@@ -348,13 +368,13 @@ class EventDetail extends Component {
                     <View style={{alignItems: 'flex-end'}}></View>
                     {eventData != undefined &&
                         eventData.can_follow &&
+                        !isClub &&
                         this.renderFollowButton()}
                 </View>
             );
         };
 
         // 渲染Header前景，返回按鈕
-        // TODO: 點擊查看大圖
         renderForeground = () => {
             return (
                 <TouchableOpacity
@@ -458,7 +478,10 @@ class EventDetail extends Component {
                                         uri:
                                             clubData == undefined
                                                 ? ''
-                                                : clubData.logo_url.replace('http:', 'https:'),
+                                                : clubData.logo_url.replace(
+                                                      'http:',
+                                                      'https:',
+                                                  ),
                                         cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
@@ -526,7 +549,6 @@ class EventDetail extends Component {
                         )}
 
                     {/* 相關照片 */}
-                    {/* TODO: 點擊查看大圖 */}
                     {relateImgUrl != undefined && relateImgUrl.length > 0 && (
                         <TouchableOpacity
                             style={{
@@ -539,7 +561,10 @@ class EventDetail extends Component {
                                 ...COLOR_DIY.viewShadow,
                             }}
                             activeOpacity={0.7}
-                            onPress={() => alert('TODO: 查看更多圖片')}>
+                            onPress={() => {
+                                this.setState({imageUrls: relateImgUrl});
+                                this.refs.imageScrollViewer.tiggerModal();
+                            }}>
                             {/* 卡片標題 */}
                             <View
                                 style={{
@@ -642,7 +667,7 @@ class EventDetail extends Component {
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
-                    imageUrls={this.state.imageUrls}
+                    imageUrls={imageUrls}
                     // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
                     // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
@@ -711,10 +736,16 @@ class EventDetail extends Component {
                         style={{
                             flex: 1,
                             backgroundColor: bg_color,
-                            alignItems: 'center',
-                            justifyContent: 'center',
                         }}>
-                        <Loading />
+                        <Header title={'Loading...'} />
+                        <View
+                            style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <Loading />
+                        </View>
                     </View>
                 )}
             </View>

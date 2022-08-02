@@ -2,6 +2,8 @@
 
 // TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = 'https://umall.one/api/';
+// 用適配API返回的圖片相對路徑
+export const BASE_HOST = 'https://umall.one';
 
 export const GET = {
     // 社團登錄
@@ -35,6 +37,8 @@ export const POST = {
     EVENT_CREATE: 'create_activity/',
     // 修改活動info
     EVENT_EDIT: 'edit_activity/',
+    // 刪除活動
+    EVENT_DEL: 'delete_activity/',
 
     // 學生add follow活動
     ADD_FOLLOW_EVENT: 'student_add_follow_activity/',
