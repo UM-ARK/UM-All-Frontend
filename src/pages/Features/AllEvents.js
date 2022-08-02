@@ -5,7 +5,7 @@ import Header from '../../components/Header';
 import EventCard from '../TabbarPages/news/components/EventCard';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {pxToDp} from '../../utils/stylesKits';
-import {BASE_URI, GET} from '../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET} from '../../utils/pathMap';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -49,6 +49,9 @@ class AllEvents extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let newDataArr = json.content;
+                    newDataArr.map(itm => {
+                        itm.cover_image_url = BASE_HOST + itm.cover_image_url;
+                    });
                     if (newDataArr.length < num_of_item) {
                         this.setState({noMoreData: true});
                     }

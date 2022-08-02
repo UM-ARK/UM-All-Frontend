@@ -14,7 +14,6 @@ import {pxToDp} from '../../../utils/stylesKits';
 
 // 本Tabbar相關頁面
 import Login from './pages/Login';
-import MeSetting from './pages/MeSetting';
 import AppSetting from './pages/AppSetting';
 import AboutUs from './pages/AboutUs';
 import MyFollow from './pages/MyFollow';

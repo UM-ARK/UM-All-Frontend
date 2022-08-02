@@ -14,7 +14,6 @@ import MessageSetting from './pages/ClubSystem/MessageSetting'
 
 import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin'
 import MeScreen from './pages/TabbarPages/me'
-import MeSetting from './pages/TabbarPages/me/pages/MeSetting'
 import MyFollow from './pages/TabbarPages/me/pages/MyFollow'
 import AppSetting from './pages/TabbarPages/me/pages/AppSetting'
 import AboutUs from './pages/TabbarPages/me/pages/AboutUs'
@@ -74,7 +73,6 @@ class Nav extends Component {
                 <Stack.Screen name="FollowClub"        component={FollowClub}/>
                 <Stack.Screen name="FollowEvent"        component={FollowEvent}/>
                 {/* 設置頁 */}
-                <Stack.Screen name="MeSetting"     component={MeSetting} />
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
 
                 {/* 服務頁 */}

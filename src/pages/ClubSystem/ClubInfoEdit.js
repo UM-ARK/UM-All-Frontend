@@ -12,7 +12,7 @@ import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {handleImageSelect} from '../../utils/fileKits';
 import Header from '../../components/Header';
-import {BASE_URI, POST} from '../../utils/pathMap';
+import {BASE_URI, BASE_HOST, POST} from '../../utils/pathMap';
 import DialogDIY from '../../components/DialogDIY';
 import Loading from '../../components/Loading';
 
@@ -57,6 +57,32 @@ class ClubInfoEdit extends Component {
         expanded1: false,
         expanded2: false,
     };
+
+    // 整理從CLubDetail傳過來的社團info
+    componentDidMount() {
+        const {clubData, imageUrlArr} = this.state;
+        if ('intro' in clubData) {
+            this.setState({introTextInput: clubData.intro});
+        }
+        // 渲染服務器已存的照片
+        if (
+            'club_photos_list' in clubData &&
+            clubData.club_photos_list.length > 0
+        ) {
+            let imgArr = clubData.club_photos_list;
+            // 不夠5張則補充
+            if (imgArr.length < 5) {
+                let pushArr = new Array(5 - imgArr.length).fill('');
+                let arr = JSON.parse(JSON.stringify(imgArr));
+                arr.push(...pushArr);
+                this.setState({imageUrlArr: arr});
+            }
+        }
+        if ('contact' in clubData && clubData.contact.length > 0) {
+            this.setState({contactInput: clubData.contact});
+        }
+        this.setState({isLoading: false});
+    }
 
     // 圖片選擇
     async handleSelect(index) {
@@ -111,31 +137,6 @@ class ClubInfoEdit extends Component {
         this.setState({imageUrlArr});
     };
 
-    componentDidMount() {
-        const {clubData, imageUrlArr} = this.state;
-        if ('intro' in clubData) {
-            this.setState({introTextInput: clubData.intro});
-        }
-        // 渲染服務器已存的照片
-        if (
-            'club_photos_list' in clubData &&
-            clubData.club_photos_list.length > 0
-        ) {
-            let imgArr = clubData.club_photos_list;
-            // 不夠5張則補充
-            if (imgArr.length < 5) {
-                let pushArr = new Array(5 - imgArr.length).fill('');
-                let arr = JSON.parse(JSON.stringify(imgArr));
-                arr.push(...pushArr);
-                this.setState({imageUrlArr: arr});
-            }
-        }
-        if ('contact' in clubData && clubData.contact.length > 0) {
-            this.setState({contactInput: clubData.contact});
-        }
-        this.setState({isLoading: false});
-    }
-
     // 上傳資料到服務器
     postNewInfo = async () => {
         const {introTextInput, clubData, contactInput} = this.state;
@@ -164,6 +165,12 @@ class ClubInfoEdit extends Component {
             data.append('add_club_photos', '[]');
         }
         if (del_club_photos.length > 0) {
+            // 刪除後綴，根據21.07.30的後端標準，圖片需後端相對路徑
+            let delHostArr = [];
+            del_club_photos.map(itm => {
+                delHostArr.push(itm.slice(BASE_HOST.length));
+            });
+            del_club_photos = delHostArr;
             data.append('del_club_photos', JSON.stringify(del_club_photos));
         } else {
             data.append('del_club_photos', '[]');
