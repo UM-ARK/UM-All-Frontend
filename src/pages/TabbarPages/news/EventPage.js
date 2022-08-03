@@ -139,14 +139,14 @@ class EventPage extends Component {
                             return (
                                 <EventCard
                                     data={item}
-                                    style={s.cardContainer}></EventCard>
+                                    style={{...s.cardContainer, marginLeft:pxToDp(5)}}></EventCard>
                             );
                         }}
                         scrollEnabled={false}
                     />
                 </View>
                 {/* 右側的列 放置單數下標的圖片 */}
-                <View style={{flex: 1, alignItems: 'center'}}>
+                <View style={{alignItems: 'center'}}>
                     {rightDataList.length > 0 ? (
                         <FlatList
                             data={rightDataList}
@@ -154,7 +154,7 @@ class EventPage extends Component {
                                 return (
                                     <EventCard
                                         data={item}
-                                        style={s.cardContainer}></EventCard>
+                                        style={{...s.cardContainer, marginRight:pxToDp(5)}}></EventCard>
                                 );
                             }}
                             scrollEnabled={false}
@@ -232,7 +232,7 @@ const s = StyleSheet.create({
     // 活動卡片間距
     cardContainer: {
         marginVertical: pxToDp(6),
-        marginHorizontal: pxToDp(5),
+        marginHorizontal: pxToDp(2),
     },
 });
 
