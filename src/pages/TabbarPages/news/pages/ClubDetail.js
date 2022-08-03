@@ -629,7 +629,7 @@ class ClubDetail extends Component {
                                             data={item}
                                             style={{
                                                 marginVertical: pxToDp(8),
-                                                marginHorizontal: pxToDp(10),
+                                                marginHorizontal: pxToDp(3),
                                             }}
                                             isLogin={this.state.isLogin}
                                         />
