@@ -31,6 +31,7 @@
     "react": "17.0.2",
     "react-content-loader": "^6.2.0",
     "react-native": "0.68.2",
+    "react-native-actionsheet": "^2.4.2",
     "react-native-animated-nav-tab-bar": "^3.1.8",
     "react-native-animated-splash-screen": "^2.0.5",
     "react-native-easy-toast": "^2.0.0",
