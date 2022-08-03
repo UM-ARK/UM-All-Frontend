@@ -134,13 +134,13 @@ class LoginChoose extends Component {
                                             this.handleStdLogin(
                                                 cookies.MoodleSession.value,
                                             );
-                                        } else {
-                                            alert(
-                                                '無法檢測Moodle登錄狀態，請聯繫開發者',
-                                            );
                                         }
                                     })
-                                    .catch(err => alert(err));
+                                    .catch(err => {
+                                        alert(
+                                            '無法檢測Moodle登錄狀態，請聯繫開發者',
+                                        );
+                                    });
                                 // 跳轉詳情頁
                                 // this.refs.webRef.injectJavaScript(`
                                 // window.location.href = 'https://ummoodle.um.edu.mo/user/profile.php';
