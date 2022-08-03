@@ -32,7 +32,7 @@ function repalceHtmlToText(str) {
 
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const { width: PAGE_WIDTH } = Dimensions.get('window');
-const COMPONENT_WIDTH = PAGE_WIDTH * 0.85;
+let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 class NewsDetail extends Component {
@@ -68,6 +68,15 @@ class NewsDetail extends Component {
 
         let imageUrls = newsData.common.imageUrls;
         imageUrls = imageUrls.map(item => item.replace('http:', 'https:'));
+        if (imageUrls.length == 2) {
+            COMPONENT_WIDTH = PAGE_WIDTH * 0.4;
+        }
+        else if (imageUrls.length < 2) {
+            COMPONENT_WIDTH = PAGE_WIDTH * 0.85;
+        }
+        else {
+            COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+        }
 
         // 存放新聞數據
         this.state = {
@@ -262,7 +271,7 @@ class NewsDetail extends Component {
                                     activeOpacity={0.7}
                                     style={{
                                         width: COMPONENT_WIDTH,
-                                        height: COMPONENT_WIDTH * 0.5625,
+                                        height: COMPONENT_WIDTH,
                                         backgroundColor: bg_color,
                                         borderRadius: pxToDp(10),
                                         overflow: 'hidden',
@@ -282,11 +291,15 @@ class NewsDetail extends Component {
                                         }}
                                         style={{
                                             width: COMPONENT_WIDTH,
-                                            height: COMPONENT_WIDTH * 0.5625,
+                                            height: COMPONENT_WIDTH,
                                         }}
                                     />
                                 </TouchableOpacity>
                             );
+                        }}
+                        itemContainerStyle={{
+                            alignItems:'center',
+                            justifyContent:'center',
                         }}
                     />
                     {/* 彈出層展示圖片查看器 */}
@@ -337,7 +350,7 @@ const styles = StyleSheet.create({
     },
     imgContainer: {
         width: COMPONENT_WIDTH,
-        height: COMPONENT_WIDTH * 0.5625,
+        height: COMPONENT_WIDTH,
         backgroundColor: bg_color,
         borderRadius: pxToDp(10),
         overflow: 'hidden',
