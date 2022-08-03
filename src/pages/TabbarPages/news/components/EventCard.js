@@ -37,7 +37,7 @@ class EventCard extends Component {
         // 解構this.props.data數據
         const eventData = this.props.data;
         this.setState({
-            coverImgUrl: eventData.cover_image_url,
+            coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
             startTimeStamp: eventData.startdatetime,
             finishTimeStamp: eventData.enddatetime,

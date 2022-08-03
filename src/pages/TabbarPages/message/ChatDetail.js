@@ -359,6 +359,11 @@ class ChatDetail extends Component {
                                 mode: 'edit',
                                 eventData,
                                 refresh: this.getData.bind(this),
+                                // 返回上一頁面並刷新數據
+                                delete: () => {
+                                    this.props.route.params.refresh();
+                                    this.props.navigation.goBack();
+                                },
                             });
                         }}
                     />

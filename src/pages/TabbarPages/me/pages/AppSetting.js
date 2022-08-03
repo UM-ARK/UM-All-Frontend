@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {
     Text,
     View,
-    Image,
     TouchableOpacity,
     StyleSheet,
     StatusBar,
@@ -86,12 +85,10 @@ class AppSetting extends Component {
                     onPress={() => alert('TODO: 對應func')}>
                     {/* 左側flex佈局 */}
                     <View style={{flexDirection: 'row'}}>
-                        <Image
-                            source={require('../icon/umsetting.png')}
-                            style={{
-                                width: pxToDp(25),
-                                height: pxToDp(25),
-                            }}
+                        <Ionicons
+                            name="shield-checkmark-outline"
+                            color={COLOR_DIY.themeColor}
+                            size={pxToDp(20)}
                         />
                         <Text
                             style={{

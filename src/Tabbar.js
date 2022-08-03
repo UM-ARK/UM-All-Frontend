@@ -26,23 +26,21 @@ import {inject} from 'mobx-react';
 const Tabs = AnimatedTabBarNavigator();
 
 class Tabbar extends Component {
-    state = {
-        isClub: false,
-        isLogin: false,
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            isClub: false,
+            isLogin: false,
+        };
 
-    componentDidMount() {
         let globalData = this.props.RootStore;
-
         if (
             globalData.userInfo &&
             JSON.stringify(globalData.userInfo) != '{}'
         ) {
-            console.log('Tabbar檢測：有token緩存');
-            this.setState({
-                isClub: globalData.userInfo.isClub,
-                isLogin: true,
-            });
+            console.log('Tabbar檢測：已登錄');
+            this.state.isClub = globalData.userInfo.isClub;
+            this.state.isLogin = true;
         }
     }
 
@@ -57,13 +55,11 @@ class Tabbar extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
                     tabBarBackground: COLOR_DIY.white,
-                    // 浮動式Tabbar
-                    // floating            : true,
                     horizontalPadding: pxToDp(10),
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'HomeTabbar'}>
-                {/* 社團賬號登錄，直接簡潔模式 */}
-                {!isClub && (
+                {/* 社團賬號登錄，進入簡潔模式 */}
+                {isClub ? null : (
                     <Tabs.Screen
                         name="NewsTabbar"
                         component={NewsScreen}
@@ -83,7 +79,7 @@ class Tabbar extends Component {
                         }}
                     />
                 )}
-                {!isClub && (
+                {isClub ? null : (
                     <Tabs.Screen
                         name="FeaturesTabbar"
                         component={FeaturesScreen}
@@ -103,7 +99,7 @@ class Tabbar extends Component {
                         }}
                     />
                 )}
-                {!isClub && (
+                {isClub ? null : (
                     <Tabs.Screen
                         name="HomeTabbar"
                         component={HomeScreen}
@@ -124,7 +120,7 @@ class Tabbar extends Component {
                     />
                 )}
 
-                {isLogin && (
+                {isLogin ? (
                     <Tabs.Screen
                         name="MessageTabbar"
                         component={isClub ? MessageConsole : MessageScreen}
@@ -141,13 +137,13 @@ class Tabbar extends Component {
                             title: '提醒',
                         }}
                     />
-                )}
+                ) : null}
                 <Tabs.Screen
                     name="MeTabbar"
                     component={isClub ? ClubDetail : MeScreen}
                     options={{
                         tabBarIcon: ({focused, color, size}) =>
-                            this.state.isClub ? (
+                            isClub ? (
                                 <MaterialCommunityIcons
                                     name="human-queue"
                                     size={size ? size : 24}
@@ -168,7 +164,7 @@ class Tabbar extends Component {
                                     color={color}
                                 />
                             ),
-                        title: this.state.isClub ? '組織' : '我的',
+                        title: isClub ? '組織' : '我的',
                     }}
                 />
             </Tabs.Navigator>

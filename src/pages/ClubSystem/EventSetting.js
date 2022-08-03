@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
-import {BASE_URI, POST} from '../../utils/pathMap';
+import {BASE_URI, BASE_HOST, POST, GET} from '../../utils/pathMap';
 import Header from '../../components/Header';
 import DialogDIY from '../../components/DialogDIY';
 import ImageSelector from '../../components/ImageSelector';
@@ -46,6 +46,8 @@ let cover_image_file = {};
 let add_relate_image = [];
 let del_relate_image = [];
 
+pressDelete = false;
+
 class EventSetting extends Component {
     state = {
         title: '',
@@ -70,42 +72,78 @@ class EventSetting extends Component {
         expanded1: false,
         isStartDatePickerVisible: false,
         isEndDatePickerVisible: false,
+
+        dialogText: '',
     };
 
     componentDidMount() {
         // 檢查是create活動還是edit活動
         let mode = this.props.route.params.mode;
-        this.setState({isLoading: false, mode});
+        this.setState({mode});
         if (mode == 'edit') {
             let eventData = this.props.route.params.eventData;
-            this.setState({
-                eventData,
-                title: eventData.title,
-                place: eventData.place,
-                link: eventData.type == 'ACTIVITY' ? '' : eventData.link,
-                place: eventData.location,
-                introText: eventData.introduction,
-                coverImgUrl: eventData.cover_image_url,
-                allowFollow: eventData.can_follow,
-                startDate: new Date(eventData.startdatetime),
-                finishDate: new Date(eventData.enddatetime),
-                type: eventData.type.toLowerCase(),
-            });
-            // 渲染服務器已存的照片
-            if (
-                'relate_image_url' in eventData &&
-                eventData.relate_image_url.length > 0
-            ) {
-                let imgArr = eventData.relate_image_url;
-                // 不夠5張則補充
-                if (imgArr.length < 4) {
-                    let pushArr = new Array(5 - imgArr.length).fill('');
-                    let arr = JSON.parse(JSON.stringify(imgArr));
-                    arr.push(...pushArr);
-                    this.setState({relateImgUrl: arr});
-                }
-            }
+            this.getData(eventData._id);
+        } else {
+            this.setState({isLoading: false});
         }
+    }
+
+    // 獲取該活動信息
+    async getData(eventID) {
+        await axios
+            .get(BASE_URI + GET.EVENT_INFO_EVENT_ID + eventID)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    let eventData = json.content;
+                    eventData.cover_image_url =
+                        BASE_HOST + eventData.cover_image_url;
+                    // 渲染服務器已存的照片
+                    if (
+                        eventData.relate_image_url &&
+                        eventData.relate_image_url.length > 0
+                    ) {
+                        let addHostArr = [];
+                        eventData.relate_image_url.map(itm => {
+                            addHostArr.push(BASE_HOST + itm);
+                        });
+                        eventData.relate_image_url = addHostArr;
+                        let imgArr = eventData.relate_image_url;
+                        // 不夠5張則補充
+                        if (imgArr.length < 4) {
+                            let pushArr = new Array(5 - imgArr.length).fill('');
+                            let arr = JSON.parse(JSON.stringify(imgArr));
+                            arr.push(...pushArr);
+                            this.setState({relateImgUrl: arr});
+                        }
+                    }
+                    this.setState({
+                        eventData,
+                        title: eventData.title,
+                        place: eventData.place,
+                        link:
+                            eventData.type == 'ACTIVITY' ? '' : eventData.link,
+                        place: eventData.location,
+                        introText: eventData.introduction,
+                        coverImgUrl: eventData.cover_image_url,
+                        allowFollow: eventData.can_follow,
+                        startDate: new Date(eventData.startdatetime),
+                        finishDate: new Date(eventData.enddatetime),
+                        type: eventData.type.toLowerCase(),
+                        isLoading: false,
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }
+
+    componentWillUnmount() {
+        cover_image_file = {};
+        add_relate_image = [];
+        del_relate_image = [];
+        pressDelete = false;
     }
 
     // 切換類型時要還原部分輸入，避免數據混亂
@@ -289,14 +327,14 @@ class EventSetting extends Component {
                 <Text
                     style={{
                         ...styles.inputTitle,
-                        color: this.state.titleColor,
+                        color: themeColor,
                     }}>
                     {'活動詳情修改 '}
                 </Text>
                 <Ionicons
                     name={this.state.expanded1 ? 'chevron-up' : 'chevron-down'}
                     size={pxToDp(20)}
-                    color={this.state.titleColor}
+                    color={black.third}
                 />
             </View>
         );
@@ -412,9 +450,24 @@ class EventSetting extends Component {
                             : item.uri.replace('file://', ''),
                 });
             });
+        } else {
+            data.append('add_relate_image', '[]');
         }
         if (mode == 'edit') {
-            data.append('del_relate_image', JSON.stringify(del_relate_image));
+            if (del_relate_image.length > 0) {
+                // 刪除後綴，根據21.07.30的後端標準，圖片需後端相對路徑
+                let delHostArr = [];
+                del_relate_image.map(itm => {
+                    delHostArr.push(itm.slice(BASE_HOST.length));
+                });
+                del_relate_image = delHostArr;
+                data.append(
+                    'del_relate_image',
+                    JSON.stringify(del_relate_image),
+                );
+            } else {
+                data.append('del_relate_image', '[]');
+            }
         }
 
         data.append(
@@ -429,7 +482,7 @@ class EventSetting extends Component {
         data.append('introduction', introText);
         data.append('can_follow', allowFollow);
 
-        // console.log('待上傳data', data);
+        console.log('待上傳data', data);
 
         let URL =
             BASE_URI + (mode == 'create' ? POST.EVENT_CREATE : POST.EVENT_EDIT);
@@ -459,8 +512,41 @@ class EventSetting extends Component {
             });
     };
 
+    // 刪除活動
+    deleteEvent = async () => {
+        this.setState({isLoading: true, submitChoice: false});
+        const {eventData} = this.state;
+        let data = new FormData();
+        data.append('id', eventData._id);
+
+        let URL = BASE_URI + POST.EVENT_DEL;
+        await axios
+            .post(URL, data, {
+                headers: {
+                    'Content-Type': `multipart/form-data`,
+                },
+            })
+            .then(res => {
+                let json = res.data;
+                // 上傳成功
+                if (json.message == 'success') {
+                    alert('刪除成功');
+                    this.props.route.params.delete();
+                    this.props.navigation.goBack();
+                }
+                // 上傳失敗
+                else {
+                    alert('上傳失敗');
+                    console.log(json);
+                }
+            })
+            .catch(err => {
+                console.log('err', err);
+            });
+    };
+
     render() {
-        const {isLoading, submitChoice, type, mode} = this.state;
+        const {isLoading, submitChoice, dialogText, type, mode} = this.state;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header title={'活動資訊編輯'} />
@@ -766,7 +852,11 @@ class EventSetting extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 if (this.checkInfoOK()) {
-                                    this.setState({submitChoice: true});
+                                    pressDelete = false;
+                                    this.setState({
+                                        submitChoice: true,
+                                        dialogText: '確定要保存修改嗎？',
+                                    });
                                 } else {
                                     alert('輸入有誤，請檢查！');
                                 }
@@ -785,7 +875,13 @@ class EventSetting extends Component {
                         {this.state.mode == 'edit' && (
                             <TouchableOpacity
                                 activeOpacity={0.8}
-                                onPress={() => alert('確定要刪除嗎？')}
+                                onPress={() => {
+                                    pressDelete = true;
+                                    this.setState({
+                                        submitChoice: true,
+                                        dialogText: '確定要刪除該活動嗎？',
+                                    });
+                                }}
                                 style={{
                                     ...styles.submitButton,
                                     backgroundColor: COLOR_DIY.unread,
@@ -811,8 +907,10 @@ class EventSetting extends Component {
                 {/* Post前提示 */}
                 <DialogDIY
                     showDialog={submitChoice}
-                    text={'確定要保存修改嗎？'}
-                    handleConfirm={this.postNewInfo}
+                    text={dialogText}
+                    handleConfirm={
+                        pressDelete ? this.deleteEvent : this.postNewInfo
+                    }
                     handleCancel={() => this.setState({submitChoice: false})}
                 />
             </View>
@@ -822,7 +920,7 @@ class EventSetting extends Component {
 
 const styles = StyleSheet.create({
     inputTitle: {
-        color: black.main,
+        color: themeColor,
         fontSize: pxToDp(16),
     },
     inputArea: {

@@ -7,7 +7,7 @@ import {
     Dimensions,
 } from 'react-native';
 
-import {BASE_URI, GET, POST} from '../../../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET, POST} from '../../../../../utils/pathMap';
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import Header from '../../../../../components/Header';
@@ -40,7 +40,11 @@ class FollowEvent extends Component {
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    this.setState({clubDataList: json.content});
+                    let clubDataList = json.content;
+                    clubDataList.map(itm => {
+                        itm.logo_url = BASE_HOST + itm.logo_url;
+                    });
+                    this.setState({clubDataList});
                 }
             })
             .catch(err => console.log('err', err));

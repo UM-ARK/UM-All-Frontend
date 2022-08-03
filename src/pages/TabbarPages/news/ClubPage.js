@@ -3,7 +3,7 @@ import {Text, View, Dimensions, RefreshControl} from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, GET} from '../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 
 import ClubCard from './components/ClubCard';
@@ -36,6 +36,9 @@ class ClubPage extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     clubDataList = json.content;
+                    clubDataList.map(itm => {
+                        itm.logo_url = BASE_HOST + itm.logo_url;
+                    });
                     this.setState({clubDataList, isLoading: false});
                 } else {
                     alert('Warning:', message);
@@ -49,40 +52,38 @@ class ClubPage extends Component {
     render() {
         const {clubDataList, isLoading} = this.state;
         return (
-            <View style={{flex: 1}}>
+            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 {clubDataList != undefined && !isLoading ? (
-                    <View style={{flex: 1}}>
-                        {/* TODO: 排序、篩選 */}
-                        <FlatGrid
-                            style={{flex: 1}}
-                            // 每个项目的最小宽度或高度（像素）
-                            itemDimension={COMPONENT_WIDTH}
-                            data={clubDataList}
-                            // 每個項目的間距
-                            spacing={pxToDp(12)}
-                            renderItem={({item}) => (
-                                <View style={{flex: 1}}>
-                                    <ClubCard data={item}></ClubCard>
-                                </View>
-                            )}
-                            // 所有項目末尾渲染，防Tabbar遮擋
-                            ListFooterComponent={() => (
-                                <View style={{marginTop: pxToDp(50)}}></View>
-                            )}
-                            refreshControl={
-                                <RefreshControl
-                                    colors={[themeColor]}
-                                    tintColor={themeColor}
-                                    refreshing={this.state.isLoading}
-                                    onRefresh={() => {
-                                        // 展示Loading標識
-                                        this.setState({isLoading: true});
-                                        this.getData();
-                                    }}
-                                />
-                            }
-                        />
-                    </View>
+                    // TODO: 排序、篩選
+                    <FlatGrid
+                        style={{flex: 1}}
+                        // 每个项目的最小宽度或高度（像素）
+                        itemDimension={COMPONENT_WIDTH}
+                        data={clubDataList}
+                        // 每個項目的間距
+                        spacing={pxToDp(12)}
+                        renderItem={({item}) => (
+                            <View style={{flex: 1}}>
+                                <ClubCard data={item}></ClubCard>
+                            </View>
+                        )}
+                        // 所有項目末尾渲染，防Tabbar遮擋
+                        ListFooterComponent={() => (
+                            <View style={{marginTop: pxToDp(50)}}></View>
+                        )}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isLoading}
+                                onRefresh={() => {
+                                    // 展示Loading標識
+                                    this.setState({isLoading: true});
+                                    this.getData();
+                                }}
+                            />
+                        }
+                    />
                 ) : (
                     <View
                         style={{

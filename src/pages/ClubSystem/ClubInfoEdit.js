@@ -12,7 +12,7 @@ import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {handleImageSelect} from '../../utils/fileKits';
 import Header from '../../components/Header';
-import {BASE_URI, POST} from '../../utils/pathMap';
+import {BASE_URI, BASE_HOST, POST} from '../../utils/pathMap';
 import DialogDIY from '../../components/DialogDIY';
 import Loading from '../../components/Loading';
 
@@ -58,19 +58,53 @@ class ClubInfoEdit extends Component {
         expanded2: false,
     };
 
+    // 整理從CLubDetail傳過來的社團info
+    componentDidMount() {
+        const {clubData, imageUrlArr} = this.state;
+        if ('intro' in clubData) {
+            this.setState({introTextInput: clubData.intro});
+        }
+        // 渲染服務器已存的照片
+        if (
+            'club_photos_list' in clubData &&
+            clubData.club_photos_list.length > 0
+        ) {
+            let imgArr = clubData.club_photos_list;
+            // 不夠5張則補充
+            if (imgArr.length < 5) {
+                let pushArr = new Array(5 - imgArr.length).fill('');
+                let arr = JSON.parse(JSON.stringify(imgArr));
+                arr.push(...pushArr);
+                this.setState({imageUrlArr: arr});
+            }
+        }
+        if ('contact' in clubData && clubData.contact.length > 0) {
+            this.setState({contactInput: clubData.contact});
+        }
+        this.setState({isLoading: false});
+    }
+
     // 圖片選擇
     async handleSelect(index) {
         const {clubData} = this.state;
         let imageUrl = '';
         let imageObj = {};
         let cancel = true;
+        let chooseOK = false;
         try {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
-                console.log('selectResult', selectResult.assets[0]);
-                imageObj = selectResult.assets[0];
-                imageUrl = imageObj.uri;
-                cancel = false;
+                let imgFileObj = selectResult.assets[0];
+                // console.log('selectResult', imgFileObj);
+                // 僅允許小於8M的圖片
+                if (imgFileObj.fileSize / 1000 / 1024 < 8) {
+                    imageObj = selectResult.assets[0];
+                    imageUrl = imageObj.uri;
+                    cancel = false;
+                    chooseOK = true;
+                } else {
+                    alert('請選擇小於8MB的圖片！\n服務器為愛發電請見諒！');
+                }
             } else {
                 if (
                     'club_photos_list' in clubData &&
@@ -82,7 +116,7 @@ class ClubInfoEdit extends Component {
         } catch (error) {
             console.log(error);
         } finally {
-            if (!cancel) {
+            if (!cancel && chooseOK) {
                 // 修改this.state相片數組的值
                 let imageUrlArr = this.state.imageUrlArr;
                 imageUrlArr.splice(index, 1, imageUrl);
@@ -110,31 +144,6 @@ class ClubInfoEdit extends Component {
         imageUrlArr.push('');
         this.setState({imageUrlArr});
     };
-
-    componentDidMount() {
-        const {clubData, imageUrlArr} = this.state;
-        if ('intro' in clubData) {
-            this.setState({introTextInput: clubData.intro});
-        }
-        // 渲染服務器已存的照片
-        if (
-            'club_photos_list' in clubData &&
-            clubData.club_photos_list.length > 0
-        ) {
-            let imgArr = clubData.club_photos_list;
-            // 不夠5張則補充
-            if (imgArr.length < 5) {
-                let pushArr = new Array(5 - imgArr.length).fill('');
-                let arr = JSON.parse(JSON.stringify(imgArr));
-                arr.push(...pushArr);
-                this.setState({imageUrlArr: arr});
-            }
-        }
-        if ('contact' in clubData && clubData.contact.length > 0) {
-            this.setState({contactInput: clubData.contact});
-        }
-        this.setState({isLoading: false});
-    }
 
     // 上傳資料到服務器
     postNewInfo = async () => {
@@ -164,6 +173,12 @@ class ClubInfoEdit extends Component {
             data.append('add_club_photos', '[]');
         }
         if (del_club_photos.length > 0) {
+            // 刪除後綴，根據21.07.30的後端標準，圖片需後端相對路徑
+            let delHostArr = [];
+            del_club_photos.map(itm => {
+                delHostArr.push(itm.slice(BASE_HOST.length));
+            });
+            del_club_photos = delHostArr;
             data.append('del_club_photos', JSON.stringify(del_club_photos));
         } else {
             data.append('del_club_photos', '[]');

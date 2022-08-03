@@ -2,6 +2,8 @@
 
 // TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = 'https://umall.one/api/';
+// 用適配API返回的圖片相對路徑
+export const BASE_HOST = 'https://umall.one';
 
 export const GET = {
     // 社團登錄
@@ -35,6 +37,8 @@ export const POST = {
     EVENT_CREATE: 'create_activity/',
     // 修改活動info
     EVENT_EDIT: 'edit_activity/',
+    // 刪除活動
+    EVENT_DEL: 'delete_activity/',
 
     // 學生add follow活動
     ADD_FOLLOW_EVENT: 'student_add_follow_activity/',
@@ -89,7 +93,7 @@ export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 
 // 學業發展分類
 // 澳大 - UM Moodle
-export const UM_Moodle = 'https://ummoodle.um.edu.mo/my';
+export const UM_Moodle = 'https://ummoodle.um.edu.mo/my/';
 // 澳大 - UM ISW
 export const UM_ISW = 'https://isw.um.edu.mo/siapp/faces/home';
 // 澳大 - UM 預選課

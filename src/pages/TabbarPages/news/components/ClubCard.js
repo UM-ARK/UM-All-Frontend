@@ -47,15 +47,25 @@ class EventCard extends Component {
                 activeOpacity={0.8}
                 onPress={this.handleJumpToDetail}>
                 {/* 社團 / 組織 Logo */}
-                <FastImage
-                    source={{uri: logo_url, cache: FastImage.cacheControl.web}}
+                <View
                     style={{
                         width: pxToDp(70),
                         height: pxToDp(70),
                         borderRadius: 50,
-                    }}
-                    resizeMode={FastImage.resizeMode.contain}
-                />
+                        overflow: 'hidden',
+                    }}>
+                    <FastImage
+                        source={{
+                            uri: logo_url,
+                            cache: FastImage.cacheControl.web,
+                        }}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                        }}
+                        resizeMode={FastImage.resizeMode.contain}
+                    />
+                </View>
 
                 {/* 組織名 */}
                 <View
