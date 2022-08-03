@@ -110,7 +110,7 @@ class FollowEvent extends Component {
                             data={item}
                             style={{
                                 marginVertical: pxToDp(8),
-                                marginHorizontal: pxToDp(10),
+                                marginHorizontal: pxToDp(4),
                             }}
                         />
                     );

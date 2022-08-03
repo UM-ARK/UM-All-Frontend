@@ -569,32 +569,41 @@ class ClubDetail extends Component {
                                                 <View
                                                     style={{
                                                         flexDirection: 'row',
+                                                        alignItems: 'center',
+                                                        marginBottom: pxToDp(3),
                                                     }}>
                                                     {/* 聯繫Type */}
-                                                    <Text
-                                                        style={{
-                                                            color: black.second,
-                                                        }}>
-                                                        {item.type + ': '}
-                                                    </Text>
-                                                    {/* 相關號碼、id */}
-                                                    <HyperlinkText
-                                                        linkStyle={{
-                                                            color: COLOR_DIY.themeColor,
-                                                        }}
-                                                        navigation={
-                                                            this.props
-                                                                .navigation
-                                                        }>
+                                                    <View
+                                                        style={{width: '20%'}}>
                                                         <Text
                                                             style={{
-                                                                color: black.third,
-                                                            }}
-                                                            // 允許用戶複製
-                                                            selectable={true}>
-                                                            {item.num}
+                                                                color: black.second,
+                                                            }}>
+                                                            {item.type + ': '}
                                                         </Text>
-                                                    </HyperlinkText>
+                                                    </View>
+                                                    {/* 相關號碼、id */}
+                                                    <View
+                                                        style={{width: '80%'}}>
+                                                        <HyperlinkText
+                                                            linkStyle={{
+                                                                color: COLOR_DIY.themeColor,
+                                                            }}
+                                                            navigation={
+                                                                this.props
+                                                                    .navigation
+                                                            }>
+                                                            <Text
+                                                                style={{
+                                                                    color: black.third,
+                                                                }}
+                                                                selectable={
+                                                                    true
+                                                                }>
+                                                                {item.num}
+                                                            </Text>
+                                                        </HyperlinkText>
+                                                    </View>
                                                 </View>
                                             );
                                         }
@@ -629,7 +638,7 @@ class ClubDetail extends Component {
                                             data={item}
                                             style={{
                                                 marginVertical: pxToDp(8),
-                                                marginHorizontal: pxToDp(3),
+                                                marginHorizontal: pxToDp(4),
                                             }}
                                             isLogin={this.state.isLogin}
                                         />

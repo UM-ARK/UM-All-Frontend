@@ -61,7 +61,8 @@ const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
                 linkDefault={false}
                 onPress={(url, text) => handleHyperLink(url, text)}
                 onLongPress={(url, text) => copyToClipboard(url, text)}>
-                <Text style={style}>{children}</Text>
+                {/* <Text style={style}>{children}</Text> */}
+                {children}
             </Hyperlink>
         </>
     );
