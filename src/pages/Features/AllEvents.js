@@ -54,8 +54,10 @@ class AllEvents extends Component {
                     });
                     if (newDataArr.length < num_of_item) {
                         this.setState({noMoreData: true});
+                    } else {
+                        this.setState({noMoreData: false});
                     }
-                    if (eventData == undefined) {
+                    if (dataPage == 1) {
                         this.setState({eventData: newDataArr});
                     } else if (eventData.length > 0) {
                         newDataArr = eventData.concat(newDataArr);
