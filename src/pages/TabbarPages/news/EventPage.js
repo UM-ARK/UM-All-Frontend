@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, {Component} from 'react';
 import {
     Text,
     View,
@@ -7,6 +7,7 @@ import {
     FlatList,
     ScrollView,
     TouchableWithoutFeedback,
+    TouchableOpacity,
     RefreshControl,
 } from 'react-native';
 
@@ -19,18 +20,22 @@ import EventCard from './components/EventCard';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-const {black, white, themeColor} = COLOR_DIY;
+const {black, white, themeColor, viewShadow} = COLOR_DIY;
 
+// 返回數據的頁數
+let dataPage = 1;
+eventDataList = [];
 class EventPage extends Component {
     state = {
         leftDataList: [],
         rightDataList: [],
         isLoading: true,
-        isScrollViewLoading: false,
+        noMoreData: false,
     };
 
     constructor() {
@@ -40,35 +45,64 @@ class EventPage extends Component {
 
     async getData() {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
+        let num_of_item = 10;
         await axios
-            .get(URL)
+            .get(URL, {
+                params: {
+                    num_of_item,
+                    page: dataPage,
+                },
+            })
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    let eventDataList = json.content;
-                    // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
-                    let leftDataList = [];
-                    let rightDataList = [];
-                    eventDataList.map((itm, idx) => {
-                        // 圖片類型服務器返回相對路徑，請記住加上域名
-                        itm.cover_image_url = BASE_HOST + itm.cover_image_url;
-                        if (idx % 2 == 0) {
-                            leftDataList.push(itm);
-                        } else {
-                            rightDataList.push(itm);
-                        }
-                    });
-                    this.setState({
-                        leftDataList,
-                        rightDataList,
-                        isLoading: false,
-                    });
+                    let newDataArr = json.content;
+                    if (newDataArr.length < num_of_item) {
+                        this.setState({noMoreData: true});
+                    } else {
+                        this.setState({noMoreData: false});
+                    }
+
+                    if (dataPage == 1) {
+                        this.separateData(newDataArr);
+                        eventDataList = newDataArr;
+                        this.setState({isLoading: false});
+                    } else if (eventDataList.length > 0) {
+                        newDataArr = eventDataList.concat(newDataArr);
+                        this.separateData(newDataArr);
+                        eventDataList = newDataArr;
+                        this.setState({isLoading: false});
+                    }
+                } else if (json.code == '2') {
+                    alert('已無更多數據');
+                    this.setState({noMoreData: true});
                 } else {
                     alert('數據出錯，請聯繫開發者');
                 }
             })
             .catch(err => console.log('err', err));
     }
+
+    separateData = eventDataList => {
+        // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
+        let leftDataList = [];
+        let rightDataList = [];
+        eventDataList.map((itm, idx) => {
+            // 圖片類型服務器返回相對路徑，請記住加上域名
+            if (itm.cover_image_url.indexOf(BASE_HOST) == -1) {
+                itm.cover_image_url = BASE_HOST + itm.cover_image_url;
+            }
+            if (idx % 2 == 0) {
+                leftDataList.push(itm);
+            } else {
+                rightDataList.push(itm);
+            }
+        });
+        this.setState({
+            leftDataList,
+            rightDataList,
+        });
+    };
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
@@ -126,6 +160,46 @@ class EventPage extends Component {
         );
     };
 
+    loadMoreData = () => {
+        const {noMoreData} = this.state;
+        dataPage++;
+        if (!noMoreData) {
+            this.toast.show(`數據加載中，請稍等~`, 2000);
+            this.getData();
+        }
+    };
+
+    renderLoadMoreView = () => {
+        const {noMoreData} = this.state;
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: pxToDp(10),
+                    marginBottom: pxToDp(50),
+                }}>
+                {noMoreData ? (
+                    <View style={{alignItems: 'center'}}>
+                        <Text style={{color: black.third}}>
+                            沒有更多活動了，過一段時間再來吧~
+                        </Text>
+                        <Text>[]~(￣▽￣)~*</Text>
+                    </View>
+                ) : (
+                    <TouchableOpacity
+                        style={s.loadMore}
+                        activeOpacity={0.8}
+                        onPress={this.loadMoreData}>
+                        <Text style={{color: white, fontSize: pxToDp(14)}}>
+                            Load More
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    };
+
     // 渲染主要內容
     renderPage = () => {
         const {leftDataList, rightDataList} = this.state;
@@ -139,7 +213,11 @@ class EventPage extends Component {
                             return (
                                 <EventCard
                                     data={item}
-                                    style={{...s.cardContainer, marginLeft:pxToDp(5)}}></EventCard>
+                                    style={{
+                                        ...s.cardContainer,
+                                        marginLeft: pxToDp(5),
+                                    }}
+                                />
                             );
                         }}
                         scrollEnabled={false}
@@ -154,7 +232,11 @@ class EventPage extends Component {
                                 return (
                                     <EventCard
                                         data={item}
-                                        style={{...s.cardContainer, marginRight:pxToDp(5)}}></EventCard>
+                                        style={{
+                                            ...s.cardContainer,
+                                            marginRight: pxToDp(5),
+                                        }}
+                                    />
                                 );
                             }}
                             scrollEnabled={false}
@@ -178,7 +260,7 @@ class EventPage extends Component {
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
-                {/* TODO: 渲染筛选栏目 */}
+                {/* TODO: 筛选功能 */}
                 <View style={{flex: 1, width: '100%'}}>
                     {/* 加載狀態渲染骨架屏 */}
                     {isLoading ? (
@@ -200,6 +282,9 @@ class EventPage extends Component {
                                     tintColor={themeColor}
                                     refreshing={this.state.isLoading}
                                     onRefresh={() => {
+                                        if (dataPage > 1) {
+                                            dataPage = 1;
+                                        }
                                         this.setState({isLoading: true});
                                         this.getData();
                                     }}
@@ -210,11 +295,26 @@ class EventPage extends Component {
                             {(leftDataList.length > 0 ||
                                 rightDataList.length > 0) &&
                                 this.renderPage()}
+
+                            {this.renderLoadMoreView()}
+
                             {/* 防止底部遮擋 */}
                             <View style={{marginBottom: pxToDp(50)}} />
                         </ScrollView>
                     )}
                 </View>
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: COLOR_DIY.themeColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }
@@ -233,6 +333,16 @@ const s = StyleSheet.create({
     cardContainer: {
         marginVertical: pxToDp(6),
         marginHorizontal: pxToDp(2),
+    },
+    loadMore: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: themeColor,
+        paddingHorizontal: pxToDp(10),
+        paddingVertical: pxToDp(10),
+        borderRadius: pxToDp(15),
+        marginBottom: pxToDp(5),
+        ...viewShadow,
     },
 });
 

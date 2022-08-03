@@ -1,3 +1,13 @@
+export const clubTagList = [
+    'SA',
+    'CLUB',
+    'SOCIETY',
+    'COLLEGE',
+    'OFFICIAL',
+    'MEDIA',
+    'BUSINESS',
+];
+
 export function clubTagMap(tag) {
     switch (tag) {
         case 'SA':
