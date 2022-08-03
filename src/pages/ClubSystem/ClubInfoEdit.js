@@ -90,13 +90,21 @@ class ClubInfoEdit extends Component {
         let imageUrl = '';
         let imageObj = {};
         let cancel = true;
+        let chooseOK = false;
         try {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
-                console.log('selectResult', selectResult.assets[0]);
-                imageObj = selectResult.assets[0];
-                imageUrl = imageObj.uri;
-                cancel = false;
+                let imgFileObj = selectResult.assets[0];
+                // console.log('selectResult', imgFileObj);
+                // 僅允許小於8M的圖片
+                if (imgFileObj.fileSize / 1000 / 1024 < 8) {
+                    imageObj = selectResult.assets[0];
+                    imageUrl = imageObj.uri;
+                    cancel = false;
+                    chooseOK = true;
+                } else {
+                    alert('請選擇小於8MB的圖片！\n服務器為愛發電請見諒！');
+                }
             } else {
                 if (
                     'club_photos_list' in clubData &&
@@ -108,7 +116,7 @@ class ClubInfoEdit extends Component {
         } catch (error) {
             console.log(error);
         } finally {
-            if (!cancel) {
+            if (!cancel && chooseOK) {
                 // 修改this.state相片數組的值
                 let imageUrlArr = this.state.imageUrlArr;
                 imageUrlArr.splice(index, 1, imageUrl);
