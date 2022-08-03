@@ -5,9 +5,9 @@ pod 'Interactable', :path => '../node_modules/react-native-interactable'
 platform :ios, '11.0'
 install! 'cocoapods', :deterministic_uuids => false
 
-target 'UMAllWhite' do
+target 'UMALL' do
   config = use_native_modules!
-  project './UMAllWhite.xcodeproj'
+  project './UMALL.xcodeproj'
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -23,7 +23,7 @@ target 'UMAllWhite' do
 
   pod 'react-native-restart', :path => '../node_modules/react-native-restart'
 
-  target 'UMAllWhiteTests' do
+  target 'UMALLTests' do
     inherit! :complete
     # Pods for testing
   end
