@@ -6,14 +6,15 @@ import {
     TouchableOpacity,
     Dimensions,
     ScrollView,
+    StyleSheet,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import Header from '../../../../components/Header';
 
-import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import {FlatGrid} from 'react-native-super-grid';
@@ -31,7 +32,8 @@ function repalceHtmlToText(str) {
 
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const {width: PAGE_WIDTH} = Dimensions.get('window');
-const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
 
 class NewsDetail extends Component {
     constructor(props) {
@@ -39,6 +41,7 @@ class NewsDetail extends Component {
 
         // 獲取上級路由傳遞的參數
         const newsData = this.props.route.params.data;
+        console.log('eventData', newsData);
 
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題、內容
         // 中文
@@ -65,6 +68,14 @@ class NewsDetail extends Component {
 
         let imageUrls = newsData.common.imageUrls;
         imageUrls = imageUrls.map(item => item.replace('http:', 'https:'));
+        // 自適應圖片寬度
+        if (imageUrls.length == 2) {
+            COMPONENT_WIDTH = PAGE_WIDTH * 0.4;
+        } else if (imageUrls.length < 2) {
+            COMPONENT_WIDTH = PAGE_WIDTH * 0.85;
+        } else {
+            COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+        }
 
         // 存放新聞數據
         this.state = {
@@ -88,12 +99,73 @@ class NewsDetail extends Component {
                 // 相片數組
                 imageUrls,
             },
+            // 語言模式
+            LanguageMode: [
+                {
+                    locale: 'cn',
+                    available: 1,
+                    name: '中',
+                },
+                {
+                    locale: 'en',
+                    available: 1,
+                    name: 'EN',
+                },
+                {
+                    locale: 'pt',
+                    available: 1,
+                    name: 'PT',
+                },
+            ],
+            chooseMode: 0,
         };
     }
 
+    // 文本語言模式選擇
+    renderModeChoice = () => {
+        const {LanguageMode, chooseMode, data} = this.state;
+        return (
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                }}>
+                {LanguageMode.map((item, index) => {
+                    //只渲染存在的语言的按钮
+                    if (item.available == 1) {
+                        return (
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={{
+                                    ...styles.languageModeButtonContainer,
+                                    backgroundColor:
+                                        chooseMode == index
+                                            ? themeColor
+                                            : bg_color,
+                                }}
+                                onPress={() =>
+                                    this.setState({chooseMode: index})
+                                }>
+                                <Text
+                                    style={{
+                                        color:
+                                            chooseMode == index
+                                                ? bg_color
+                                                : themeColor,
+                                    }}>
+                                    {item.name}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    }
+                })}
+            </View>
+        );
+    };
+
     render() {
         // 解構全局ui設計顏色
-        const {white, black, viewShadow, bg_color} = COLOR_DIY;
+        const {LanguageMode, chooseMode, data} = this.state;
         // 結構this.state的新聞數據
         const {
             // 發佈日期
@@ -116,136 +188,97 @@ class NewsDetail extends Component {
             imageUrls,
         } = this.state.data;
 
+        //判断语言是否存在
+        if (title_cn.length <= 0) {
+            LanguageMode[0].available = 0;
+        }
+        if (title_en.length <= 0) {
+            LanguageMode[1].available = 0;
+        }
+        if (title_pt.length <= 0) {
+            LanguageMode[2].available = 0;
+        }
+
+        //用数组存储内容，便于根据语言筛选条件显示
+        var title = [title_cn, title_en, title_pt];
+        var content = [content_cn, content_en, content_pt];
+
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: '新聞詳情',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: COLOR_DIY.bg_color,
-                        barStyle: 'dark-content',
-                    }}
-                />
+                <Header title={'新聞詳情'} />
 
-                <ScrollView style={{padding: pxToDp(10)}}>
-                    {/* 英文標題 */}
-                    {title_en.length > 0 && (
-                        <Text
-                            style={{
-                                color: black.main,
-                                fontWeight: 'bold',
-                                fontSize: pxToDp(18),
-                            }}
-                            selectable={true}>
-                            {title_en}
-                        </Text>
-                    )}
-                    {/* 中文標題 */}
-                    {title_cn.length > 0 && (
-                        <Text
-                            style={{
-                                color:
-                                    title_en.length > 0
-                                        ? black.second
-                                        : black.main,
-                                fontWeight: 'bold',
-                                fontSize:
-                                    title_en.length > 0
-                                        ? pxToDp(16)
-                                        : pxToDp(18),
-                            }}
-                            selectable={true}>
-                            {title_cn}
-                        </Text>
-                    )}
-                    {/* 葡文標題 */}
-                    {title_pt.length > 0 && (
-                        <Text
-                            style={{
-                                color:
-                                    title_en.length > 0
-                                        ? black.second
-                                        : black.main,
-                                fontWeight: 'bold',
-                                fontSize:
-                                    title_en.length > 0
-                                        ? pxToDp(16)
-                                        : pxToDp(18),
-                            }}
-                            selectable={true}>
-                            {title_pt}
-                        </Text>
-                    )}
+                <ScrollView>
+                    {/* 文本模式選擇 3語切換 */}
+                    {this.renderModeChoice()}
+                    {/* 大標題 */}
+                    <Text style={styles.title} selectable={true}>
+                        {title[chooseMode]}
+                    </Text>
                     {/* 日期 */}
-                    <Text
-                        style={{
-                            color: black.third,
-                            alignSelf: 'flex-end',
-                        }}>
-                        Update:{' '}
-                        {moment
-                            .tz(lastModified, 'Asia/Macau')
-                            .format('YYYY/MM/DD')}
+                    <Text style={styles.date}>
+                        {'Update: ' +
+                            moment
+                                .tz(lastModified, 'Asia/Macau')
+                                .format('YYYY/MM/DD')}
                     </Text>
 
                     {/* 圖片展示 */}
                     <FlatGrid
-                        style={{flex: 1, alignSelf: 'center'}}
                         // 每个项目的最小宽度或高度（像素）
                         itemDimension={COMPONENT_WIDTH}
                         data={imageUrls}
                         // 每個項目的間距
                         spacing={pxToDp(15)}
-                        renderItem={({item, index}) => {
-                            // item是每一項數組的數據
-                            // index是每一項的數組下標
-                            return (
-                                <TouchableOpacity
-                                    activeOpacity={0.7}
-                                    style={{
-                                        width: COMPONENT_WIDTH,
-                                        height: COMPONENT_WIDTH,
-                                        backgroundColor: bg_color,
-                                        borderRadius: pxToDp(10),
-                                        overflow: 'hidden',
-                                        ...viewShadow,
+                        renderItem={({item, index}) => (
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                style={{
+                                    width: COMPONENT_WIDTH,
+                                    height: COMPONENT_WIDTH,
+                                    backgroundColor: bg_color,
+                                    borderRadius: pxToDp(10),
+                                    overflow: 'hidden',
+                                    ...viewShadow,
+                                }}
+                                // 打開圖片瀏覽大圖
+                                onPress={() => {
+                                    this.refs.imageScrollViewer.handleOpenImage(
+                                        index,
+                                    );
+                                }}>
+                                <FastImage
+                                    source={{
+                                        uri: item,
+                                        cache: FastImage.cacheControl.web,
                                     }}
-                                    // 打開圖片瀏覽大圖
-                                    onPress={() => {
-                                        this.refs.imageScrollViewer.handleOpenImage(
-                                            index,
-                                        );
-                                    }}>
-                                    <FastImage
-                                        source={{
-                                            uri: item,
-                                            cache: FastImage.cacheControl.web,
-                                        }}
-                                        style={{
-                                            width: COMPONENT_WIDTH,
-                                            height: COMPONENT_WIDTH,
-                                        }}
-                                    />
-                                </TouchableOpacity>
-                            );
+                                    style={{width: '100%', height: '100%'}}
+                                />
+                            </TouchableOpacity>
+                        )}
+                        itemContainerStyle={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                     />
+
+                    {/* 正文 */}
+                    <View style={styles.contentContainer}>
+                        <HyperlinkText
+                            linkStyle={{
+                                color: COLOR_DIY.themeColor,
+                            }}
+                            navigation={this.props.navigation}>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontSize: pxToDp(15),
+                                }}
+                                selectable={true}>
+                                {'\t\t' + repalceHtmlToText(content[chooseMode])}
+                            </Text>
+                        </HyperlinkText>
+                    </View>
+
                     {/* 彈出層展示圖片查看器 */}
                     <ImageScrollViewer
                         ref={'imageScrollViewer'}
@@ -253,58 +286,42 @@ class NewsDetail extends Component {
                         // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
                         // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                     />
-
-                    {/* 中文正文 */}
-                    {content_cn.length > 0 && (
-                        <View>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
-                                }}
-                                selectable={true}>
-                                {'\t' + repalceHtmlToText(content_cn)}
-                            </Text>
-
-                            <View style={{marginTop: pxToDp(50)}} />
-                        </View>
-                    )}
-
-                    {/* 英文正文 */}
-                    {content_en.length > 0 && (
-                        <View>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
-                                }}
-                                selectable={true}>
-                                {'\t' + repalceHtmlToText(content_en)}
-                            </Text>
-
-                            <View style={{marginTop: pxToDp(50)}} />
-                        </View>
-                    )}
-
-                    {/* 葡文正文 */}
-                    {content_pt.length > 0 && (
-                        <View>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(13),
-                                }}
-                                selectable={true}>
-                                {'\t' + repalceHtmlToText(content_pt)}
-                            </Text>
-                        </View>
-                    )}
-
-                    <View style={{marginBottom: pxToDp(100)}} />
+                    <View style={{marginBottom: pxToDp(50)}} />
                 </ScrollView>
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    title: {
+        alignSelf: 'center',
+        marginVertical: pxToDp(5),
+        marginHorizontal: pxToDp(10),
+        fontWeight: 'bold',
+        fontSize: pxToDp(20),
+        color: themeColor,
+    },
+    date: {
+        color: COLOR_DIY.secondThemeColor,
+        alignSelf: 'flex-end',
+        marginRight: pxToDp(15),
+        fontWeight: '600',
+    },
+    languageModeButtonContainer: {
+        padding: pxToDp(10),
+        marginVertical: pxToDp(5),
+        borderRadius: pxToDp(10),
+        ...viewShadow,
+    },
+    contentContainer: {
+        marginHorizontal: pxToDp(10),
+        paddingHorizontal: pxToDp(15),
+        paddingVertical: pxToDp(10),
+        borderRadius: pxToDp(10),
+        backgroundColor: white,
+        ...viewShadow,
+    },
+});
 
 export default NewsDetail;

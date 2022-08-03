@@ -215,6 +215,47 @@ class UMEventDetail extends Component {
         };
     }
 
+    renderModeChoice = () => {
+        const {LanguageMode, chooseMode} = this.state;
+        return (
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                }}>
+                {LanguageMode.map((item, index) => {
+                    //只渲染存在的语言的按钮
+                    if (item.available == 1) {
+                        return (
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={{
+                                    ...styles.languageModeButtonContainer,
+                                    backgroundColor:
+                                        chooseMode == index
+                                            ? themeColor
+                                            : bg_color,
+                                }}
+                                onPress={() =>
+                                    this.setState({chooseMode: index})
+                                }>
+                                <Text
+                                    style={{
+                                        color:
+                                            chooseMode == index
+                                                ? bg_color
+                                                : themeColor,
+                                    }}>
+                                    {item.name}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    }
+                })}
+            </View>
+        );
+    };
+
     render() {
         const {LanguageMode, chooseMode, data} = this.state;
         const {imageUrls} = data;
@@ -407,46 +448,13 @@ class UMEventDetail extends Component {
 
                 <ScrollView>
                     {/* 文本模式選擇 3語切換 */}
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-around',
-                        }}>
-                        {LanguageMode.map((item, index) => {
-                            //只渲染存在的语言的按钮
-                            if (item.available == 1) {
-                                return (
-                                    <TouchableOpacity
-                                        activeOpacity={0.8}
-                                        style={{
-                                            ...styles.languageModeButtonContainer,
-                                            backgroundColor:
-                                                chooseMode == index
-                                                    ? themeColor
-                                                    : bg_color,
-                                        }}
-                                        onPress={() =>
-                                            this.setState({chooseMode: index})
-                                        }>
-                                        <Text
-                                            style={{
-                                                color:
-                                                    chooseMode == index
-                                                        ? bg_color
-                                                        : themeColor,
-                                            }}>
-                                            {item.name}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            }
-                        })}
-                    </View>
+                    {this.renderModeChoice()}
                     {/* 活動大標題 */}
                     <View
                         style={{
                             marginHorizontal: pxToDp(10),
                             marginTop: pxToDp(10),
+                            alignItems: 'center',
                         }}>
                         <Text
                             style={{
