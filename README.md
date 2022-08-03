@@ -1,5 +1,7 @@
 # UM ALL - Frontend - Public
 
+## 當前版本號 `0.0.2`
+
 ## 內容
 - [環境安裝與運行模擬器](#環境安裝與運行模擬器)
   * [Android環境安裝](#android環境-install)
