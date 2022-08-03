@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     View,
     Image,
@@ -9,15 +9,15 @@ import {
     StyleSheet,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
-import { pxToDp } from '../../../../utils/stylesKits';
+import {COLOR_DIY} from '../../../../utils/uiMap';
+import {pxToDp} from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import Header from '../../../../components/Header';
 
-import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import { FlatGrid } from 'react-native-super-grid';
+import {FlatGrid} from 'react-native-super-grid';
 import moment from 'moment-timezone';
 
 // HTML轉純文本
@@ -30,10 +30,10 @@ function repalceHtmlToText(str) {
     return str;
 }
 
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
-const { width: PAGE_WIDTH } = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const {width: PAGE_WIDTH} = Dimensions.get('window');
 let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
-const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
+const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
 
 class NewsDetail extends Component {
     constructor(props) {
@@ -68,13 +68,12 @@ class NewsDetail extends Component {
 
         let imageUrls = newsData.common.imageUrls;
         imageUrls = imageUrls.map(item => item.replace('http:', 'https:'));
+        // 自適應圖片寬度
         if (imageUrls.length == 2) {
             COMPONENT_WIDTH = PAGE_WIDTH * 0.4;
-        }
-        else if (imageUrls.length < 2) {
+        } else if (imageUrls.length < 2) {
             COMPONENT_WIDTH = PAGE_WIDTH * 0.85;
-        }
-        else {
+        } else {
             COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
         }
 
@@ -122,10 +121,51 @@ class NewsDetail extends Component {
         };
     }
 
+    // 文本語言模式選擇
+    renderModeChoice = () => {
+        const {LanguageMode, chooseMode, data} = this.state;
+        return (
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                }}>
+                {LanguageMode.map((item, index) => {
+                    //只渲染存在的语言的按钮
+                    if (item.available == 1) {
+                        return (
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={{
+                                    ...styles.languageModeButtonContainer,
+                                    backgroundColor:
+                                        chooseMode == index
+                                            ? themeColor
+                                            : bg_color,
+                                }}
+                                onPress={() =>
+                                    this.setState({chooseMode: index})
+                                }>
+                                <Text
+                                    style={{
+                                        color:
+                                            chooseMode == index
+                                                ? bg_color
+                                                : themeColor,
+                                    }}>
+                                    {item.name}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    }
+                })}
+            </View>
+        );
+    };
+
     render() {
         // 解構全局ui設計顏色
-        const { white, black, viewShadow, bg_color } = COLOR_DIY;
-        const { LanguageMode, chooseMode, data } = this.state;
+        const {LanguageMode, chooseMode, data} = this.state;
         // 結構this.state的新聞數據
         const {
             // 發佈日期
@@ -164,161 +204,65 @@ class NewsDetail extends Component {
         var content = [content_cn, content_en, content_pt];
 
         return (
-            <View style={{ backgroundColor: bg_color, flex: 1 }}>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: '新聞詳情',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: COLOR_DIY.bg_color,
-                        barStyle: 'dark-content',
-                    }}
-                />
+            <View style={{backgroundColor: bg_color, flex: 1}}>
+                <Header title={'新聞詳情'} />
 
-                <ScrollView style={{ padding: pxToDp(10) }}>
+                <ScrollView>
                     {/* 文本模式選擇 3語切換 */}
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-around',
-                        }}>
-                        {LanguageMode.map((item, index) => {
-                            //只渲染存在的语言的按钮
-                            if (item.available == 1) {
-                                return (
-                                    <TouchableOpacity
-                                        activeOpacity={0.8}
-                                        style={{
-                                            ...styles.languageModeButtonContainer,
-                                            backgroundColor:
-                                                chooseMode == index
-                                                    ? themeColor
-                                                    : bg_color,
-                                        }}
-                                        onPress={() =>
-                                            this.setState({ chooseMode: index })
-                                        }>
-                                        <Text
-                                            style={{
-                                                color:
-                                                    chooseMode == index
-                                                        ? bg_color
-                                                        : themeColor,
-                                            }}>
-                                            {item.name}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            }
-                        })}
-                    </View>
+                    {this.renderModeChoice()}
                     {/* 大標題 */}
-                    <Text
-                        style={{
-                            color: COLOR_DIY.themeColor,
-                            paddingHorizontal: pxToDp(15),
-                            fontWeight: 'bold',
-                            fontSize: pxToDp(22),
-                            alignSelf: 'center',
-                            marginTop: pxToDp(15),
-                        }}
-                        selectable={true}>
+                    <Text style={styles.title} selectable={true}>
                         {title[chooseMode]}
                     </Text>
                     {/* 日期 */}
-                    <Text
-                        style={{
-                            color: COLOR_DIY.secondThemeColor,
-                            alignSelf: 'flex-end',
-                            paddingTop: pxToDp(10),
-                            paddingRight: pxToDp(15),
-                            fontWeight: '700',
-                        }}>
-                        Update:{' '}
-                        {moment
-                            .tz(lastModified, 'Asia/Macau')
-                            .format('YYYY/MM/DD')}
+                    <Text style={styles.date}>
+                        {'Update: ' +
+                            moment
+                                .tz(lastModified, 'Asia/Macau')
+                                .format('YYYY/MM/DD')}
                     </Text>
 
                     {/* 圖片展示 */}
                     <FlatGrid
-                        style={{ flex: 1, alignSelf: 'center' }}
                         // 每个项目的最小宽度或高度（像素）
                         itemDimension={COMPONENT_WIDTH}
                         data={imageUrls}
                         // 每個項目的間距
                         spacing={pxToDp(15)}
-                        renderItem={({ item, index }) => {
-                            // item是每一項數組的數據
-                            // index是每一項的數組下標
-                            return (
-                                <TouchableOpacity
-                                    activeOpacity={0.7}
-                                    style={{
-                                        width: COMPONENT_WIDTH,
-                                        height: COMPONENT_WIDTH,
-                                        backgroundColor: bg_color,
-                                        borderRadius: pxToDp(10),
-                                        overflow: 'hidden',
-                                        alignSelf: 'center',
-                                        ...viewShadow,
+                        renderItem={({item, index}) => (
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                style={{
+                                    width: COMPONENT_WIDTH,
+                                    height: COMPONENT_WIDTH,
+                                    backgroundColor: bg_color,
+                                    borderRadius: pxToDp(10),
+                                    overflow: 'hidden',
+                                    ...viewShadow,
+                                }}
+                                // 打開圖片瀏覽大圖
+                                onPress={() => {
+                                    this.refs.imageScrollViewer.handleOpenImage(
+                                        index,
+                                    );
+                                }}>
+                                <FastImage
+                                    source={{
+                                        uri: item,
+                                        cache: FastImage.cacheControl.web,
                                     }}
-                                    // 打開圖片瀏覽大圖
-                                    onPress={() => {
-                                        this.refs.imageScrollViewer.handleOpenImage(
-                                            index,
-                                        );
-                                    }}>
-                                    <FastImage
-                                        source={{
-                                            uri: item,
-                                            cache: FastImage.cacheControl.web,
-                                        }}
-                                        style={{
-                                            width: COMPONENT_WIDTH,
-                                            height: COMPONENT_WIDTH,
-                                        }}
-                                    />
-                                </TouchableOpacity>
-                            );
-                        }}
+                                    style={{width: '100%', height: '100%'}}
+                                />
+                            </TouchableOpacity>
+                        )}
                         itemContainerStyle={{
-                            alignItems:'center',
-                            justifyContent:'center',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                     />
-                    {/* 彈出層展示圖片查看器 */}
-                    <ImageScrollViewer
-                        ref={'imageScrollViewer'}
-                        imageUrls={imageUrls}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
-                    />
+
                     {/* 正文 */}
-                    <View style={{
-                        marginBottom: pxToDp(5),
-                        marginHorizontal: pxToDp(20),
-                        borderRadius: pxToDp(10),
-                        backgroundColor: white,
-                        paddingHorizontal: pxToDp(15),
-                        paddingVertical: pxToDp(13),
-                        ...viewShadow,
-                    }}>
+                    <View style={styles.contentContainer}>
                         <HyperlinkText
                             linkStyle={{
                                 color: COLOR_DIY.themeColor,
@@ -327,14 +271,22 @@ class NewsDetail extends Component {
                             <Text
                                 style={{
                                     color: black.second,
-                                    fontSize: pxToDp(17),
+                                    fontSize: pxToDp(15),
                                 }}
                                 selectable={true}>
-                                {'\t' + repalceHtmlToText(content[chooseMode])}
+                                {'\t\t' + repalceHtmlToText(content[chooseMode])}
                             </Text>
                         </HyperlinkText>
                     </View>
-                    <View style={{ marginBottom: pxToDp(100) }} />
+
+                    {/* 彈出層展示圖片查看器 */}
+                    <ImageScrollViewer
+                        ref={'imageScrollViewer'}
+                        imageUrls={imageUrls}
+                        // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                        // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                    />
+                    <View style={{marginBottom: pxToDp(50)}} />
                 </ScrollView>
             </View>
         );
@@ -342,44 +294,33 @@ class NewsDetail extends Component {
 }
 
 const styles = StyleSheet.create({
+    title: {
+        alignSelf: 'center',
+        marginVertical: pxToDp(5),
+        marginHorizontal: pxToDp(10),
+        fontWeight: 'bold',
+        fontSize: pxToDp(20),
+        color: themeColor,
+    },
+    date: {
+        color: COLOR_DIY.secondThemeColor,
+        alignSelf: 'flex-end',
+        marginRight: pxToDp(15),
+        fontWeight: '600',
+    },
     languageModeButtonContainer: {
         padding: pxToDp(10),
         marginVertical: pxToDp(5),
         borderRadius: pxToDp(10),
         ...viewShadow,
     },
-    imgContainer: {
-        width: COMPONENT_WIDTH,
-        height: COMPONENT_WIDTH,
-        backgroundColor: bg_color,
-        borderRadius: pxToDp(10),
-        overflow: 'hidden',
-        alignSelf: 'center',
-        marginVertical: pxToDp(10),
-        ...viewShadow,
-    },
-    infoCardContainer: {
-        marginVertical: pxToDp(8),
-        marginHorizontal: pxToDp(20),
-        borderRadius: pxToDp(10),
-        backgroundColor: white,
+    contentContainer: {
+        marginHorizontal: pxToDp(10),
         paddingHorizontal: pxToDp(15),
         paddingVertical: pxToDp(10),
+        borderRadius: pxToDp(10),
+        backgroundColor: white,
         ...viewShadow,
-    },
-    contentContainer: {
-        flexDirection: 'row',
-        marginVertical: pxToDp(2),
-    },
-    secondTitle: {
-        color: COLOR_DIY.themeColor,
-        fontSize: pxToDp(15),
-        fontWeight: '600',
-    },
-    content: {
-        color: black.third,
-        fontSize: pxToDp(15),
-        fontWeight: 'normal',
     },
 });
 
