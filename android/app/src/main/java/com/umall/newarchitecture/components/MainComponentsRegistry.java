@@ -1,4 +1,4 @@
-package com.umallwhite.newarchitecture.components;
+package one.umall.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
