@@ -25,15 +25,21 @@ const {black} = COLOR_DIY;
 const optionsInfo = [
     {
         title: '通知設置',
-        func: '',
+        func: () => {
+            alert('施工中');
+        },
     },
     {
         title: '語言設置',
-        func: '',
+        func: () => {
+            alert('施工中');
+        },
     },
     {
         title: '檢查更新',
-        func: '',
+        func: () => {
+            alert('施工中');
+        },
     },
 ];
 
@@ -50,7 +56,7 @@ class AppSetting extends Component {
             <TouchableOpacity
                 activeOpacity={0.8}
                 style={{...s.optionContainer}}
-                onPress={() => alert('TODO: 對應func')}>
+                onPress={func}>
                 {/* 左側flex佈局 */}
                 {/* 選項標題 */}
                 <Text style={{...s.optionTitle}}>{title}</Text>
@@ -78,7 +84,7 @@ class AppSetting extends Component {
 
                 {optionsInfo.map((_, index) => this.renderOptions(index))}
 
-                {/* 隱私設置 */}
+                {/* 快捷登錄設置 */}
                 <TouchableOpacity
                     activeOpacity={0.8}
                     style={{...s.optionContainer, marginTop: pxToDp(20)}}
@@ -97,7 +103,7 @@ class AppSetting extends Component {
                                 color: 'black',
                                 marginLeft: pxToDp(5),
                             }}>
-                            {'隱私設置'}
+                            {'快捷登錄設置'}
                         </Text>
                     </View>
 
