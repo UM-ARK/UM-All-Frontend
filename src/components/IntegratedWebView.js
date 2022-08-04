@@ -15,7 +15,12 @@ import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CookieManager from '@react-native-cookies/cookies';
 
-const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
+const IntegratedWebView = ({
+    source,
+    needRefresh,
+    triggerRefresh,
+    UmPassInfo,
+}) => {
     // 記錄網站加載進度和是否加載完成
     const [progress, setProgress] = useState(0);
     const [isLoaded, setLoaded] = useState(false);
@@ -129,6 +134,11 @@ const IntegratedWebView = ({source, needRefresh, triggerRefresh}) => {
                 // Android
                 thirdPartyCookiesEnabled={true}
                 cacheEnabled={true}
+                // 自動注入賬號密碼
+                injectedJavaScript={`
+                    document.getElementById("userNameInput").value="${UmPassInfo.account}";
+                    document.getElementById("passwordInput").value="${UmPassInfo.password}";
+                `}
             />
 
             {/* 吸底導航按鈕 */}

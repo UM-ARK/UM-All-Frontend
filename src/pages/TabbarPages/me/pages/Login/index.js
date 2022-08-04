@@ -104,11 +104,6 @@ class LoginChoose extends Component {
                         source={{uri: UM_Moodle}}
                         ref={'webRef'}
                         startInLoadingState={true}
-                        // TODO: 自動注入賬號密碼
-                        // injectedJavaScript={`
-                        //     document.getElementById("userNameInput").value="dc02581";
-                        //     document.getElementById("passwordInput").value="";
-                        // `}
                         onNavigationStateChange={e => {
                             // SSO密碼輸入頁面e.title為https://websso.....
                             // 雙重認證頁面e.title為Duo Security
