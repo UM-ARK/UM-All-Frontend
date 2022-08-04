@@ -19,6 +19,7 @@ import EventCard from './components/EventCard';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ActionSheet from 'react-native-actionsheet';
 import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
 
@@ -36,6 +37,7 @@ class EventPage extends Component {
         rightDataList: [],
         isLoading: true,
         noMoreData: false,
+        needFilter: false,
     };
 
     constructor() {
@@ -69,7 +71,12 @@ class EventPage extends Component {
                         this.setState({isLoading: false});
                     } else if (eventDataList.length > 0) {
                         newDataArr = eventDataList.concat(newDataArr);
-                        this.separateData(newDataArr);
+                        console.log('needFilter', this.state.needFilter);
+                        if (this.state.needFilter) {
+                            this.eventFilter(newDataArr);
+                        } else {
+                            this.separateData(newDataArr);
+                        }
                         eventDataList = newDataArr;
                         this.setState({isLoading: false});
                     }
@@ -80,7 +87,7 @@ class EventPage extends Component {
                     alert('數據出錯，請聯繫開發者');
                 }
             })
-            .catch(err => console.log('err', err));
+            .catch(err => alert('請求錯誤!'));
     }
 
     separateData = eventDataList => {
@@ -102,6 +109,67 @@ class EventPage extends Component {
             leftDataList,
             rightDataList,
         });
+    };
+
+    // 篩選尚未結束的活動
+    eventFilter = eventDataList => {
+        let newDataArr = [];
+        // 當前時刻時間戳
+        let nowTimeStamp = new Date().getTime();
+        eventDataList.map(itm => {
+            if (nowTimeStamp < Date.parse(itm.enddatetime)) {
+                newDataArr.push(itm);
+            }
+        });
+        this.separateData(newDataArr);
+    };
+
+    renderFilter = () => {
+        let optionsList = ['未結束', '全部', '取消'];
+        return (
+            <View>
+                <TouchableOpacity
+                    onPress={() => this.ActionSheet.show()}
+                    activeOpacity={0.8}
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        marginTop: pxToDp(8),
+                    }}>
+                    <Text style={{color: black.third}}>篩選</Text>
+                    <Ionicons
+                        name={
+                            this.state.applyFilter
+                                ? 'md-funnel'
+                                : 'md-funnel-outline'
+                        }
+                        size={pxToDp(10)}
+                        color={black.third}
+                        style={{marginLeft: pxToDp(5)}}
+                    />
+                </TouchableOpacity>
+
+                {/* 選擇彈窗 */}
+                <ActionSheet
+                    ref={o => (this.ActionSheet = o)}
+                    options={optionsList}
+                    cancelButtonIndex={optionsList.length - 1}
+                    destructiveButtonIndex={optionsList.length - 1}
+                    onPress={index => {
+                        if (index == 1) {
+                            // 全部mode
+                            this.setState({needFilter: false});
+                            this.separateData(eventDataList);
+                        } else if (index == 0) {
+                            // 篩選未結束mode
+                            this.setState({needFilter: true});
+                            this.eventFilter(eventDataList);
+                        }
+                    }}
+                />
+            </View>
+        );
     };
 
     // 渲染懸浮可拖動按鈕
@@ -221,6 +289,7 @@ class EventPage extends Component {
                             );
                         }}
                         scrollEnabled={false}
+                        keyExtractor={item => item._id}
                     />
                 </View>
                 {/* 右側的列 放置單數下標的圖片 */}
@@ -240,6 +309,7 @@ class EventPage extends Component {
                                 );
                             }}
                             scrollEnabled={false}
+                            keyExtractor={item => item._id}
                         />
                     ) : (
                         <Text>No more data</Text>
@@ -260,7 +330,7 @@ class EventPage extends Component {
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
-                {/* TODO: 筛选功能 */}
+
                 <View style={{flex: 1, width: '100%'}}>
                     {/* 加載狀態渲染骨架屏 */}
                     {isLoading ? (
@@ -285,16 +355,21 @@ class EventPage extends Component {
                                         if (dataPage > 1) {
                                             dataPage = 1;
                                         }
-                                        this.setState({isLoading: true});
+                                        this.setState({
+                                            isLoading: true,
+                                            needFilter: false,
+                                        });
                                         this.getData();
                                     }}
                                 />
                             }>
+                            {/* 篩選 */}
+                            {this.renderFilter()}
                             {/* 仿瀑布屏展示 */}
                             {/* 渲染主要內容 */}
-                            {(leftDataList.length > 0 ||
-                                rightDataList.length > 0) &&
-                                this.renderPage()}
+                            {leftDataList.length > 0 || rightDataList.length > 0
+                                ? this.renderPage()
+                                : null}
 
                             {this.renderLoadMoreView()}
 
