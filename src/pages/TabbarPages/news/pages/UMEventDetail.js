@@ -524,22 +524,24 @@ class UMEventDetail extends Component {
                             {moment(timeTo).format('HH:SS')}
                         </Text>
                         {/* 講者 */}
-                        <View style={styles.contentContainer}>
-                            {/* 文本標題，e.g. 講者： */}
-                            <Text style={styles.secondTitle}>
-                                {speaker[chooseMode + 3]}
-                                {/* 對應該活動的講者名稱 */}
-                                <Text style={styles.content}>
-                                    {speaker[chooseMode]}
+                        {speaker[chooseMode] ? (
+                            <View style={styles.contentContainer}>
+                                {/* 文本標題，e.g. 講者： */}
+                                <Text style={styles.secondTitle}>
+                                    {speaker[chooseMode + 3]}
+                                    {/* 對應該活動的講者名稱 */}
+                                    <Text style={styles.content} selectable>
+                                        {speaker[chooseMode]}
+                                    </Text>
                                 </Text>
-                            </Text>
-                        </View>
+                            </View>
+                        ) : null}
                         {/*地點*/}
                         <View style={styles.contentContainer}>
                             <Text style={styles.secondTitle}>
                                 {venue[chooseMode + 3]}
                             </Text>
-                            <Text style={styles.content}>
+                            <Text style={styles.content} selectable>
                                 {venue[chooseMode]}
                             </Text>
                         </View>
