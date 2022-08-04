@@ -439,7 +439,8 @@ class ClubInfoEdit extends Component {
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
-                    <KeyboardAvoidingView behavior={'height'}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
                         <ScrollView
                             contentContainerStyle={{
                                 paddingHorizontal: pxToDp(10),
