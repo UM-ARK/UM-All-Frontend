@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     ScrollView,
     TextInput,
+    KeyboardAvoidingView,
 } from 'react-native';
 
 import {pxToDp} from '../../utils/stylesKits';
@@ -302,32 +303,38 @@ class ClubInfoEdit extends Component {
 
     renderTextArea = () => {
         return (
-            <TextInput
-                multiline={true}
-                numberOfLines={8}
-                style={{
-                    ...styles.inputArea,
-                    borderColor: this.state.borderColor,
-                    color: this.state.borderColor,
-                }}
-                maxLength={500}
-                value={this.state.introTextInput}
-                onChangeText={introTextInput => this.setState({introTextInput})}
-                onBlur={() => {
-                    console.log('失焦');
-                    this.setState({
-                        borderColor: black.third,
-                        titleColor: black.main,
-                    });
-                }}
-                onFocus={() => {
-                    console.log('聚焦');
-                    this.setState({
-                        borderColor: themeColor,
-                        titleColor: themeColor,
-                    });
-                }}
-            />
+            <KeyboardAvoidingView
+                behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+                <TextInput
+                    multiline={true}
+                    numberOfLines={8}
+                    minHeight={Platform.OS === 'ios' ? 20 * 8 : null}
+                    style={{
+                        ...styles.inputArea,
+                        borderColor: this.state.borderColor,
+                        color: this.state.borderColor,
+                    }}
+                    maxLength={500}
+                    value={this.state.introTextInput}
+                    onChangeText={introTextInput =>
+                        this.setState({introTextInput})
+                    }
+                    onBlur={() => {
+                        console.log('失焦');
+                        this.setState({
+                            borderColor: black.third,
+                            titleColor: black.main,
+                        });
+                    }}
+                    onFocus={() => {
+                        console.log('聚焦');
+                        this.setState({
+                            borderColor: themeColor,
+                            titleColor: themeColor,
+                        });
+                    }}
+                />
+            </KeyboardAvoidingView>
         );
     };
 
