@@ -28,10 +28,9 @@ const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
             Linking.openURL(url);
         } else if (url.includes('http')) {
             // both for http & https
-            console.log('This is a http');
             if (navigation) {
                 webview_param.url = url;
-                webview_param.title = title ? title : '活動';
+                webview_param.title = title ? title : 'UM ALL 集成瀏覽器';
 
                 navigation.navigate('Webviewer', webview_param);
             }

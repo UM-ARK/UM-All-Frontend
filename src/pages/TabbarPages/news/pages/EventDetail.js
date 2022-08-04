@@ -519,7 +519,7 @@ class EventDetail extends Component {
                                     <Text
                                         style={{
                                             fontSize: pxToDp(12),
-                                            color: COLOR_DIY.black.main,
+                                            color: themeColor,
                                             fontWeight: 'bold',
                                         }}>
                                         詳情
@@ -527,7 +527,7 @@ class EventDetail extends Component {
                                     <Ionicons
                                         name="chevron-forward-outline"
                                         size={pxToDp(14)}
-                                        color={COLOR_DIY.black.main}></Ionicons>
+                                        color={black.third}></Ionicons>
                                 </View>
                                 {/* 卡片內容 */}
                                 <View
@@ -578,15 +578,11 @@ class EventDetail extends Component {
                                 <Text
                                     style={{
                                         fontSize: pxToDp(12),
-                                        color: COLOR_DIY.black.main,
+                                        color: themeColor,
                                         fontWeight: 'bold',
                                     }}>
                                     相關照片
                                 </Text>
-                                <Ionicons
-                                    name="chevron-forward-outline"
-                                    size={pxToDp(14)}
-                                    color={COLOR_DIY.black.main}></Ionicons>
                             </View>
 
                             {/* 卡片內容 */}
