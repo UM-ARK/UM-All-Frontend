@@ -321,6 +321,17 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'ab-testing',
+                        fn_name: '課表&成績',
+                        needLogin: true,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_ISW,
+                            title: 'UM ISW',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'eye-plus',
                         fn_name: '預選課',
                         needLogin: true,
@@ -363,17 +374,6 @@ class Index extends Component {
                         webview_param: {
                             url: UM_WHOLE_PERSON,
                             title: '全人發展',
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'ab-testing',
-                        fn_name: '成績',
-                        needLogin: true,
-                        go_where: 'Webview',
-                        webview_param: {
-                            url: UM_ISW,
-                            title: 'UM ISW',
                         },
                     },
                     {
