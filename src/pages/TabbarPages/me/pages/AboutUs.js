@@ -17,6 +17,10 @@ import {COLOR_DIY} from '../../../../utils/uiMap';
 const {black} = COLOR_DIY;
 
 class About extends Component {
+    componentDidMount() {
+        alert('未完成');
+    }
+
     render() {
         return (
             <View style={{flex: 1}}>
@@ -40,9 +44,7 @@ class About extends Component {
                     </View>
 
                     {/* 發展時間軸 */}
-                    <View>
-                        
-                    </View>
+                    <View></View>
                 </ScrollView>
             </View>
         );

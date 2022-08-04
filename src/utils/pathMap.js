@@ -26,6 +26,14 @@ export const GET = {
     FOLLOW_EVENT: 'get_follow_activity/',
     // 獲取follow的社團
     FOLLOW_CLUB: 'get_follow_club/',
+
+    // 獲取公告
+    NOTICE: 'get_notice/',
+    NOTICE_MODE: {
+        event: 'activity/',
+        club: 'club/',
+        all: 'all/',
+    }
 }
 
 export const POST = {
@@ -51,6 +59,8 @@ export const POST = {
 }
 
 export const ARK_LETTER_IMG = 'https://umall.one/static/logo.png';
+
+export const USER_AGREE = 'https://umall.one/user_agreement.html';
 
 
 // Webview 服務

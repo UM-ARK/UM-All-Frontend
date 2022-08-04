@@ -16,7 +16,7 @@ import {
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import {handleLogin} from '../../../../../utils/storageKits';
-import {BASE_URI, POST} from '../../../../../utils/pathMap';
+import {BASE_URI, POST, USER_AGREE} from '../../../../../utils/pathMap';
 import Webviewer from '../../../../../components/Webviewer';
 import {UM_Moodle} from '../../../../../utils/pathMap';
 import DialogDIY from '../../../../../components/DialogDIY';
@@ -104,11 +104,6 @@ class LoginChoose extends Component {
                         source={{uri: UM_Moodle}}
                         ref={'webRef'}
                         startInLoadingState={true}
-                        // TODO: 自動注入賬號密碼
-                        // injectedJavaScript={`
-                        //     document.getElementById("userNameInput").value="dc02581";
-                        //     document.getElementById("passwordInput").value="";
-                        // `}
                         onNavigationStateChange={e => {
                             // SSO密碼輸入頁面e.title為https://websso.....
                             // 雙重認證頁面e.title為Duo Security
@@ -125,7 +120,7 @@ class LoginChoose extends Component {
                                         );
                                         if ('MoodleSession' in cookies) {
                                             alert(
-                                                `Moodle登錄成功，正在登錄UM ALL...\n先不要進行其他操作...`,
+                                                `Moodle登錄成功，正在登錄UM ALL...\n先不要進行其他操作...\n等待重新出現UM ALL主頁則登錄成功！`,
                                             );
                                             console.log(
                                                 'MoodleSession =>',
@@ -253,7 +248,7 @@ class LoginChoose extends Component {
                                         我已閱讀且同意遵守
                                     </Text>
                                 </TouchableOpacity>
-                                {/* TODO: 跳轉用戶協議 */}
+                                {/* 查看用戶協議 */}
                                 <TouchableOpacity>
                                     <Text
                                         style={{
@@ -263,21 +258,13 @@ class LoginChoose extends Component {
                                         activeOpacity={0.9}
                                         onPress={() => {
                                             let webview_param = {
-                                                // import pathMap的鏈接進行跳轉
-                                                url: 'https://umbbs.xyz/d/72/14',
+                                                url: USER_AGREE,
                                                 title: '用戶協議',
-                                                // 標題顏色，默認為black.main
-                                                // text_color: '#002c55',
-                                                // 標題背景顏色，默認為bg_color
-                                                // bg_color_diy: '#fff',
-                                                // 狀態欄字體是否黑色，默認true
-                                                // isBarStyleBlack: false,
                                             };
                                             this.context.navigate(
                                                 'Webviewer',
                                                 webview_param,
                                             );
-                                            alert('未完成!');
                                         }}>
                                         《隱私政策與用戶協議》
                                     </Text>

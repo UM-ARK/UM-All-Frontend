@@ -12,6 +12,7 @@ import ModalBottom from '../components/ModalBottom';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class WebViewer extends Component {
     constructor(props) {
@@ -38,7 +39,23 @@ class WebViewer extends Component {
             url,
             needRefresh: false,
             isShowModal: false,
+            UmPassInfo: {
+                account: '',
+                password: '',
+            },
         };
+    }
+
+    async componentDidMount() {
+        try {
+            const strUmPassInfo = await AsyncStorage.getItem('umPass');
+            const UmPassInfo = strUmPassInfo ? JSON.parse(strUmPassInfo) : {};
+            if (JSON.stringify(UmPassInfo) != '{}') {
+                this.setState({UmPassInfo});
+            }
+        } catch (e) {
+            alert(e);
+        }
     }
 
     // 切換Webview刷新標識
@@ -53,8 +70,14 @@ class WebViewer extends Component {
     };
 
     render() {
-        const {url, title, text_color, bg_color_diy, isBarStyleBlack} =
-            this.state;
+        const {
+            url,
+            title,
+            text_color,
+            bg_color_diy,
+            isBarStyleBlack,
+            UmPassInfo,
+        } = this.state;
 
         return (
             <View style={{flex: 1}}>
@@ -160,6 +183,7 @@ class WebViewer extends Component {
                     source={{uri: url}}
                     needRefresh={this.state.needRefresh}
                     triggerRefresh={this.triggerRefresh}
+                    UmPassInfo={UmPassInfo}
                 />
             </View>
         );

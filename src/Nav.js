@@ -11,6 +11,7 @@ import ClubInfoEdit from './pages/ClubSystem/ClubInfoEdit'
 import MessageConsole from './pages/ClubSystem/MessageConsole'
 import EventSetting from './pages/ClubSystem/EventSetting'
 import MessageSetting from './pages/ClubSystem/MessageSetting'
+import LoginSetting from './pages/TabbarPages/me/pages/Login/LoginSetting'
 
 import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin'
 import MeScreen from './pages/TabbarPages/me'
@@ -74,6 +75,7 @@ class Nav extends Component {
                 <Stack.Screen name="FollowEvent"        component={FollowEvent}/>
                 {/* 設置頁 */}
                 <Stack.Screen name="AppSetting"     component={AppSetting} />
+                <Stack.Screen name="LoginSetting"     component={LoginSetting} />
 
                 {/* 服務頁 */}
                 {/* 自定義Webview */}

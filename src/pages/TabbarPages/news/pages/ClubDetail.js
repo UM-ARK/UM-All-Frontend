@@ -463,7 +463,7 @@ class ClubDetail extends Component {
 
                     {/* 照片 */}
                     {clubData.club_photos_list &&
-                    clubData.club_photos_list.length > 0 ? (
+                    clubData.club_photos_list.length > 1 ? (
                         <View style={styles.cardContainer}>
                             {/* 卡片標題 */}
                             {this.renderCardTitle('照片')}

@@ -13,6 +13,11 @@ import Header from '../../../../components/Header';
 
 class UsualQuestion extends Component {
     state = {};
+
+    componentDidMount() {
+        alert('未完成');
+    }
+
     render() {
         return (
             <View style={{flex: 1}}>
