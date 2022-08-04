@@ -434,9 +434,7 @@ class ClubDetail extends Component {
                     {/* 1.0 社團基本資料 */}
                     <View style={{alignItems: 'center'}}>
                         {/* 建議使用社團名的簡稱 */}
-                        <Text style={styles.clubNameText} numberOfLines={1}>
-                            {name}
-                        </Text>
+                        <Text style={styles.clubNameText}>{name}</Text>
                         {/* 社團ID */}
                         <Text
                             style={{
@@ -834,6 +832,7 @@ const styles = StyleSheet.create({
         fontSize: pxToDp(20),
         fontWeight: '500',
         marginTop: pxToDp(5),
+        alignSelf: 'center',
     },
     imageContainer: {
         width: pxToDp(CLUB_IMAGE_WIDTH),
