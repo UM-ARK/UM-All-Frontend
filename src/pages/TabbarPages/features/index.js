@@ -125,7 +125,6 @@ class Index extends Component {
                             isBarStyleBlack: false,
                         },
                     },
-                    // TODO: 車位用Webview還是API
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'car-brake-parking',
