@@ -109,9 +109,9 @@ class EventSetting extends Component {
                         });
                         eventData.relate_image_url = addHostArr;
                         let imgArr = eventData.relate_image_url;
-                        // 不夠5張則補充
-                        if (imgArr.length < 4) {
-                            let pushArr = new Array(5 - imgArr.length).fill('');
+                        // 不夠4張則補充
+                        if (imgArr.length < 3) {
+                            let pushArr = new Array(4 - imgArr.length).fill('');
                             let arr = JSON.parse(JSON.stringify(imgArr));
                             arr.push(...pushArr);
                             this.setState({relateImgUrl: arr});
@@ -222,12 +222,12 @@ class EventSetting extends Component {
     };
 
     renderImageSelectorItem = (index, type) => {
-        const {mode, eventData} = this.state;
+        const {mode, eventData, relateImgUrl} = this.state;
         let imageUrlArr = [];
         if (type == 'cover') {
             imageUrlArr = [this.state.coverImgUrl];
         } else {
-            imageUrlArr = this.state.relateImgUrl;
+            imageUrlArr = relateImgUrl;
         }
 
         // 服務器照片庫無數據，del數組留空[]，所有選圖都加入add數組
@@ -482,7 +482,7 @@ class EventSetting extends Component {
         data.append('introduction', introText);
         data.append('can_follow', allowFollow);
 
-        console.log('待上傳data', data);
+        // console.log('待上傳data', data);
 
         let URL =
             BASE_URI + (mode == 'create' ? POST.EVENT_CREATE : POST.EVENT_EDIT);
@@ -504,11 +504,12 @@ class EventSetting extends Component {
                 // 上傳失敗
                 else {
                     alert('上傳失敗');
-                    console.log(json);
+                    // console.log(json);
                 }
             })
             .catch(err => {
                 console.log('err', err);
+                alert('請求錯誤');
             });
     };
 
@@ -537,11 +538,12 @@ class EventSetting extends Component {
                 // 上傳失敗
                 else {
                     alert('上傳失敗');
-                    console.log(json);
+                    // console.log(json);
                 }
             })
             .catch(err => {
-                console.log('err', err);
+                // console.log('err', err);
+                alert('請求錯誤');
             });
     };
 
