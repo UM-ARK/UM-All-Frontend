@@ -8,6 +8,7 @@ import {
     RefreshControl,
     TouchableOpacity,
     Linking,
+    StyleSheet,
 } from 'react-native';
 
 // 引入本地工具
@@ -146,21 +147,21 @@ class LostAndFound extends Component {
                     <Text
                         style={{
                             color: themeColor,
-                            fontSize: 23,
+                            fontSize: pxToDp(23),
                             fontWeight: 'bold',
                             paddingLeft: pxToDp(16),
                             paddingTop: pxToDp(6),
-                            paddingBottom:pxToDp(8),
+                            paddingBottom: pxToDp(8),
                         }}>
                         {'物品: '}
                     </Text>
                     <Text
                         style={{
                             color: '#FF8627',
-                            fontSize: 23,
+                            fontSize: pxToDp(23),
                             fontWeight: 'bold',
                             paddingTop: pxToDp(6),
-                            paddingBottom:pxToDp(8),
+                            paddingBottom: pxToDp(8),
                         }}>
                         {item.title}
                     </Text>
@@ -171,17 +172,10 @@ class LostAndFound extends Component {
                     style={{
                         flexDirection: 'row',
                         paddingLeft: pxToDp(8),
-                        paddingBottom:pxToDp(5),
+                        paddingBottom: pxToDp(5),
                     }}>
-                    <Text
-                        style={{
-                            fontWeight: 'bold',
-                            color: themeColor,
-                            fontSize: 15,
-                        }}>
-                        {'拾獲日期: '}
-                    </Text>
-                    <Text style={{fontSize: 15}}>{item.date}</Text>
+                    <Text style={styles.titleText}>{'拾獲日期: '}</Text>
+                    <Text style={styles.contentText}>{item.date}</Text>
                 </View>
 
                 {/* 地點 */}
@@ -189,18 +183,11 @@ class LostAndFound extends Component {
                     style={{
                         flexDirection: 'row',
                         paddingLeft: pxToDp(8),
-                        paddingBottom:pxToDp(5),
+                        paddingBottom: pxToDp(5),
                         width: pxToDp(260),
                     }}>
-                    <Text
-                        style={{
-                            fontWeight: 'bold',
-                            color: themeColor,
-                            fontSize: 15,
-                        }}>
-                        {'拾獲地點: '}
-                    </Text>
-                    <Text style={{fontSize: 15}}>{item.pick_up}</Text>
+                    <Text style={styles.titleText}>{'拾獲地點: '}</Text>
+                    <Text style={styles.contentText}>{item.pick_up}</Text>
                 </View>
 
                 {/* 現時位置 */}
@@ -208,18 +195,13 @@ class LostAndFound extends Component {
                     style={{
                         flexDirection: 'row',
                         paddingLeft: pxToDp(8),
-                        paddingBottom:pxToDp(5),
+                        paddingBottom: pxToDp(5),
                         width: pxToDp(260),
                     }}>
-                    <Text
-                        style={{
-                            fontWeight: 'bold',
-                            color: themeColor,
-                            fontSize: 15,
-                        }}>
-                        {'現時位置: '}
+                    <Text style={styles.titleText}>{'現時位置: '}</Text>
+                    <Text style={styles.contentText}>
+                        {item.current.substr(7)}
                     </Text>
-                    <Text style={{fontSize: 15}}>{item.current.substr(7)}</Text>
                 </View>
 
                 {/* 參考編號 */}
@@ -233,7 +215,7 @@ class LostAndFound extends Component {
                     <Text
                         style={{
                             color: black.third,
-                            fontSize: 13,
+                            fontSize: pxToDp(13),
                             marginLeft: pxToDp(80),
                         }}>
                         {item.ref.substr(1, 8)}
@@ -315,5 +297,17 @@ class LostAndFound extends Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    titleText: {
+        fontWeight: 'bold',
+        color: themeColor,
+        fontSize: pxToDp(15),
+    },
+    contentText: {
+        fontSize: pxToDp(14),
+        color: black.third,
+    },
+});
 
 export default LostAndFound;
