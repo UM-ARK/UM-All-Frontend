@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "UMAllWhite.app"
+               BuildableName = "UMALL.app"
                BlueprintName = "UMALL"
                ReferencedContainer = "container:UMALL.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "UMAllWhiteTests.xctest"
+               BuildableName = "UMALLTests.xctest"
                BlueprintName = "UMALLTests"
                ReferencedContainer = "container:UMALL.xcodeproj">
             </BuildableReference>
@@ -55,7 +55,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "UMAllWhite.app"
+            BuildableName = "UMALL.app"
             BlueprintName = "UMALL"
             ReferencedContainer = "container:UMALL.xcodeproj">
          </BuildableReference>
@@ -72,7 +72,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "UMAllWhite.app"
+            BuildableName = "UMALL.app"
             BlueprintName = "UMALL"
             ReferencedContainer = "container:UMALL.xcodeproj">
          </BuildableReference>
