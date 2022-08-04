@@ -4,7 +4,9 @@ import {Text, View, TouchableOpacity, FlatList} from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
+import {BASE_URI, GET} from '../../../utils/pathMap';
 import ChatCard from './ChatCard';
+import axios from 'axios';
 
 import {Header} from '@rneui/themed';
 import {SpringScrollView} from 'react-native-spring-scrollview';
@@ -16,8 +18,7 @@ const messages = [
         user: {
             _id: '0',
             name: '澳大電子通告',
-            avatar:
-                'http://images.jjl.cn/ugc/2018/1129/20181129152330319.png',
+            avatar: 'http://images.jjl.cn/ugc/2018/1129/20181129152330319.png',
         },
         message_history: [
             {
@@ -37,8 +38,7 @@ const messages = [
         user: {
             _id: '3',
             name: '鄭裕彤書院(CYTC)',
-            avatar:
-                'https://cytc.rc.um.edu.mo/wp-content/uploads/2019/09/CYTC-Logo-2014-Purple-1.png',
+            avatar: 'https://cytc.rc.um.edu.mo/wp-content/uploads/2019/09/CYTC-Logo-2014-Purple-1.png',
         },
         message_history: [
             {
@@ -76,7 +76,22 @@ const messages = [
 ];
 
 class MesgScreen extends Component {
-    state = {};
+    constructor() {
+        super();
+        // this.getData();
+    }
+
+    async getData() {
+        let URL = BASE_URI + GET.NOTICE + GET.NOTICE_MODE.all;
+        await axios
+            .get(URL)
+            .then(res => {
+                console.log(res.data);
+            })
+            .catch(err => {
+                alert('請求錯誤！');
+            });
+    }
 
     render() {
         const {bg_color, themeColor, white, viewShadow} = COLOR_DIY;

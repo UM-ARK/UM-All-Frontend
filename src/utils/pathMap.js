@@ -26,6 +26,14 @@ export const GET = {
     FOLLOW_EVENT: 'get_follow_activity/',
     // 獲取follow的社團
     FOLLOW_CLUB: 'get_follow_club/',
+
+    // 獲取公告
+    NOTICE: 'get_notice/',
+    NOTICE_MODE: {
+        event: 'activity/',
+        club: 'club/',
+        all: 'all/',
+    }
 }
 
 export const POST = {
