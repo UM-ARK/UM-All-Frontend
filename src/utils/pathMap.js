@@ -60,6 +60,8 @@ export const POST = {
 
 export const ARK_LETTER_IMG = 'https://umall.one/static/logo.png';
 
+export const USER_AGREE = 'https://umall.one/user_agreement.html';
+
 
 // Webview 服務
 // 選咩課

@@ -117,6 +117,9 @@ class MesgScreen extends Component {
                 <SpringScrollView
                     style={{marginTop: pxToDp(5)}}
                     showsVerticalScrollIndicator={false}>
+                    <Text style={{color: COLOR_DIY.black.third}}>
+                        1.0.0版本將改為用戶的Follow頁，從關注的活動或社團直接查看其發佈的公告詳情。
+                    </Text>
                     <FlatList
                         data={messages}
                         renderItem={({item, index}) => {

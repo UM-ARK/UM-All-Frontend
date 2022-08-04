@@ -11,6 +11,7 @@ import {
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {handleLogout} from '../../../../utils/storageKits';
+import {USER_AGREE} from '../../../../utils/pathMap';
 import Header from '../../../../components/Header';
 import DialogDIY from '../../../../components/DialogDIY';
 
@@ -88,7 +89,9 @@ class AppSetting extends Component {
                 <TouchableOpacity
                     activeOpacity={0.8}
                     style={{...s.optionContainer, marginTop: pxToDp(20)}}
-                    onPress={() => alert('TODO: 對應func')}>
+                    onPress={() =>
+                        this.props.navigation.navigate('LoginSetting')
+                    }>
                     {/* 左側flex佈局 */}
                     <View style={{flexDirection: 'row'}}>
                         <Ionicons
@@ -119,7 +122,16 @@ class AppSetting extends Component {
                 {/* 隱私條款 */}
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => alert('閱讀隱私條款')}
+                    onPress={() => {
+                        let webview_param = {
+                            url: USER_AGREE,
+                            title: '用戶協議',
+                        };
+                        this.props.navigation.navigate(
+                            'Webviewer',
+                            webview_param,
+                        );
+                    }}
                     style={{
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -128,7 +140,6 @@ class AppSetting extends Component {
                     <Text
                         style={{
                             fontSize: pxToDp(13),
-                            fontWeight: '600',
                             color: COLOR_DIY.themeColor,
                         }}>
                         {'《隱私信息收集與使用條款》'}
