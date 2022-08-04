@@ -549,9 +549,20 @@ class UMEventDetail extends Component {
                         <View style={styles.contentContainer}>
                             <Text style={styles.secondTitle}>
                                 {language[chooseMode + 3]}
-                            </Text>
-                            <Text style={styles.content}>
-                                {language[chooseMode]}
+                                {language[chooseMode].map((itm, idx) => {
+                                    let show = itm;
+                                    if (
+                                        language[chooseMode].length - 1 !=
+                                        idx
+                                    ) {
+                                        show = show + ', ';
+                                    }
+                                    return (
+                                        <Text style={styles.content}>
+                                            {show}
+                                        </Text>
+                                    );
+                                })}
                             </Text>
                         </View>
                         {/*對象*/}
