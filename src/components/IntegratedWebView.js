@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
     Text,
     StyleSheet,
@@ -57,40 +57,29 @@ const IntegratedWebView = ({
         triggerRefresh();
     }
 
-    useEffect(() => {
-        console.log('開啟Webview，訪問', source.uri);
-        // 獲取當前頁所有的cookies
-        CookieManager.get(source.uri).then(cookies => {
-            console.log('CookieManager.get =>', cookies);
-        });
-        // 清除所有的cookies
-        // CookieManager.clearAll().then(success => {
-        //     console.log('CookieManager.clearAll =>', success);
-        // });
+    const onAndroidBackPress = useCallback(() => {
+        if (canGoBack && webViewRef.current) {
+            webViewRef.current.goBack();
+            return true;
+        }
+        return false;
+    }, [canGoBack]);
 
+    useEffect(() => {
         // Android平台返回按鈕監聽
         if (Platform.OS === 'android') {
             BackHandler.addEventListener(
                 'hardwareBackPress',
                 onAndroidBackPress,
             );
-            return (): void => {
+            return () => {
                 BackHandler.removeEventListener(
                     'hardwareBackPress',
                     onAndroidBackPress,
                 );
             };
         }
-    }, []);
-
-    // Android憑條返回按鈕按下時間
-    const onAndroidBackPress = (): boolean => {
-        if (webViewRef.current) {
-            webViewRef.current.goBack();
-            return true; // prevent default behavior (exit app)
-        }
-        return false;
-    };
+    }, [onAndroidBackPress]);
 
     return (
         <>
@@ -111,20 +100,16 @@ const IntegratedWebView = ({
                 source={source}
                 originWhitelist={['*']}
                 startInLoadingState={true}
-                onLoadProgress={event =>
-                    setProgress(event.nativeEvent.progress)
-                }
+                onLoadProgress={event => {
+                    setProgress(event.nativeEvent.progress);
+                    setCanGoBack(event.nativeEvent.canGoBack);
+                    setCanGoForward(event.nativeEvent.canGoForward);
+                }}
                 onLoadStart={() => {
                     setLoaded(false);
                     setProgress(0);
                 }}
                 onLoadEnd={() => setLoaded(true)}
-                onNavigationStateChange={state => {
-                    const back = state.canGoBack;
-                    const forward = state.canGoForward;
-                    setCanGoBack(back);
-                    setCanGoForward(forward);
-                }}
                 onScroll={e => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}
