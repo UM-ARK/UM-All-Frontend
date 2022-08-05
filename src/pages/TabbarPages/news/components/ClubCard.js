@@ -24,7 +24,6 @@ class EventCard extends Component {
 
     // 處理點擊跳轉邏輯
     handleJumpToDetail = () => {
-        // TODO: 跳轉對應club
         this.context.navigate('ClubDetail', {
             data: this.state.data,
         });

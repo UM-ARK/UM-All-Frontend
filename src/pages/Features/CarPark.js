@@ -52,13 +52,7 @@ class CarPark extends Component {
                     Authorization:
                         'Bearer c9b17308-8579-3672-8a0d-beb483b794bf',
                 },
-                params: {
-                    date_from: macauTime,
-                    // TODO: 篩選特定車類型、停車場
-                    // car_park_code: '',
-                    // vehicle_type: '',
-                    // parking_type: '',
-                },
+                params: {date_from: macauTime},
             })
             .then(res => {
                 let result = res.data._embedded;

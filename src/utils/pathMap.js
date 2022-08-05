@@ -1,6 +1,6 @@
 // 網站地址映射
 
-// TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
+// 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = 'https://umall.one/api/';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';

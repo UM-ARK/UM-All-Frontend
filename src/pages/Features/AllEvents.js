@@ -134,7 +134,7 @@ class AllEvents extends Component {
                         />
                     </View>
                 </ModalDropdown>
-                {/* TODO: 篩選選擇 */}
+                {/* 篩選選擇 */}
                 <TouchableOpacity
                     onPress={() => alert('打開篩選')}
                     activeOpacity={0.8}
@@ -224,8 +224,8 @@ class AllEvents extends Component {
         return (
             <View style={{flex: 1}}>
                 <Header title={'所有活動查看'} />
-                {/* 排序與篩選 選擇器 */}
-                {this.renderDropDown()}
+                {/* TODO: 排序與篩選 選擇器 */}
+                {/* {this.renderDropDown()} */}
 
                 {/* 渲染所有活動 */}
                 {this.renderEvent()}

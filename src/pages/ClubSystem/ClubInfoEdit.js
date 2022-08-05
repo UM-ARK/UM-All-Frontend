@@ -403,7 +403,6 @@ class ClubInfoEdit extends Component {
                         expanded2: !this.state.expanded2,
                     });
                 }}>
-                {/* TODO: 文本識別link點擊可跳轉 */}
                 {this.state.contactInput.map((item, index) =>
                     this.renderContactInput(item, index),
                 )}
