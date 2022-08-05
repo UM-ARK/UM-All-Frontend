@@ -62,7 +62,6 @@ const iconTypes = {
     img: 'img',
 };
 
-// TODO: 登錄判斷，登錄才允許使用某些功能
 class Index extends Component {
     state = {
         functionArr: [
@@ -322,7 +321,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'ab-testing',
-                        fn_name: '課表&成績',
+                        fn_name: 'ISW',
                         needLogin: true,
                         go_where: 'Webview',
                         webview_param: {
