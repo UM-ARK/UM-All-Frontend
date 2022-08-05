@@ -6,6 +6,8 @@ export const BASE_URI = 'https://umall.one/api/';
 export const BASE_HOST = 'https://umall.one';
 
 export const GET = {
+    // 獲取APP info
+    APP_INFO: 'get_appInfo/',
     // 社團登錄
     CLUB_SIGN_IN: 'club_signin/',
 
