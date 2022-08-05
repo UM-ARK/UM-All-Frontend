@@ -36,6 +36,7 @@ class EventCard extends Component {
     componentDidMount() {
         // 解構this.props.data數據
         const eventData = this.props.data;
+        // TODO: 檢查IOS上enddatetime的表現形式
         this.setState({
             coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
@@ -80,15 +81,16 @@ class EventCard extends Component {
             type,
         } = this.state;
 
+        // TODO: BUG: 時間已過，但仍顯示未讀標籤。可能是IOS和安卓的時間戳位數問題。
         // 當前時刻時間戳
-        let nowTimeStamp = new Date().getTime();
+        let nowTimeStamp = moment(new Date()).valueOf();
         // 活動結束標誌
-        let isFinish = nowTimeStamp > Date.parse(finishTimeStamp);
+        let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
 
         return (
             <View style={{...this.props.style}}>
                 {/* 未結束紅點標識 */}
-                {!isFinish && (
+                {isFinish ? null : (
                     <View
                         style={{
                             ...styles.rightTopIconPosition,
@@ -97,7 +99,7 @@ class EventCard extends Component {
                         }}
                     />
                 )}
-                {coverImgUrl && (
+                {coverImgUrl ? (
                     <TouchableOpacity
                         style={{
                             borderRadius: pxToDp(8),
@@ -142,7 +144,7 @@ class EventCard extends Component {
                             </View>
                         </View>
                     </TouchableOpacity>
-                )}
+                ) : null}
             </View>
         );
     }
@@ -152,8 +154,8 @@ const styles = StyleSheet.create({
     // 右上角紅點提示位置
     rightTopIconPosition: {
         position: 'absolute',
-        right: -3,
-        top: -3,
+        right: -pxToDp(1),
+        top: -pxToDp(3),
     },
     // 紅點標籤樣式
     unFinish: {

@@ -22,6 +22,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
 import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import moment from 'moment-timezone';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -115,9 +116,10 @@ class EventPage extends Component {
     eventFilter = eventDataList => {
         let newDataArr = [];
         // 當前時刻時間戳
-        let nowTimeStamp = new Date().getTime();
+        let nowTimeStamp = moment(new Date()).valueOf();
+        // TODO: IOS有全未結束的bug
         eventDataList.map(itm => {
-            if (nowTimeStamp < Date.parse(itm.enddatetime)) {
+            if (nowTimeStamp < moment(itm.enddatetime).valueOf()) {
                 newDataArr.push(itm);
             }
         });
