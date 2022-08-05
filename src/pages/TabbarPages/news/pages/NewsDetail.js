@@ -7,6 +7,7 @@ import {
     Dimensions,
     ScrollView,
     StyleSheet,
+    Linking,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -19,14 +20,17 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import {FlatGrid} from 'react-native-super-grid';
 import moment from 'moment-timezone';
+import HTMLView from 'react-native-htmlview';
 
-// HTML轉純文本
-// TODO: 實用性有限，等待後人開發
+// HTML正則篩數據
 function repalceHtmlToText(str) {
-    str = str.replace(/(<([^>]+)>)/g, '');
-    str = str.replace(/<\/?.+?>/g, '');
-    str = str.replace(/&nbsp;/g, '');
-    str = str.replace(/[\r\n]/g, '');
+    // str = str.replace(/(<([^>]+)>)/g, '');
+    // str = str.replace(/<\/?.+?>/g, '');
+    // str = str.replace(/&nbsp;/g, '');
+    // str = str.replace(/[\r\n]/g, '');
+    str = str.replace(/<br\s*\/?>/g, '');
+    str = str.replace(/<p><\s*\/?p>/g, '');
+    str = str.replace(/<div><\s*\/?div>/g, '');
     return str;
 }
 
@@ -41,7 +45,6 @@ class NewsDetail extends Component {
 
         // 獲取上級路由傳遞的參數
         const newsData = this.props.route.params.data;
-        console.log('eventData', newsData);
 
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題、內容
         // 中文
@@ -163,6 +166,21 @@ class NewsDetail extends Component {
         );
     };
 
+    handleHyperLink = url => {
+        if (url.includes('mailto:')) {
+            Linking.openURL(url);
+        } else if (url.includes('http')) {
+            let webview_param = {
+                url: url,
+                title: 'UM ALL 集成瀏覽器',
+                text_color: '#FFF',
+                bg_color_diy: COLOR_DIY.themeColor,
+                isBarStyleBlack: false,
+            };
+            this.props.navigation.navigate('Webviewer', webview_param);
+        }
+    };
+
     render() {
         // 解構全局ui設計顏色
         const {LanguageMode, chooseMode, data} = this.state;
@@ -200,8 +218,8 @@ class NewsDetail extends Component {
         }
 
         //用数组存储内容，便于根据语言筛选条件显示
-        var title = [title_cn, title_en, title_pt];
-        var content = [content_cn, content_en, content_pt];
+        let title = [title_cn, title_en, title_pt];
+        let content = [content_cn, content_en, content_pt];
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
@@ -263,20 +281,11 @@ class NewsDetail extends Component {
 
                     {/* 正文 */}
                     <View style={styles.contentContainer}>
-                        <HyperlinkText
-                            linkStyle={{
-                                color: COLOR_DIY.themeColor,
-                            }}
-                            navigation={this.props.navigation}>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontSize: pxToDp(15),
-                                }}
-                                selectable={true}>
-                                {'\t\t' + repalceHtmlToText(content[chooseMode])}
-                            </Text>
-                        </HyperlinkText>
+                        <HTMLView
+                            value={repalceHtmlToText(content[chooseMode])}
+                            onLinkPress={url => this.handleHyperLink(url)}
+                            nodeComponentProps={{selectable: true}}
+                        />
                     </View>
 
                     {/* 彈出層展示圖片查看器 */}
