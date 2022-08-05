@@ -301,7 +301,6 @@ class NewsPage extends Component {
     };
 
     render() {
-        // 解構全局ui設計顏色
         return (
             <View
                 style={{
@@ -338,9 +337,8 @@ class NewsPage extends Component {
                         ref={'virtualizedList'}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
                         initialNumToRender={3}
-                        renderItem={({item}) => {
-                            return <NewsCard data={item}></NewsCard>;
-                        }}
+                        renderItem={({item}) => <NewsCard data={item} />}
+                        keyExtractor={itm => itm._id}
                         // 整理item數據
                         getItem={getItem}
                         // 渲染項目數量
