@@ -438,42 +438,42 @@ class ClubInfoEdit extends Component {
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
-                        <ScrollView
-                            contentContainerStyle={{
-                                paddingHorizontal: pxToDp(10),
-                            }}>
-                            {/* 圖片修改 */}
-                            <View>
-                                <Text style={styles.title}>照片修改</Text>
-                                <Text style={{color: black.third}}>
-                                    *首張圖片將作為主頁背景圖
-                                </Text>
-                                {this.renderImageSelector()}
-                            </View>
+                    <ScrollView
+                        contentContainerStyle={{
+                            paddingHorizontal: pxToDp(10),
+                        }}>
+                        {/* 圖片修改 */}
+                        <View>
+                            <Text style={styles.title}>照片修改</Text>
+                            <Text style={{color: black.third}}>
+                                *首張圖片將作為主頁背景圖
+                            </Text>
+                            {this.renderImageSelector()}
+                        </View>
 
+                        <KeyboardAvoidingView
+                            behavior={
+                                Platform.OS == 'ios' ? 'padding' : 'height'
+                            }>
                             {/* 簡介 */}
-                            <View>{this.renderExpandSection1()}</View>
+                            {this.renderExpandSection1()}
 
                             {/* 聯繫方式 */}
                             <View style={{marginTop: pxToDp(20)}}>
                                 {this.renderExpandSection2()}
                             </View>
+                        </KeyboardAvoidingView>
 
-                            {/* 保存修改 */}
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() =>
-                                    this.setState({submitChoice: true})
-                                }
-                                style={styles.submitButton}>
-                                <Text style={{...styles.submitButtonText}}>
-                                    保存修改
-                                </Text>
-                            </TouchableOpacity>
-                        </ScrollView>
-                    </KeyboardAvoidingView>
+                        {/* 保存修改 */}
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => this.setState({submitChoice: true})}
+                            style={styles.submitButton}>
+                            <Text style={{...styles.submitButtonText}}>
+                                保存修改
+                            </Text>
+                        </TouchableOpacity>
+                    </ScrollView>
                 ) : (
                     <View
                         style={{
