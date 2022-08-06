@@ -101,7 +101,6 @@ class EventDetail extends Component {
                     let eventData = json.content;
                     eventData.cover_image_url =
                         BASE_HOST + eventData.cover_image_url;
-                    console.log('eventData', eventData);
                     if (
                         eventData.relate_image_url &&
                         eventData.relate_image_url.length > 0
