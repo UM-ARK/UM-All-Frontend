@@ -41,11 +41,17 @@ class LoginSetting extends Component {
     }
 
     async handleSavePW(account, password) {
+        console.log(account);
+        console.log(password);
         try {
             const strUmPassInfo = JSON.stringify({account, password});
             await AsyncStorage.setItem('umPass', strUmPassInfo)
                 .then(() => {
-                    alert('已將賬號密碼保存至本地~');
+                    if (this.state.enableQI) {
+                        alert('已將賬號密碼保存至本地~');
+                    } else {
+                        alert('已關閉該功能');
+                    }
                 })
                 .catch(e => console.log(e));
         } catch (e) {
@@ -73,9 +79,12 @@ class LoginSetting extends Component {
                         </Text>
                         <Switch
                             value={enableQI}
-                            onValueChange={(enableQI: boolean) =>
-                                this.setState({enableQI})
-                            }
+                            onValueChange={(enableQI: boolean) => {
+                                this.setState({enableQI});
+                                if (!enableQI) {
+                                    this.handleSavePW('', '');
+                                }
+                            }}
                             style={{marginLeft: pxToDp(5)}}
                             onColor={themeColor}
                         />
@@ -119,6 +128,7 @@ class LoginSetting extends Component {
                                     onChangeText={password =>
                                         this.setState({password})
                                     }
+                                    secureTextEntry={true}
                                 />
                             </View>
 
