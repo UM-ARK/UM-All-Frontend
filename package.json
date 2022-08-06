@@ -1,6 +1,6 @@
 {
   "name": "umall",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -39,6 +39,7 @@
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.4.2",
     "react-native-html-parser": "^0.1.0",
+    "react-native-htmlview": "^0.16.0",
     "react-native-hyperlink": "^0.0.19",
     "react-native-image-header-scroll-view": "^1.0.0",
     "react-native-image-picker": "^4.8.4",

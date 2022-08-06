@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         overflow: 'hidden',
         ...COLOR_DIY.viewShadow,
-        backgroundColor: bg_color,
+        backgroundColor: white,
     },
     clubLogoWhiteSpace: {
         bottom: 0,

@@ -1,11 +1,13 @@
 // 網站地址映射
 
-// TODO: 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
+// 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
 export const BASE_URI = 'https://umall.one/api/';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
 export const GET = {
+    // 獲取APP info
+    APP_INFO: 'get_appInfo/',
     // 社團登錄
     CLUB_SIGN_IN: 'club_signin/',
 
@@ -73,6 +75,8 @@ export const UM_WHOLE = 'https://umbbs.xyz';
 export const UM_API_CAR_PARK = 'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
 // 澳大 - API 活動
 export const UM_API_EVENT = 'https://api.data.um.edu.mo/service/media/events/v1.0.0/all';
+// 澳大 - API 新聞
+export const UM_API_NEWS = 'https://api.data.um.edu.mo/service/media/news/v1.0.0/all';
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站

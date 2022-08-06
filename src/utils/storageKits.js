@@ -22,9 +22,10 @@ export async function handleLogin(userInfo) {
 }
 
 // 清除緩存退出登錄
-export async function handleLogout(userInfo) {
+export async function handleLogout() {
     try {
-        await AsyncStorage.clear();
+        // await AsyncStorage.clear();
+        await AsyncStorage.removeItem('userInfo');
         // 清除所有的cookies
         await CookieManager.clearAll();
     } catch (e) {
@@ -42,6 +43,16 @@ export async function updateUserInfo(userInfo) {
         await AsyncStorage.setItem('userInfo', strUserInfo).catch(e =>
             console.log(e),
         );
+    } catch (e) {
+        alert(e);
+    }
+}
+
+// 寫入緩存數據
+export async function setAPPInfo(appInfo) {
+    try {
+        const strAppInfo = JSON.stringify(appInfo);
+        await AsyncStorage.setItem('appInfo', strAppInfo).catch(e => console.log(e));
     } catch (e) {
         alert(e);
     }

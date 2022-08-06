@@ -221,7 +221,6 @@ class Index extends Component {
                             isBarStyleBlack: false,
                         },
                     },
-                    // TODO: 圖書館有東西可以爬蟲嗎
                     {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'library',
@@ -258,7 +257,6 @@ class Index extends Component {
                             // isBarStyleBlack: false,
                         },
                     },
-                    // TODO: UM Portal，如果後期全部整合完畢就可以刪除該入口
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'view-grid-plus',

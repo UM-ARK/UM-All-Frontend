@@ -214,7 +214,7 @@ class ClubLogin extends Component {
                             }}>
                             註冊須知:
                         </Text>
-                        {/* TODO: 文本自動識別鏈接 */}
+                        {/* TODO: 跳轉聯繫我們網頁 */}
                         <Text
                             style={{
                                 color: COLOR_DIY.black.second,

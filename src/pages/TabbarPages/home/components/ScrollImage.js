@@ -56,7 +56,6 @@ function ScrollImage(props) {
                 marginVertical: pxToDp(-10),
             }}>
             {/* 輪播圖組件 */}
-            {/* TODO: 用戶引導 */}
             <Carousel
                 vertical={false}
                 width={PAGE_WIDTH}

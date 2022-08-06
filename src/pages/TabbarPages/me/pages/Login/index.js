@@ -28,6 +28,7 @@ import CookieManager from '@react-native-cookies/cookies';
 import WebView from 'react-native-webview';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {bg_color, black, themeColor, white} = COLOR_DIY;
 
@@ -42,7 +43,23 @@ class LoginChoose extends Component {
         showDialog: false,
         showMoodle: false,
         disabledButton: false,
+        UmPassInfo: {
+            account: '',
+            password: '',
+        },
     };
+
+    async componentDidMount() {
+        try {
+            const strUmPassInfo = await AsyncStorage.getItem('umPass');
+            const UmPassInfo = strUmPassInfo ? JSON.parse(strUmPassInfo) : {};
+            if (JSON.stringify(UmPassInfo) != '{}') {
+                this.setState({UmPassInfo});
+            }
+        } catch (e) {
+            alert(e);
+        }
+    }
 
     handleStdLogin = async session => {
         let URL = BASE_URI + POST.STD_LOGIN;
@@ -71,7 +88,7 @@ class LoginChoose extends Component {
     };
 
     render() {
-        const {disabledButton} = this.state;
+        const {disabledButton, UmPassInfo} = this.state;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header
@@ -104,6 +121,11 @@ class LoginChoose extends Component {
                         source={{uri: UM_Moodle}}
                         ref={'webRef'}
                         startInLoadingState={true}
+                        // 自動注入賬號密碼
+                        injectedJavaScript={`
+                            document.getElementById("userNameInput").value="${UmPassInfo.account}";
+                            document.getElementById("passwordInput").value="${UmPassInfo.password}";
+                        `}
                         onNavigationStateChange={e => {
                             // SSO密碼輸入頁面e.title為https://websso.....
                             // 雙重認證頁面e.title為Duo Security
