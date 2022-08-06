@@ -24,6 +24,7 @@ import {inject} from 'mobx-react';
 import axios from 'axios';
 import FastImage from 'react-native-fast-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const {black, themeColor, white, bg_color} = COLOR_DIY;
 
@@ -438,10 +439,8 @@ class ClubInfoEdit extends Component {
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
-                    <ScrollView
-                        contentContainerStyle={{
-                            paddingHorizontal: pxToDp(10),
-                        }}>
+                    <KeyboardAwareScrollView
+                        contentContainerStyle={{paddingHorizontal: pxToDp(10)}}>
                         {/* 圖片修改 */}
                         <View>
                             <Text style={styles.title}>照片修改</Text>
@@ -451,18 +450,18 @@ class ClubInfoEdit extends Component {
                             {this.renderImageSelector()}
                         </View>
 
-                        <KeyboardAvoidingView
+                        {/* <KeyboardAvoidingView
                             behavior={
                                 Platform.OS == 'ios' ? 'padding' : 'height'
-                            }>
-                            {/* 簡介 */}
-                            {this.renderExpandSection1()}
+                            }> */}
+                        {/* 簡介 */}
+                        {this.renderExpandSection1()}
 
-                            {/* 聯繫方式 */}
-                            <View style={{marginTop: pxToDp(20)}}>
-                                {this.renderExpandSection2()}
-                            </View>
-                        </KeyboardAvoidingView>
+                        {/* 聯繫方式 */}
+                        <View style={{marginTop: pxToDp(20)}}>
+                            {this.renderExpandSection2()}
+                        </View>
+                        {/* </KeyboardAvoidingView> */}
 
                         {/* 保存修改 */}
                         <TouchableOpacity
@@ -473,7 +472,7 @@ class ClubInfoEdit extends Component {
                                 保存修改
                             </Text>
                         </TouchableOpacity>
-                    </ScrollView>
+                    </KeyboardAwareScrollView>
                 ) : (
                     <View
                         style={{

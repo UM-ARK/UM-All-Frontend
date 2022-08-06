@@ -45,6 +45,7 @@
     "react-native-image-picker": "^4.8.4",
     "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-interactable": "^2.0.1",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-modal": "^13.0.1",
     "react-native-modal-datetime-picker": "^13.1.2",
