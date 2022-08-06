@@ -333,53 +333,50 @@ class EventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
 
-                <View style={{flex: 1, width: '100%'}}>
-                    {/* 加載狀態渲染骨架屏 */}
-                    {isLoading ? (
-                        <View
-                            style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}>
-                            <Loading />
-                        </View>
-                    ) : (
-                        <ScrollView
-                            ref={'scrollView'}
-                            style={{width: '100%'}}
-                            refreshControl={
-                                <RefreshControl
-                                    colors={[themeColor]}
-                                    tintColor={themeColor}
-                                    refreshing={this.state.isLoading}
-                                    onRefresh={() => {
-                                        if (dataPage > 1) {
-                                            dataPage = 1;
-                                        }
-                                        this.setState({
-                                            isLoading: true,
-                                            needFilter: false,
-                                        });
-                                        this.getData();
-                                    }}
-                                />
-                            }>
-                            {/* 篩選 */}
-                            {this.renderFilter()}
-                            {/* 仿瀑布屏展示 */}
-                            {/* 渲染主要內容 */}
-                            {leftDataList.length > 0 || rightDataList.length > 0
-                                ? this.renderPage()
-                                : null}
+                {/* 加載狀態渲染骨架屏 */}
+                {isLoading ? (
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        <Loading />
+                    </View>
+                ) : (
+                    <ScrollView
+                        ref={'scrollView'}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isLoading}
+                                onRefresh={() => {
+                                    if (dataPage > 1) {
+                                        dataPage = 1;
+                                    }
+                                    this.setState({
+                                        isLoading: true,
+                                        needFilter: false,
+                                    });
+                                    this.getData();
+                                }}
+                            />
+                        }>
+                        {/* 篩選 */}
+                        {this.renderFilter()}
+                        {/* 仿瀑布屏展示 */}
+                        {/* 渲染主要內容 */}
+                        {leftDataList.length > 0 || rightDataList.length > 0
+                            ? this.renderPage()
+                            : null}
 
-                            {this.renderLoadMoreView()}
+                        {this.renderLoadMoreView()}
 
-                            {/* 防止底部遮擋 */}
-                            <View style={{marginBottom: pxToDp(50)}} />
-                        </ScrollView>
-                    )}
-                </View>
+                        {/* 防止底部遮擋 */}
+                        <View style={{marginBottom: pxToDp(50)}} />
+                    </ScrollView>
+                )}
 
                 {/* Tost */}
                 <Toast
@@ -399,7 +396,6 @@ class EventPage extends Component {
 
 const s = StyleSheet.create({
     waterFlowContainer: {
-        flex: 1,
         flexDirection: 'row',
         width: '100%',
         backgroundColor: COLOR_DIY.bg_color,

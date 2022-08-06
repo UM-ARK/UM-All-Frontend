@@ -68,9 +68,7 @@ class ClubPage extends Component {
                 data={clubDataList}
                 // 每個項目的間距
                 spacing={pxToDp(12)}
-                renderItem={({item}) => {
-                    return <ClubCard data={item} />;
-                }}
+                renderItem={({item}) => <ClubCard data={item} />}
                 // 所有項目末尾渲染，防Tabbar遮擋
                 ListFooterComponent={() => (
                     <View>
@@ -167,7 +165,7 @@ class ClubPage extends Component {
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 {clubDataList != undefined && !isLoading ? (
-                    <View style={{flex: 1}}>
+                    <View>
                         {this.renderFilter()}
                         {this.renderClub()}
                     </View>
