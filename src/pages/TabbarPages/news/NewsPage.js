@@ -13,6 +13,7 @@ import NewsCard from './components/NewsCard';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
+import {UM_API_NEWS} from '../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
 import Interactable from 'react-native-interactable';
@@ -87,7 +88,7 @@ class NewsPage extends Component {
     // 請求澳大api返回新聞數據
     async getData() {
         axios
-            .get('https://api.data.um.edu.mo/service/media/news/v1.0.0/all', {
+            .get(UM_API_NEWS, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
