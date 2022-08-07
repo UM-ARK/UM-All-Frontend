@@ -33,6 +33,10 @@ class AllEvents extends Component {
         }
     }
 
+    componentWillUnmount() {
+        dataPage = 1;
+    }
+
     async getEventData(club_num, sort, filter) {
         const {eventData} = this.state;
         let URL = BASE_URI + GET.EVENT_INFO_CLUB_NUM_P;

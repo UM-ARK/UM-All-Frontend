@@ -46,6 +46,10 @@ class EventPage extends Component {
         this.getData();
     }
 
+    componentWillUnmount() {
+        dataPage = 1;
+    }
+
     async getData() {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 10;

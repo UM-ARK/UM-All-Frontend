@@ -24,6 +24,10 @@ class FollowEvent extends Component {
         this.getFollowEvents();
     }
 
+    componentWillUnmount() {
+        dataPage = 1;
+    }
+
     async getFollowEvents() {
         const {eventData} = this.state;
         let URL = BASE_URI + GET.FOLLOW_EVENT;

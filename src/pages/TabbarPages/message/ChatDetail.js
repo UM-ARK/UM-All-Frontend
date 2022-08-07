@@ -60,6 +60,10 @@ class ChatDetail extends Component {
         }
     }
 
+    componentWillUnmount() {
+        dataPage = 1;
+    }
+
     getNotice = async isClub => {
         const params = this.props.route.params;
         let URL = '';
