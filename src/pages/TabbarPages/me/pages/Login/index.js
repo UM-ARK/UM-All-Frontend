@@ -164,6 +164,12 @@ class LoginChoose extends Component {
                                 // `)
                             }
                         }}
+                        // IOS
+                        sharedCookiesEnabled
+                        // Android
+                        thirdPartyCookiesEnabled
+                        cacheEnabled
+                        domStorageEnabled
                     />
                 ) : (
                     <View

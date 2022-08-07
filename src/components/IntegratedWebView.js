@@ -113,12 +113,15 @@ const IntegratedWebView = ({
                 onScroll={e => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}
-                pullToRefreshEnabled={true}
+                pullToRefreshEnabled
+                allowFileAccess
+                allowUniversalAccessFromFileURLs
                 // IOS
-                sharedCookiesEnabled={true}
+                sharedCookiesEnabled
                 // Android
-                thirdPartyCookiesEnabled={true}
-                cacheEnabled={true}
+                thirdPartyCookiesEnabled
+                cacheEnabled
+                domStorageEnabled
                 // 自動注入賬號密碼
                 injectedJavaScript={`
                     document.getElementById("userNameInput").value="${UmPassInfo.account}";
