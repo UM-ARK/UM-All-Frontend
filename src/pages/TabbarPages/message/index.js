@@ -8,6 +8,7 @@ import {
     ScrollView,
     Dimensions,
     StyleSheet,
+    RefreshControl,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
@@ -31,6 +32,7 @@ class MesgScreen extends Component {
     state = {
         clubDataList: undefined,
         eventData: undefined,
+        isLoading: true,
     };
 
     componentDidMount() {
@@ -50,7 +52,7 @@ class MesgScreen extends Component {
                     clubDataList.map(itm => {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
-                    this.setState({clubDataList});
+                    this.setState({clubDataList, isLoading: false});
                 }
             })
             .catch(err => console.log('err', err));
@@ -97,7 +99,7 @@ class MesgScreen extends Component {
     };
 
     render() {
-        const {clubDataList, eventData} = this.state;
+        const {clubDataList, eventData, isLoading} = this.state;
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
                 <Header
@@ -115,7 +117,19 @@ class MesgScreen extends Component {
                     }}
                 />
 
-                <ScrollView>
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={isLoading}
+                            onRefresh={() => {
+                                this.setState({isLoading: true});
+                                this.getFollowClubs();
+                                this.getFollowEvents();
+                            }}
+                        />
+                    }>
                     {/* 消息內容 */}
                     <View style={styles.infoContainer}>
                         <Text style={styles.title}>Follow的組織</Text>
