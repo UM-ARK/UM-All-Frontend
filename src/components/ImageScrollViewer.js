@@ -13,9 +13,7 @@ import {
 import {COLOR_DIY} from '../utils/uiMap';
 import {pxToDp} from '../utils/stylesKits';
 
-import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import ModalBottom from './ModalSave';

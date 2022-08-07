@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     ScrollView,
     TextInput,
-    KeyboardAvoidingView,
 } from 'react-native';
 
 import {pxToDp} from '../../utils/stylesKits';
@@ -450,10 +449,6 @@ class ClubInfoEdit extends Component {
                             {this.renderImageSelector()}
                         </View>
 
-                        {/* <KeyboardAvoidingView
-                            behavior={
-                                Platform.OS == 'ios' ? 'padding' : 'height'
-                            }> */}
                         {/* 簡介 */}
                         {this.renderExpandSection1()}
 
@@ -461,7 +456,6 @@ class ClubInfoEdit extends Component {
                         <View style={{marginTop: pxToDp(20)}}>
                             {this.renderExpandSection2()}
                         </View>
-                        {/* </KeyboardAvoidingView> */}
 
                         {/* 保存修改 */}
                         <TouchableOpacity

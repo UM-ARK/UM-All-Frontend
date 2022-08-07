@@ -122,7 +122,7 @@ class FollowEvent extends Component {
                 <Text style={{color: black.third}}>
                     你還沒有follow的活動，快去follow一些吧~
                 </Text>
-                <Text>[]~(￣▽￣)~*</Text>
+                <Text style={{color: black.third}}>[]~(￣▽￣)~*</Text>
             </View>
         );
     };
