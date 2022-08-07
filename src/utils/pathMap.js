@@ -58,6 +58,9 @@ export const POST = {
     ADD_FOLLOW_CLUB: 'student_add_follow_club/',
     // del follow組織
     DEL_FOLLOW_CLUB: 'student_del_follow_club/',
+
+    // 新增公告
+    NOTICE_CREATE: 'create_notice/',
 }
 
 export const ARK_LETTER_IMG = 'https://umall.one/static/logo.png';
