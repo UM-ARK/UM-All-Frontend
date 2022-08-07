@@ -34,6 +34,7 @@ import {updateUserInfo} from '../../../../utils/storageKits';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
 import {
     ImageHeaderScrollView,
     TriggeringView,
@@ -298,7 +299,8 @@ class ClubDetail extends Component {
 
     render() {
         // 解構state數據
-        const {clubData, isFollow, isAdmin, isLoading, imageUrls} = this.state;
+        const {clubData, isFollow, isAdmin, isLoading, imageUrls, isLogin} =
+            this.state;
         let logo_url,
             name,
             tag,
@@ -345,22 +347,25 @@ class ClubDetail extends Component {
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => this.props.navigation.goBack()}
-                        style={{
-                            position: 'absolute',
-                            top: pxToDp(65),
-                            left: pxToDp(10),
-                        }}>
-                        <Ionicons
-                            name="chevron-back-outline"
-                            size={pxToDp(25)}
-                            color={white}
-                        />
-                    </TouchableOpacity>
+                    {!isAdmin ? (
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => this.props.navigation.goBack()}
+                            style={{
+                                position: 'absolute',
+                                top: pxToDp(65),
+                                left: pxToDp(10),
+                            }}>
+                            <Ionicons
+                                name="chevron-back-outline"
+                                size={pxToDp(25)}
+                                color={white}
+                            />
+                        </TouchableOpacity>
+                    ) : null}
+
                     {/* 編輯資料按鈕 只有管理員可見 */}
-                    {isAdmin && (
+                    {isAdmin ? (
                         <View
                             style={{
                                 position: 'absolute',
@@ -388,7 +393,32 @@ class ClubDetail extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                    )}
+                    ) : null}
+
+                    {/* 公告 */}
+                    {isLogin && isFollow ? (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: pxToDp(65),
+                                right: pxToDp(10),
+                            }}>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    this.props.navigation.navigate(
+                                        'ChatDetail',
+                                        {get: 'club', id: clubData.club_num},
+                                    );
+                                }}>
+                                <Feather
+                                    name="message-circle"
+                                    size={pxToDp(25)}
+                                    color={white}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity

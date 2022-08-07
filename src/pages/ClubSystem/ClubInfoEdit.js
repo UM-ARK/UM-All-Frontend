@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     ScrollView,
     TextInput,
-    KeyboardAvoidingView,
 } from 'react-native';
 
 import {pxToDp} from '../../utils/stylesKits';
@@ -24,6 +23,7 @@ import {inject} from 'mobx-react';
 import axios from 'axios';
 import FastImage from 'react-native-fast-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const {black, themeColor, white, bg_color} = COLOR_DIY;
 
@@ -438,42 +438,35 @@ class ClubInfoEdit extends Component {
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
-                        <ScrollView
-                            contentContainerStyle={{
-                                paddingHorizontal: pxToDp(10),
-                            }}>
-                            {/* 圖片修改 */}
-                            <View>
-                                <Text style={styles.title}>照片修改</Text>
-                                <Text style={{color: black.third}}>
-                                    *首張圖片將作為主頁背景圖
-                                </Text>
-                                {this.renderImageSelector()}
-                            </View>
+                    <KeyboardAwareScrollView
+                        contentContainerStyle={{paddingHorizontal: pxToDp(10)}}>
+                        {/* 圖片修改 */}
+                        <View>
+                            <Text style={styles.title}>照片修改</Text>
+                            <Text style={{color: black.third}}>
+                                *首張圖片將作為主頁背景圖
+                            </Text>
+                            {this.renderImageSelector()}
+                        </View>
 
-                            {/* 簡介 */}
-                            <View>{this.renderExpandSection1()}</View>
+                        {/* 簡介 */}
+                        {this.renderExpandSection1()}
 
-                            {/* 聯繫方式 */}
-                            <View style={{marginTop: pxToDp(20)}}>
-                                {this.renderExpandSection2()}
-                            </View>
+                        {/* 聯繫方式 */}
+                        <View style={{marginTop: pxToDp(20)}}>
+                            {this.renderExpandSection2()}
+                        </View>
 
-                            {/* 保存修改 */}
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() =>
-                                    this.setState({submitChoice: true})
-                                }
-                                style={styles.submitButton}>
-                                <Text style={{...styles.submitButtonText}}>
-                                    保存修改
-                                </Text>
-                            </TouchableOpacity>
-                        </ScrollView>
-                    </KeyboardAvoidingView>
+                        {/* 保存修改 */}
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => this.setState({submitChoice: true})}
+                            style={styles.submitButton}>
+                            <Text style={{...styles.submitButtonText}}>
+                                保存修改
+                            </Text>
+                        </TouchableOpacity>
+                    </KeyboardAwareScrollView>
                 ) : (
                     <View
                         style={{

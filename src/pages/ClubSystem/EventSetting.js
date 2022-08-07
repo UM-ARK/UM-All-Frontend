@@ -13,7 +13,6 @@ import {COLOR_DIY} from '../../utils/uiMap';
 import {BASE_URI, BASE_HOST, POST, GET} from '../../utils/pathMap';
 import Header from '../../components/Header';
 import DialogDIY from '../../components/DialogDIY';
-import ImageSelector from '../../components/ImageSelector';
 import Loading from '../../components/Loading';
 import {handleImageSelect} from '../../utils/fileKits';
 
@@ -31,6 +30,7 @@ import {FlatGrid} from 'react-native-super-grid';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import FastImage from 'react-native-fast-image';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 import {pxToDp} from '../../utils/stylesKits';
 
@@ -297,6 +297,7 @@ class EventSetting extends Component {
             <TextInput
                 multiline={true}
                 numberOfLines={8}
+                minHeight={Platform.OS === 'ios' ? 20 * 8 : null}
                 style={{
                     ...styles.inputArea,
                     borderColor: this.state.borderColor,
@@ -329,7 +330,7 @@ class EventSetting extends Component {
                         ...styles.inputTitle,
                         color: themeColor,
                     }}>
-                    {'活動詳情修改 '}
+                    {'活動簡介、詳情 '}
                 </Text>
                 <Ionicons
                     name={this.state.expanded1 ? 'chevron-up' : 'chevron-down'}
@@ -532,7 +533,7 @@ class EventSetting extends Component {
                 // 上傳成功
                 if (json.message == 'success') {
                     alert('刪除成功');
-                    this.props.route.params.delete();
+                    // TODO: 需適配新的社團操作系統
                     this.props.navigation.goBack();
                 }
                 // 上傳失敗
@@ -554,7 +555,7 @@ class EventSetting extends Component {
                 <Header title={'活動資訊編輯'} />
 
                 {!isLoading ? (
-                    <ScrollView
+                    <KeyboardAwareScrollView
                         contentContainerStyle={{marginHorizontal: pxToDp(10)}}>
                         {/* 活動類型選擇 */}
                         {!(mode == 'edit') && (
@@ -723,6 +724,10 @@ class EventSetting extends Component {
                                     });
                                 }}
                             />
+                            <Text style={{color: black.third, fontSize: 12}}>
+                                *
+                                如非緊急，最多提前兩星期發佈活動，共用宣傳資源，請理解！
+                            </Text>
                             {/* 開始時間 */}
                             <TouchableOpacity
                                 style={{
@@ -894,7 +899,7 @@ class EventSetting extends Component {
                                 </Text>
                             </TouchableOpacity>
                         )}
-                    </ScrollView>
+                    </KeyboardAwareScrollView>
                 ) : (
                     <View
                         style={{

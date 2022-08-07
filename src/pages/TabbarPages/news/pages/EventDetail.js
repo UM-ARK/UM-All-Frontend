@@ -22,6 +22,7 @@ import Loading from '../../../../components/Loading';
 import Header from '../../../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
 import {
     ImageHeaderScrollView,
     TriggeringView,
@@ -243,12 +244,14 @@ class EventDetail extends Component {
             tintColor={themeColor}
             refreshing={this.state.isLoading}
             progressViewOffset={pxToDp(300)}
-            onRefresh={() => {
-                this.setState({isLoading: true});
-                this.getEventData(this.state.eventData._id);
-            }}
+            onRefresh={this.onRefresh}
         />
     );
+
+    onRefresh = () => {
+        this.setState({isLoading: true});
+        this.getEventData(this.state.eventData._id);
+    };
 
     render() {
         // 解構state數據
@@ -265,6 +268,8 @@ class EventDetail extends Component {
             eventData,
             imageUrls,
             isClub,
+            isLogin,
+            isFollow,
         } = this.state;
 
         // 活動基本信息
@@ -400,6 +405,57 @@ class EventDetail extends Component {
                             />
                         </TouchableOpacity>
                     </View>
+                    {/* 設置按鈕 */}
+                    {isClub ? (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: pxToDp(65),
+                                right: pxToDp(10),
+                            }}>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    this.props.navigation.navigate(
+                                        'ClubSetting',
+                                        {
+                                            eventID: eventData._id,
+                                            refresh: this.onRefresh.bind(this),
+                                        },
+                                    );
+                                }}>
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={pxToDp(25)}
+                                    color={white}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
+                    {/* 公告 */}
+                    {isLogin && isFollow ? (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: pxToDp(65),
+                                right: pxToDp(10),
+                            }}>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    this.props.navigation.navigate(
+                                        'ChatDetail',
+                                        {get: 'event', id: eventData._id},
+                                    );
+                                }}>
+                                <Feather
+                                    name="message-circle"
+                                    size={pxToDp(25)}
+                                    color={white}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity
@@ -436,11 +492,13 @@ class EventDetail extends Component {
                 <View style={{backgroundColor: bg_color, flex: 1}}>
                     {/* 舉辦方頭像 */}
                     <TouchableWithoutFeedback
-                        onPress={() =>
-                            this.props.navigation.navigate('ClubDetail', {
-                                data: clubData,
-                            })
-                        }>
+                        onPress={() => {
+                            if (!isClub) {
+                                this.props.navigation.navigate('ClubDetail', {
+                                    data: clubData,
+                                });
+                            }
+                        }}>
                         <View
                             style={{
                                 alignSelf: 'center',

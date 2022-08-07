@@ -8,9 +8,9 @@ import Tabbar from './Tabbar';
 
 import ClubSetting from './pages/ClubSystem/CLubSetting'
 import ClubInfoEdit from './pages/ClubSystem/ClubInfoEdit'
-import MessageConsole from './pages/ClubSystem/MessageConsole'
 import EventSetting from './pages/ClubSystem/EventSetting'
 import MessageSetting from './pages/ClubSystem/MessageSetting'
+import FollowersPage from './pages/ClubSystem/FollowersPage'
 import LoginSetting from './pages/TabbarPages/me/pages/Login/LoginSetting'
 
 import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin'
@@ -93,9 +93,9 @@ class Nav extends Component {
                 {/* 社團系統 */}
                 <Stack.Screen name="ClubSetting"     component={ClubSetting} />
                 <Stack.Screen name="ClubInfoEdit"     component={ClubInfoEdit} />
-                <Stack.Screen name="MessageConsole"     component={MessageConsole} />
                 <Stack.Screen name="EventSetting"     component={EventSetting} />
                 <Stack.Screen name="MessageSetting"     component={MessageSetting} />
+                <Stack.Screen name="FollowersPage"     component={FollowersPage} />
 
                 {/* 測試頁 */}
                 <Stack.Screen name="TestScreen"     component={TestScreen} />

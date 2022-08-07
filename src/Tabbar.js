@@ -9,7 +9,6 @@ import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
-import MessageConsole from './pages/ClubSystem/MessageConsole';
 
 // 本地工具
 import {pxToDp} from './utils/stylesKits';
@@ -120,10 +119,10 @@ class Tabbar extends Component {
                     />
                 )}
 
-                {isLogin ? (
+                {isLogin && !isClub ? (
                     <Tabs.Screen
                         name="MessageTabbar"
-                        component={isClub ? MessageConsole : MessageScreen}
+                        component={MessageScreen}
                         options={{
                             tabBarIcon: ({focused, color, size}) => (
                                 <Icon
@@ -134,10 +133,11 @@ class Tabbar extends Component {
                                     color={color}
                                 />
                             ),
-                            title: '提醒',
+                            title: '關注',
                         }}
                     />
                 ) : null}
+
                 <Tabs.Screen
                     name="MeTabbar"
                     component={isClub ? ClubDetail : MeScreen}

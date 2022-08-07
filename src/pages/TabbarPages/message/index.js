@@ -1,107 +1,109 @@
-// 信息頁
+// 信息頁 - 2022.08.07臨時改為Follow頁
 import React, {Component} from 'react';
-import {Text, View, TouchableOpacity, FlatList} from 'react-native';
+import {
+    Text,
+    View,
+    TouchableOpacity,
+    FlatList,
+    ScrollView,
+    Dimensions,
+    StyleSheet,
+} from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, GET} from '../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
 import ChatCard from './ChatCard';
+import ClubCard from '../news/components/ClubCard';
+import EventCard from '../news/components/EventCard';
+
 import axios from 'axios';
-
 import {Header} from '@rneui/themed';
-import {SpringScrollView} from 'react-native-spring-scrollview';
+// import {SpringScrollView} from 'react-native-spring-scrollview';
+import {FlatGrid} from 'react-native-super-grid';
+import FastImage from 'react-native-fast-image';
 
-// 模擬服務器請求回來的data
-// user.type有 普通none、官方official、學生會sa、社團club、書院college
-const messages = [
-    {
-        user: {
-            _id: '0',
-            name: '澳大電子通告',
-            avatar: 'http://images.jjl.cn/ugc/2018/1129/20181129152330319.png',
-        },
-        message_history: [
-            {
-                content:
-                    '請全澳居民於6月22日內進行一次快速抗原檢測。知道了嗎阿是離開打飛機拉克絲定積分了卡時代峻峰',
-                time: '2022/6/26 2:30',
-                unread: 1,
-            },
-            {
-                content: 'hahahaha',
-                time: '2022/6/26 1:30',
-                unread: 1,
-            },
-        ],
-    },
-    {
-        user: {
-            _id: '3',
-            name: '鄭裕彤書院(CYTC)',
-            avatar: 'https://cytc.rc.um.edu.mo/wp-content/uploads/2019/09/CYTC-Logo-2014-Purple-1.png',
-        },
-        message_history: [
-            {
-                content:
-                    '書院活動 purple dating 現已開啟，一切唉算了東風科技唉算了到科技付。',
-                time: '2022/6/26 2:30',
-                unread: 0,
-            },
-            {
-                content: 'hahahaha',
-                time: '2022/6/26 1:30',
-                unread: 0,
-            },
-        ],
-    },
-    {
-        user: {
-            _id: '4',
-            name: '電腦學會',
-            avatar: 'https://info.umsu.org.mo/storage/affiliate/images/da6f2ec4b5ec3216f9344453f796a97c.jpg',
-        },
-        message_history: [
-            {
-                content: '遊戲工作坊',
-                time: '2022/6/26 2:30',
-                unread: 1,
-            },
-            {
-                content: 'hahahaha',
-                time: '2022/6/26 1:30',
-                unread: 1,
-            },
-        ],
-    },
-];
+const {bg_color, themeColor, white, viewShadow, black} = COLOR_DIY;
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 
 class MesgScreen extends Component {
-    constructor() {
-        super();
-        // this.getData();
+    state = {
+        clubDataList: undefined,
+        eventData: undefined,
+    };
+
+    componentDidMount() {
+        this.getFollowClubs();
+        this.getFollowEvents();
     }
 
-    async getData() {
-        let URL = BASE_URI + GET.NOTICE + GET.NOTICE_MODE.all;
+    async getFollowClubs() {
+        const {clubDataList} = this.state;
+        let URL = BASE_URI + GET.FOLLOW_CLUB;
         await axios
             .get(URL)
             .then(res => {
-                console.log(res.data);
+                let json = res.data;
+                if (json.message == 'success') {
+                    let clubDataList = json.content;
+                    clubDataList.map(itm => {
+                        itm.logo_url = BASE_HOST + itm.logo_url;
+                    });
+                    this.setState({clubDataList});
+                }
             })
-            .catch(err => {
-                alert('請求錯誤！');
-            });
+            .catch(err => console.log('err', err));
     }
 
-    render() {
-        const {bg_color, themeColor, white, viewShadow} = COLOR_DIY;
+    async getFollowEvents() {
+        const {eventData} = this.state;
+        let URL = BASE_URI + GET.FOLLOW_EVENT;
+        let num_of_item = 5;
+        await axios
+            .get(URL, {
+                params: {
+                    num_of_item,
+                },
+            })
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    let newDataArr = json.content;
+                    newDataArr.map(itm => {
+                        itm.cover_image_url = BASE_HOST + itm.cover_image_url;
+                    });
+                    this.setState({eventData: newDataArr});
+                }
+            })
+            .catch(err => console.log('err', err));
+    }
+
+    renderGoToAll = type => {
         return (
-            <View style={{backgroundColor: COLOR_DIY.bg_color, flex: 1}}>
-                {/* 頂部標題 */}
+            <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                    if (type == 'club') {
+                        this.props.navigation.navigate('FollowClub');
+                    } else if (type == 'event') {
+                        this.props.navigation.navigate('FollowEvent');
+                    }
+                }}
+                style={styles.seeMoreButton}>
+                <Text style={{color: white, fontSize: 14}}>查看全部</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    render() {
+        const {clubDataList, eventData} = this.state;
+        return (
+            <View style={{backgroundColor: bg_color, flex: 1}}>
                 <Header
-                    backgroundColor={COLOR_DIY.bg_color}
+                    backgroundColor={bg_color}
                     centerComponent={{
-                        text: '提醒訊息',
+                        text: '關注',
                         style: {
                             color: COLOR_DIY.black.main,
                             fontSize: pxToDp(15),
@@ -112,26 +114,157 @@ class MesgScreen extends Component {
                         barStyle: 'dark-content',
                     }}
                 />
-                {/* 消息內容 */}
-                {/* 條件渲染，參考：https://segmentfault.com/a/1190000025135870 */}
-                <SpringScrollView
-                    style={{marginTop: pxToDp(5)}}
-                    showsVerticalScrollIndicator={false}>
-                    <Text style={{color: COLOR_DIY.black.third}}>
-                        1.0.0版本將改為用戶的Follow頁，從關注的活動或社團直接查看其發佈的公告詳情。
-                    </Text>
-                    <FlatList
-                        data={messages}
-                        renderItem={({item, index}) => {
-                            return <ChatCard messages={item}></ChatCard>;
-                        }}
-                        keyExtractor={(_, index) => index}
-                        scrollEnabled={false}
-                    />
-                </SpringScrollView>
+
+                <ScrollView>
+                    {/* 消息內容 */}
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.title}>Follow的組織</Text>
+                        {clubDataList && clubDataList.length > 0 ? (
+                            <View>
+                                <FlatList
+                                    data={clubDataList}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    renderItem={({item}) => {
+                                        return (
+                                            <TouchableOpacity
+                                                style={{
+                                                    margin: pxToDp(5),
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    width: COMPONENT_WIDTH,
+                                                    height: COMPONENT_WIDTH,
+                                                }}
+                                                activeOpacity={0.8}
+                                                onPress={() => {
+                                                    this.props.navigation.navigate(
+                                                        'ClubDetail',
+                                                        {
+                                                            data: item,
+                                                        },
+                                                    );
+                                                }}>
+                                                <FastImage
+                                                    source={{
+                                                        uri: item.logo_url,
+                                                        cache: FastImage
+                                                            .cacheControl.web,
+                                                    }}
+                                                    resizeMode={
+                                                        FastImage.resizeMode
+                                                            .contain
+                                                    }
+                                                    style={{
+                                                        width: '60%',
+                                                        height: '60%',
+                                                        borderRadius: 50,
+                                                        backgroundColor: white,
+                                                        ...viewShadow,
+                                                    }}
+                                                />
+                                                <View
+                                                    style={{
+                                                        alignItems: 'center',
+                                                        width: '90%',
+                                                        marginTop: pxToDp(5),
+                                                    }}>
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 12,
+                                                            color: black.third,
+                                                        }}
+                                                        numberOfLines={1}>
+                                                        {item.name}
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        );
+                                    }}
+                                    keyExtractor={(_, index) => index}
+                                />
+                                {this.renderGoToAll('club')}
+                            </View>
+                        ) : (
+                            <View style={{alignItems: 'center'}}>
+                                <Text style={{color: black.third}}>
+                                    你還沒有follow的組織，快去follow一些吧~
+                                </Text>
+                                <Text style={{color: black.third}}>
+                                    []~(￣▽￣)~*
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    <View
+                        style={{
+                            marginTop: pxToDp(10),
+                            ...styles.infoContainer,
+                        }}>
+                        <Text style={styles.title}>Follow的活動</Text>
+                        {eventData && eventData.length > 0 ? (
+                            <View>
+                                <FlatList
+                                    data={eventData}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    renderItem={({item}) => {
+                                        return (
+                                            <EventCard
+                                                data={item}
+                                                style={{
+                                                    marginVertical: pxToDp(8),
+                                                    marginHorizontal: pxToDp(4),
+                                                }}
+                                            />
+                                        );
+                                    }}
+                                    keyExtractor={(_, index) => index}
+                                />
+                                {this.renderGoToAll('event')}
+                            </View>
+                        ) : (
+                            <View style={{alignItems: 'center'}}>
+                                <Text style={{color: black.third}}>
+                                    你還沒有follow的活動，快去follow一些吧~
+                                </Text>
+                                <Text style={{color: black.third}}>
+                                    []~(￣▽￣)~*
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                </ScrollView>
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    infoContainer: {
+        paddingHorizontal: pxToDp(10),
+        paddingVertical: pxToDp(5),
+        backgroundColor: white,
+        borderRadius: pxToDp(10),
+        margin: pxToDp(10),
+        ...viewShadow,
+    },
+    title: {
+        color: themeColor,
+        alignSelf: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    seeMoreButton: {
+        marginVertical: pxToDp(5),
+        paddingHorizontal: pxToDp(20),
+        paddingVertical: pxToDp(10),
+        alignItems: 'center',
+        alignSelf: 'center',
+        borderRadius: pxToDp(10),
+        backgroundColor: themeColor,
+        ...viewShadow,
+    },
+});
 
 export default MesgScreen;
