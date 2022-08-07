@@ -103,7 +103,7 @@ class MesgScreen extends Component {
                 <Header
                     backgroundColor={bg_color}
                     centerComponent={{
-                        text: '提醒訊息',
+                        text: '關注',
                         style: {
                             color: COLOR_DIY.black.main,
                             fontSize: pxToDp(15),

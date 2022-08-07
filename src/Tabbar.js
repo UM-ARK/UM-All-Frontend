@@ -133,7 +133,7 @@ class Tabbar extends Component {
                                     color={color}
                                 />
                             ),
-                            title: '提醒',
+                            title: '關注',
                         }}
                     />
                 ) : null}
