@@ -220,6 +220,7 @@ class NewsDetail extends Component {
         //用数组存储内容，便于根据语言筛选条件显示
         let title = [title_cn, title_en, title_pt];
         let content = [content_cn, content_en, content_pt];
+        console.log(content[chooseMode]);
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
@@ -285,6 +286,7 @@ class NewsDetail extends Component {
                             value={repalceHtmlToText(content[chooseMode])}
                             onLinkPress={url => this.handleHyperLink(url)}
                             nodeComponentProps={{selectable: true}}
+                            stylesheet={htmlStyles}
                         />
                     </View>
 
@@ -292,8 +294,6 @@ class NewsDetail extends Component {
                     <ImageScrollViewer
                         ref={'imageScrollViewer'}
                         imageUrls={imageUrls}
-                        // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                        // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                     />
                     <View style={{marginBottom: pxToDp(50)}} />
                 </ScrollView>
@@ -330,6 +330,21 @@ const styles = StyleSheet.create({
         borderRadius: pxToDp(10),
         backgroundColor: white,
         ...viewShadow,
+    },
+});
+
+const htmlStyles = StyleSheet.create({
+    p: {
+        color: black.second,
+    },
+    span: {
+        color: black.second,
+    },
+    div: {
+        color: black.second,
+    },
+    td: {
+        color: black.third,
     },
 });
 
