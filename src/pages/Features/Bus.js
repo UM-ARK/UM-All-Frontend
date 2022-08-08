@@ -228,6 +228,18 @@ class BusScreen extends Component {
             </View>
         );
     };
+    renderCircle2 = (left, top) => {
+        return (
+            <View
+                style={{
+                    position: 'absolute',
+                    left: pcHeightToNumHeight(left, PAGE_WIDTH),
+                    top: pcHeightToNumHeight(top, PAGE_HEIGHT),
+                }}>
+                <Image source={dotImg} style={s.dotSize} />
+            </View>
+        );
+    };
 
     render() {
         let busStyleArr = [
@@ -326,11 +338,22 @@ class BusScreen extends Component {
                         {/* 右上箭頭 */}
                         {this.renderArrow2(0, '85%', '5%')}
                         {/* 左上箭頭 */}
-                        {this.renderArrow2(-90, '30%', '5%')}
+                        {this.renderArrow2(-90, '3%', '22%')}
                         {/* 左下箭頭 */}
-                        {this.renderArrow2(180, '5%', '90%')}
+                        {this.renderArrow2(180, '3%', '90%')}
                         {/* 右下箭頭 */}
                         {this.renderArrow2(90, '87%', '90%')}
+
+                        {/* 站點圓點圖標 */}
+                        {/* PGH - 逆時針 - S4 */}
+                        {this.renderCircle2('86%', '80%')}
+                        {this.renderCircle2('86%', '55%')}
+                        {this.renderCircle2('86%', '12%')}
+                        {this.renderCircle2('34%', '18%')}
+                        {this.renderCircle2('8%', '35%')}
+                        {this.renderCircle2('8%', '48%')}
+                        {this.renderCircle2('8%', '70%')}
+                        {this.renderCircle2('70%', '90%')}
 
                         {false && (
                             <View>
