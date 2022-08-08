@@ -102,8 +102,9 @@ function getBusData(busInfoHtml) {
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
     state = {
-        busPositionArr: [{index: 0}],
-        busInfoArr: [''],
+        busPositionArr: [],
+        // Example: busPositionArr: [{index: 0}],
+        busInfoArr: [],
         // 彈出層默認關閉
         isModalVisible: false,
         // 彈出層內容
@@ -231,8 +232,15 @@ class BusScreen extends Component {
             {position: 'absolute', left: pxToDp(280), top: pxToDp(570)}, // s4 ~ PGH
         ];
 
+        const {busPositionArr, busInfoArr} = this.state;
+
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
+            <View
+                style={{
+                    width: scale(350),
+                    height: verticalScale(680),
+                    backgroundColor: bg_color,
+                }}>
                 <Header title={'校園巴士'} />
 
                 <ScrollView horizontal bounces={false}>
@@ -267,49 +275,46 @@ class BusScreen extends Component {
                             {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
                             {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
                             {/* Bus運行信息的渲染 */}
-                            <View
-                                style={{
-                                    width: scale(120),
-                                    height: verticalScale(130),
-                                    marginLeft: scale(5),
-                                    backgroundColor: '#d1d1d1',
-                                    borderRadius: pxToDp(20),
-                                    paddingHorizontal: pxToDp(10),
-                                    paddingVertical: pxToDp(3),
-                                    overflow: 'hidden',
-                                }}>
-                                <ScrollView>
-                                    {this.state.busInfoArr.map(item => (
-                                        <Text
-                                            style={{
-                                                color: black.second,
-                                                fontSize: 12,
-                                            }}>
-                                            {item}
-                                        </Text>
-                                    ))}
-                                </ScrollView>
-                            </View>
+                            {busInfoArr.length > 0 ? (
+                                <View
+                                    style={{
+                                        width: scale(120),
+                                        height: verticalScale(130),
+                                        marginLeft: scale(5),
+                                        backgroundColor: '#d1d1d1',
+                                        borderRadius: pxToDp(20),
+                                        paddingHorizontal: pxToDp(10),
+                                        paddingVertical: pxToDp(3),
+                                        overflow: 'hidden',
+                                    }}>
+                                    <ScrollView>
+                                        {this.state.busInfoArr.map(item => (
+                                            <Text
+                                                style={{
+                                                    color: black.second,
+                                                    fontSize: 12,
+                                                }}>
+                                                {item}
+                                            </Text>
+                                        ))}
+                                    </ScrollView>
+                                </View>
+                            ) : null}
 
-                            {/* TODO:在Sketch中修改文字邊框為圓角，使用整張作背景 */}
-                            {/* TODO:使用絕對位置在不同分辨率下的問題，尋找適配方法，像素單位等 */}
                             {/* TODO:無Bus的情況，連busPositionArr都為空(undefined)，應隱藏Bus圖標 */}
                             {/* TODO:不止一輛巴士的情況 */}
                             {/* 巴士圖標 */}
-                            <View
-                                style={
-                                    busStyleArr[
-                                        this.state.busPositionArr.length > 0
-                                            ? this.state.busPositionArr[0].index
-                                            : 0
-                                    ]
-                                }>
-                                <Ionicons
-                                    name={'bus'}
-                                    size={pxToDp(30)}
-                                    color={themeColor}
-                                />
-                            </View>
+                            {busPositionArr.length > 0
+                                ? busPositionArr.map(item => (
+                                      <View style={busStyleArr[item.index]}>
+                                          <Ionicons
+                                              name={'bus'}
+                                              size={pxToDp(30)}
+                                              color={themeColor}
+                                          />
+                                      </View>
+                                  ))
+                                : null}
 
                             {/* 右上箭頭 */}
                             {this.renderArrow(0, 280, 25)}
