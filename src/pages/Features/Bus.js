@@ -25,9 +25,8 @@ const {bg_color, white, black, themeColor} = COLOR_DIY;
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
 
+let busIcon = require('../../static/img/Bus/bus.png');
 let busRouteImg = require('../../static/img/Bus/bus_route.png');
-let arrowImg = require('../../static/img/Bus/direction_left.png');
-let dotImg = require('../../static/img/Bus/loc_dot.png');
 let stopImgArr = [
     require('../../static/img/Bus/stopImg/PGH.jpg'),
     require('../../static/img/Bus/stopImg/E4.jpg'),
@@ -160,11 +159,10 @@ class BusScreen extends Component {
         return (
             <TouchableOpacity
                 onPress={this.toggleModal.bind(this, index)}
-                // TODO: 兩輛巴士情況的到站標識
                 style={{
                     position: 'absolute',
-                    left: scale(left),
-                    top: verticalScale(top),
+                    left: pcHeightToNumHeight(left, PAGE_WIDTH),
+                    top: pcHeightToNumHeight(top, PAGE_HEIGHT),
                     paddingHorizontal: pxToDp(5),
                     paddingVertical: pxToDp(2),
                     alignItems: 'center',
@@ -183,62 +181,6 @@ class BusScreen extends Component {
             isModalVisible: !this.state.isModalVisible,
             clickStopIndex: index,
         });
-    };
-
-    renderArrow = (deg, left, top) => {
-        return (
-            <View
-                style={{
-                    position: 'absolute',
-                    left: scale(left),
-                    top: verticalScale(top),
-                }}>
-                <Image
-                    source={arrowImg}
-                    style={{...s.arrowSize, transform: [{rotate: deg + 'deg'}]}}
-                />
-            </View>
-        );
-    };
-    renderArrow2 = (deg, left, top) => {
-        return (
-            <View
-                style={{
-                    position: 'absolute',
-                    left: pcHeightToNumHeight(left, PAGE_WIDTH),
-                    top: pcHeightToNumHeight(top, PAGE_HEIGHT),
-                }}>
-                <Image
-                    source={arrowImg}
-                    style={{...s.arrowSize, transform: [{rotate: deg + 'deg'}]}}
-                />
-            </View>
-        );
-    };
-
-    renderCircle = (left, top) => {
-        return (
-            <View
-                style={{
-                    position: 'absolute',
-                    left: scale(left),
-                    top: verticalScale(top),
-                }}>
-                <Image source={dotImg} style={s.dotSize} />
-            </View>
-        );
-    };
-    renderCircle2 = (left, top) => {
-        return (
-            <View
-                style={{
-                    position: 'absolute',
-                    left: pcHeightToNumHeight(left, PAGE_WIDTH),
-                    top: pcHeightToNumHeight(top, PAGE_HEIGHT),
-                }}>
-                <Image source={dotImg} style={s.dotSize} />
-            </View>
-        );
     };
 
     render() {
@@ -273,8 +215,6 @@ class BusScreen extends Component {
                     <FastImage
                         source={busRouteImg}
                         style={{
-                            // width: scale(350),
-                            // height: verticalScale(680),
                             width: pcHeightToNumHeight('100%', PAGE_WIDTH),
                             height: pcHeightToNumHeight('100%', PAGE_HEIGHT),
                         }}>
@@ -326,107 +266,50 @@ class BusScreen extends Component {
                         {busPositionArr.length > 0
                             ? busPositionArr.map(item => (
                                   <View style={busStyleArr[item.index]}>
-                                      <Ionicons
-                                          name={'bus'}
-                                          size={pxToDp(30)}
-                                          color={themeColor}
+                                      <Image
+                                          source={busIcon}
+                                          style={{
+                                              width: pxToDp(30),
+                                              height: pxToDp(30),
+                                          }}
                                       />
                                   </View>
                               ))
                             : null}
 
-                        {/* 右上箭頭 */}
-                        {this.renderArrow2(0, '85%', '5%')}
-                        {/* 左上箭頭 */}
-                        {this.renderArrow2(-90, '3%', '22%')}
-                        {/* 左下箭頭 */}
-                        {this.renderArrow2(180, '3%', '90%')}
-                        {/* 右下箭頭 */}
-                        {this.renderArrow2(90, '87%', '90%')}
-
-                        {/* 站點圓點圖標 */}
-                        {/* PGH - 逆時針 - S4 */}
-                        {this.renderCircle2('86%', '80%')}
-                        {this.renderCircle2('86%', '55%')}
-                        {this.renderCircle2('86%', '12%')}
-                        {this.renderCircle2('34%', '18%')}
-                        {this.renderCircle2('8%', '35%')}
-                        {this.renderCircle2('8%', '48%')}
-                        {this.renderCircle2('8%', '70%')}
-                        {this.renderCircle2('70%', '90%')}
-
-                        {false && (
-                            <View>
-                                {/* 右上箭頭 */}
-                                {this.renderArrow(0, 280, 25)}
-                                {/* 左上箭頭 */}
-                                {this.renderArrow(-90, 35, 150)}
-                                {/* 左下箭頭 */}
-                                {this.renderArrow(180, 35, 610)}
-                                {/* 右下箭頭 */}
-                                {this.renderArrow(90, 290, 610)}
-
-                                {/* 站點圓點圖標 */}
-                                {/* PGH - 逆時針 - S4 */}
-                                {this.renderCircle(281, 540)}
-                                {this.renderCircle(281, 360)}
-                                {this.renderCircle(281, 80)}
-                                {this.renderCircle(126, 120)}
-                                {this.renderCircle(50, 250)}
-                                {this.renderCircle(50, 330)}
-                                {this.renderCircle(50, 510)}
-                                {this.renderCircle(250, 610)}
-
-                                {/* 巴士站點文字 */}
-                                {this.renderBusStopText(
-                                    140,
-                                    540,
-                                    'PGH 研究生宿舍(起)',
-                                    0,
-                                )}
-                                {this.renderBusStopText(
-                                    190,
-                                    357,
-                                    'E4 劉少榮樓',
-                                    1,
-                                )}
-                                {this.renderBusStopText(
-                                    188,
-                                    75,
-                                    'N2 大學會堂',
-                                    2,
-                                )}
-                                {this.renderBusStopText(
-                                    150,
-                                    115,
-                                    'N6 行政樓',
-                                    3,
-                                )}
-                                {this.renderBusStopText(
-                                    75,
-                                    247,
-                                    'E11 科技學院',
-                                    4,
-                                )}
-                                {this.renderBusStopText(
-                                    75,
-                                    325,
-                                    'E21 人文社科樓',
-                                    5,
-                                )}
-                                {this.renderBusStopText(
-                                    75,
-                                    505,
-                                    'E32 法學院',
-                                    6,
-                                )}
-                                {this.renderBusStopText(
-                                    110,
-                                    633,
-                                    'S4 研究生宿舍南四座(終)',
-                                    7,
-                                )}
-                            </View>
+                        {/* 巴士站點文字 */}
+                        {this.renderBusStopText(
+                            '40%',
+                            '76.2%',
+                            'PGH 研究生宿舍(起)',
+                            0,
+                        )}
+                        {this.renderBusStopText('52%', '51%', 'E4 劉少榮樓', 1)}
+                        {this.renderBusStopText('52%', '14%', 'N2 大學會堂', 2)}
+                        {this.renderBusStopText('16%', '14%', 'N6 行政樓', 3)}
+                        {this.renderBusStopText(
+                            '24%',
+                            '27%',
+                            'E11 科技學院',
+                            4,
+                        )}
+                        {this.renderBusStopText(
+                            '24%',
+                            '44.8%',
+                            'E21 人文社科樓',
+                            5,
+                        )}
+                        {this.renderBusStopText(
+                            '24%',
+                            '66.2%',
+                            'E32 法學院',
+                            6,
+                        )}
+                        {this.renderBusStopText(
+                            '30%',
+                            '92%',
+                            'S4 研究生宿舍南四座(終)',
+                            7,
                         )}
                     </FastImage>
                 </ScrollView>
