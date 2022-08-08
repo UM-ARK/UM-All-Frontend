@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import {Text, View, Image, Dimensions, StyleSheet} from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import {BASE_URI, GET} from './src/utils/pathMap';
+import {COLOR_DIY} from './src/utils/uiMap';
 import {setAPPInfo, handleLogout} from './src/utils/storageKits';
 import {Provider} from 'mobx-react';
 import packageInfo from './package.json';
@@ -14,6 +15,11 @@ import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import axios from 'axios';
+import {pxToDp} from './src/utils/stylesKits';
+
+const {viewShadow, bg_color, white} = COLOR_DIY;
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const LOGO_WIDTH = PAGE_WIDTH * 0.5;
 
 class App extends Component {
     state = {
@@ -97,10 +103,22 @@ class App extends Component {
             <AnimatedSplash
                 translucent={true}
                 isLoaded={this.state.isLoaded}
-                logoImage={require('./src/static/img/umallLogo.png')}
-                backgroundColor={'#fff'}
-                logoHeight={150}
-                logoWidth={150}>
+                customComponent={
+                    <View
+                        style={{
+                            width: LOGO_WIDTH,
+                            height: LOGO_WIDTH,
+                            borderRadius: pxToDp(30),
+                            overflow: 'hidden',
+                            ...viewShadow,
+                        }}>
+                        <Image
+                            source={require('./src/static/img/umallLogo.png')}
+                            style={{width: '100%', height: '100%'}}
+                        />
+                    </View>
+                }
+                backgroundColor={bg_color}>
                 <SafeAreaProvider>
                     <Provider RootStore={RootStore}>
                         <NativeBaseProvider>
