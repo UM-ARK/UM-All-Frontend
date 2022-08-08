@@ -1,14 +1,5 @@
 import React, {Component} from 'react';
-import {
-    Dimensions,
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    StatusBar,
-    Button,
-    Image,
-} from 'react-native';
+import {Dimensions, View, Text} from 'react-native';
 
 import {COLOR_DIY} from '../utils/uiMap';
 import {pxToDp} from '../utils/stylesKits';
@@ -18,6 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -75,10 +67,19 @@ class ImageScrollViewer extends Component {
                     backgroundColor={'transparent'}
                     useNativeDriver={true}
                     imageUrls={imageUrlsObjArr}
+                    renderImage={props => (
+                        <FastImage
+                            source={{
+                                uri: props.source.uri,
+                                cache: FastImage.cacheControl.web,
+                            }}
+                            style={props.style}
+                        />
+                    )}
                     // 打開的imageUrls的索引
                     index={imagesIndex}
                     // 注釋掉renderIndicator屬性則 默認會有頁數顯示
-                    renderIndicator={() => null}
+                    // renderIndicator={() => null}
                     onClick={this.tiggerModal}
                     doubleClickInterval={300}
                     enableSwipeDown={true}
