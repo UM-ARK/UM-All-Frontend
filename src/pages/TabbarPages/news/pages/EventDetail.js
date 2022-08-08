@@ -32,6 +32,7 @@ import {inject} from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -157,6 +158,7 @@ class EventDetail extends Component {
                 this.postDelFollow(eventID);
             }
         }
+        ReactNativeHapticFeedback.trigger('soft');
     };
 
     async postAddFollow(eventID) {

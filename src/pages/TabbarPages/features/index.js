@@ -54,6 +54,7 @@ import {FlatGrid} from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {inject} from 'mobx-react';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -606,6 +607,7 @@ class Index extends Component {
                                 activeOpacity={0.7}
                                 // 跳轉具體頁面
                                 onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
                                     if (!needLogin || this.state.isLogin) {
                                         // 跳轉對應本地頁面
                                         if (go_where != 'Webview') {

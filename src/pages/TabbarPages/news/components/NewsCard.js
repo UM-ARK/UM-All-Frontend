@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
@@ -7,7 +7,6 @@ import {pxToDp} from '../../../../utils/stylesKits';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import moment from 'moment-timezone';
 
 // 解構全局ui設計顏色

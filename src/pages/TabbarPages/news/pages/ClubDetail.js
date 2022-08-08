@@ -44,6 +44,7 @@ import {useToast} from 'native-base';
 import {inject} from 'mobx-react';
 import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
@@ -250,6 +251,7 @@ class ClubDetail extends Component {
                 this.postDelFollow(club_num);
             }
         }
+        ReactNativeHapticFeedback.trigger('soft');
     };
 
     renderFollowButton = () => {
@@ -680,12 +682,15 @@ class ClubDetail extends Component {
                                     <TouchableOpacity
                                         style={styles.checkMoreButton}
                                         activeOpacity={0.8}
-                                        onPress={() =>
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger(
+                                                'soft',
+                                            );
                                             this.props.navigation.navigate(
                                                 'AllEvents',
                                                 {clubData},
-                                            )
-                                        }>
+                                            );
+                                        }}>
                                         <Text style={{color: white}}>
                                             查看全部
                                         </Text>

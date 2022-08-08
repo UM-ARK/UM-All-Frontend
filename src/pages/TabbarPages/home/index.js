@@ -22,6 +22,7 @@ import Carousel from 'react-native-reanimated-carousel';
 import {FlatGrid} from 'react-native-super-grid';
 import {inject} from 'mobx-react';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 let carouselProgress = 0;
@@ -63,36 +64,48 @@ class HomeScreen extends Component {
             {
                 icon_name: 'bus',
                 function_name: '校園巴士',
-                func: () => this.props.navigation.navigate('Bus'),
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                    this.props.navigation.navigate('Bus');
+                },
             },
             {
                 icon_name: 'aperture-sharp',
                 function_name: '最近活動',
-                func: () =>
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.props.navigation.jumpTo('NewsTabbar', {
                         screen: 'EventPage',
-                    }),
+                    });
+                },
             },
             {
                 icon_name: 'color-wand',
                 function_name: '澳大社團',
-                func: () =>
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.props.navigation.jumpTo('NewsTabbar', {
                         screen: 'ClubPage',
-                    }),
+                    });
+                },
             },
             {
                 icon_name: 'earth-sharp',
                 function_name: '澳大新聞',
-                func: () =>
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.props.navigation.jumpTo('NewsTabbar', {
                         screen: 'NewsPage',
-                    }),
+                    });
+                },
             },
             {
                 icon_name: 'grid',
                 function_name: '所有服務',
-                func: () => this.props.navigation.jumpTo('FeaturesTabbar'),
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                    this.props.navigation.jumpTo('FeaturesTabbar');
+                },
             },
         ],
 
@@ -182,6 +195,7 @@ class HomeScreen extends Component {
                         </View>
                     </View>
 
+                    {/* 提示按鈕 */}
                     <View
                         style={{
                             alignItems: 'center',
@@ -201,6 +215,7 @@ class HomeScreen extends Component {
                             style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
                                 this.props.navigation.navigate('AboutUs');
                             }}>
                             <Text style={{color: white}}>{`這個APP是?`}</Text>
@@ -214,6 +229,7 @@ class HomeScreen extends Component {
                             style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
                                 alert('跳轉迎新欄目');
                             }}>
                             <Text style={{color: white}}>{`我是萌新`}</Text>
@@ -227,6 +243,7 @@ class HomeScreen extends Component {
                             style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
                                 this.props.navigation.navigate('UsualQuestion');
                             }}>
                             <Text style={{color: white}}>{`嗯嗯嗯???`}</Text>
@@ -248,6 +265,7 @@ class HomeScreen extends Component {
                             style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
                                 this.props.navigation.navigate('LoginSetting');
                             }}>
                             <Text style={{color: white}}>
@@ -298,6 +316,9 @@ class HomeScreen extends Component {
                                         alignSelf: 'center',
                                     }}
                                     onPress={() => {
+                                        ReactNativeHapticFeedback.trigger(
+                                            'soft',
+                                        );
                                         this.setState({isShowModal: false});
                                         this.props.navigation.jumpTo(
                                             'MeTabbar',

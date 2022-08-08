@@ -23,6 +23,7 @@ import ActionSheet from 'react-native-actionsheet';
 import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import moment from 'moment-timezone';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -135,7 +136,9 @@ class EventPage extends Component {
         return (
             <View>
                 <TouchableOpacity
-                    onPress={() => this.ActionSheet.show()}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.ActionSheet.show()}}
                     activeOpacity={0.8}
                     style={{
                         flexDirection: 'row',
@@ -206,6 +209,7 @@ class EventPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.refs.scrollView.scrollTo({
                             x: 0,
@@ -241,6 +245,7 @@ class EventPage extends Component {
             this.toast.show(`數據加載中，請稍等~`, 2000);
             this.getData();
         }
+        ReactNativeHapticFeedback.trigger('soft');
     };
 
     renderLoadMoreView = () => {

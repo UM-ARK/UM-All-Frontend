@@ -21,6 +21,7 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -104,6 +105,7 @@ class UMEventPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.refs.virtualizedList.scrollToOffset({
                             x: 0,

@@ -12,11 +12,12 @@ import {
 
 import {COLOR_DIY} from '../utils/uiMap';
 import {pxToDp} from '../utils/stylesKits';
+import ModalBottom from './ModalSave';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import ModalBottom from './ModalSave';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -84,6 +85,7 @@ class ImageScrollViewer extends Component {
                     onSwipeDown={this.tiggerModal}
                     // 自定義長按菜單
                     menus={({cancel, _}) => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         return (
                             <ModalBottom
                                 cancel={cancel}
