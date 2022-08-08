@@ -788,13 +788,18 @@ class ClubDetail extends Component {
                                 簡介
                             </Text>
                             <ScrollView style={{marginTop: pxToDp(5)}}>
-                                <Text
-                                    style={{
-                                        color: black.main,
-                                        fontSize: pxToDp(16),
-                                    }}>
-                                    {intro}
-                                </Text>
+                                <HyperlinkText
+                                    linkStyle={{color: themeColor}}
+                                    navigation={this.props.navigation}>
+                                    <Text
+                                        style={{
+                                            color: black.main,
+                                            fontSize: pxToDp(16),
+                                        }}
+                                        selectable>
+                                        {intro}
+                                    </Text>
+                                </HyperlinkText>
                             </ScrollView>
                         </View>
                     </ModalBottom>
