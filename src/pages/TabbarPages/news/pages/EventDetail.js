@@ -773,7 +773,8 @@ class EventDetail extends Component {
                         // 前景固定內容
                         renderTouchableFixedForeground={renderForeground}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={this.renderRefreshCompo()}>
+                        refreshControl={this.renderRefreshCompo()}
+                        bounces={false}>
                         {/* 主要頁面內容 */}
                         {renderMainContent()}
                         <View
