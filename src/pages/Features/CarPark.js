@@ -15,7 +15,7 @@ import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
-import {UM_API_CAR_PARK} from '../../utils/pathMap';
+import {UM_API_CAR_PARK, UM_API_TOKEN} from '../../utils/pathMap';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -49,8 +49,7 @@ class CarPark extends Component {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
-                    Authorization:
-                        'Bearer c9b17308-8579-3672-8a0d-beb483b794bf',
+                    Authorization: UM_API_TOKEN,
                 },
                 params: {date_from: macauTime},
             })

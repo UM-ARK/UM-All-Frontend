@@ -15,7 +15,7 @@ import NewsCard from './components/NewsCard';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {UM_API_NEWS} from '../../../utils/pathMap';
+import {UM_API_NEWS, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
 import Interactable from 'react-native-interactable';
@@ -91,8 +91,7 @@ class NewsPage extends Component {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
-                    Authorization:
-                        'Bearer 3edfffda-97ce-326a-a0a5-5e876adbf89f',
+                    Authorization: UM_API_TOKEN,
                 },
             })
             .then(res => {

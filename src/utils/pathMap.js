@@ -80,6 +80,8 @@ export const UM_API_CAR_PARK = 'https://api.data.um.edu.mo/service/facilities/ca
 export const UM_API_EVENT = 'https://api.data.um.edu.mo/service/media/events/v1.0.0/all';
 // 澳大 - API 新聞
 export const UM_API_NEWS = 'https://api.data.um.edu.mo/service/media/news/v1.0.0/all';
+// 澳大 - API token
+export const UM_API_TOKEN = 'Bearer c9b17308-8579-3672-8a0d-beb483b794bf';
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站

@@ -13,7 +13,7 @@ import {
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {UM_API_EVENT} from '../../../utils/pathMap';
+import {UM_API_EVENT, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
 
@@ -60,8 +60,7 @@ class UMEventPage extends Component {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
-                    Authorization:
-                        'Bearer c9b17308-8579-3672-8a0d-beb483b794bf',
+                    Authorization: UM_API_TOKEN,
                 },
                 // params: {
                 // date_from: macauTime,
