@@ -104,19 +104,15 @@ class App extends Component {
                 translucent={true}
                 isLoaded={this.state.isLoaded}
                 customComponent={
-                    <View
+                    <Image
+                        source={require('./src/static/img/umallLogo.png')}
                         style={{
                             width: LOGO_WIDTH,
                             height: LOGO_WIDTH,
                             borderRadius: pxToDp(30),
                             overflow: 'hidden',
-                            ...viewShadow,
-                        }}>
-                        <Image
-                            source={require('./src/static/img/umallLogo.png')}
-                            style={{width: '100%', height: '100%'}}
-                        />
-                    </View>
+                        }}
+                    />
                 }
                 backgroundColor={bg_color}>
                 <SafeAreaProvider>
