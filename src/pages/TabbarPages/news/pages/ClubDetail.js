@@ -52,8 +52,9 @@ const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const CLUB_LOGO_SIZE = pxToDp(80);
-const CLUB_IMAGE_WIDTH = pxToDp(75);
-const CLUB_IMAGE_HEIGHT = pxToDp(55);
+
+const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
+const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 class ClubDetail extends Component {
     state = {

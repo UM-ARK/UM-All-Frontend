@@ -37,8 +37,8 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const CLUB_LOGO_SIZE = 80;
-const CLUB_IMAGE_WIDTH = 75;
-const CLUB_IMAGE_HEIGHT = 55;
+const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
+const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor} = COLOR_DIY;
@@ -340,7 +340,7 @@ class EventDetail extends Component {
                                         color: COLOR_DIY.black.third,
                                     }}>
                                     {moment(startTimeStamp).format(
-                                        'MM/DD, HH:mm',
+                                        'YYYY/MM/DD, HH:mm',
                                     )}
                                 </Text>
                             </View>
@@ -364,7 +364,7 @@ class EventDetail extends Component {
                                         color: COLOR_DIY.black.third,
                                     }}>
                                     {moment(finishTimeStamp).format(
-                                        'MM/DD, HH:mm',
+                                        'YYYY/MM/DD, HH:mm',
                                     )}
                                 </Text>
                             </View>
@@ -654,26 +654,36 @@ class EventDetail extends Component {
                                     marginTop: pxToDp(0),
                                 }}>
                                 {/* 圖片相冊 最多4張 */}
-                                {relateImgUrl.map(item => {
+                                {relateImgUrl.map((item, index) => {
                                     return (
-                                        <FastImage
-                                            source={{
-                                                uri: item.replace(
-                                                    'http:',
-                                                    'https:',
-                                                ),
-                                                cache: FastImage.cacheControl
-                                                    .web,
-                                            }}
-                                            style={{
-                                                width: pxToDp(CLUB_IMAGE_WIDTH),
-                                                height: pxToDp(
-                                                    CLUB_IMAGE_HEIGHT,
-                                                ),
-                                                borderRadius: pxToDp(5),
-                                                ...COLOR_DIY.viewShadow,
-                                            }}
-                                        />
+                                        <TouchableOpacity
+                                            activeOpacity={0.8}
+                                            onPress={() => {
+                                                this.setState({
+                                                    imageUrls: relateImgUrl,
+                                                });
+                                                this.refs.imageScrollViewer.handleOpenImage(
+                                                    index,
+                                                );
+                                            }}>
+                                            <FastImage
+                                                source={{
+                                                    uri: item,
+                                                    cache: FastImage
+                                                        .cacheControl.web,
+                                                }}
+                                                style={{
+                                                    width: pxToDp(
+                                                        CLUB_IMAGE_WIDTH,
+                                                    ),
+                                                    height: pxToDp(
+                                                        CLUB_IMAGE_HEIGHT,
+                                                    ),
+                                                    borderRadius: pxToDp(5),
+                                                    ...COLOR_DIY.viewShadow,
+                                                }}
+                                            />
+                                        </TouchableOpacity>
                                     );
                                 })}
                             </View>
