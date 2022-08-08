@@ -46,6 +46,7 @@ const Stack = createStackNavigator();
 class Nav extends Component {
     render() {
         return (
+        !this.props.lock?(
         <NavigationContainer>
             {/* initialRouteName可以指定初始頁面的組件，headerShown可以控制頂部標題顯示 */}
             <Stack.Navigator
@@ -101,6 +102,7 @@ class Nav extends Component {
                 <Stack.Screen name="TestScreen"     component={TestScreen} />
             </Stack.Navigator>
         </NavigationContainer>
+        ):null
         );
     }
 }

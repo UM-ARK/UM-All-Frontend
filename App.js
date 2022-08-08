@@ -21,6 +21,8 @@ const {viewShadow, bg_color, white} = COLOR_DIY;
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
 
+let versionLock = false;
+
 class App extends Component {
     state = {
         isLoaded: false,
@@ -76,12 +78,12 @@ class App extends Component {
             const strAppInfo = await AsyncStorage.getItem('appInfo');
             const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
             if (strAppInfo == null) {
-                // console.log('尚未緩存版本數據');
                 setAPPInfo(serverInfo);
             } else {
                 // APP版本更新，提示下載新版本
                 if (packageInfo.version != serverInfo.app_version) {
-                    alert(`新版本可用，請盡快前往更新喔~\n[]~(￣▽￣)~*`);
+                    alert(`APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`);
+                    versionLock = true;
                 }
                 // 服務器API更新，需要重新登錄
                 if (appInfo.API_version != serverInfo.API_version) {
@@ -119,7 +121,7 @@ class App extends Component {
                     <Provider RootStore={RootStore}>
                         <NativeBaseProvider>
                             <View style={{flex: 1}}>
-                                <Nav></Nav>
+                                <Nav lock={versionLock} />
                             </View>
                         </NativeBaseProvider>
                     </Provider>
