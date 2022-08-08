@@ -49,7 +49,7 @@ class Nav extends Component {
         <NavigationContainer>
             {/* initialRouteName可以指定初始頁面的組件，headerShown可以控制頂部標題顯示 */}
             <Stack.Navigator
-                initialRouteName="Bus"
+                initialRouteName="Tabbar"
                 screenOptions={{ headerShown:false }}
                 >
                 <Stack.Screen name="Tabbar"         component={Tabbar} options={{headerShown:false}}/>
