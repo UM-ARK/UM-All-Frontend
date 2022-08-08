@@ -122,7 +122,6 @@ class EventPage extends Component {
         let newDataArr = [];
         // 當前時刻時間戳
         let nowTimeStamp = moment(new Date()).valueOf();
-        // TODO: IOS有全未結束的bug
         eventDataList.map(itm => {
             if (nowTimeStamp < moment(itm.enddatetime).valueOf()) {
                 newDataArr.push(itm);
