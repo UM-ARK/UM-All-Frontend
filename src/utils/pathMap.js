@@ -63,9 +63,12 @@ export const POST = {
     NOTICE_CREATE: 'create_notice/',
 }
 
-export const ARK_LETTER_IMG = 'https://umall.one/static/logo.png';
+export const ARK_LETTER_IMG = 'https://umall.one/static/ark_letter.png';
 
+// 用戶協議
 export const USER_AGREE = 'https://umall.one/user_agreement.html';
+// 常見問題
+export const USUAL_Q = 'https://umall.one/qa.html';
 
 
 // Webview 服務
