@@ -541,9 +541,15 @@ class UMEventDetail extends Component {
                             <Text style={styles.secondTitle}>
                                 {venue[chooseMode + 3]}
                             </Text>
-                            <Text style={styles.content} selectable>
-                                {venue[chooseMode]}
-                            </Text>
+                            <HyperlinkText
+                                linkStyle={{
+                                    color: COLOR_DIY.themeColor,
+                                }}
+                                navigation={this.props.navigation}>
+                                <Text style={styles.content} selectable>
+                                    {venue[chooseMode]}
+                                </Text>
+                            </HyperlinkText>
                         </View>
                         {/*語言*/}
                         <View style={styles.contentContainer}>

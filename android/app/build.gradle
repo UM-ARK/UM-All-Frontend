@@ -286,6 +286,8 @@ dependencies {
 
     implementation project(':react-native-restart') // https://github.com/avishayil/react-native-restart
 
+    implementation project(':react-native-haptic-feedback')
+
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
     }

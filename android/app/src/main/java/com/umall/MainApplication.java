@@ -18,6 +18,7 @@ import com.BV.LinearGradient.LinearGradientPackage; // 漸變庫需要
 import com.wix.interactable.Interactable; // 拖動手勢庫需要
 import com.reactnativecommunity.cameraroll.CameraRollPackage; // 圖片保存需要
 import com.reactnativerestart.RestartPackage;  // <--- Import
+import com.mkuczera.RNReactNativeHapticFeedbackPackage; // 震動包
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -38,6 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
           packages.add(new Interactable());           // 拖動手勢庫需要
           // packages.add(new RestartPackage());           // 重啟庫需要
           // packages.add(new CameraRollPackage());      // 圖片保存需要
+          // packages.add(new RNReactNativeHapticFeedbackPackage());      // 震動
           
           return packages;
         }

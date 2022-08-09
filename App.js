@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import {Text, View, Image, Dimensions, StyleSheet} from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import {BASE_URI, GET} from './src/utils/pathMap';
+import {COLOR_DIY} from './src/utils/uiMap';
 import {setAPPInfo, handleLogout} from './src/utils/storageKits';
 import {Provider} from 'mobx-react';
 import packageInfo from './package.json';
@@ -14,6 +15,13 @@ import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import axios from 'axios';
+import {pxToDp} from './src/utils/stylesKits';
+
+const {viewShadow, bg_color, white} = COLOR_DIY;
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const LOGO_WIDTH = PAGE_WIDTH * 0.5;
+
+let versionLock = false;
 
 class App extends Component {
     state = {
@@ -65,17 +73,18 @@ class App extends Component {
     }
 
     async checkInfo(serverInfo) {
-        console.log('服務器版本信息', serverInfo);
         try {
             const strAppInfo = await AsyncStorage.getItem('appInfo');
             const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
             if (strAppInfo == null) {
-                // console.log('尚未緩存版本數據');
                 setAPPInfo(serverInfo);
             } else {
                 // APP版本更新，提示下載新版本
                 if (packageInfo.version != serverInfo.app_version) {
-                    alert(`新版本可用，請盡快前往更新喔~\n[]~(￣▽￣)~*`);
+                    alert(
+                        `APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`,
+                    );
+                    versionLock = true;
                 }
                 // 服務器API更新，需要重新登錄
                 if (appInfo.API_version != serverInfo.API_version) {
@@ -97,15 +106,23 @@ class App extends Component {
             <AnimatedSplash
                 translucent={true}
                 isLoaded={this.state.isLoaded}
-                logoImage={require('./src/static/img/umallLogo.png')}
-                backgroundColor={'#fff'}
-                logoHeight={150}
-                logoWidth={150}>
+                customComponent={
+                    <Image
+                        source={require('./src/static/img/umallLogo.png')}
+                        style={{
+                            width: LOGO_WIDTH,
+                            height: LOGO_WIDTH,
+                            borderRadius: pxToDp(30),
+                            overflow: 'hidden',
+                        }}
+                    />
+                }
+                backgroundColor={bg_color}>
                 <SafeAreaProvider>
                     <Provider RootStore={RootStore}>
                         <NativeBaseProvider>
                             <View style={{flex: 1}}>
-                                <Nav></Nav>
+                                <Nav lock={versionLock} />
                             </View>
                         </NativeBaseProvider>
                     </Provider>

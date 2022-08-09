@@ -55,8 +55,8 @@ class EventSetting extends Component {
         link: '',
         place: '',
         introText: '',
-        startDate: new Date(),
-        finishDate: new Date(),
+        startDate: moment(new Date()),
+        finishDate: moment(new Date()),
         coverImgUrl: '',
         relateImgUrl: ['', '', '', ''],
         expanded: false,
@@ -110,7 +110,7 @@ class EventSetting extends Component {
                         eventData.relate_image_url = addHostArr;
                         let imgArr = eventData.relate_image_url;
                         // 不夠4張則補充
-                        if (imgArr.length < 3) {
+                        if (imgArr.length <= 4) {
                             let pushArr = new Array(4 - imgArr.length).fill('');
                             let arr = JSON.parse(JSON.stringify(imgArr));
                             arr.push(...pushArr);
@@ -473,11 +473,11 @@ class EventSetting extends Component {
 
         data.append(
             'startdatetime',
-            moment(startDate).format('YYYY-MM-DDTHH:mm'),
+            moment(String(startDate)).format('YYYY-MM-DDTHH:mm'),
         );
         data.append(
             'enddatetime',
-            moment(finishDate).format('YYYY-MM-DDTHH:mm'),
+            moment(String(finishDate)).format('YYYY-MM-DDTHH:mm'),
         );
         data.append('location', place);
         data.append('introduction', introText);
@@ -509,7 +509,7 @@ class EventSetting extends Component {
                 }
             })
             .catch(err => {
-                console.log('err', err);
+                // console.log('err', err);
                 alert('請求錯誤');
             });
     };
@@ -549,7 +549,16 @@ class EventSetting extends Component {
     };
 
     render() {
-        const {isLoading, submitChoice, dialogText, type, mode} = this.state;
+        const {
+            isLoading,
+            submitChoice,
+            dialogText,
+            type,
+            mode,
+            startDate,
+            finishDate,
+        } = this.state;
+
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header title={'活動資訊編輯'} />
@@ -749,8 +758,8 @@ class EventSetting extends Component {
                                             fontSize: pxToDp(15),
                                             color: black.third,
                                         }}>
-                                        {moment(this.state.startDate).format(
-                                            'MM-DD, HH:mm',
+                                        {moment(String(startDate)).format(
+                                            'YYYY/MM/DD, HH:mm',
                                         )}
                                     </Text>
                                 </Text>
@@ -781,8 +790,8 @@ class EventSetting extends Component {
                                             fontSize: pxToDp(15),
                                             color: black.third,
                                         }}>
-                                        {moment(this.state.finishDate).format(
-                                            'MM-DD, HH:mm',
+                                        {moment(String(finishDate)).format(
+                                            'YYYY/MM/DD, HH:mm',
                                         )}
                                     </Text>
                                 </Text>

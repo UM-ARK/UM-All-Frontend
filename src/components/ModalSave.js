@@ -2,12 +2,13 @@
 import React, {Component} from 'react';
 import {Dimensions, View, Text, Button, TouchableOpacity} from 'react-native';
 
-import Modal from 'react-native-modal';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import {pxToDp} from '../utils/stylesKits';
 import {COLOR_DIY} from '../utils/uiMap';
 import {handleImageDownload} from '../utils/fileKits';
+
+import Modal from 'react-native-modal';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -63,6 +64,7 @@ class ModalSave extends Component {
                                     alignItems: 'center',
                                 }}
                                 onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
                                     handleImageDownload(
                                         this.props.imageUrl.url,
                                     );

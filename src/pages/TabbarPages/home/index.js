@@ -5,6 +5,7 @@ import {
     Text,
     Dimensions,
     TouchableOpacity,
+    StyleSheet,
 } from 'react-native';
 
 // 本地工具
@@ -21,11 +22,12 @@ import Carousel from 'react-native-reanimated-carousel';
 import {FlatGrid} from 'react-native-super-grid';
 import {inject} from 'mobx-react';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 let carouselProgress = 0;
 
-const {white, bg_color} = COLOR_DIY;
+const {white, bg_color, black, themeColor} = COLOR_DIY;
 
 class HomeScreen extends Component {
     state = {
@@ -62,36 +64,48 @@ class HomeScreen extends Component {
             {
                 icon_name: 'bus',
                 function_name: '校園巴士',
-                func: () => this.props.navigation.navigate('Bus'),
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                    this.props.navigation.navigate('Bus');
+                },
             },
             {
                 icon_name: 'aperture-sharp',
                 function_name: '最近活動',
-                func: () =>
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.props.navigation.jumpTo('NewsTabbar', {
                         screen: 'EventPage',
-                    }),
+                    });
+                },
             },
             {
                 icon_name: 'color-wand',
                 function_name: '澳大社團',
-                func: () =>
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.props.navigation.jumpTo('NewsTabbar', {
                         screen: 'ClubPage',
-                    }),
+                    });
+                },
             },
             {
                 icon_name: 'earth-sharp',
                 function_name: '澳大新聞',
-                func: () =>
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.props.navigation.jumpTo('NewsTabbar', {
                         screen: 'NewsPage',
-                    }),
+                    });
+                },
             },
             {
                 icon_name: 'grid',
                 function_name: '所有服務',
-                func: () => this.props.navigation.jumpTo('FeaturesTabbar'),
+                func: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                    this.props.navigation.jumpTo('FeaturesTabbar');
+                },
             },
         ],
 
@@ -181,6 +195,7 @@ class HomeScreen extends Component {
                         </View>
                     </View>
 
+                    {/* 提示按鈕 */}
                     <View
                         style={{
                             alignItems: 'center',
@@ -188,11 +203,54 @@ class HomeScreen extends Component {
                             backgroundColor: white,
                             paddingVertical: pxToDp(10),
                         }}>
-                        <Text style={{color: COLOR_DIY.black.third}}>
-                            TODO: Holiday 提示
+                        <Text style={{color: black.second, fontSize: 15}}>
+                            {`歡迎來到UM ALL~`}
                         </Text>
+
+                        <Text
+                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            您可能想先了解：
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.buttonContainer}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.navigate('AboutUs');
+                            }}>
+                            <Text style={{color: white}}>{`這個APP是?`}</Text>
+                        </TouchableOpacity>
+
+                        <Text
+                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            如果你是新同學...
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.buttonContainer}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                alert('跳轉迎新欄目');
+                            }}>
+                            <Text style={{color: white}}>{`我是萌新`}</Text>
+                        </TouchableOpacity>
+
+                        <Text
+                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            您可能還有一肚子疑問...
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.buttonContainer}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.navigate('UsualQuestion');
+                            }}>
+                            <Text style={{color: white}}>{`嗯嗯嗯???`}</Text>
+                        </TouchableOpacity>
                     </View>
 
+                    {/* 快速填充功能提示 */}
                     <View
                         style={{
                             alignItems: 'center',
@@ -200,21 +258,20 @@ class HomeScreen extends Component {
                             backgroundColor: white,
                             paddingVertical: pxToDp(10),
                         }}>
-                        <Text style={{color: COLOR_DIY.black.third}}>
-                            {`TODO: 歡迎來到UM ALL~\n這個APP是...\n能用來...\n由誰...\n如果你是新同學...`}
+                        <Text style={{color: black.third}}>
+                            {`UM Pass頁面需要重新輸入賬號？`}
                         </Text>
-                    </View>
-
-                    <View
-                        style={{
-                            alignItems: 'center',
-                            marginTop: pxToDp(10),
-                            backgroundColor: white,
-                            paddingVertical: pxToDp(10),
-                        }}>
-                        <Text style={{color: COLOR_DIY.black.third}}>
-                            {`TODO: 登錄體驗完整功能！`}
-                        </Text>
+                        <TouchableOpacity
+                            style={styles.buttonContainer}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.navigate('LoginSetting');
+                            }}>
+                            <Text style={{color: white}}>
+                                {`啟用自動填充功能`}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     <View style={{marginBottom: pxToDp(50)}} />
@@ -259,6 +316,9 @@ class HomeScreen extends Component {
                                         alignSelf: 'center',
                                     }}
                                     onPress={() => {
+                                        ReactNativeHapticFeedback.trigger(
+                                            'soft',
+                                        );
                                         this.setState({isShowModal: false});
                                         this.props.navigation.jumpTo(
                                             'MeTabbar',
@@ -293,4 +353,14 @@ class HomeScreen extends Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    buttonContainer: {
+        marginTop: pxToDp(5),
+        backgroundColor: themeColor,
+        padding: pxToDp(10),
+        borderRadius: pxToDp(10),
+    },
+});
+
 export default inject('RootStore')(HomeScreen);

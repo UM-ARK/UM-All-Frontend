@@ -29,6 +29,7 @@ import WebView from 'react-native-webview';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {bg_color, black, themeColor, white} = COLOR_DIY;
 
@@ -201,6 +202,23 @@ class LoginChoose extends Component {
 
                         {/* 登錄按鈕卡片 */}
                         <View style={{width: '100%', flexDirection: 'row'}}>
+                            {/* 社團賬號登錄 */}
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: '#4994c4',
+                                    ...s.roleCardContainer,
+                                }}
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    this.context.navigate('ClubLogin');
+                                }}
+                                disabled={!this.state.ruleChoice}>
+                                <Text style={{...s.roleCardText}}>
+                                    社團/組織賬號
+                                </Text>
+                            </TouchableOpacity>
+
                             {/* 個人賬號登錄 */}
                             <TouchableOpacity
                                 style={{
@@ -209,27 +227,13 @@ class LoginChoose extends Component {
                                 }}
                                 activeOpacity={0.7}
                                 onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
                                     this.setState({showDialog: true});
                                 }}
                                 disabled={!this.state.ruleChoice}>
                                 <Text style={{...s.roleCardText}}>UM PASS</Text>
                                 <Text style={{...s.roleCardText}}>
                                     學生個人賬號
-                                </Text>
-                            </TouchableOpacity>
-                            {/* 社團賬號登錄 */}
-                            <TouchableOpacity
-                                style={{
-                                    backgroundColor: '#4994c4',
-                                    ...s.roleCardContainer,
-                                }}
-                                activeOpacity={0.7}
-                                onPress={() =>
-                                    this.context.navigate('ClubLogin')
-                                }
-                                disabled={!this.state.ruleChoice}>
-                                <Text style={{...s.roleCardText}}>
-                                    社團/組織賬號
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -255,19 +259,25 @@ class LoginChoose extends Component {
                                     uncheckedIcon="circle-o"
                                     size={pxToDp(20)}
                                     checked={this.state.ruleChoice}
-                                    onPress={() =>
+                                    onPress={() => {
+                                        ReactNativeHapticFeedback.trigger(
+                                            'soft',
+                                        );
                                         this.setState({
                                             ruleChoice: !this.state.ruleChoice,
-                                        })
-                                    }
+                                        });
+                                    }}
                                 />
                                 <TouchableOpacity
                                     activeOpacity={0.9}
-                                    onPress={() =>
+                                    onPress={() => {
+                                        ReactNativeHapticFeedback.trigger(
+                                            'soft',
+                                        );
                                         this.setState({
                                             ruleChoice: !this.state.ruleChoice,
-                                        })
-                                    }>
+                                        });
+                                    }}>
                                     <Text
                                         style={{
                                             color: COLOR_DIY.black.third,

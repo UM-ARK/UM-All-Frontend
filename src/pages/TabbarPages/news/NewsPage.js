@@ -7,24 +7,23 @@ import {
     ScrollView,
     RefreshControl,
     StyleSheet,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {UM_API_NEWS} from '../../../utils/pathMap';
+import {UM_API_NEWS, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
-import {
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-} from 'react-native-gesture-handler';
 import axios from 'axios';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -92,8 +91,7 @@ class NewsPage extends Component {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
-                    Authorization:
-                        'Bearer 3edfffda-97ce-326a-a0a5-5e876adbf89f',
+                    Authorization: UM_API_TOKEN,
                 },
             })
             .then(res => {
@@ -273,12 +271,13 @@ class NewsPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        // // 回頂，需先創建ref，可以在this.refs直接找到方法引用
+                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.refs.virtualizedList.scrollToOffset({
                             x: 0,
                             y: 0,
                             duration: 500, // 回頂時間
                         });
+                        ReactNativeHapticFeedback.trigger('soft');
                     }}>
                     <View
                         style={{

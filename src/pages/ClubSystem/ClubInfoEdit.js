@@ -72,7 +72,7 @@ class ClubInfoEdit extends Component {
         ) {
             let imgArr = clubData.club_photos_list;
             // 不夠5張則補充
-            if (imgArr.length < 5) {
+            if (imgArr.length <= 5) {
                 let pushArr = new Array(5 - imgArr.length).fill('');
                 let arr = JSON.parse(JSON.stringify(imgArr));
                 arr.push(...pushArr);

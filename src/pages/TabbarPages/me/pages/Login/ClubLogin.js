@@ -26,6 +26,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useToast} from 'native-base';
 import axios from 'axios';
 import qs from 'qs';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 存入臨時變量，準備提交後端驗證
 let accountPassword = {
@@ -54,6 +55,9 @@ const NBTextInput = () => {
                 }
                 placeholder="Club Account"
                 onChangeText={account => (accountPassword.account = account)}
+                onFocus={() => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                }}
             />
             <Input
                 variant="rounded"
@@ -72,11 +76,17 @@ const NBTextInput = () => {
                         size={pxToDp(20)}
                         mr="2"
                         color="muted.400"
-                        onPress={() => setShow(!show)}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            setShow(!show);
+                        }}
                     />
                 }
                 placeholder="Password"
                 onChangeText={password => (accountPassword.password = password)}
+                onFocus={() => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                }}
             />
         </Stack>
     );
@@ -88,6 +98,7 @@ function RenderLoginButton(props) {
     const {unread, white, black, success} = COLOR_DIY;
 
     handleLoginPress = () => {
+        ReactNativeHapticFeedback.trigger('soft');
         // 賬戶輸入未完成
         if (accountPassword.account == '' || accountPassword.password == '') {
             toast.show({
@@ -255,9 +266,10 @@ class ClubLogin extends Component {
 
                     {/* 進駐提示 */}
                     <TouchableOpacity
-                        onPress={() =>
-                            this.setState({isModalBottomVisible: true})
-                        }
+                        onPress={() => {
+                            alert('未完成');
+                            this.setState({isModalBottomVisible: true});
+                        }}
                         style={{marginTop: pxToDp(20), alignSelf: 'center'}}>
                         <Text style={{color: COLOR_DIY.black.third}}>
                             沒有賬號?

@@ -1,23 +1,18 @@
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
-// 本地引用
 import HomeScreen from './pages/TabbarPages/home';
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/news';
 import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
-
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 
-// 本地工具
 import {pxToDp} from './utils/stylesKits';
 import {COLOR_DIY} from './utils/uiMap';
 
-// 第三方庫
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-// 有動畫的tabbar，來源兼文檔：https://github.com/torgeadelin/react-native-animated-nav-tab-bar
 import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
 import {inject} from 'mobx-react';
 

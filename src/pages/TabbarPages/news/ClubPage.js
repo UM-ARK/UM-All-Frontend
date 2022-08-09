@@ -18,6 +18,7 @@ import {FlatGrid} from 'react-native-super-grid';
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {themeColor, black, white} = COLOR_DIY;
 
@@ -121,7 +122,10 @@ class ClubPage extends Component {
         return (
             <View>
                 <TouchableOpacity
-                    onPress={() => this.ActionSheet.show()}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.ActionSheet.show();
+                    }}
                     activeOpacity={0.8}
                     style={{
                         flexDirection: 'row',

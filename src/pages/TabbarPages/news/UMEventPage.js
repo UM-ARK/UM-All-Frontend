@@ -13,7 +13,7 @@ import {
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {UM_API_EVENT} from '../../../utils/pathMap';
+import {UM_API_EVENT, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
 
@@ -21,6 +21,7 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -59,8 +60,7 @@ class UMEventPage extends Component {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
-                    Authorization:
-                        'Bearer c9b17308-8579-3672-8a0d-beb483b794bf',
+                    Authorization: UM_API_TOKEN,
                 },
                 // params: {
                 // date_from: macauTime,
@@ -104,6 +104,7 @@ class UMEventPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.refs.virtualizedList.scrollToOffset({
                             x: 0,

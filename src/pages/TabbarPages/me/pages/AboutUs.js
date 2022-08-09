@@ -18,7 +18,7 @@ const {black} = COLOR_DIY;
 
 class About extends Component {
     componentDidMount() {
-        alert('未完成');
+        // alert('未完成');
     }
 
     render() {

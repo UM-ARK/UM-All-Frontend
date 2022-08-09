@@ -44,6 +44,7 @@ import {useToast} from 'native-base';
 import {inject} from 'mobx-react';
 import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
@@ -51,8 +52,9 @@ const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const CLUB_LOGO_SIZE = pxToDp(80);
-const CLUB_IMAGE_WIDTH = pxToDp(75);
-const CLUB_IMAGE_HEIGHT = pxToDp(55);
+
+const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
+const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 class ClubDetail extends Component {
     state = {
@@ -250,6 +252,7 @@ class ClubDetail extends Component {
                 this.postDelFollow(club_num);
             }
         }
+        ReactNativeHapticFeedback.trigger('soft');
     };
 
     renderFollowButton = () => {
@@ -680,12 +683,15 @@ class ClubDetail extends Component {
                                     <TouchableOpacity
                                         style={styles.checkMoreButton}
                                         activeOpacity={0.8}
-                                        onPress={() =>
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger(
+                                                'soft',
+                                            );
                                             this.props.navigation.navigate(
                                                 'AllEvents',
                                                 {clubData},
-                                            )
-                                        }>
+                                            );
+                                        }}>
                                         <Text style={{color: white}}>
                                             查看全部
                                         </Text>
@@ -735,7 +741,8 @@ class ClubDetail extends Component {
                         // 前景固定內容
                         renderTouchableFixedForeground={renderForeground}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={this.renderRefreshCompo()}>
+                        refreshControl={this.renderRefreshCompo()}
+                        bounces={false}>
                         {/* 渲染主要頁面內容 */}
                         {renderMainContent()}
                     </ImageHeaderScrollView>
@@ -787,13 +794,18 @@ class ClubDetail extends Component {
                                 簡介
                             </Text>
                             <ScrollView style={{marginTop: pxToDp(5)}}>
-                                <Text
-                                    style={{
-                                        color: black.main,
-                                        fontSize: pxToDp(16),
-                                    }}>
-                                    {intro}
-                                </Text>
+                                <HyperlinkText
+                                    linkStyle={{color: themeColor}}
+                                    navigation={this.props.navigation}>
+                                    <Text
+                                        style={{
+                                            color: black.main,
+                                            fontSize: pxToDp(16),
+                                        }}
+                                        selectable>
+                                        {intro}
+                                    </Text>
+                                </HyperlinkText>
                             </ScrollView>
                         </View>
                     </ModalBottom>
