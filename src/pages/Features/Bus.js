@@ -222,8 +222,8 @@ class BusScreen extends Component {
                             height: rpx(30),
                             borderRadius: 50,
                             backgroundColor: 'red',
-                            left: scale(144),
-                            top: verticalScale(86),
+                            left: rpx(308),
+                            top: rpx(172),
                         }}></View>
                     <View
                         style={{
@@ -232,8 +232,8 @@ class BusScreen extends Component {
                             height: rpx(30),
                             borderRadius: 50,
                             backgroundColor: 'red',
-                            left: scale(250),
-                            top: verticalScale(310),
+                            left: rpx(535),
+                            top: rpx(618),
                         }}></View>
                 </ImageBackground>
 
