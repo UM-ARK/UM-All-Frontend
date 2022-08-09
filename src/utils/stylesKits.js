@@ -1,4 +1,4 @@
-import {Dimensions} from 'react-native';
+import {Dimensions, StyleSheet, PixelRatio} from 'react-native';
 
 // 等號左邊單位都是px，右邊都是dp
 // 設計稿的寬度 / 元素的寬度 = 手機屏幕 / 手機中元素的寬度
@@ -19,4 +19,8 @@ export const pxToDp = elePx => (screenWidth * elePx) / 375;
 // 百分比高度轉父級高度的相對高度
 export function pcHeightToNumHeight(percentHeightStr, fatherHeight) {
     return (percentHeightStr.replace('%', '') / 100) * fatherHeight;
+}
+
+export function rpx(x) {
+    return (Dimensions.get('window').width / 750) * x;
 }
