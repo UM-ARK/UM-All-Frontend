@@ -98,8 +98,6 @@ class ChatDetail extends Component {
             }
         }
 
-        console.log('URL', URL);
-
         await axios
             .get(URL, {
                 params: {

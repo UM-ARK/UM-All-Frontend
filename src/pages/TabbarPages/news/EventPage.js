@@ -77,7 +77,6 @@ class EventPage extends Component {
                         this.setState({isLoading: false});
                     } else if (eventDataList.length > 0) {
                         newDataArr = eventDataList.concat(newDataArr);
-                        console.log('needFilter', this.state.needFilter);
                         if (this.state.needFilter) {
                             this.eventFilter(newDataArr);
                         } else {

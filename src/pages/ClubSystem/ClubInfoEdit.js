@@ -326,14 +326,12 @@ class ClubInfoEdit extends Component {
                 value={this.state.introTextInput}
                 onChangeText={introTextInput => this.setState({introTextInput})}
                 onBlur={() => {
-                    console.log('失焦');
                     this.setState({
                         borderColor: black.third,
                         titleColor: black.main,
                     });
                 }}
                 onFocus={() => {
-                    console.log('聚焦');
                     this.setState({
                         borderColor: themeColor,
                         titleColor: themeColor,

@@ -32,7 +32,7 @@ class Tabbar extends Component {
             globalData.userInfo &&
             JSON.stringify(globalData.userInfo) != '{}'
         ) {
-            console.log('Tabbar檢測：已登錄');
+            // console.log('Tabbar檢測：已登錄');
             this.state.isClub = globalData.userInfo.isClub;
             this.state.isLogin = true;
         }

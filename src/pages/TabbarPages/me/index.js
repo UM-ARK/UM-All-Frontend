@@ -64,7 +64,7 @@ class MeScreen extends Component {
     componentDidMount() {
         const globalData = this.props.RootStore;
         if (globalData.userInfo && globalData.userInfo.stdData) {
-            console.log('Me檢測：有token緩存');
+            // console.log('Me檢測：有token緩存');
             this.setState({
                 isLogin: true,
                 stdData: globalData.userInfo.stdData,

@@ -48,11 +48,11 @@ class App extends Component {
             // 判斷有無登錄token
             if (userInfo.stdData || userInfo.clubData) {
                 // 把緩存中的數據存一份到mobx
-                console.log('有登錄token，需存到mobx');
+                // console.log('有登錄token，需存到mobx');
                 this.setState({isLogin: true});
                 RootStore.setUserInfo(userInfo);
             } else {
-                console.log('無用戶token');
+                // console.log('無用戶token');
                 this.setState({isLogin: false});
             }
         } catch (e) {
@@ -71,7 +71,7 @@ class App extends Component {
                 }
             })
             .catch(err => {
-                console.log('err', err);
+                // console.log('err', err);
             });
     }
 

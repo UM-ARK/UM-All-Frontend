@@ -128,7 +128,7 @@ class HomeScreen extends Component {
                     imgUrlArr.map(itm => {
                         itm.url = BASE_HOST + itm.url;
                     });
-                    console.log(imgUrlArr);
+                    // console.log(imgUrlArr);
                     this.setState({carouselImagesArr: imgUrlArr});
                 }
             }

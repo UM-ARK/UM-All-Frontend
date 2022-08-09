@@ -561,8 +561,6 @@ class EventSetting extends Component {
             isEndDatePickerVisible,
         } = this.state;
 
-        console.log('startDate', startDate);
-
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header title={'活動資訊編輯'} />

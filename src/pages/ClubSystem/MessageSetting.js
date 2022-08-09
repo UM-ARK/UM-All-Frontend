@@ -49,7 +49,7 @@ class MessageSetting extends Component {
 
     componentDidMount() {
         let params = this.props.route.params;
-        console.log('公告設置頁', params);
+        // console.log('公告設置頁', params);
     }
 
     cleanInput = () => {
@@ -124,9 +124,9 @@ class MessageSetting extends Component {
             if (!cancel) {
                 // 修改this.state相片數組的值
                 uploadImage = imageObj;
-                console.log('coverImgUrl', this.state.coverImgUrl);
+                // console.log('coverImgUrl', this.state.coverImgUrl);
                 this.setState({coverImgUrl: imageUrl});
-                console.log('coverImgUrl', this.state.coverImgUrl);
+                // console.log('coverImgUrl', this.state.coverImgUrl);
             }
         }
     };

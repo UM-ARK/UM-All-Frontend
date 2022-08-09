@@ -52,7 +52,7 @@ class FollowEvent extends Component {
 
     renderClub = () => {
         const {clubDataList} = this.state;
-        console.log('clubDataList', clubDataList);
+        // console.log('clubDataList', clubDataList);
         return clubDataList != undefined && clubDataList.length > 0 ? (
             <FlatGrid
                 style={{flex: 1}}
