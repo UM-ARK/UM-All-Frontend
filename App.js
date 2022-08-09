@@ -73,7 +73,6 @@ class App extends Component {
     }
 
     async checkInfo(serverInfo) {
-        console.log('服務器版本信息', serverInfo);
         try {
             const strAppInfo = await AsyncStorage.getItem('appInfo');
             const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
@@ -82,7 +81,9 @@ class App extends Component {
             } else {
                 // APP版本更新，提示下載新版本
                 if (packageInfo.version != serverInfo.app_version) {
-                    alert(`APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`);
+                    alert(
+                        `APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`,
+                    );
                     versionLock = true;
                 }
                 // 服務器API更新，需要重新登錄

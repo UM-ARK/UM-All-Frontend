@@ -83,7 +83,8 @@ class AppSetting extends Component {
                 {/*标题栏*/}
                 <Header title={'APP設置'} />
 
-                {optionsInfo.map((_, index) => this.renderOptions(index))}
+                {/* TODO: 幾項設置 */}
+                {/* {optionsInfo.map((_, index) => this.renderOptions(index))} */}
 
                 {/* 快捷登錄設置 */}
                 <TouchableOpacity
