@@ -273,13 +273,24 @@ class ClubInfoEdit extends Component {
     };
 
     renderContactInput = (item, index) => {
+        let hint = '';
+        console.log(item);
+        const {type} = item;
+        if (type == 'Website') {
+            hint = 'https://umall.one';
+        } else if (type == 'Facebook') {
+            hint = 'fb.me/cpsumsu';
+        } else if (type == 'IG') {
+            hint = 'instagram.com/cps.umsu';
+        }
         return (
             <TextField
-                placeholder={item.type}
+                placeholder={type}
                 floatingPlaceholder
                 floatOnFocus
                 floatingPlaceholderColor={floatingPlaceholderColor}
                 floatingPlaceholderStyle={floatingPlaceholderStyle}
+                hint={hint}
                 dynamicFieldStyle={(context: FieldContextType) => {
                     return {
                         borderBottomWidth: pxToDp(1),
