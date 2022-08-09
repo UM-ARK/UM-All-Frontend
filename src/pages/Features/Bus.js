@@ -8,6 +8,7 @@ import {
     ImageBackground,
     ScrollView,
     Dimensions,
+    RefreshControl,
 } from 'react-native';
 
 // 引入本地工具
@@ -22,7 +23,8 @@ var DomParser = require('react-native-html-parser').DOMParser;
 import FastImage from 'react-native-fast-image';
 import {scale, verticalScale} from 'react-native-size-matters';
 
-const {bg_color, white, black, themeColor} = COLOR_DIY;
+const {bg_color, white, black, themeColor, secondThemeColor, viewShadow} =
+    COLOR_DIY;
 const {width: PAGE_WIDTH} = Dimensions.get('window'); // screen 包括navi bar
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
@@ -114,12 +116,13 @@ class BusScreen extends Component {
         modalContent: ['text', 'stopImage', 'busName'],
         // 點擊站點的數組索引
         clickStopIndex: 0,
+        isLoading: true,
     };
 
     constructor() {
         super();
         // 打開Bus頁時直接請求巴士報站的數據
-        // this.fetchBusInfo();
+        this.fetchBusInfo();
     }
 
     // TODO:有兩輛車的情況，不急做
@@ -135,17 +138,12 @@ class BusScreen extends Component {
                 // console.log("爬蟲後的result為", result);
                 // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
                 result.busInfoArr.shift(); // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
-                console.log('busInfoArr為', result.busInfoArr);
-                {
-                    /* TODO:不止一輛巴士的情況 */
-                }
-                console.log('busPositionArr為', result.busPositionArr[0]);
 
-                // TODO:如果沒有Bus，則觸發提醒
                 this.setState({
                     busInfoArr: result.busInfoArr,
                     busPositionArr: result.busPositionArr,
                     haveBus: result.busPositionArr.length > 0 ? true : false,
+                    isLoading: false,
                 });
                 if (this.state.busPositionArr.length == 0) {
                     alert('當前沒有巴士~');
@@ -157,6 +155,16 @@ class BusScreen extends Component {
 
     // 巴士站點文字渲染
     renderBusStopText = (left, top, text, index) => {
+        const {busPositionArr} = this.state;
+        let borderColor = themeColor;
+        if (busPositionArr.length > 0) {
+            busPositionArr.map(item => {
+                if (item.index / 2 == index) {
+                    borderColor = secondThemeColor;
+                }
+            });
+        }
+
         return (
             <TouchableOpacity
                 onPress={this.toggleModal.bind(this, index)}
@@ -167,11 +175,11 @@ class BusScreen extends Component {
                     paddingHorizontal: pxToDp(5),
                     paddingVertical: pxToDp(2),
                     alignItems: 'center',
-                    borderColor: themeColor,
+                    borderColor,
                     borderRadius: pxToDp(20),
                     borderWidth: pxToDp(2),
                 }}>
-                <Text style={{color: themeColor, fontSize: 13}}>{text}</Text>
+                <Text style={{color: borderColor, fontSize: 12.5}}>{text}</Text>
             </TouchableOpacity>
         );
     };
@@ -187,22 +195,22 @@ class BusScreen extends Component {
     render() {
         let busStyleArr = [
             // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-            {position: 'absolute', left: pxToDp(328), top: pxToDp(540)}, // PGH
-            {position: 'absolute', left: pxToDp(328), top: pxToDp(450)}, // PGH ~ E4
-            {position: 'absolute', left: pxToDp(328), top: pxToDp(340)}, // E4
-            {position: 'absolute', left: pxToDp(328), top: pxToDp(200)}, // E4 ~ N2
-            {position: 'absolute', left: pxToDp(328), top: pxToDp(70)}, // N2
-            {position: 'absolute', left: pxToDp(160), top: pxToDp(65)}, // N2 ~ N6
-            {position: 'absolute', left: pxToDp(110), top: pxToDp(110)}, // N6
-            {position: 'absolute', left: pxToDp(80), top: pxToDp(180)}, // N6 ~ E11
-            {position: 'absolute', left: pxToDp(30), top: pxToDp(235)}, // E11
-            {position: 'absolute', left: pxToDp(30), top: pxToDp(270)}, // E11 ~ E21
-            {position: 'absolute', left: pxToDp(30), top: pxToDp(310)}, // N21
-            {position: 'absolute', left: pxToDp(30), top: pxToDp(400)}, // N21 ~ E32
-            {position: 'absolute', left: pxToDp(30), top: pxToDp(483)}, // E32
-            {position: 'absolute', left: pxToDp(80), top: pxToDp(570)}, // E32 ~ S4
-            {position: 'absolute', left: pxToDp(235), top: pxToDp(570)}, // s4
-            {position: 'absolute', left: pxToDp(280), top: pxToDp(570)}, // s4 ~ PGH
+            {position: 'absolute', left: scale(255), top: scale(450)}, // PGH
+            {position: 'absolute', left: scale(255), top: scale(380)}, // PGH ~ E4
+            {position: 'absolute', left: scale(255), top: scale(300)}, // E4
+            {position: 'absolute', left: scale(255), top: scale(200)}, // E4 ~ N2
+            {position: 'absolute', left: scale(255), top: scale(80)}, // N2
+            {position: 'absolute', left: scale(160), top: scale(30)}, // N2 ~ N6
+            {position: 'absolute', left: scale(75), top: scale(58)}, // N6
+            {position: 'absolute', left: scale(30), top: scale(120)}, // N6 ~ E11
+            {position: 'absolute', left: scale(30), top: scale(155)}, // E11
+            {position: 'absolute', left: scale(30), top: scale(210)}, // E11 ~ E21
+            {position: 'absolute', left: scale(30), top: scale(265)}, // N21
+            {position: 'absolute', left: scale(30), top: scale(330)}, // N21 ~ E32
+            {position: 'absolute', left: scale(30), top: scale(390)}, // E32
+            {position: 'absolute', left: scale(30), top: scale(500)}, // E32 ~ S4
+            {position: 'absolute', left: scale(190), top: scale(493)}, // s4
+            {position: 'absolute', left: scale(255), top: scale(500)}, // s4 ~ PGH
         ];
 
         const {busPositionArr, busInfoArr} = this.state;
@@ -211,7 +219,18 @@ class BusScreen extends Component {
             <View style={{flex: 1, backgroundColor: bg_color}}>
                 <Header title={'校園巴士'} />
 
-                <ScrollView>
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={this.state.isLoading}
+                            onRefresh={() => {
+                                this.setState({isLoading: true});
+                                this.fetchBusInfo();
+                            }}
+                        />
+                    }>
                     <ScrollView horizontal>
                         <ImageBackground
                             style={{
@@ -221,49 +240,49 @@ class BusScreen extends Component {
                             }}
                             source={busRouteImg}
                             resizeMode={'contain'}>
-                            {/* 刷新按鈕 */}
-                            {/* <TouchableOpacity
-                            style={{
-                                position: 'absolute',
-                                top: pxToDp(400),
-                                right: pxToDp(150),
-                                alignItems: 'center',
-                                backgroundColor: '#DDDDDD',
-                                padding: 10,
-                                borderRadius: 10,
-                            }}
-                            onPress={this.fetchBusInfo}>
-                            <Text style={{color: black.third}}>Refresh</Text>
-                        </TouchableOpacity> */}
-
-                            {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
-                            {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
+                            <View
+                                style={{
+                                    position: 'absolute',
+                                    left: scale(65),
+                                    top: scale(570),
+                                    marginHorizontal: pxToDp(10),
+                                    backgroundColor: white,
+                                    borderRadius: pxToDp(10),
+                                    ...viewShadow,
+                                    paddingHorizontal: pxToDp(10),
+                                    paddingVertical: pxToDp(3),
+                                }}>
+                                <Text
+                                    style={{fontSize: 12, color: black.third}}>
+                                    Data From: cmdo.um.edu.mo
+                                </Text>
+                            </View>
                             {/* Bus運行信息的渲染 */}
-                            {busInfoArr.length > 0 ? (
-                                <View
-                                    style={{
-                                        width: pxToDp(120),
-                                        height: pxToDp(130),
-                                        marginLeft: pxToDp(5),
-                                        backgroundColor: '#d1d1d1',
-                                        borderRadius: pxToDp(20),
-                                        paddingHorizontal: pxToDp(10),
-                                        paddingVertical: pxToDp(3),
-                                        overflow: 'hidden',
-                                    }}>
-                                    <ScrollView>
-                                        {this.state.busInfoArr.map(item => (
-                                            <Text
-                                                style={{
-                                                    color: black.second,
-                                                    fontSize: 12,
-                                                }}>
-                                                {item}
-                                            </Text>
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            ) : null}
+                            <View
+                                style={{
+                                    position: 'absolute',
+                                    left: scale(65),
+                                    top: scale(185),
+                                    width: scale(160),
+                                    marginHorizontal: pxToDp(10),
+                                    backgroundColor: white,
+                                    borderRadius: pxToDp(10),
+                                    ...viewShadow,
+                                    paddingHorizontal: pxToDp(10),
+                                    paddingVertical: pxToDp(3),
+                                }}>
+                                {busInfoArr.length > 0
+                                    ? this.state.busInfoArr.map(item => (
+                                          <Text
+                                              style={{
+                                                  color: black.second,
+                                                  fontSize: 12,
+                                              }}>
+                                              {item}
+                                          </Text>
+                                      ))
+                                    : null}
+                            </View>
 
                             {/* 巴士圖標 */}
                             {busPositionArr.length > 0
