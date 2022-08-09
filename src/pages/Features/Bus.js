@@ -213,7 +213,7 @@ class BusScreen extends Component {
 
                 <ScrollView>
                     <ImageBackground
-                        style={{width: scale(310), height: verticalScale(600)}}
+                        style={{width: scale(310), height: scale(600)}}
                         source={busRouteImg}
                         resizeMode={'contain'}>
                         <View
@@ -223,8 +223,8 @@ class BusScreen extends Component {
                                 height: rpx(30),
                                 borderRadius: 50,
                                 backgroundColor: 'red',
-                                left: scale(124),
-                                top: verticalScale(86),
+                                left: scale(122),
+                                top: scale(88),
                             }}></View>
                         <View
                             style={{
@@ -233,8 +233,8 @@ class BusScreen extends Component {
                                 height: rpx(30),
                                 borderRadius: 50,
                                 backgroundColor: 'red',
-                                left: scale(230),
-                                top: verticalScale(307),
+                                left: scale(234),
+                                top: scale(308),
                             }}></View>
                     </ImageBackground>
                 </ScrollView>
