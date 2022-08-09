@@ -42,6 +42,8 @@ import {
     UM_ISW,
     NEW_INFOG,
     UM_DOCUMENTS,
+    NEW_SCZN,
+    NEW_MAINLAND,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
@@ -494,10 +496,35 @@ class Index extends Component {
                     },
                 ],
             },
-            // TODO: 新生推薦
             {
                 title: '新生推薦',
                 fn: [
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'ghost',
+                        fn_name: '生存指南',
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: NEW_SCZN,
+                            title: '新鮮人要知道的億些Tips',
+                            text_color: COLOR_DIY.black.second,
+                            bg_color_diy: '#ededed',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'bag-suitcase',
+                        fn_name: '內地生',
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: NEW_MAINLAND,
+                            title: '成為賭王前的億些入學須知',
+                            text_color: COLOR_DIY.black.second,
+                            bg_color_diy: '#ededed',
+                        },
+                    },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'account-heart',

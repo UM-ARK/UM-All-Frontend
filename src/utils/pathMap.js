@@ -168,3 +168,7 @@ export const OF_BASE = 'https://www.um.edu.mo';
 
 // 迎新推薦 - 官網圖文包
 export const NEW_INFOG = 'https://reg.um.edu.mo/infographic/?lang=zh-hant';
+// 生存指南
+export const NEW_SCZN = 'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1463637399816323072&__biz=MzU0NzEyODM3Mg==#wechat_redirect';
+// 內地生指南
+export const NEW_MAINLAND = 'https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU0NzEyODM3Mg==&action=getalbum&album_id=2476350502922977281#wechat_redirect';

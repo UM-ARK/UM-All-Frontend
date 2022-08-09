@@ -11,7 +11,7 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {UM_WHOLE, WHAT_2_REG} from '../../../utils/pathMap';
+import {UM_WHOLE, WHAT_2_REG, NEW_SCZN} from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
 
@@ -230,7 +230,16 @@ class HomeScreen extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                alert('跳轉迎新欄目');
+                                let webview_param = {
+                                    url: NEW_SCZN,
+                                    title: '新鮮人要知道的億些Tips',
+                                    text_color: COLOR_DIY.black.second,
+                                    bg_color_diy: '#ededed',
+                                };
+                                this.props.navigation.navigate(
+                                    'Webviewer',
+                                    webview_param,
+                                );
                             }}>
                             <Text style={{color: white}}>{`我是萌新`}</Text>
                         </TouchableOpacity>
