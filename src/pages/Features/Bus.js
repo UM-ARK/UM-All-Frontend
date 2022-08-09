@@ -156,25 +156,25 @@ class BusScreen extends Component {
     };
 
     // 巴士站點文字渲染
-    // renderBusStopText = (left, top, text, index) => {
-    //     return (
-    //         <TouchableOpacity
-    //             onPress={this.toggleModal.bind(this, index)}
-    //             style={{
-    //                 position: 'absolute',
-    //                 left: pcHeightToNumHeight(left, PAGE_WIDTH),
-    //                 top: pcHeightToNumHeight(top, PAGE_HEIGHT),
-    //                 paddingHorizontal: pxToDp(5),
-    //                 paddingVertical: pxToDp(2),
-    //                 alignItems: 'center',
-    //                 borderColor: themeColor,
-    //                 borderRadius: pxToDp(20),
-    //                 borderWidth: pxToDp(2),
-    //             }}>
-    //             <Text style={{color: themeColor}}>{text}</Text>
-    //         </TouchableOpacity>
-    //     );
-    // };
+    renderBusStopText = (left, top, text, index) => {
+        return (
+            <TouchableOpacity
+                onPress={this.toggleModal.bind(this, index)}
+                style={{
+                    position: 'absolute',
+                    left: scale(left),
+                    top: scale(top),
+                    paddingHorizontal: pxToDp(5),
+                    paddingVertical: pxToDp(2),
+                    alignItems: 'center',
+                    borderColor: themeColor,
+                    borderRadius: pxToDp(20),
+                    borderWidth: pxToDp(2),
+                }}>
+                <Text style={{color: themeColor, fontSize: 13}}>{text}</Text>
+            </TouchableOpacity>
+        );
+    };
 
     // 控制彈出層打開 or 關閉
     toggleModal = index => {
@@ -212,44 +212,17 @@ class BusScreen extends Component {
                 <Header title={'校園巴士'} />
 
                 <ScrollView>
-                    <ImageBackground
-                        style={{width: scale(310), height: scale(600)}}
-                        source={busRouteImg}
-                        resizeMode={'contain'}>
-                        <View
+                    <ScrollView horizontal>
+                        <ImageBackground
                             style={{
-                                position: 'absolute',
-                                width: rpx(30),
-                                height: rpx(30),
-                                borderRadius: 50,
-                                backgroundColor: 'red',
-                                left: scale(122),
-                                top: scale(88),
-                            }}></View>
-                        <View
-                            style={{
-                                position: 'absolute',
-                                width: rpx(30),
-                                height: rpx(30),
-                                borderRadius: 50,
-                                backgroundColor: 'red',
-                                left: scale(234),
-                                top: scale(308),
-                            }}></View>
-                    </ImageBackground>
-                </ScrollView>
-
-                {/* 背景的Bus路線圖 */}
-                {false && (
-                    <ImageBackground
-                        source={busRouteImg}
-                        style={{
-                            flex: 1,
-                            // width: '100%',
-                            // height: '100%',
-                        }}>
-                        {/* 刷新按鈕 */}
-                        <TouchableOpacity
+                                width: scale(310),
+                                height: scale(600),
+                                marginLeft: scale(25),
+                            }}
+                            source={busRouteImg}
+                            resizeMode={'contain'}>
+                            {/* 刷新按鈕 */}
+                            {/* <TouchableOpacity
                             style={{
                                 position: 'absolute',
                                 top: pxToDp(400),
@@ -260,84 +233,80 @@ class BusScreen extends Component {
                                 borderRadius: 10,
                             }}
                             onPress={this.fetchBusInfo}>
-                            <Text>Refresh</Text>
-                        </TouchableOpacity>
+                            <Text style={{color: black.third}}>Refresh</Text>
+                        </TouchableOpacity> */}
 
-                        {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
-                        {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
-                        {/* Bus運行信息的渲染 */}
-                        {busInfoArr.length > 0 ? (
-                            <View
-                                style={{
-                                    width: pxToDp(120),
-                                    height: pxToDp(130),
-                                    marginLeft: pxToDp(5),
-                                    backgroundColor: '#d1d1d1',
-                                    borderRadius: pxToDp(20),
-                                    paddingHorizontal: pxToDp(10),
-                                    paddingVertical: pxToDp(3),
-                                    overflow: 'hidden',
-                                }}>
-                                <ScrollView>
-                                    {this.state.busInfoArr.map(item => (
-                                        <Text
-                                            style={{
-                                                color: black.second,
-                                                fontSize: 12,
-                                            }}>
-                                            {item}
-                                        </Text>
-                                    ))}
-                                </ScrollView>
-                            </View>
-                        ) : null}
+                            {/* TODO: 要檢視到站和未到站數組文字是否有變化 */}
+                            {/* TODO: 要檢視工作日和非工作日數組文字是否有變化 */}
+                            {/* Bus運行信息的渲染 */}
+                            {busInfoArr.length > 0 ? (
+                                <View
+                                    style={{
+                                        width: pxToDp(120),
+                                        height: pxToDp(130),
+                                        marginLeft: pxToDp(5),
+                                        backgroundColor: '#d1d1d1',
+                                        borderRadius: pxToDp(20),
+                                        paddingHorizontal: pxToDp(10),
+                                        paddingVertical: pxToDp(3),
+                                        overflow: 'hidden',
+                                    }}>
+                                    <ScrollView>
+                                        {this.state.busInfoArr.map(item => (
+                                            <Text
+                                                style={{
+                                                    color: black.second,
+                                                    fontSize: 12,
+                                                }}>
+                                                {item}
+                                            </Text>
+                                        ))}
+                                    </ScrollView>
+                                </View>
+                            ) : null}
 
-                        {/* 巴士圖標 */}
-                        {busPositionArr.length > 0
-                            ? busPositionArr.map(item => (
-                                  <View style={busStyleArr[item.index]}>
-                                      <Image
-                                          source={busIcon}
-                                          style={{
-                                              width: pxToDp(30),
-                                              height: pxToDp(30),
-                                          }}
-                                      />
-                                  </View>
-                              ))
-                            : null}
+                            {/* 巴士圖標 */}
+                            {busPositionArr.length > 0
+                                ? busPositionArr.map(item => (
+                                      <View style={busStyleArr[item.index]}>
+                                          <Image
+                                              source={busIcon}
+                                              style={{
+                                                  width: pxToDp(30),
+                                                  height: pxToDp(30),
+                                              }}
+                                          />
+                                      </View>
+                                  ))
+                                : null}
 
-                        {/* 巴士站點文字 */}
-                        {/* {this.renderBusStopText(1, 2, 'PGH 研究生宿舍(起)', 0)} */}
-                        {/* {this.renderBusStopText('52%', '51%', 'E4 劉少榮樓', 1)} */}
-                        {/* {this.renderBusStopText('52%', '14%', 'N2 大學會堂', 2)} */}
-                        {/* {this.renderBusStopText('16%', '14%', 'N6 行政樓', 3)} */}
-                        {/* {this.renderBusStopText(
-                            '24%',
-                            '27%',
-                            'E11 科技學院',
-                            4,
-                        )}
-                        {this.renderBusStopText(
-                            '24%',
-                            '44.8%',
-                            'E21 人文社科樓',
-                            5,
-                        )}
-                        {this.renderBusStopText(
-                            '24%',
-                            '66.2%',
-                            'E32 法學院',
-                            6,
-                        )}
-                        {this.renderBusStopText(
-                            '30%',
-                            '92%',
-                            'S4 研究生宿舍南四座(終)',
-                            7,
-                        )} */}
-                    </ImageBackground>
-                )}
+                            {/* 巴士站點文字 */}
+                            {this.renderBusStopText(
+                                110,
+                                455,
+                                'PGH 研究生宿舍(起)',
+                                0,
+                            )}
+                            {this.renderBusStopText(153, 305, 'E4 劉少榮樓', 1)}
+                            {this.renderBusStopText(153, 83, 'N2 大學會堂', 2)}
+                            {this.renderBusStopText(52, 90, 'N6 行政樓', 3)}
+                            {this.renderBusStopText(79, 160, 'E11 科技學院', 4)}
+                            {this.renderBusStopText(
+                                79,
+                                265,
+                                'E21 人文社科樓',
+                                5,
+                            )}
+                            {this.renderBusStopText(79, 395, 'E32 法學院', 6)}
+                            {this.renderBusStopText(
+                                79,
+                                547,
+                                'S4 研究生宿舍南四座(終)',
+                                7,
+                            )}
+                        </ImageBackground>
+                    </ScrollView>
+                </ScrollView>
 
                 {/* 彈出層 - 展示站點圖片 */}
                 <Modal
