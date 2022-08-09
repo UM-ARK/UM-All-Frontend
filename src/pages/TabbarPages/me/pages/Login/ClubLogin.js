@@ -55,9 +55,6 @@ const NBTextInput = () => {
                 }
                 placeholder="Club Account"
                 onChangeText={account => (accountPassword.account = account)}
-                onFocus={() => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                }}
             />
             <Input
                 variant="rounded"
@@ -84,9 +81,6 @@ const NBTextInput = () => {
                 }
                 placeholder="Password"
                 onChangeText={password => (accountPassword.password = password)}
-                onFocus={() => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                }}
             />
         </Stack>
     );
