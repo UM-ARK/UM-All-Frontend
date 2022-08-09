@@ -128,8 +128,12 @@ class EventSetting extends Component {
                         introText: eventData.introduction,
                         coverImgUrl: eventData.cover_image_url,
                         allowFollow: eventData.can_follow,
-                        startDate: new Date(String(eventData.startdatetime)),
-                        finishDate: new Date(String(eventData.enddatetime)),
+                        startDate: new Date(
+                            String(eventData.startdatetime).replace(' ', 'T'),
+                        ),
+                        finishDate: new Date(
+                            String(eventData.enddatetime).replace(' ', 'T'),
+                        ),
                         type: eventData.type.toLowerCase(),
                         isLoading: false,
                     });
