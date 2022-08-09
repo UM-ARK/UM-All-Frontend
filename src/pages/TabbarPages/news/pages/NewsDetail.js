@@ -8,6 +8,7 @@ import {
     ScrollView,
     StyleSheet,
     Linking,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -121,6 +122,7 @@ class NewsDetail extends Component {
                 },
             ],
             chooseMode: 0,
+            imgLoading: true,
         };
     }
 
@@ -220,7 +222,6 @@ class NewsDetail extends Component {
         //用数组存储内容，便于根据语言筛选条件显示
         let title = [title_cn, title_en, title_pt];
         let content = [content_cn, content_en, content_pt];
-        console.log(content[chooseMode]);
 
         return (
             <View style={{backgroundColor: bg_color, flex: 1}}>
@@ -271,7 +272,28 @@ class NewsDetail extends Component {
                                         cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
+                                    onLoadStart={() => {
+                                        this.setState({imgLoading: true});
+                                    }}
+                                    onLoad={() => {
+                                        this.setState({imgLoading: false});
+                                    }}
                                 />
+                                {this.state.imgLoading ? (
+                                    <View
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            position: 'absolute',
+                                        }}>
+                                        <ActivityIndicator
+                                            size={'large'}
+                                            color={COLOR_DIY.themeColor}
+                                        />
+                                    </View>
+                                ) : null}
                             </TouchableOpacity>
                         )}
                         itemContainerStyle={{

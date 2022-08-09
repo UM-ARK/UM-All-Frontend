@@ -76,7 +76,7 @@ class LoginChoose extends Component {
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    console.log('登錄結果', json.content);
+                    // console.log('登錄結果', json.content);
                     // 設定本地緩存，並重啟APP
                     handleLogin({
                         isClub: false,
@@ -148,18 +148,18 @@ class LoginChoose extends Component {
                                 // 獲取Moodle頁所有的cookies
                                 CookieManager.get(UM_Moodle, true)
                                     .then(cookies => {
-                                        console.log(
-                                            'CookieManager.get =>',
-                                            cookies,
-                                        );
+                                        // console.log(
+                                        //     'CookieManager.get =>',
+                                        //     cookies,
+                                        // );
                                         if ('MoodleSession' in cookies) {
                                             alert(
                                                 `Moodle登錄成功，正在登錄UM ALL...\n先不要進行其他操作...\n等待重新出現UM ALL主頁則登錄成功！`,
                                             );
-                                            console.log(
-                                                'MoodleSession =>',
-                                                cookies.MoodleSession.value,
-                                            );
+                                            // console.log(
+                                            //     'MoodleSession =>',
+                                            //     cookies.MoodleSession.value,
+                                            // );
                                             this.handleStdLogin(
                                                 cookies.MoodleSession.value,
                                             );

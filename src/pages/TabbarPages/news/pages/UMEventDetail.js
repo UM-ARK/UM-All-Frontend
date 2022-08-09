@@ -7,6 +7,7 @@ import {
     Dimensions,
     ScrollView,
     StyleSheet,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -32,7 +33,6 @@ class UMEventDetail extends Component {
 
         // 獲取上級路由傳遞的參數
         const eventData = this.props.route.params.data;
-        console.log('eventData', eventData);
 
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題、內容
         //共通内容
@@ -212,6 +212,7 @@ class UMEventDetail extends Component {
                         ? eventData.common.posterUrl.replace('http:', 'https:')
                         : '',
             },
+            imgLoading: true,
         };
     }
 
@@ -480,7 +481,28 @@ class UMEventDetail extends Component {
                                 cache: FastImage.cacheControl.web,
                             }}
                             style={{width: '100%', height: '100%'}}
+                            onLoadStart={() => {
+                                this.setState({imgLoading: true});
+                            }}
+                            onLoad={() => {
+                                this.setState({imgLoading: false});
+                            }}
                         />
+                        {this.state.imgLoading ? (
+                            <View
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.themeColor}
+                                />
+                            </View>
+                        ) : null}
                     </TouchableOpacity>
 
                     {/* 詳情資訊 */}

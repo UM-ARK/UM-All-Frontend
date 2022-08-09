@@ -1,5 +1,11 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ActivityIndicator,
+} from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
@@ -16,6 +22,10 @@ class NewsCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
     static contextType = NavigationContext;
+
+    state = {
+        imgLoading: true,
+    };
 
     render() {
         // 接收NewsPage頁傳來的該卡片需要渲染的信息
@@ -158,9 +168,29 @@ class NewsCard extends Component {
                                                   ),
                                         cache: FastImage.cacheControl.web,
                                     }}
+                                    onLoadStart={() => {
+                                        this.setState({imgLoading: true});
+                                    }}
+                                    onLoad={() => {
+                                        this.setState({imgLoading: false});
+                                    }}
                                     style={styles.newsCardImg}
                                     resizeMode={FastImage.resizeMode.cover}
                                 />
+                                {this.state.imgLoading ? (
+                                    <View
+                                        style={{
+                                            ...styles.newsCardImg,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            position: 'absolute',
+                                        }}>
+                                        <ActivityIndicator
+                                            size={'large'}
+                                            color={COLOR_DIY.themeColor}
+                                        />
+                                    </View>
+                                ) : null}
                             </View>
                         </View>
                     )}

@@ -9,8 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {Image} from '@rneui/themed';
-// import FastImage from 'react-native-fast-image';
+import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -23,6 +22,7 @@ class ImageScrollViewer extends Component {
         imagesIndex: 0,
         // 展示長按圖片菜單
         isModalBottomVisible: true,
+        isLoading: true,
     };
 
     // 打開和關閉顯示照片的彈出層
@@ -73,15 +73,18 @@ class ImageScrollViewer extends Component {
                     useNativeDriver={true}
                     imageUrls={imageUrlsObjArr}
                     renderImage={props => (
-                        <Image
-                            source={props.source}
-                            containerStyle={props.style}
-                            PlaceholderContent={
-                                <ActivityIndicator
-                                    size={'large'}
-                                    color={COLOR_DIY.white}
-                                />
-                            }
+                        <FastImage
+                            source={{
+                                uri: props.source.uri,
+                                cache: FastImage.cacheControl.web,
+                            }}
+                            style={props.style}
+                            onLoadStart={() => {
+                                this.setState({isLoading: true});
+                            }}
+                            onLoad={() => {
+                                this.setState({isLoading: false});
+                            }}
                         />
                     )}
                     // 打開的imageUrls的索引
@@ -103,6 +106,18 @@ class ImageScrollViewer extends Component {
                         );
                     }}
                 />
+
+                {this.state.isLoading ? (
+                    <ActivityIndicator
+                        size={'large'}
+                        color={COLOR_DIY.white}
+                        style={{
+                            alignSelf: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute',
+                        }}
+                    />
+                ) : null}
             </Modal>
         );
     }

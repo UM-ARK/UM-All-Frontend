@@ -9,6 +9,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
+    ActivityIndicator,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
@@ -78,6 +79,7 @@ class NewsPage extends Component {
             isScrollViewLoading: false,
             newsList: [],
             topNews: {},
+            imgLoading: true,
         };
 
         // 請求澳大新聞API
@@ -198,7 +200,13 @@ class NewsPage extends Component {
                                         ),
                                         cache: FastImage.cacheControl.web,
                                     }}
-                                    style={{width: '100%', height: '100%'}}>
+                                    style={{width: '100%', height: '100%'}}
+                                    onLoadStart={() => {
+                                        this.setState({imgLoading: true});
+                                    }}
+                                    onLoad={() => {
+                                        this.setState({imgLoading: false});
+                                    }}>
                                     {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                     <View style={styles.topNewsOverlay}>
                                         {/* Top Story字樣 */}
@@ -234,6 +242,22 @@ class NewsPage extends Component {
                                             </Text>
                                         </View>
                                     </View>
+
+                                    {this.state.imgLoading ? (
+                                        <View
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                position: 'absolute',
+                                            }}>
+                                            <ActivityIndicator
+                                                size={'large'}
+                                                color={COLOR_DIY.white}
+                                            />
+                                        </View>
+                                    ) : null}
                                 </FastImage>
                             </TouchableOpacity>
                         )}
