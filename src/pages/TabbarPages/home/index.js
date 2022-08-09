@@ -17,6 +17,8 @@ import {
     NEW_SCZN,
     USUAL_Q,
     BASE_HOST,
+    ARK_LETTER_IMG,
+    UMALL_LOGO,
 } from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
@@ -41,13 +43,7 @@ class HomeScreen extends Component {
         // 首頁輪播圖數據
         carouselImagesArr: [
             {
-                url: '',
-            },
-            {
-                url: '',
-            },
-            {
-                url: '',
+                url: UMALL_LOGO,
             },
         ],
 
@@ -278,7 +274,7 @@ class HomeScreen extends Component {
                                     webview_param,
                                 );
                             }}>
-                            <Text style={{color: white}}>{`嗯嗯嗯???`}</Text>
+                            <Text style={{color: white}}>{`我要怎麼...`}</Text>
                         </TouchableOpacity>
                     </View>
 
