@@ -55,8 +55,8 @@ class EventSetting extends Component {
         link: '',
         place: '',
         introText: '',
-        startDate: moment(new Date()),
-        finishDate: moment(new Date()),
+        startDate: new Date(),
+        finishDate: new Date(),
         coverImgUrl: '',
         relateImgUrl: ['', '', '', ''],
         expanded: false,
@@ -557,7 +557,11 @@ class EventSetting extends Component {
             mode,
             startDate,
             finishDate,
+            isStartDatePickerVisible,
+            isEndDatePickerVisible,
         } = this.state;
+
+        console.log('startDate', startDate);
 
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
@@ -703,16 +707,12 @@ class EventSetting extends Component {
                         <View style={{marginTop: pxToDp(10)}}>
                             <DateTimePickerModal
                                 isVisible={
-                                    this.state.isStartDatePickerVisible ||
-                                    this.state.isEndDatePickerVisible
+                                    isStartDatePickerVisible ||
+                                    isEndDatePickerVisible
                                 }
-                                date={this.state.startDate}
+                                date={startDate}
                                 mode="datetime"
                                 onConfirm={date => {
-                                    const {
-                                        isStartDatePickerVisible,
-                                        isEndDatePickerVisible,
-                                    } = this.state;
                                     if (isStartDatePickerVisible) {
                                         this.setState({
                                             startDate: date,
@@ -737,6 +737,7 @@ class EventSetting extends Component {
                                 *
                                 如非緊急，最多提前兩星期發佈活動，共用宣傳資源，請理解！
                             </Text>
+
                             {/* 開始時間 */}
                             <TouchableOpacity
                                 style={{
