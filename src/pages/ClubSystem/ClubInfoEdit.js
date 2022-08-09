@@ -274,7 +274,6 @@ class ClubInfoEdit extends Component {
 
     renderContactInput = (item, index) => {
         let hint = '';
-        console.log(item);
         const {type} = item;
         if (type == 'Website') {
             hint = 'https://umall.one';

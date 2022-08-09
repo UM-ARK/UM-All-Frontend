@@ -81,6 +81,14 @@ class ClubPage extends Component {
                             }}>
                             下拉可刷新頁面~
                         </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                alignSelf: 'center',
+                                fontSize: pxToDp(12),
+                            }}>
+                            歡迎澳大各組織進駐! 請到網站聯繫我們!
+                        </Text>
                         <View style={{marginTop: pxToDp(50)}}></View>
                     </View>
                 )}
