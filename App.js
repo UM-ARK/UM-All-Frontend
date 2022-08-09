@@ -29,6 +29,12 @@ class App extends Component {
         isLogin: false,
     };
 
+    constructor() {
+        super();
+        // 獲取版本和輪播圖信息
+        this.getData();
+    }
+
     async componentDidMount() {
         // 開屏動畫
         setTimeout(() => {
@@ -52,9 +58,6 @@ class App extends Component {
         } catch (e) {
             console.error(e);
         }
-
-        // 獲取版本和輪播圖信息
-        this.getData();
     }
 
     async getData() {
@@ -79,13 +82,6 @@ class App extends Component {
             if (strAppInfo == null) {
                 setAPPInfo(serverInfo);
             } else {
-                // APP版本更新，提示下載新版本
-                if (packageInfo.version != serverInfo.app_version) {
-                    alert(
-                        `APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`,
-                    );
-                    versionLock = true;
-                }
                 // 服務器API更新，需要重新登錄
                 if (appInfo.API_version != serverInfo.API_version) {
                     setAPPInfo(serverInfo);
@@ -96,6 +92,13 @@ class App extends Component {
                 } else {
                     setAPPInfo(serverInfo);
                 }
+            }
+            // APP版本更新，提示下載新版本
+            if (packageInfo.version != serverInfo.app_version) {
+                alert(
+                    `APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`,
+                );
+                versionLock = true;
             }
         } catch (e) {
             console.error(e);
