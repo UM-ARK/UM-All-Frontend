@@ -8,6 +8,7 @@ import {
     ScrollView,
     StyleSheet,
     TextInput,
+    Linking,
 } from 'react-native';
 
 // 本地工具
@@ -17,7 +18,7 @@ import Header from '../../../../../components/Header';
 import {ToastDIY} from '../../../../../components/ToastDIY';
 import {handleLogin} from '../../../../../utils/storageKits';
 import ModalBottom from '../../../../../components/ModalBottom';
-import {BASE_URI, GET} from '../../../../../utils/pathMap';
+import {BASE_URI, GET, USUAL_Q} from '../../../../../utils/pathMap';
 
 import {NavigationContext} from '@react-navigation/native';
 import {Input, Box, Center, Stack, Icon} from 'native-base';
@@ -239,7 +240,7 @@ class ClubLogin extends Component {
                 <Header title={'社團 | 組織 | 登錄'} />
 
                 {/* 聯繫我們彈出框 */}
-                {this.state.isModalBottomVisible && this.renderContactHelp()}
+                {/* {this.state.isModalBottomVisible && this.renderContactHelp()} */}
 
                 <ScrollView>
                     <Icon
@@ -260,13 +261,10 @@ class ClubLogin extends Component {
 
                     {/* 進駐提示 */}
                     <TouchableOpacity
-                        onPress={() => {
-                            alert('未完成');
-                            this.setState({isModalBottomVisible: true});
-                        }}
+                        onPress={() => Linking.openURL(USUAL_Q)}
                         style={{marginTop: pxToDp(20), alignSelf: 'center'}}>
                         <Text style={{color: COLOR_DIY.black.third}}>
-                            沒有賬號?
+                            沒有賬號? 進駐UM ALL!
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>

@@ -63,9 +63,12 @@ export const POST = {
     NOTICE_CREATE: 'create_notice/',
 }
 
-export const ARK_LETTER_IMG = 'https://umall.one/static/logo.png';
+export const ARK_LETTER_IMG = 'https://umall.one/static/ark_letter.png';
 
+// 用戶協議
 export const USER_AGREE = 'https://umall.one/user_agreement.html';
+// 常見問題
+export const USUAL_Q = 'https://umall.one/qa.html';
 
 
 // Webview 服務
@@ -168,3 +171,7 @@ export const OF_BASE = 'https://www.um.edu.mo';
 
 // 迎新推薦 - 官網圖文包
 export const NEW_INFOG = 'https://reg.um.edu.mo/infographic/?lang=zh-hant';
+// 生存指南
+export const NEW_SCZN = 'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1463637399816323072&__biz=MzU0NzEyODM3Mg==#wechat_redirect';
+// 內地生指南
+export const NEW_MAINLAND = 'https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU0NzEyODM3Mg==&action=getalbum&album_id=2476350502922977281#wechat_redirect';

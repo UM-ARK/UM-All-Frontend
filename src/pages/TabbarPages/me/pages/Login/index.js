@@ -39,6 +39,7 @@ class LoginChoose extends Component {
     static contextType = NavigationContext;
 
     state = {
+        title: '',
         ruleChoice: false,
         haveAccount: false,
         showDialog: false,
@@ -99,6 +100,13 @@ class LoginChoose extends Component {
                         barStyle: 'dark-content',
                         translucent: true,
                     }}
+                    centerComponent={{
+                        text: this.state.title,
+                        style: {
+                            color: COLOR_DIY.black.main,
+                            fontSize: pxToDp(15),
+                        },
+                    }}
                     leftComponent={
                         this.state.showMoodle && (
                             <TouchableOpacity
@@ -133,7 +141,10 @@ class LoginChoose extends Component {
                             // Moodle頁面e.title為Dashboard
                             // 已登錄到Moodle
                             if (e.url == UM_Moodle) {
-                                this.setState({disabledButton: true});
+                                this.setState({
+                                    disabledButton: true,
+                                    title: '請等待..',
+                                });
                                 // 獲取Moodle頁所有的cookies
                                 CookieManager.get(UM_Moodle, true)
                                     .then(cookies => {
@@ -323,9 +334,7 @@ class LoginChoose extends Component {
                 {/* 學生首次登錄提示 */}
                 <DialogDIY
                     showDialog={this.state.showDialog}
-                    text={
-                        '將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！'
-                    }
+                    text={`將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！\n請確定您已閱讀用戶條款`}
                     handleConfirm={() => {
                         this.setState({showDialog: false, showMoodle: true});
                     }}

@@ -1,9 +1,10 @@
-import * as React from 'react';
+import React, {useRef} from 'react';
 import {View, Dimensions, Text, Image, StyleSheet} from 'react-native';
 
 import {pxToDp, pcHeightToNumHeight} from '../../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import BlurViewWrapper from '../../../../components/BlurViewWrapper';
+import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 
 import Animated, {
     Extrapolate,
@@ -26,6 +27,7 @@ const {white, bg_color, black, viewShadow} = COLOR_DIY;
 function ScrollImage(props) {
     const progressValue = useSharedValue(0);
     const {imageData} = props;
+    const imageScrollViewerRef = useRef(null);
 
     // 以接收的圖像數據，調整圓點數量
     let numDiff = imageData.length - colors.length;
@@ -41,10 +43,7 @@ function ScrollImage(props) {
 
     // 點擊圖片事件
     function handleOnClickImage(item, index) {
-        // 2022.06.24 方案：直接跳轉相關頁面、廣告web
-        // console.log(item);
-        // console.log(index);
-        alert(`點擊了 “${item.title}” 的跳轉鏈接`);
+        imageScrollViewerRef.current.handleOpenImage(index);
     }
 
     // 輪播圖渲染
@@ -127,7 +126,7 @@ function ScrollImage(props) {
                             )}
                             <FastImage
                                 source={{
-                                    uri: item.uri.replace('http:', 'https:'),
+                                    uri: item.url.replace('http:', 'https:'),
                                     cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
@@ -136,6 +135,12 @@ function ScrollImage(props) {
                         </TouchableWithoutFeedback>
                     </View>
                 )}
+            />
+
+            {/* 彈出層展示圖片查看器 */}
+            <ImageScrollViewer
+                ref={imageScrollViewerRef}
+                imageUrls={imageData}
             />
 
             {/* 圓點下標標識 */}

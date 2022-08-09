@@ -173,7 +173,7 @@ class LoginSetting extends Component {
                                         marginHorizontal: pxToDp(15),
                                         marginTop: pxToDp(5),
                                     }}>
-                                    {`重申：APP不會在用戶不知情、不同意的情況下，擅自搜集用戶的賬號密碼，和上傳至服務器。\n\n緣由：因雙重認證或UM Pass憑證過期，在使用APP其他服務時會需要重新登錄UM Pass。該功能將用戶輸入的賬號密碼儲存在用戶的設備中，當需要UM Pass登錄時會根據此處的輸入自動填入。\n\n該功能僅適用於APP內登錄需UM PASS認證的頁面，在您退出APP的登錄後，儲存的密碼會自動清空。`}
+                                    {`重申：APP不會在用戶不知情、不同意的情況下，擅自搜集用戶的賬號密碼，和上傳至服務器。\n\n緣由：因雙重認證或UM Pass憑證過期，在使用APP其他服務時會需要重新登錄UM Pass。該功能將用戶輸入的賬號密碼儲存在用戶的設備中，當需要UM Pass登錄時會根據此處的輸入自動填入。\n\n該功能僅適用於APP內登錄需UM PASS認證的頁面，在您清空緩存或卸載APP後，儲存的密碼會自動清空。`}
                                 </Text>
                             </View>
                         </View>

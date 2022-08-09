@@ -11,6 +11,7 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
+import {USUAL_Q} from '../../../utils/pathMap';
 
 // 本Tabbar相關頁面
 import Login from './pages/Login';
@@ -128,7 +129,20 @@ class MeScreen extends Component {
             <TouchableOpacity
                 style={{...s.optionContainer}}
                 activeOpacity={0.8}
-                onPress={() => this.props.navigation.navigate(routeName)}>
+                onPress={() => {
+                    if (routeName == 'UsualQuestion') {
+                        let webview_param = {
+                            url: USUAL_Q,
+                            title: '常見問題',
+                        };
+                        this.props.navigation.navigate(
+                            'Webviewer',
+                            webview_param,
+                        );
+                    } else {
+                        this.props.navigation.navigate(routeName);
+                    }
+                }}>
                 {/* 左側flex佈局 */}
                 <View style={{flexDirection: 'row'}}>
                     {/* 選項圖標 */}
