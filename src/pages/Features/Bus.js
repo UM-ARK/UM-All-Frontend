@@ -211,31 +211,33 @@ class BusScreen extends Component {
             <View style={{flex: 1, backgroundColor: bg_color}}>
                 <Header title={'校園巴士'} />
 
-                <ImageBackground
-                    style={{flex: 1}}
-                    source={busRouteImg}
-                    resizeMode={'contain'}>
-                    <View
-                        style={{
-                            position: 'absolute',
-                            width: rpx(30),
-                            height: rpx(30),
-                            borderRadius: 50,
-                            backgroundColor: 'red',
-                            left: rpx(308),
-                            top: rpx(172),
-                        }}></View>
-                    <View
-                        style={{
-                            position: 'absolute',
-                            width: rpx(30),
-                            height: rpx(30),
-                            borderRadius: 50,
-                            backgroundColor: 'red',
-                            left: rpx(535),
-                            top: rpx(618),
-                        }}></View>
-                </ImageBackground>
+                <ScrollView>
+                    <ImageBackground
+                        style={{width: scale(310), height: verticalScale(600)}}
+                        source={busRouteImg}
+                        resizeMode={'contain'}>
+                        <View
+                            style={{
+                                position: 'absolute',
+                                width: rpx(30),
+                                height: rpx(30),
+                                borderRadius: 50,
+                                backgroundColor: 'red',
+                                left: scale(124),
+                                top: verticalScale(86),
+                            }}></View>
+                        <View
+                            style={{
+                                position: 'absolute',
+                                width: rpx(30),
+                                height: rpx(30),
+                                borderRadius: 50,
+                                backgroundColor: 'red',
+                                left: scale(230),
+                                top: verticalScale(307),
+                            }}></View>
+                    </ImageBackground>
+                </ScrollView>
 
                 {/* 背景的Bus路線圖 */}
                 {false && (
