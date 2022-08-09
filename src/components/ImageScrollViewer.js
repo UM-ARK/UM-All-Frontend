@@ -49,7 +49,11 @@ class ImageScrollViewer extends Component {
             imageUrlsObjArr.push({url: imageUrls});
         } else {
             imageUrls.map(item => {
-                imageUrlsObjArr.push({url: item});
+                if (typeof item == 'object' && item.url) {
+                    imageUrlsObjArr.push(item);
+                } else {
+                    imageUrlsObjArr.push({url: item});
+                }
             });
         }
 

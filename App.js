@@ -93,6 +93,8 @@ class App extends Component {
                         alert('服務器API更新，需要重新登錄');
                         handleLogout();
                     }
+                } else {
+                    setAPPInfo(serverInfo);
                 }
             }
         } catch (e) {

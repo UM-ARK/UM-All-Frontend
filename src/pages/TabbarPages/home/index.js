@@ -11,7 +11,13 @@ import {
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {UM_WHOLE, WHAT_2_REG, NEW_SCZN} from '../../../utils/pathMap';
+import {
+    UM_WHOLE,
+    WHAT_2_REG,
+    NEW_SCZN,
+    USUAL_Q,
+    BASE_HOST,
+} from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
 
@@ -23,6 +29,7 @@ import {FlatGrid} from 'react-native-super-grid';
 import {inject} from 'mobx-react';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 let carouselProgress = 0;
@@ -34,28 +41,13 @@ class HomeScreen extends Component {
         // 首頁輪播圖數據
         carouselImagesArr: [
             {
-                title: '澳大對外暫時僅提供有限度服務',
-                uri: 'https://www.um.edu.mo/wp-content/uploads/2022/07/271267-270507-1.jpeg',
+                url: '',
             },
             {
-                title: '校園Vlog大賽',
-                uri: 'https://info.umsu.org.mo/storage/activity_covers/images/13a5158b6a890818615af9bcff8bc81b.png',
+                url: '',
             },
             {
-                title: '香水工作坊',
-                uri: 'https://info.umsu.org.mo/storage/activity_covers/images/c8049bf0ebd8ea081e75f1c1573631f2.png',
-            },
-            {
-                title: '網絡爬蟲工作坊',
-                uri: 'https://www.cpsumsu.org/_announcement/CPSUMSU_Web_Crawler_Workshop2022/poster.jpg',
-            },
-            {
-                title: '澳大電競節2022',
-                uri: 'https://www.cpsumsu.org/_announcement/CPSUMSU_UMEF2022_postpone/279037122_5018677904858794_5613582783794191615_n.jpg',
-            },
-            {
-                title: '遊戲設計工作坊',
-                uri: 'https://www.cpsumsu.org/_announcement/Game_Design_Workshop2022/img/poster.jpg',
+                url: '',
             },
         ],
 
@@ -123,7 +115,31 @@ class HomeScreen extends Component {
                 this.setState({isShowModal: true});
             }, 1500);
         }
+
+        this.getData();
     }
+
+    getData = async () => {
+        try {
+            const strAppInfo = await AsyncStorage.getItem('appInfo');
+            const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
+            if (strAppInfo != null) {
+                if (
+                    appInfo.index_head_carousel &&
+                    appInfo.index_head_carousel.length > 0
+                ) {
+                    let imgUrlArr = appInfo.index_head_carousel;
+                    imgUrlArr.map(itm => {
+                        itm.url = BASE_HOST + itm.url;
+                    });
+                    console.log(imgUrlArr);
+                    this.setState({carouselImagesArr: imgUrlArr});
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({icon_name, function_name, func}) => {
@@ -253,7 +269,14 @@ class HomeScreen extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                this.props.navigation.navigate('UsualQuestion');
+                                let webview_param = {
+                                    url: USUAL_Q,
+                                    title: '常見問題',
+                                };
+                                this.props.navigation.navigate(
+                                    'Webviewer',
+                                    webview_param,
+                                );
                             }}>
                             <Text style={{color: white}}>{`嗯嗯嗯???`}</Text>
                         </TouchableOpacity>
