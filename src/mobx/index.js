@@ -10,6 +10,7 @@ class RootStore {
     // isClub = false;
     // 用戶緩存信息
     userInfo = {};
+    appInfo = {};
 
     @action // 行為修飾器
     // 登錄或登出賬號
@@ -34,6 +35,9 @@ class RootStore {
     // 一般是從緩存存入數據到全局變量
     setUserInfo(userInfo) {
         this.userInfo = userInfo;
+    }
+    setAppInfo(appInfo) {
+        this.appInfo = appInfo;
     }
 }
 

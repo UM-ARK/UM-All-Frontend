@@ -100,6 +100,11 @@ class HomeScreen extends Component {
         isShowModal: false,
     };
 
+    constructor() {
+        super();
+        // this.getData();
+    }
+
     componentDidMount() {
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
@@ -111,31 +116,44 @@ class HomeScreen extends Component {
                 this.setState({isShowModal: true});
             }, 1500);
         }
-
-        this.getData();
+        // this.getData();
+        if (globalData.appInfo) {
+            let appInfo = globalData.appInfo;
+            if (
+                appInfo.index_head_carousel &&
+                appInfo.index_head_carousel.length > 0
+            ) {
+                let imgUrlArr = appInfo.index_head_carousel;
+                imgUrlArr.map(itm => {
+                    itm.url = BASE_HOST + itm.url;
+                });
+                // console.log(imgUrlArr);
+                this.setState({carouselImagesArr: imgUrlArr});
+            }
+        }
     }
 
-    getData = async () => {
-        try {
-            const strAppInfo = await AsyncStorage.getItem('appInfo');
-            const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
-            if (strAppInfo != null) {
-                if (
-                    appInfo.index_head_carousel &&
-                    appInfo.index_head_carousel.length > 0
-                ) {
-                    let imgUrlArr = appInfo.index_head_carousel;
-                    imgUrlArr.map(itm => {
-                        itm.url = BASE_HOST + itm.url;
-                    });
-                    // console.log(imgUrlArr);
-                    this.setState({carouselImagesArr: imgUrlArr});
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
+    // getData = async () => {
+    //     try {
+    //         const strAppInfo = await AsyncStorage.getItem('appInfo');
+    //         const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
+    //         if (strAppInfo != null) {
+    //             if (
+    //                 appInfo.index_head_carousel &&
+    //                 appInfo.index_head_carousel.length > 0
+    //             ) {
+    //                 let imgUrlArr = appInfo.index_head_carousel;
+    //                 imgUrlArr.map(itm => {
+    //                     itm.url = BASE_HOST + itm.url;
+    //                 });
+    //                 // console.log(imgUrlArr);
+    //                 this.setState({carouselImagesArr: imgUrlArr});
+    //             }
+    //         }
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    // };
 
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({icon_name, function_name, func}) => {

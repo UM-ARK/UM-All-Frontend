@@ -1,5 +1,12 @@
-import React, {useRef} from 'react';
-import {View, Dimensions, Text, Image, StyleSheet} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {
+    View,
+    Dimensions,
+    Text,
+    Image,
+    StyleSheet,
+    ActivityIndicator,
+} from 'react-native';
 
 import {pxToDp, pcHeightToNumHeight} from '../../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -28,6 +35,7 @@ function ScrollImage(props) {
     const progressValue = useSharedValue(0);
     const {imageData} = props;
     const imageScrollViewerRef = useRef(null);
+    const [imgLoading, SetImgLoading] = useState(true);
 
     // 以接收的圖像數據，調整圓點數量
     let numDiff = imageData.length - colors.length;
@@ -129,9 +137,30 @@ function ScrollImage(props) {
                                     uri: item.url.replace('http:', 'https:'),
                                     cache: FastImage.cacheControl.web,
                                 }}
-                                style={{width: '100%', height: '100%'}}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: COLOR_DIY.white,
+                                }}
                                 resizeMode={FastImage.resizeMode.cover}
+                                onLoadStart={() => {
+                                    SetImgLoading(true);
+                                }}
+                                onLoad={() => {
+                                    SetImgLoading(false);
+                                }}
                             />
+                            {imgLoading ? (
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.white}
+                                    style={{
+                                        alignSelf: 'center',
+                                        justifyContent: 'center',
+                                        position: 'absolute',
+                                    }}
+                                />
+                            ) : null}
                         </TouchableWithoutFeedback>
                     </View>
                 )}

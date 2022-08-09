@@ -81,23 +81,24 @@ class App extends Component {
             const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
             if (strAppInfo == null) {
                 setAPPInfo(serverInfo);
+                RootStore.setAppInfo(serverInfo);
             } else {
                 // 服務器API更新，需要重新登錄
                 if (appInfo.API_version != serverInfo.API_version) {
                     setAPPInfo(serverInfo);
+                    RootStore.setAppInfo(serverInfo);
                     if (this.state.isLogin) {
                         alert('服務器API更新，需要重新登錄');
                         handleLogout();
                     }
                 } else {
                     setAPPInfo(serverInfo);
+                    RootStore.setAppInfo(serverInfo);
                 }
             }
             // APP版本更新，提示下載新版本
             if (packageInfo.version != serverInfo.app_version) {
-                alert(
-                    `APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`,
-                );
+                alert(`APP版本和API更新，需使用新版本才能繼續~\n[]~(￣▽￣)~*`);
                 versionLock = true;
             }
         } catch (e) {
