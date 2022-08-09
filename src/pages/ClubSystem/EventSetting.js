@@ -96,6 +96,7 @@ class EventSetting extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let eventData = json.content;
+                    console.log('eventData', eventData);
                     eventData.cover_image_url =
                         BASE_HOST + eventData.cover_image_url;
                     // 渲染服務器已存的照片
@@ -127,8 +128,8 @@ class EventSetting extends Component {
                         introText: eventData.introduction,
                         coverImgUrl: eventData.cover_image_url,
                         allowFollow: eventData.can_follow,
-                        startDate: new Date(eventData.startdatetime),
-                        finishDate: new Date(eventData.enddatetime),
+                        startDate: new Date(String(eventData.startdatetime)),
+                        finishDate: new Date(String(eventData.enddatetime)),
                         type: eventData.type.toLowerCase(),
                         isLoading: false,
                     });

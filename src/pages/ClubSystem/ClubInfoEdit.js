@@ -76,13 +76,19 @@ class ClubInfoEdit extends Component {
                 let pushArr = new Array(5 - imgArr.length).fill('');
                 let arr = JSON.parse(JSON.stringify(imgArr));
                 arr.push(...pushArr);
-                this.setState({imageUrlArr: arr});
+            } else {
+                this.setState({imageUrlArr: imgArr});
             }
         }
         if ('contact' in clubData && clubData.contact.length > 0) {
             this.setState({contactInput: clubData.contact});
         }
         this.setState({isLoading: false});
+    }
+
+    componentWillUnmount() {
+        add_club_photos = [];
+        del_club_photos = [];
     }
 
     // 圖片選擇
