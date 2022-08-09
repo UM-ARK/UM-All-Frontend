@@ -20,8 +20,8 @@ import Header from '../../components/Header';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 var DomParser = require('react-native-html-parser').DOMParser;
-import FastImage from 'react-native-fast-image';
 import {scale, verticalScale} from 'react-native-size-matters';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 const {bg_color, white, black, themeColor, secondThemeColor, viewShadow} =
     COLOR_DIY;
@@ -117,6 +117,7 @@ class BusScreen extends Component {
         // 點擊站點的數組索引
         clickStopIndex: 0,
         isLoading: true,
+        toastColor: themeColor,
     };
 
     constructor() {
@@ -125,7 +126,6 @@ class BusScreen extends Component {
         this.fetchBusInfo();
     }
 
-    // TODO:有兩輛車的情況，不急做
     // 爬蟲campus Bus
     fetchBusInfo = () => {
         // 訪問campusloop網站
@@ -135,7 +135,6 @@ class BusScreen extends Component {
             .then(res => res.text())
             .then(text => getBusData(text))
             .then(result => {
-                // console.log("爬蟲後的result為", result);
                 // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
                 result.busInfoArr.shift(); // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
 
@@ -146,11 +145,17 @@ class BusScreen extends Component {
                     isLoading: false,
                 });
                 if (this.state.busPositionArr.length == 0) {
-                    alert('當前沒有巴士~');
+                    this.setState({toastColor: COLOR_DIY.warning});
+                    this.toast.show(`當前沒有巴士~\n[]~(￣▽￣)~*`, 3000);
+                } else {
+                    this.setState({toastColor: themeColor});
+                    this.toast.show(`不要著急~\nData is Loading~\n[]~(￣▽￣)~*`, 1500);
                 }
             })
-
-            .catch(error => console.error(error));
+            .catch(error => {
+                this.setState({toastColor: COLOR_DIY.warning});
+                this.toast.show(`網絡錯誤`, 2000);
+            });
     };
 
     // 巴士站點文字渲染
@@ -213,7 +218,7 @@ class BusScreen extends Component {
             {position: 'absolute', left: scale(255), top: scale(500)}, // s4 ~ PGH
         ];
 
-        const {busPositionArr, busInfoArr} = this.state;
+        const {busPositionArr, busInfoArr, toastColor} = this.state;
 
         return (
             <View style={{flex: 1, backgroundColor: bg_color}}>
@@ -240,17 +245,12 @@ class BusScreen extends Component {
                             }}
                             source={busRouteImg}
                             resizeMode={'contain'}>
+                            {/* Data From */}
                             <View
                                 style={{
-                                    position: 'absolute',
+                                    ...s.infoContainer,
                                     left: scale(65),
                                     top: scale(570),
-                                    marginHorizontal: pxToDp(10),
-                                    backgroundColor: white,
-                                    borderRadius: pxToDp(10),
-                                    ...viewShadow,
-                                    paddingHorizontal: pxToDp(10),
-                                    paddingVertical: pxToDp(3),
                                 }}>
                                 <Text
                                     style={{fontSize: 12, color: black.third}}>
@@ -260,16 +260,10 @@ class BusScreen extends Component {
                             {/* Bus運行信息的渲染 */}
                             <View
                                 style={{
-                                    position: 'absolute',
+                                    ...s.infoContainer,
                                     left: scale(65),
                                     top: scale(185),
                                     width: scale(160),
-                                    marginHorizontal: pxToDp(10),
-                                    backgroundColor: white,
-                                    borderRadius: pxToDp(10),
-                                    ...viewShadow,
-                                    paddingHorizontal: pxToDp(10),
-                                    paddingVertical: pxToDp(3),
                                 }}>
                                 {busInfoArr.length > 0
                                     ? this.state.busInfoArr.map(item => (
@@ -368,6 +362,18 @@ class BusScreen extends Component {
                         />
                     </View>
                 </Modal>
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: toastColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }
@@ -387,6 +393,15 @@ const s = StyleSheet.create({
         width: pxToDp(21),
         height: pxToDp(21),
         resizeMode: 'contain',
+    },
+    infoContainer: {
+        position: 'absolute',
+        marginHorizontal: pxToDp(10),
+        backgroundColor: white,
+        borderRadius: pxToDp(10),
+        ...viewShadow,
+        paddingHorizontal: pxToDp(10),
+        paddingVertical: pxToDp(3),
     },
 });
 
