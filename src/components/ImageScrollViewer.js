@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Dimensions, View, Text} from 'react-native';
+import {Dimensions, View, Text, ActivityIndicator} from 'react-native';
 
 import {COLOR_DIY} from '../utils/uiMap';
 import {pxToDp} from '../utils/stylesKits';
@@ -9,8 +9,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-// import {Image} from '@rneui/themed';
-import FastImage from 'react-native-fast-image';
+import {Image} from '@rneui/themed';
+// import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -73,12 +73,15 @@ class ImageScrollViewer extends Component {
                     useNativeDriver={true}
                     imageUrls={imageUrlsObjArr}
                     renderImage={props => (
-                        <FastImage
-                            source={{
-                                uri: props.source.uri,
-                                cache: FastImage.cacheControl.web,
-                            }}
-                            style={props.style}
+                        <Image
+                            source={props.source}
+                            containerStyle={props.style}
+                            PlaceholderContent={
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.white}
+                                />
+                            }
                         />
                     )}
                     // 打開的imageUrls的索引
