@@ -146,7 +146,10 @@ class HomeScreen extends Component {
             } else {
                 const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
                 // 服務器API更新，需要重新登錄
-                if (appInfo.API_version != serverInfo.API_version) {
+                if (
+                    appInfo.API_version &&
+                    appInfo.API_version != serverInfo.API_version
+                ) {
                     if (isLogin) {
                         alert('服務器API更新，需要重新登錄');
                         handleLogout();
