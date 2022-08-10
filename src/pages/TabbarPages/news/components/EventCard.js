@@ -120,8 +120,11 @@ class EventCard extends Component {
                             ...styles.rightTopIconPosition,
                             ...styles.unFinish,
                             zIndex: 9,
-                        }}
-                    />
+                        }}>
+                        <Text style={{fontSize: scale(10), color: white}}>
+                            進行中
+                        </Text>
+                    </View>
                 )}
                 {coverImgUrl ? (
                     <TouchableOpacity
@@ -206,10 +209,10 @@ const styles = StyleSheet.create({
     },
     // 紅點標籤樣式
     unFinish: {
-        height: pxToDp(12),
-        width: pxToDp(12),
-        backgroundColor: COLOR_DIY.unread,
-        borderRadius: 50,
+        paddingHorizontal: scale(5),
+        paddingVertical: scale(2),
+        backgroundColor: COLOR_DIY.secondThemeColor,
+        borderRadius: scale(20),
         ...COLOR_DIY.viewShadow,
     },
     title: {
