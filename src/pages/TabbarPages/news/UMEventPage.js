@@ -175,6 +175,7 @@ class UMEventPage extends Component {
                         }}
                     />
                 }
+                directionalLockEnabled
             />
         );
     };

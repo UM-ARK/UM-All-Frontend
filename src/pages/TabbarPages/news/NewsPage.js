@@ -389,6 +389,7 @@ class NewsPage extends Component {
                                 }}
                             />
                         }
+                        directionalLockEnabled
                     />
                 )}
             </View>

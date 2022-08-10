@@ -371,7 +371,8 @@ class EventPage extends Component {
                                     this.getData();
                                 }}
                             />
-                        }>
+                        }
+                        directionalLockEnabled>
                         {/* 篩選 */}
                         {this.renderFilter()}
                         {/* 仿瀑布屏展示 */}
