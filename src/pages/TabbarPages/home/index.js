@@ -108,7 +108,6 @@ class HomeScreen extends Component {
     };
 
     componentDidMount() {
-        // console.log('index頁', this.props.route.params);
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
