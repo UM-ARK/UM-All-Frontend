@@ -185,7 +185,6 @@ class EventSetting extends Component {
                     compressionMethod: 'auto',
                 });
                 imgFileObj.uri = compUri;
-                alert(imgFileObj.fileSize)
                 // 僅允許小於10M的圖片
                 if (imgFileObj.fileSize / 1000 / 1024 < 10) {
                     imageObj = imgFileObj;
