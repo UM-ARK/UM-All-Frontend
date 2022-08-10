@@ -37,6 +37,7 @@ class NewsScreen extends Component {
                     screenOptions={{
                         tabBarLabelStyle: {fontSize: pxToDp(11)},
                         tabBarStyle: {backgroundColor: bg_color},
+                        tabBarBounces: false,
                     }}
                     initialRouteName={'EventPage'}>
                     <Tab.Screen

@@ -176,6 +176,7 @@ class UMEventPage extends Component {
                     />
                 }
                 directionalLockEnabled
+                alwaysBounceHorizontal={false}
             />
         );
     };
