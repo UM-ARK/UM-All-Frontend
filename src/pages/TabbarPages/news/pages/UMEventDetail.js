@@ -19,13 +19,14 @@ import HyperlinkText from '../../../../components/HyperlinkText';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import moment, {lang} from 'moment-timezone';
+import {scale} from 'react-native-size-matters';
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
 
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 const {width: PAGE_WIDTH} = Dimensions.get('window');
-const COMPONENT_WIDTH = PAGE_WIDTH * 0.9;
+const COMPONENT_WIDTH = scale(320);
 
 class UMEventDetail extends Component {
     constructor(props) {
@@ -214,6 +215,10 @@ class UMEventDetail extends Component {
             },
             imgLoading: true,
         };
+    }
+
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
     }
 
     renderModeChoice = () => {
@@ -478,7 +483,7 @@ class UMEventDetail extends Component {
                         <FastImage
                             source={{
                                 uri: imageUrls,
-                                cache: FastImage.cacheControl.web,
+                                // cache: FastImage.cacheControl.web,
                             }}
                             style={{width: '100%', height: '100%'}}
                             onLoadStart={() => {

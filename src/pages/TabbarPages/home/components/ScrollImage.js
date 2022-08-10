@@ -103,7 +103,7 @@ function ScrollImage(props) {
                                         }}
                                         source={{
                                             uri: item.uri,
-                                            cache: FastImage.cacheControl.web,
+                                            // cache: FastImage.cacheControl.web,
                                         }}>
                                         {/* 1.2 圖片附文字說明展示 開始 */}
                                         <LinearGradient
@@ -135,7 +135,7 @@ function ScrollImage(props) {
                             <FastImage
                                 source={{
                                     uri: item.url.replace('http:', 'https:'),
-                                    cache: FastImage.cacheControl.web,
+                                    // cache: FastImage.cacheControl.web,
                                 }}
                                 style={{
                                     width: '100%',

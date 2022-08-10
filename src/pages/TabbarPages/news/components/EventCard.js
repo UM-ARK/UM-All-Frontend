@@ -5,6 +5,7 @@ import {
     StyleSheet,
     Dimensions,
     TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -14,11 +15,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
+import {scale} from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-const IMAGE_SIZE = pxToDp(PAGE_WIDTH / 2 - 30);
+const IMAGE_SIZE = scale(160);
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, bg_color} = COLOR_DIY;
@@ -36,6 +38,7 @@ class EventCard extends Component {
         link: undefined,
         relateImgUrl: undefined,
         type: undefined,
+        imgLoading: true,
     };
 
     componentDidMount() {
@@ -86,7 +89,6 @@ class EventCard extends Component {
             type,
         } = this.state;
 
-        // TODO: BUG: 時間已過，但仍顯示未讀標籤。可能是IOS和安卓的時間戳位數問題。
         // 當前時刻時間戳
         let nowTimeStamp = moment(new Date()).valueOf();
         // 活動結束標誌
@@ -116,14 +118,37 @@ class EventCard extends Component {
                         <FastImage
                             source={{
                                 uri: coverImgUrl,
-                                cache: FastImage.cacheControl.web,
+                                // cache: FastImage.cacheControl.web,
                             }}
+                            // fallback={Platform.OS === 'android'}
                             style={{
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,
+                                backgroundColor: COLOR_DIY.white,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
-                        />
+                            onLoadStart={() => {
+                                this.setState({imgLoading: true});
+                            }}
+                            onLoad={() => {
+                                this.setState({imgLoading: false});
+                            }}>
+                            {this.state.imgLoading ? (
+                                <View
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'absolute',
+                                    }}>
+                                    <ActivityIndicator
+                                        size={'large'}
+                                        color={COLOR_DIY.themeColor}
+                                    />
+                                </View>
+                            ) : null}
+                        </FastImage>
 
                         {/* 標題描述 */}
                         <View style={styles.title.container}>

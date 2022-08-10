@@ -52,6 +52,10 @@ class MessageSetting extends Component {
         // console.log('公告設置頁', params);
     }
 
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
+    }
+
     cleanInput = () => {
         uploadImage = {};
         this.setState({coverImgUrl: '', websiteLink: ''});
@@ -144,7 +148,7 @@ class MessageSetting extends Component {
                     <FastImage
                         source={{
                             uri: coverImgUrl,
-                            cache: FastImage.cacheControl.web,
+                            // cache: FastImage.cacheControl.web,
                         }}
                         style={{width: '100%', height: '100%'}}
                     />

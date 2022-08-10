@@ -25,6 +25,10 @@ class ImageScrollViewer extends Component {
         isLoading: true,
     };
 
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
+    }
+
     // 打開和關閉顯示照片的彈出層
     tiggerModal = () => {
         this.setState({
@@ -76,7 +80,7 @@ class ImageScrollViewer extends Component {
                         <FastImage
                             source={{
                                 uri: props.source.uri,
-                                cache: FastImage.cacheControl.web,
+                                // cache: FastImage.cacheControl.web,
                             }}
                             style={props.style}
                             onLoadStart={() => {

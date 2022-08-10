@@ -6,13 +6,14 @@ import {
     TouchableOpacity,
     ScrollView,
     TextInput,
+    ActivityIndicator,
 } from 'react-native';
 
 import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {handleImageSelect} from '../../utils/fileKits';
 import Header from '../../components/Header';
-import {BASE_URI, BASE_HOST, POST} from '../../utils/pathMap';
+import {BASE_URI, BASE_HOST, POST, GET, addHost} from '../../utils/pathMap';
 import DialogDIY from '../../components/DialogDIY';
 import Loading from '../../components/Loading';
 
@@ -50,18 +51,43 @@ class ClubInfoEdit extends Component {
             {type: 'Facebook', num: ''},
             {type: 'Website', num: ''},
         ],
-        clubData: this.props.RootStore.userInfo.clubData,
+        clubData: undefined,
         isLoading: true,
         // 文本輸入框顏色
         borderColor: black.third,
         titleColor: black.main,
         expanded1: false,
         expanded2: false,
+        imgLoading: true,
     };
 
-    // 整理從CLubDetail傳過來的社團info
     componentDidMount() {
-        const {clubData, imageUrlArr} = this.state;
+        let clubData = this.props.RootStore.userInfo.clubData;
+        this.getData(clubData.club_num);
+    }
+
+    componentWillUnmount() {
+        add_club_photos = [];
+        del_club_photos = [];
+        FastImage.clearMemoryCache();
+    }
+
+    getData = async clubID => {
+        await axios
+            .get(BASE_URI + GET.CLUB_INFO_NUM + clubID)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    let clubData = json.content;
+                    this.setData(clubData);
+                }
+            })
+            .catch(err => {
+                // console.log('err', err);
+            });
+    };
+
+    setData = clubData => {
         if ('intro' in clubData) {
             this.setState({introTextInput: clubData.intro});
         }
@@ -71,25 +97,27 @@ class ClubInfoEdit extends Component {
             clubData.club_photos_list.length > 0
         ) {
             let imgArr = clubData.club_photos_list;
+            let newImgArr = [];
             // 不夠5張則補充
             if (imgArr.length <= 5) {
                 let pushArr = new Array(5 - imgArr.length).fill('');
                 let arr = JSON.parse(JSON.stringify(imgArr));
                 arr.push(...pushArr);
+                newImgArr = JSON.parse(JSON.stringify(arr));
             } else {
-                this.setState({imageUrlArr: imgArr});
+                newImgArr = JSON.parse(JSON.stringify(imgArr));
             }
+            let addHostArr = [];
+            newImgArr.map(itm => {
+                addHostArr.push(addHost(itm));
+            });
+            this.setState({imageUrlArr: addHostArr});
         }
         if ('contact' in clubData && clubData.contact.length > 0) {
             this.setState({contactInput: clubData.contact});
         }
-        this.setState({isLoading: false});
-    }
-
-    componentWillUnmount() {
-        add_club_photos = [];
-        del_club_photos = [];
-    }
+        this.setState({clubData, isLoading: false});
+    };
 
     // 圖片選擇
     async handleSelect(index) {
@@ -222,6 +250,7 @@ class ClubInfoEdit extends Component {
 
         // 服務器照片庫無數據，del數組留空[]，所有選圖都加入add數組
         let needDelete =
+            clubData &&
             'club_photos_list' in clubData &&
             clubData.club_photos_list.length == 0
                 ? false
@@ -263,10 +292,31 @@ class ClubInfoEdit extends Component {
                     <FastImage
                         source={{
                             uri: imageUrlArr[index],
-                            cache: FastImage.cacheControl.web,
+                            // cache: FastImage.cacheControl.web,
                         }}
                         style={{width: '100%', height: '100%'}}
-                    />
+                        onLoadStart={() => {
+                            this.setState({imgLoading: true});
+                        }}
+                        onLoad={() => {
+                            this.setState({imgLoading: false});
+                        }}>
+                        {this.state.imgLoading ? (
+                            <View
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.themeColor}
+                                />
+                            </View>
+                        ) : null}
+                    </FastImage>
                 ) : (
                     <Ionicons
                         name="camera-outline"

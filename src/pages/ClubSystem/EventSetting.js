@@ -7,6 +7,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     TextInput,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
@@ -74,6 +75,8 @@ class EventSetting extends Component {
         isEndDatePickerVisible: false,
 
         dialogText: '',
+
+        imgLoading: true,
     };
 
     componentDidMount() {
@@ -116,6 +119,8 @@ class EventSetting extends Component {
                             let arr = JSON.parse(JSON.stringify(imgArr));
                             arr.push(...pushArr);
                             this.setState({relateImgUrl: arr});
+                        } else {
+                            this.setState({relateImgUrl: imgArr});
                         }
                     }
                     this.setState({
@@ -149,6 +154,7 @@ class EventSetting extends Component {
         add_relate_image = [];
         del_relate_image = [];
         pressDelete = false;
+        FastImage.clearMemoryCache();
     }
 
     // 切換類型時要還原部分輸入，避免數據混亂
@@ -281,10 +287,31 @@ class EventSetting extends Component {
                     <FastImage
                         source={{
                             uri: imageUrlArr[index],
-                            cache: FastImage.cacheControl.web,
+                            // cache: FastImage.cacheControl.web,
                         }}
                         style={{width: '100%', height: '100%'}}
-                    />
+                        onLoadStart={() => {
+                            this.setState({imgLoading: true});
+                        }}
+                        onLoad={() => {
+                            this.setState({imgLoading: false});
+                        }}>
+                        {this.state.imgLoading ? (
+                            <View
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.themeColor}
+                                />
+                            </View>
+                        ) : null}
+                    </FastImage>
                 ) : (
                     <Ionicons
                         name="camera-outline"

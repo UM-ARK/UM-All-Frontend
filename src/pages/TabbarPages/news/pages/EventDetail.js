@@ -33,6 +33,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -73,6 +74,10 @@ class EventDetail extends Component {
         const eventData = this.props.route.params.data;
         this.getClubData(eventData.created_by);
         this.getEventData(eventData._id);
+    }
+
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
     }
 
     // 按社團id獲取社團資訊，頭像
@@ -245,7 +250,7 @@ class EventDetail extends Component {
             colors={[themeColor]}
             tintColor={themeColor}
             refreshing={this.state.isLoading}
-            progressViewOffset={pxToDp(300)}
+            progressViewOffset={scale(220)}
             onRefresh={this.onRefresh}
         />
     );
@@ -537,11 +542,8 @@ class EventDetail extends Component {
                                         uri:
                                             clubData == undefined
                                                 ? ''
-                                                : clubData.logo_url.replace(
-                                                      'http:',
-                                                      'https:',
-                                                  ),
-                                        cache: FastImage.cacheControl.web,
+                                                : clubData.logo_url,
+                                        // cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
                                     resizeMode={FastImage.resizeMode.contain}
@@ -669,8 +671,8 @@ class EventDetail extends Component {
                                             <FastImage
                                                 source={{
                                                     uri: item,
-                                                    cache: FastImage
-                                                        .cacheControl.web,
+                                                    // cache: FastImage
+                                                    //     .cacheControl.web,
                                                 }}
                                                 style={{
                                                     width: pxToDp(
@@ -769,15 +771,15 @@ class EventDetail extends Component {
                         // 向上滾動的淡出效果
                         fadeOutForeground
                         // 收起時的高度
-                        minHeight={pxToDp(220)}
+                        minHeight={scale(220)}
                         // 打開時的高度
-                        maxHeight={pxToDp(PAGE_HEIGHT * 0.65)}
+                        maxHeight={scale(445)}
                         // 背景內容 - 圖片 - 建議使用橫圖
                         renderHeader={() => (
                             <FastImage
                                 source={{
                                     uri: coverImgUrl.replace('http:', 'https:'),
-                                    cache: FastImage.cacheControl.web,
+                                    // cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
                             />
