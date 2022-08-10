@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     TextInput,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
@@ -32,6 +33,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import FastImage from 'react-native-fast-image';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import ImgComp from 'react-native-compressor';
 
 import {pxToDp} from '../../utils/stylesKits';
 
@@ -178,13 +180,18 @@ class EventSetting extends Component {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
                 let imgFileObj = selectResult.assets[0];
-                // 僅允許小於5M的圖片
-                if (imgFileObj.fileSize / 1000 / 1024 < 5) {
+                // 圖片壓縮，返回的是file:// uri路徑
+                let compUri = await ImgComp.Image.compress(imgFileObj.uri, {
+                    compressionMethod: 'auto',
+                });
+                imgFileObj.uri = compUri;
+                // 僅允許小於10M的圖片
+                if (imgFileObj.fileSize / 1000 / 1024 < 10) {
                     imageObj = imgFileObj;
                     imageUrl = imgFileObj.uri;
                     cancel = false;
                 } else {
-                    alert('請選擇小於5MB的圖片！\n服務器為愛發電請見諒！');
+                    alert('請選擇小於10MB的圖片！\n服務器為愛發電請見諒！');
                 }
             } else {
                 if (type == 'cover' && 'cover_image_url' in eventData) {

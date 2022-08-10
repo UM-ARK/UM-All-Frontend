@@ -26,6 +26,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import FastImage from 'react-native-fast-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import ImgComp from 'react-native-compressor';
 
 const {black, themeColor, white, bg_color} = COLOR_DIY;
 
@@ -113,13 +114,18 @@ class MessageSetting extends Component {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
                 let imgFileObj = selectResult.assets[0];
-                // 僅允許小於8M的圖片
-                if (imgFileObj.fileSize / 1000 / 1024 < 8) {
+                // 圖片壓縮，返回的是file:// uri路徑
+                let compUri = await ImgComp.Image.compress(imgFileObj.uri, {
+                    compressionMethod: 'auto',
+                });
+                imgFileObj.uri = compUri;
+                // 僅允許小於10M的圖片
+                if (imgFileObj.fileSize / 1000 / 1024 < 10) {
                     imageObj = selectResult.assets[0];
                     imageUrl = imageObj.uri;
                     cancel = false;
                 } else {
-                    alert('請選擇小於8MB的圖片！\n服務器為愛發電請見諒！');
+                    alert('請選擇小於10MB的圖片！\n服務器為愛發電請見諒！');
                 }
             }
         } catch (error) {

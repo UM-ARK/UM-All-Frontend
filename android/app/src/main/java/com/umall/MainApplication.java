@@ -19,6 +19,7 @@ import com.wix.interactable.Interactable; // 拖動手勢庫需要
 import com.reactnativecommunity.cameraroll.CameraRollPackage; // 圖片保存需要
 import com.reactnativerestart.RestartPackage;  // <--- Import
 import com.mkuczera.RNReactNativeHapticFeedbackPackage; // 震動包
+import com.reactnativecompressor.CompressorPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
