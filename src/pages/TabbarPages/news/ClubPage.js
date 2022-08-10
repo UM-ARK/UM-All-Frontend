@@ -105,6 +105,7 @@ class ClubPage extends Component {
                     />
                 }
                 keyExtractor={item => item._id}
+                directionalLockEnabled
             />
         );
     };

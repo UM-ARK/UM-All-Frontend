@@ -5,6 +5,14 @@ export const BASE_URI = 'https://umall.one/api/';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
+export function addHost(itm) {
+    if (itm.length > 0) {
+        return BASE_HOST + itm;
+    } else {
+        return itm;
+    }
+}
+
 export const GET = {
     // 獲取APP info
     APP_INFO: 'get_appInfo/',
@@ -35,14 +43,14 @@ export const GET = {
         event: 'activity/',
         club: 'club/',
         all: 'all/',
-    }
-}
+    },
+};
 
 export const POST = {
     // 學生登錄
-    STD_LOGIN : 'student_signin/',
+    STD_LOGIN: 'student_signin/',
     // 修改社團info
-    CLUB_EDIT_INFO : 'edit_club_info/',
+    CLUB_EDIT_INFO: 'edit_club_info/',
     // 創建活動
     EVENT_CREATE: 'create_activity/',
     // 修改活動info
@@ -61,7 +69,7 @@ export const POST = {
 
     // 新增公告
     NOTICE_CREATE: 'create_notice/',
-}
+};
 
 export const ARK_LETTER_IMG = 'https://umall.one/static/ark_letter.png';
 export const UMALL_LOGO = 'https://umall.one/static/logo.png';
@@ -71,7 +79,6 @@ export const USER_AGREE = 'https://umall.one/user_agreement.html';
 // 常見問題
 export const USUAL_Q = 'https://umall.one/qa.html';
 
-
 // Webview 服務
 // 選咩課
 export const WHAT_2_REG = 'https://www.umeh.top';
@@ -79,19 +86,24 @@ export const WHAT_2_REG = 'https://www.umeh.top';
 export const UM_WHOLE = 'https://umbbs.xyz';
 
 // 澳大 - API 車位
-export const UM_API_CAR_PARK = 'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
+export const UM_API_CAR_PARK =
+    'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
 // 澳大 - API 活動
-export const UM_API_EVENT = 'https://api.data.um.edu.mo/service/media/events/v1.0.0/all';
+export const UM_API_EVENT =
+    'https://api.data.um.edu.mo/service/media/events/v1.0.0/all';
 // 澳大 - API 新聞
-export const UM_API_NEWS = 'https://api.data.um.edu.mo/service/media/news/v1.0.0/all';
+export const UM_API_NEWS =
+    'https://api.data.um.edu.mo/service/media/news/v1.0.0/all';
 // 澳大 - API token
 export const UM_API_TOKEN = 'Bearer c9b17308-8579-3672-8a0d-beb483b794bf';
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站
-export const UM_BUS_LOOP = 'https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo';
+export const UM_BUS_LOOP =
+    'https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo';
 // 澳大 - 校曆
-export const UM_CALENDAR = 'https://reg.um.edu.mo/university-almanac/?lang=zh-hant';
+export const UM_CALENDAR =
+    'https://reg.um.edu.mo/university-almanac/?lang=zh-hant';
 // 澳大 - 校園地圖
 export const UM_MAP = 'https://maps.um.edu.mo';
 // 澳大 - 課室地圖
@@ -101,7 +113,8 @@ export const UM_RBS = 'https://isw.um.edu.mo/umresource/schedule.php';
 // 澳大 - 公共電腦室使用情況
 export const UM_COMPUTER_ROOM = 'https://computerroom.icto.um.edu.mo';
 // 澳大 - 儲物箱租借
-export const UM_LOCKER = 'https://isw.um.edu.mo/lockerRental/zh_TW/student/myagreement';
+export const UM_LOCKER =
+    'https://isw.um.edu.mo/lockerRental/zh_TW/student/myagreement';
 // 澳大 - 維修預約，例如書院房間傢私維修等
 export const UM_CMMS = 'https://cmms.um.edu.mo';
 // 澳大 - 體育場所預約
@@ -113,27 +126,28 @@ export const UM_PASS = 'https://umpass.um.edu.mo';
 // 澳大 - UM Portal
 export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 
-
 // 學業發展分類
 // 澳大 - UM Moodle
 export const UM_Moodle = 'https://ummoodle.um.edu.mo/my/';
 // 澳大 - UM ISW
 export const UM_ISW = 'https://isw.um.edu.mo/siapp/faces/home';
 // 澳大 - UM 預選課
-export const UM_PRE_ENROLMENT = 'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
+export const UM_PRE_ENROLMENT =
+    'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
 // 澳大 - UM 選課模擬系統
 export const UM_COURSE_SIMU = 'https://kchomacau.github.io/timetable';
 // 澳大 - UM Add/Drop
 export const UM_ADD_DROP = 'https://isw.um.edu.mo/siwad';
 // 澳大 - UM 全人發展
-export const UM_WHOLE_PERSON = 'https://isw.um.edu.mo/wp/faces/app/stud/MyRecord.jspx';
+export const UM_WHOLE_PERSON =
+    'https://isw.um.edu.mo/wp/faces/app/stud/MyRecord.jspx';
 // 澳大 - 交流項目
 export const UM_EXCHANGE = 'https://isw.um.edu.mo/seas';
 // 澳大 - 獎學金
-export const UM_SCHOLARSHIP = 'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
+export const UM_SCHOLARSHIP =
+    'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
 // 澳大 - 證明文件
 export const UM_DOCUMENTS = 'https://ops.fo.um.edu.mo/services/?lang=zh-hant';
-
 
 // 澳大 - 失物認領
 export const UM_LOST_FOUND = 'https://um2.umac.mo/apps/com/umlostfound.nsf';
@@ -141,7 +155,6 @@ export const UM_LOST_FOUND = 'https://um2.umac.mo/apps/com/umlostfound.nsf';
 export const UM_PARK_APPLY = 'https://isw.um.edu.mo/parkmpapp/application';
 // 澳大 - 職位空缺系統
 export const UM_JOB_SYSTEM = 'https://isw.um.edu.mo/umsjv/zh_TW';
-
 
 // 書院 - 職位空缺系統
 export const CO_EPORTFOLIO = 'https://eportfolio.um.edu.mo';
@@ -166,13 +179,14 @@ export const CO_SPC = 'https://spc.rc.um.edu.mo';
 // 書院 - 何鴻燊
 export const CO_SHEAC = 'https://sheac.rc.um.edu.mo';
 
-
 // 學校行政 - 官網
 export const OF_BASE = 'https://www.um.edu.mo';
 
 // 迎新推薦 - 官網圖文包
 export const NEW_INFOG = 'https://reg.um.edu.mo/infographic/?lang=zh-hant';
 // 生存指南
-export const NEW_SCZN = 'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1463637399816323072&__biz=MzU0NzEyODM3Mg==#wechat_redirect';
+export const NEW_SCZN =
+    'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1463637399816323072';
 // 內地生指南
-export const NEW_MAINLAND = 'https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU0NzEyODM3Mg==&action=getalbum&album_id=2476350502922977281#wechat_redirect';
+export const NEW_MAINLAND =
+    'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=2476350502922977281';

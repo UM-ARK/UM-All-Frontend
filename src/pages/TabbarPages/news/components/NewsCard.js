@@ -14,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
+import {scale} from 'react-native-size-matters';
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow} = COLOR_DIY;
@@ -166,7 +167,7 @@ class NewsCard extends Component {
                                                       'http:',
                                                       'https:',
                                                   ),
-                                        cache: FastImage.cacheControl.web,
+                                        // cache: FastImage.cacheControl.web,
                                     }}
                                     onLoadStart={() => {
                                         this.setState({imgLoading: true});
@@ -215,8 +216,8 @@ const styles = StyleSheet.create({
         paddingVertical: pxToDp(8),
     },
     newsCardImg: {
-        width: pxToDp(125),
-        height: pxToDp(100),
+        width: scale(125),
+        height: scale(100),
     },
 });
 

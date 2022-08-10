@@ -126,6 +126,10 @@ class NewsDetail extends Component {
         };
     }
 
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
+    }
+
     // 文本語言模式選擇
     renderModeChoice = () => {
         const {LanguageMode, chooseMode, data} = this.state;
@@ -269,7 +273,7 @@ class NewsDetail extends Component {
                                 <FastImage
                                     source={{
                                         uri: item,
-                                        cache: FastImage.cacheControl.web,
+                                        // cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
                                     onLoadStart={() => {

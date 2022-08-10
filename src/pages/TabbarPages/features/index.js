@@ -614,7 +614,7 @@ class Index extends Component {
                                 <FastImage
                                     source={{
                                         uri: item.icon_name,
-                                        cache: FastImage.cacheControl.web,
+                                        // cache: FastImage.cacheControl.web,
                                     }}
                                     style={{
                                         height: pxToDp(60),

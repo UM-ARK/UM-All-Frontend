@@ -7,6 +7,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     TextInput,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
@@ -74,6 +75,8 @@ class EventSetting extends Component {
         isEndDatePickerVisible: false,
 
         dialogText: '',
+
+        imgLoading: true,
     };
 
     componentDidMount() {
@@ -115,6 +118,8 @@ class EventSetting extends Component {
                             let arr = JSON.parse(JSON.stringify(imgArr));
                             arr.push(...pushArr);
                             this.setState({relateImgUrl: arr});
+                        } else {
+                            this.setState({relateImgUrl: imgArr});
                         }
                     }
                     this.setState({
@@ -127,8 +132,12 @@ class EventSetting extends Component {
                         introText: eventData.introduction,
                         coverImgUrl: eventData.cover_image_url,
                         allowFollow: eventData.can_follow,
-                        startDate: new Date(eventData.startdatetime),
-                        finishDate: new Date(eventData.enddatetime),
+                        startDate: new Date(
+                            String(eventData.startdatetime).replace(' ', 'T'),
+                        ),
+                        finishDate: new Date(
+                            String(eventData.enddatetime).replace(' ', 'T'),
+                        ),
                         type: eventData.type.toLowerCase(),
                         isLoading: false,
                     });
@@ -144,6 +153,7 @@ class EventSetting extends Component {
         add_relate_image = [];
         del_relate_image = [];
         pressDelete = false;
+        FastImage.clearMemoryCache();
     }
 
     // 切換類型時要還原部分輸入，避免數據混亂
@@ -276,10 +286,31 @@ class EventSetting extends Component {
                     <FastImage
                         source={{
                             uri: imageUrlArr[index],
-                            cache: FastImage.cacheControl.web,
+                            // cache: FastImage.cacheControl.web,
                         }}
                         style={{width: '100%', height: '100%'}}
-                    />
+                        onLoadStart={() => {
+                            this.setState({imgLoading: true});
+                        }}
+                        onLoad={() => {
+                            this.setState({imgLoading: false});
+                        }}>
+                        {this.state.imgLoading ? (
+                            <View
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.themeColor}
+                                />
+                            </View>
+                        ) : null}
+                    </FastImage>
                 ) : (
                     <Ionicons
                         name="camera-outline"
@@ -483,8 +514,6 @@ class EventSetting extends Component {
         data.append('introduction', introText);
         data.append('can_follow', allowFollow);
 
-        // console.log('待上傳data', data);
-
         let URL =
             BASE_URI + (mode == 'create' ? POST.EVENT_CREATE : POST.EVENT_EDIT);
         await axios
@@ -499,7 +528,9 @@ class EventSetting extends Component {
                 if (json.message == 'success') {
                     alert('上傳成功');
                     // 返回上一頁面，重新請求數據
-                    this.props.route.params.refresh();
+                    if (this.props.route.params.refresh) {
+                        this.props.route.params.refresh();
+                    }
                     this.props.navigation.goBack();
                 }
                 // 上傳失敗
@@ -533,7 +564,6 @@ class EventSetting extends Component {
                 // 上傳成功
                 if (json.message == 'success') {
                     alert('刪除成功');
-                    // TODO: 需適配新的社團操作系統
                     this.props.navigation.goBack();
                 }
                 // 上傳失敗

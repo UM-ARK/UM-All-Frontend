@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 
 import Header from '../../../../components/Header';
-import FastImage from 'react-native-fast-image';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {BASE_HOST} from '../../../../utils/pathMap';
 
+import FastImage from 'react-native-fast-image';
 import Timeline from 'react-native-timeline-flatlist';
 
 const {black, bg_color, white, themeColor, secondThemeColor} = COLOR_DIY;

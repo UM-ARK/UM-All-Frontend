@@ -130,7 +130,7 @@ class MesgScreen extends Component {
                             }}
                         />
                     }>
-                    {/* 消息內容 */}
+                    {/* 關注內容 */}
                     <View style={styles.infoContainer}>
                         <Text style={styles.title}>Follow的組織</Text>
                         {clubDataList && clubDataList.length > 0 ? (
@@ -161,8 +161,8 @@ class MesgScreen extends Component {
                                                 <FastImage
                                                     source={{
                                                         uri: item.logo_url,
-                                                        cache: FastImage
-                                                            .cacheControl.web,
+                                                        // cache: FastImage
+                                                        //     .cacheControl.web,
                                                     }}
                                                     resizeMode={
                                                         FastImage.resizeMode

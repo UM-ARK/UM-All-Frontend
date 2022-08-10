@@ -24,6 +24,7 @@ import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -53,7 +54,7 @@ class EventPage extends Component {
 
     async getData() {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
-        let num_of_item = 10;
+        let num_of_item = 20;
         await axios
             .get(URL, {
                 params: {
@@ -136,7 +137,8 @@ class EventPage extends Component {
                 <TouchableOpacity
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        this.ActionSheet.show()}}
+                        this.ActionSheet.show();
+                    }}
                     activeOpacity={0.8}
                     style={{
                         flexDirection: 'row',
@@ -292,7 +294,7 @@ class EventPage extends Component {
                                     data={item}
                                     style={{
                                         ...s.cardContainer,
-                                        marginLeft: pxToDp(5),
+                                        // marginLeft: scale(5),
                                     }}
                                 />
                             );
@@ -312,7 +314,7 @@ class EventPage extends Component {
                                         data={item}
                                         style={{
                                             ...s.cardContainer,
-                                            marginRight: pxToDp(5),
+                                            // marginRight: scale(5),
                                         }}
                                     />
                                 );
@@ -369,7 +371,8 @@ class EventPage extends Component {
                                     this.getData();
                                 }}
                             />
-                        }>
+                        }
+                        directionalLockEnabled>
                         {/* 篩選 */}
                         {this.renderFilter()}
                         {/* 仿瀑布屏展示 */}
@@ -407,12 +410,12 @@ const s = StyleSheet.create({
         width: '100%',
         backgroundColor: COLOR_DIY.bg_color,
         justifyContent: 'space-around',
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
     },
     // 活動卡片間距
     cardContainer: {
-        marginVertical: pxToDp(6),
-        marginHorizontal: pxToDp(2),
+        marginVertical: scale(5),
+        marginHorizontal: scale(2),
     },
     loadMore: {
         alignItems: 'center',

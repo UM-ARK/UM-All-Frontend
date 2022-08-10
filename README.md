@@ -1,8 +1,6 @@
 # UM ALL - Frontend - Public
 
-## 當前版本號 `0.1.0`
-
--   [ ] 刪除所有的 console.log，會影響性能
+## 當前版本號 `0.1.1`
 
 ## 內容
 

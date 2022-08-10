@@ -16,6 +16,7 @@ import {
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
+import {setAPPInfo} from '../../../../utils/storageKits';
 import {
     BASE_URI,
     BASE_HOST,
@@ -24,6 +25,7 @@ import {
     POST,
 } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
@@ -45,16 +47,17 @@ import {inject} from 'mobx-react';
 import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const CLUB_LOGO_SIZE = pxToDp(80);
-
-const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
-const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
+const CLUB_LOGO_SIZE = scale(80);
+const CLUB_IMAGE_WIDTH = scale(66);
+const CLUB_IMAGE_HEIGHT = scale(55);
 
 class ClubDetail extends Component {
     state = {
@@ -94,11 +97,16 @@ class ClubDetail extends Component {
             let clubData = globalData.userInfo.clubData;
             this.setState({isAdmin: true});
             this.getData(clubData.club_num);
+            this.getAppData();
         }
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
             this.setState({isLogin: true});
         }
+    }
+
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
     }
 
     // 獲取指定id的社團信息
@@ -237,6 +245,45 @@ class ClubDetail extends Component {
             });
     }
 
+    getAppData = async () => {
+        let URL = BASE_URI + GET.APP_INFO;
+        await axios
+            .get(URL)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    this.checkInfo(json.content);
+                }
+            })
+            .catch(err => {
+                // console.log('err', err);
+            });
+    };
+
+    checkInfo = async (serverInfo, isLogin) => {
+        try {
+            const strAppInfo = await AsyncStorage.getItem('appInfo');
+            if (strAppInfo == null) {
+                setAPPInfo(serverInfo);
+            } else {
+                const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
+                // 服務器API更新，需要重新登錄
+                if (appInfo.API_version != serverInfo.API_version) {
+                    alert('服務器API更新，需要重新登錄');
+                    handleLogout();
+                } else {
+                    setAPPInfo(serverInfo);
+                }
+            }
+            // APP版本更新，提示下載新版本
+            if (packageInfo.version != serverInfo.app_version) {
+                this.props.route.params.setLock(serverInfo.app_version);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
         const {isFollow, isLogin, showDialog, clubData} = this.state;
@@ -283,7 +330,7 @@ class ClubDetail extends Component {
             colors={[themeColor]}
             tintColor={themeColor}
             refreshing={this.state.isLoading}
-            progressViewOffset={pxToDp(150)}
+            progressViewOffset={scale(150)}
             onRefresh={() => {
                 this.setState({isLoading: true});
                 this.getData(this.state.clubData.club_num);
@@ -384,8 +431,7 @@ class ClubDetail extends Component {
                                             refresh: this.getData.bind(
                                                 this,
                                                 clubData.club_num,
-                                            ), // 傳遞回調函數
-                                            test: true,
+                                            ),
                                         },
                                     )
                                 }>
@@ -438,7 +484,7 @@ class ClubDetail extends Component {
                             <FastImage
                                 source={{
                                     uri: logo_url,
-                                    cache: FastImage.cacheControl.web,
+                                    // cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
                                 resizeMode={FastImage.resizeMode.contain}
@@ -504,8 +550,8 @@ class ClubDetail extends Component {
                                     justifyContent: 'space-around',
                                     alignItems: 'flex-start',
                                     flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
+                                    margin: scale(10),
+                                    marginTop: scale(0),
                                 }}>
                                 {/* 圖片相冊 最多4張 */}
                                 {clubData.club_photos_list.map(
@@ -529,9 +575,9 @@ class ClubDetail extends Component {
                                                     <FastImage
                                                         source={{
                                                             uri: item,
-                                                            cache: FastImage
-                                                                .cacheControl
-                                                                .web,
+                                                            // cache: FastImage
+                                                            //     .cacheControl
+                                                            //     .web,
                                                         }}
                                                         style={{
                                                             width: '100%',
@@ -571,7 +617,10 @@ class ClubDetail extends Component {
                                 {/* 服務圖標與文字 */}
                                 <Text
                                     numberOfLines={5}
-                                    style={{color: black.second}}>
+                                    style={{
+                                        color: black.second,
+                                        fontSize: scale(13),
+                                    }}>
                                     {intro}
                                 </Text>
                             </View>
@@ -605,17 +654,19 @@ class ClubDetail extends Component {
                                                     }}>
                                                     {/* 聯繫Type */}
                                                     <View
-                                                        style={{width: '20%'}}>
+                                                        style={{width: '22%'}}>
                                                         <Text
                                                             style={{
                                                                 color: black.second,
+                                                                fontSize:
+                                                                    scale(13),
                                                             }}>
                                                             {item.type + ': '}
                                                         </Text>
                                                     </View>
                                                     {/* 相關號碼、id */}
                                                     <View
-                                                        style={{width: '80%'}}>
+                                                        style={{width: '78%'}}>
                                                         <HyperlinkText
                                                             linkStyle={{
                                                                 color: COLOR_DIY.themeColor,
@@ -627,6 +678,10 @@ class ClubDetail extends Component {
                                                             <Text
                                                                 style={{
                                                                     color: black.third,
+                                                                    fontSize:
+                                                                        scale(
+                                                                            12.5,
+                                                                        ),
                                                                 }}
                                                                 selectable={
                                                                     true
@@ -671,7 +726,7 @@ class ClubDetail extends Component {
                                                 marginVertical: pxToDp(8),
                                                 marginHorizontal: pxToDp(4),
                                             }}
-                                            isLogin={this.state.isLogin}
+                                            isAdmin={this.state.isAdmin}
                                         />
                                     );
                                 }
@@ -725,15 +780,15 @@ class ClubDetail extends Component {
                         // 向上滾動的淡出效果
                         fadeOutForeground
                         // 收起時的高度
-                        minHeight={pxToDp(140)}
+                        minHeight={scale(140)}
                         // 打開時的高度
-                        maxHeight={pxToDp(230)}
-                        // 背景內容 - 圖片 - 建議使用橫圖
+                        maxHeight={scale(230)}
+                        // 背景內容
                         renderHeader={() => (
                             <FastImage
                                 source={{
                                     uri: bgImgUrl,
-                                    cache: FastImage.cacheControl.web,
+                                    // cache: FastImage.cacheControl.web,
                                 }}
                                 style={{width: '100%', height: '100%'}}
                             />
@@ -877,9 +932,9 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     imageContainer: {
-        width: pxToDp(CLUB_IMAGE_WIDTH),
-        height: pxToDp(CLUB_IMAGE_HEIGHT),
-        borderRadius: pxToDp(5),
+        width: CLUB_IMAGE_WIDTH,
+        height: CLUB_IMAGE_HEIGHT,
+        borderRadius: scale(5),
         overflow: 'hidden',
         ...viewShadow,
     },

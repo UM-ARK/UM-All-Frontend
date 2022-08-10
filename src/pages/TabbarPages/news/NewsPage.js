@@ -86,6 +86,10 @@ class NewsPage extends Component {
         this.getData();
     }
 
+    componentWillUnmount() {
+        FastImage.clearMemoryCache();
+    }
+
     // 請求澳大api返回新聞數據
     async getData() {
         axios
@@ -198,7 +202,7 @@ class NewsPage extends Component {
                                             'http:',
                                             'https:',
                                         ),
-                                        cache: FastImage.cacheControl.web,
+                                        // cache: FastImage.cacheControl.web,
                                     }}
                                     style={{width: '100%', height: '100%'}}
                                     onLoadStart={() => {
@@ -385,6 +389,7 @@ class NewsPage extends Component {
                                 }}
                             />
                         }
+                        directionalLockEnabled
                     />
                 )}
             </View>

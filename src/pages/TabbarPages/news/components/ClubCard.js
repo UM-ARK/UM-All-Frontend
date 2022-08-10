@@ -6,6 +6,7 @@ import {
     ImageBackground,
     Dimensions,
     TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -26,6 +27,7 @@ class EventCard extends Component {
 
     state = {
         data: this.props.data,
+        imgLoading: true,
     };
 
     // 處理點擊跳轉邏輯
@@ -64,14 +66,35 @@ class EventCard extends Component {
                     <FastImage
                         source={{
                             uri: logo_url,
-                            cache: FastImage.cacheControl.web,
+                            // cache: FastImage.cacheControl.web,
                         }}
                         style={{
                             width: '100%',
                             height: '100%',
                         }}
                         resizeMode={FastImage.resizeMode.contain}
-                    />
+                        onLoadStart={() => {
+                            this.setState({imgLoading: true});
+                        }}
+                        onLoad={() => {
+                            this.setState({imgLoading: false});
+                        }}>
+                        {this.state.imgLoading ? (
+                            <View
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={COLOR_DIY.themeColor}
+                                />
+                            </View>
+                        ) : null}
+                    </FastImage>
                 </View>
 
                 {/* 組織名 */}

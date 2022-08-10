@@ -5,6 +5,7 @@ import {
     StyleSheet,
     Dimensions,
     TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
@@ -14,11 +15,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
+import {scale} from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-const IMAGE_SIZE = pxToDp(PAGE_WIDTH / 2 - 30);
+const IMAGE_SIZE = scale(160);
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, bg_color} = COLOR_DIY;
@@ -36,12 +38,17 @@ class EventCard extends Component {
         link: undefined,
         relateImgUrl: undefined,
         type: undefined,
+        imgLoading: true,
+        isAdmin: false,
     };
 
     componentDidMount() {
         // 解構this.props.data數據
         const eventData = this.props.data;
-        // TODO: 檢查IOS上enddatetime的表現形式
+        const isAdmin = this.props.isAdmin;
+        if (isAdmin) {
+            this.setState({isAdmin});
+        }
         this.setState({
             coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
@@ -54,7 +61,7 @@ class EventCard extends Component {
     }
 
     handleJumpToDetail = () => {
-        const {type, link, title} = this.state;
+        const {type, link, title, isAdmin} = this.state;
         let webview_param = {
             // import pathMap的鏈接進行跳轉
             url: link,
@@ -67,7 +74,20 @@ class EventCard extends Component {
             // isBarStyleBlack: false,
         };
         if (type == 'WEBSITE') {
-            this.context.navigate('Webviewer', webview_param);
+            if (isAdmin) {
+                // this.context.navigate('EventDetail', {
+                //     data: this.state.eventData,
+                // });
+                // 跳轉活動info編輯頁，並傳遞刷新函數
+                this.context.navigate('EventSetting', {
+                    mode: 'edit',
+                    eventData: {_id: this.state.eventData._id},
+                    // refresh:
+                    //     this.props.route.params.refresh,
+                });
+            } else {
+                this.context.navigate('Webviewer', webview_param);
+            }
         } else {
             this.context.navigate('EventDetail', {
                 data: this.state.eventData,
@@ -86,7 +106,6 @@ class EventCard extends Component {
             type,
         } = this.state;
 
-        // TODO: BUG: 時間已過，但仍顯示未讀標籤。可能是IOS和安卓的時間戳位數問題。
         // 當前時刻時間戳
         let nowTimeStamp = moment(new Date()).valueOf();
         // 活動結束標誌
@@ -116,14 +135,37 @@ class EventCard extends Component {
                         <FastImage
                             source={{
                                 uri: coverImgUrl,
-                                cache: FastImage.cacheControl.web,
+                                // cache: FastImage.cacheControl.web,
                             }}
+                            // fallback={Platform.OS === 'android'}
                             style={{
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,
+                                backgroundColor: COLOR_DIY.white,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
-                        />
+                            onLoadStart={() => {
+                                this.setState({imgLoading: true});
+                            }}
+                            onLoad={() => {
+                                this.setState({imgLoading: false});
+                            }}>
+                            {this.state.imgLoading ? (
+                                <View
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'absolute',
+                                    }}>
+                                    <ActivityIndicator
+                                        size={'large'}
+                                        color={COLOR_DIY.themeColor}
+                                    />
+                                </View>
+                            ) : null}
+                        </FastImage>
 
                         {/* 標題描述 */}
                         <View style={styles.title.container}>
