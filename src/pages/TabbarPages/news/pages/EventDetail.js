@@ -399,8 +399,8 @@ class EventDetail extends Component {
                     <View
                         style={{
                             position: 'absolute',
-                            top: pxToDp(65),
-                            left: pxToDp(10),
+                            top: scale(65),
+                            left: scale(15),
                         }}>
                         <TouchableOpacity
                             activeOpacity={0.7}
@@ -417,8 +417,8 @@ class EventDetail extends Component {
                         <View
                             style={{
                                 position: 'absolute',
-                                top: pxToDp(65),
-                                right: pxToDp(10),
+                                top: scale(65),
+                                right: scale(15),
                             }}>
                             <TouchableOpacity
                                 activeOpacity={0.7}
@@ -444,8 +444,8 @@ class EventDetail extends Component {
                         <View
                             style={{
                                 position: 'absolute',
-                                top: pxToDp(65),
-                                right: pxToDp(10),
+                                top: scale(65),
+                                right: scale(15),
                             }}>
                             <TouchableOpacity
                                 activeOpacity={0.7}

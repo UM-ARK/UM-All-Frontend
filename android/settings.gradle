@@ -25,3 +25,7 @@ project(':@react-native-community_cameraroll').projectDir = new File(rootProject
 // https://github.com/junina-de/react-native-haptic-feedback
 include ':react-native-haptic-feedback'
 project(':react-native-haptic-feedback').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-haptic-feedback/android')
+
+// https://github.com/Shobbak/react-native-compressor
+include ':react-native-compressor'
+project(':react-native-compressor').projectDir = new File(rootProject.projectDir,'../node_modules/react-native-compressor/android')

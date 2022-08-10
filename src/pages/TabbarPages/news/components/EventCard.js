@@ -16,6 +16,7 @@ import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
 import {scale} from 'react-native-size-matters';
+import {inject} from 'mobx-react';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -45,10 +46,6 @@ class EventCard extends Component {
     componentDidMount() {
         // 解構this.props.data數據
         const eventData = this.props.data;
-        const isAdmin = this.props.isAdmin;
-        if (isAdmin) {
-            this.setState({isAdmin});
-        }
         this.setState({
             coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
@@ -58,6 +55,11 @@ class EventCard extends Component {
             link: eventData.link,
             eventData,
         });
+        let globalData = this.props.RootStore;
+        // 社團賬號登錄
+        if (globalData.userInfo && globalData.userInfo.clubData) {
+            this.setState({isAdmin: true});
+        }
     }
 
     handleJumpToDetail = () => {
@@ -75,15 +77,10 @@ class EventCard extends Component {
         };
         if (type == 'WEBSITE') {
             if (isAdmin) {
-                // this.context.navigate('EventDetail', {
-                //     data: this.state.eventData,
-                // });
                 // 跳轉活動info編輯頁，並傳遞刷新函數
                 this.context.navigate('EventSetting', {
                     mode: 'edit',
                     eventData: {_id: this.state.eventData._id},
-                    // refresh:
-                    //     this.props.route.params.refresh,
                 });
             } else {
                 this.context.navigate('Webviewer', webview_param);
@@ -120,8 +117,11 @@ class EventCard extends Component {
                             ...styles.rightTopIconPosition,
                             ...styles.unFinish,
                             zIndex: 9,
-                        }}
-                    />
+                        }}>
+                        <Text style={{fontSize: scale(10), color: white}}>
+                            進行中
+                        </Text>
+                    </View>
                 )}
                 {coverImgUrl ? (
                     <TouchableOpacity
@@ -206,10 +206,10 @@ const styles = StyleSheet.create({
     },
     // 紅點標籤樣式
     unFinish: {
-        height: pxToDp(12),
-        width: pxToDp(12),
-        backgroundColor: COLOR_DIY.unread,
-        borderRadius: 50,
+        paddingHorizontal: scale(5),
+        paddingVertical: scale(2),
+        backgroundColor: COLOR_DIY.secondThemeColor,
+        borderRadius: scale(20),
         ...COLOR_DIY.viewShadow,
     },
     title: {
@@ -223,4 +223,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default EventCard;
+export default inject('RootStore')(EventCard);

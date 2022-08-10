@@ -36,7 +36,7 @@ class About extends Component {
             },
             {
                 time: '2022-08-11',
-                title: 'UM ALL 1.0.0正式開放下載',
+                title: 'UM ALL 正式版開放下載',
             },
         ],
     };

@@ -338,7 +338,7 @@ class ChatDetail extends Component {
                         <Text style={{color: black.third}}>
                             沒有更多公告，過一段時間再來吧~
                         </Text>
-                        <Text>[]~(￣▽￣)~*</Text>
+                        <Text style={{color: black.third}}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity
