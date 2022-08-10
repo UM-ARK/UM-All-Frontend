@@ -177,9 +177,15 @@ class EventSetting extends Component {
         try {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
-                imageObj = selectResult.assets[0];
-                imageUrl = imageObj.uri;
-                cancel = false;
+                let imgFileObj = selectResult.assets[0];
+                // 僅允許小於5M的圖片
+                if (imgFileObj.fileSize / 1000 / 1024 < 5) {
+                    imageObj = imgFileObj;
+                    imageUrl = imgFileObj.uri;
+                    cancel = false;
+                } else {
+                    alert('請選擇小於5MB的圖片！\n服務器為愛發電請見諒！');
+                }
             } else {
                 if (type == 'cover' && 'cover_image_url' in eventData) {
                     imageUrl = eventData.cover_image_url;
@@ -262,7 +268,10 @@ class EventSetting extends Component {
             <TouchableOpacity
                 style={styles.imgSelectorContainer}
                 activeOpacity={0.7}
-                disabled={shouldDisable}
+                disabled={
+                    type != 'cover' &&
+                    (shouldDisable || imageUrlArr[index].length > 0)
+                }
                 // 選擇圖片
                 onPress={() => this.handleSelect(index, type)}>
                 {/* 刪除圖片按鈕 */}
