@@ -407,8 +407,8 @@ class ClubDetail extends Component {
                             onPress={() => this.props.navigation.goBack()}
                             style={{
                                 position: 'absolute',
-                                top: pxToDp(65),
-                                left: pxToDp(10),
+                                top: scale(65),
+                                left: scale(15),
                             }}>
                             <Ionicons
                                 name="chevron-back-outline"
@@ -423,8 +423,8 @@ class ClubDetail extends Component {
                         <View
                             style={{
                                 position: 'absolute',
-                                top: pxToDp(65),
-                                right: pxToDp(10),
+                                top: scale(65),
+                                right: scale(15),
                             }}>
                             <TouchableOpacity
                                 activeOpacity={0.7}
@@ -453,8 +453,8 @@ class ClubDetail extends Component {
                         <View
                             style={{
                                 position: 'absolute',
-                                top: pxToDp(65),
-                                right: pxToDp(10),
+                                top: scale(65),
+                                right: scale(15),
                             }}>
                             <TouchableOpacity
                                 activeOpacity={0.7}
@@ -730,7 +730,6 @@ class ClubDetail extends Component {
                                                 marginVertical: pxToDp(8),
                                                 marginHorizontal: pxToDp(4),
                                             }}
-                                            isAdmin={this.state.isAdmin}
                                         />
                                     );
                                 }
