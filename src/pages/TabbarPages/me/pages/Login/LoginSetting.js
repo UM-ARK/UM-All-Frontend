@@ -41,6 +41,7 @@ class LoginSetting extends Component {
     }
 
     async handleSavePW(account, password) {
+        this.setState({account, password});
         try {
             const strUmPassInfo = JSON.stringify({account, password});
             await AsyncStorage.setItem('umPass', strUmPassInfo)

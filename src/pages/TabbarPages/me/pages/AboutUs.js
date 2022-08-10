@@ -15,7 +15,7 @@ import {COLOR_DIY} from '../../../../utils/uiMap';
 import {BASE_HOST} from '../../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
-import Timeline from 'react-native-timeline-flatlist';
+import {scale} from 'react-native-size-matters';
 
 const {black, bg_color, white, themeColor, secondThemeColor} = COLOR_DIY;
 
@@ -23,23 +23,16 @@ class About extends Component {
     state = {
         timeLineData: [
             {
-                time: '2021-03-15',
-                title: 'ARK分享活動首次出現',
-            },
-            {
                 time: '2021-09-20',
                 title: 'UM ARK小程序發佈',
-                description: '巴士報站功能、ARK學術分享活動、FST各學會社團進駐',
             },
             {
                 time: '2022-04-03',
                 title: 'UM ARK小程序結束運營',
-                description: '遭無端舉報，申訴無效，小程序永久封禁',
             },
             {
                 time: '2022-05-24',
                 title: '新UM ARK開發團隊成立',
-                description: 'UM ALL項目立項',
             },
             {
                 time: '2022-08-11',
@@ -72,6 +65,14 @@ class About extends Component {
                             alignItems: 'center',
                         }}>
                         <Text
+                            style={{
+                                fontSize: pxToDp(15),
+                                color: black.second,
+                                fontWeight: 'bold',
+                            }}>
+                            Why not all in one ?
+                        </Text>
+                        <Text
                             style={{fontSize: pxToDp(15), color: black.second}}>
                             致力成為 UMer 人手一個的校園資訊APP！
                         </Text>
@@ -89,15 +90,26 @@ class About extends Component {
                     </View>
 
                     {/* 發展時間軸 */}
-                    <Timeline
-                        data={timeLineData}
-                        style={{
-                            marginHorizontal: pxToDp(10),
-                            marginTop: pxToDp(10),
-                        }}
-                        circleColor={themeColor}
-                        lineColor={themeColor}
-                    />
+                    <View style={{marginTop: scale(10), alignSelf: 'center'}}>
+                        {this.state.timeLineData.map(itm => (
+                            <View style={{flexDirection: 'row'}}>
+                                <Text
+                                    style={{
+                                        color: themeColor,
+                                        fontWeight: 'bold',
+                                    }}>
+                                    {itm.time + '     ---     '}
+                                    <Text
+                                        style={{
+                                            color: black.second,
+                                            fontWeight: 'normal',
+                                        }}>
+                                        {itm.title}
+                                    </Text>
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
 
                     <TouchableOpacity
                         style={{
