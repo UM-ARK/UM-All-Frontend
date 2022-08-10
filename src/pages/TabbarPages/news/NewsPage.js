@@ -390,6 +390,7 @@ class NewsPage extends Component {
                             />
                         }
                         directionalLockEnabled
+                        alwaysBounceHorizontal={false}
                     />
                 )}
             </View>
