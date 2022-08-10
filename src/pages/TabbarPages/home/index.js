@@ -26,7 +26,7 @@ import {
 } from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
-import {setAPPInfo} from '../../../utils/storageKits';
+import {setAPPInfo, handleLogout} from '../../../utils/storageKits';
 import packageInfo from '../../../../package.json';
 
 import {Header, Divider} from '@rneui/themed';
