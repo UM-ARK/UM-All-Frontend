@@ -16,6 +16,7 @@ import {
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
+import {setAPPInfo} from '../../../../utils/storageKits';
 import {
     BASE_URI,
     BASE_HOST,
@@ -24,6 +25,7 @@ import {
     POST,
 } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
@@ -46,16 +48,14 @@ import axios from 'axios';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {scale} from 'react-native-size-matters';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 解構uiMap的數據
 const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const CLUB_LOGO_SIZE = pxToDp(80);
-
-// const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
-// const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
+const CLUB_LOGO_SIZE = scale(80);
 const CLUB_IMAGE_WIDTH = scale(66);
 const CLUB_IMAGE_HEIGHT = scale(55);
 
@@ -97,6 +97,7 @@ class ClubDetail extends Component {
             let clubData = globalData.userInfo.clubData;
             this.setState({isAdmin: true});
             this.getData(clubData.club_num);
+            this.getAppData();
         }
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
@@ -243,6 +244,45 @@ class ClubDetail extends Component {
                 alert('錯誤', err.message);
             });
     }
+
+    getAppData = async () => {
+        let URL = BASE_URI + GET.APP_INFO;
+        await axios
+            .get(URL)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    this.checkInfo(json.content);
+                }
+            })
+            .catch(err => {
+                // console.log('err', err);
+            });
+    };
+
+    checkInfo = async (serverInfo, isLogin) => {
+        try {
+            const strAppInfo = await AsyncStorage.getItem('appInfo');
+            if (strAppInfo == null) {
+                setAPPInfo(serverInfo);
+            } else {
+                const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
+                // 服務器API更新，需要重新登錄
+                if (appInfo.API_version != serverInfo.API_version) {
+                    alert('服務器API更新，需要重新登錄');
+                    handleLogout();
+                } else {
+                    setAPPInfo(serverInfo);
+                }
+            }
+            // APP版本更新，提示下載新版本
+            if (packageInfo.version != serverInfo.app_version) {
+                this.props.route.params.setLock(serverInfo.app_version);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
@@ -686,7 +726,7 @@ class ClubDetail extends Component {
                                                 marginVertical: pxToDp(8),
                                                 marginHorizontal: pxToDp(4),
                                             }}
-                                            isLogin={this.state.isLogin}
+                                            isAdmin={this.state.isAdmin}
                                         />
                                     );
                                 }

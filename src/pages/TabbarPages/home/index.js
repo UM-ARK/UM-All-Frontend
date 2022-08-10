@@ -6,6 +6,7 @@ import {
     Dimensions,
     TouchableOpacity,
     StyleSheet,
+    RefreshControl,
 } from 'react-native';
 
 // 本地工具
@@ -19,9 +20,14 @@ import {
     BASE_HOST,
     ARK_LETTER_IMG,
     UMALL_LOGO,
+    BASE_URI,
+    GET,
+    addHost,
 } from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
+import {setAPPInfo} from '../../../utils/storageKits';
+import packageInfo from '../../../../package.json';
 
 import {Header, Divider} from '@rneui/themed';
 import {PageControl, Card} from 'react-native-ui-lib';
@@ -32,10 +38,9 @@ import {inject} from 'mobx-react';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
-let carouselProgress = 0;
-
 const {white, bg_color, black, themeColor} = COLOR_DIY;
 
 class HomeScreen extends Component {
@@ -98,62 +103,78 @@ class HomeScreen extends Component {
         ],
 
         isShowModal: false,
+
+        isLoading: true,
     };
 
-    constructor() {
-        super();
-        // this.getData();
-    }
-
     componentDidMount() {
+        // console.log('index頁', this.props.route.params);
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
             this.setState({isShowModal: false});
             this.toast.show(`Welcome Back~\n[]~(￣▽￣)~*`, 3000);
+            this.getAppData(true);
         } else {
             setTimeout(() => {
                 this.setState({isShowModal: true});
             }, 1500);
-        }
-        // this.getData();
-        if (globalData.appInfo) {
-            let appInfo = globalData.appInfo;
-            if (
-                appInfo.index_head_carousel &&
-                appInfo.index_head_carousel.length > 0
-            ) {
-                let imgUrlArr = appInfo.index_head_carousel;
-                imgUrlArr.map(itm => {
-                    itm.url = BASE_HOST + itm.url;
-                });
-                // console.log(imgUrlArr);
-                this.setState({carouselImagesArr: imgUrlArr});
-            }
+            this.getAppData(false);
         }
     }
 
-    // getData = async () => {
-    //     try {
-    //         const strAppInfo = await AsyncStorage.getItem('appInfo');
-    //         const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
-    //         if (strAppInfo != null) {
-    //             if (
-    //                 appInfo.index_head_carousel &&
-    //                 appInfo.index_head_carousel.length > 0
-    //             ) {
-    //                 let imgUrlArr = appInfo.index_head_carousel;
-    //                 imgUrlArr.map(itm => {
-    //                     itm.url = BASE_HOST + itm.url;
-    //                 });
-    //                 // console.log(imgUrlArr);
-    //                 this.setState({carouselImagesArr: imgUrlArr});
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    // };
+    getAppData = async isLogin => {
+        let URL = BASE_URI + GET.APP_INFO;
+        await axios
+            .get(URL)
+            .then(res => {
+                let json = res.data;
+                if (json.message == 'success') {
+                    this.checkInfo(json.content, isLogin);
+                }
+            })
+            .catch(err => {
+                // console.log('err', err);
+            });
+    };
+
+    checkInfo = async (serverInfo, isLogin) => {
+        try {
+            const strAppInfo = await AsyncStorage.getItem('appInfo');
+            if (strAppInfo == null) {
+                setAPPInfo(serverInfo);
+            } else {
+                const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
+                // 服務器API更新，需要重新登錄
+                if (appInfo.API_version != serverInfo.API_version) {
+                    if (isLogin) {
+                        alert('服務器API更新，需要重新登錄');
+                        handleLogout();
+                    }
+                } else {
+                    setAPPInfo(serverInfo);
+                }
+            }
+            // APP版本更新，提示下載新版本
+            if (packageInfo.version != serverInfo.app_version) {
+                this.props.route.params.setLock(serverInfo.app_version);
+            }
+        } catch (e) {
+            // console.error(e);
+        } finally {
+            if (
+                serverInfo.index_head_carousel &&
+                serverInfo.index_head_carousel.length > 0
+            ) {
+                let imgUrlArr = serverInfo.index_head_carousel;
+                imgUrlArr.map(itm => {
+                    itm.url = addHost(itm.url);
+                });
+                this.setState({carouselImagesArr: imgUrlArr});
+            }
+            this.setState({isLoading: false});
+        }
+    };
 
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({icon_name, function_name, func}) => {
@@ -203,7 +224,19 @@ class HomeScreen extends Component {
                         barStyle: 'dark-content',
                     }}
                 />
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={this.state.isLoading}
+                            onRefresh={() => {
+                                this.setState({isLoading: true});
+                                this.getAppData();
+                            }}
+                        />
+                    }>
                     {/* 輪播圖 */}
                     <View style={{backgroundColor: white}}>
                         <ScrollImage imageData={carouselImagesArr} />

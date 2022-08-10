@@ -26,6 +26,7 @@ export async function handleLogout() {
     try {
         // await AsyncStorage.clear();
         await AsyncStorage.removeItem('userInfo');
+        await AsyncStorage.removeItem('appInfo');
         // 清除所有的cookies
         await CookieManager.clearAll();
     } catch (e) {

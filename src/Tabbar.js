@@ -111,6 +111,7 @@ class Tabbar extends Component {
                             ),
                             title: '主頁',
                         }}
+                        initialParams={{setLock: this.props.route.params.setLock}}
                     />
                 )}
 
@@ -161,6 +162,7 @@ class Tabbar extends Component {
                             ),
                         title: isClub ? '組織' : '我的',
                     }}
+                    initialParams={{setLock: this.props.route.params.setLock}}
                 />
             </Tabs.Navigator>
         );
