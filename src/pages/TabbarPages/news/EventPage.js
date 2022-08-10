@@ -373,7 +373,8 @@ class EventPage extends Component {
                             />
                         }
                         directionalLockEnabled
-                        alwaysBounceHorizontal={false}>
+                        alwaysBounceHorizontal={false}
+                        bounces={false}>
                         {/* 篩選 */}
                         {this.renderFilter()}
                         {/* 仿瀑布屏展示 */}
