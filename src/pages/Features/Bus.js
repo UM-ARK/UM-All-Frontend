@@ -149,7 +149,10 @@ class BusScreen extends Component {
                     this.toast.show(`當前沒有巴士~\n[]~(￣▽￣)~*`, 3000);
                 } else {
                     this.setState({toastColor: themeColor});
-                    this.toast.show(`不要著急~\nData is Loading~\n[]~(￣▽￣)~*`, 1500);
+                    this.toast.show(
+                        `不要著急~\nData is Loading~\n[]~(￣▽￣)~*`,
+                        1500,
+                    );
                 }
             })
             .catch(error => {
@@ -242,6 +245,7 @@ class BusScreen extends Component {
                                 width: scale(310),
                                 height: scale(600),
                                 marginLeft: scale(25),
+                                marginBottom: scale(25),
                             }}
                             source={busRouteImg}
                             resizeMode={'contain'}>
@@ -249,8 +253,8 @@ class BusScreen extends Component {
                             <View
                                 style={{
                                     ...s.infoContainer,
-                                    left: scale(65),
-                                    top: scale(570),
+                                    left: scale(60),
+                                    top: scale(575),
                                 }}>
                                 <Text
                                     style={{fontSize: 12, color: black.third}}>
@@ -270,7 +274,7 @@ class BusScreen extends Component {
                                           <Text
                                               style={{
                                                   color: black.second,
-                                                  fontSize: 12,
+                                                  fontSize: scale(11),
                                               }}>
                                               {item}
                                           </Text>
