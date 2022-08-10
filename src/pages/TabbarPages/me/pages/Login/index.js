@@ -51,7 +51,11 @@ class LoginChoose extends Component {
         },
     };
 
-    async componentDidMount() {
+    componentDidMount() {
+        this.getUmPass();
+    }
+
+    getUmPass = async () => {
         try {
             const strUmPassInfo = await AsyncStorage.getItem('umPass');
             const UmPassInfo = strUmPassInfo ? JSON.parse(strUmPassInfo) : {};
@@ -61,7 +65,7 @@ class LoginChoose extends Component {
         } catch (e) {
             alert(e);
         }
-    }
+    };
 
     handleStdLogin = async session => {
         let URL = BASE_URI + POST.STD_LOGIN;
@@ -90,7 +94,7 @@ class LoginChoose extends Component {
     };
 
     render() {
-        const {disabledButton, UmPassInfo} = this.state;
+        const {disabledButton} = this.state;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header
@@ -132,8 +136,8 @@ class LoginChoose extends Component {
                         startInLoadingState={true}
                         // 自動注入賬號密碼
                         injectedJavaScript={`
-                            document.getElementById("userNameInput").value="${UmPassInfo.account}";
-                            document.getElementById("passwordInput").value="${UmPassInfo.password}";
+                            document.getElementById("userNameInput").value="${this.state.UmPassInfo.account}";
+                            document.getElementById("passwordInput").value="${this.state.UmPassInfo.password}";
                         `}
                         onNavigationStateChange={e => {
                             // SSO密碼輸入頁面e.title為https://websso.....
@@ -336,6 +340,7 @@ class LoginChoose extends Component {
                     showDialog={this.state.showDialog}
                     text={`將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！\n請確定您已閱讀用戶條款`}
                     handleConfirm={() => {
+                        this.getUmPass();
                         this.setState({showDialog: false, showMoodle: true});
                     }}
                     handleCancel={() => this.setState({showDialog: false})}

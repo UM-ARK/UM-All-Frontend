@@ -25,6 +25,7 @@ import {
     POST,
 } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import {handleLogout} from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';

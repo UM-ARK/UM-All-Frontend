@@ -130,15 +130,15 @@ class ClubInfoEdit extends Component {
             let selectResult = await handleImageSelect();
             if (!selectResult.didCancel) {
                 let imgFileObj = selectResult.assets[0];
-                // console.log('selectResult', imgFileObj);
-                // 僅允許小於8M的圖片
-                if (imgFileObj.fileSize / 1000 / 1024 < 8) {
+                // 僅允許小於5M的圖片
+                if (imgFileObj.fileSize / 1000 / 1024 < 5) {
+                    const {imageUrlArr} = this.state;
                     imageObj = selectResult.assets[0];
                     imageUrl = imageObj.uri;
                     cancel = false;
                     chooseOK = true;
                 } else {
-                    alert('請選擇小於8MB的圖片！\n服務器為愛發電請見諒！');
+                    alert('請選擇小於5MB的圖片！\n服務器為愛發電請見諒！');
                 }
             } else {
                 if (
@@ -268,7 +268,7 @@ class ClubInfoEdit extends Component {
             <TouchableOpacity
                 style={styles.imgSelectorContainer}
                 activeOpacity={0.7}
-                disabled={shouldDisable}
+                disabled={shouldDisable || imageUrlArr[index].length > 0}
                 // 選擇圖片
                 onPress={() => this.handleSelect(index)}>
                 {/* 刪除圖片按鈕 */}
