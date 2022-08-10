@@ -99,7 +99,6 @@ class EventSetting extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let eventData = json.content;
-                    console.log('eventData', eventData);
                     eventData.cover_image_url =
                         BASE_HOST + eventData.cover_image_url;
                     // 渲染服務器已存的照片
@@ -515,8 +514,6 @@ class EventSetting extends Component {
         data.append('introduction', introText);
         data.append('can_follow', allowFollow);
 
-        // console.log('待上傳data', data);
-
         let URL =
             BASE_URI + (mode == 'create' ? POST.EVENT_CREATE : POST.EVENT_EDIT);
         await axios
@@ -531,7 +528,9 @@ class EventSetting extends Component {
                 if (json.message == 'success') {
                     alert('上傳成功');
                     // 返回上一頁面，重新請求數據
-                    this.props.route.params.refresh();
+                    if (this.props.route.params.refresh) {
+                        this.props.route.params.refresh();
+                    }
                     this.props.navigation.goBack();
                 }
                 // 上傳失敗
@@ -565,7 +564,6 @@ class EventSetting extends Component {
                 // 上傳成功
                 if (json.message == 'success') {
                     alert('刪除成功');
-                    // TODO: 需適配新的社團操作系統
                     this.props.navigation.goBack();
                 }
                 // 上傳失敗

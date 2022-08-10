@@ -39,12 +39,16 @@ class EventCard extends Component {
         relateImgUrl: undefined,
         type: undefined,
         imgLoading: true,
+        isAdmin: false,
     };
 
     componentDidMount() {
         // 解構this.props.data數據
         const eventData = this.props.data;
-        // TODO: 檢查IOS上enddatetime的表現形式
+        const isAdmin = this.props.isAdmin;
+        if (isAdmin) {
+            this.setState({isAdmin});
+        }
         this.setState({
             coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
@@ -57,7 +61,7 @@ class EventCard extends Component {
     }
 
     handleJumpToDetail = () => {
-        const {type, link, title} = this.state;
+        const {type, link, title, isAdmin} = this.state;
         let webview_param = {
             // import pathMap的鏈接進行跳轉
             url: link,
@@ -70,7 +74,20 @@ class EventCard extends Component {
             // isBarStyleBlack: false,
         };
         if (type == 'WEBSITE') {
-            this.context.navigate('Webviewer', webview_param);
+            if (isAdmin) {
+                // this.context.navigate('EventDetail', {
+                //     data: this.state.eventData,
+                // });
+                // 跳轉活動info編輯頁，並傳遞刷新函數
+                this.context.navigate('EventSetting', {
+                    mode: 'edit',
+                    eventData: {_id: this.state.eventData._id},
+                    // refresh:
+                    //     this.props.route.params.refresh,
+                });
+            } else {
+                this.context.navigate('Webviewer', webview_param);
+            }
         } else {
             this.context.navigate('EventDetail', {
                 data: this.state.eventData,
