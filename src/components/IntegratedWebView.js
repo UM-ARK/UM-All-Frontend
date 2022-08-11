@@ -116,12 +116,13 @@ const IntegratedWebView = ({
                 pullToRefreshEnabled
                 allowFileAccess
                 allowUniversalAccessFromFileURLs
+                cacheEnabled={false}
                 // IOS
                 sharedCookiesEnabled
                 // Android
                 thirdPartyCookiesEnabled
-                cacheEnabled
-                domStorageEnabled
+                domStorageEnabled={true}
+                cacheMode={'LOAD_NO_CACHE'}
                 // 自動注入賬號密碼
                 injectedJavaScript={`
                     document.getElementById("userNameInput").value="${UmPassInfo.account}";
@@ -130,13 +131,15 @@ const IntegratedWebView = ({
             />
 
             {/* 吸底導航按鈕 */}
-            <NavigationView
-                onBackPress={handleBackPress}
-                onForwardPress={handleForwardPress}
-                canGoBack={canGoBack}
-                canGoForward={canGoForward}
-                translateY={translateY}
-            />
+            {Platform.OS === 'android' ? null : (
+                <NavigationView
+                    onBackPress={handleBackPress}
+                    onForwardPress={handleForwardPress}
+                    canGoBack={canGoBack}
+                    canGoForward={canGoForward}
+                    translateY={translateY}
+                />
+            )}
         </>
     );
 };
