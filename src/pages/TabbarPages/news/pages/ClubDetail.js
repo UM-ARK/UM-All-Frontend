@@ -279,8 +279,13 @@ class ClubDetail extends Component {
                     setAPPInfo(serverInfo);
                 }
             }
-            // APP版本更新，提示下載新版本
-            if (packageInfo.version != serverInfo.app_version) {
+            // APP版本滯後，提示下載新版本
+            if (
+                versionStringCompare(
+                    packageInfo.version,
+                    serverInfo.app_version,
+                ) == -1
+            ) {
                 this.props.route.params.setLock(serverInfo.app_version);
             }
         } catch (e) {
