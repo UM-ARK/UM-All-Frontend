@@ -263,7 +263,7 @@ class EventPage extends Component {
                         <Text style={{color: black.third}}>
                             沒有更多活動了，過一段時間再來吧~
                         </Text>
-                        <Text>[]~(￣▽￣)~*</Text>
+                        <Text style={{color: black.third}}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity

@@ -66,21 +66,22 @@ class About extends Component {
                         }}>
                         <Text
                             style={{
-                                fontSize: pxToDp(15),
+                                fontSize: scale(15),
                                 color: black.second,
                                 fontWeight: 'bold',
+                                marginBottom: scale(10),
                             }}>
                             Why not all in one ?
                         </Text>
                         <Text
-                            style={{fontSize: pxToDp(15), color: black.second}}>
+                            style={{fontSize: scale(15), color: black.second}}>
                             致力成為 UMer 人手一個的校園資訊APP！
                         </Text>
                         <Text
                             style={{
-                                fontSize: pxToDp(13),
+                                fontSize: scale(13),
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                             }}>
                             UM ALL
                             是由幾位不知名的澳大FST同學，在2022年暑假自主開發的校園資訊平台。UM
@@ -92,7 +93,12 @@ class About extends Component {
                     {/* 發展時間軸 */}
                     <View style={{marginTop: scale(10), alignSelf: 'center'}}>
                         {this.state.timeLineData.map(itm => (
-                            <View style={{flexDirection: 'row'}}>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginBottom: scale(5),
+                                    justifyContent: 'space-between',
+                                }}>
                                 <Text
                                     style={{
                                         color: themeColor,
@@ -122,7 +128,7 @@ class About extends Component {
                             Linking.openURL(BASE_HOST);
                         }}>
                         <Text style={{color: themeColor, fontSize: 15}}>
-                            Website Page
+                            更多內容請查看: Website Page
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>

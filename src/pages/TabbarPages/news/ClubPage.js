@@ -19,11 +19,13 @@ import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
 
 const {themeColor, black, white} = COLOR_DIY;
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
-const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+// const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
+const COMPONENT_WIDTH = scale(87);
 
 originClubDataList = [];
 class ClubPage extends Component {
@@ -68,11 +70,21 @@ class ClubPage extends Component {
                 itemDimension={COMPONENT_WIDTH}
                 data={clubDataList}
                 // 每個項目的間距
-                spacing={pxToDp(12)}
+                spacing={scale(12)}
                 renderItem={({item}) => <ClubCard data={item} />}
                 // 所有項目末尾渲染，防Tabbar遮擋
-                ListFooterComponent={() => (
-                    <View>
+                ListFooterComponent={
+                    <View style={{marginBottom: scale(60)}}>
+                        <Text
+                            style={{
+                                color: black.third,
+                                alignSelf: 'center',
+                                fontSize: pxToDp(12),
+                            }}>
+                            {'已有 ' +
+                                originClubDataList.length +
+                                ' 個組織進駐~~'}
+                        </Text>
                         <Text
                             style={{
                                 color: black.third,
@@ -89,9 +101,8 @@ class ClubPage extends Component {
                             }}>
                             歡迎澳大各組織進駐! 請到網站聯繫我們!
                         </Text>
-                        <View style={{marginTop: pxToDp(50)}}></View>
                     </View>
-                )}
+                }
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}

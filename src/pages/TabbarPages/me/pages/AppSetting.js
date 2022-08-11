@@ -17,41 +17,40 @@ import DialogDIY from '../../../../components/DialogDIY';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Dialog} from '@rneui/themed';
-import CookieManager from '@react-native-cookies/cookies';
+import {scale} from 'react-native-size-matters';
 
 const {bg_color} = COLOR_DIY.meScreenColor;
 const {black} = COLOR_DIY;
 
-// 循環渲染選項
-const optionsInfo = [
-    {
-        title: '通知設置',
-        func: () => {
-            alert('施工中');
-        },
-    },
-    {
-        title: '語言設置',
-        func: () => {
-            alert('施工中');
-        },
-    },
-    {
-        title: '檢查更新',
-        func: () => {
-            alert('施工中');
-        },
-    },
-];
-
 class AppSetting extends Component {
     state = {
+        optionsInfo: [
+            {
+                title: '通知設置',
+                func: () => {
+                    alert('施工中');
+                },
+            },
+            {
+                title: '語言設置',
+                func: () => {
+                    alert('施工中');
+                },
+            },
+            {
+                title: '檢查更新',
+                func: () => {
+                    alert('施工中');
+                },
+            },
+        ],
         // 退出提示Dialog
         logoutChoice: false,
     };
 
     // 渲染對應的選項
     renderOptions = optionsInfoIndex => {
+        const {optionsInfo} = this.state;
         const {title, func} = optionsInfo[optionsInfoIndex];
         return (
             <TouchableOpacity
@@ -168,6 +167,7 @@ class AppSetting extends Component {
                         登出賬號
                     </Text>
                 </TouchableOpacity>
+
                 {/* 登出前提示 */}
                 <DialogDIY
                     showDialog={this.state.logoutChoice}
