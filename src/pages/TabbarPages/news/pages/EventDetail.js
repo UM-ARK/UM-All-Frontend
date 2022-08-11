@@ -20,6 +20,7 @@ import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
 import Header from '../../../../components/Header';
+import HyperlinkText from '../../../../components/HyperlinkText';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
@@ -719,13 +720,18 @@ class EventDetail extends Component {
                                 詳情
                             </Text>
                             <ScrollView style={{marginTop: pxToDp(5)}}>
-                                <Text
-                                    style={{
-                                        color: black.main,
-                                        fontSize: pxToDp(16),
-                                    }}>
-                                    {introduction}
-                                </Text>
+                                <HyperlinkText
+                                    linkStyle={{color: themeColor}}
+                                    navigation={this.props.navigation}>
+                                    <Text
+                                        style={{
+                                            color: black.main,
+                                            fontSize: pxToDp(16),
+                                        }}
+                                        selectable>
+                                        {introduction}
+                                    </Text>
+                                </HyperlinkText>
                             </ScrollView>
                         </View>
                     </ModalBottom>
