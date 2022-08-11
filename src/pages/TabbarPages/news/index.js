@@ -41,20 +41,6 @@ class NewsScreen extends Component {
                     }}
                     initialRouteName={'EventPage'}>
                     <Tab.Screen
-                        name="NewsPage"
-                        component={NewsPage}
-                        options={{
-                            title: '新聞',
-                        }}
-                    />
-                    <Tab.Screen
-                        name="UMEventPage"
-                        component={UMEventPage}
-                        options={{
-                            title: '澳大活動',
-                        }}
-                    />
-                    <Tab.Screen
                         name="EventPage"
                         component={EventPage}
                         options={{
@@ -66,6 +52,20 @@ class NewsScreen extends Component {
                         component={ClubPage}
                         options={{
                             title: '進駐組織',
+                        }}
+                    />
+                    <Tab.Screen
+                        name="NewsPage"
+                        component={NewsPage}
+                        options={{
+                            title: '新聞',
+                        }}
+                    />
+                    <Tab.Screen
+                        name="UMEventPage"
+                        component={UMEventPage}
+                        options={{
+                            title: '澳大活動',
                         }}
                     />
                 </Tab.Navigator>

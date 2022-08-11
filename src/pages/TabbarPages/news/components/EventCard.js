@@ -128,6 +128,7 @@ class EventCard extends Component {
                         style={{
                             borderRadius: pxToDp(8),
                             overflow: 'hidden',
+                            backgroundColor: white,
                             ...viewShadow,
                         }}
                         activeOpacity={0.9}
@@ -141,7 +142,7 @@ class EventCard extends Component {
                             style={{
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,
-                                backgroundColor: COLOR_DIY.white,
+                                backgroundColor: white,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                             onLoadStart={() => {
