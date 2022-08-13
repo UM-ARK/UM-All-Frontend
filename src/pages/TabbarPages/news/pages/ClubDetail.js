@@ -874,7 +874,7 @@ class ClubDetail extends Component {
                         Linking.openURL('mailto:' + MAIL);
                         this.setState({reportChoice: false});
                     }}
-                    handleCancel={() => this.setState({showDialog: false})}
+                    handleCancel={() => this.setState({reportChoice: false})}
                 />
 
                 {/* 展示簡介的Modal */}
