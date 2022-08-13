@@ -5,11 +5,13 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
+    Linking,
 } from 'react-native';
 
 import {pxToDp} from '../../utils/stylesKits';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {handleLogout} from '../../utils/storageKits';
+import {MAIL} from '../../utils/pathMap';
 import DialogDIY from '../../components/DialogDIY';
 import Header from '../../components/Header';
 
@@ -21,6 +23,7 @@ class ClubSetting extends Component {
     state = {
         // 退出提示Dialog
         logoutChoice: false,
+        deleteChoice: false,
         fromEvent: false,
         eventID: undefined,
     };
@@ -35,7 +38,7 @@ class ClubSetting extends Component {
     }
 
     render() {
-        const {logoutChoice, fromEvent, eventID} = this.state;
+        const {logoutChoice, fromEvent, eventID, deleteChoice} = this.state;
         return (
             <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
                 <Header title={fromEvent ? '活動設置' : '組織賬號設置'} />
@@ -243,6 +246,18 @@ class ClubSetting extends Component {
                                     登出賬號
                                 </Text>
                             </TouchableOpacity>
+
+                            {/* 刪除賬號 */}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() =>
+                                    this.setState({deleteChoice: true})
+                                }
+                                style={styles.logoutButton}>
+                                <Text style={{...styles.submitButtonText}}>
+                                    刪除組織賬號
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     )}
                 </ScrollView>
@@ -254,6 +269,17 @@ class ClubSetting extends Component {
                     handleConfirm={handleLogout}
                     handleCancel={() => this.setState({logoutChoice: false})}
                 />
+
+                {/* 登出前提示 */}
+                <DialogDIY
+                    showDialog={deleteChoice}
+                    text={`即將跳轉email界面，您可以向服務器管理員提出刪除該組織賬號。\n該組織賬號所有內容，包括發佈的活動，都將被刪除。`}
+                    handleConfirm={() => {
+                        this.setState({deleteChoice: false});
+                        Linking.openURL('mailto:' + MAIL);
+                    }}
+                    handleCancel={() => this.setState({deleteChoice: false})}
+                />
             </View>
         );
     }
@@ -264,7 +290,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLOR_DIY.unread,
         alignItems: 'center',
         alignSelf: 'center',
-        marginVertical: pxToDp(20),
+        marginTop: pxToDp(20),
         paddingHorizontal: pxToDp(20),
         paddingVertical: pxToDp(10),
         borderRadius: pxToDp(10),
