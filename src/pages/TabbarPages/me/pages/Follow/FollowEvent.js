@@ -1,11 +1,25 @@
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    FlatList,
+    RefreshControl,
+} from 'react-native';
 
-import {BASE_URI, BASE_HOST, GET, POST} from '../../../../../utils/pathMap';
+import {
+    BASE_URI,
+    BASE_HOST,
+    GET,
+    POST,
+    addHost,
+} from '../../../../../utils/pathMap';
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import Header from '../../../../../components/Header';
 import EventCard from '../../../news/components/EventCard';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -18,6 +32,7 @@ class FollowEvent extends Component {
     state = {
         eventData: undefined,
         noMoreData: false,
+        isLoading: true,
     };
 
     componentDidMount() {
@@ -44,12 +59,14 @@ class FollowEvent extends Component {
                 if (json.message == 'success') {
                     let newDataArr = json.content;
                     newDataArr.map(itm => {
-                        itm.cover_image_url = BASE_HOST + itm.cover_image_url;
+                        itm.cover_image_url = addHost(itm.cover_image_url);
                     });
                     if (newDataArr.length < num_of_item) {
                         this.setState({noMoreData: true});
+                    } else {
+                        this.setState({noMoreData: false});
                     }
-                    if (eventData == undefined) {
+                    if (dataPage == 1) {
                         this.setState({eventData: newDataArr});
                     } else if (eventData.length > 0) {
                         newDataArr = eventData.concat(newDataArr);
@@ -59,11 +76,13 @@ class FollowEvent extends Component {
                     alert('已無更多數據');
                     this.setState({noMoreData: true});
                 }
+                this.setState({isLoading: false});
             })
             .catch(err => console.log('err', err));
     }
 
     loadMoreData = () => {
+        this.toast.show(`Data is Loading...`, 2000);
         const {noMoreData} = this.state;
         dataPage++;
         if (!noMoreData) {
@@ -120,6 +139,21 @@ class FollowEvent extends Component {
                     );
                 }}
                 ListFooterComponent={this.renderLoadMoreView}
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={this.state.isLoading}
+                        onRefresh={() => {
+                            this.toast.show(`Data is Loading...`, 2000);
+                            if (dataPage > 1) {
+                                dataPage = 1;
+                            }
+                            this.setState({isLoading: true});
+                            this.getFollowEvents();
+                        }}
+                    />
+                }
             />
         ) : (
             <View style={{alignItems: 'center'}}>
@@ -139,6 +173,18 @@ class FollowEvent extends Component {
 
                 {/* 渲染所有活動 */}
                 {this.renderEvent()}
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: COLOR_DIY.themeColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }

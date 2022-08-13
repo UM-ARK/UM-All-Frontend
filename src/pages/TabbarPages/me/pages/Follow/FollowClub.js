@@ -5,6 +5,7 @@ import {
     TouchableOpacity,
     StyleSheet,
     Dimensions,
+    RefreshControl,
 } from 'react-native';
 
 import {BASE_URI, BASE_HOST, GET, POST} from '../../../../../utils/pathMap';
@@ -16,6 +17,7 @@ import ClubCard from '../../../news/components/ClubCard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {FlatGrid} from 'react-native-super-grid';
 import axios from 'axios';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 const {bg_color, white, black, viewShadow, themeColor} = COLOR_DIY;
 const {width: PAGE_WIDTH} = Dimensions.get('window');
@@ -26,6 +28,7 @@ class FollowEvent extends Component {
     state = {
         clubDataList: undefined,
         noMoreData: false,
+        isLoading: true,
     };
 
     componentDidMount() {
@@ -46,13 +49,13 @@ class FollowEvent extends Component {
                     });
                     this.setState({clubDataList});
                 }
+                this.setState({isLoading: false});
             })
             .catch(err => console.log('err', err));
     }
 
     renderClub = () => {
         const {clubDataList} = this.state;
-        // console.log('clubDataList', clubDataList);
         return clubDataList != undefined && clubDataList.length > 0 ? (
             <FlatGrid
                 style={{flex: 1}}
@@ -66,6 +69,18 @@ class FollowEvent extends Component {
                         <ClubCard data={item}></ClubCard>
                     </View>
                 )}
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={this.state.isLoading}
+                        onRefresh={() => {
+                            this.toast.show(`Data is Loading...`, 2000);
+                            this.setState({isLoading: true});
+                            this.getFollowClubs();
+                        }}
+                    />
+                }
             />
         ) : (
             <View style={{alignItems: 'center'}}>
@@ -84,6 +99,18 @@ class FollowEvent extends Component {
 
                 {/* 渲染所有組織 */}
                 {this.renderClub()}
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: COLOR_DIY.themeColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }
