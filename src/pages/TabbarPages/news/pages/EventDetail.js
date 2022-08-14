@@ -9,11 +9,12 @@ import {
     StyleSheet,
     ScrollView,
     RefreshControl,
+    Linking,
 } from 'react-native';
 
 import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-import {BASE_URI, BASE_HOST, GET, POST} from '../../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET, POST, MAIL} from '../../../../utils/pathMap';
 import EventCard from '../components/EventCard';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
@@ -24,6 +25,7 @@ import HyperlinkText from '../../../../components/HyperlinkText';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {
     ImageHeaderScrollView,
     TriggeringView,
@@ -56,6 +58,7 @@ class EventDetail extends Component {
         clubData: undefined,
         imageUrls: '',
         showDialog: false,
+        reportChoice: false,
         toastColor: themeColor,
     };
 
@@ -692,6 +695,29 @@ class EventDetail extends Component {
                             </View>
                         </TouchableOpacity>
                     )}
+
+                    {/* 舉報活動 */}
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            marginTop: scale(20),
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            this.setState({reportChoice: true});
+                        }}>
+                        <EvilIcons
+                            name="exclamation"
+                            size={scale(20)}
+                            color={black.third}
+                        />
+                        <Text style={{color: black.third, fontSize: scale(13)}}>
+                            向管理員舉報該活動
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             );
         };
@@ -754,6 +780,15 @@ class EventDetail extends Component {
                         this.props.navigation.navigate('MeTabbar');
                     }}
                     handleCancel={() => this.setState({showDialog: false})}
+                />
+                <DialogDIY
+                    showDialog={this.state.reportChoice}
+                    text={'請在郵件中說明需舉報活動的標題，和舉報的原因。'}
+                    handleConfirm={() => {
+                        Linking.openURL('mailto:' + MAIL);
+                        this.setState({reportChoice: false});
+                    }}
+                    handleCancel={() => this.setState({reportChoice: false})}
                 />
 
                 {/* Tost */}

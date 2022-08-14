@@ -11,6 +11,7 @@ import {
     Alert,
     StyleSheet,
     RefreshControl,
+    Linking,
 } from 'react-native';
 
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
@@ -23,6 +24,7 @@ import {
     GET,
     ARK_LETTER_IMG,
     POST,
+    MAIL,
 } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import {handleLogout} from '../../../../utils/storageKits';
@@ -38,6 +40,7 @@ import {updateUserInfo} from '../../../../utils/storageKits';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {
     ImageHeaderScrollView,
     TriggeringView,
@@ -72,6 +75,7 @@ class ClubDetail extends Component {
         // 默認背景大圖，默認查看大圖
         imageUrls: ARK_LETTER_IMG,
         showDialog: false,
+        reportChoice: false,
         isLoading: true,
         toastColor: themeColor,
     };
@@ -764,8 +768,31 @@ class ClubDetail extends Component {
                         />
                     ) : null}
 
+                    {/* 舉報活動 */}
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            marginTop: scale(20),
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            this.setState({reportChoice: true});
+                        }}>
+                        <EvilIcons
+                            name="exclamation"
+                            size={scale(20)}
+                            color={black.third}
+                        />
+                        <Text style={{color: black.third, fontSize: scale(13)}}>
+                            向管理員舉報該組織
+                        </Text>
+                    </TouchableOpacity>
+
                     <View
-                        style={{height: pxToDp(50), backgroundColor: bg_color}}
+                        style={{height: scale(50), backgroundColor: bg_color}}
                     />
                 </View>
             );
@@ -839,6 +866,15 @@ class ClubDetail extends Component {
                         this.props.navigation.navigate('MeTabbar');
                     }}
                     handleCancel={() => this.setState({showDialog: false})}
+                />
+                <DialogDIY
+                    showDialog={this.state.reportChoice}
+                    text={'請在郵件中說明需舉報組織、舉報的原因。'}
+                    handleConfirm={() => {
+                        Linking.openURL('mailto:' + MAIL);
+                        this.setState({reportChoice: false});
+                    }}
+                    handleCancel={() => this.setState({reportChoice: false})}
                 />
 
                 {/* 展示簡介的Modal */}

@@ -113,7 +113,6 @@ class HomeScreen extends Component {
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
             this.setState({isShowModal: false});
-            this.toast.show(`Welcome Back~\n[]~(￣▽￣)~*`, 3000);
             this.getAppData(true);
         } else {
             setTimeout(() => {
@@ -124,6 +123,7 @@ class HomeScreen extends Component {
     }
 
     getAppData = async isLogin => {
+        this.toast.show(`UM ALL全力加載中...`, 2000);
         let URL = BASE_URI + GET.APP_INFO;
         await axios
             .get(URL)
@@ -134,6 +134,7 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
+                this.toast.show(`請求錯誤 TAT ...`, 2000);
                 // console.log('err', err);
             });
     };
@@ -153,6 +154,8 @@ class HomeScreen extends Component {
                     if (isLogin) {
                         alert('服務器API更新，需要重新登錄');
                         handleLogout();
+                    } else {
+                        setAPPInfo(serverInfo);
                     }
                 } else {
                     setAPPInfo(serverInfo);

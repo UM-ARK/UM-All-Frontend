@@ -5,13 +5,14 @@ import {
     TouchableOpacity,
     StyleSheet,
     StatusBar,
+    Linking,
 } from 'react-native';
 
 // 本地工具
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {pxToDp} from '../../../../utils/stylesKits';
 import {handleLogout} from '../../../../utils/storageKits';
-import {USER_AGREE} from '../../../../utils/pathMap';
+import {USER_AGREE, MAIL} from '../../../../utils/pathMap';
 import Header from '../../../../components/Header';
 import DialogDIY from '../../../../components/DialogDIY';
 
@@ -41,6 +42,19 @@ class AppSetting extends Component {
                 title: '檢查更新',
                 func: () => {
                     alert('施工中');
+                },
+            },
+            {
+                title: '建議 / 反饋',
+                func: () => {
+                    let URL = 'mailto:' + MAIL;
+                    Linking.openURL(URL);
+                },
+            },
+            {
+                title: 'APP權限設置',
+                func: () => {
+                    Linking.openSettings();
                 },
             },
         ],
@@ -84,6 +98,8 @@ class AppSetting extends Component {
 
                 {/* TODO: 幾項設置 */}
                 {/* {optionsInfo.map((_, index) => this.renderOptions(index))} */}
+                {this.renderOptions(3)}
+                {this.renderOptions(4)}
 
                 {/* 快捷登錄設置 */}
                 <TouchableOpacity

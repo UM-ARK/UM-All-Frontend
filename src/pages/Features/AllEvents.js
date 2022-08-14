@@ -1,11 +1,19 @@
 import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    FlatList,
+    RefreshControl,
+} from 'react-native';
 
 import Header from '../../components/Header';
 import EventCard from '../TabbarPages/news/components/EventCard';
 import {COLOR_DIY} from '../../utils/uiMap';
 import {pxToDp} from '../../utils/stylesKits';
 import {BASE_URI, BASE_HOST, GET} from '../../utils/pathMap';
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -22,6 +30,7 @@ class AllEvents extends Component {
         applyFilter: false,
         eventData: undefined,
         noMoreData: false,
+        isLoading: true,
     };
     componentDidMount() {
         let params = this.props.route.params;
@@ -71,6 +80,7 @@ class AllEvents extends Component {
                     alert('已無更多數據');
                     this.setState({noMoreData: true});
                 }
+                this.setState({isLoading: false});
             })
             .catch(err => console.log('err', err));
     }
@@ -160,6 +170,7 @@ class AllEvents extends Component {
     };
 
     loadMoreData = () => {
+        this.toast.show(`Data is Loading...`, 2000);
         const {club_num, noMoreData} = this.state;
         dataPage++;
         if (!noMoreData) {
@@ -197,7 +208,7 @@ class AllEvents extends Component {
         );
     };
     renderEvent = () => {
-        const {eventData} = this.state;
+        const {eventData, club_num} = this.state;
         return (
             eventData != undefined &&
             eventData.length > 0 && (
@@ -219,6 +230,21 @@ class AllEvents extends Component {
                         );
                     }}
                     ListFooterComponent={this.renderLoadMoreView}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={this.state.isLoading}
+                            onRefresh={() => {
+                                this.toast.show(`Data is Loading...`, 2000);
+                                if (dataPage > 1) {
+                                    dataPage = 1;
+                                }
+                                this.setState({isLoading: true});
+                                this.getEventData(club_num);
+                            }}
+                        />
+                    }
                 />
             )
         );
@@ -233,6 +259,18 @@ class AllEvents extends Component {
 
                 {/* 渲染所有活動 */}
                 {this.renderEvent()}
+
+                {/* Tost */}
+                <Toast
+                    ref={toast => (this.toast = toast)}
+                    position="top"
+                    positionValue={'10%'}
+                    textStyle={{color: white}}
+                    style={{
+                        backgroundColor: COLOR_DIY.themeColor,
+                        borderRadius: pxToDp(10),
+                    }}
+                />
             </View>
         );
     }
