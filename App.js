@@ -65,7 +65,7 @@ class App extends Component {
                 isLoaded={this.state.isLoaded}
                 customComponent={
                     <Image
-                        source={require('./src/static/img/umallLogo-rounded.png')}
+                        source={require('./src/static/img/logo-rounded.png')}
                         style={{
                             width: LOGO_WIDTH,
                             height: LOGO_WIDTH,
