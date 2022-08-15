@@ -132,7 +132,7 @@ export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 // 澳大 - UM Moodle
 export const UM_Moodle = 'https://ummoodle.um.edu.mo/my/';
 // 澳大 - UM ISW
-export const UM_ISW = 'https://isw.um.edu.mo/siapp/faces/home';
+export const UM_ISW = 'https://isw.um.edu.mo/siweb/faces/login.jspx';
 // 澳大 - UM 預選課
 export const UM_PRE_ENROLMENT =
     'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
