@@ -455,10 +455,8 @@ class ClubDetail extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                    ) : null}
-
-                    {/* 公告 */}
-                    {isLogin && isFollow ? (
+                    ) : (
+                        // 公告
                         <View
                             style={{
                                 position: 'absolute',
@@ -480,7 +478,7 @@ class ClubDetail extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                    ) : null}
+                    )}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity
@@ -549,7 +547,7 @@ class ClubDetail extends Component {
                     </View>
 
                     {/* Follow按鈕 */}
-                    {!isAdmin ? this.renderFollowButton() : null}
+                    {!isAdmin && false ? this.renderFollowButton() : null}
 
                     {/* 照片 */}
                     {clubData.club_photos_list &&

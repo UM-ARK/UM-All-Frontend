@@ -30,7 +30,7 @@ const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
             // both for http & https
             if (navigation) {
                 webview_param.url = url;
-                webview_param.title = title ? title : 'UM ALL 集成瀏覽器';
+                webview_param.title = title ? title : 'ARK ALL 集成瀏覽器';
 
                 navigation.navigate('Webviewer', webview_param);
             }

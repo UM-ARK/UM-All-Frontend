@@ -380,11 +380,13 @@ class EventDetail extends Component {
                         </View>
                     </View>
                     {/* Follow按鈕 帶Toast */}
-                    <View style={{alignItems: 'flex-end'}}></View>
+                    {/* <View style={{alignItems: 'flex-end'}}></View> */}
                     {eventData != undefined &&
-                        eventData.can_follow &&
-                        !isClub &&
-                        this.renderFollowButton()}
+                    eventData.can_follow &&
+                    !isClub &&
+                    false
+                        ? this.renderFollowButton()
+                        : null}
                 </View>
             );
         };
@@ -442,9 +444,7 @@ class EventDetail extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                    ) : null}
-                    {/* 公告 */}
-                    {isLogin && isFollow ? (
+                    ) : (
                         <View
                             style={{
                                 position: 'absolute',
@@ -466,7 +466,7 @@ class EventDetail extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                    ) : null}
+                    )}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity

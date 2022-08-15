@@ -226,7 +226,7 @@ class ClubLogin extends Component {
                                 color: COLOR_DIY.black.second,
                                 fontSize: pxToDp(15),
                             }}>
-                            {`歡迎各社團/組織使用UM ALL~\n進駐UM ALL，註冊一個“社團/組織”賬號，無需費用。\n進駐請將文件：1、組織頭像圖片。2、社團名字(簡稱)。3、需要設置的賬號&密碼。4、任何一種組織在澳大服務的證明。\n發送到郵箱xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n即有運營的同學幫忙註冊！`}
+                            {`歡迎各社團/組織使用ARK ALL~\n進駐ARK ALL，註冊一個“社團/組織”賬號，無需費用。\n進駐請將文件：1、組織頭像圖片。2、社團名字(簡稱)。3、需要設置的賬號&密碼。4、任何一種組織在澳大服務的證明。\n發送到郵箱xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n即有運營的同學幫忙註冊！`}
                         </Text>
                     </View>
                 </ScrollView>
@@ -264,7 +264,7 @@ class ClubLogin extends Component {
                         onPress={() => Linking.openURL(USUAL_Q)}
                         style={{marginTop: pxToDp(20), alignSelf: 'center'}}>
                         <Text style={{color: COLOR_DIY.black.third}}>
-                            沒有賬號? 進駐UM ALL!
+                            沒有賬號? 進駐ARK ALL!
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>

@@ -119,6 +119,7 @@ const IntegratedWebView = ({
                 cacheEnabled={false}
                 // IOS
                 sharedCookiesEnabled
+                enableApplePay={true}
                 // Android
                 thirdPartyCookiesEnabled
                 domStorageEnabled={true}

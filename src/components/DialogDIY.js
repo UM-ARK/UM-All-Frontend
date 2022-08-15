@@ -14,7 +14,7 @@ class DialogDIY extends Component {
                 isVisible={this.props.showDialog}
                 onBackdropPress={this.props.handleCancel}>
                 <Dialog.Title
-                    title="UM ALL 提示"
+                    title="ARK ALL 提示"
                     titleStyle={{color: COLOR_DIY.black.main}}
                 />
                 <Text style={{color: COLOR_DIY.black.second}}>

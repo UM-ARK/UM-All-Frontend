@@ -150,14 +150,19 @@ class UMEventPage extends Component {
                 getItemCount={getItemCount}
                 // 列表頭部渲染的組件 - Data From說明
                 ListHeaderComponent={() => (
-                    <Text
-                        style={{
-                            color: black.third,
-                            alignSelf: 'center',
-                            marginTop: pxToDp(5),
-                        }}>
-                        Data From: data.um.edu.mo
-                    </Text>
+                    <View>
+                        <Text
+                            style={{
+                                color: black.third,
+                                alignSelf: 'center',
+                                marginTop: pxToDp(5),
+                            }}>
+                            Data From: data.um.edu.mo
+                        </Text>
+                        <Text style={{color: black.third, alignSelf: 'center'}}>
+                            數據可能會有延遲
+                        </Text>
+                    </View>
                 )}
                 // 列表底部渲染，防止Tabbar遮擋
                 ListFooterComponent={() => (

@@ -178,7 +178,7 @@ class ChatDetail extends Component {
                         if (item.notice_type == 'WEBSITE') {
                             let webview_param = {
                                 url: item.link,
-                                title: 'UM ALL內置瀏覽器',
+                                title: 'ARK ALL內置瀏覽器',
                                 text_color: '#FFF',
                                 bg_color_diy: themeColor,
                                 isBarStyleBlack: false,

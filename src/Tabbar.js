@@ -52,6 +52,30 @@ class Tabbar extends Component {
                     horizontalPadding: pxToDp(10),
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'HomeTabbar'}>
+                {isClub ? null : (
+                    <Tabs.Screen
+                        name="HomeTabbar"
+                        component={HomeScreen}
+                        options={{
+                            tabBarIcon: ({focused, color, size}) => (
+                                <Icon
+                                    name="home"
+                                    size={size ? size : 24}
+                                    color={
+                                        focused ? color : COLOR_DIY.black.main
+                                    }
+                                    focused={focused}
+                                    color={color}
+                                />
+                            ),
+                            title: '主頁',
+                        }}
+                        initialParams={{
+                            setLock: this.props.route.params.setLock,
+                        }}
+                    />
+                )}
+
                 {/* 社團賬號登錄，進入簡潔模式 */}
                 {isClub ? null : (
                     <Tabs.Screen
@@ -73,6 +97,7 @@ class Tabbar extends Component {
                         }}
                     />
                 )}
+
                 {isClub ? null : (
                     <Tabs.Screen
                         name="FeaturesTabbar"
@@ -91,27 +116,6 @@ class Tabbar extends Component {
                             ),
                             title: '服務',
                         }}
-                    />
-                )}
-                {isClub ? null : (
-                    <Tabs.Screen
-                        name="HomeTabbar"
-                        component={HomeScreen}
-                        options={{
-                            tabBarIcon: ({focused, color, size}) => (
-                                <Icon
-                                    name="home"
-                                    size={size ? size : 24}
-                                    color={
-                                        focused ? color : COLOR_DIY.black.main
-                                    }
-                                    focused={focused}
-                                    color={color}
-                                />
-                            ),
-                            title: '主頁',
-                        }}
-                        initialParams={{setLock: this.props.route.params.setLock}}
                     />
                 )}
 
