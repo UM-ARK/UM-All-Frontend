@@ -30,6 +30,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
 
 const {bg_color, black, themeColor, white} = COLOR_DIY;
 
@@ -158,7 +159,7 @@ class LoginChoose extends Component {
                                         // );
                                         if ('MoodleSession' in cookies) {
                                             alert(
-                                                `Moodle登錄成功，正在登錄UM ALL...\n先不要進行其他操作...\n等待重新出現UM ALL主頁則登錄成功！`,
+                                                `Moodle登錄成功，正在登錄ARK ALL...\n先不要進行其他操作...\n等待重新出現ARK ALL主頁則登錄成功！`,
                                             );
                                             // console.log(
                                             //     'MoodleSession =>',
@@ -204,7 +205,7 @@ class LoginChoose extends Component {
                                     color: COLOR_DIY.black.third,
                                     fontSize: pxToDp(18),
                                 }}>
-                                Welcome To UM ALL~
+                                Welcome To ARK ALL~
                             </Text>
                             <Text
                                 style={{
@@ -220,7 +221,7 @@ class LoginChoose extends Component {
                             {/* 社團賬號登錄 */}
                             <TouchableOpacity
                                 style={{
-                                    backgroundColor: '#4994c4',
+                                    backgroundColor: themeColor,
                                     ...s.roleCardContainer,
                                 }}
                                 activeOpacity={0.7}
@@ -230,27 +231,33 @@ class LoginChoose extends Component {
                                 }}
                                 disabled={!this.state.ruleChoice}>
                                 <Text style={{...s.roleCardText}}>
-                                    社團/組織賬號
+                                    社團 / 組織賬號
                                 </Text>
                             </TouchableOpacity>
 
                             {/* 個人賬號登錄 */}
-                            <TouchableOpacity
-                                style={{
-                                    backgroundColor: '#a2d2e2',
-                                    ...s.roleCardContainer,
-                                }}
-                                activeOpacity={0.7}
-                                onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
-                                    this.setState({showDialog: true});
-                                }}
-                                disabled={!this.state.ruleChoice}>
-                                <Text style={{...s.roleCardText}}>UM PASS</Text>
-                                <Text style={{...s.roleCardText}}>
-                                    學生個人賬號
-                                </Text>
-                            </TouchableOpacity>
+                            {false && (
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: '#a2d2e2',
+                                        ...s.roleCardContainer,
+                                    }}
+                                    activeOpacity={0.7}
+                                    onPress={() => {
+                                        ReactNativeHapticFeedback.trigger(
+                                            'soft',
+                                        );
+                                        this.setState({showDialog: true});
+                                    }}
+                                    disabled={!this.state.ruleChoice}>
+                                    <Text style={{...s.roleCardText}}>
+                                        UM PASS
+                                    </Text>
+                                    <Text style={{...s.roleCardText}}>
+                                        學生個人賬號
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
 
                         {/* 登錄提示 */}
@@ -332,6 +339,10 @@ class LoginChoose extends Component {
                                 請選擇您的角色
                             </Text>
                         </View>
+                        <Text
+                            style={{color: black.third, marginTop: scale(10)}}>
+                            Follow、推送等功能敬請期待！
+                        </Text>
                     </View>
                 )}
 

@@ -185,6 +185,9 @@ class NewsPage extends Component {
                 <Text style={{color: black.third, alignSelf: 'center'}}>
                     Data From: data.um.edu.mo
                 </Text>
+                <Text style={{color: black.third, alignSelf: 'center'}}>
+                    數據可能會有延遲
+                </Text>
                 <View style={styles.topNewsContainer}>
                     <View style={{width: '100%'}}>
                         {/* 圖片背景 */}

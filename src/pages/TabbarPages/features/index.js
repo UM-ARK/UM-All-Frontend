@@ -57,6 +57,7 @@ import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {inject} from 'mobx-react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -78,7 +79,6 @@ class Index extends Component {
                         needLogin: false,
                         go_where: 'Bus', // a function
                     },
-                    // TODO: 爬蟲
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'calendar-today',
@@ -113,7 +113,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map-marker-multiple',
                         fn_name: '課室地圖',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -138,7 +138,7 @@ class Index extends Component {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'logo-dropbox',
                         fn_name: '資源借用',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -156,7 +156,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'console-network',
                         fn_name: '公共電腦',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -174,7 +174,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'door-closed-lock',
                         fn_name: '儲物箱',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -192,7 +192,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'hammer-wrench',
                         fn_name: '維修預約',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -210,7 +210,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'basketball',
                         fn_name: '體育預訂',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -228,7 +228,7 @@ class Index extends Component {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'library',
                         fn_name: '圖書館',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -246,7 +246,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'passport',
                         fn_name: 'UM Pass',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -264,7 +264,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'view-grid-plus',
                         fn_name: '更多服務',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -287,7 +287,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'alpha-m-circle-outline',
                         fn_name: 'Moodle',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -305,7 +305,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'database-search',
                         fn_name: '選咩課',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
@@ -323,7 +323,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'ab-testing',
                         fn_name: 'ISW',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_ISW,
@@ -334,7 +334,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'eye-plus',
                         fn_name: '預選課',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_PRE_ENROLMENT,
@@ -345,7 +345,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bank-plus',
                         fn_name: 'Add Drop',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_ADD_DROP,
@@ -356,7 +356,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'clipboard-edit',
                         fn_name: '課表模擬',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_COURSE_SIMU,
@@ -369,7 +369,7 @@ class Index extends Component {
                         // icon_name:"account-star",
                         icon_name: 'cow',
                         fn_name: '全人發展',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_WHOLE_PERSON,
@@ -380,7 +380,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dolphin',
                         fn_name: '交流',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_EXCHANGE,
@@ -409,7 +409,7 @@ class Index extends Component {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'badge-account',
                         fn_name: '證明文件',
-                        needLogin: true,
+                        needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
                             url: UM_DOCUMENTS,
@@ -421,24 +421,24 @@ class Index extends Component {
             {
                 title: '生活服務',
                 fn: [
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'coffee-outline',
-                        fn_name: '澳大論壇',
-                        needLogin: true,
-                        go_where: 'Webview',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_WHOLE,
-                            title: '澳大論壇',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
+                    // {
+                    //     icon_type: iconTypes.materialCommunityIcons,
+                    //     icon_name: 'coffee-outline',
+                    //     fn_name: '澳大論壇',
+                    //     needLogin: false,
+                    //     go_where: 'Webview',
+                    //     webview_param: {
+                    //         // import pathMap的鏈接進行跳轉
+                    //         url: UM_WHOLE,
+                    //         title: '澳大論壇',
+                    //         // 標題顏色，默認為black.main
+                    //         // text_color: '#fff',
+                    //         // 標題背景顏色，默認為bg_color
+                    //         // bg_color_diy: '#23407d',
+                    //         // 狀態欄字體是否黑色，默認true
+                    //         // isBarStyleBlack: false,
+                    //     },
+                    // },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',
@@ -655,6 +655,7 @@ class Index extends Component {
                                 }}
                                 // 複製相關網站link
                                 onLongPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
                                     if (go_where == 'Webview') {
                                         Clipboard.setString(webview_param.url);
                                         Alert.alert('已複製網站Link到剪貼板！');
@@ -696,6 +697,45 @@ class Index extends Component {
                     }}
                 />
                 <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={{paddingHorizontal: scale(20)}}>
+                        <Text
+                            style={{
+                                alignSelf: 'center',
+                                color: COLOR_DIY.black.third,
+                                fontWeight: 'bold',
+                            }}>
+                            ARK ALL 提示：
+                        </Text>
+                        <Text
+                            style={{
+                                alignSelf: 'center',
+                                color: COLOR_DIY.black.third,
+                            }}>
+                            請勿在來意不明的頁面輸入您的賬號密碼！
+                        </Text>
+                        <Text
+                            style={{
+                                alignSelf: 'center',
+                                color: COLOR_DIY.black.third,
+                            }}>
+                            一切內容以官網為準！
+                        </Text>
+                        <Text
+                            style={{
+                                alignSelf: 'center',
+                                color: COLOR_DIY.black.third,
+                            }}>
+                            長按圖標可複製對應的link ~
+                        </Text>
+                        <Text
+                            style={{
+                                alignSelf: 'center',
+                                color: COLOR_DIY.black.third,
+                            }}>
+                            如付款等關鍵操作，您應該轉到瀏覽器進行！
+                        </Text>
+                    </View>
+
                     {this.state.functionArr.map(fn_card => {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);
                     })}

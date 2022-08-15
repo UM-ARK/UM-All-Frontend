@@ -24,19 +24,19 @@ class About extends Component {
         timeLineData: [
             {
                 time: '2021-09-20',
-                title: 'UM ARK小程序發佈',
+                title: 'ARK小程序發佈',
             },
             {
                 time: '2022-04-03',
-                title: 'UM ARK小程序結束運營',
+                title: 'ARK小程序結束運營',
             },
             {
                 time: '2022-05-24',
-                title: '新UM ARK開發團隊成立',
+                title: '新ARK開發團隊成立',
             },
             {
-                time: '2022-08-11',
-                title: 'UM ALL 正式版開放下載',
+                time: '2022-08-15',
+                title: 'ARK ALL 可供下載',
             },
         ],
     };
@@ -52,7 +52,7 @@ class About extends Component {
                     {/* LOGO */}
                     <View style={{...s.logoContainer}}>
                         <FastImage
-                            source={require('../../../../static/img/umallLogo.png')}
+                            source={require('../../../../static/img/logo.png')}
                             style={{width: 100, height: 100}}
                         />
                     </View>
@@ -83,10 +83,7 @@ class About extends Component {
                                 color: black.third,
                                 marginTop: scale(5),
                             }}>
-                            UM ALL
-                            是由幾位不知名的澳大FST同學，在2022年暑假自主開發的校園資訊平台。UM
-                            ALL 有UM All In
-                            One的含義，目的是為了一次整合澳大所有的功能、資訊。讓新生不再苦惱各種UM部門，讓社團不再苦惱籌劃的活動沒有曝光，讓澳大師生都可以更便捷地閱覽澳大活動，使用校園服務。
+                            {`ARK ALL 是由幾位不知名的澳大FST同學，在2022年暑假自主開發的校園資訊平台。本軟件在Github開源，本軟件並非澳大官方軟件，本軟件出現的言論不代表澳大官方言論，一切資訊應以澳大官方網站為準。\n“ALL”的目的是為了一次整合澳大所有的功能、資訊。讓新生不再苦惱各種UM部門，讓社團不再苦惱籌劃的活動沒有曝光，讓澳大師生都可以更便捷地閱覽澳大活動，使用校園服務。`}
                         </Text>
                     </View>
 

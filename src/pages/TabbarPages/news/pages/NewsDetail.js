@@ -178,7 +178,7 @@ class NewsDetail extends Component {
         } else if (url.includes('http')) {
             let webview_param = {
                 url: url,
-                title: 'UM ALL 集成瀏覽器',
+                title: 'ARK ALL 集成瀏覽器',
                 text_color: '#FFF',
                 bg_color_diy: COLOR_DIY.themeColor,
                 isBarStyleBlack: false,

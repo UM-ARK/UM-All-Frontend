@@ -40,6 +40,7 @@ import Toast, {DURATION} from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {scale} from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {white, bg_color, black, themeColor} = COLOR_DIY;
@@ -115,15 +116,15 @@ class HomeScreen extends Component {
             this.setState({isShowModal: false});
             this.getAppData(true);
         } else {
-            setTimeout(() => {
-                this.setState({isShowModal: true});
-            }, 1500);
+            // setTimeout(() => {
+            //     this.setState({isShowModal: true});
+            // }, 1500);
             this.getAppData(false);
         }
     }
 
     getAppData = async isLogin => {
-        this.toast.show(`UM ALL全力加載中...`, 2000);
+        this.toast.show(`ARK ALL全力加載中...`, 2000);
         let URL = BASE_URI + GET.APP_INFO;
         await axios
             .get(URL)
@@ -224,7 +225,7 @@ class HomeScreen extends Component {
                 <Header
                     backgroundColor={white}
                     centerComponent={{
-                        text: 'UM ALL',
+                        text: 'ARK ALL',
                         style: {
                             color: COLOR_DIY.black.main,
                             fontSize: pxToDp(15),
@@ -277,9 +278,72 @@ class HomeScreen extends Component {
                             backgroundColor: white,
                             paddingVertical: pxToDp(10),
                         }}>
-                        <Text style={{color: black.second, fontSize: 15}}>
-                            {`歡迎來到UM ALL~`}
-                        </Text>
+                        <View style={{paddingHorizontal: scale(20)}}>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                }}>
+                                {`本軟件純屬FST同學為愛發電TAT，`}
+                                <Text style={{fontWeight: 'bold'}}>
+                                    並非官方應用程式！
+                                </Text>
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    alignSelf: 'center',
+                                }}>
+                                {`本軟件代碼在Github開源`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    alignSelf: 'center',
+                                }}>
+                                {`本軟件並非澳大官方應用！ x1`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    alignSelf: 'center',
+                                }}>
+                                {`本軟件並非澳大官方應用！ x2`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    alignSelf: 'center',
+                                }}>
+                                {`本軟件並非澳大官方應用！ x3`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    alignSelf: 'center',
+                                }}>
+                                {`This APP is not an official APP of UM！`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    alignSelf: 'center',
+                                }}>
+                                {`如您仍然信任本軟件，感謝您的認可 ♪(･ω･)ﾉ`}
+                            </Text>
+                        </View>
 
                         <Text
                             style={{color: black.third, marginTop: pxToDp(5)}}>
@@ -297,7 +361,7 @@ class HomeScreen extends Component {
 
                         <Text
                             style={{color: black.third, marginTop: pxToDp(5)}}>
-                            如果你是新同學...
+                            如果你是新同學... (詳見服務頁新生推薦)
                         </Text>
                         <TouchableOpacity
                             style={styles.buttonContainer}
@@ -320,7 +384,7 @@ class HomeScreen extends Component {
 
                         <Text
                             style={{color: black.third, marginTop: pxToDp(5)}}>
-                            您可能還有一肚子疑問...
+                            您可能還有很多疑問...
                         </Text>
                         <TouchableOpacity
                             style={styles.buttonContainer}
@@ -341,28 +405,32 @@ class HomeScreen extends Component {
                     </View>
 
                     {/* 快速填充功能提示 */}
-                    <View
-                        style={{
-                            alignItems: 'center',
-                            marginTop: pxToDp(10),
-                            backgroundColor: white,
-                            paddingVertical: pxToDp(10),
-                        }}>
-                        <Text style={{color: black.third}}>
-                            {`UM Pass頁面需要重新輸入賬號？`}
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.buttonContainer}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                this.props.navigation.navigate('LoginSetting');
+                    {false && (
+                        <View
+                            style={{
+                                alignItems: 'center',
+                                marginTop: pxToDp(10),
+                                backgroundColor: white,
+                                paddingVertical: pxToDp(10),
                             }}>
-                            <Text style={{color: white}}>
-                                {`啟用自動填充功能`}
+                            <Text style={{color: black.third}}>
+                                {`UM Pass頁面需要重新輸入賬號？`}
                             </Text>
-                        </TouchableOpacity>
-                    </View>
+                            <TouchableOpacity
+                                style={styles.buttonContainer}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    this.props.navigation.navigate(
+                                        'LoginSetting',
+                                    );
+                                }}>
+                                <Text style={{color: white}}>
+                                    {`啟用自動填充功能`}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
                     <View style={{marginBottom: pxToDp(50)}} />
                 </ScrollView>
@@ -385,7 +453,7 @@ class HomeScreen extends Component {
                                         fontSize: pxToDp(18),
                                         color: COLOR_DIY.black.third,
                                     }}>
-                                    歡迎來到UM ALL~
+                                    歡迎來到ARK ALL~
                                 </Text>
                                 <Text
                                     style={{
@@ -446,10 +514,10 @@ class HomeScreen extends Component {
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        marginTop: pxToDp(5),
+        marginVertical: scale(5),
         backgroundColor: themeColor,
-        padding: pxToDp(10),
-        borderRadius: pxToDp(10),
+        padding: scale(10),
+        borderRadius: scale(10),
     },
 });
 
