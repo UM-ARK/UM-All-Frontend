@@ -41,6 +41,8 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {scale} from 'react-native-size-matters';
+import FastImage from 'react-native-fast-image';
+import CookieManager from '@react-native-cookies/cookies';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {white, bg_color, black, themeColor} = COLOR_DIY;
@@ -296,7 +298,7 @@ class HomeScreen extends Component {
                                     fontWeight: 'bold',
                                     alignSelf: 'center',
                                 }}>
-                                {`本軟件代碼在Github開源`}
+                                {`本軟件代碼在Github開源，歡迎✨✨`}
                             </Text>
                             <Text
                                 style={{
@@ -305,7 +307,7 @@ class HomeScreen extends Component {
                                     fontWeight: 'bold',
                                     alignSelf: 'center',
                                 }}>
-                                {`本軟件並非澳大官方應用！ x1`}
+                                {`本軟件並非澳大官方應用‼️ x1`}
                             </Text>
                             <Text
                                 style={{
@@ -314,7 +316,7 @@ class HomeScreen extends Component {
                                     fontWeight: 'bold',
                                     alignSelf: 'center',
                                 }}>
-                                {`本軟件並非澳大官方應用！ x2`}
+                                {`本軟件並非澳大官方應用‼️ x2`}
                             </Text>
                             <Text
                                 style={{
@@ -323,7 +325,7 @@ class HomeScreen extends Component {
                                     fontWeight: 'bold',
                                     alignSelf: 'center',
                                 }}>
-                                {`本軟件並非澳大官方應用！ x3`}
+                                {`本軟件並非澳大官方應用‼️ x3`}
                             </Text>
                             <Text
                                 style={{
@@ -332,7 +334,7 @@ class HomeScreen extends Component {
                                     fontWeight: 'bold',
                                     alignSelf: 'center',
                                 }}>
-                                {`This APP is not an official APP of UM！`}
+                                {`This APP is not an official APP of UM‼️`}
                             </Text>
                             <Text
                                 style={{
@@ -405,32 +407,61 @@ class HomeScreen extends Component {
                     </View>
 
                     {/* 快速填充功能提示 */}
-                    {false && (
-                        <View
-                            style={{
-                                alignItems: 'center',
-                                marginTop: pxToDp(10),
-                                backgroundColor: white,
-                                paddingVertical: pxToDp(10),
+                    <View
+                        style={{
+                            alignItems: 'center',
+                            marginTop: pxToDp(10),
+                            backgroundColor: white,
+                            paddingVertical: pxToDp(10),
+                        }}>
+                        <Text style={{color: black.third}}>
+                            {`UM Pass頁面需要重新輸入賬號？`}
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.buttonContainer}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.navigate('LoginSetting');
                             }}>
-                            <Text style={{color: black.third}}>
-                                {`UM Pass頁面需要重新輸入賬號？`}
+                            <Text style={{color: white}}>
+                                {`啟用自動填充功能`}
                             </Text>
-                            <TouchableOpacity
-                                style={styles.buttonContainer}
-                                activeOpacity={0.8}
-                                onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
-                                    this.props.navigation.navigate(
-                                        'LoginSetting',
-                                    );
-                                }}>
-                                <Text style={{color: white}}>
-                                    {`啟用自動填充功能`}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* 清除緩存 */}
+                    <View
+                        style={{
+                            alignItems: 'center',
+                            marginTop: pxToDp(10),
+                            backgroundColor: white,
+                            paddingVertical: pxToDp(10),
+                        }}>
+                        <Text style={{color: black.third}}>
+                            {`圖片更新不及時？網站響應出錯？`}
+                        </Text>
+                        <Text style={{color: black.third}}>
+                            {`‼️:您已登錄的界面可能會退出登錄`}
+                        </Text>
+                        <Text style={{color: black.third}}>
+                            {`‼️:您可能需要重新加載圖片，會消耗流量`}
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.buttonContainer}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                FastImage.clearDiskCache();
+                                FastImage.clearMemoryCache();
+                                CookieManager.clearAll();
+                                this.toast.show(`已清除所有緩存`, 2000);
+                            }}>
+                            <Text style={{color: white}}>
+                                {`清除圖片和Web緩存`}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
                     <View style={{marginBottom: pxToDp(50)}} />
                 </ScrollView>
