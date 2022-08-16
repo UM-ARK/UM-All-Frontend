@@ -141,7 +141,7 @@ class UMEventPage extends Component {
                 data={data}
                 ref={'virtualizedList'}
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
-                initialNumToRender={4}
+                initialNumToRender={6}
                 renderItem={({item}) => <NewsCard data={item} type={'event'} />}
                 keyExtractor={itm => itm._id}
                 // 整理item數據

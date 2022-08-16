@@ -68,8 +68,6 @@ const NewsLoader = props => (
 let topNews = {};
 
 class NewsPage extends Component {
-    // NavigationContext組件可以在非基頁面拿到路由信息
-    // this.context === this.props.navigation 等同效果
     static contextType = NavigationContext;
 
     constructor() {
@@ -367,7 +365,7 @@ class NewsPage extends Component {
                         data={this.state.newsList}
                         ref={'virtualizedList'}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
-                        initialNumToRender={3}
+                        initialNumToRender={4}
                         renderItem={({item}) => <NewsCard data={item} />}
                         keyExtractor={itm => itm._id}
                         // 整理item數據
