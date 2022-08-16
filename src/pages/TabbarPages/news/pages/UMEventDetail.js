@@ -564,58 +564,72 @@ class UMEventDetail extends Component {
                             </View>
                         ) : null}
                         {/*地點*/}
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle}>
-                                {venue[chooseMode + 3]}
-                            </Text>
-                            <HyperlinkText
-                                linkStyle={{
-                                    color: COLOR_DIY.themeColor,
-                                }}
-                                navigation={this.props.navigation}>
-                                <Text style={styles.content} selectable>
-                                    {venue[chooseMode]}
+                        {venue[chooseMode] ? (
+                            <View style={styles.contentContainer}>
+                                <Text
+                                    style={{
+                                        width: '15%',
+                                        ...styles.secondTitle,
+                                    }}>
+                                    {venue[chooseMode + 3]}
                                 </Text>
-                            </HyperlinkText>
-                        </View>
-                        {/*語言*/}
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle}>
-                                {language[chooseMode + 3]}
-                                {language[chooseMode].map((itm, idx) => {
-                                    let show = itm;
-                                    if (
-                                        language[chooseMode].length - 1 !=
-                                        idx
-                                    ) {
-                                        show = show + ', ';
-                                    }
-                                    return (
-                                        <Text style={styles.content}>
-                                            {show}
+                                <View style={{width: '75%'}}>
+                                    <HyperlinkText
+                                        linkStyle={{
+                                            color: COLOR_DIY.themeColor,
+                                        }}
+                                        navigation={this.props.navigation}>
+                                        <Text style={styles.content} selectable>
+                                            {venue[chooseMode]}
                                         </Text>
-                                    );
-                                })}
-                            </Text>
-                        </View>
-                        {/*對象*/}
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle}>
-                                {targetAudience[chooseMode + 3]}
-                                <Text style={styles.content}>
-                                    {targetAudience[chooseMode]}
+                                    </HyperlinkText>
+                                </View>
+                            </View>
+                        ) : null}
+                        {/*語言*/}
+                        {language[chooseMode] ? (
+                            <View style={styles.contentContainer}>
+                                <Text style={styles.secondTitle}>
+                                    {language[chooseMode + 3]}
+                                    {language[chooseMode].map((itm, idx) => {
+                                        let show = itm;
+                                        if (
+                                            language[chooseMode].length - 1 !=
+                                            idx
+                                        ) {
+                                            show = show + ', ';
+                                        }
+                                        return (
+                                            <Text style={styles.content}>
+                                                {show}
+                                            </Text>
+                                        );
+                                    })}
                                 </Text>
-                            </Text>
-                        </View>
+                            </View>
+                        ) : null}
+                        {/*對象*/}
+                        {targetAudience[chooseMode] ? (
+                            <View style={styles.contentContainer}>
+                                <Text style={styles.secondTitle}>
+                                    {targetAudience[chooseMode + 3]}
+                                    <Text style={styles.content}>
+                                        {targetAudience[chooseMode]}
+                                    </Text>
+                                </Text>
+                            </View>
+                        ) : null}
                         {/*主辦單位*/}
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle}>
-                                {organiser[chooseMode + 3]}
-                            </Text>
-                            <Text style={styles.content}>
-                                {organiser[chooseMode]}
-                            </Text>
-                        </View>
+                        {organiser[chooseMode] ? (
+                            <View style={styles.contentContainer}>
+                                <Text style={styles.secondTitle}>
+                                    {organiser[chooseMode + 3]}
+                                    <Text style={styles.content}>
+                                        {organiser[chooseMode]}
+                                    </Text>
+                                </Text>
+                            </View>
+                        ) : null}
                         {/* 協辦單位 */}
                         {available[0] == 1 && (
                             <View style={styles.contentContainer}>
