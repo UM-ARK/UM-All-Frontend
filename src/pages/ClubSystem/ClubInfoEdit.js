@@ -384,7 +384,6 @@ class ClubInfoEdit extends Component {
                     borderColor: this.state.borderColor,
                     color: this.state.borderColor,
                 }}
-                maxLength={500}
                 value={this.state.introTextInput}
                 onChangeText={introTextInput => this.setState({introTextInput})}
                 onBlur={() => {

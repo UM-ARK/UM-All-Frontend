@@ -350,7 +350,6 @@ class EventSetting extends Component {
                     borderColor: this.state.borderColor,
                     color: this.state.borderColor,
                 }}
-                maxLength={500}
                 value={this.state.introText}
                 onChangeText={introText => this.setState({introText})}
                 onBlur={() => {
