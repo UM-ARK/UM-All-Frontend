@@ -829,7 +829,9 @@ class EventDetail extends Component {
                         renderTouchableFixedForeground={renderForeground}
                         showsVerticalScrollIndicator={false}
                         refreshControl={this.renderRefreshCompo()}
-                        bounces={false}>
+                        alwaysBounceHorizontal={false}
+                        // bounces={false}
+                    >
                         {/* 主要頁面內容 */}
                         {renderMainContent()}
                         <View

@@ -110,7 +110,7 @@ class EventCard extends Component {
 
         return (
             <View style={{...this.props.style}}>
-                {/* 未結束紅點標識 */}
+                {/* 進行中標識 */}
                 {isFinish ? null : (
                     <View
                         style={{
@@ -173,12 +173,20 @@ class EventCard extends Component {
                             {/* 標題文字 & 日期 */}
                             <View style={{width: '90%'}}>
                                 <Text
-                                    style={{color: black.main}}
+                                    style={{
+                                        color: black.main,
+                                        fontWeight: '500',
+                                        fontSize: scale(13),
+                                    }}
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
                                 {/* 日期 */}
-                                <Text style={{color: black.third}}>
+                                <Text
+                                    style={{
+                                        color: black.third,
+                                        fontSize: scale(12),
+                                    }}>
                                     {moment(startTimeStamp).format('MM-DD')}
                                 </Text>
                             </View>

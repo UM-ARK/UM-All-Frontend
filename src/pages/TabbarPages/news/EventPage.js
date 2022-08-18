@@ -131,7 +131,7 @@ class EventPage extends Component {
     };
 
     renderFilter = () => {
-        let optionsList = ['未結束', '全部', '取消'];
+        let optionsList = ['進行中', '全部', '取消'];
         return (
             <View>
                 <TouchableOpacity
@@ -143,8 +143,9 @@ class EventPage extends Component {
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        alignSelf: 'center',
+                        justifyContent: 'center',
                         marginTop: pxToDp(8),
+                        width: '100%',
                     }}>
                     <Text style={{color: black.third}}>篩選</Text>
                     <Ionicons
@@ -374,7 +375,8 @@ class EventPage extends Component {
                         }
                         directionalLockEnabled
                         alwaysBounceHorizontal={false}
-                        bounces={false}>
+                        // bounces={false}
+                    >
                         {/* 篩選 */}
                         {this.renderFilter()}
                         {/* 仿瀑布屏展示 */}

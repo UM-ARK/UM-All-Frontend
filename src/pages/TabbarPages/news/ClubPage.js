@@ -151,8 +151,9 @@ class ClubPage extends Component {
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        alignSelf: 'center',
+                        justifyContent: 'center',
                         marginTop: pxToDp(8),
+                        width: '100%',
                     }}>
                     <Text style={{color: black.third}}>篩選</Text>
                     <Ionicons
