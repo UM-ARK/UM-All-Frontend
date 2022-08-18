@@ -554,10 +554,10 @@ class UMEventDetail extends Component {
                         {speaker[chooseMode] ? (
                             <View style={styles.contentContainer}>
                                 {/* 文本標題，e.g. 講者： */}
-                                <Text style={styles.secondTitle}>
+                                <Text style={styles.secondTitle} selectable>
                                     {speaker[chooseMode + 3]}
                                     {/* 對應該活動的講者名稱 */}
-                                    <Text style={styles.content} selectable>
+                                    <Text style={styles.content}>
                                         {speaker[chooseMode]}
                                     </Text>
                                 </Text>
@@ -570,7 +570,8 @@ class UMEventDetail extends Component {
                                     style={{
                                         width: '15%',
                                         ...styles.secondTitle,
-                                    }}>
+                                    }}
+                                    selectable>
                                     {venue[chooseMode + 3]}
                                 </Text>
                                 <View style={{width: '75%'}}>
@@ -611,7 +612,7 @@ class UMEventDetail extends Component {
                         {/*對象*/}
                         {targetAudience[chooseMode] ? (
                             <View style={styles.contentContainer}>
-                                <Text style={styles.secondTitle}>
+                                <Text style={styles.secondTitle} selectable>
                                     {targetAudience[chooseMode + 3]}
                                     <Text style={styles.content}>
                                         {targetAudience[chooseMode]}
@@ -622,7 +623,7 @@ class UMEventDetail extends Component {
                         {/*主辦單位*/}
                         {organiser[chooseMode] ? (
                             <View style={styles.contentContainer}>
-                                <Text style={styles.secondTitle}>
+                                <Text style={styles.secondTitle} selectable>
                                     {organiser[chooseMode + 3]}
                                     <Text style={styles.content}>
                                         {organiser[chooseMode]}
@@ -633,10 +634,10 @@ class UMEventDetail extends Component {
                         {/* 協辦單位 */}
                         {available[0] == 1 && (
                             <View style={styles.contentContainer}>
-                                <Text style={styles.secondTitle}>
+                                <Text style={styles.secondTitle} selectable>
                                     {coorganiser[chooseMode + 3]}
                                 </Text>
-                                <Text style={styles.content}>
+                                <Text style={styles.content} selectable>
                                     {coorganiser[chooseMode]}
                                 </Text>
                             </View>
@@ -649,7 +650,7 @@ class UMEventDetail extends Component {
                                         color: COLOR_DIY.themeColor,
                                     }}
                                     navigation={this.props.navigation}>
-                                    <Text style={styles.secondTitle}>
+                                    <Text style={styles.secondTitle} selectable>
                                         {content[chooseMode + 3]}
                                         <Text style={styles.content}>
                                             {content[chooseMode]}
@@ -661,7 +662,7 @@ class UMEventDetail extends Component {
                         {/*備註*/}
                         {available[2] == 1 && (
                             <View style={styles.contentContainer}>
-                                <Text style={styles.secondTitle}>
+                                <Text style={styles.secondTitle} selectable>
                                     {remark[chooseMode + 3]}
                                     <Text style={styles.content}>
                                         {remark[chooseMode]}

@@ -109,8 +109,15 @@ class EventCard extends Component {
         let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
 
         return (
-            <View style={{...this.props.style}}>
-                {/* 未結束紅點標識 */}
+            <View
+                style={{
+                    ...this.props.style,
+                    backgroundColor: white,
+                    borderRadius: pxToDp(8),
+                    overflow: 'hidden',
+                    ...viewShadow,
+                }}>
+                {/* 進行中標識 */}
                 {isFinish ? null : (
                     <View
                         style={{
@@ -125,12 +132,6 @@ class EventCard extends Component {
                 )}
                 {coverImgUrl ? (
                     <TouchableOpacity
-                        style={{
-                            borderRadius: pxToDp(8),
-                            overflow: 'hidden',
-                            backgroundColor: white,
-                            ...viewShadow,
-                        }}
                         activeOpacity={0.9}
                         onPress={this.handleJumpToDetail}>
                         <FastImage
@@ -173,12 +174,20 @@ class EventCard extends Component {
                             {/* 標題文字 & 日期 */}
                             <View style={{width: '90%'}}>
                                 <Text
-                                    style={{color: black.main}}
+                                    style={{
+                                        color: black.main,
+                                        fontWeight: '500',
+                                        fontSize: scale(13),
+                                    }}
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
                                 {/* 日期 */}
-                                <Text style={{color: black.third}}>
+                                <Text
+                                    style={{
+                                        color: black.third,
+                                        fontSize: scale(12),
+                                    }}>
                                     {moment(startTimeStamp).format('MM-DD')}
                                 </Text>
                             </View>

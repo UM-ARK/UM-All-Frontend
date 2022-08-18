@@ -250,7 +250,8 @@ class HomeScreen extends Component {
                                 this.getAppData();
                             }}
                         />
-                    }>
+                    }
+                    alwaysBounceHorizontal={false}>
                     {/* 輪播圖 */}
                     <View style={{backgroundColor: white}}>
                         <ScrollImage imageData={carouselImagesArr} />
