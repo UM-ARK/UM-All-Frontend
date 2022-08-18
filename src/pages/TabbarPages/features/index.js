@@ -269,7 +269,7 @@ class Index extends Component {
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_PORTAL,
-                            title: 'UM Protal',
+                            title: 'UM Portal',
                             // 標題顏色，默認為black.main
                             // text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
