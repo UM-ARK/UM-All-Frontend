@@ -16,6 +16,7 @@ import {pxToDp} from '../../../utils/stylesKits';
 import {UM_API_EVENT, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
+import Loading from '../../../components/Loading';
 
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -50,11 +51,6 @@ class UMEventPage extends Component {
 
     // 獲取澳大舉辦活動的資訊
     async getData() {
-        // 澳門時間，3個月前
-        // let macauTime = moment
-        //     .tz(new Date(), 'Asia/Macau')
-        //     .subtract(3, 'month')
-        //     .format('YYYY-MM-DD');
         axios
             .get(UM_API_EVENT, {
                 // 請求頭配置
@@ -69,6 +65,19 @@ class UMEventPage extends Component {
             })
             .then(res => {
                 let result = res.data._embedded;
+                let nowTimeStamp = new Date().getTime();
+                result.sort((a, b) => {
+                    return Math.abs(
+                        nowTimeStamp - new Date(a.common.dateFrom).getTime(),
+                    ) >
+                        Math.abs(
+                            nowTimeStamp -
+                                new Date(b.common.dateFrom).getTime(),
+                        )
+                        ? 1
+                        : -1;
+                });
+
                 this.setState({data: result, isLoading: false});
             })
             .catch(err => {
@@ -162,6 +171,12 @@ class UMEventPage extends Component {
                         <Text style={{color: black.third, alignSelf: 'center'}}>
                             數據可能會有延遲
                         </Text>
+                        <Text style={{color: black.third, alignSelf: 'center'}}>
+                            卡片顯示為發佈日期
+                        </Text>
+                        <Text style={{color: black.third, alignSelf: 'center'}}>
+                            默認排序: 開始時間距離今天最近
+                        </Text>
                     </View>
                 )}
                 // 列表底部渲染，防止Tabbar遮擋
@@ -199,7 +214,19 @@ class UMEventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
 
-                {!isLoading && this.renderPage()}
+                {isLoading ? (
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: COLOR_DIY.bg_color,
+                        }}>
+                        <Loading />
+                    </View>
+                ) : (
+                    this.renderPage()
+                )}
             </View>
         );
     }
