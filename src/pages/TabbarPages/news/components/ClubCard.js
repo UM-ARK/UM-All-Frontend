@@ -60,6 +60,8 @@ class EventCard extends Component {
                         height: pxToDp(70),
                         borderRadius: 50,
                         overflow: 'hidden',
+                        backgroundColor: COLOR_DIY.white,
+                        ...viewShadow,
                     }}>
                     <FastImage
                         source={{

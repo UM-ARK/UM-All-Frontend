@@ -109,7 +109,14 @@ class EventCard extends Component {
         let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
 
         return (
-            <View style={{...this.props.style}}>
+            <View
+                style={{
+                    ...this.props.style,
+                    backgroundColor: white,
+                    borderRadius: pxToDp(8),
+                    overflow: 'hidden',
+                    ...viewShadow,
+                }}>
                 {/* 進行中標識 */}
                 {isFinish ? null : (
                     <View
@@ -125,12 +132,6 @@ class EventCard extends Component {
                 )}
                 {coverImgUrl ? (
                     <TouchableOpacity
-                        style={{
-                            borderRadius: pxToDp(8),
-                            overflow: 'hidden',
-                            backgroundColor: white,
-                            ...viewShadow,
-                        }}
                         activeOpacity={0.9}
                         onPress={this.handleJumpToDetail}>
                         <FastImage
