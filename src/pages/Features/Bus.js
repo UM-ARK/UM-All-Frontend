@@ -104,6 +104,8 @@ function getBusData(busInfoHtml) {
     };
 }
 
+let timer = null;
+
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
     state = {
@@ -124,6 +126,16 @@ class BusScreen extends Component {
         super();
         // 打開Bus頁時直接請求巴士報站的數據
         this.fetchBusInfo();
+    }
+
+    componentDidMount() {
+        timer = setInterval(() => {
+            this.onRefresh();
+        }, 7000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(timer);
     }
 
     // 爬蟲campus Bus
@@ -200,6 +212,11 @@ class BusScreen extends Component {
         });
     };
 
+    onRefresh = () => {
+        this.setState({isLoading: true});
+        this.fetchBusInfo();
+    };
+
     render() {
         let busStyleArr = [
             // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
@@ -233,10 +250,7 @@ class BusScreen extends Component {
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={this.state.isLoading}
-                            onRefresh={() => {
-                                this.setState({isLoading: true});
-                                this.fetchBusInfo();
-                            }}
+                            onRefresh={this.onRefresh}
                         />
                     }>
                     <ScrollView horizontal>
