@@ -6,6 +6,7 @@ import {
     Animated,
     TouchableOpacity,
     BackHandler,
+    Linking,
 } from 'react-native';
 
 import {pxToDp} from '../utils/stylesKits';
@@ -14,6 +15,9 @@ import {WebView} from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CookieManager from '@react-native-cookies/cookies';
+import {NavigationContext} from '@react-navigation/native';
+
+let URL = '';
 
 const IntegratedWebView = ({
     source,
@@ -39,6 +43,8 @@ const IntegratedWebView = ({
 
     // 創建對webview組件的DOM方法引用
     const webViewRef = useRef();
+
+    const navigation = React.useContext(NavigationContext);
 
     // 點擊後退按鈕觸發
     const handleBackPress = () => {
@@ -79,6 +85,10 @@ const IntegratedWebView = ({
                 );
             };
         }
+
+        return function cleanup() {
+            URL = '';
+        };
     }, [onAndroidBackPress]);
 
     return (
@@ -109,7 +119,14 @@ const IntegratedWebView = ({
                     setLoaded(false);
                     setProgress(0);
                 }}
-                onLoadEnd={() => setLoaded(true)}
+                onLoadEnd={e => {
+                    setLoaded(true);
+                    if (e.nativeEvent && e.nativeEvent.code == -10) {
+                        URL = source.uri;
+                        Linking.openURL(URL);
+                        navigation.goBack();
+                    }
+                }}
                 onScroll={e => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}

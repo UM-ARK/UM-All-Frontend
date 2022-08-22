@@ -730,15 +730,7 @@ class ClubDetail extends Component {
                             data={eventData}
                             renderItem={({item, index}) => {
                                 if (index != 4) {
-                                    return (
-                                        <EventCard
-                                            data={item}
-                                            style={{
-                                                marginVertical: pxToDp(8),
-                                                marginHorizontal: pxToDp(4),
-                                            }}
-                                        />
-                                    );
+                                    return <EventCard data={item} />;
                                 }
                             }}
                             scrollEnabled={false}

@@ -32,8 +32,8 @@ class NewsCard extends Component {
         // 接收NewsPage頁傳來的該卡片需要渲染的信息
         const newsData = this.props.data;
         let type = this.props.type ? this.props.type : 'news';
-        // 發佈日期
-        let publishDate = newsData.common.publishDate;
+        // 開始日期
+        let beginDate = newsData.common.dateFrom;
         // 最後更新時間
         // let lastModified= newsData.lastModified;
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
@@ -141,7 +141,7 @@ class NewsCard extends Component {
                                 bottom: 0,
                                 color: black.third,
                             }}>
-                            @ {moment(publishDate).format('MM-DD')}
+                            @ {moment(beginDate).format('MM-DD')}
                         </Text>
                     </View>
 

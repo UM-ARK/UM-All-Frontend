@@ -258,15 +258,6 @@ class ClubLogin extends Component {
 
                     {/* 登錄按鈕 */}
                     <RenderLoginButton />
-
-                    {/* 進駐提示 */}
-                    <TouchableOpacity
-                        onPress={() => Linking.openURL(USUAL_Q)}
-                        style={{marginTop: pxToDp(20), alignSelf: 'center'}}>
-                        <Text style={{color: COLOR_DIY.black.third}}>
-                            沒有賬號? 進駐ARK ALL!
-                        </Text>
-                    </TouchableOpacity>
                 </ScrollView>
             </View>
         );

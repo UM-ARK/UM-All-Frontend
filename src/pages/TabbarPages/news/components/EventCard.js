@@ -109,14 +109,16 @@ class EventCard extends Component {
         let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
 
         return (
-            <View
+            <TouchableOpacity
                 style={{
-                    ...this.props.style,
                     backgroundColor: white,
                     borderRadius: pxToDp(8),
+                    margin: scale(5),
                     overflow: 'hidden',
                     ...viewShadow,
-                }}>
+                }}
+                activeOpacity={0.9}
+                onPress={this.handleJumpToDetail}>
                 {/* 進行中標識 */}
                 {isFinish ? null : (
                     <View
@@ -131,9 +133,7 @@ class EventCard extends Component {
                     </View>
                 )}
                 {coverImgUrl ? (
-                    <TouchableOpacity
-                        activeOpacity={0.9}
-                        onPress={this.handleJumpToDetail}>
+                    <View>
                         <FastImage
                             source={{
                                 uri: coverImgUrl,
@@ -200,9 +200,9 @@ class EventCard extends Component {
                                     size={pxToDp(20)}></Ionicons>
                             </View>
                         </View>
-                    </TouchableOpacity>
+                    </View>
                 ) : null}
-            </View>
+            </TouchableOpacity>
         );
     }
 }
@@ -211,8 +211,8 @@ const styles = StyleSheet.create({
     // 右上角紅點提示位置
     rightTopIconPosition: {
         position: 'absolute',
-        right: -pxToDp(1),
-        top: -pxToDp(3),
+        right: 0,
+        top: 0,
     },
     // 紅點標籤樣式
     unFinish: {

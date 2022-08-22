@@ -287,7 +287,7 @@ class HomeScreen extends Component {
                                     color: black.third,
                                     marginTop: pxToDp(5),
                                 }}>
-                                {`本軟件純屬FST同學為愛發電TAT，`}
+                                {`ARK ALL源自FST同學為愛發電TAT，`}
                                 <Text style={{fontWeight: 'bold'}}>
                                     並非官方應用程式！
                                 </Text>
@@ -408,7 +408,7 @@ class HomeScreen extends Component {
                     </View>
 
                     {/* 快速填充功能提示 */}
-                    <View
+                    {/* <View
                         style={{
                             alignItems: 'center',
                             marginTop: pxToDp(10),
@@ -429,7 +429,7 @@ class HomeScreen extends Component {
                                 {`啟用自動填充功能`}
                             </Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
 
                     {/* 清除緩存 */}
                     <View

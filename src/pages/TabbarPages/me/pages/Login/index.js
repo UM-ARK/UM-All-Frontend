@@ -10,13 +10,19 @@ import {
     AppRegistry,
     StyleSheet,
     TextInput,
+    Linking,
 } from 'react-native';
 
 // 本地工具
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import {handleLogin} from '../../../../../utils/storageKits';
-import {BASE_URI, POST, USER_AGREE} from '../../../../../utils/pathMap';
+import {
+    BASE_URI,
+    POST,
+    USER_AGREE,
+    USUAL_Q,
+} from '../../../../../utils/pathMap';
 import Webviewer from '../../../../../components/Webviewer';
 import {UM_Moodle} from '../../../../../utils/pathMap';
 import DialogDIY from '../../../../../components/DialogDIY';
@@ -330,19 +336,23 @@ class LoginChoose extends Component {
                                     </Text>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+
+                        {/* 進駐提示 */}
+                        <TouchableOpacity
+                            onPress={() => Linking.openURL(USUAL_Q)}
+                            style={{
+                                // marginTop: pxToDp(20),
+                                alignSelf: 'center',
+                            }}>
                             <Text
                                 style={{
-                                    color: COLOR_DIY.black.third,
-                                    fontSize: pxToDp(18),
-                                    marginTop: pxToDp(5),
+                                    color: themeColor,
+                                    fontSize: scale(12),
                                 }}>
-                                請選擇您的角色
+                                沒有賬號? 進駐ARK ALL!
                             </Text>
-                        </View>
-                        <Text
-                            style={{color: black.third, marginTop: scale(10)}}>
-                            Follow、推送等功能敬請期待！
-                        </Text>
+                        </TouchableOpacity>
                     </View>
                 )}
 
