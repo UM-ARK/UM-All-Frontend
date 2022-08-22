@@ -5,11 +5,12 @@ import {
     Dimensions,
     RefreshControl,
     TouchableOpacity,
+    Linking,
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
+import {BASE_URI, BASE_HOST, GET, USUAL_Q} from '../../../utils/pathMap';
 import {clubTagList, clubTagMap} from '../../../utils/clubMap';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
@@ -79,7 +80,7 @@ class ClubPage extends Component {
                             style={{
                                 color: black.third,
                                 alignSelf: 'center',
-                                fontSize: pxToDp(12),
+                                fontSize: scale(12),
                             }}>
                             {'已有 ' +
                                 originClubDataList.length +
@@ -89,18 +90,25 @@ class ClubPage extends Component {
                             style={{
                                 color: black.third,
                                 alignSelf: 'center',
-                                fontSize: pxToDp(12),
+                                fontSize: scale(12),
                             }}>
                             下拉可刷新頁面~
                         </Text>
-                        <Text
+                        {/* 進駐提示 */}
+                        <TouchableOpacity
+                            onPress={() => Linking.openURL(USUAL_Q)}
                             style={{
-                                color: black.third,
+                                // marginTop: pxToDp(20),
                                 alignSelf: 'center',
-                                fontSize: pxToDp(12),
                             }}>
-                            歡迎澳大各組織進駐! 請到網站聯繫我們!
-                        </Text>
+                            <Text
+                                style={{
+                                    color: themeColor,
+                                    fontSize: scale(12),
+                                }}>
+                                沒有賬號? 進駐ARK ALL!
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 }
                 refreshControl={

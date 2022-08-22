@@ -169,12 +169,6 @@ class UMEventPage extends Component {
                             Data From: data.um.edu.mo
                         </Text>
                         <Text style={{color: black.third, alignSelf: 'center'}}>
-                            數據可能會有延遲
-                        </Text>
-                        <Text style={{color: black.third, alignSelf: 'center'}}>
-                            卡片顯示為發佈日期
-                        </Text>
-                        <Text style={{color: black.third, alignSelf: 'center'}}>
                             默認排序: 開始時間距離今天最近
                         </Text>
                     </View>
