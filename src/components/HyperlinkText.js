@@ -6,7 +6,14 @@ import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {COLOR_DIY, ToastText} from '../utils/uiMap';
 
-const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
+const HyperlinkText = ({
+    children,
+    title,
+    linkStyle,
+    style,
+    navigation,
+    beforeJump,
+}) => {
     const toast = useToast();
 
     const options = {
@@ -24,6 +31,9 @@ const HyperlinkText = ({children, title, linkStyle, style, navigation}) => {
     };
 
     const handleHyperLink = (url, text) => {
+        if (beforeJump) {
+            beforeJump();
+        }
         if (url.includes('mailto:')) {
             Linking.openURL(url);
         } else if (url.includes('http')) {
