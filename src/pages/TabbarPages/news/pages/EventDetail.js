@@ -748,7 +748,8 @@ class EventDetail extends Component {
                             <ScrollView style={{marginTop: pxToDp(5)}}>
                                 <HyperlinkText
                                     linkStyle={{color: themeColor}}
-                                    navigation={this.props.navigation}>
+                                    navigation={this.props.navigation}
+                                    beforeJump={this.tiggerModalBottom}>
                                     <Text
                                         style={{
                                             color: black.main,
