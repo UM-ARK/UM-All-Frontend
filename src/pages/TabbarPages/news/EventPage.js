@@ -29,7 +29,7 @@ import {scale} from 'react-native-size-matters';
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-const {black, white, themeColor, viewShadow} = COLOR_DIY;
+const {black, white, themeColor, viewShadow, bg_color} = COLOR_DIY;
 
 // 返回數據的頁數
 let dataPage = 1;
@@ -146,6 +146,7 @@ class EventPage extends Component {
                         justifyContent: 'center',
                         marginTop: pxToDp(8),
                         width: '100%',
+                        backgroundColor: bg_color,
                     }}>
                     <Text style={{color: black.third}}>篩選</Text>
                     <Ionicons
@@ -290,15 +291,7 @@ class EventPage extends Component {
                     <FlatList
                         data={leftDataList}
                         renderItem={({item}) => {
-                            return (
-                                <EventCard
-                                    data={item}
-                                    style={{
-                                        ...s.cardContainer,
-                                        // marginLeft: scale(5),
-                                    }}
-                                />
-                            );
+                            return <EventCard data={item} />;
                         }}
                         scrollEnabled={false}
                         keyExtractor={item => item._id}
@@ -310,15 +303,7 @@ class EventPage extends Component {
                         <FlatList
                             data={rightDataList}
                             renderItem={({item}) => {
-                                return (
-                                    <EventCard
-                                        data={item}
-                                        style={{
-                                            ...s.cardContainer,
-                                            // marginRight: scale(5),
-                                        }}
-                                    />
-                                );
+                                return <EventCard data={item} />;
                             }}
                             scrollEnabled={false}
                             keyExtractor={item => item._id}
@@ -339,6 +324,7 @@ class EventPage extends Component {
                     flex: 1,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    backgroundColor: bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
@@ -412,14 +398,7 @@ const s = StyleSheet.create({
     waterFlowContainer: {
         flexDirection: 'row',
         width: '100%',
-        backgroundColor: COLOR_DIY.bg_color,
-        justifyContent: 'space-around',
-        marginTop: scale(5),
-    },
-    // 活動卡片間距
-    cardContainer: {
-        marginVertical: scale(5),
-        marginHorizontal: scale(2),
+        backgroundColor: bg_color,
     },
     loadMore: {
         alignItems: 'center',
