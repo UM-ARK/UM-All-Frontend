@@ -21,7 +21,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
-import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
@@ -93,45 +92,6 @@ function ScrollImage(props) {
                                 ...viewShadow,
                             }}
                             onPress={() => handleOnClickImage(item, index)}>
-                            {false && (
-                                <View style={{width: '100%', height: '100%'}}>
-                                    <FastImage
-                                        resizeMode={FastImage.resizeMode.cover}
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                        }}
-                                        source={{
-                                            uri: item.uri,
-                                            // cache: FastImage.cacheControl.web,
-                                        }}>
-                                        {/* 1.2 圖片附文字說明展示 開始 */}
-                                        <LinearGradient
-                                            start={{x: 0, y: 0}}
-                                            end={{x: 0, y: 0.8}}
-                                            colors={[
-                                                'rgba(255, 255, 255, 0)',
-                                                'rgba(0,0,0,0.7)',
-                                            ]}
-                                            style={{
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                height: '15%',
-                                                width: '100%',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                            }}>
-                                            <Text
-                                                style={{
-                                                    fontSize: pxToDp(14),
-                                                    color: COLOR_DIY.white,
-                                                }}>
-                                                {item.title}
-                                            </Text>
-                                        </LinearGradient>
-                                    </FastImage>
-                                </View>
-                            )}
                             <FastImage
                                 source={{
                                     uri: item.url.replace('http:', 'https:'),

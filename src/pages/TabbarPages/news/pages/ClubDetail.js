@@ -36,6 +36,7 @@ import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
 import {updateUserInfo} from '../../../../utils/storageKits';
+import {versionStringCompare} from '../../../../utils/versionKits';
 
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';

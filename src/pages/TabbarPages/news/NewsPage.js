@@ -25,6 +25,7 @@ import {NavigationContext} from '@react-navigation/native';
 import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
 import axios from 'axios';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {scale} from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
@@ -281,19 +282,19 @@ class NewsPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -pxToDp(140), y: -pxToDp(220)},
-                    {x: pxToDp(140), y: -pxToDp(220)},
-                    {x: -pxToDp(140), y: -pxToDp(120)},
-                    {x: pxToDp(140), y: -pxToDp(120)},
-                    {x: -pxToDp(140), y: pxToDp(0)},
-                    {x: pxToDp(140), y: pxToDp(0)},
-                    {x: -pxToDp(140), y: pxToDp(120)},
-                    {x: pxToDp(140), y: pxToDp(120)},
-                    {x: -pxToDp(140), y: pxToDp(220)},
-                    {x: pxToDp(140), y: pxToDp(220)},
+                    {x: -scale(140), y: -scale(220)},
+                    {x: scale(140), y: -scale(220)},
+                    {x: -scale(140), y: -scale(120)},
+                    {x: scale(140), y: -scale(120)},
+                    {x: -scale(140), y: scale(0)},
+                    {x: scale(140), y: scale(0)},
+                    {x: -scale(140), y: scale(120)},
+                    {x: scale(140), y: scale(120)},
+                    {x: -scale(140), y: scale(220)},
+                    {x: scale(140), y: scale(220)},
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: pxToDp(140), y: pxToDp(220)}}>
+                initialPosition={{x: scale(140), y: scale(220)}}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -307,17 +308,17 @@ class NewsPage extends Component {
                     }}>
                     <View
                         style={{
-                            width: pxToDp(50),
-                            height: pxToDp(50),
+                            width: scale(50),
+                            height: scale(50),
                             backgroundColor: COLOR_DIY.white,
                             backgroundColor: COLOR_DIY.white,
-                            borderRadius: pxToDp(50),
+                            borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}>
                         <Ionicons
                             name={'chevron-up'}
-                            size={pxToDp(40)}
+                            size={scale(40)}
                             color={black.main}
                         />
                     </View>

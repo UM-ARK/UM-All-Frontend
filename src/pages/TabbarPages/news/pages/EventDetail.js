@@ -289,98 +289,98 @@ class EventDetail extends Component {
                 <View
                     style={{
                         backgroundColor: white,
-                        margin: pxToDp(10),
-                        marginHorizontal: pxToDp(40),
-                        paddingVertical: pxToDp(20),
-                        paddingHorizontal: pxToDp(15),
-                        borderRadius: pxToDp(10),
+                        margin: scale(10),
+                        marginHorizontal: scale(40),
+                        paddingVertical: scale(20),
+                        paddingHorizontal: scale(15),
+                        borderRadius: scale(10),
                         overflow: 'hidden',
                         ...COLOR_DIY.viewShadow,
                     }}>
-                    {/* 文字描述 */}
-                    <View>
-                        {/* 活動名 */}
-                        <View style={{marginBottom: pxToDp(15)}}>
-                            <Text
-                                style={{
-                                    color: black.main,
-                                    fontWeight: 'bold',
-                                    fontSize: pxToDp(15),
-                                }}>
-                                {title}
-                            </Text>
-                        </View>
+                    {/* 活動名 */}
+                    <View style={{marginBottom: scale(15)}}>
+                        <Text
+                            style={{
+                                color: black.main,
+                                fontWeight: 'bold',
+                                fontSize: scale(15),
+                            }}>
+                            {title}
+                        </Text>
+                    </View>
 
-                        {/* 活動地點 */}
-                        <View style={{flexDirection: 'row'}}>
+                    {/* 活動地點 */}
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <View style={{width: scale(25)}}>
                             <View style={{...styles.infoShowContainer}}>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(11),
+                                        fontSize: scale(11),
                                         color: COLOR_DIY.themeColor,
                                     }}>
                                     @
                                 </Text>
                             </View>
+                        </View>
+                        <View style={{marginLeft: scale(5), width: '90%'}}>
                             <Text
                                 style={{
-                                    marginLeft: pxToDp(5),
                                     color: COLOR_DIY.black.third,
                                 }}>
                                 {location}
                             </Text>
                         </View>
+                    </View>
 
-                        {/* 活動時間 */}
-                        <View style={{marginTop: pxToDp(5)}}>
-                            <View style={{flexDirection: 'row'}}>
-                                <View style={{...styles.infoShowContainer}}>
-                                    <Text
-                                        style={{
-                                            fontSize: pxToDp(11),
-                                            color: COLOR_DIY.themeColor,
-                                        }}>
-                                        from
-                                    </Text>
-                                </View>
+                    {/* 活動時間 */}
+                    <View style={{marginTop: scale(5)}}>
+                        <View style={{flexDirection: 'row'}}>
+                            <View style={{...styles.infoShowContainer}}>
                                 <Text
                                     style={{
-                                        marginHorizontal: pxToDp(5),
-                                        color: COLOR_DIY.black.third,
+                                        fontSize: scale(11),
+                                        color: COLOR_DIY.themeColor,
                                     }}>
-                                    {moment(startTimeStamp).format(
-                                        'YYYY/MM/DD, HH:mm',
-                                    )}
+                                    from
                                 </Text>
                             </View>
-                            <View
+                            <Text
                                 style={{
-                                    flexDirection: 'row',
-                                    marginTop: pxToDp(5),
+                                    marginHorizontal: scale(5),
+                                    color: COLOR_DIY.black.third,
                                 }}>
-                                <View style={{...styles.infoShowContainer}}>
-                                    <Text
-                                        style={{
-                                            fontSize: pxToDp(11),
-                                            color: COLOR_DIY.themeColor,
-                                        }}>
-                                        to
-                                    </Text>
-                                </View>
+                                {moment(startTimeStamp).format(
+                                    'YYYY/MM/DD, HH:mm',
+                                )}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                marginTop: scale(5),
+                            }}>
+                            <View style={{...styles.infoShowContainer}}>
                                 <Text
                                     style={{
-                                        marginLeft: pxToDp(5),
-                                        color: COLOR_DIY.black.third,
+                                        fontSize: scale(11),
+                                        color: COLOR_DIY.themeColor,
                                     }}>
-                                    {moment(finishTimeStamp).format(
-                                        'YYYY/MM/DD, HH:mm',
-                                    )}
+                                    to
                                 </Text>
                             </View>
+                            <Text
+                                style={{
+                                    marginLeft: scale(5),
+                                    color: COLOR_DIY.black.third,
+                                }}>
+                                {moment(finishTimeStamp).format(
+                                    'YYYY/MM/DD, HH:mm',
+                                )}
+                            </Text>
                         </View>
                     </View>
+
                     {/* Follow按鈕 帶Toast */}
-                    {/* <View style={{alignItems: 'flex-end'}}></View> */}
                     {eventData != undefined &&
                     eventData.can_follow &&
                     !isClub &&
@@ -419,54 +419,56 @@ class EventDetail extends Component {
                         </TouchableOpacity>
                     </View>
                     {/* 設置按鈕 */}
-                    {isClub ? (
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: scale(65),
-                                right: scale(15),
-                            }}>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() => {
-                                    this.props.navigation.navigate(
-                                        'ClubSetting',
-                                        {
-                                            eventID: eventData._id,
-                                            refresh: this.onRefresh.bind(this),
-                                        },
-                                    );
+                    {
+                        isClub ? (
+                            <View
+                                style={{
+                                    position: 'absolute',
+                                    top: scale(65),
+                                    right: scale(15),
                                 }}>
-                                <Ionicons
-                                    name="settings-outline"
-                                    size={pxToDp(25)}
-                                    color={white}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: scale(65),
-                                right: scale(15),
-                            }}>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() => {
-                                    this.props.navigation.navigate(
-                                        'ChatDetail',
-                                        {get: 'event', id: eventData._id},
-                                    );
-                                }}>
-                                <Feather
-                                    name="message-circle"
-                                    size={pxToDp(25)}
-                                    color={white}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => {
+                                        this.props.navigation.navigate(
+                                            'ClubSetting',
+                                            {
+                                                eventID: eventData._id,
+                                                refresh:
+                                                    this.onRefresh.bind(this),
+                                            },
+                                        );
+                                    }}>
+                                    <Ionicons
+                                        name="settings-outline"
+                                        size={pxToDp(25)}
+                                        color={white}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        ) : null
+                        // <View
+                        //     style={{
+                        //         position: 'absolute',
+                        //         top: scale(65),
+                        //         right: scale(15),
+                        //     }}>
+                        //     <TouchableOpacity
+                        //         activeOpacity={0.7}
+                        //         onPress={() => {
+                        //             this.props.navigation.navigate(
+                        //                 'ChatDetail',
+                        //                 {get: 'event', id: eventData._id},
+                        //             );
+                        //         }}>
+                        //         <Feather
+                        //             name="message-circle"
+                        //             size={pxToDp(25)}
+                        //             color={white}
+                        //         />
+                        //     </TouchableOpacity>
+                        // </View>
+                    }
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity
@@ -869,30 +871,30 @@ const styles = StyleSheet.create({
     // 展示 from to，在哪裡舉辦的文字的樣式
     infoShowContainer: {
         borderColor: COLOR_DIY.themeColor,
-        borderWidth: pxToDp(1),
-        paddingHorizontal: pxToDp(8),
-        paddingVertical: pxToDp(1),
-        borderRadius: pxToDp(10),
+        borderWidth: scale(1),
+        paddingHorizontal: scale(6),
+        paddingVertical: scale(1),
+        borderRadius: scale(10),
         justifyContent: 'center',
         alignItems: 'center',
     },
     clubLogoContainer: {
-        width: pxToDp(CLUB_LOGO_SIZE),
-        height: pxToDp(CLUB_LOGO_SIZE),
+        width: scale(CLUB_LOGO_SIZE),
+        height: scale(CLUB_LOGO_SIZE),
         borderRadius: 50,
         overflow: 'hidden',
-        marginVertical: pxToDp(5),
-        marginHorizontal: pxToDp(20),
+        marginVertical: scale(5),
+        marginHorizontal: scale(20),
         backgroundColor: white,
         ...COLOR_DIY.viewShadow,
     },
     followButton: {
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         position: 'absolute',
-        right: pxToDp(12),
-        bottom: pxToDp(12),
-        padding: pxToDp(10),
-        borderRadius: pxToDp(12),
+        right: scale(12),
+        bottom: scale(12),
+        padding: scale(10),
+        borderRadius: scale(12),
     },
 });
 

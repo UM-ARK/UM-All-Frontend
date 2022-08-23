@@ -54,7 +54,7 @@ export async function handleImageDownload(IMAGE_URL) {
         .then(res => {
             CameraRoll.save(res.data, 'photo')
                 .then(res => {
-                    Alert.alert('Saving Image Success!');
+                    Alert.alert('Already Save!');
                 })
                 .catch(err => console.error(err));
         })
