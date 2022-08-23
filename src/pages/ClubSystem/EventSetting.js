@@ -72,7 +72,7 @@ class EventSetting extends Component {
         submitChoice: false,
         borderColor: black.main,
         titleColor: black.main,
-        expanded1: false,
+        expanded1: true,
         isStartDatePickerVisible: false,
         isEndDatePickerVisible: false,
 
@@ -776,10 +776,6 @@ class EventSetting extends Component {
                                     });
                                 }}
                             />
-                            <Text style={{color: black.third, fontSize: 12}}>
-                                *
-                                如非緊急，最多提前兩星期發佈活動，共用宣傳資源，請理解！
-                            </Text>
 
                             {/* 開始時間 */}
                             <TouchableOpacity
@@ -850,6 +846,11 @@ class EventSetting extends Component {
                         {/* 活動詳情說明 */}
                         {type == 'activity' && (
                             <View style={{marginTop: pxToDp(10)}}>
+                                <Text
+                                    style={{color: black.third, fontSize: 12}}>
+                                    *
+                                    將問卷等Link直接寫到活動詳情，方便同學直接跳轉！
+                                </Text>
                                 {this.renderExpandSection1()}
                             </View>
                         )}
@@ -886,7 +887,7 @@ class EventSetting extends Component {
                         )}
 
                         {/* 允許Follow */}
-                        {type == 'activity' && (
+                        {type == 'activity' && false && (
                             <View
                                 style={{
                                     flexDirection: 'row',

@@ -13,6 +13,7 @@ import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 class WebViewer extends Component {
     constructor(props) {
@@ -85,7 +86,10 @@ class WebViewer extends Component {
                     backgroundColor={bg_color_diy}
                     leftComponent={
                         <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.goBack();
+                            }}>
                             <Ionicons
                                 name="close"
                                 size={pxToDp(25)}

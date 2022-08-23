@@ -13,7 +13,6 @@ import {COLOR_DIY} from '../../../utils/uiMap';
 import {pxToDp} from '../../../utils/stylesKits';
 import {certificate} from '../../../static/icon/iconSvg';
 
-import SvgUri from 'react-native-svg-uri';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 

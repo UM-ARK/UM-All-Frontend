@@ -602,7 +602,7 @@ class Index extends Component {
                             icon = (
                                 <Ionicons
                                     name={item.icon_name}
-                                    size={pxToDp(30)}
+                                    size={scale(30)}
                                     color={COLOR_DIY.themeColor}
                                 />
                             );
@@ -610,7 +610,7 @@ class Index extends Component {
                             icon = (
                                 <MaterialCommunityIcons
                                     name={item.icon_name}
-                                    size={pxToDp(30)}
+                                    size={scale(30)}
                                     color={COLOR_DIY.themeColor}
                                 />
                             );
@@ -622,8 +622,8 @@ class Index extends Component {
                                         // cache: FastImage.cacheControl.web,
                                     }}
                                     style={{
-                                        height: pxToDp(60),
-                                        width: pxToDp(60),
+                                        height: scale(60),
+                                        width: scale(60),
                                     }}
                                 />
                             );
@@ -671,7 +671,7 @@ class Index extends Component {
                                 {icon}
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(12),
+                                        fontSize: scale(12),
                                         color: COLOR_DIY.black.second,
                                     }}>
                                     {item.fn_name}

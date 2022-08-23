@@ -103,28 +103,30 @@ class ClubSetting extends Component {
                             </TouchableOpacity>
 
                             {/* 歷史公告 選項 */}
-                            <TouchableOpacity
-                                style={{...styles.optionContainer}}
-                                activeOpacity={0.8}
-                                onPress={() =>
-                                    this.props.navigation.navigate(
-                                        'ChatDetail',
-                                        {sendTo: eventID},
-                                    )
-                                }>
-                                {/* 選項標題 */}
-                                <Text style={{...styles.optionTitle}}>
-                                    {'歷史公告'}
-                                </Text>
+                            {false && (
+                                <TouchableOpacity
+                                    style={{...styles.optionContainer}}
+                                    activeOpacity={0.8}
+                                    onPress={() =>
+                                        this.props.navigation.navigate(
+                                            'ChatDetail',
+                                            {sendTo: eventID},
+                                        )
+                                    }>
+                                    {/* 選項標題 */}
+                                    <Text style={{...styles.optionTitle}}>
+                                        {'歷史公告'}
+                                    </Text>
 
-                                {/* 右側flex佈局 */}
-                                {/* 引導點擊的 > 箭頭 */}
-                                <Ionicons
-                                    name="chevron-forward-outline"
-                                    color={black.third}
-                                    size={pxToDp(20)}
-                                />
-                            </TouchableOpacity>
+                                    {/* 右側flex佈局 */}
+                                    {/* 引導點擊的 > 箭頭 */}
+                                    <Ionicons
+                                        name="chevron-forward-outline"
+                                        color={black.third}
+                                        size={pxToDp(20)}
+                                    />
+                                </TouchableOpacity>
+                            )}
                         </View>
                     ) : (
                         // 社團設置
