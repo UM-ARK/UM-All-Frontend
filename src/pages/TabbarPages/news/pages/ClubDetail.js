@@ -605,40 +605,6 @@ class ClubDetail extends Component {
                         </View>
                     ) : null}
 
-                    {/* 簡介 */}
-                    {intro && intro.length > 0 ? (
-                        <TouchableOpacity
-                            style={styles.cardContainer}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                if (intro != undefined && intro.length > 0) {
-                                    this.tiggerModalBottom();
-                                }
-                            }}>
-                            {/* 卡片標題 */}
-                            {this.renderCardTitle('簡介')}
-                            {/* 卡片內容 */}
-                            <View
-                                style={{
-                                    justifyContent: 'space-between',
-                                    alignItems: 'flex-start',
-                                    flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
-                                }}>
-                                {/* 服務圖標與文字 */}
-                                <Text
-                                    numberOfLines={5}
-                                    style={{
-                                        color: black.second,
-                                        fontSize: scale(13),
-                                    }}>
-                                    {intro}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    ) : null}
-
                     {/* 聯繫方式 */}
                     <View style={styles.cardContainer}>
                         {/* 卡片標題 */}
@@ -720,6 +686,37 @@ class ClubDetail extends Component {
                             </View>
                         )}
                     </View>
+
+                    {/* 簡介 */}
+                    {intro && intro.length > 0 ? (
+                        <View style={styles.cardContainer}>
+                            {/* 卡片標題 */}
+                            {this.renderCardTitle('簡介')}
+                            {/* 卡片內容 */}
+                            <View
+                                style={{
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    flexDirection: 'row',
+                                    margin: pxToDp(10),
+                                    marginTop: pxToDp(0),
+                                }}>
+                                {/* 服務圖標與文字 */}
+                                <HyperlinkText
+                                    linkStyle={{color: themeColor}}
+                                    navigation={this.props.navigation}>
+                                    <Text
+                                        style={{
+                                            color: black.second,
+                                            fontSize: scale(13),
+                                        }}
+                                        selectable>
+                                        {intro}
+                                    </Text>
+                                </HyperlinkText>
+                            </View>
+                        </View>
+                    ) : null}
 
                     {/* 舉辦的活動 */}
                     {eventData != undefined && eventData.length > 0 ? (

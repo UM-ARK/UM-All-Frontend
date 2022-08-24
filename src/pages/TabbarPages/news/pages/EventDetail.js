@@ -561,7 +561,7 @@ class EventDetail extends Component {
                     {/* 詳情介紹 */}
                     {eventData != undefined &&
                         eventData.introduction.length > 0 && (
-                            <TouchableOpacity
+                            <View
                                 style={{
                                     backgroundColor: COLOR_DIY.white,
                                     borderRadius: pxToDp(10),
@@ -570,9 +570,7 @@ class EventDetail extends Component {
                                     marginBottom: pxToDp(8),
                                     marginTop: pxToDp(10),
                                     ...COLOR_DIY.viewShadow,
-                                }}
-                                activeOpacity={0.7}
-                                onPress={() => this.tiggerModalBottom()}>
+                                }}>
                                 {/* 卡片標題 */}
                                 <View
                                     style={{
@@ -591,10 +589,6 @@ class EventDetail extends Component {
                                         }}>
                                         詳情
                                     </Text>
-                                    <Ionicons
-                                        name="chevron-forward-outline"
-                                        size={pxToDp(14)}
-                                        color={black.third}></Ionicons>
                                 </View>
                                 {/* 卡片內容 */}
                                 <View
@@ -606,13 +600,17 @@ class EventDetail extends Component {
                                         marginTop: pxToDp(0),
                                     }}>
                                     {/* 文字 */}
-                                    <Text
-                                        numberOfLines={4}
-                                        style={{color: black.second}}>
-                                        {eventData.introduction}
-                                    </Text>
+                                    <HyperlinkText
+                                        linkStyle={{color: themeColor}}
+                                        navigation={this.props.navigation}>
+                                        <Text
+                                            style={{color: black.second}}
+                                            selectable>
+                                            {eventData.introduction}
+                                        </Text>
+                                    </HyperlinkText>
                                 </View>
-                            </TouchableOpacity>
+                            </View>
                         )}
 
                     {/* 相關照片 */}
