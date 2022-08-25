@@ -73,6 +73,7 @@
 		5709B34CF0A7D63546082F79 /* Pods-UMALL.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL.release.xcconfig"; path = "Target Support Files/Pods-UMALL/Pods-UMALL.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-UMALL-UMALLTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL-UMALLTests.debug.xcconfig"; path = "Target Support Files/Pods-UMALL-UMALLTests/Pods-UMALL-UMALLTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-UMALL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-UMALL.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		604D241528B5EDB8008ECEAB /* UMALL.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = UMALL.entitlements; path = UMALL/UMALL.entitlements; sourceTree = "<group>"; };
 		6072934828664212007FBD2F /* Fontisto.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fontisto.ttf; sourceTree = "<group>"; };
 		6072934928664212007FBD2F /* Octicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Octicons.ttf; sourceTree = "<group>"; };
 		6072934A28664212007FBD2F /* Feather.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Feather.ttf; sourceTree = "<group>"; };
@@ -151,6 +152,7 @@
 		13B07FAE1A68108700A75B9A /* UMALL */ = {
 			isa = PBXGroup;
 			children = (
+				604D241528B5EDB8008ECEAB /* UMALL.entitlements */,
 				6072934728664212007FBD2F /* Fonts */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -631,8 +633,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.1.4;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = UMALL/Info.plist;
@@ -640,7 +643,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -648,8 +651,10 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = one.umall;
 				PRODUCT_NAME = "UM ALL";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -660,16 +665,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.1.4;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				INFOPLIST_FILE = UMALL/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -677,7 +683,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = one.umall;
 				PRODUCT_NAME = "UM ALL";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
