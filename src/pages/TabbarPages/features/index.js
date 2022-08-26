@@ -671,7 +671,7 @@ class Index extends Component {
                                 {icon}
                                 <Text
                                     style={{
-                                        fontSize: scale(12),
+                                        fontSize: scale(11),
                                         color: COLOR_DIY.black.second,
                                     }}>
                                     {item.fn_name}
