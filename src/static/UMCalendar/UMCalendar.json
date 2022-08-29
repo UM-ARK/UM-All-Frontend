@@ -1,0 +1,366 @@
+{
+  "vcalendar": [
+    {
+      "version": "2.0",
+      "prodid": "-//ical.marudot.com//iCal Event Maker",
+      "x-wr-calname": "UMAlmanac2223",
+      "name": "UMAlmanac2223",
+      "calscale": "GREGORIAN",
+      "vtimezone": [
+        {
+          "tzid": "Asia/Shanghai",
+          "last-modified": "20201011T015911Z",
+          "tzurl": "http://tzurl.org/zoneinfo-outlook/Asia/Shanghai",
+          "x-lic-location": "Asia/Shanghai",
+          "standard": [
+            {
+              "tzname": "CST",
+              "tzoffsetfrom": "+0800",
+              "tzoffsetto": "+0800",
+              "dtstart": "19700101T000000"
+            }
+          ]
+        }
+      ],
+      "vevent": [
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1336830003@marudot.com",
+          "dtstart": ["20220804", { "value": "DATE" }],
+          "dtend": ["20220805", { "value": "DATE" }],
+          "summary": "Last day of Student Summer Recess "
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1208631827@marudot.com",
+          "dtstart": ["20220818", { "value": "DATE" }],
+          "dtend": ["20220819", { "value": "DATE" }],
+          "summary": "First day of 1st semester's classes"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1261266639@marudot.com",
+          "dtstart": ["20220911", { "value": "DATE" }],
+          "dtend": ["20220912", { "value": "DATE" }],
+          "summary": "The day following Mid-Autumn Festival"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "1650971479878-64671@ical.marudot.com",
+          "dtstart": ["20220912", { "value": "DATE" }],
+          "dtend": ["20220913", { "value": "DATE" }],
+          "summary": "Compensatory rest day set forth in No. 4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1153680494@marudot.com",
+          "dtstart": ["20221001", { "value": "DATE" }],
+          "dtend": ["20221002", { "value": "DATE" }],
+          "summary": "National Day of the People's Republic of China"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-619932782@marudot.com",
+          "dtstart": ["20221002", { "value": "DATE" }],
+          "dtend": ["20221003", { "value": "DATE" }],
+          "summary": "The day following National Day of the People's Republic of China"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-734237915@marudot.com",
+          "dtstart": ["20221003", { "value": "DATE" }],
+          "dtend": ["20221004", { "value": "DATE" }],
+          "summary": "Compensatory rest day set forth in No.4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1179688372@marudot.com",
+          "dtstart": ["20221004", { "value": "DATE" }],
+          "dtend": ["20221005", { "value": "DATE" }],
+          "summary": "Chong Yeung Festival"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "1650971526183-23232@ical.marudot.com",
+          "dtstart": ["20221005", { "value": "DATE" }],
+          "dtend": ["20221006", { "value": "DATE" }],
+          "summary": "Compensatory rest day set forth in No. 4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-870018466@marudot.com",
+          "dtstart": ["20221102", { "value": "DATE" }],
+          "dtend": ["20221103", { "value": "DATE" }],
+          "summary": "All Souls' Day"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1177521652@marudot.com",
+          "dtstart": ["20221130", { "value": "DATE" }],
+          "dtend": ["20221201", { "value": "DATE" }],
+          "summary": "Last day of 1st semester's classes"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-508536705@marudot.com",
+          "dtstart": ["20221201", { "value": "DATE" }],
+          "dtend": ["20221205", { "value": "DATE" }],
+          "summary": "Examination Study Period"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-671414335@marudot.com",
+          "dtstart": ["20221205", { "value": "DATE" }],
+          "dtend": ["20221218", { "value": "DATE" }],
+          "summary": "1st semester's final examinations"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-632231566@marudot.com",
+          "dtstart": ["20221208", { "value": "DATE" }],
+          "dtend": ["20221209", { "value": "DATE" }],
+          "summary": "Feast of Immaculate Conception"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1221164610@marudot.com",
+          "dtstart": ["20221211", { "value": "DATE" }],
+          "dtend": ["20221212", { "value": "DATE" }],
+          "summary": "Contingency plan for final examinations"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1483137020@marudot.com",
+          "dtstart": ["20221218", { "value": "DATE" }],
+          "dtend": ["20221219", { "value": "DATE" }],
+          "summary": "Contingency plan for final examinations"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-45471305@marudot.com",
+          "dtstart": ["20221218", { "value": "DATE" }],
+          "dtend": ["20230102", { "value": "DATE" }],
+          "summary": "Christmas/New Year Recess for students"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-488144662@marudot.com",
+          "dtstart": ["20221220", { "value": "DATE" }],
+          "dtend": ["20221221", { "value": "DATE" }],
+          "summary": "Macao S.A.R. Establishment Day"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1612175319@marudot.com",
+          "dtstart": ["20221222", { "value": "DATE" }],
+          "dtend": ["20221223", { "value": "DATE" }],
+          "summary": "Winter Solstice"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1078599569@marudot.com",
+          "dtstart": ["20221224", { "value": "DATE" }],
+          "dtend": ["20221225", { "value": "DATE" }],
+          "summary": "Christmas Eve"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-538327772@marudot.com",
+          "dtstart": ["20221225", { "value": "DATE" }],
+          "dtend": ["20221226", { "value": "DATE" }],
+          "summary": "Christmas Day"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1062449803@marudot.com",
+          "dtstart": ["20221226", { "value": "DATE" }],
+          "dtend": ["20221228", { "value": "DATE" }],
+          "summary": "Compensatory rest days set forth in No. 4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-129867637@marudot.com",
+          "dtstart": ["20230101", { "value": "DATE" }],
+          "dtend": ["20230102", { "value": "DATE" }],
+          "summary": "New Year's Day"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1237661610@marudot.com",
+          "dtstart": ["20230102", { "value": "DATE" }],
+          "dtend": ["20230105", { "value": "DATE" }],
+          "summary": "Semester Break"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-474042148@marudot.com",
+          "dtstart": ["20230102", { "value": "DATE" }],
+          "dtend": ["20230103", { "value": "DATE" }],
+          "summary": "Compensatory rest day set forth in No. 4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-264546875@marudot.com",
+          "dtstart": ["20230103", { "value": "DATE" }],
+          "dtend": ["20230104", { "value": "DATE" }],
+          "summary": "Release of Academic Reports of Undergraduate Programmes"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-2138148065@marudot.com",
+          "dtstart": ["20230105", { "value": "DATE" }],
+          "dtend": ["20230106", { "value": "DATE" }],
+          "summary": "First day of 2nd semester's classes"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-540875766@marudot.com",
+          "dtstart": ["20230115", { "value": "DATE" }],
+          "dtend": ["20230130", { "value": "DATE" }],
+          "summary": "Lunar New Year Recess for students"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1878960762@marudot.com",
+          "dtstart": ["20230122", { "value": "DATE" }],
+          "dtend": ["20230125", { "value": "DATE" }],
+          "summary": "Lunar New Year"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1057378145@marudot.com",
+          "dtstart": ["20230125", { "value": "DATE" }],
+          "dtend": ["20230126", { "value": "DATE" }],
+          "summary": "Compensatory rest day set forth in No. 4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-541605786@marudot.com",
+          "dtstart": ["20230318", { "value": "DATE" }],
+          "dtend": ["20230320", { "value": "DATE" }],
+          "summary": "UM Admission Examination and Joint Admission Examination for Macao Four Higher Education Institutions"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1453220457@marudot.com",
+          "dtstart": ["20230405", { "value": "DATE" }],
+          "dtend": ["20230406", { "value": "DATE" }],
+          "summary": "Cheng Ming Festival"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1267042732@marudot.com",
+          "dtstart": ["20230407", { "value": "DATE" }],
+          "dtend": ["20230408", { "value": "DATE" }],
+          "summary": "Good Friday"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-124856244@marudot.com",
+          "dtstart": ["20230407", { "value": "DATE" }],
+          "dtend": ["20230411", { "value": "DATE" }],
+          "summary": "Easter Recess for students"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1998655895@marudot.com",
+          "dtstart": ["20230408", { "value": "DATE" }],
+          "dtend": ["20230409", { "value": "DATE" }],
+          "summary": "The Day before Easter"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1648598339@marudot.com",
+          "dtstart": ["20230410", { "value": "DATE" }],
+          "dtend": ["20230411", { "value": "DATE" }],
+          "summary": "Compensatory rest day set forth in No. 4 of Article 79 of the ETAPM"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1951366052@marudot.com",
+          "dtstart": ["20230501", { "value": "DATE" }],
+          "dtend": ["20230502", { "value": "DATE" }],
+          "summary": "Labour Day"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-35754146@marudot.com",
+          "dtstart": ["20230503", { "value": "DATE" }],
+          "dtend": ["20230504", { "value": "DATE" }],
+          "summary": "Last day of 2nd semester's classes"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1249147416@marudot.com",
+          "dtstart": ["20230504", { "value": "DATE" }],
+          "dtend": ["20230508", { "value": "DATE" }],
+          "summary": "Examination Study Period"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1170869617@marudot.com",
+          "dtstart": ["20230508", { "value": "DATE" }],
+          "dtend": ["20230520", { "value": "DATE" }],
+          "summary": "2nd semester's final examinations"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1528314684@marudot.com",
+          "dtstart": ["20230514", { "value": "DATE" }],
+          "dtend": ["20230515", { "value": "DATE" }],
+          "summary": "Contingency plan for final examinations"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1414483162@marudot.com",
+          "dtstart": ["20230520", { "value": "DATE" }],
+          "dtend": ["20230521", { "value": "DATE" }],
+          "summary": "Contingency plan for final examinations"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-329347681@marudot.com",
+          "dtstart": ["20230526", { "value": "DATE" }],
+          "dtend": ["20230527", { "value": "DATE" }],
+          "summary": "The Buddha's Birthday"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-764968394@marudot.com",
+          "dtstart": ["20230602", { "value": "DATE" }],
+          "dtend": ["20230603", { "value": "DATE" }],
+          "summary": "Release of Academic Reports of Undergraduate Programmes"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-317978273@marudot.com",
+          "dtstart": ["20230605", { "value": "DATE" }],
+          "dtend": ["20230606", { "value": "DATE" }],
+          "summary": "First day of Summer Term"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-295179449@marudot.com",
+          "dtstart": ["20230609", { "value": "DATE" }],
+          "dtend": ["20230610", { "value": "DATE" }],
+          "summary": "First day of Student Summer Recess"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1472247041@marudot.com",
+          "dtstart": ["20230622", { "value": "DATE" }],
+          "dtend": ["20230623", { "value": "DATE" }],
+          "summary": "Tuen Ng Festival"
+        },
+        {
+          "dtstamp": "20220426T123853Z",
+          "uid": "20211101T015955Z-1069178261@marudot.com",
+          "dtstart": ["20230731", { "value": "DATE" }],
+          "dtend": ["20230801", { "value": "DATE" }],
+          "summary": "Last day of Summer Term"
+        }
+      ]
+    }
+  ],
+  "success": true
+}
