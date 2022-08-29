@@ -80,7 +80,6 @@ class ImageScrollViewer extends Component {
                         <FastImage
                             source={{
                                 uri: props.source.uri,
-                                // cache: FastImage.cacheControl.web,
                             }}
                             style={props.style}
                             onLoadStart={() => {
@@ -94,7 +93,6 @@ class ImageScrollViewer extends Component {
                     // 打開的imageUrls的索引
                     index={imagesIndex}
                     // 注釋掉renderIndicator屬性則 默認會有頁數顯示
-                    // renderIndicator={() => null}
                     onClick={this.tiggerModal}
                     doubleClickInterval={300}
                     enableSwipeDown={true}

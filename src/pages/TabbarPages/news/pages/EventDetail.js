@@ -398,7 +398,7 @@ class EventDetail extends Component {
                     style={{flex: 1, position: 'relative'}}
                     onPress={() => {
                         this.setState({imageUrls: coverImgUrl});
-                        this.refs.imageScrollViewer.tiggerModal();
+                        this.refs.imageScrollViewer.handleOpenImage(0);
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
