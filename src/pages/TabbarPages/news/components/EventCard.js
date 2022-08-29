@@ -22,6 +22,7 @@ const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
 const IMAGE_SIZE = scale(160);
+const BORDER_RADIUS = scale(8);
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, bg_color} = COLOR_DIY;
@@ -112,9 +113,8 @@ class EventCard extends Component {
             <TouchableOpacity
                 style={{
                     backgroundColor: white,
-                    borderRadius: pxToDp(8),
+                    borderRadius: BORDER_RADIUS,
                     margin: scale(5),
-                    overflow: 'hidden',
                     ...viewShadow,
                 }}
                 activeOpacity={0.9}
@@ -133,7 +133,11 @@ class EventCard extends Component {
                     </View>
                 )}
                 {coverImgUrl ? (
-                    <View>
+                    <View
+                        style={{
+                            borderRadius: BORDER_RADIUS,
+                            overflow: 'hidden',
+                        }}>
                         <FastImage
                             source={{
                                 uri: coverImgUrl,

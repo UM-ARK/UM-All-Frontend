@@ -709,14 +709,6 @@ class Index extends Component {
                             style={{
                                 alignSelf: 'center',
                                 color: COLOR_DIY.black.third,
-                                fontWeight: 'bold',
-                            }}>
-                            ARK ALL 提示：
-                        </Text>
-                        <Text
-                            style={{
-                                alignSelf: 'center',
-                                color: COLOR_DIY.black.third,
                             }}>
                             一切內容以官網為準！
                         </Text>
@@ -726,13 +718,6 @@ class Index extends Component {
                                 color: COLOR_DIY.black.third,
                             }}>
                             長按圖標可複製對應的link ~
-                        </Text>
-                        <Text
-                            style={{
-                                alignSelf: 'center',
-                                color: COLOR_DIY.black.third,
-                            }}>
-                            短按圖標將使用默認瀏覽器打開相關頁面 ~
                         </Text>
                     </View>
 
