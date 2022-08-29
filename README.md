@@ -1,6 +1,6 @@
 # UM ALL - Frontend - Public
 
-## 最新版本號 `1.1.5`
+## 最新版本號 `1.2.0`
 
 ## 內容
 
@@ -13,6 +13,7 @@
     -   [故障排除](#故障排除)
 -   [使用 Git 的方法](#git方法)
 -   [使用的第三方庫](#該項目使用的第三方庫)
+-   [維護須知](#維護須知)
 
 ---
 
@@ -196,3 +197,8 @@ npx react-native run-ios
 1. [跟手的彈窗](https://github.com/oblador/react-native-lightbox)
 1. [RN 與 webview 傳輸數據](https://github.com/alinz/react-native-webview-bridge)
 1. [有 Apple 樣式的 Header](https://github.com/WrathChaos/react-native-header-view)
+
+## 維護須知
+
+1. 澳大日曆更新。從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 獲取 ics 文件；使用任何工具將 ics 轉為 json，例如 `https://ical-to-json.herokuapp.com/`。**務必注意最終 json 中的 key 必須為小寫**。覆蓋 `src/static/UMCalendar/UMCalendar.json` 中的內容即可。
+1. 輪播圖變更。登錄服務器後台，修改 `static/index` 下的文件，並且修改數據庫`app_info`表中輪播圖文本數組的文件名即可。
