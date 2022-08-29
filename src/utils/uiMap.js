@@ -39,7 +39,7 @@ export const COLOR_DIY = {
     viewShadow: {
         shadowColor: '#000',
         shadowOffset: {width: 1, height: 1},
-        shadowOpacity: 0.3,
+        shadowOpacity: 0.2,
         shadowRadius: 3,
         // 適用於Android
         elevation: 4,

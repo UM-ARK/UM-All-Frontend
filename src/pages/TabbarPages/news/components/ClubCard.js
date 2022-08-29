@@ -16,6 +16,7 @@ import {clubTagMap} from '../../../../utils/clubMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
+import {scale} from 'react-native-size-matters';
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, themeColor} = COLOR_DIY;
@@ -43,12 +44,12 @@ class EventCard extends Component {
             <TouchableOpacity
                 style={{
                     backgroundColor: white,
-                    borderRadius: pxToDp(8),
+                    borderRadius: scale(8),
                     justifyContent: 'space-around',
                     alignItems: 'center',
-                    marginTop: pxToDp(2),
-                    padding: pxToDp(10),
-                    paddingHorizontal: pxToDp(4),
+                    marginTop: scale(2),
+                    padding: scale(10),
+                    paddingHorizontal: scale(4),
                     ...viewShadow,
                 }}
                 activeOpacity={0.8}
@@ -56,21 +57,19 @@ class EventCard extends Component {
                 {/* 社團 / 組織 Logo */}
                 <View
                     style={{
-                        width: pxToDp(70),
-                        height: pxToDp(70),
+                        width: scale(70),
+                        height: scale(70),
                         borderRadius: 50,
-                        overflow: 'hidden',
                         backgroundColor: COLOR_DIY.white,
                         ...viewShadow,
                     }}>
                     <FastImage
-                        source={{
-                            uri: logo_url,
-                            // cache: FastImage.cacheControl.web,
-                        }}
+                        source={{uri: logo_url}}
                         style={{
                             width: '100%',
                             height: '100%',
+                            borderRadius: 50,
+                            overflow: 'hidden',
                         }}
                         resizeMode={FastImage.resizeMode.contain}
                         onLoadStart={() => {
@@ -103,10 +102,10 @@ class EventCard extends Component {
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        marginTop: pxToDp(5),
+                        marginTop: scale(5),
                     }}>
                     <Text
-                        style={{color: black.main, fontSize: pxToDp(12)}}
+                        style={{color: black.main, fontSize: scale(11)}}
                         numberOfLines={1}>
                         {name}
                     </Text>
@@ -116,8 +115,8 @@ class EventCard extends Component {
                 <Text
                     style={{
                         color: themeColor,
-                        fontSize: pxToDp(10),
-                        marginTop: pxToDp(5),
+                        fontSize: scale(10),
+                        marginTop: scale(5),
                     }}>
                     #{clubTagMap(tag)}
                 </Text>
