@@ -31,6 +31,7 @@ import {setAPPInfo, handleLogout} from '../../../utils/storageKits';
 import {versionStringCompare} from '../../../utils/versionKits';
 import packageInfo from '../../../../package.json';
 import UMCalendar from '../../../static/UMCalendar/UMCalendar.json';
+import HomeCard from '../../../../test/HomeCard.js';
 
 import {Header, Divider} from '@rneui/themed';
 import {PageControl, Card} from 'react-native-ui-lib';
@@ -428,6 +429,7 @@ class HomeScreen extends Component {
                     </View>
 
                     {/* 提示按鈕 */}
+                    <HomeCard />
                     <View
                         style={{
                             alignItems: 'center',
