@@ -51,6 +51,7 @@ import {
     UM_DOCUMENTS,
     NEW_SCZN,
     NEW_MAINLAND,
+    UM_COMMENTS,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
@@ -259,6 +260,24 @@ class Index extends Component {
                             // import pathMap的鏈接進行跳轉
                             url: UM_PASS,
                             title: 'UM Pass系統',
+                            // 標題顏色，默認為black.main
+                            // text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#005f96',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'account-question',
+                        fn_name: 'UM提意見',
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_COMMENTS,
+                            title: 'UM 好意見',
                             // 標題顏色，默認為black.main
                             // text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
