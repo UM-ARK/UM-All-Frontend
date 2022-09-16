@@ -110,7 +110,8 @@ class EventCard extends Component {
         let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
         // 活動即將結束標誌
         let isAlmost =
-            moment(finishTimeStamp).diff(moment(nowTimeStamp), 'days') <= 3
+            moment(finishTimeStamp).diff(moment(nowTimeStamp), 'days') <= 3 &&
+            moment(finishTimeStamp).isSameOrAfter(nowTimeStamp)
                 ? true
                 : false;
 
