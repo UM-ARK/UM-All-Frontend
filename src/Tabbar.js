@@ -51,8 +51,8 @@ class Tabbar extends Component {
                     tabBarBackground: COLOR_DIY.white,
                     horizontalPadding: pxToDp(10),
                 }}
-                initialRouteName={isClub ? 'MeTabbar' : 'HomeTabbar'}>
-                {isClub ? null : (
+                initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
+                {/* {isClub ? null : (
                     <Tabs.Screen
                         name="HomeTabbar"
                         component={HomeScreen}
@@ -74,7 +74,7 @@ class Tabbar extends Component {
                             setLock: this.props.route.params.setLock,
                         }}
                     />
-                )}
+                )} */}
 
                 {/* 社團賬號登錄，進入簡潔模式 */}
                 {isClub ? null : (
