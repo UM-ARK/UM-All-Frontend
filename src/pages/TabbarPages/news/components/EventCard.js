@@ -106,8 +106,13 @@ class EventCard extends Component {
 
         // 當前時刻時間戳
         let nowTimeStamp = moment(new Date()).valueOf();
-        // 活動結束標誌
+        // 活動進行中標誌
         let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
+        // 活動即將結束標誌
+        let isAlmost =
+            moment(finishTimeStamp).diff(moment(nowTimeStamp), 'days') <= 3
+                ? true
+                : false;
 
         return (
             <TouchableOpacity
@@ -132,6 +137,21 @@ class EventCard extends Component {
                         </Text>
                     </View>
                 )}
+                {/* 即將結束標識 */}
+                {isAlmost ? (
+                    <View
+                        style={{
+                            ...styles.rightTopIconPosition,
+                            ...styles.unFinish,
+                            top: scale(20),
+                            backgroundColor: COLOR_DIY.unread,
+                            zIndex: 9,
+                        }}>
+                        <Text style={{fontSize: scale(10), color: white}}>
+                            將結束
+                        </Text>
+                    </View>
+                ) : null}
                 {coverImgUrl ? (
                     <View
                         style={{

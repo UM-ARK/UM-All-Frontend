@@ -67,6 +67,7 @@ class UMEventPage extends Component {
             .then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
+                // 排序：距離今天最近
                 result.sort((a, b) => {
                     return Math.abs(
                         nowTimeStamp - new Date(a.common.dateFrom).getTime(),
