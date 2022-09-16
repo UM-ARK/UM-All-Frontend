@@ -288,7 +288,7 @@ class BusScreen extends Component {
                                           <Text
                                               style={{
                                                   color: black.second,
-                                                  fontSize: scale(11),
+                                                  fontSize: scale(10.5),
                                               }}>
                                               {item}
                                           </Text>
