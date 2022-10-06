@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -8,24 +8,24 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../../utils/uiMap';
+import { pxToDp } from '../../../../utils/stylesKits';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {NavigationContext} from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
-import {scale} from 'react-native-size-matters';
-import {inject} from 'mobx-react';
+import { scale } from 'react-native-size-matters';
+import { inject } from 'mobx-react';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 const IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
 
 // 解構全局ui設計顏色
-const {white, black, viewShadow, bg_color} = COLOR_DIY;
+const { white, black, viewShadow, bg_color } = COLOR_DIY;
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -59,12 +59,12 @@ class EventCard extends Component {
         let globalData = this.props.RootStore;
         // 社團賬號登錄
         if (globalData.userInfo && globalData.userInfo.clubData) {
-            this.setState({isAdmin: true});
+            this.setState({ isAdmin: true });
         }
     }
 
     handleJumpToDetail = () => {
-        const {type, link, title, isAdmin} = this.state;
+        const { type, link, title, isAdmin } = this.state;
         let webview_param = {
             // import pathMap的鏈接進行跳轉
             url: link,
@@ -81,7 +81,7 @@ class EventCard extends Component {
                 // 跳轉活動info編輯頁，並傳遞刷新函數
                 this.context.navigate('EventSetting', {
                     mode: 'edit',
-                    eventData: {_id: this.state.eventData._id},
+                    eventData: { _id: this.state.eventData._id },
                 });
             } else {
                 this.context.navigate('Webviewer', webview_param);
@@ -106,8 +106,14 @@ class EventCard extends Component {
 
         // 當前時刻時間戳
         let nowTimeStamp = moment(new Date()).valueOf();
-        // 活動結束標誌
+        // 活動進行中標誌
         let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
+        // 活動即將結束標誌
+        let isAlmost =
+            moment(finishTimeStamp).diff(moment(nowTimeStamp), 'days') <= 3 &&
+                moment(finishTimeStamp).isSameOrAfter(nowTimeStamp)
+                ? true
+                : false;
 
         return (
             <TouchableOpacity
@@ -120,7 +126,7 @@ class EventCard extends Component {
                 activeOpacity={0.9}
                 onPress={this.handleJumpToDetail}>
                 {/* 進行中標識 */}
-                {isFinish ? null : (
+                {/* {isFinish ? null : (
                     <View
                         style={{
                             ...styles.rightTopIconPosition,
@@ -131,6 +137,33 @@ class EventCard extends Component {
                             進行中
                         </Text>
                     </View>
+                )} */}
+                {/* 即將結束標識 */}
+                {isAlmost ? (
+                    <View
+                        style={{
+                            ...styles.rightTopIconPosition,
+                            ...styles.unFinish,
+                            backgroundColor: COLOR_DIY.unread,
+                            zIndex: 9,
+                        }}>
+                        <Text style={{ fontSize: scale(10), color: white }}>
+                            將結束
+                        </Text>
+                    </View>
+                ) : (
+                    isFinish ? null : (
+                        <View
+                            style={{
+                                ...styles.rightTopIconPosition,
+                                ...styles.unFinish,
+                                zIndex: 9,
+                            }}>
+                            <Text style={{ fontSize: scale(10), color: white }}>
+                                進行中
+                            </Text>
+                        </View>
+                    )
                 )}
                 {coverImgUrl ? (
                     <View
@@ -151,10 +184,10 @@ class EventCard extends Component {
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                             onLoadStart={() => {
-                                this.setState({imgLoading: true});
+                                this.setState({ imgLoading: true });
                             }}
                             onLoad={() => {
-                                this.setState({imgLoading: false});
+                                this.setState({ imgLoading: false });
                             }}>
                             {this.state.imgLoading ? (
                                 <View
@@ -176,7 +209,7 @@ class EventCard extends Component {
                         {/* 標題描述 */}
                         <View style={styles.title.container}>
                             {/* 標題文字 & 日期 */}
-                            <View style={{width: '90%'}}>
+                            <View style={{ width: '90%' }}>
                                 <Text
                                     style={{
                                         color: black.main,

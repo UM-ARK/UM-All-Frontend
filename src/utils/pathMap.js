@@ -125,6 +125,8 @@ export const UM_SPORT_BOOKING = 'https://isw.um.edu.mo/cdweb/pages/booking';
 export const UM_LIBRARY = 'https://library.um.edu.mo';
 // 澳大 - UM Pass
 export const UM_PASS = 'https://umpass.um.edu.mo';
+// 澳大 - 好意見計劃
+export const UM_COMMENTS = 'https://isw.umac.mo/qmweb/faces/app/addComments.jspx';
 // 澳大 - UM Portal
 export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
 

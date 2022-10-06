@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -6,25 +6,26 @@ import {
     RefreshControl,
     TouchableOpacity,
     Linking,
+    ScrollView
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, BASE_HOST, GET, USUAL_Q} from '../../../utils/pathMap';
-import {clubTagList, clubTagMap} from '../../../utils/clubMap';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
+import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
+import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
 
-import {FlatGrid} from 'react-native-super-grid';
+import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
-const {themeColor, black, white} = COLOR_DIY;
+const { themeColor, black, white } = COLOR_DIY;
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
 // const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 const COMPONENT_WIDTH = scale(87);
 
@@ -53,7 +54,7 @@ class ClubPage extends Component {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
                     originClubDataList = clubDataList;
-                    this.setState({clubDataList, isLoading: false});
+                    this.setState({ clubDataList, isLoading: false });
                 } else {
                     alert('Warning:', message);
                 }
@@ -64,7 +65,7 @@ class ClubPage extends Component {
     }
 
     renderClub = () => {
-        const {clubDataList} = this.state;
+        const { clubDataList } = this.state;
         return (
             <FlatGrid
                 // 每个项目的最小宽度或高度（像素）
@@ -72,10 +73,10 @@ class ClubPage extends Component {
                 data={clubDataList}
                 // 每個項目的間距
                 spacing={scale(12)}
-                renderItem={({item}) => <ClubCard data={item} />}
+                renderItem={({ item }) => <ClubCard data={item} />}
                 // 所有項目末尾渲染，防Tabbar遮擋
                 ListFooterComponent={
-                    <View style={{marginBottom: scale(60)}}>
+                    <View style={{ marginBottom: scale(60) }}>
                         <Text
                             style={{
                                 color: black.third,
@@ -118,7 +119,7 @@ class ClubPage extends Component {
                         refreshing={this.state.isLoading}
                         onRefresh={() => {
                             // 展示Loading標識
-                            this.setState({isLoading: true});
+                            this.setState({ isLoading: true });
                             this.getData();
                         }}
                     />
@@ -131,14 +132,14 @@ class ClubPage extends Component {
     };
 
     clubFilter = tag => {
-        this.setState({isLoading: true});
+        this.setState({ isLoading: true });
         // const {clubDataList} = this.state;
 
         var filter = [tag];
         var result = originClubDataList.filter(a => {
             return filter.some(f => f === a.tag);
         });
-        this.setState({clubDataList: result, isLoading: false});
+        this.setState({ clubDataList: result, isLoading: false });
     };
 
     renderFilter = () => {
@@ -163,7 +164,7 @@ class ClubPage extends Component {
                         marginTop: pxToDp(8),
                         width: '100%',
                     }}>
-                    <Text style={{color: black.third}}>篩選</Text>
+                    <Text style={{ color: black.third }}>篩選</Text>
                     <Ionicons
                         name={
                             this.state.applyFilter
@@ -172,7 +173,7 @@ class ClubPage extends Component {
                         }
                         size={pxToDp(10)}
                         color={black.third}
-                        style={{marginLeft: pxToDp(5)}}
+                        style={{ marginLeft: pxToDp(5) }}
                     />
                 </TouchableOpacity>
 
@@ -186,7 +187,7 @@ class ClubPage extends Component {
                         if (clubTagList[index]) {
                             this.clubFilter(clubTagList[index]);
                         } else if (index == optionsList.length - 2) {
-                            this.setState({clubDataList: originClubDataList});
+                            this.setState({ clubDataList: originClubDataList });
                         }
                     }}
                 />
@@ -195,23 +196,36 @@ class ClubPage extends Component {
     };
 
     render() {
-        const {clubDataList, isLoading} = this.state;
+        const { clubDataList, isLoading } = this.state;
         return (
-            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 {clubDataList != undefined && !isLoading ? (
                     <View>
                         {this.renderFilter()}
                         {this.renderClub()}
                     </View>
                 ) : (
-                    <View
-                        style={{
+                    <ScrollView
+                        contentContainerStyle={{
                             flex: 1,
-                            alignItems: 'center',
                             justifyContent: 'center',
-                        }}>
+                            alignItems: 'center',
+                        }}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={this.state.isLoading}
+                                onRefresh={() => {
+                                    // 展示Loading標識
+                                    this.setState({ isLoading: true });
+                                    this.getData();
+                                }}
+                            />
+                        }
+                    >
                         <Loading />
-                    </View>
+                    </ScrollView>
                 )}
             </View>
         );

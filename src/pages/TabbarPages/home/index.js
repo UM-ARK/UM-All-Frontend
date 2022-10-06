@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     ScrollView,
     View,
@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 
 // 本地工具
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
 import {
     UM_WHOLE,
     WHAT_2_REG,
@@ -27,28 +27,30 @@ import {
 } from '../../../utils/pathMap';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
-import {setAPPInfo, handleLogout} from '../../../utils/storageKits';
-import {versionStringCompare} from '../../../utils/versionKits';
+import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
+import { versionStringCompare } from '../../../utils/versionKits';
 import packageInfo from '../../../../package.json';
 import UMCalendar from '../../../static/UMCalendar/UMCalendar.json';
+import HomeCard from './components/HomeCard';
 
-import {Header, Divider} from '@rneui/themed';
-import {PageControl, Card} from 'react-native-ui-lib';
+import { Header, Divider } from '@rneui/themed';
+import { PageControl, Card } from 'react-native-ui-lib';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Carousel from 'react-native-reanimated-carousel';
-import {FlatGrid} from 'react-native-super-grid';
-import {inject} from 'mobx-react';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import { FlatGrid } from 'react-native-super-grid';
+import { inject } from 'mobx-react';
+import Toast, { DURATION } from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {white, bg_color, black, themeColor} = COLOR_DIY;
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { white, bg_color, black, themeColor } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -58,6 +60,13 @@ const getItem = (data, index) => {
 // 返回數據數組的長度
 const getItemCount = data => {
     return data.length;
+};
+
+// 定義可使用icon，注意大小寫
+const iconTypes = {
+    ionicons: 'ionicons',
+    materialCommunityIcons: 'MaterialCommunityIcons',
+    img: 'img',
 };
 
 class HomeScreen extends Component {
@@ -73,6 +82,7 @@ class HomeScreen extends Component {
         functionArray: [
             {
                 icon_name: 'bus',
+                icon_type: iconTypes.ionicons,
                 function_name: '校園巴士',
                 func: () => {
                     ReactNativeHapticFeedback.trigger('soft');
@@ -80,41 +90,50 @@ class HomeScreen extends Component {
                 },
             },
             {
-                icon_name: 'aperture-sharp',
-                function_name: '最近活動',
+                icon_name: 'database-search',
+                icon_type: iconTypes.materialCommunityIcons,
+                function_name: '選咩課',
                 func: () => {
                     ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.jumpTo('NewsTabbar', {
-                        screen: 'EventPage',
-                    });
+                    let webview_param = {
+                        url: WHAT_2_REG,
+                        title: '澳大選咩課',
+                        text_color: '#fff',
+                        bg_color_diy: '#1e558c',
+                        isBarStyleBlack: false,
+                    };
+                    this.props.navigation.navigate('Webviewer', webview_param);
+                    // this.props.navigation.jumpTo('NewsTabbar', {
+                    //     screen: 'EventPage',
+                    // });
                 },
             },
             {
-                icon_name: 'color-wand',
-                function_name: '澳大社團',
+                icon_name: 'coffee-outline',
+                icon_type: iconTypes.materialCommunityIcons,
+                function_name: '論壇',
                 func: () => {
                     ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.jumpTo('NewsTabbar', {
-                        screen: 'ClubPage',
-                    });
+                    let webview_param = {
+                        url: UM_WHOLE,
+                        title: '討論區',
+                    };
+                    this.props.navigation.navigate('Webviewer', webview_param);
                 },
             },
             {
-                icon_name: 'earth-sharp',
-                function_name: '澳大新聞',
+                icon_name: 'ghost',
+                icon_type: iconTypes.materialCommunityIcons,
+                function_name: '生存指南',
                 func: () => {
                     ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.jumpTo('NewsTabbar', {
-                        screen: 'NewsPage',
-                    });
-                },
-            },
-            {
-                icon_name: 'grid',
-                function_name: '所有服務',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.jumpTo('FeaturesTabbar');
+                    let webview_param = {
+                        url: NEW_SCZN,
+                        title: '新鮮人要知道的億些Tips',
+                        text_color: COLOR_DIY.black.second,
+                        bg_color_diy: '#ededed',
+                    };
+                    this.props.navigation.navigate('Webviewer', webview_param);
                 },
             },
         ],
@@ -131,7 +150,7 @@ class HomeScreen extends Component {
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
-            this.setState({isShowModal: false});
+            this.setState({ isShowModal: false });
             this.getAppData(true);
         } else {
             // setTimeout(() => {
@@ -201,9 +220,9 @@ class HomeScreen extends Component {
                 imgUrlArr.map(itm => {
                     itm.url = addHost(itm.url);
                 });
-                this.setState({carouselImagesArr: imgUrlArr});
+                this.setState({ carouselImagesArr: imgUrlArr });
             }
-            this.setState({isLoading: false});
+            this.setState({ isLoading: false });
         }
     };
 
@@ -215,15 +234,18 @@ class HomeScreen extends Component {
         // ***務必注意key、value的大小寫！！**
         let cal = UMCalendar.vcalendar[0].vevent;
         if (cal) {
-            console.log('日曆事件有', cal);
+            // console.log('日曆事件有', cal);
             let showCal = [];
             let nowTimeStamp = moment(new Date());
-            cal.map(itm => {
-                if (moment(itm.dtstart[0]).isAfter(nowTimeStamp)) {
-                    showCal.push(itm);
+            showCal = cal;
+            // 篩選出未來的重要日期
+            for (let i = 0; i < cal.length; i++) {
+                if (moment(cal[i].dtstart[0]).isSameOrAfter(nowTimeStamp)) {
+                    this.setState({ selectDay: i });
+                    break;
                 }
-            });
-            this.setState({cal: showCal});
+            }
+            this.setState({ cal: showCal });
         }
     };
 
@@ -249,7 +271,7 @@ class HomeScreen extends Component {
     }
 
     renderCal = (item, index) => {
-        const {selectDay} = this.state;
+        const { selectDay } = this.state;
         return (
             <TouchableOpacity
                 style={{
@@ -261,17 +283,16 @@ class HomeScreen extends Component {
                     width: scale(95),
                     height: scale(95),
                     margin: scale(5),
-                    // paddingHorizontal: scale(35),
                     paddingVertical: scale(3),
                     ...COLOR_DIY.viewShadow,
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
-                    this.setState({selectDay: index});
+                    this.setState({ selectDay: index });
                 }}>
-                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     {/* 年份 */}
-                    <Text style={{color: white, fontSize: scale(10)}}>
+                    <Text style={{ color: white, fontSize: scale(10) }}>
                         {item.dtstart[0].substring(0, 4)}
                     </Text>
                     {/* 月份 */}
@@ -293,7 +314,7 @@ class HomeScreen extends Component {
                         {item.dtstart[0].substring(6, 8)}
                     </Text>
                     {/* 星期幾 */}
-                    <Text style={{color: white, fontSize: scale(10)}}>
+                    <Text style={{ color: white, fontSize: scale(10) }}>
                         {this.getWeek(item.dtstart[0])}
                     </Text>
                 </View>
@@ -302,7 +323,39 @@ class HomeScreen extends Component {
     };
 
     // 渲染快捷功能卡片的圖標
-    GetFunctionIcon = ({icon_name, function_name, func}) => {
+    GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
+        let icon = null;
+        if (icon_type == 'ionicons') {
+            icon = (
+                <Ionicons
+                    name={icon_name}
+                    size={scale(30)}
+                    color={COLOR_DIY.themeColor}
+                />
+            );
+        } else if (icon_type == 'MaterialCommunityIcons') {
+            icon = (
+                <MaterialCommunityIcons
+                    name={icon_name}
+                    size={scale(35)}
+                    color={COLOR_DIY.themeColor}
+                />
+            );
+        } else if (icon_type == 'img') {
+            icon = (
+                <FastImage
+                    source={{
+                        uri: icon_name,
+                        // cache: FastImage.cacheControl.web,
+                    }}
+                    style={{
+                        height: scale(60),
+                        width: scale(60),
+                    }}
+                />
+            );
+        }
+
         return (
             <TouchableOpacity
                 style={{
@@ -310,10 +363,7 @@ class HomeScreen extends Component {
                     alignItems: 'center',
                 }}
                 onPress={func}>
-                <Ionicons
-                    name={icon_name}
-                    size={pxToDp(35)}
-                    color={COLOR_DIY.themeColor}></Ionicons>
+                {icon}
                 <Text
                     style={{
                         fontSize: pxToDp(12),
@@ -327,15 +377,14 @@ class HomeScreen extends Component {
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
-        this.setState({isShowModal: !this.state.isShowModal});
+        this.setState({ isShowModal: !this.state.isShowModal });
     };
 
     render() {
-        const {carouselImagesArr} = this.state;
-
+        const { carouselImagesArr, selectDay } = this.state;
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
-                <Header
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
+                {/* <Header
                     backgroundColor={white}
                     centerComponent={{
                         text: 'ARK ALL',
@@ -348,47 +397,52 @@ class HomeScreen extends Component {
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
                     }}
-                />
+                /> */}
                 <ScrollView
-                    showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={this.state.isLoading}
                             onRefresh={() => {
-                                this.setState({isLoading: true});
+                                this.setState({ isLoading: true });
                                 this.getAppData();
                             }}
                         />
                     }
                     alwaysBounceHorizontal={false}>
-                    <View style={{backgroundColor: white}}>
+                    <View style={{ backgroundColor: white }}>
                         {/* 輪播圖 */}
                         <ScrollImage imageData={carouselImagesArr} />
 
-                        {/* 快捷功能入口卡片 */}
-                        <View style={{marginTop: pxToDp(10)}}>
-                            {/* 快捷功能圖標 */}
-                            <FlatGrid
-                                maxItemsPerRow={5}
-                                itemDimension={pxToDp(50)}
-                                spacing={pxToDp(10)}
-                                data={this.state.functionArray}
-                                renderItem={({item}) => {
-                                    return this.GetFunctionIcon(item);
-                                }}
-                                showsVerticalScrollIndicator={false}
-                                scrollEnabled={false}
-                            />
-                        </View>
+                        {/* 快捷功能圖標 */}
+                        <FlatGrid
+                            style={{ alignSelf: 'center' }}
+                            maxItemsPerRow={6}
+                            itemDimension={scale(50)}
+                            spacing={scale(10)}
+                            data={this.state.functionArray}
+                            renderItem={({ item }) => {
+                                return this.GetFunctionIcon(item);
+                            }}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
 
                         {this.state.cal && this.state.cal.length > 0 ? (
                             <View>
                                 <VirtualizedList
                                     data={this.state.cal}
                                     initialNumToRender={4}
-                                    renderItem={({item, index}) => {
+                                    initialScrollIndex={selectDay}
+                                    getItemLayout={(data, index) => {
+                                        return {
+                                            length: scale(100),
+                                            offset: scale(100) * index,
+                                            index,
+                                        };
+                                    }}
+                                    renderItem={({ item, index }) => {
                                         return this.renderCal(item, index);
                                     }}
                                     horizontal
@@ -398,11 +452,11 @@ class HomeScreen extends Component {
                                     getItemCount={getItemCount}
                                     keyExtractor={item => item.uid}
                                     ListHeaderComponent={
-                                        <View style={{marginLeft: scale(10)}} />
+                                        <View style={{ marginLeft: scale(10) }} />
                                     }
                                     ListFooterComponent={
                                         <View
-                                            style={{marginRight: scale(10)}}
+                                            style={{ marginRight: scale(10) }}
                                         />
                                     }
                                 />
@@ -415,113 +469,108 @@ class HomeScreen extends Component {
                                         marginTop: scale(5),
                                     }}>
                                     <Text
-                                        style={{color: black.third}}
+                                        style={{ color: black.third }}
                                         selectable>
-                                        {
-                                            this.state.cal[this.state.selectDay]
-                                                .summary
-                                        }
+                                        {'Important date: ' +
+                                            this.state.cal[selectDay].summary}
                                     </Text>
                                 </View>
                             </View>
                         ) : null}
                     </View>
 
-                    {/* 提示按鈕 */}
-                    <View
-                        style={{
-                            alignItems: 'center',
-                            marginTop: pxToDp(10),
-                            backgroundColor: white,
-                            paddingVertical: pxToDp(10),
-                        }}>
-                        <View style={{paddingHorizontal: scale(20)}}>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                }}>
-                                {`ARK ALL源自FST同學為愛發電TAT，`}
-                                <Text style={{fontWeight: 'bold'}}>
-                                    並非官方應用程式！
-                                </Text>
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}>
-                                {`本軟件代碼在Github開源，歡迎✨✨`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}>
-                                {`本軟件並非澳大官方應用‼️ x1`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}>
-                                {`本軟件並非澳大官方應用‼️ x2`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}>
-                                {`本軟件並非澳大官方應用‼️ x3`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}>
-                                {`This APP is not an official APP of UM‼️`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}>
-                                {`如您仍然信任本軟件，感謝您的認可 ♪(･ω･)ﾉ`}
-                            </Text>
-                        </View>
-
+                    {/* 提示資訊 */}
+                    <HomeCard>
                         <Text
-                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                            }}>
+                            {`ARK ALL源自FST同學為愛發電，`}
+                            <Text style={{ fontWeight: 'bold' }}>
+                                並非官方應用程式！
+                            </Text>
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                                fontWeight: 'bold',
+                                // alignSelf: 'center',
+                            }}>
+                            {`本軟件並非澳大官方應用‼️ x1`}
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                                fontWeight: 'bold',
+                                // alignSelf: 'center',
+                            }}>
+                            {`本軟件並非澳大官方應用‼️ x2`}
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                                fontWeight: 'bold',
+                                // alignSelf: 'center',
+                            }}>
+                            {`本軟件並非澳大官方應用‼️ x3`}
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                                fontWeight: 'bold',
+                                // alignSelf: 'center',
+                            }}>
+                            {`This APP is not an official APP of UM‼️`}
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                                fontWeight: 'bold',
+                                // alignSelf: 'center',
+                            }}>
+                            {`如您仍然信任本軟件，感謝您的認可 ♪(･ω･)ﾉ`}
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: pxToDp(5),
+                                fontWeight: 'bold',
+                                // alignSelf: 'center',
+                            }}>
+                            {`本軟件代碼在Github開源，歡迎✨✨`}
+                        </Text>
+                    </HomeCard>
+
+                    {/* 其他提示 */}
+                    <HomeCard>
+                        <Text
+                            style={{ color: black.third, marginTop: pxToDp(5) }}>
                             您可能想先了解：
                         </Text>
                         <TouchableOpacity
-                            style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 this.props.navigation.navigate('AboutUs');
                             }}>
-                            <Text style={{color: white}}>{`這個APP是?`}</Text>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontWeight: '600',
+                                }}>{`這個APP是?`}</Text>
                         </TouchableOpacity>
 
                         <Text
-                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            style={{ color: black.third, marginTop: pxToDp(5) }}>
                             如果你是新同學... (詳見服務頁新生推薦)
                         </Text>
                         <TouchableOpacity
-                            style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
@@ -536,15 +585,18 @@ class HomeScreen extends Component {
                                     webview_param,
                                 );
                             }}>
-                            <Text style={{color: white}}>{`我是萌新`}</Text>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontWeight: '600',
+                                }}>{`我是萌新`}</Text>
                         </TouchableOpacity>
 
                         <Text
-                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            style={{ color: black.third, marginTop: pxToDp(5) }}>
                             您可能還有很多疑問...
                         </Text>
                         <TouchableOpacity
-                            style={styles.buttonContainer}
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
@@ -557,9 +609,43 @@ class HomeScreen extends Component {
                                     webview_param,
                                 );
                             }}>
-                            <Text style={{color: white}}>{`我要怎麼...`}</Text>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontWeight: '600',
+                                }}>{`我要怎麼...`}</Text>
                         </TouchableOpacity>
-                    </View>
+                    </HomeCard>
+
+                    {/* 清除緩存 */}
+                    <HomeCard>
+                        <Text style={{ color: black.third }}>
+                            {`圖片更新不及時？網站響應出錯？`}
+                        </Text>
+                        <Text style={{ color: black.third }}>
+                            {`‼️:您已登錄的界面可能會退出登錄`}
+                        </Text>
+                        <Text style={{ color: black.third }}>
+                            {`‼️:您可能需要重新加載圖片，會消耗流量`}
+                        </Text>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                FastImage.clearDiskCache();
+                                FastImage.clearMemoryCache();
+                                CookieManager.clearAll();
+                                this.toast.show(`已清除所有緩存`, 2000);
+                            }}>
+                            <Text
+                                style={{
+                                    color: black.second,
+                                    fontWeight: '600',
+                                }}>
+                                {`清除圖片和Web緩存`}
+                            </Text>
+                        </TouchableOpacity>
+                    </HomeCard>
 
                     {/* 快速填充功能提示 */}
                     {/* <View
@@ -585,40 +671,7 @@ class HomeScreen extends Component {
                         </TouchableOpacity>
                     </View> */}
 
-                    {/* 清除緩存 */}
-                    <View
-                        style={{
-                            alignItems: 'center',
-                            marginTop: pxToDp(10),
-                            backgroundColor: white,
-                            paddingVertical: pxToDp(10),
-                        }}>
-                        <Text style={{color: black.third}}>
-                            {`圖片更新不及時？網站響應出錯？`}
-                        </Text>
-                        <Text style={{color: black.third}}>
-                            {`‼️:您已登錄的界面可能會退出登錄`}
-                        </Text>
-                        <Text style={{color: black.third}}>
-                            {`‼️:您可能需要重新加載圖片，會消耗流量`}
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.buttonContainer}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                FastImage.clearDiskCache();
-                                FastImage.clearMemoryCache();
-                                CookieManager.clearAll();
-                                this.toast.show(`已清除所有緩存`, 2000);
-                            }}>
-                            <Text style={{color: white}}>
-                                {`清除圖片和Web緩存`}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={{marginBottom: pxToDp(50)}} />
+                    <View style={{ marginBottom: scale(50) }} />
                 </ScrollView>
 
                 {/* 彈出提示登錄的Modal */}
@@ -663,7 +716,7 @@ class HomeScreen extends Component {
                                         ReactNativeHapticFeedback.trigger(
                                             'soft',
                                         );
-                                        this.setState({isShowModal: false});
+                                        this.setState({ isShowModal: false });
                                         this.props.navigation.jumpTo(
                                             'MeTabbar',
                                         );
@@ -687,7 +740,7 @@ class HomeScreen extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
                         borderRadius: pxToDp(10),
@@ -697,14 +750,5 @@ class HomeScreen extends Component {
         );
     }
 }
-
-const styles = StyleSheet.create({
-    buttonContainer: {
-        marginVertical: scale(5),
-        backgroundColor: themeColor,
-        padding: scale(10),
-        borderRadius: scale(10),
-    },
-});
 
 export default inject('RootStore')(HomeScreen);
