@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -7,17 +7,17 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../../utils/uiMap';
+import { pxToDp } from '../../../../utils/stylesKits';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {NavigationContext} from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
 // 解構全局ui設計顏色
-const {white, black, viewShadow} = COLOR_DIY;
+const { white, black, viewShadow } = COLOR_DIY;
 
 class NewsCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -76,13 +76,13 @@ class NewsCard extends Component {
                     // 跳轉對應新聞的詳情頁
                     this.context.navigate(
                         type == 'news' ? 'NewsDetail' : 'UMEventDetail',
-                        {data: newsData},
+                        { data: newsData },
                     );
                 }}>
                 {/* 文字居左，圖片居右 */}
                 <View style={styles.newsCardContentContainer}>
                     {/* 標題，有英文中文則顯示，無則顯示葡文 */}
-                    <View style={{width: haveImage ? '61%' : '100%'}}>
+                    <View style={{ width: haveImage ? '61%' : '100%' }}>
                         {/* 英文 */}
                         {title_en.length > 0 && (
                             <Text
@@ -131,7 +131,7 @@ class NewsCard extends Component {
                         )}
 
                         {/* 佔位 防止標題過長遮擋日期 */}
-                        <View style={{marginTop: pxToDp(25)}}></View>
+                        <View style={{ marginTop: pxToDp(25) }}></View>
 
                         {/* 日期 */}
                         <Text
@@ -139,7 +139,7 @@ class NewsCard extends Component {
                                 fontSize: pxToDp(12),
                                 position: 'absolute',
                                 bottom: 0,
-                                color: black.third,
+                                color: (type == 'event' && moment(beginDate).isSameOrAfter(moment(new Date()).valueOf())) ? COLOR_DIY.secondThemeColor : black.third,
                             }}>
                             @ {moment(beginDate).format('MM-DD')}
                         </Text>
@@ -147,7 +147,7 @@ class NewsCard extends Component {
 
                     {/* 新聞卡片配圖 */}
                     {haveImage && (
-                        <View style={{alignSelf: 'center'}}>
+                        <View style={{ alignSelf: 'center' }}>
                             <View
                                 style={{
                                     borderRadius: pxToDp(10),
@@ -160,20 +160,20 @@ class NewsCard extends Component {
                                         uri:
                                             type == 'event'
                                                 ? imageUrls.replace(
-                                                      'http:',
-                                                      'https:',
-                                                  )
+                                                    'http:',
+                                                    'https:',
+                                                )
                                                 : imageUrls[0].replace(
-                                                      'http:',
-                                                      'https:',
-                                                  ),
+                                                    'http:',
+                                                    'https:',
+                                                ),
                                         // cache: FastImage.cacheControl.web,
                                     }}
                                     onLoadStart={() => {
-                                        this.setState({imgLoading: true});
+                                        this.setState({ imgLoading: true });
                                     }}
                                     onLoad={() => {
-                                        this.setState({imgLoading: false});
+                                        this.setState({ imgLoading: false });
                                     }}
                                     style={styles.newsCardImg}
                                     resizeMode={FastImage.resizeMode.cover}
