@@ -338,12 +338,11 @@ class EventPage extends Component {
                     backgroundColor: bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
-                {this.renderGoTopButton()}
+                {isLoading ? null : this.renderGoTopButton()}
 
                 {/* 加載狀態渲染骨架屏 */}
-                {isLoading ? (
+                {this.state.isLoading ? (
                     <ScrollView
-                        ref={'scrollView'}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
@@ -359,33 +358,36 @@ class EventPage extends Component {
                         }}>
                         <Loading />
                     </ScrollView>
-                ) : (
-                    <ScrollView
-                        ref={'scrollView'}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={this.state.isLoading}
-                                onRefresh={this.onRefresh}
-                            />
-                        }
-                        directionalLockEnabled
-                        alwaysBounceHorizontal={false}>
-                        {/* 篩選 */}
-                        {this.renderFilter()}
-                        {/* 仿瀑布屏展示 */}
-                        {/* 渲染主要內容 */}
-                        {leftDataList.length > 0 || rightDataList.length > 0
-                            ? this.renderPage()
-                            : null}
+                ) : null}
+                <ScrollView
+                    ref={'scrollView'}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={isLoading}
+                            onRefresh={this.onRefresh}
+                        />
+                    }
+                    directionalLockEnabled
+                    alwaysBounceHorizontal={false}>
+                    {isLoading ? null : (
+                        <View>
+                            {/* 篩選 */}
+                            {this.renderFilter()}
+                            {/* 仿瀑布屏展示 */}
+                            {/* 渲染主要內容 */}
+                            {leftDataList.length > 0 || rightDataList.length > 0
+                                ? this.renderPage()
+                                : null}
 
-                        {this.renderLoadMoreView()}
+                            {this.renderLoadMoreView()}
 
-                        {/* 防止底部遮擋 */}
-                        <View style={{marginBottom: pxToDp(50)}} />
-                    </ScrollView>
-                )}
+                            {/* 防止底部遮擋 */}
+                            <View style={{marginBottom: pxToDp(50)}} />
+                        </View>
+                    )}
+                </ScrollView>
 
                 {/* Tost */}
                 <Toast
