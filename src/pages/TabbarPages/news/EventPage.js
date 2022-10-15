@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     Text,
     View,
@@ -11,9 +11,9 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
-import { pxToDp } from '../../../utils/stylesKits';
-import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
+import {COLOR_DIY} from '../../../utils/uiMap';
+import {pxToDp} from '../../../utils/stylesKits';
+import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
 
@@ -21,15 +21,15 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
 import axios from 'axios';
-import Toast, { DURATION } from 'react-native-easy-toast';
+import Toast, {DURATION} from 'react-native-easy-toast';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { scale } from 'react-native-size-matters';
+import {scale} from 'react-native-size-matters';
 
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
+const {width: PAGE_WIDTH} = Dimensions.get('window');
+const {height: PAGE_HEIGHT} = Dimensions.get('window');
 
-const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
+const {black, white, themeColor, viewShadow, bg_color} = COLOR_DIY;
 
 // 返回數據的頁數
 let dataPage = 1;
@@ -67,15 +67,15 @@ class EventPage extends Component {
                 if (json.message == 'success') {
                     let newDataArr = json.content;
                     if (newDataArr.length < num_of_item) {
-                        this.setState({ noMoreData: true });
+                        this.setState({noMoreData: true});
                     } else {
-                        this.setState({ noMoreData: false });
+                        this.setState({noMoreData: false});
                     }
 
                     if (dataPage == 1) {
                         this.separateData(newDataArr);
                         eventDataList = newDataArr;
-                        this.setState({ isLoading: false });
+                        this.setState({isLoading: false});
                     } else if (eventDataList.length > 0) {
                         newDataArr = eventDataList.concat(newDataArr);
                         if (this.state.needFilter) {
@@ -84,11 +84,11 @@ class EventPage extends Component {
                             this.separateData(newDataArr);
                         }
                         eventDataList = newDataArr;
-                        this.setState({ isLoading: false });
+                        this.setState({isLoading: false});
                     }
                 } else if (json.code == '2') {
                     alert('已無更多數據');
-                    this.setState({ noMoreData: true });
+                    this.setState({noMoreData: true});
                 } else {
                     alert('數據出錯，請聯繫開發者');
                 }
@@ -148,7 +148,7 @@ class EventPage extends Component {
                         width: '100%',
                         backgroundColor: bg_color,
                     }}>
-                    <Text style={{ color: black.third }}>篩選</Text>
+                    <Text style={{color: black.third}}>篩選</Text>
                     <Ionicons
                         name={
                             this.state.applyFilter
@@ -157,7 +157,7 @@ class EventPage extends Component {
                         }
                         size={pxToDp(10)}
                         color={black.third}
-                        style={{ marginLeft: pxToDp(5) }}
+                        style={{marginLeft: pxToDp(5)}}
                     />
                 </TouchableOpacity>
 
@@ -170,11 +170,11 @@ class EventPage extends Component {
                     onPress={index => {
                         if (index == 1) {
                             // 全部mode
-                            this.setState({ needFilter: false });
+                            this.setState({needFilter: false});
                             this.separateData(eventDataList);
                         } else if (index == 0) {
                             // 篩選未結束mode
-                            this.setState({ needFilter: true });
+                            this.setState({needFilter: true});
                             this.eventFilter(eventDataList);
                         }
                     }}
@@ -185,7 +185,7 @@ class EventPage extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
+        const {white, black, viewShadow} = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -195,19 +195,19 @@ class EventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    { x: -scale(140), y: -scale(220) },
-                    { x: scale(140), y: -scale(220) },
-                    { x: -scale(140), y: -scale(120) },
-                    { x: scale(140), y: -scale(120) },
-                    { x: -scale(140), y: scale(0) },
-                    { x: scale(140), y: scale(0) },
-                    { x: -scale(140), y: scale(120) },
-                    { x: scale(140), y: scale(120) },
-                    { x: -scale(140), y: scale(220) },
-                    { x: scale(140), y: scale(220) },
+                    {x: -scale(140), y: -scale(220)},
+                    {x: scale(140), y: -scale(220)},
+                    {x: -scale(140), y: -scale(120)},
+                    {x: scale(140), y: -scale(120)},
+                    {x: -scale(140), y: scale(0)},
+                    {x: scale(140), y: scale(0)},
+                    {x: -scale(140), y: scale(120)},
+                    {x: scale(140), y: scale(120)},
+                    {x: -scale(140), y: scale(220)},
+                    {x: scale(140), y: scale(220)},
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: scale(220) }}>
+                initialPosition={{x: scale(140), y: scale(220)}}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -241,10 +241,10 @@ class EventPage extends Component {
     };
 
     loadMoreData = () => {
-        const { noMoreData } = this.state;
+        const {noMoreData} = this.state;
         dataPage++;
         if (!noMoreData) {
-            this.toast.show(`數據加載中，請稍等~`, 2000);
+            this.toast.show('數據加載中，請稍等~', 2000);
             this.getData();
         }
         ReactNativeHapticFeedback.trigger('soft');
@@ -259,10 +259,10 @@ class EventPage extends Component {
             needFilter: false,
         });
         this.getData();
-    }
+    };
 
     renderLoadMoreView = () => {
-        const { noMoreData } = this.state;
+        const {noMoreData} = this.state;
         return (
             <View
                 style={{
@@ -272,18 +272,18 @@ class EventPage extends Component {
                     marginBottom: pxToDp(50),
                 }}>
                 {noMoreData ? (
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: black.third }}>
+                    <View style={{alignItems: 'center'}}>
+                        <Text style={{color: black.third}}>
                             沒有更多活動了，過一段時間再來吧~
                         </Text>
-                        <Text style={{ color: black.third }}>[]~(￣▽￣)~*</Text>
+                        <Text style={{color: black.third}}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity
                         style={s.loadMore}
                         activeOpacity={0.8}
                         onPress={this.loadMoreData}>
-                        <Text style={{ color: white, fontSize: pxToDp(14) }}>
+                        <Text style={{color: white, fontSize: pxToDp(14)}}>
                             Load More
                         </Text>
                     </TouchableOpacity>
@@ -294,14 +294,14 @@ class EventPage extends Component {
 
     // 渲染主要內容
     renderPage = () => {
-        const { leftDataList, rightDataList } = this.state;
+        const {leftDataList, rightDataList} = this.state;
         return (
             <View style={s.waterFlowContainer}>
                 {/* 左側的列 放置雙數下標的圖片 從0開始 */}
                 <View>
                     <FlatList
                         data={leftDataList}
-                        renderItem={({ item }) => {
+                        renderItem={({item}) => {
                             return <EventCard data={item} />;
                         }}
                         scrollEnabled={false}
@@ -309,11 +309,11 @@ class EventPage extends Component {
                     />
                 </View>
                 {/* 右側的列 放置單數下標的圖片 */}
-                <View style={{ alignItems: 'center' }}>
+                <View style={{alignItems: 'center'}}>
                     {rightDataList.length > 0 ? (
                         <FlatList
                             data={rightDataList}
-                            renderItem={({ item }) => {
+                            renderItem={({item}) => {
                                 return <EventCard data={item} />;
                             }}
                             scrollEnabled={false}
@@ -328,7 +328,7 @@ class EventPage extends Component {
     };
 
     render() {
-        const { leftDataList, rightDataList, isLoading } = this.state;
+        const {leftDataList, rightDataList, isLoading} = this.state;
         return (
             <View
                 style={{
@@ -343,6 +343,7 @@ class EventPage extends Component {
                 {/* 加載狀態渲染骨架屏 */}
                 {isLoading ? (
                     <ScrollView
+                        ref={'scrollView'}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
@@ -355,8 +356,7 @@ class EventPage extends Component {
                             flex: 1,
                             justifyContent: 'center',
                             alignItems: 'center',
-                        }}
-                    >
+                        }}>
                         <Loading />
                     </ScrollView>
                 ) : (
@@ -371,8 +371,7 @@ class EventPage extends Component {
                             />
                         }
                         directionalLockEnabled
-                        alwaysBounceHorizontal={false}
-                    >
+                        alwaysBounceHorizontal={false}>
                         {/* 篩選 */}
                         {this.renderFilter()}
                         {/* 仿瀑布屏展示 */}
@@ -384,7 +383,7 @@ class EventPage extends Component {
                         {this.renderLoadMoreView()}
 
                         {/* 防止底部遮擋 */}
-                        <View style={{ marginBottom: pxToDp(50) }} />
+                        <View style={{marginBottom: pxToDp(50)}} />
                     </ScrollView>
                 )}
 
@@ -393,7 +392,7 @@ class EventPage extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{ color: white }}
+                    textStyle={{color: white}}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
                         borderRadius: pxToDp(10),
