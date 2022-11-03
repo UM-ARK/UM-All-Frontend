@@ -44,6 +44,16 @@
 		60729386286644C7007FBD2F /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 60729376286644C7007FBD2F /* EvilIcons.ttf */; };
 		60729387286644C7007FBD2F /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 60729377286644C7007FBD2F /* SimpleLineIcons.ttf */; };
 		60729388286644C7007FBD2F /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 60729378286644C7007FBD2F /* MaterialIcons.ttf */; };
+		607C62F52913EBD400D0AE62 /* DynamicIslandBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 607C62F32913EBD400D0AE62 /* DynamicIslandBridge.m */; };
+		607C62F62913EBD400D0AE62 /* DynamicIslandModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607C62F42913EBD400D0AE62 /* DynamicIslandModule.swift */; };
+		607C63012913EC5800D0AE62 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 607C63002913EC5800D0AE62 /* WidgetKit.framework */; };
+		607C63032913EC5800D0AE62 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 607C63022913EC5800D0AE62 /* SwiftUI.framework */; };
+		607C63082913EC5800D0AE62 /* UMBusReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607C63072913EC5800D0AE62 /* UMBusReminder.swift */; };
+		607C630A2913EC5900D0AE62 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607C63092913EC5900D0AE62 /* Assets.xcassets */; };
+		607C630E2913EC5900D0AE62 /* UMBusReminderExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 607C62FF2913EC5800D0AE62 /* UMBusReminderExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		607C63162913EE5D00D0AE62 /* ActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607C63152913EE5D00D0AE62 /* ActivityAttributes.swift */; };
+		607C63172913EE5D00D0AE62 /* ActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607C63152913EE5D00D0AE62 /* ActivityAttributes.swift */; };
+		607C63182913EE5D00D0AE62 /* ActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607C63152913EE5D00D0AE62 /* ActivityAttributes.swift */; };
 		7699B88040F8A987B510C191 /* libPods-UMALL-UMALLTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-UMALL-UMALLTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -56,7 +66,28 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = UMALL;
 		};
+		607C630C2913EC5900D0AE62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 607C62FE2913EC5800D0AE62;
+			remoteInfo = UMBusReminderExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		607C63122913EC5900D0AE62 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				607C630E2913EC5900D0AE62 /* UMBusReminderExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00E356EE1AD99517003FC87E /* UMALLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UMALLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,6 +137,16 @@
 		60729376286644C7007FBD2F /* EvilIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = EvilIcons.ttf; sourceTree = "<group>"; };
 		60729377286644C7007FBD2F /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SimpleLineIcons.ttf; sourceTree = "<group>"; };
 		60729378286644C7007FBD2F /* MaterialIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MaterialIcons.ttf; sourceTree = "<group>"; };
+		607C62F32913EBD400D0AE62 /* DynamicIslandBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DynamicIslandBridge.m; path = UMALL/DynamicIslandBridge.m; sourceTree = "<group>"; };
+		607C62F42913EBD400D0AE62 /* DynamicIslandModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DynamicIslandModule.swift; path = UMALL/DynamicIslandModule.swift; sourceTree = "<group>"; };
+		607C62FF2913EC5800D0AE62 /* UMBusReminderExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = UMBusReminderExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		607C63002913EC5800D0AE62 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		607C63022913EC5800D0AE62 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		607C63072913EC5800D0AE62 /* UMBusReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UMBusReminder.swift; sourceTree = "<group>"; };
+		607C63092913EC5900D0AE62 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		607C630B2913EC5900D0AE62 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		607C63132913EDEA00D0AE62 /* RNDynamicIsland-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNDynamicIsland-Bridging-Header.h"; sourceTree = "<group>"; };
+		607C63152913EE5D00D0AE62 /* ActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ActivityAttributes.swift; path = UMALL/ActivityAttributes.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = UMALL/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-UMALL-UMALLTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL-UMALLTests.release.xcconfig"; path = "Target Support Files/Pods-UMALL-UMALLTests/Pods-UMALL-UMALLTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -125,6 +166,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-UMALL.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		607C62FC2913EC5800D0AE62 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				607C63032913EC5800D0AE62 /* SwiftUI.framework in Frameworks */,
+				607C63012913EC5800D0AE62 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,6 +210,10 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				607C63152913EE5D00D0AE62 /* ActivityAttributes.swift */,
+				607C62F32913EBD400D0AE62 /* DynamicIslandBridge.m */,
+				607C62F42913EBD400D0AE62 /* DynamicIslandModule.swift */,
+				607C63132913EDEA00D0AE62 /* RNDynamicIsland-Bridging-Header.h */,
 			);
 			name = UMALL;
 			sourceTree = "<group>";
@@ -170,6 +224,8 @@
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-UMALL.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-UMALL-UMALLTests.a */,
+				607C63002913EC5800D0AE62 /* WidgetKit.framework */,
+				607C63022913EC5800D0AE62 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -222,6 +278,16 @@
 			path = "../../node_modules/react-native-vector-icons/Fonts";
 			sourceTree = "<group>";
 		};
+		607C63042913EC5800D0AE62 /* UMBusReminder */ = {
+			isa = PBXGroup;
+			children = (
+				607C63072913EC5800D0AE62 /* UMBusReminder.swift */,
+				607C63092913EC5900D0AE62 /* Assets.xcassets */,
+				607C630B2913EC5900D0AE62 /* Info.plist */,
+			);
+			path = UMBusReminder;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -235,6 +301,7 @@
 				13B07FAE1A68108700A75B9A /* UMALL */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* UMALLTests */,
+				607C63042913EC5800D0AE62 /* UMBusReminder */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
@@ -249,6 +316,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* UM ALL.app */,
 				00E356EE1AD99517003FC87E /* UMALLTests.xctest */,
+				607C62FF2913EC5800D0AE62 /* UMBusReminderExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -300,15 +368,34 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				607C63122913EC5900D0AE62 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				607C630D2913EC5900D0AE62 /* PBXTargetDependency */,
 			);
 			name = UMALL;
 			productName = UMALL;
 			productReference = 13B07F961A680F5B00A75B9A /* UM ALL.app */;
 			productType = "com.apple.product-type.application";
+		};
+		607C62FE2913EC5800D0AE62 /* UMBusReminderExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 607C630F2913EC5900D0AE62 /* Build configuration list for PBXNativeTarget "UMBusReminderExtension" */;
+			buildPhases = (
+				607C62FB2913EC5800D0AE62 /* Sources */,
+				607C62FC2913EC5800D0AE62 /* Frameworks */,
+				607C62FD2913EC5800D0AE62 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = UMBusReminderExtension;
+			productName = UMBusReminderExtension;
+			productReference = 607C62FF2913EC5800D0AE62 /* UMBusReminderExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -316,14 +403,19 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 1410;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1410;
+					};
+					607C62FE2913EC5800D0AE62 = {
+						CreatedOnToolsVersion = 14.1;
 					};
 				};
 			};
@@ -342,6 +434,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* UMALL */,
 				00E356ED1AD99517003FC87E /* UMALLTests */,
+				607C62FE2913EC5800D0AE62 /* UMBusReminderExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -392,6 +485,14 @@
 				6072936128664212007FBD2F /* FontAwesome5_Solid.ttf in Resources */,
 				6072935D28664212007FBD2F /* MaterialCommunityIcons.ttf in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		607C62FD2913EC5800D0AE62 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				607C630A2913EC5900D0AE62 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -551,6 +652,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00E356F31AD99517003FC87E /* UMALL.m in Sources */,
+				607C63172913EE5D00D0AE62 /* ActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -558,8 +660,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				607C62F52913EBD400D0AE62 /* DynamicIslandBridge.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				607C63162913EE5D00D0AE62 /* ActivityAttributes.swift in Sources */,
+				607C62F62913EBD400D0AE62 /* DynamicIslandModule.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		607C62FB2913EC5800D0AE62 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				607C63082913EC5800D0AE62 /* UMBusReminder.swift in Sources */,
+				607C63182913EE5D00D0AE62 /* ActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -571,6 +685,11 @@
 			target = 13B07F861A680F5B00A75B9A /* UMALL */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
+		607C630D2913EC5900D0AE62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 607C62FE2913EC5800D0AE62 /* UMBusReminderExtension */;
+			targetProxy = 607C630C2913EC5900D0AE62 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -578,7 +697,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-UMALL-UMALLTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -598,6 +719,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = one.umall;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UMALL.app/UMALL";
 			};
 			name = Debug;
@@ -606,7 +729,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 89C6BE57DB24E9ADA2F236DE /* Pods-UMALL-UMALLTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				INFOPLIST_FILE = UMALLTests/Info.plist;
@@ -623,6 +748,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = one.umall;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UMALL.app/UMALL";
 			};
 			name = Release;
@@ -631,6 +757,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-UMALL.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
@@ -639,6 +766,7 @@
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = UMALL/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -663,6 +791,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-UMALL.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
@@ -671,6 +800,7 @@
 				CURRENT_PROJECT_VERSION = 1.2.0;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				INFOPLIST_FILE = UMALL/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -687,6 +817,89 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		607C63102913EC5900D0AE62 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = UVSHNJYJWU;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UMBusReminder/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UMBusReminder;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = one.umall.UMBusReminder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		607C63112913EC5900D0AE62 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UVSHNJYJWU;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UMBusReminder/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UMBusReminder;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = one.umall.UMBusReminder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -842,6 +1055,15 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		607C630F2913EC5900D0AE62 /* Build configuration list for PBXNativeTarget "UMBusReminderExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				607C63102913EC5900D0AE62 /* Debug */,
+				607C63112913EC5900D0AE62 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
