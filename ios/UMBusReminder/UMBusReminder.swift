@@ -28,7 +28,26 @@ struct DynamicIslandCompactTrailing: View {
 struct DynamicIslandcompactLeading: View {
   let context: ActivityViewContext<UMBusAttributes>
   var body: some View {
-    Text(context.state.mesage)
+    Text(context.state.message)
+  }
+}
+
+struct DynamicIslandExpandingCenter: View {
+  let context: ActivityViewContext<UMBusAttributes>
+  var body: some View {
+    Text(context.state.messageExpanding)
+  }
+}
+
+struct DynamicIslandLockScreen: View {
+  let context: ActivityViewContext<UMBusAttributes>
+  var body: some View {
+    VStack(alignment: .center) {
+      Text(context.state.messageExpanding).multilineTextAlignment(.center)
+      Text("UM Campus Loop by Minami").multilineTextAlignment(.center)
+    }
+    .frame(maxWidth: .infinity, alignment: .center)
+    .padding()
   }
 }
 
@@ -39,19 +58,19 @@ struct UMBusActivityWidget: Widget {
             // banner on the Home Screen of devices that don't support the
             // Dynamic Island.
             // ...
-          Text("Arrived at E11")
+          DynamicIslandLockScreen(context: context)
         } dynamicIsland: { context in
             // Create the presentations that appear in the Dynamic Island.
             // ...
           DynamicIsland {
             DynamicIslandExpandedRegion(.leading){
-              Text("Demo by")
+              Text("Demo")
             }
             DynamicIslandExpandedRegion(.trailing){
               Text("Minami")
             }
             DynamicIslandExpandedRegion(.center){
-              DynamicIslandcompactLeading(context: context)
+              DynamicIslandExpandingCenter(context: context)
             }
             DynamicIslandExpandedRegion(.bottom){
               Text("UM Campus Loop")

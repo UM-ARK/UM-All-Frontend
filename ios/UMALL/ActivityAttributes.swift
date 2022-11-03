@@ -12,7 +12,8 @@ struct UMBusAttributes: ActivityAttributes {
   public typealias UMBusStatus = ContentState
   
   public struct ContentState: Codable, Hashable {
-    var mesage: String
+    var message: String
+    var messageExpanding: String
   }
   
   var title:String
