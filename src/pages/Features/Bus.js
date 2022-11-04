@@ -98,9 +98,9 @@ function getBusData(busInfoHtml) {
             });
             DynamicIslandModule.updateBusReminder(busPositionArr[0].index);
         }
-        else {
-            DynamicIslandModule.updateBusReminder(16);
-        }
+    }
+    if (busPositionArr[0].index < 0 || busPositionArr[0].index > 15) {
+        DynamicIslandModule.updateBusReminder(16);
     }
     //console.log("Bus車牌、位置總數據：",busPositionArr);
 
@@ -164,7 +164,6 @@ class BusScreen extends Component {
                     haveBus: result.busPositionArr.length > 0 ? true : false,
                     isLoading: false,
                 });
-                //this.DynamicIslandModule.updateBusReminder(busPositionArr[0].index);
                 if (this.state.busPositionArr.length == 0) {
                     this.setState({ toastColor: COLOR_DIY.warning });
                     this.toast.show(`當前沒有巴士~\n[]~(￣▽￣)~*`, 3000);
@@ -249,21 +248,27 @@ class BusScreen extends Component {
 
         const { busPositionArr, busInfoArr, toastColor } = this.state;
 
+        const startReminder = () => {
+            if (busPositionArr.length > 0) {
+                DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[0].index);
+            }
+            if (busPositionArr.length == 0) {
+                DynamicIslandModule.startBusReminder('Start Reminder', 16)
+            }
+        }
+
+        const stopReminder = () => {
+            DynamicIslandModule.endBusReminder()
+        }
+
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'校園巴士'} />
-                {busPositionArr.length > 0
-                    ? busPositionArr.map(item => (
-                        <Button title="开启灵动报站"
-                            onPress={() => { DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[0].index) }}
-                        />
-                    ))
-                    : <Button title="开启灵动报站"
-                    onPress={() => { DynamicIslandModule.startBusReminder('Start Reminder', 16) }}
-                />}
-
+                <Button title="开启灵动报站"
+                    onPress={startReminder}
+                />
                 <Button title="关闭灵动报站"
-                    onPress={() => { DynamicIslandModule.endBusReminder() }}
+                    onPress={stopReminder}
                 />
                 <ScrollView
                     refreshControl={
