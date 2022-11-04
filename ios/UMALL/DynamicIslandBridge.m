@@ -10,8 +10,8 @@
 
 @interface RCT_EXTERN_MODULE(DynamicIslandModule, NSObject)
 
-RCT_EXTERN_METHOD(startBusReminder:(NSString)title withMessage:(int)message)
-RCT_EXTERN_METHOD(updateBusReminder:(int)message)
+RCT_EXTERN_METHOD(startBusReminder:(NSString)title withMessage:(int)message withMessage:(NSString)nextBusTime withMessage:(NSString)serviceState withMessage:(NSString)lastUpdatedTime)
+RCT_EXTERN_METHOD(updateBusReminder:(int)message withMessage:(NSString)nextBusTime withMessage:(NSString)serviceState withMessage:(NSString)lastUpdatedTime)
 RCT_EXTERN_METHOD(endBusReminder)
 
 @end

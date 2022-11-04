@@ -22,7 +22,7 @@ struct UMBusWidgets: WidgetBundle {
 struct DynamicIslandCompactLeading: View {
   var body: some View {
     HStack(alignment: .center) {
-      Image(systemName: "bus")
+      Image(systemName: "bus").foregroundColor(Color("UMLightBlue"))
     }
   }
 }
@@ -30,7 +30,7 @@ struct DynamicIslandCompactLeading: View {
 struct DynamicIslandcompactTrailing: View {
   let context: ActivityViewContext<UMBusAttributes>
   var body: some View {
-    Text(context.state.message)
+    Text(context.state.message).foregroundColor(Color("UMLightBlue"))
   }
 }
 
@@ -60,7 +60,7 @@ struct DynamicIslandExpandingCenter: View {
     VStack(alignment: .center) {
       Text(context.state.messageExpanding)
         .multilineTextAlignment(.center)
-        .foregroundColor(Color.white)
+        .foregroundColor(Color("UMLightBlue"))
         .font(Font.system(size:30))
         .font(.headline)
       Text("UM Campus Loop").multilineTextAlignment(.center)
@@ -75,12 +75,13 @@ struct DynamicIslandExpandingBottom: View {
   let context: ActivityViewContext<UMBusAttributes>
   var body: some View {
     VStack(alignment: .center) {
-      Text("最后更新时间 2022-11-04 17:46:47").multilineTextAlignment(.center)
-        .foregroundColor(Color.white)
+      Text(context.state.lastUpdatedTime)
+        .multilineTextAlignment(.center)
+        .foregroundColor(Color("UMLightBlue"))
         .font(Font.system(size:10))
         .font(.body)
-      Text("服务状态：正常（上课期间）").multilineTextAlignment(.center)
-        .foregroundColor(Color.white)
+      Text(context.state.serviceState).multilineTextAlignment(.center)
+        .foregroundColor(Color("UMLightBlue"))
         .font(Font.system(size:10))
         .font(.body)
     }.padding(.top, 4)
@@ -95,12 +96,8 @@ struct DynamicIslandExpandingTrailing: View {
         .foregroundColor(Color("UMOrange"))
         .font(Font.system(size:13))
         .font(.body)
-      Text("循环行驶").multilineTextAlignment(.center)
-        .foregroundColor(Color.white)
-        .font(Font.system(size:13))
-        .font(.body)
-      Text("17:00-19:00").multilineTextAlignment(.center)
-        .foregroundColor(Color.white)
+      Text(context.state.nextBusTime).multilineTextAlignment(.center)
+        .foregroundColor(Color("UMLightBlue"))
         .font(Font.system(size:13))
         .font(.body)
     }.padding(.top, 30)
@@ -112,6 +109,7 @@ struct DynamicIslandExpandingLeading: View {
     VStack(alignment: .center) {
       Image(systemName: "bus").resizable()
         .scaledToFit()
+        .foregroundColor(Color("UMLightBlue"))
             .frame(minWidth:nil,
                    idealWidth: nil,
                    maxWidth: UIScreen.main.bounds.width,
@@ -121,7 +119,7 @@ struct DynamicIslandExpandingLeading: View {
                    alignment: .center
                    )
       Text("UM ALL").multilineTextAlignment(.center)
-        .foregroundColor(Color.white)
+        .foregroundColor(Color("UMLightBlue"))
         .font(Font.system(size:13))
         .font(.body)
     }.padding(.top, 25)

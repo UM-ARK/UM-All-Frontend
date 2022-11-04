@@ -14,6 +14,9 @@ struct UMBusAttributes: ActivityAttributes {
   public struct ContentState: Codable, Hashable {
     var message: String
     var messageExpanding: String
+    var nextBusTime: String
+    var serviceState: String
+    var lastUpdatedTime: String
   }
   
   var title:String
