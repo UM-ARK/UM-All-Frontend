@@ -19,23 +19,18 @@ struct UMBusWidgets: WidgetBundle {
     }
 }
 
-struct DynamicIslandCompactTrailing: View {
+struct DynamicIslandCompactLeading: View {
   var body: some View {
-    Image(systemName: "bus")
+    HStack(alignment: .center) {
+      Image(systemName: "bus")
+    }
   }
 }
 
-struct DynamicIslandcompactLeading: View {
+struct DynamicIslandcompactTrailing: View {
   let context: ActivityViewContext<UMBusAttributes>
   var body: some View {
     Text(context.state.message)
-  }
-}
-
-struct DynamicIslandExpandingCenter: View {
-  let context: ActivityViewContext<UMBusAttributes>
-  var body: some View {
-    Text(context.state.messageExpanding)
   }
 }
 
@@ -43,11 +38,93 @@ struct DynamicIslandLockScreen: View {
   let context: ActivityViewContext<UMBusAttributes>
   var body: some View {
     VStack(alignment: .center) {
-      Text(context.state.messageExpanding).multilineTextAlignment(.center)
-      Text("UM Campus Loop by Minami").multilineTextAlignment(.center)
+      Text(context.state.messageExpanding)
+        .multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:30))
+        .font(.headline)
+      Text("UM Campus Loop").multilineTextAlignment(.center)
+        .foregroundColor(Color("UMOrange"))
+        .font(Font.system(size:20))
+        .font(.body)
     }
     .frame(maxWidth: .infinity, alignment: .center)
     .padding()
+    .background(Color("UMBlue"))
+  }
+}
+
+struct DynamicIslandExpandingCenter: View {
+  let context: ActivityViewContext<UMBusAttributes>
+  var body: some View {
+    VStack(alignment: .center) {
+      Text(context.state.messageExpanding)
+        .multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:30))
+        .font(.headline)
+      Text("UM Campus Loop").multilineTextAlignment(.center)
+        .foregroundColor(Color("UMOrange"))
+        .font(Font.system(size:20))
+        .font(.body)
+    }
+  }
+}
+
+struct DynamicIslandExpandingBottom: View {
+  let context: ActivityViewContext<UMBusAttributes>
+  var body: some View {
+    VStack(alignment: .center) {
+      Text("最后更新时间 2022-11-04 17:46:47").multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:10))
+        .font(.body)
+      Text("服务状态：正常（上课期间）").multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:10))
+        .font(.body)
+    }.padding(.top, 4)
+  }
+}
+
+struct DynamicIslandExpandingTrailing: View {
+  let context: ActivityViewContext<UMBusAttributes>
+  var body: some View {
+    VStack(alignment: .center) {
+      Text("下一班").multilineTextAlignment(.center)
+        .foregroundColor(Color("UMOrange"))
+        .font(Font.system(size:13))
+        .font(.body)
+      Text("循环行驶").multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:13))
+        .font(.body)
+      Text("17:00-19:00").multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:13))
+        .font(.body)
+    }.padding(.top, 30)
+  }
+}
+
+struct DynamicIslandExpandingLeading: View {
+  var body: some View {
+    VStack(alignment: .center) {
+      Image(systemName: "bus").resizable()
+        .scaledToFit()
+            .frame(minWidth:nil,
+                   idealWidth: nil,
+                   maxWidth: UIScreen.main.bounds.width,
+                   minHeight: nil,
+                   idealHeight: nil,
+                   maxHeight: 35,
+                   alignment: .center
+                   )
+      Text("UM ALL").multilineTextAlignment(.center)
+        .foregroundColor(Color.white)
+        .font(Font.system(size:13))
+        .font(.body)
+    }.padding(.top, 25)
   }
 }
 
@@ -64,23 +141,23 @@ struct UMBusActivityWidget: Widget {
             // ...
           DynamicIsland {
             DynamicIslandExpandedRegion(.leading){
-              Text("Demo")
+              DynamicIslandExpandingLeading()
             }
             DynamicIslandExpandedRegion(.trailing){
-              Text("Minami")
+              DynamicIslandExpandingTrailing(context: context)
             }
             DynamicIslandExpandedRegion(.center){
               DynamicIslandExpandingCenter(context: context)
             }
             DynamicIslandExpandedRegion(.bottom){
-              Text("UM Campus Loop")
+              DynamicIslandExpandingBottom(context: context)
             }
           } compactLeading: {
-            DynamicIslandcompactLeading(context: context)
+            DynamicIslandCompactLeading()
           } compactTrailing: {
-            DynamicIslandCompactTrailing()
+            DynamicIslandcompactTrailing(context: context)
           } minimal: {
-            DynamicIslandCompactTrailing()
+            DynamicIslandCompactLeading()
           }
 
         }

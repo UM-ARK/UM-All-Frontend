@@ -37,6 +37,7 @@ class DynamicIslandModule: NSObject {
     Task {
       for activity in Activity<UMBusAttributes>.activities {
         await activity.update(using: initialContentState)
+        print("Updated Bus Position.")
       }
     }
   }
@@ -47,6 +48,7 @@ class DynamicIslandModule: NSObject {
     Task{
       for activity in Activity<UMBusAttributes>.activities {
         await activity.end(dismissalPolicy: .default)
+        print("Ended Bus Reminder.")
       }
     }
   }

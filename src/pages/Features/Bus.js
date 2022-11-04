@@ -10,7 +10,7 @@ import {
     Dimensions,
     RefreshControl,
     NativeModules,
-    Button,
+    Alert,
 } from 'react-native';
 
 // 引入本地工具
@@ -20,10 +20,12 @@ import { UM_BUS_LOOP } from '../../utils/pathMap';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackgroundTimer from 'react-native-background-timer';
 import Modal from 'react-native-modal';
 var DomParser = require('react-native-html-parser').DOMParser;
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast, { DURATION } from 'react-native-easy-toast';
+import { Center, Row } from 'native-base';
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -96,10 +98,12 @@ function getBusData(busInfoHtml) {
                 number: item,
                 index: i,
             });
+            //向灵动岛传递巴士位置
             DynamicIslandModule.updateBusReminder(busPositionArr[0].index);
         }
     }
     if (busPositionArr[0].index < 0 || busPositionArr[0].index > 15) {
+        //向灵动岛传递巴士位置，若没有巴士则传送16
         DynamicIslandModule.updateBusReminder(16);
     }
     //console.log("Bus車牌、位置總數據：",busPositionArr);
@@ -248,28 +252,35 @@ class BusScreen extends Component {
 
         const { busPositionArr, busInfoArr, toastColor } = this.state;
 
+        //iOS灵动岛启动函数
         const startReminder = () => {
             if (busPositionArr.length > 0) {
                 DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[0].index);
+                BackgroundTimer.runBackgroundTimer(() => {
+                    this.onRefresh();
+                },
+                    7000);
             }
             if (busPositionArr.length == 0) {
-                DynamicIslandModule.startBusReminder('Start Reminder', 16)
+                DynamicIslandModule.startBusReminder('Start Reminder', 16);
+                BackgroundTimer.runBackgroundTimer(() => {
+                    this.onRefresh();
+                },
+                    7000);
             }
+            Alert.alert('灵动报站已开启','您可以直接返回桌面，请勿返回上一页面或关闭应用后台，以免巴士信息无法及时更新');
         }
-
+        //iOS灵动岛结束函数
         const stopReminder = () => {
-            DynamicIslandModule.endBusReminder()
+            DynamicIslandModule.endBusReminder();
+            BackgroundTimer.stopBackgroundTimer();
+            Alert.alert('灵动报站已结束','感谢您的使用');
         }
 
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'校園巴士'} />
-                <Button title="开启灵动报站"
-                    onPress={startReminder}
-                />
-                <Button title="关闭灵动报站"
-                    onPress={stopReminder}
-                />
+
                 <ScrollView
                     refreshControl={
                         <RefreshControl
@@ -300,6 +311,41 @@ class BusScreen extends Component {
                                     style={{ fontSize: 12, color: black.third }}>
                                     Data From: cmdo.um.edu.mo
                                 </Text>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    marginHorizontal: scale(5),
+                                    marginVertical: scale(5),
+                                    justifyContent:'space-between',
+                                }}>
+                                <TouchableOpacity  onPress={startReminder}
+                                style={{
+                                    backgroundColor: themeColor,
+                                    height: scale(20),
+                                    borderRadius: scale(5),
+                                    justifyContent:'center',
+                                }}>
+                                    <Text style={{
+                                        fontSize:scale(8),
+                                        fontWeight: 'bold',
+                                        color:white,
+                                        marginHorizontal:scale(5),
+                                    }}>开启灵动报站</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity  onPress={stopReminder}
+                                style={{
+                                    backgroundColor: secondThemeColor,
+                                    height: scale(20),
+                                    borderRadius: scale(5),
+                                    justifyContent:'center',
+                                }}>
+                                    <Text style={{
+                                        fontSize:scale(8),
+                                        fontWeight:'bold',
+                                        color:white,
+                                        marginHorizontal:scale(5),
+                                    }}>关闭灵动报站</Text>
+                                </TouchableOpacity>
+                                </View>
                             </View>
                             {/* Bus運行信息的渲染 */}
                             <View
@@ -318,10 +364,10 @@ class BusScreen extends Component {
                                             }}>
                                             {item}
                                         </Text>
+
                                     ))
                                     : null}
                             </View>
-
                             {/* 巴士圖標 */}
                             {busPositionArr.length > 0
                                 ? busPositionArr.map(item => (
