@@ -129,14 +129,9 @@ struct DynamicIslandExpandingLeading: View {
 struct UMBusActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: UMBusAttributes.self) { context in
-            // Create the presentation that appears on the Lock Screen and as a
-            // banner on the Home Screen of devices that don't support the
-            // Dynamic Island.
-            // ...
+          //Lock Screen Live Activities
           DynamicIslandLockScreen(context: context)
         } dynamicIsland: { context in
-            // Create the presentations that appear in the Dynamic Island.
-            // ...
           DynamicIsland {
             DynamicIslandExpandedRegion(.leading){
               DynamicIslandExpandingLeading()
