@@ -99,13 +99,24 @@ function getBusData(busInfoHtml) {
                 number: item,
                 index: i,
             });
-            //向灵动岛传递巴士位置
-            DynamicIslandModule.updateBusReminder(busPositionArr[0].index, busInfoArr[1], busInfoArr[2], busInfoArr[3]);
+            //如果有两辆巴士，则传送不在PGH的那一台（运行中的），如果都在PGH则传送第一辆
+            if (item.length == 2) {
+                if (busPositionArr[1].index != 0) {
+                    DynamicIslandModule.updateBusReminder(busPositionArr[1].index, busInfoArr[1].substring(4), busInfoArr[2], busInfoArr[3]);
+                }
+                else {
+                    DynamicIslandModule.updateBusReminder(busPositionArr[0].index, busInfoArr[1].substring(4), busInfoArr[2], busInfoArr[3]);
+                }
+            }
+            //向灵动岛传递巴士位置，参数分别为：int巴士位置，NSString下一辆巴士的时间，NSString服务状态，NSString最后一次更新时间
+            else {
+                DynamicIslandModule.updateBusReminder(busPositionArr[0].index, busInfoArr[1].substring(4), busInfoArr[2], busInfoArr[3]);
+            }
         }
     }
     if (busPositionArr[0].index < 0 || busPositionArr[0].index > 15) {
         //向灵动岛传递巴士位置，若没有巴士则传送16，对应“X”符号
-        DynamicIslandModule.updateBusReminder(16, busInfoArr[1], busInfoArr[2], busInfoArr[3]);
+        DynamicIslandModule.updateBusReminder(16, busInfoArr[1].substring(4), busInfoArr[2], busInfoArr[3]);
     }
     //console.log("Bus車牌、位置總數據：",busPositionArr);
 
@@ -118,6 +129,7 @@ function getBusData(busInfoHtml) {
 
 let timer = null;
 let timerForiOS = null;
+let DynamicIslandStart=0;
 
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
@@ -258,28 +270,52 @@ class BusScreen extends Component {
             if (Platform.OS != 'ios') {
                 Alert.alert('不受支持的设备', '灵动报站功能暂时只支持iOS 16.1以上的设备，鸿蒙和安卓设备的巴士报站提醒功能尽情期待！');
             } else {
-                if (busPositionArr.length > 0) {
-                    DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[0].index, busInfoArr[0], busInfoArr[1], busInfoArr[2]);
-                    BackgroundTimer.runBackgroundTimer(() => {
-                        this.onRefresh();
-                    },
-                        7000);
+                const majorVersion = parseInt(Platform.Version, 10);
+                if (majorVersion >= 16) {
+                    DynamicIslandStart=1;
+                    if (busPositionArr.length > 0) {
+                        //如果有两辆巴士，则传送不在PGH的那一台（运行中的），如果都在PGH则传送第一辆
+                        if (busPositionArr.length == 2) {
+                            if (busPositionArr[1].index != 0) {
+                                DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[1].index, busInfoArr[0].substring(4), busInfoArr[1], busInfoArr[2]);
+                            }
+                            else {
+                                DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[0].index, busInfoArr[0].substring(4), busInfoArr[1], busInfoArr[2]);
+                            }
+                        }
+                        //向灵动岛传递巴士位置，参数分别为：int巴士位置，NSString下一辆巴士的时间，NSString服务状态，NSString最后一次更新时间
+                        else {
+                            DynamicIslandModule.startBusReminder('Start Reminder', busPositionArr[0].index, busInfoArr[0].substring(4), busInfoArr[1], busInfoArr[2]);
+                        }
+                        BackgroundTimer.runBackgroundTimer(() => {
+                            this.onRefresh();
+                        },
+                            7000);
+                    }
+                    //如果没有巴士则传送16（代表无巴士）
+                    if (busPositionArr.length == 0) {
+                        DynamicIslandModule.startBusReminder('Start Reminder', 16, busInfoArr[0].substring(4), busInfoArr[1], busInfoArr[2]);
+                        BackgroundTimer.runBackgroundTimer(() => {
+                            this.onRefresh();
+                        },
+                            7000);
+                    }
+                    Alert.alert('灵动报站已开启', '您可以直接返回桌面，请勿返回上一页面或关闭应用后台，以免巴士信息无法及时更新');
                 }
-                if (busPositionArr.length == 0) {
-                    DynamicIslandModule.startBusReminder('Start Reminder', 16);
-                    BackgroundTimer.runBackgroundTimer(() => {
-                        this.onRefresh();
-                    },
-                        7000);
+                else{
+                    Alert.alert('iOS版本过低', '灵动报站功能暂时只支持iOS 16.1以上的设备，请前往设置检查您的更新');
                 }
-                Alert.alert('灵动报站已开启', '您可以直接返回桌面，请勿返回上一页面或关闭应用后台，以免巴士信息无法及时更新');
             }
         }
         //iOS灵动岛结束函数
         const stopReminder = () => {
+            if(DynamicIslandStart==1){
             DynamicIslandModule.endBusReminder();
             BackgroundTimer.stopBackgroundTimer();
-            Alert.alert('灵动报站已结束', '感谢您的使用');
+            Alert.alert('灵动报站已结束', '感谢您的使用');}
+            else{
+                Alert.alert('灵动报站未启用', '请先开启灵动报站功能');
+            }
         }
 
         return (

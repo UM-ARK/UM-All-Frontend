@@ -22,9 +22,7 @@ class DynamicIslandModule: NSObject {
       if #available(iOS 16.1, *){
         _ = try Activity.request(attributes: activityAttributes, contentState: initialContentState)
       } else {
-        Alert(title: Text("不受支持的iOS版本"),
-              message: Text("实时活动和灵动岛功能需要iOS 16.1或更高版本的系统，请前往设置检查您的更新。"),
-              dismissButton: .default(Text("OK")))
+        //iOS 16.1以下设备不执行
       }
         print("Requested a Bus Reminder Live Activity.")
     } catch (_) {
