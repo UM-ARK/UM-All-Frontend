@@ -19,20 +19,50 @@ import { pxToDp, pcHeightToNumHeight, rpx } from '../../utils/stylesKits';
 import { COLOR_DIY } from '../../utils/uiMap';
 import { UM_BUS_LOOP } from '../../utils/pathMap';
 import Header from '../../components/Header';
-
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Video from "react-native-video";
 import BackgroundTimer from 'react-native-background-timer';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 var DomParser = require('react-native-html-parser').DOMParser;
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast, { DURATION } from 'react-native-easy-toast';
 import { Center, Row } from 'native-base';
+import backgroundSound from '../../../src/static/UMARK_Assets/test.mp3';
+import BackgroundService from 'react-native-background-actions';
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window'); // screen 包括navi bar
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const { DynamicIslandModule } = NativeModules;
+const sleep = (time) => new Promise((resolve) => setTimeout(() => resolve(), time));
+
+const veryIntensiveTask = async (taskDataArguments) => {
+    // Example of an infinite loop task
+    const { delay } = taskDataArguments;
+    await new Promise(async (resolve) => {
+        for (let i = 0; BackgroundService.isRunning(); i++) {
+            console.log(i);
+            fetchBusInfoBackground();
+            await sleep(delay);
+        }
+    });
+};
+
+const options = {
+    taskName: 'Example',
+    taskTitle: 'ExampleTask title',
+    taskDesc: 'ExampleTask description',
+    taskIcon: {
+        name: 'ic_launcher',
+        type: 'mipmap',
+    },
+    color: '#ff00ff',
+    linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
+    parameters: {
+        delay: 5000,
+    },
+};
 
 let busIcon = require('../../static/img/Bus/bus.png');
 let busRouteImg = require('../../static/img/Bus/bus_route.png');
@@ -46,6 +76,16 @@ let stopImgArr = [
     require('../../static/img/Bus/stopImg/E32.jpg'),
     require('../../static/img/Bus/stopImg/S4.jpg'),
 ];
+
+//后台更新巴士数据
+function fetchBusInfoBackground() {
+    // 訪問campusloop網站
+    fetch(UM_BUS_LOOP, {
+        method: 'GET',
+    })
+        .then(res => res.text())
+        .then(text => getBusData(text))
+};
 
 // 解析campus Bus的HTML
 function getBusData(busInfoHtml) {
@@ -146,6 +186,7 @@ function getBusData(busInfoHtml) {
 let timer = null;
 let timerForiOS = null;
 let DynamicIslandStart = 0;
+let backgroundSoundControl = true;
 
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
@@ -169,15 +210,19 @@ class BusScreen extends Component {
         this.fetchBusInfo();
     }
 
-    componentDidMount() {
-        timer = setInterval(() => {
-            this.onRefresh();
-        }, 7000);
-    }
+    // componentDidMount() {
+    //     if (backgroundSoundControl) {
+    //         timer = setInterval(() => {
+    //             this.onRefresh();
+    //         }, 7000);
+    //     }
+    // }
 
-    componentWillUnmount() {
-        clearInterval(timer);
-    }
+    // componentWillUnmount() {
+    //     if (backgroundSoundControl) {
+    //         clearInterval(timer);
+    //     }
+    // }
 
     // 爬蟲campus Bus
     fetchBusInfo = () => {
@@ -289,6 +334,9 @@ class BusScreen extends Component {
                 const majorVersion = parseInt(Platform.Version, 10);
                 if (majorVersion >= 16) {
                     DynamicIslandStart = 1;
+                    backgroundSoundControl = false;
+                    BackgroundService.start(veryIntensiveTask, options);
+                    this.onRefresh();
                     if (busInfoArr.length == 3) {
                         //如果有两辆巴士，则传送不在PGH的那一台（运行中的），如果都在PGH则传送第一辆
                         if (busPositionArr.length == 2) {
@@ -322,15 +370,7 @@ class BusScreen extends Component {
                     //如果没有巴士则传送16（代表无巴士）
                     if (busPositionArr.length == 0) {
                         DynamicIslandModule.startBusReminder('Start Reminder', 16, '暂无巴士', busInfoArr[0], busInfoArr[1]);
-                        BackgroundTimer.runBackgroundTimer(() => {
-                            this.onRefresh();
-                        },
-                            7000);
                     }
-                    BackgroundTimer.runBackgroundTimer(() => {
-                        this.onRefresh();
-                    },
-                        7000);
                     Alert.alert('灵动报站已开启', '您可以直接返回桌面，请勿返回上一页面或关闭应用后台，以免巴士信息无法及时更新');
                 }
                 else {
@@ -340,14 +380,11 @@ class BusScreen extends Component {
         }
         //iOS灵动岛结束函数
         const stopReminder = () => {
-            if (DynamicIslandStart == 1) {
-                DynamicIslandModule.endBusReminder();
-                BackgroundTimer.stopBackgroundTimer();
-                Alert.alert('灵动报站已结束', '感谢您的使用');
-            }
-            else {
-                Alert.alert('灵动报站未启用', '请先开启灵动报站功能');
-            }
+            DynamicIslandModule.endBusReminder();
+            backgroundSoundControl = true;
+            BackgroundService.stop();
+            this.onRefresh();
+            Alert.alert('灵动报站已结束', '感谢您的使用');
         }
 
         return (
@@ -418,6 +455,13 @@ class BusScreen extends Component {
                                             marginHorizontal: scale(5),
                                         }}>关闭灵动报站</Text>
                                     </TouchableOpacity>
+                                    <Video
+                                        source={backgroundSound}
+                                        paused={backgroundSoundControl}
+                                        repeat={true}
+                                        playInBackground={true}
+                                        ignoreSilentSwitch={"ignore"}
+                                    />
                                 </View>
                             </View>
                             {/* Bus運行信息的渲染 */}
