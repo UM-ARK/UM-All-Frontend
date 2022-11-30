@@ -27,7 +27,7 @@ var DomParser = require('react-native-html-parser').DOMParser;
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast, { DURATION } from 'react-native-easy-toast';
 import { Center, Row } from 'native-base';
-import backgroundSound from '../../../src/static/UMARK_Assets/test.mp3';
+import backgroundSound from '../../../src/static/UMARK_Assets/emptyFile.mp3';
 import BackgroundService from 'react-native-background-actions';
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
