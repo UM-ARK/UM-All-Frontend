@@ -25,6 +25,7 @@ import {
     GET,
     addHost,
 } from '../../../utils/pathMap';
+import EventPage from '../news/EventPage.js';
 import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
 import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
@@ -159,6 +160,7 @@ class HomeScreen extends Component {
             this.getAppData(false);
         }
         this.getCal();
+        console.log(this.refs.eventPage);
     }
 
     getAppData = async isLogin => {
@@ -411,26 +413,13 @@ class HomeScreen extends Component {
                         />
                     }
                     alwaysBounceHorizontal={false}>
-                    <View style={{ backgroundColor: white }}>
+                    <View style={{ backgroundColor: bg_color }}>
                         {/* 輪播圖 */}
-                        <ScrollImage imageData={carouselImagesArr} />
+                        {/* <ScrollImage imageData={carouselImagesArr} /> */}
 
-                        {/* 快捷功能圖標 */}
-                        <FlatGrid
-                            style={{ alignSelf: 'center' }}
-                            maxItemsPerRow={6}
-                            itemDimension={scale(50)}
-                            spacing={scale(10)}
-                            data={this.state.functionArray}
-                            renderItem={({ item }) => {
-                                return this.GetFunctionIcon(item);
-                            }}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-
+                        {/* 校曆 */}
                         {this.state.cal && this.state.cal.length > 0 ? (
-                            <View>
+                            <View style={{ marginTop: scale(10) }}>
                                 <VirtualizedList
                                     data={this.state.cal}
                                     initialNumToRender={4}
@@ -465,7 +454,6 @@ class HomeScreen extends Component {
                                     style={{
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        margin: scale(10),
                                         marginTop: scale(5),
                                     }}>
                                     <Text
@@ -477,7 +465,24 @@ class HomeScreen extends Component {
                                 </View>
                             </View>
                         ) : null}
+
+                        {/* 快捷功能圖標 */}
+                        <FlatGrid
+                            style={{ alignSelf: 'center' }}
+                            maxItemsPerRow={6}
+                            itemDimension={scale(50)}
+                            spacing={scale(10)}
+                            data={this.state.functionArray}
+                            renderItem={({ item }) => {
+                                return this.GetFunctionIcon(item);
+                            }}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
                     </View>
+
+                    {/* 活動頁 */}
+                    <EventPage ref="eventPage"></EventPage>
 
                     {/* 提示資訊 */}
                     <HomeCard>
