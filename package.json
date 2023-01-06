@@ -23,6 +23,8 @@
     "@rneui/themed": "^4.0.0-rc.5",
     "axios": "^0.27.2",
     "fbjs": "^3.0.4",
+    "jcore-react-native": "^2.0.7",
+    "jpush-react-native": "^2.9.7",
     "mobx": "^6.6.2",
     "mobx-react": "^7.5.3",
     "moment": "^2.29.4",
