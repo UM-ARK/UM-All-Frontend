@@ -338,7 +338,7 @@ class EventPage extends Component {
                     backgroundColor: bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
-                {isLoading ? null : this.renderGoTopButton()}
+                {/* {isLoading ? null : this.renderGoTopButton()} */}
 
                 {/* 加載狀態渲染骨架屏 */}
                 {this.state.isLoading ? (
@@ -374,7 +374,8 @@ class EventPage extends Component {
                     {isLoading ? null : (
                         <View>
                             {/* 篩選 */}
-                            {this.renderFilter()}
+                            {/* {this.renderFilter()} */}
+
                             {/* 仿瀑布屏展示 */}
                             {/* 渲染主要內容 */}
                             {leftDataList.length > 0 || rightDataList.length > 0
@@ -384,7 +385,7 @@ class EventPage extends Component {
                             {this.renderLoadMoreView()}
 
                             {/* 防止底部遮擋 */}
-                            <View style={{marginBottom: pxToDp(50)}} />
+                            {/* <View style={{marginBottom: pxToDp(50)}} /> */}
                         </View>
                     )}
                 </ScrollView>

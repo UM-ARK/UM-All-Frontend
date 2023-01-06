@@ -49,13 +49,13 @@ class NewsScreen extends Component {
                             title: '主頁',
                         }}
                     />
-                    <Tab.Screen
+                    {/* <Tab.Screen
                         name="EventPage"
                         component={EventPage}
                         options={{
                             title: '組織活動',
                         }}
-                    />
+                    /> */}
                     <Tab.Screen
                         name="ClubPage"
                         component={ClubPage}
