@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import {Text, View, SafeAreaView} from 'react-native';
 
 import HomeScreen from './pages/TabbarPages/home';
 import FeaturesScreen from './pages/TabbarPages/features';
@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
 import {inject} from 'mobx-react';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 // 創建Tabbar的路由棧
 const Tabs = AnimatedTabBarNavigator();
@@ -41,6 +42,7 @@ class Tabbar extends Component {
     render() {
         const {isClub, isLogin} = this.state;
         return (
+        <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
             <Tabs.Navigator
                 tabBarOptions={{
                     inactiveTintColor: COLOR_DIY.black.main,
@@ -169,6 +171,7 @@ class Tabbar extends Component {
                     initialParams={{setLock: this.props.route.params.setLock}}
                 />
             </Tabs.Navigator>
+            </SafeAreaView>
         );
     }
 }
