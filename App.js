@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View, Image, Dimensions, StyleSheet} from 'react-native';
+import {Text, View, Image, Dimensions, StyleSheet,SafeAreaView} from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -60,6 +60,7 @@ class App extends Component {
     render() {
         return (
             // 開屏動畫
+            <SafeAreaView style={{flex: 1, backgroundColor: bg_color}}>
             <AnimatedSplash
                 translucent={true}
                 isLoaded={this.state.isLoaded}
@@ -86,6 +87,7 @@ class App extends Component {
                     </Provider>
                 </SafeAreaProvider>
             </AnimatedSplash>
+            </SafeAreaView>
         );
     }
 }

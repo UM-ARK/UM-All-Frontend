@@ -20,7 +20,7 @@ class NewsScreen extends Component {
     render() {
         return (
             <View style={{backgroundColor: COLOR_DIY.bg_color, flex: 1}}>
-                <Header
+                {/*<Header
                     backgroundColor={bg_color}
                     // centerComponent={{
                     //     text: 'ARK ALL',
@@ -33,7 +33,7 @@ class NewsScreen extends Component {
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
                     }}
-                />
+                />*/}
                 {/* 能左右切換的TabPage */}
                 <Tab.Navigator
                     screenOptions={{

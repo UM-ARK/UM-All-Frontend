@@ -42,7 +42,6 @@ class Tabbar extends Component {
     render() {
         const {isClub, isLogin} = this.state;
         return (
-        <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
             <Tabs.Navigator
                 tabBarOptions={{
                     inactiveTintColor: COLOR_DIY.black.main,
@@ -50,7 +49,7 @@ class Tabbar extends Component {
                 appearance={{
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
-                    tabBarBackground: COLOR_DIY.white,
+                    tabBarBackground: 'transparent',
                     horizontalPadding: pxToDp(10),
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
@@ -171,7 +170,6 @@ class Tabbar extends Component {
                     initialParams={{setLock: this.props.route.params.setLock}}
                 />
             </Tabs.Navigator>
-            </SafeAreaView>
         );
     }
 }
