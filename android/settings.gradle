@@ -18,9 +18,12 @@ project(':react-native-linear-gradient').projectDir = new File(rootProject.proje
 include ':react-native-interactable'
 project(':react-native-interactable').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-interactable/lib/android')
 
-// https://www.npmjs.com/package/@react-native-community/cameraroll
-include ':@react-native-community_cameraroll'
-project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/cameraroll/android')
+// 舊：https://www.npmjs.com/package/@react-native-community/cameraroll
+// include ':@react-native-community_cameraroll'
+// project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/cameraroll/android')
+// 新；https://github.com/react-native-cameraroll/react-native-cameraroll
+include ':@react-native-camera-roll_camera-roll'
+project(':@react-native-camera-roll_camera-roll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-camera-roll/camera-roll/android')
 
 // https://github.com/junina-de/react-native-haptic-feedback
 include ':react-native-haptic-feedback'
@@ -29,3 +32,10 @@ project(':react-native-haptic-feedback').projectDir = new File(rootProject.proje
 // https://github.com/Shobbak/react-native-compressor
 include ':react-native-compressor'
 project(':react-native-compressor').projectDir = new File(rootProject.projectDir,'../node_modules/react-native-compressor/android')
+
+// 更新gradle時，https://reactnative.dev/docs/new-architecture-app-intro
+includeBuild('../node_modules/react-native-gradle-plugin')
+include(":ReactAndroid")
+project(":ReactAndroid").projectDir = file('../node_modules/react-native/ReactAndroid')
+include(":ReactAndroid:hermes-engine")
+project(":ReactAndroid:hermes-engine").projectDir = file('../node_modules/react-native/ReactAndroid/hermes-engine')

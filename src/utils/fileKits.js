@@ -1,6 +1,6 @@
 // 文件操作相關
 import {PermissionsAndroid, Platform, Alert} from 'react-native';
-import CameraRoll from '@react-native-community/cameraroll';
+import CameraRoll from '@react-native-camera-roll/camera-roll';
 import RNFetchBlob from 'rn-fetch-blob';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
