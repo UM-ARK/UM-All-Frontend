@@ -1,6 +1,6 @@
 // 文件操作相關
 import {PermissionsAndroid, Platform, Alert} from 'react-native';
-import CameraRoll from '@react-native-camera-roll/camera-roll';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import RNFetchBlob from 'rn-fetch-blob';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
@@ -52,9 +52,9 @@ export async function handleImageDownload(IMAGE_URL) {
     })
         .fetch('GET', IMAGE_URL)
         .then(res => {
-            CameraRoll.save(res.data, 'photo')
+            CameraRoll.save(res.data, {type: 'photo'})
                 .then(res => {
-                    Alert.alert('Already Save!');
+                    Alert.alert('Saved successfully 😊 ~');
                 })
                 .catch(err => console.error(err));
         })
