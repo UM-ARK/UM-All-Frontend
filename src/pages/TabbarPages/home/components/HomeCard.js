@@ -52,7 +52,7 @@ class HomeCard extends Component {
         } = this.state;
 
         return (
-            <View style={styles.homeCard}>
+            <View style={[styles.homeCard,this.props.style]}>
                 {/* 用户信息 */}
                 <View style={styles.userInformation}>
                     {/*用户头像*/}

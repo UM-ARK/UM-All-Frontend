@@ -336,6 +336,7 @@ class EventPage extends Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     backgroundColor: bg_color,
+                    ...this.props.style
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {/* {isLoading ? null : this.renderGoTopButton()} */}

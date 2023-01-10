@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     ScrollView,
     View,
@@ -9,11 +9,12 @@ import {
     RefreshControl,
     VirtualizedList,
     TouchableWithoutFeedback,
+    Linking
 } from 'react-native';
 
 // 本地工具
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
 import {
     UM_WHOLE,
     WHAT_2_REG,
@@ -27,33 +28,33 @@ import {
     addHost,
 } from '../../../utils/pathMap';
 import EventPage from '../news/EventPage.js';
-import ScrollImage from './components/ScrollImage';
+// import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
-import {setAPPInfo, handleLogout} from '../../../utils/storageKits';
-import {versionStringCompare} from '../../../utils/versionKits';
+import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
+import { versionStringCompare } from '../../../utils/versionKits';
 import packageInfo from '../../../../package.json';
 import UMCalendar from '../../../static/UMCalendar/UMCalendar.json';
 import HomeCard from './components/HomeCard';
 
-import {Header, Divider} from '@rneui/themed';
-import {PageControl, Card} from 'react-native-ui-lib';
+import { Header, Divider } from '@rneui/themed';
+import { PageControl, Card } from 'react-native-ui-lib';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Carousel from 'react-native-reanimated-carousel';
 import Interactable from 'react-native-interactable';
-import {FlatGrid} from 'react-native-super-grid';
-import {inject} from 'mobx-react';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import { FlatGrid } from 'react-native-super-grid';
+import { inject } from 'mobx-react';
+import Toast, { DURATION } from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {white, bg_color, black, themeColor} = COLOR_DIY;
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { white, bg_color, black, themeColor } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -147,13 +148,21 @@ class HomeScreen extends Component {
         isShowModal: false,
 
         isLoading: true,
+
+        // 是否提示更新
+        showUpdateInfo: false,
+
+        app_version: {
+            lastest: '',
+            local: '',
+        }
     };
 
     componentDidMount() {
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
-            this.setState({isShowModal: false});
+            this.setState({ isShowModal: false });
             this.getAppData(true);
         } else {
             // setTimeout(() => {
@@ -210,21 +219,29 @@ class HomeScreen extends Component {
                     serverInfo.app_version,
                 ) == -1
             ) {
-                this.props.route.params.setLock(serverInfo.app_version);
+                this.setState({
+                    showUpdateInfo: true,
+                    app_version: {
+                        lastest: serverInfo.app_version,
+                        local: packageInfo.version,
+                    }
+                })
             }
         } catch (e) {
             // console.error(e);
-        } finally {
-            if (
-                serverInfo.index_head_carousel &&
-                serverInfo.index_head_carousel.length > 0
-            ) {
-                let imgUrlArr = serverInfo.index_head_carousel;
-                imgUrlArr.map(itm => {
-                    itm.url = addHost(itm.url);
-                });
-                this.setState({carouselImagesArr: imgUrlArr});
-            }
+        }
+        finally {
+            // 設定輪播圖
+            // if (
+            //     serverInfo.index_head_carousel &&
+            //     serverInfo.index_head_carousel.length > 0
+            // ) {
+            //     let imgUrlArr = serverInfo.index_head_carousel;
+            //     imgUrlArr.map(itm => {
+            //         itm.url = addHost(itm.url);
+            //     });
+            //     this.setState({carouselImagesArr: imgUrlArr});
+            // }
             this.setState({isLoading: false});
         }
     };
@@ -244,11 +261,11 @@ class HomeScreen extends Component {
             // 篩選出未來的重要日期
             for (let i = 0; i < cal.length; i++) {
                 if (moment(cal[i].dtstart[0]).isSameOrAfter(nowTimeStamp)) {
-                    this.setState({selectDay: i});
+                    this.setState({ selectDay: i });
                     break;
                 }
             }
-            this.setState({cal: showCal});
+            this.setState({ cal: showCal });
         }
     };
 
@@ -274,7 +291,7 @@ class HomeScreen extends Component {
     }
 
     renderCal = (item, index) => {
-        const {selectDay} = this.state;
+        const { selectDay } = this.state;
         return (
             <TouchableOpacity
                 style={{
@@ -291,11 +308,11 @@ class HomeScreen extends Component {
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
-                    this.setState({selectDay: index});
+                    this.setState({ selectDay: index });
                 }}>
-                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     {/* 年份 */}
-                    <Text style={{color: white, fontSize: scale(10)}}>
+                    <Text style={{ color: white, fontSize: scale(10) }}>
                         {item.dtstart[0].substring(0, 4)}
                     </Text>
                     {/* 月份 */}
@@ -317,7 +334,7 @@ class HomeScreen extends Component {
                         {item.dtstart[0].substring(6, 8)}
                     </Text>
                     {/* 星期幾 */}
-                    <Text style={{color: white, fontSize: scale(10)}}>
+                    <Text style={{ color: white, fontSize: scale(10) }}>
                         {this.getWeek(item.dtstart[0])}
                     </Text>
                 </View>
@@ -326,7 +343,7 @@ class HomeScreen extends Component {
     };
 
     // 渲染快捷功能卡片的圖標
-    GetFunctionIcon = ({icon_type, icon_name, function_name, func}) => {
+    GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
         if (icon_type == 'ionicons') {
             icon = (
@@ -380,12 +397,12 @@ class HomeScreen extends Component {
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
-        this.setState({isShowModal: !this.state.isShowModal});
+        this.setState({ isShowModal: !this.state.isShowModal });
     };
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const {white, black, viewShadow} = COLOR_DIY;
+        const { white, black, viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -395,19 +412,19 @@ class HomeScreen extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -scale(140), y: -scale(220)},
-                    {x: scale(140), y: -scale(220)},
-                    {x: -scale(140), y: -scale(120)},
-                    {x: scale(140), y: -scale(120)},
-                    {x: -scale(140), y: scale(0)},
-                    {x: scale(140), y: scale(0)},
-                    {x: -scale(140), y: scale(120)},
-                    {x: scale(140), y: scale(120)},
-                    {x: -scale(140), y: scale(220)},
-                    {x: scale(140), y: scale(220)},
+                    { x: -scale(140), y: -scale(220) },
+                    { x: scale(140), y: -scale(220) },
+                    { x: -scale(140), y: -scale(120) },
+                    { x: scale(140), y: -scale(120) },
+                    { x: -scale(140), y: scale(0) },
+                    { x: scale(140), y: scale(0) },
+                    { x: -scale(140), y: scale(120) },
+                    { x: scale(140), y: scale(120) },
+                    { x: -scale(140), y: scale(220) },
+                    { x: scale(140), y: scale(220) },
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: scale(140), y: scale(220)}}>
+                initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -441,7 +458,7 @@ class HomeScreen extends Component {
     };
 
     render() {
-        const {carouselImagesArr, selectDay} = this.state;
+        const { carouselImagesArr, selectDay } = this.state;
         return (
             <View
                 style={{
@@ -475,7 +492,7 @@ class HomeScreen extends Component {
                             tintColor={themeColor}
                             refreshing={this.state.isLoading}
                             onRefresh={() => {
-                                this.setState({isLoading: true});
+                                this.setState({ isLoading: true });
                                 this.getAppData();
                                 // 刷新重新請求活動頁數據
                                 this.refs.eventPage.onRefresh();
@@ -484,13 +501,13 @@ class HomeScreen extends Component {
                     }
                     alwaysBounceHorizontal={false}
                     ref={'scrollView'}>
-                    <View style={{backgroundColor: bg_color}}>
+                    <View style={{ backgroundColor: bg_color }}>
                         {/* 輪播圖 */}
                         {/* <ScrollImage imageData={carouselImagesArr} /> */}
 
                         {/* 校曆 */}
                         {this.state.cal && this.state.cal.length > 0 ? (
-                            <View style={{marginTop: scale(10)}}>
+                            <View style={{ marginTop: scale(10) }}>
                                 <VirtualizedList
                                     data={this.state.cal}
                                     initialNumToRender={4}
@@ -502,7 +519,7 @@ class HomeScreen extends Component {
                                             index,
                                         };
                                     }}
-                                    renderItem={({item, index}) => {
+                                    renderItem={({ item, index }) => {
                                         return this.renderCal(item, index);
                                     }}
                                     horizontal
@@ -512,11 +529,11 @@ class HomeScreen extends Component {
                                     getItemCount={getItemCount}
                                     keyExtractor={item => item.uid}
                                     ListHeaderComponent={
-                                        <View style={{marginLeft: scale(10)}} />
+                                        <View style={{ marginLeft: scale(10) }} />
                                     }
                                     ListFooterComponent={
                                         <View
-                                            style={{marginRight: scale(10)}}
+                                            style={{ marginRight: scale(10) }}
                                         />
                                     }
                                 />
@@ -528,7 +545,7 @@ class HomeScreen extends Component {
                                         marginTop: scale(5),
                                     }}>
                                     <Text
-                                        style={{color: black.third}}
+                                        style={{ color: black.third }}
                                         selectable>
                                         {'Important date: ' +
                                             this.state.cal[selectDay].summary}
@@ -539,12 +556,12 @@ class HomeScreen extends Component {
 
                         {/* 快捷功能圖標 */}
                         <FlatGrid
-                            style={{alignSelf: 'center'}}
+                            style={{ alignSelf: 'center' }}
                             maxItemsPerRow={6}
                             itemDimension={scale(50)}
                             spacing={scale(10)}
                             data={this.state.functionArray}
-                            renderItem={({item}) => {
+                            renderItem={({ item }) => {
                                 return this.GetFunctionIcon(item);
                             }}
                             showsVerticalScrollIndicator={false}
@@ -552,8 +569,49 @@ class HomeScreen extends Component {
                         />
                     </View>
 
+                    {/* 更新提示 */}
+                    {this.state.showUpdateInfo ?
+                        <HomeCard style={{marginTop:scale(-10)}}>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    // alignSelf: 'center',
+                                }}>
+                                {`Lastest Version: ${this.state.app_version.lastest}`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    // alignSelf: 'center',
+                                }}>
+                                {`Your App Version: ${this.state.app_version.local}`}
+                            </Text>
+                            <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL(BASE_HOST);
+                            }}>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    // alignSelf: 'center',
+                                }}>
+                                {`Click me to update App 😉~`}
+                            </Text>
+                        </TouchableOpacity>
+                        </HomeCard>
+                        : null
+                    }
+
                     {/* 活動頁 */}
-                    <EventPage ref="eventPage"></EventPage>
+                    <EventPage ref="eventPage" style={{marginTop:scale(-15)}}></EventPage>
 
                     {/* 提示資訊 */}
                     <HomeCard>
@@ -563,7 +621,7 @@ class HomeScreen extends Component {
                                 marginTop: pxToDp(5),
                             }}>
                             {`ARK ALL源自FST同學為愛發電，`}
-                            <Text style={{fontWeight: 'bold'}}>
+                            <Text style={{ fontWeight: 'bold' }}>
                                 並非官方應用程式！
                             </Text>
                         </Text>
@@ -626,7 +684,7 @@ class HomeScreen extends Component {
                     {/* 其他提示 */}
                     <HomeCard>
                         <Text
-                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            style={{ color: black.third, marginTop: pxToDp(5) }}>
                             您可能想先了解：
                         </Text>
                         <TouchableOpacity
@@ -643,7 +701,7 @@ class HomeScreen extends Component {
                         </TouchableOpacity>
 
                         <Text
-                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            style={{ color: black.third, marginTop: pxToDp(5) }}>
                             如果你是新同學... (詳見服務頁新生推薦)
                         </Text>
                         <TouchableOpacity
@@ -669,7 +727,7 @@ class HomeScreen extends Component {
                         </TouchableOpacity>
 
                         <Text
-                            style={{color: black.third, marginTop: pxToDp(5)}}>
+                            style={{ color: black.third, marginTop: pxToDp(5) }}>
                             您可能還有很多疑問...
                         </Text>
                         <TouchableOpacity
@@ -695,13 +753,13 @@ class HomeScreen extends Component {
 
                     {/* 清除緩存 */}
                     <HomeCard>
-                        <Text style={{color: black.third}}>
+                        <Text style={{ color: black.third }}>
                             {`圖片更新不及時？網站響應出錯？`}
                         </Text>
-                        <Text style={{color: black.third}}>
+                        <Text style={{ color: black.third }}>
                             {`‼️:您已登錄的界面可能會退出登錄`}
                         </Text>
-                        <Text style={{color: black.third}}>
+                        <Text style={{ color: black.third }}>
                             {`‼️:您可能需要重新加載圖片，會消耗流量`}
                         </Text>
                         <TouchableOpacity
@@ -747,7 +805,7 @@ class HomeScreen extends Component {
                         </TouchableOpacity>
                     </View> */}
 
-                    <View style={{marginBottom: scale(50)}} />
+                    <View style={{ marginBottom: scale(50) }} />
                 </ScrollView>
 
                 {/* 彈出提示登錄的Modal */}
@@ -792,7 +850,7 @@ class HomeScreen extends Component {
                                         ReactNativeHapticFeedback.trigger(
                                             'soft',
                                         );
-                                        this.setState({isShowModal: false});
+                                        this.setState({ isShowModal: false });
                                         this.props.navigation.jumpTo(
                                             'MeTabbar',
                                         );
@@ -816,7 +874,7 @@ class HomeScreen extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
                         borderRadius: pxToDp(10),
