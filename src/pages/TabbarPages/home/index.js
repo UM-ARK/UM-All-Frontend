@@ -185,7 +185,7 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
-                this.toast.show(`請求錯誤 TAT ...`, 2000);
+                this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
                 // console.log('err', err);
             });
     };
