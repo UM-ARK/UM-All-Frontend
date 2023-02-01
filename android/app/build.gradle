@@ -138,8 +138,8 @@ android {
         applicationId "one.umall"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "1.3.2"
+        versionCode 25
+        versionName "1.4.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
@@ -282,7 +282,8 @@ dependencies {
     // 漸變庫安裝需要
     implementation project(':react-native-linear-gradient')
 
-    implementation project(':@react-native-community_cameraroll')  // https://github.com/react-native-cameraroll/react-native-cameraroll
+    // implementation project(':@react-native-community_cameraroll')  // https://github.com/react-native-cameraroll/react-native-cameraroll
+    implementation project(':@react-native-camera-roll_camera-roll')    // https://github.com/react-native-cameraroll/react-native-cameraroll
 
     implementation project(':react-native-restart') // https://github.com/avishayil/react-native-restart
 

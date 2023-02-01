@@ -8,6 +8,8 @@ import {
     StyleSheet,
     RefreshControl,
     VirtualizedList,
+    TouchableWithoutFeedback,
+    Linking
 } from 'react-native';
 
 // 本地工具
@@ -25,7 +27,8 @@ import {
     GET,
     addHost,
 } from '../../../utils/pathMap';
-import ScrollImage from './components/ScrollImage';
+import EventPage from '../news/EventPage.js';
+// import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
 import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
 import { versionStringCompare } from '../../../utils/versionKits';
@@ -38,6 +41,7 @@ import { PageControl, Card } from 'react-native-ui-lib';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Carousel from 'react-native-reanimated-carousel';
+import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import { inject } from 'mobx-react';
 import Toast, { DURATION } from 'react-native-easy-toast';
@@ -144,6 +148,14 @@ class HomeScreen extends Component {
         isShowModal: false,
 
         isLoading: true,
+
+        // 是否提示更新
+        showUpdateInfo: false,
+
+        app_version: {
+            lastest: '',
+            local: '',
+        }
     };
 
     componentDidMount() {
@@ -173,7 +185,7 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
-                this.toast.show(`請求錯誤 TAT ...`, 2000);
+                this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
                 // console.log('err', err);
             });
     };
@@ -207,22 +219,30 @@ class HomeScreen extends Component {
                     serverInfo.app_version,
                 ) == -1
             ) {
-                this.props.route.params.setLock(serverInfo.app_version);
+                this.setState({
+                    showUpdateInfo: true,
+                    app_version: {
+                        lastest: serverInfo.app_version,
+                        local: packageInfo.version,
+                    }
+                })
             }
         } catch (e) {
             // console.error(e);
-        } finally {
-            if (
-                serverInfo.index_head_carousel &&
-                serverInfo.index_head_carousel.length > 0
-            ) {
-                let imgUrlArr = serverInfo.index_head_carousel;
-                imgUrlArr.map(itm => {
-                    itm.url = addHost(itm.url);
-                });
-                this.setState({ carouselImagesArr: imgUrlArr });
-            }
-            this.setState({ isLoading: false });
+        }
+        finally {
+            // 設定輪播圖
+            // if (
+            //     serverInfo.index_head_carousel &&
+            //     serverInfo.index_head_carousel.length > 0
+            // ) {
+            //     let imgUrlArr = serverInfo.index_head_carousel;
+            //     imgUrlArr.map(itm => {
+            //         itm.url = addHost(itm.url);
+            //     });
+            //     this.setState({carouselImagesArr: imgUrlArr});
+            // }
+            this.setState({isLoading: false});
         }
     };
 
@@ -380,10 +400,73 @@ class HomeScreen extends Component {
         this.setState({ isShowModal: !this.state.isShowModal });
     };
 
+    // 渲染懸浮可拖動按鈕
+    renderGoTopButton = () => {
+        const { white, black, viewShadow } = COLOR_DIY;
+        return (
+            <Interactable.View
+                style={{
+                    zIndex: 999,
+                    position: 'absolute',
+                }}
+                ref="headInstance"
+                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
+                snapPoints={[
+                    { x: -scale(140), y: -scale(220) },
+                    { x: scale(140), y: -scale(220) },
+                    { x: -scale(140), y: -scale(120) },
+                    { x: scale(140), y: -scale(120) },
+                    { x: -scale(140), y: scale(0) },
+                    { x: scale(140), y: scale(0) },
+                    { x: -scale(140), y: scale(120) },
+                    { x: scale(140), y: scale(120) },
+                    { x: -scale(140), y: scale(220) },
+                    { x: scale(140), y: scale(220) },
+                ]}
+                // 設定初始吸附位置
+                initialPosition={{ x: scale(140), y: scale(220) }}>
+                {/* 懸浮吸附按鈕，回頂箭頭 */}
+                <TouchableWithoutFeedback
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
+                        this.refs.scrollView.scrollTo({
+                            x: 0,
+                            y: 0,
+                            duration: 500, // 回頂時間
+                        });
+                    }}>
+                    <View
+                        style={{
+                            width: scale(50),
+                            height: scale(50),
+                            backgroundColor: COLOR_DIY.white,
+                            borderRadius: scale(50),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            ...viewShadow,
+                        }}>
+                        <Ionicons
+                            name={'chevron-up'}
+                            size={scale(40)}
+                            color={black.main}
+                        />
+                    </View>
+                </TouchableWithoutFeedback>
+            </Interactable.View>
+        );
+    };
+
     render() {
         const { carouselImagesArr, selectDay } = this.state;
         return (
-            <View style={{ flex: 1, backgroundColor: bg_color }}>
+            <View
+                style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: bg_color,
+                }}>
                 {/* <Header
                     backgroundColor={white}
                     centerComponent={{
@@ -398,6 +481,10 @@ class HomeScreen extends Component {
                         barStyle: 'dark-content',
                     }}
                 /> */}
+
+                {/* 懸浮可拖動按鈕 */}
+                {this.state.isLoading ? null : this.renderGoTopButton()}
+
                 <ScrollView
                     refreshControl={
                         <RefreshControl
@@ -407,30 +494,20 @@ class HomeScreen extends Component {
                             onRefresh={() => {
                                 this.setState({ isLoading: true });
                                 this.getAppData();
+                                // 刷新重新請求活動頁數據
+                                this.refs.eventPage.onRefresh();
                             }}
                         />
                     }
-                    alwaysBounceHorizontal={false}>
-                    <View style={{ backgroundColor: white }}>
+                    alwaysBounceHorizontal={false}
+                    ref={'scrollView'}>
+                    <View style={{ backgroundColor: bg_color }}>
                         {/* 輪播圖 */}
-                        <ScrollImage imageData={carouselImagesArr} />
+                        {/* <ScrollImage imageData={carouselImagesArr} /> */}
 
-                        {/* 快捷功能圖標 */}
-                        <FlatGrid
-                            style={{ alignSelf: 'center' }}
-                            maxItemsPerRow={6}
-                            itemDimension={scale(50)}
-                            spacing={scale(10)}
-                            data={this.state.functionArray}
-                            renderItem={({ item }) => {
-                                return this.GetFunctionIcon(item);
-                            }}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-
+                        {/* 校曆 */}
                         {this.state.cal && this.state.cal.length > 0 ? (
-                            <View>
+                            <View style={{ marginTop: scale(10) }}>
                                 <VirtualizedList
                                     data={this.state.cal}
                                     initialNumToRender={4}
@@ -465,7 +542,6 @@ class HomeScreen extends Component {
                                     style={{
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        margin: scale(10),
                                         marginTop: scale(5),
                                     }}>
                                     <Text
@@ -477,7 +553,65 @@ class HomeScreen extends Component {
                                 </View>
                             </View>
                         ) : null}
+
+                        {/* 快捷功能圖標 */}
+                        <FlatGrid
+                            style={{ alignSelf: 'center' }}
+                            maxItemsPerRow={6}
+                            itemDimension={scale(50)}
+                            spacing={scale(10)}
+                            data={this.state.functionArray}
+                            renderItem={({ item }) => {
+                                return this.GetFunctionIcon(item);
+                            }}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
                     </View>
+
+                    {/* 更新提示 */}
+                    {this.state.showUpdateInfo ?
+                        <HomeCard style={{marginTop:scale(-10)}}>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    // alignSelf: 'center',
+                                }}>
+                                {`Lastest Version: ${this.state.app_version.lastest}`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    // alignSelf: 'center',
+                                }}>
+                                {`Your App Version: ${this.state.app_version.local}`}
+                            </Text>
+                            <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL(BASE_HOST);
+                            }}>
+                            <Text
+                                style={{
+                                    color: black.third,
+                                    marginTop: pxToDp(5),
+                                    fontWeight: 'bold',
+                                    // alignSelf: 'center',
+                                }}>
+                                {`Click me to update App 😉~`}
+                            </Text>
+                        </TouchableOpacity>
+                        </HomeCard>
+                        : null
+                    }
+
+                    {/* 活動頁 */}
+                    <EventPage ref="eventPage" style={{marginTop:scale(-15)}}></EventPage>
 
                     {/* 提示資訊 */}
                     <HomeCard>

@@ -216,7 +216,6 @@ class UMEventPage extends Component {
                             flex: 1,
                             justifyContent: 'center',
                             alignItems: 'center',
-                            backgroundColor: COLOR_DIY.bg_color,
                         }}>
                         <Loading />
                     </View>
