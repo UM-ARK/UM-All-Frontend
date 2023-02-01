@@ -1,11 +1,11 @@
 # UM ALL - Frontend - Public
 
-## 最新版本號 `1.3.2`
+## 最新版本號 `1.4.0`
 
 ## 內容
 
 - [UM ALL - Frontend - Public](#um-all---frontend---public)
-  - [最新版本號 `1.3.1`](#最新版本號-131)
+  - [最新版本號 `1.4.0`](#最新版本號-140)
   - [內容](#內容)
   - [環境安裝與運行模擬器](#環境安裝與運行模擬器)
     - [Android 環境 Install](#android-環境-install)
@@ -91,23 +91,34 @@ npx react-native run-ios
 
 ### 安裝及運行流程
 
-1. 去複製倉庫的代碼到本地
+1. 克隆倉庫的代碼到本地（推薦使用`GitHub Desktop`）
 
 ```console
 git clone <repo:link>
 ```
 
-2. 安裝 android 模擬器需要的依賴包
+2. 在項目根目錄下啟動控制台安裝依賴包
 
 ```console
-cd android
-npm i or npm install
+npm i
+or
+npm install
+or
+忽略警告安裝 - 正常會使用這條指令，因為某些有問題的包未有更新
+npm i --legacy-peer-deps
 ```
 
-3. 運行 android 模擬器
+3. 在 android 上編譯/運行App
 
 ```console
 npx react-native run-android
+or
+yarn android
+or
+npm run android
+or
+（已開啟App的情況下）
+npx react-native start --reset-cache
 ```
 
 4. 安裝 ios 模擬器需要的依賴包
@@ -117,7 +128,7 @@ cd ios
 pod install
 ```
 
-5. 運行 ios 模擬器
+5. 在 ios 模擬器上編譯/運行App
 
 ```console
 npx react-native run-ios
@@ -207,3 +218,4 @@ npx react-native run-ios
 
 1. 澳大日曆更新。從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 獲取 ics 文件；使用任何工具將 ics 轉為 json，例如 `https://ical-to-json.herokuapp.com/`。**務必注意最終 json 中的 key 必須為小寫**。覆蓋 `src/static/UMCalendar/UMCalendar.json` 中的內容即可。
 1. 輪播圖變更。登錄服務器後台，修改 `static/index` 下的文件，並且修改數據庫`app_info`表中輪播圖文本數組的文件名即可。
+1. Android端需保存好`.keystore`或`.jks`文件。編譯出包時，將該文件放置在`android/app`目錄下，以作App密鑰。
