@@ -78,7 +78,10 @@ class NewsCard extends Component {
                         type == 'news' ? 'NewsDetail' : 'UMEventDetail',
                         { data: newsData },
                     );
-                }}>
+                }}
+                // 沒有相片數據時，禁用點擊，跳轉頁面會引起閃退
+                disabled={haveImage == false}
+            >
                 {/* 文字居左，圖片居右 */}
                 <View style={styles.newsCardContentContainer}>
                     {/* 標題，有英文中文則顯示，無則顯示葡文 */}
