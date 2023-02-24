@@ -295,11 +295,10 @@ class HomeScreen extends Component {
         return (
             <TouchableOpacity
                 style={{
-                    // #a2d2e2
-                    backgroundColor: '#4994c4',
+                    backgroundColor: '#82c27b',
                     borderRadius: scale(20),
-                    borderColor: selectDay == index ? '#94c449' : null,
-                    borderWidth: selectDay == index ? scale(3) : null,
+                    borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
+                    borderWidth: selectDay == index ? scale(2) : null,
                     width: scale(95),
                     height: scale(95),
                     margin: scale(5),
