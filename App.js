@@ -14,6 +14,7 @@ import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { pxToDp } from './src/utils/stylesKits';
+import { scale } from 'react-native-size-matters';
 
 const { viewShadow, bg_color, white } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -87,10 +88,11 @@ class App extends Component {
                     isLoaded={this.state.isLoaded}
                     customComponent={
                         <Image
-                            source={require('./src/static/img/logo-rounded.png')}
+                            source={require('./src/static/img/logo.png')}
                             style={{
                                 width: LOGO_WIDTH,
                                 height: LOGO_WIDTH,
+                                borderRadius: scale(40)
                             }}
                         />
                     }
