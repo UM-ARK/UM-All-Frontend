@@ -319,7 +319,7 @@ class NewsPage extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={black.main}
+                            color={COLOR_DIY.themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>

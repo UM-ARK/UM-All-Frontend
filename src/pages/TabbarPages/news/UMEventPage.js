@@ -162,7 +162,7 @@ class UMEventPage extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={black.main}
+                            color={COLOR_DIY.themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -195,9 +195,6 @@ class UMEventPage extends Component {
                                 marginTop: pxToDp(5),
                             }}>
                             Data From: data.um.edu.mo
-                        </Text>
-                        <Text style={{color: black.third, alignSelf: 'center'}}>
-                            默認排序: 開始時間距離今天最近
                         </Text>
                     </View>
                 )}

@@ -41,6 +41,8 @@ class NewsScreen extends Component {
                         tabBarStyle: { backgroundColor: bg_color },
                         tabBarBounces: false,
                         tabBarLabelStyle: { fontSize: scale(10) },
+                        tabBarActiveTintColor: COLOR_DIY.themeColor,
+                        tabBarInactiveTintColor: COLOR_DIY.black.third,
                     }}
                     tabBarOptions={{
                         indicatorStyle: { backgroundColor: COLOR_DIY.themeColor },
