@@ -67,8 +67,33 @@ class UMEventPage extends Component {
             .then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
+                let nowMomentDate = moment(nowTimeStamp);
+
+                // 分隔今天/未來的活動 和 過往的活動
+                let resultList = [];
+                let outdatedList = [];
+                result.map((itm)=>{
+                    let beginMomentDate = moment(itm.common.dateFrom);
+                    if ( nowMomentDate.isSame(beginMomentDate,'day') || beginMomentDate.isSameOrAfter(nowMomentDate) ) {
+                        resultList.push(itm);
+                    }
+                    else{
+                        outdatedList.push(itm);
+                    }
+                })
                 // 排序：距離今天最近
-                result.sort((a, b) => {
+                resultList.sort((a, b) => {
+                    return Math.abs(
+                        nowTimeStamp - new Date(a.common.dateFrom).getTime(),
+                    ) >
+                        Math.abs(
+                            nowTimeStamp -
+                                new Date(b.common.dateFrom).getTime(),
+                        )
+                        ? 1
+                        : -1;
+                });
+                outdatedList.sort((a, b) => {
                     return Math.abs(
                         nowTimeStamp - new Date(a.common.dateFrom).getTime(),
                     ) >
@@ -80,7 +105,8 @@ class UMEventPage extends Component {
                         : -1;
                 });
 
-                this.setState({data: result, isLoading: false});
+                resultList = resultList.concat(outdatedList);
+                this.setState({data: resultList, isLoading: false});
             })
             .catch(err => {
                 console.error(err);
