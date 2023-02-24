@@ -52,6 +52,9 @@ class NewsCard extends Component {
                 title_cn = item.title;
             }
         });
+        let dateColor = black.third;
+        let beginMomentDate = moment(beginDate);
+        let nowMomentDate = moment(new Date());
 
         // 相片數組
         let haveImage = undefined;
@@ -60,6 +63,12 @@ class NewsCard extends Component {
         if (type == 'event') {
             haveImage = 'posterUrl' in newsData.common;
             imageUrls = haveImage ? newsData.common.posterUrl : '';
+            if (beginMomentDate.isSameOrAfter(nowMomentDate)) {
+                dateColor = COLOR_DIY.secondThemeColor
+            }
+            if (beginMomentDate.isSame(nowMomentDate, 'day')) {
+                dateColor = COLOR_DIY.themeColor
+            }
         }
         // 新聞類型
         // type為news時會有無圖情況
@@ -142,7 +151,7 @@ class NewsCard extends Component {
                                 fontSize: pxToDp(12),
                                 position: 'absolute',
                                 bottom: 0,
-                                color: (type == 'event' && moment(beginDate).isSameOrAfter(moment(new Date()).valueOf())) ? COLOR_DIY.secondThemeColor : black.third,
+                                color: dateColor,
                             }}>
                             @ {moment(beginDate).format('MM-DD')}
                         </Text>
