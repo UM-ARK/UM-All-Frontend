@@ -242,7 +242,7 @@ class HomeScreen extends Component {
             //     });
             //     this.setState({carouselImagesArr: imgUrlArr});
             // }
-            this.setState({isLoading: false});
+            this.setState({ isLoading: false });
         }
     };
 
@@ -295,11 +295,10 @@ class HomeScreen extends Component {
         return (
             <TouchableOpacity
                 style={{
-                    // #a2d2e2
-                    backgroundColor: '#4994c4',
+                    backgroundColor: '#82c27b',
                     borderRadius: scale(20),
-                    borderColor: selectDay == index ? '#94c449' : null,
-                    borderWidth: selectDay == index ? scale(3) : null,
+                    borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
+                    borderWidth: selectDay == index ? scale(2) : null,
                     width: scale(95),
                     height: scale(95),
                     margin: scale(5),
@@ -449,7 +448,7 @@ class HomeScreen extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={black.main}
+                            color={COLOR_DIY.themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -571,7 +570,7 @@ class HomeScreen extends Component {
 
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
-                        <HomeCard style={{marginTop:scale(-10)}}>
+                        <HomeCard style={{ marginTop: scale(-10) }}>
                             <Text
                                 style={{
                                     color: black.third,
@@ -591,27 +590,27 @@ class HomeScreen extends Component {
                                 {`Your App Version: ${this.state.app_version.local}`}
                             </Text>
                             <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL(BASE_HOST);
-                            }}>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: pxToDp(5),
-                                    fontWeight: 'bold',
-                                    // alignSelf: 'center',
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Linking.openURL(BASE_HOST);
                                 }}>
-                                {`Click me to update App 😉~`}
-                            </Text>
-                        </TouchableOpacity>
+                                <Text
+                                    style={{
+                                        color: black.third,
+                                        marginTop: pxToDp(5),
+                                        fontWeight: 'bold',
+                                        // alignSelf: 'center',
+                                    }}>
+                                    {`Click me to update App 😉~`}
+                                </Text>
+                            </TouchableOpacity>
                         </HomeCard>
                         : null
                     }
 
                     {/* 活動頁 */}
-                    <EventPage ref="eventPage" style={{marginTop:scale(-15)}}></EventPage>
+                    <EventPage ref="eventPage" style={{ marginTop: scale(-15) }}></EventPage>
 
                     {/* 提示資訊 */}
                     <HomeCard>
