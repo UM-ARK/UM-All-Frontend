@@ -296,7 +296,7 @@ PODS:
   - React-jsinspector (0.68.2)
   - React-logger (0.68.2):
     - glog
-  - react-native-cameraroll (5.2.3):
+  - react-native-cameraroll (5.2.4):
     - React-Core
   - react-native-compressor (1.6.1):
     - NextLevelSessionExporter
@@ -305,7 +305,7 @@ PODS:
     - React-Core
   - react-native-image-picker (4.10.3):
     - React-Core
-  - react-native-pager-view (6.1.2):
+  - react-native-pager-view (6.1.4):
     - React-Core
   - react-native-restart (0.0.24):
     - React-Core
@@ -390,7 +390,7 @@ PODS:
     - React-Core
   - RNCClipboard (1.11.1):
     - React-Core
-  - RNDateTimePicker (6.7.3):
+  - RNDateTimePicker (6.7.5):
     - React-Core
   - RNFastImage (8.6.3):
     - React-Core
@@ -429,10 +429,10 @@ PODS:
     - React-RCTText
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.19.0):
+  - RNScreens (3.20.0):
     - React-Core
     - React-RCTImage
-  - RNSVG (12.5.0):
+  - RNSVG (12.5.1):
     - React-Core
   - SDWebImage (5.11.1):
     - SDWebImage/Core (= 5.11.1)
@@ -690,11 +690,11 @@ SPEC CHECKSUMS:
   React-jsiexecutor: b7b553412f2ec768fe6c8f27cd6bafdb9d8719e6
   React-jsinspector: c5989c77cb89ae6a69561095a61cce56a44ae8e8
   React-logger: a0833912d93b36b791b7a521672d8ee89107aff1
-  react-native-cameraroll: 5b25d0be40185d02e522bf2abf8a1ba4e8faa107
+  react-native-cameraroll: cb752fda6d5268f1646b4390bd5be1f27706b9a0
   react-native-compressor: ebcf8bc36f8e44581a8f831583caee8a27e55a01
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-image-picker: 60f4246eb5bb7187fc15638a8c1f13abd3820695
-  react-native-pager-view: 54bed894cecebe28cede54c01038d9d1e122de43
+  react-native-pager-view: b58cb9e9f42f64e50cab3040815772c1d119a2e2
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
   react-native-webview: 9f111dfbcfc826084d6c507f569e5e03342ee1c1
@@ -714,14 +714,14 @@ SPEC CHECKSUMS:
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNCAsyncStorage: 8616bd5a58af409453ea4e1b246521bb76578d60
   RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
-  RNDateTimePicker: 00247f26c34683c80be94207f488f6f13448586e
+  RNDateTimePicker: 65e1d202799460b286ff5e741d8baf54695e8abd
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 071d7a9ad81e8b83fe7663b303d132406a7d8f39
   RNReactNativeHapticFeedback: 1e3efeca9628ff9876ee7cdd9edec1b336913f8c
   RNReanimated: 73afd1a9b4087e403163e0d300854cb99260c9b6
-  RNScreens: ea4cd3a853063cda19a4e3c28d2e52180c80f4eb
-  RNSVG: 6adc5c52d2488a476248413064b7f2832e639057
+  RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
+  RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
