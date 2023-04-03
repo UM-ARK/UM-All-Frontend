@@ -1,25 +1,25 @@
-import React, {Component} from 'react';
-import {Text, View, Dimensions} from 'react-native';
+import React, { Component } from 'react';
+import { Text, View, Dimensions } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
 import HomePage from '../home/index';
 import NewsPage from './NewsPage';
 import EventPage from './EventPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';
 
-import {Header} from '@rneui/themed';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { Header } from '@rneui/themed';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale } from 'react-native-size-matters';
 
-const {bg_color, white, black, themeColor} = COLOR_DIY;
+const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
 
 class NewsScreen extends Component {
     render() {
         return (
-            <View style={{backgroundColor: COLOR_DIY.bg_color, flex: 1}}>
+            <View style={{ backgroundColor: COLOR_DIY.bg_color, flex: 1 }}>
                 <Header
                     backgroundColor={bg_color}
                     // centerComponent={{
@@ -37,9 +37,15 @@ class NewsScreen extends Component {
                 {/* 能左右切換的TabPage */}
                 <Tab.Navigator
                     screenOptions={{
-                        tabBarLabelStyle: {fontSize: scale(10)},
-                        tabBarStyle: {backgroundColor: bg_color},
+                        tabBarLabelStyle: { fontSize: scale(10) },
+                        tabBarStyle: { backgroundColor: bg_color },
                         tabBarBounces: false,
+                        tabBarLabelStyle: { fontSize: scale(10) },
+                        tabBarActiveTintColor: COLOR_DIY.themeColor,
+                        tabBarInactiveTintColor: COLOR_DIY.black.third,
+                    }}
+                    tabBarOptions={{
+                        indicatorStyle: { backgroundColor: COLOR_DIY.themeColor },
                     }}
                     initialRouteName={'HomePage'}>
                     <Tab.Screen
@@ -49,13 +55,13 @@ class NewsScreen extends Component {
                             title: '主頁',
                         }}
                     />
-                    <Tab.Screen
+                    {/* <Tab.Screen
                         name="EventPage"
                         component={EventPage}
                         options={{
                             title: '組織活動',
                         }}
-                    />
+                    /> */}
                     <Tab.Screen
                         name="ClubPage"
                         component={ClubPage}
