@@ -295,15 +295,12 @@ class HomeScreen extends Component {
         return (
             <TouchableOpacity
                 style={{
-                    backgroundColor: COLOR_DIY.themeColor,
-                    borderRadius: scale(20),
-                    borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
+                    borderRadius: scale(8),
+                    borderColor: selectDay == index ? COLOR_DIY.themeColor : null,
                     borderWidth: selectDay == index ? scale(2) : null,
-                    width: scale(95),
-                    height: scale(95),
-                    margin: scale(5),
+                    paddingHorizontal: scale(5),
                     paddingVertical: scale(3),
-                    ...COLOR_DIY.viewShadow,
+                    // ...COLOR_DIY.viewShadow,
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
@@ -311,29 +308,37 @@ class HomeScreen extends Component {
                 }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     {/* 年份 */}
-                    <Text style={{ color: white, fontSize: scale(10) }}>
+                    <Text style={{
+                        color: COLOR_DIY.themeColor,
+                        fontSize: scale(10),
+                        fontWeight: selectDay == index ? 'bold' : null,
+                    }}>
                         {item.dtstart[0].substring(0, 4)}
                     </Text>
                     {/* 月份 */}
                     <Text
                         style={{
-                            color: white,
+                            color: COLOR_DIY.themeColor,
                             fontSize: scale(22),
-                            fontWeight: 'bold',
+                            fontWeight: selectDay == index ? 'bold' : null,
                         }}>
                         {item.dtstart[0].substring(4, 6)}
                     </Text>
                     {/* 日期 */}
                     <Text
                         style={{
-                            color: white,
+                            color: COLOR_DIY.themeColor,
                             fontSize: scale(22),
-                            fontWeight: 'bold',
+                            fontWeight: selectDay == index ? 'bold' : null,
                         }}>
                         {item.dtstart[0].substring(6, 8)}
                     </Text>
                     {/* 星期幾 */}
-                    <Text style={{ color: white, fontSize: scale(10) }}>
+                    <Text style={{
+                        color: COLOR_DIY.themeColor,
+                        fontSize: scale(10),
+                        fontWeight: selectDay == index ? 'bold' : null,
+                    }}>
                         {this.getWeek(item.dtstart[0])}
                     </Text>
                 </View>
@@ -531,9 +536,7 @@ class HomeScreen extends Component {
                                         <View style={{ marginLeft: scale(10) }} />
                                     }
                                     ListFooterComponent={
-                                        <View
-                                            style={{ marginRight: scale(10) }}
-                                        />
+                                        <View style={{ marginRight: scale(50) }} />
                                     }
                                 />
                                 {/* 該天描述 */}
@@ -542,12 +545,29 @@ class HomeScreen extends Component {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginTop: scale(5),
+                                        paddingHorizontal: scale(20),
+                                        flexDirection: 'row'
                                     }}>
-                                    <Text
-                                        style={{ color: black.third }}
-                                        selectable>
-                                        {'Important date: ' +
-                                            this.state.cal[selectDay].summary}
+                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                                    >
+                                        {'\\' + '\\'}
+                                    </Text>
+                                    <View style={{
+                                        borderWidth: scale(1),
+                                        borderColor: COLOR_DIY.themeColor,
+                                        borderRadius: scale(5),
+                                        paddingVertical: scale(2),
+                                        paddingHorizontal: scale(5),
+                                    }}>
+                                        <Text
+                                            style={{ color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                                            selectable>
+                                            {this.state.cal[selectDay].summary}
+                                        </Text>
+                                    </View>
+                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                                    >
+                                        {'//'}
                                     </Text>
                                 </View>
                             </View>
