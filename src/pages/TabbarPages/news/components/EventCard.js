@@ -125,19 +125,6 @@ class EventCard extends Component {
                 }}
                 activeOpacity={0.9}
                 onPress={this.handleJumpToDetail}>
-                {/* 進行中標識 */}
-                {/* {isFinish ? null : (
-                    <View
-                        style={{
-                            ...styles.rightTopIconPosition,
-                            ...styles.unFinish,
-                            zIndex: 9,
-                        }}>
-                        <Text style={{fontSize: scale(10), color: white}}>
-                            進行中
-                        </Text>
-                    </View>
-                )} */}
                 {/* 即將結束標識 */}
                 {/* {isAlmost ? (
                     <View
@@ -206,23 +193,16 @@ class EventCard extends Component {
                             ) : null}
                         </FastImage>
 
-                        {/* 標題描述 */}
+                        {/* 活動簡單描述 */}
                         <View style={styles.title.container}>
-                            {/* 標題文字 & 日期 */}
                             <View style={{ width: '100%' }}>
+                                {/* 活動標題 */}
                                 <Text
                                     style={styles.title.text}
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
-                                {/* 日期 */}
-                                {/* <Text
-                                    style={{
-                                        color: black.third,
-                                        fontSize: scale(12),
-                                    }}>
-                                    {moment(startTimeStamp).format('MM-DD')}
-                                </Text> */}
+
                                 {/* 標識 & 組織名 */}
                                 <View style={{
                                     marginTop: isFinish ? null : scale(5),
@@ -330,8 +310,8 @@ const styles = StyleSheet.create({
             backgroundColor: white,
             width: IMAGE_SIZE,
             padding: scale(8),
-            flexDirection: 'row',
-            alignItems: 'center',
+            // flexDirection: 'row',
+            // alignItems: 'center',
         },
         text: {
             color: black.main,
