@@ -11,7 +11,7 @@ import {
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { pxToDp } from '../../../../utils/stylesKits';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
@@ -139,7 +139,7 @@ class EventCard extends Component {
                     </View>
                 )} */}
                 {/* 即將結束標識 */}
-                {isAlmost ? (
+                {/* {isAlmost ? (
                     <View
                         style={{
                             ...styles.rightTopIconPosition,
@@ -164,7 +164,7 @@ class EventCard extends Component {
                             </Text>
                         </View>
                     )
-                )}
+                )} */}
                 {coverImgUrl ? (
                     <View
                         style={{
@@ -209,33 +209,94 @@ class EventCard extends Component {
                         {/* 標題描述 */}
                         <View style={styles.title.container}>
                             {/* 標題文字 & 日期 */}
-                            <View style={{ width: '90%' }}>
+                            <View style={{ width: '100%' }}>
                                 <Text
-                                    style={{
-                                        color: black.main,
-                                        fontWeight: '500',
-                                        fontSize: scale(13),
-                                    }}
+                                    style={styles.title.text}
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
                                 {/* 日期 */}
-                                <Text
+                                {/* <Text
                                     style={{
                                         color: black.third,
                                         fontSize: scale(12),
                                     }}>
                                     {moment(startTimeStamp).format('MM-DD')}
-                                </Text>
+                                </Text> */}
+                                {/* 標識 & 組織名 */}
+                                <View style={{
+                                    marginTop: isFinish ? null : scale(5),
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    width: '100%'
+                                }}>
+                                    {/* <View style={{
+                                        borderWidth: scale(1),
+                                        borderColor: black.third,
+                                        borderRadius: scale(5),
+                                        padding: scale(1)
+                                    }}>
+                                        <Text
+                                            style={{
+                                                color: black.third,
+                                                fontSize: scale(8),
+                                            }}>
+                                            By
+                                        </Text>
+                                    </View> */}
+                                    {/* 即將結束標識 */}
+                                    {isAlmost ? (
+                                        <View
+                                            style={{
+                                                // ...styles.rightTopIconPosition,
+                                                ...styles.unFinish,
+                                                borderColor: COLOR_DIY.unread,
+                                            }}>
+                                            <Text style={{
+                                                ...styles.stateNoticeText,
+                                                color: COLOR_DIY.unread
+                                            }}>
+                                                將結束
+                                            </Text>
+                                        </View>
+                                    ) : (
+                                        isFinish ? null : (
+                                            <View
+                                                // ...styles.rightTopIconPosition,
+                                                style={{ ...styles.unFinish }}>
+                                                <Text style={{
+                                                    ...styles.stateNoticeText,
+                                                    color: COLOR_DIY.secondThemeColor
+                                                }}>
+                                                    進行中
+                                                </Text>
+                                            </View>
+                                        )
+                                    )}
+                                    {/* TODO: 獲取活動API附帶組織名 */}
+                                    {/* <View style={{
+                                        marginLeft: isFinish ? null : scale(3),
+                                        width: isFinish ? '100%' : '80%',
+                                    }}>
+                                        <Text
+                                            numberOfLines={1}
+                                            style={{
+                                                color: black.third,
+                                                fontSize: scale(9),
+                                            }}>
+                                            澳門大學學生會機械工程學生會
+                                        </Text>
+                                    </View> */}
+                                </View>
                             </View>
 
                             {/* 點擊指示圖標 */}
-                            <View>
+                            {/* <View style={{ backgroundColor: 'red' }}>
                                 <Ionicons
                                     name="chevron-forward-outline"
                                     color={black.third}
-                                    size={pxToDp(20)}></Ionicons>
-                            </View>
+                                    size={scale(15)} />
+                            </View> */}
                         </View>
                     </View>
                 ) : null}
@@ -253,20 +314,30 @@ const styles = StyleSheet.create({
     },
     // 紅點標籤樣式
     unFinish: {
-        paddingHorizontal: scale(5),
-        paddingVertical: scale(2),
-        backgroundColor: COLOR_DIY.secondThemeColor,
+        paddingHorizontal: scale(2),
+        paddingVertical: scale(1),
+        borderColor: COLOR_DIY.secondThemeColor,
         borderRadius: scale(20),
-        ...COLOR_DIY.viewShadow,
+        borderWidth: scale(1),
+        zIndex: 9,
+        // ...COLOR_DIY.viewShadow,
+    },
+    stateNoticeText: {
+        fontSize: scale(7)
     },
     title: {
         container: {
             backgroundColor: white,
             width: IMAGE_SIZE,
-            padding: pxToDp(10),
+            padding: scale(8),
             flexDirection: 'row',
             alignItems: 'center',
         },
+        text: {
+            color: black.main,
+            fontWeight: '500',
+            fontSize: scale(11),
+        }
     },
 });
 
