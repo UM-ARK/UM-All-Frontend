@@ -113,19 +113,6 @@ class HomeScreen extends Component {
                 },
             },
             {
-                icon_name: 'coffee-outline',
-                icon_type: iconTypes.materialCommunityIcons,
-                function_name: '論壇',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    let webview_param = {
-                        url: UM_WHOLE,
-                        title: '討論區',
-                    };
-                    this.props.navigation.navigate('Webviewer', webview_param);
-                },
-            },
-            {
                 icon_name: 'ghost',
                 icon_type: iconTypes.materialCommunityIcons,
                 function_name: '生存指南',
@@ -254,18 +241,15 @@ class HomeScreen extends Component {
         // ***務必注意key、value的大小寫！！**
         let cal = UMCalendar.vcalendar[0].vevent;
         if (cal) {
-            // console.log('日曆事件有', cal);
-            let showCal = [];
+            this.setState({ cal })
             let nowTimeStamp = moment(new Date());
-            showCal = cal;
-            // 篩選出未來的重要日期
+            // 同日或未來的重要時間設為選中日
             for (let i = 0; i < cal.length; i++) {
                 if (moment(cal[i].dtstart[0]).isSameOrAfter(nowTimeStamp)) {
                     this.setState({ selectDay: i });
                     break;
                 }
             }
-            this.setState({ cal: showCal });
         }
     };
 
@@ -349,11 +333,13 @@ class HomeScreen extends Component {
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
+        let imageSize = scale(60);
+        let iconSize = scale(30);
         if (icon_type == 'ionicons') {
             icon = (
                 <Ionicons
                     name={icon_name}
-                    size={scale(30)}
+                    size={iconSize - 5}
                     color={COLOR_DIY.themeColor}
                 />
             );
@@ -361,7 +347,7 @@ class HomeScreen extends Component {
             icon = (
                 <MaterialCommunityIcons
                     name={icon_name}
-                    size={scale(35)}
+                    size={iconSize}
                     color={COLOR_DIY.themeColor}
                 />
             );
@@ -373,8 +359,8 @@ class HomeScreen extends Component {
                         // cache: FastImage.cacheControl.web,
                     }}
                     style={{
-                        height: scale(60),
-                        width: scale(60),
+                        height: imageSize,
+                        width: imageSize,
                     }}
                 />
             );
@@ -390,7 +376,7 @@ class HomeScreen extends Component {
                 {icon}
                 <Text
                     style={{
-                        fontSize: pxToDp(12),
+                        fontSize: pxToDp(11),
                         color: COLOR_DIY.black.second,
                     }}>
                     {function_name}
@@ -462,7 +448,7 @@ class HomeScreen extends Component {
     };
 
     render() {
-        const { carouselImagesArr, selectDay } = this.state;
+        const { selectDay, cal } = this.state;
         return (
             <View
                 style={{
@@ -506,20 +492,17 @@ class HomeScreen extends Component {
                     alwaysBounceHorizontal={false}
                     ref={'scrollView'}>
                     <View style={{ backgroundColor: bg_color }}>
-                        {/* 輪播圖 */}
-                        {/* <ScrollImage imageData={carouselImagesArr} /> */}
-
-                        {/* 校曆 */}
-                        {this.state.cal && this.state.cal.length > 0 ? (
-                            <View style={{ marginTop: scale(10) }}>
+                        <View style={{ marginTop: scale(10), flexDirection: 'row' }}>
+                            {/* 校曆 */}
+                            {this.state.cal && this.state.cal.length > 0 ? (
                                 <VirtualizedList
                                     data={this.state.cal}
                                     initialNumToRender={4}
                                     initialScrollIndex={selectDay}
                                     getItemLayout={(data, index) => {
                                         return {
-                                            length: scale(100),
-                                            offset: scale(100) * index,
+                                            length: scale(35),
+                                            offset: scale(35) * index,
                                             index,
                                         };
                                     }}
@@ -536,40 +519,56 @@ class HomeScreen extends Component {
                                         <View style={{ marginLeft: scale(10) }} />
                                     }
                                     ListFooterComponent={
-                                        <View style={{ marginRight: scale(50) }} />
+                                        <View style={{ marginRight: scale(10) }} />
                                     }
                                 />
-                                {/* 該天描述 */}
-                                <View
-                                    style={{
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        marginTop: scale(5),
-                                        paddingHorizontal: scale(20),
-                                        flexDirection: 'row'
-                                    }}>
-                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                            ) : null}
+
+                            {/* 快捷功能入口 */}
+                            {/* <View style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'space-around',
+                                marginRight: scale(5),
+                            }}>
+                                {
+                                    this.state.functionArray.map((itm) => this.GetFunctionIcon(itm))
+                                }
+                            </View> */}
+                        </View>
+                        {/* 校曆日期描述 */}
+                        {cal ? (
+                            <View
+                                style={{
+                                    flex: 1,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginVertical: scale(5),
+                                    paddingHorizontal: scale(20),
+                                    flexDirection: 'row'
+                                }}>
+                                <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                                >
+                                    {'\\' + '\\'}
+                                </Text>
+                                <View style={{
+                                    borderWidth: scale(1),
+                                    borderColor: COLOR_DIY.themeColor,
+                                    borderRadius: scale(5),
+                                    paddingVertical: scale(2),
+                                    paddingHorizontal: scale(5),
+                                }}>
+                                    <Text
+                                        selectable
+                                        style={{ color: COLOR_DIY.themeColor, textAlign: 'center' }}
                                     >
-                                        {'\\' + '\\'}
-                                    </Text>
-                                    <View style={{
-                                        borderWidth: scale(1),
-                                        borderColor: COLOR_DIY.themeColor,
-                                        borderRadius: scale(5),
-                                        paddingVertical: scale(2),
-                                        paddingHorizontal: scale(5),
-                                    }}>
-                                        <Text
-                                            style={{ color: COLOR_DIY.themeColor, textAlign: 'center' }}
-                                            selectable>
-                                            {this.state.cal[selectDay].summary}
-                                        </Text>
-                                    </View>
-                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
-                                    >
-                                        {'//'}
+                                        {this.state.cal[selectDay].summary}
                                     </Text>
                                 </View>
+                                <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                                >
+                                    {'//'}
+                                </Text>
                             </View>
                         ) : null}
 
@@ -578,11 +577,9 @@ class HomeScreen extends Component {
                             style={{ alignSelf: 'center' }}
                             maxItemsPerRow={6}
                             itemDimension={scale(50)}
-                            spacing={scale(10)}
+                            spacing={scale(5)}
                             data={this.state.functionArray}
-                            renderItem={({ item }) => {
-                                return this.GetFunctionIcon(item);
-                            }}
+                            renderItem={({ item }) => this.GetFunctionIcon(item)}
                             showsVerticalScrollIndicator={false}
                             scrollEnabled={false}
                         />
@@ -590,7 +587,7 @@ class HomeScreen extends Component {
 
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
-                        <HomeCard style={{ marginTop: scale(-10) }}>
+                        <HomeCard>
                             <Text
                                 style={{
                                     color: black.third,
@@ -626,11 +623,10 @@ class HomeScreen extends Component {
                                 </Text>
                             </TouchableOpacity>
                         </HomeCard>
-                        : null
-                    }
+                        : null}
 
                     {/* 活動頁 */}
-                    <EventPage ref="eventPage" style={{ marginTop: scale(-15) }}></EventPage>
+                    <EventPage ref="eventPage" />
 
                     {/* 提示資訊 */}
                     <HomeCard>
