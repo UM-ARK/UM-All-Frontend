@@ -491,7 +491,7 @@ class HomeScreen extends Component {
                     alwaysBounceHorizontal={false}
                     ref={'scrollView'}>
                     <View style={{ backgroundColor: bg_color }}>
-                        <View style={{ marginTop: scale(10), flexDirection: 'row' }}>
+                        <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
                             {/* 校曆 */}
                             {this.state.cal && this.state.cal.length > 0 ? (
                                 <VirtualizedList
