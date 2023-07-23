@@ -5,8 +5,8 @@ import {Dimensions, View, Text, Button, TouchableOpacity} from 'react-native';
 import Modal from 'react-native-modal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {pxToDp} from '../utils/stylesKits';
 import {COLOR_DIY} from '../utils/uiMap';
+import { scale } from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -48,8 +48,8 @@ class ModalBottom extends Component {
                         // height: '18%',
                         width: '100%',
                         backgroundColor: COLOR_DIY.meScreenColor.bg_color,
-                        borderTopLeftRadius: pxToDp(15),
-                        borderTopRightRadius: pxToDp(15),
+                        borderTopLeftRadius: scale(15),
+                        borderTopRightRadius: scale(15),
                         overflow: 'hidden',
                         // 可接收樣式覆蓋
                         ...this.props.style,

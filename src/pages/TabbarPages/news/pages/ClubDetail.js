@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
 import {setAPPInfo} from '../../../../utils/storageKits';
 import {
@@ -422,7 +421,7 @@ class ClubDetail extends Component {
                             }}>
                             <Ionicons
                                 name="chevron-back-outline"
-                                size={pxToDp(25)}
+                                size={scale(25)}
                                 color={white}
                             />
                         </TouchableOpacity>
@@ -451,7 +450,7 @@ class ClubDetail extends Component {
                                 }>
                                 <Ionicons
                                     name="settings-outline"
-                                    size={pxToDp(25)}
+                                    size={scale(25)}
                                     color={white}
                                 />
                             </TouchableOpacity>
@@ -474,7 +473,7 @@ class ClubDetail extends Component {
                                 }}>
                                 <Feather
                                     name="message-circle"
-                                    size={pxToDp(25)}
+                                    size={scale(25)}
                                     color={white}
                                 />
                             </TouchableOpacity>
@@ -530,8 +529,8 @@ class ClubDetail extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                fontSize: pxToDp(13),
-                                marginVertical: pxToDp(2),
+                                fontSize: scale(13),
+                                marginVertical: scale(2),
                             }}>
                             {'@' +
                                 '000'.substr(club_num.toString().length) +
@@ -541,7 +540,7 @@ class ClubDetail extends Component {
                         <Text
                             style={{
                                 color: themeColor,
-                                fontSize: pxToDp(15),
+                                fontSize: scale(15),
                             }}>
                             {'#' + clubTagMap(tag)}
                         </Text>
@@ -616,8 +615,8 @@ class ClubDetail extends Component {
                                     justifyContent: 'space-between',
                                     alignItems: 'flex-start',
                                     flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
+                                    margin: scale(10),
+                                    marginTop: scale(0),
                                 }}>
                                 {/* 聯繫方式 */}
                                 <View>
@@ -628,7 +627,7 @@ class ClubDetail extends Component {
                                                     style={{
                                                         flexDirection: 'row',
                                                         alignItems: 'center',
-                                                        marginBottom: pxToDp(3),
+                                                        marginBottom: scale(3),
                                                     }}>
                                                     {/* 聯繫Type */}
                                                     <View
@@ -677,8 +676,8 @@ class ClubDetail extends Component {
                         ) : (
                             <View
                                 style={{
-                                    marginLeft: pxToDp(10),
-                                    marginBottom: pxToDp(10),
+                                    marginLeft: scale(10),
+                                    marginBottom: scale(10),
                                 }}>
                                 <Text style={{color: black.third}}>
                                     這個組織還未留下聯繫方式~
@@ -698,8 +697,8 @@ class ClubDetail extends Component {
                                     justifyContent: 'space-between',
                                     alignItems: 'flex-start',
                                     flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
+                                    margin: scale(10),
+                                    marginTop: scale(0),
                                 }}>
                                 {/* 服務圖標與文字 */}
                                 <HyperlinkText
@@ -872,17 +871,17 @@ class ClubDetail extends Component {
                     <ModalBottom cancel={this.tiggerModalBottom}>
                         <View
                             style={{
-                                padding: pxToDp(20),
+                                padding: scale(20),
                                 height: PAGE_HEIGHT * 0.7,
                             }}>
                             <Text
                                 style={{
                                     color: black.third,
-                                    fontSize: pxToDp(13),
+                                    fontSize: scale(13),
                                 }}>
                                 簡介
                             </Text>
-                            <ScrollView style={{marginTop: pxToDp(5)}}>
+                            <ScrollView style={{marginTop: scale(5)}}>
                                 <HyperlinkText
                                     linkStyle={{color: themeColor}}
                                     navigation={this.props.navigation}
@@ -890,7 +889,7 @@ class ClubDetail extends Component {
                                     <Text
                                         style={{
                                             color: black.main,
-                                            fontSize: pxToDp(16),
+                                            fontSize: scale(16),
                                         }}
                                         selectable>
                                         {intro}
@@ -909,7 +908,7 @@ class ClubDetail extends Component {
                     textStyle={{color: white}}
                     style={{
                         backgroundColor: this.state.toastColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
@@ -920,31 +919,31 @@ class ClubDetail extends Component {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: COLOR_DIY.white,
-        borderRadius: pxToDp(10),
-        marginHorizontal: pxToDp(15),
+        borderRadius: scale(10),
+        marginHorizontal: scale(15),
         // 增加陰影
-        marginBottom: pxToDp(8),
-        marginTop: pxToDp(10),
+        marginBottom: scale(8),
+        marginTop: scale(10),
         ...COLOR_DIY.viewShadow,
     },
     cardTitleContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: pxToDp(10),
-        paddingHorizontal: pxToDp(10),
+        paddingVertical: scale(10),
+        paddingHorizontal: scale(10),
     },
     cardTitleText: {
-        fontSize: pxToDp(13),
+        fontSize: scale(13),
         color: themeColor,
         fontWeight: 'bold',
     },
     clubLogoContainer: {
         position: 'absolute',
-        bottom: pxToDp(5),
+        bottom: scale(5),
         alignSelf: 'center',
-        width: pxToDp(CLUB_LOGO_SIZE),
-        height: pxToDp(CLUB_LOGO_SIZE),
+        width: scale(CLUB_LOGO_SIZE),
+        height: scale(CLUB_LOGO_SIZE),
         borderRadius: 50,
         overflow: 'hidden',
         ...COLOR_DIY.viewShadow,
@@ -953,17 +952,17 @@ const styles = StyleSheet.create({
     clubLogoWhiteSpace: {
         bottom: 0,
         width: '100%',
-        height: pxToDp(20),
+        height: scale(20),
         backgroundColor: bg_color,
         position: 'absolute',
-        borderTopLeftRadius: pxToDp(15),
-        borderTopRightRadius: pxToDp(15),
+        borderTopLeftRadius: scale(15),
+        borderTopRightRadius: scale(15),
     },
     clubNameText: {
         color: black.main,
-        fontSize: pxToDp(20),
+        fontSize: scale(20),
         fontWeight: '500',
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
     },
     imageContainer: {
@@ -974,17 +973,17 @@ const styles = StyleSheet.create({
         ...viewShadow,
     },
     checkMoreButton: {
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
-        padding: pxToDp(10),
-        borderRadius: pxToDp(15),
+        padding: scale(10),
+        borderRadius: scale(15),
         backgroundColor: themeColor,
     },
     followButton: {
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
-        padding: pxToDp(10),
-        borderRadius: pxToDp(12),
+        padding: scale(10),
+        borderRadius: scale(12),
     },
 });
 

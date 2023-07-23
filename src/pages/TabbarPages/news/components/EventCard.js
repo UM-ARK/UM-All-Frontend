@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
-import { pxToDp } from '../../../../utils/stylesKits';
 
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';

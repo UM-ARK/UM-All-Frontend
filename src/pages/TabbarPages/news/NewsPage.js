@@ -15,7 +15,6 @@ import {
 import NewsCard from './components/NewsCard';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
 import {UM_API_NEWS, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
@@ -180,7 +179,7 @@ class NewsPage extends Component {
         } = this.state.topNews;
 
         return (
-            <View style={{marginTop: pxToDp(5)}}>
+            <View style={{marginTop: scale(5)}}>
                 <Text style={{color: black.third, alignSelf: 'center'}}>
                     Data From: data.um.edu.mo
                 </Text>
@@ -230,7 +229,7 @@ class NewsPage extends Component {
                                                 style={{
                                                     color: white,
                                                     fontWeight: 'bold',
-                                                    fontSize: pxToDp(18),
+                                                    fontSize: scale(18),
                                                 }}
                                                 numberOfLines={3}>
                                                 {title_en}
@@ -239,7 +238,7 @@ class NewsPage extends Component {
                                                 style={{
                                                     color: white,
                                                     fontWeight: 'bold',
-                                                    fontSize: pxToDp(13),
+                                                    fontSize: scale(13),
                                                 }}>
                                                 {title_cn}
                                             </Text>
@@ -374,7 +373,7 @@ class NewsPage extends Component {
                         ListHeaderComponent={this.renderTopNews}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (
-                            <View style={{marginTop: pxToDp(200)}}></View>
+                            <View style={{marginTop: scale(200)}}></View>
                         )}
                         refreshControl={
                             <RefreshControl
@@ -399,11 +398,11 @@ class NewsPage extends Component {
 
 const styles = StyleSheet.create({
     topNewsContainer: {
-        borderRadius: pxToDp(10),
+        borderRadius: scale(10),
         overflow: 'hidden',
-        marginHorizontal: pxToDp(10),
-        marginVertical: pxToDp(5),
-        height: pxToDp(200),
+        marginHorizontal: scale(10),
+        marginVertical: scale(5),
+        height: scale(200),
         backgroundColor: white,
         ...viewShadow,
     },
@@ -411,18 +410,18 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: pxToDp(15),
+        padding: scale(15),
         justifyContent: 'flex-end',
     },
     topNewsPosition: {
         position: 'absolute',
-        top: pxToDp(10),
-        left: pxToDp(15),
+        top: scale(10),
+        left: scale(15),
     },
     topNewsText: {
         color: white,
         fontWeight: 'bold',
-        fontSize: pxToDp(20),
+        fontSize: scale(20),
     },
 });
 

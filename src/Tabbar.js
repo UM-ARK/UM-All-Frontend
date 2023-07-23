@@ -6,8 +6,8 @@ import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 
-import {pxToDp} from './utils/stylesKits';
 import {COLOR_DIY} from './utils/uiMap';
+import { scale } from 'react-native-size-matters';
 
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -47,7 +47,7 @@ class Tabbar extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
                     tabBarBackground: 'transparent',
-                    horizontalPadding: pxToDp(10),
+                    horizontalPadding: scale(10),
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
                 {/* {isClub ? null : (

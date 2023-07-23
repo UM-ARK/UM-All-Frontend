@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
 import {UM_API_EVENT, UM_API_TOKEN} from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
@@ -192,7 +191,7 @@ class UMEventPage extends Component {
                             style={{
                                 color: black.third,
                                 alignSelf: 'center',
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                             }}>
                             Data From: data.um.edu.mo
                         </Text>
@@ -200,7 +199,7 @@ class UMEventPage extends Component {
                 )}
                 // 列表底部渲染，防止Tabbar遮擋
                 ListFooterComponent={() => (
-                    <View style={{marginBottom: pxToDp(50)}}></View>
+                    <View style={{marginBottom: scale(50)}}></View>
                 )}
                 refreshControl={
                     <RefreshControl
@@ -253,8 +252,8 @@ class UMEventPage extends Component {
 const s = StyleSheet.create({
     // 活動卡片間距
     cardContainer: {
-        marginVertical: pxToDp(6),
-        marginHorizontal: pxToDp(5),
+        marginVertical: scale(6),
+        marginHorizontal: scale(5),
     },
 });
 

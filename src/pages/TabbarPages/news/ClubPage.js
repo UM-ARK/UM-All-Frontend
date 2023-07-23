@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
-import { pxToDp } from '../../../utils/stylesKits';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import Loading from '../../../components/Loading';
@@ -99,7 +98,7 @@ class ClubPage extends Component {
                         <TouchableOpacity
                             onPress={() => Linking.openURL(USUAL_Q)}
                             style={{
-                                // marginTop: pxToDp(20),
+                                // marginTop: scale(20),
                                 alignSelf: 'center',
                             }}>
                             <Text
@@ -161,7 +160,7 @@ class ClubPage extends Component {
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        marginTop: pxToDp(8),
+                        marginTop: scale(8),
                         width: '100%',
                     }}>
                     <Text style={{ color: black.third }}>篩選</Text>
@@ -171,9 +170,9 @@ class ClubPage extends Component {
                                 ? 'md-funnel'
                                 : 'md-funnel-outline'
                         }
-                        size={pxToDp(10)}
+                        size={scale(10)}
                         color={black.third}
-                        style={{ marginLeft: pxToDp(5) }}
+                        style={{ marginLeft: scale(5) }}
                     />
                 </TouchableOpacity>
 

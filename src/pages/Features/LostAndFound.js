@@ -1,5 +1,5 @@
 // 失物招領
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -12,15 +12,15 @@ import {
 } from 'react-native';
 
 // 引入本地工具
-import {pxToDp} from '../../utils/stylesKits';
-import {COLOR_DIY} from '../../utils/uiMap';
-import {UM_LOST_FOUND} from '../../utils/pathMap';
+import { COLOR_DIY } from '../../utils/uiMap';
+import { UM_LOST_FOUND } from '../../utils/pathMap';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 
 import axios from 'axios';
+import { scale } from 'react-native-size-matters';
 
-const {black, white, themeColor, bg_color} = COLOR_DIY;
+const { black, white, themeColor, bg_color } = COLOR_DIY;
 
 // 失物招領網頁數據轉json  (Lost and found)
 function LaF_to_Json(html_source_data) {
@@ -118,7 +118,7 @@ class LostAndFound extends Component {
                 let recordNum = html.length / 5;
                 html = html.slice(0, recordNum);
                 let json = LaF_to_Json(html);
-                this.setState({data: json, isLoading: false});
+                this.setState({ data: json, isLoading: false });
             })
             .catch(err => {
                 console.error(err);
@@ -130,11 +130,11 @@ class LostAndFound extends Component {
         return (
             <View
                 style={{
-                    marginVertical: pxToDp(5),
-                    marginHorizontal: pxToDp(15),
+                    marginVertical: scale(5),
+                    marginHorizontal: scale(15),
                     backgroundColor: white,
-                    padding: pxToDp(5),
-                    borderRadius: pxToDp(12),
+                    padding: scale(5),
+                    borderRadius: scale(12),
                     ...COLOR_DIY.viewShadow,
                     overflow: 'visible',
                 }}>
@@ -142,26 +142,23 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        marginLeft: pxToDp(4),
+                        marginLeft: scale(8),
+                        marginVertical: scale(5),
                     }}>
                     <Text
                         style={{
                             color: themeColor,
-                            fontSize: pxToDp(23),
+                            fontSize: scale(23),
                             fontWeight: 'bold',
-                            paddingLeft: pxToDp(16),
-                            paddingTop: pxToDp(6),
-                            paddingBottom: pxToDp(8),
                         }}>
                         {'物品: '}
                     </Text>
                     <Text
                         style={{
                             color: '#FF8627',
-                            fontSize: pxToDp(23),
+                            fontSize: scale(23),
                             fontWeight: 'bold',
-                            paddingTop: pxToDp(6),
-                            paddingBottom: pxToDp(8),
+                            marginLeft: scale(9)
                         }}>
                         {item.title}
                     </Text>
@@ -171,8 +168,8 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        paddingLeft: pxToDp(8),
-                        paddingBottom: pxToDp(5),
+                        paddingLeft: scale(8),
+                        paddingBottom: scale(5),
                     }}>
                     <Text style={styles.titleText}>{'拾獲日期: '}</Text>
                     <Text style={styles.contentText}>{item.date}</Text>
@@ -182,9 +179,9 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        paddingLeft: pxToDp(8),
-                        paddingBottom: pxToDp(5),
-                        width: pxToDp(260),
+                        paddingLeft: scale(8),
+                        paddingBottom: scale(5),
+                        width: '75%',
                     }}>
                     <Text style={styles.titleText}>{'拾獲地點: '}</Text>
                     <Text style={styles.contentText}>{item.pick_up}</Text>
@@ -194,9 +191,9 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         flexDirection: 'row',
-                        paddingLeft: pxToDp(8),
-                        paddingBottom: pxToDp(5),
-                        width: pxToDp(260),
+                        paddingLeft: scale(8),
+                        paddingBottom: scale(5),
+                        width: '75%',
                     }}>
                     <Text style={styles.titleText}>{'現時位置: '}</Text>
                     <Text style={styles.contentText}>
@@ -208,15 +205,14 @@ class LostAndFound extends Component {
                 <View
                     style={{
                         position: 'absolute',
-                        alignSelf: 'flex-end',
-                        top: pxToDp(5),
-                        right: pxToDp(10),
+                        top: scale(10),
+                        right: scale(10),
                     }}>
                     <Text
                         style={{
                             color: black.third,
-                            fontSize: pxToDp(13),
-                            marginLeft: pxToDp(80),
+                            fontSize: scale(12),
+                            marginLeft: scale(80),
                         }}>
                         {item.ref.substr(1, 8)}
                     </Text>
@@ -226,9 +222,9 @@ class LostAndFound extends Component {
     };
 
     render() {
-        const {data, isLoading} = this.state;
+        const { data, isLoading } = this.state;
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'失物招領'} />
 
                 <Text
@@ -246,7 +242,7 @@ class LostAndFound extends Component {
                         style={{
                             alignSelf: 'center',
                             color: themeColor,
-                            marginBottom: pxToDp(5),
+                            marginBottom: scale(5),
                         }}>
                         Check all
                     </Text>
@@ -257,7 +253,7 @@ class LostAndFound extends Component {
                         ref={'virtualizedList'}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
                         initialNumToRender={4}
-                        renderItem={({item}) => {
+                        renderItem={({ item }) => {
                             return this.renderContent(item);
                         }}
                         // 整理item數據
@@ -266,7 +262,7 @@ class LostAndFound extends Component {
                         getItemCount={getItemCount}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (
-                            <View style={{marginBottom: pxToDp(50)}}></View>
+                            <View style={{ marginBottom: scale(50) }}></View>
                         )}
                         refreshControl={
                             <RefreshControl
@@ -275,7 +271,7 @@ class LostAndFound extends Component {
                                 refreshing={this.state.isLoading}
                                 onRefresh={() => {
                                     // 展示Loading標識
-                                    this.setState({isLoading: true});
+                                    this.setState({ isLoading: true });
                                     this.getData();
                                 }}
                             />
@@ -288,7 +284,7 @@ class LostAndFound extends Component {
                             flex: 1,
                             justifyContent: 'center',
                             alignItems: 'center',
-                            marginTop: pxToDp(-200),
+                            marginTop: scale(-200),
                         }}>
                         <Loading />
                     </View>
@@ -302,10 +298,10 @@ const styles = StyleSheet.create({
     titleText: {
         fontWeight: 'bold',
         color: themeColor,
-        fontSize: pxToDp(15),
+        fontSize: scale(15),
     },
     contentText: {
-        fontSize: pxToDp(14),
+        fontSize: scale(14),
         color: black.third,
     },
 });

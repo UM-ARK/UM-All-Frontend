@@ -10,7 +10,6 @@ import {
 
 // 本地工具
 import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
 import {USUAL_Q} from '../../../utils/pathMap';
 
 // 本Tabbar相關頁面
@@ -24,6 +23,7 @@ import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {inject} from 'mobx-react';
+import { scale } from 'react-native-size-matters';
 
 const {black, white} = COLOR_DIY;
 const {bg_color, card_color} = COLOR_DIY.meScreenColor;
@@ -83,27 +83,27 @@ class MeScreen extends Component {
                         width: '80%',
                         flexDirection: 'row',
                         alignItems: 'center',
-                        marginLeft: pxToDp(20),
+                        marginLeft: scale(20),
                     }}>
                     {/* 頭像 */}
                     <Image
                         source={{uri: icon_url}}
                         style={{
-                            height: pxToDp(70),
-                            width: pxToDp(70),
-                            borderRadius: pxToDp(70),
+                            height: scale(70),
+                            width: scale(70),
+                            borderRadius: scale(70),
                         }}
                     />
                     {/* 暱稱 學號 展示 */}
                     <View
                         style={{
-                            marginLeft: pxToDp(20),
+                            marginLeft: scale(20),
                             justifyContent: 'center',
                         }}>
                         <Text
                             style={{
                                 color: COLOR_DIY.black.second,
-                                fontSize: pxToDp(20),
+                                fontSize: scale(20),
                                 fontWeight: '600',
                             }}>
                             {name}
@@ -111,7 +111,7 @@ class MeScreen extends Component {
                         <Text
                             style={{
                                 color: COLOR_DIY.black.third,
-                                fontSize: pxToDp(16),
+                                fontSize: scale(16),
                                 // fontWeight: '500',
                             }}>
                             {_id}
@@ -148,7 +148,7 @@ class MeScreen extends Component {
                     {/* 選項圖標 */}
                     <Ionicons
                         name={iconPath}
-                        size={pxToDp(22)}
+                        size={scale(22)}
                         color={COLOR_DIY.themeColor}
                     />
                     {/* 選項標題 */}
@@ -160,7 +160,7 @@ class MeScreen extends Component {
                 <Ionicons
                     name="chevron-forward-outline"
                     color={black.third}
-                    size={pxToDp(20)}
+                    size={scale(20)}
                 />
             </TouchableOpacity>
         );
@@ -188,14 +188,14 @@ class MeScreen extends Component {
                         {/* 個人信息欄 */}
                         {this.renderUserInfo()}
 
-                        <View style={{marginTop: pxToDp(6)}} />
+                        <View style={{marginTop: scale(6)}} />
 
                         {/* 渲染選項 */}
                         {optionsInfo.map((_, index) =>
                             this.renderOptions(index),
                         )}
 
-                        <View style={{paddingBottom: pxToDp(100)}} />
+                        <View style={{paddingBottom: scale(100)}} />
                     </ScrollView>
                 ) : (
                     // 未登錄的用戶則展示登錄界面
@@ -208,30 +208,30 @@ class MeScreen extends Component {
 
 const s = StyleSheet.create({
     personalInfoContainer: {
-        height: pxToDp(120),
+        height: scale(120),
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: COLOR_DIY.meScreenColor.card_color,
-        borderBottomLeftRadius: pxToDp(40),
-        borderBottomRightRadius: pxToDp(40),
+        borderBottomLeftRadius: scale(40),
+        borderBottomRightRadius: scale(40),
     },
     optionContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: pxToDp(45),
-        padding: pxToDp(10),
+        height: scale(45),
+        padding: scale(10),
         backgroundColor: COLOR_DIY.meScreenColor.card_color,
-        marginBottom: pxToDp(1),
-        borderRadius: pxToDp(15),
-        marginHorizontal: pxToDp(10),
-        marginVertical: pxToDp(6),
+        marginBottom: scale(1),
+        borderRadius: scale(15),
+        marginHorizontal: scale(10),
+        marginVertical: scale(6),
     },
     optionTitle: {
-        fontSize: pxToDp(16),
+        fontSize: scale(16),
         color: COLOR_DIY.black.main,
-        marginLeft: pxToDp(10),
+        marginLeft: scale(10),
     },
 });
 

@@ -2,13 +2,13 @@
 import React, {Component} from 'react';
 import {Dimensions, View, Text, Button, TouchableOpacity} from 'react-native';
 
-import {pxToDp} from '../utils/stylesKits';
 import {COLOR_DIY} from '../utils/uiMap';
 import {handleImageDownload} from '../utils/fileKits';
 
 import Modal from 'react-native-modal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { scale } from 'react-native-size-matters';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
@@ -44,11 +44,11 @@ class ModalSave extends Component {
                         height: '18%',
                         width: '100%',
                         backgroundColor: COLOR_DIY.meScreenColor.bg_color,
-                        borderTopLeftRadius: pxToDp(15),
-                        borderTopRightRadius: pxToDp(15),
+                        borderTopLeftRadius: scale(15),
+                        borderTopRightRadius: scale(15),
                         overflow: 'hidden',
                     }}>
-                    <View style={{padding: pxToDp(20)}}>
+                    <View style={{padding: scale(20)}}>
                         <View
                             style={{
                                 justifyContent: 'center',
@@ -57,9 +57,9 @@ class ModalSave extends Component {
                             <TouchableOpacity
                                 style={{
                                     backgroundColor: COLOR_DIY.white,
-                                    width: pxToDp(70),
-                                    height: pxToDp(70),
-                                    borderRadius: pxToDp(20),
+                                    width: scale(70),
+                                    height: scale(70),
+                                    borderRadius: scale(20),
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}
@@ -73,11 +73,11 @@ class ModalSave extends Component {
                                 <Ionicons
                                     name="images-outline"
                                     color={COLOR_DIY.themeColor}
-                                    size={pxToDp(30)}></Ionicons>
+                                    size={scale(30)}></Ionicons>
                             </TouchableOpacity>
                             <Text
                                 style={{
-                                    marginTop: pxToDp(2),
+                                    marginTop: scale(2),
                                     color: COLOR_DIY.themeColor,
                                 }}>
                                 保存圖片

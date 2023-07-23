@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';

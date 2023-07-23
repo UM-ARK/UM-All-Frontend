@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
 import {
     UM_MAP,
     UM_RBS,
@@ -584,9 +583,9 @@ class Index extends Component {
                 style={{
                     flex: 1,
                     backgroundColor: COLOR_DIY.bg_color,
-                    borderRadius: pxToDp(10),
-                    margin: pxToDp(15),
-                    marginTop: pxToDp(5),
+                    borderRadius: scale(10),
+                    margin: scale(15),
+                    marginTop: scale(5),
                     // 增加陰影
                     ...COLOR_DIY.viewShadow,
                 }}>
@@ -596,12 +595,12 @@ class Index extends Component {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        paddingHorizontal: pxToDp(12),
-                        paddingTop: pxToDp(12),
+                        paddingHorizontal: scale(12),
+                        paddingTop: scale(12),
                     }}>
                     <Text
                         style={{
-                            fontSize: pxToDp(12),
+                            fontSize: scale(12),
                             color: COLOR_DIY.black.main,
                             fontWeight: 'bold',
                         }}>
@@ -611,8 +610,8 @@ class Index extends Component {
 
                 <FlatGrid
                     maxItemsPerRow={5}
-                    itemDimension={pxToDp(50)}
-                    spacing={pxToDp(10)}
+                    itemDimension={scale(50)}
+                    spacing={scale(10)}
                     data={fn_list}
                     renderItem={({item}) => {
                         // 索引出相關服務的icon
@@ -690,7 +689,7 @@ class Index extends Component {
                                 {icon}
                                 <Text
                                     style={{
-                                        fontSize: scale(11),
+                                        fontSize: scale(10),
                                         color: COLOR_DIY.black.second,
                                     }}>
                                     {item.fn_name}
@@ -714,7 +713,7 @@ class Index extends Component {
                         text: '（づ￣3￣）づ',
                         style: {
                             color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
+                            fontSize: scale(15),
                         },
                     }}
                     statusBarProps={{
@@ -744,7 +743,7 @@ class Index extends Component {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);
                     })}
 
-                    <View style={{marginBottom: pxToDp(100)}} />
+                    <View style={{marginBottom: scale(100)}} />
                 </ScrollView>
 
                 {/* 彈出層提示 */}

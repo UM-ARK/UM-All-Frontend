@@ -1,5 +1,5 @@
 // 車位訊息
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -11,17 +11,17 @@ import {
 } from 'react-native';
 
 // 引入本地工具
-import {pxToDp} from '../../utils/stylesKits';
-import {COLOR_DIY} from '../../utils/uiMap';
+import { COLOR_DIY } from '../../utils/uiMap';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
-import {UM_API_CAR_PARK, UM_API_TOKEN} from '../../utils/pathMap';
+import { UM_API_CAR_PARK, UM_API_TOKEN } from '../../utils/pathMap';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
-import {color} from 'react-native-reanimated';
+import { color } from 'react-native-reanimated';
+import { scale } from 'react-native-size-matters';
 
-const {black, white, themeColor, bg_color} = COLOR_DIY;
+const { black, white, themeColor, bg_color } = COLOR_DIY;
 
 class CarPark extends Component {
     state = {
@@ -51,7 +51,7 @@ class CarPark extends Component {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
-                params: {date_from: macauTime},
+                params: { date_from: macauTime },
             })
             .then(res => {
                 let result = res.data._embedded;
@@ -61,7 +61,7 @@ class CarPark extends Component {
                     for (let i = 0; i < 5; i++) {
                         data.push(result[i]);
                     }
-                    this.setState({data, isLoading: false});
+                    this.setState({ data, isLoading: false });
                     // console.log('儲存的data為', this.state.data);
                 }
             })
@@ -71,13 +71,13 @@ class CarPark extends Component {
     }
 
     render() {
-        const {data, Sort, Type, isLoading} = this.state;
+        const { data, Sort, Type, isLoading } = this.state;
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'車位訊息'} />
 
                 <ScrollView
-                    contentContainerStyle={{paddingHorizontal: pxToDp(10)}}
+                    contentContainerStyle={{ paddingHorizontal: scale(10) }}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -85,7 +85,7 @@ class CarPark extends Component {
                             refreshing={this.state.isLoading}
                             onRefresh={() => {
                                 // 展示Loading標識
-                                this.setState({isLoading: true});
+                                this.setState({ isLoading: true });
                                 this.getData();
                             }}
                         />
@@ -96,7 +96,7 @@ class CarPark extends Component {
                             <Text
                                 style={{
                                     alignSelf: 'center',
-                                    marginBottom: pxToDp(10),
+                                    marginBottom: scale(10),
                                     color: black.third,
                                 }}>
                                 Data from: data.um.edu.mo
@@ -109,9 +109,9 @@ class CarPark extends Component {
                                     <Text
                                         style={{
                                             alignSelf: 'center',
-                                            marginBottom: pxToDp(10),
+                                            marginBottom: scale(10),
                                             color: black.third,
-                                            marginTop: pxToDp(-5),
+                                            marginTop: scale(-5),
                                         }}>
                                         數據更新時間:
                                         {moment
@@ -126,22 +126,23 @@ class CarPark extends Component {
                                     <View
                                         style={{
                                             width: '100%',
-                                            height: pxToDp(30),
+                                            height: scale(30),
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            marginTop: pxToDp(-10),
+                                            marginTop: scale(-10),
+                                            paddingHorizontal: scale(10),
                                             justifyContent: 'space-between',
                                             zIndex: 9,
                                         }}>
                                         <TouchableOpacity
                                             onPress={() =>
-                                                this.setState({Sort: 'All'})
+                                                this.setState({ Sort: 'All' })
                                             }>
                                             {Sort == 'All' ? (
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     All
@@ -150,7 +151,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     All
@@ -159,13 +160,13 @@ class CarPark extends Component {
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
-                                                this.setState({Sort: 'Staff'})
+                                                this.setState({ Sort: 'Staff' })
                                             }>
                                             {Sort == 'Staff' ? (
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     Staff
@@ -174,7 +175,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     Staff
@@ -191,7 +192,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     Monthly Pass
@@ -200,7 +201,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     Monthly Pass
@@ -209,13 +210,13 @@ class CarPark extends Component {
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
-                                                this.setState({Sort: 'Visitor'})
+                                                this.setState({ Sort: 'Visitor' })
                                             }>
                                             {Sort == 'Visitor' ? (
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     Visitor
@@ -224,7 +225,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     Visitor
@@ -236,22 +237,22 @@ class CarPark extends Component {
                                     <View
                                         style={{
                                             width: '100%',
-                                            height: pxToDp(30),
+                                            height: scale(30),
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            marginTop: pxToDp(-10),
+                                            marginTop: scale(-10),
                                             justifyContent: 'space-around',
                                             zIndex: 9,
                                         }}>
                                         <TouchableOpacity
                                             onPress={() =>
-                                                this.setState({Type: 'All'})
+                                                this.setState({ Type: 'All' })
                                             }>
                                             {Type == 'All' ? (
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     All
@@ -260,7 +261,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     All
@@ -277,7 +278,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     Light Vehicle
@@ -286,7 +287,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     Light Vehicle
@@ -303,7 +304,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: '#FF8627',
                                                     }}>
                                                     Motorcycle
@@ -312,7 +313,7 @@ class CarPark extends Component {
                                                 <Text
                                                     style={{
                                                         fontWeight: 'bold',
-                                                        fontSize: pxToDp(13),
+                                                        fontSize: scale(13),
                                                         color: COLOR_DIY.themeColor,
                                                     }}>
                                                     Motorcycle
@@ -344,18 +345,18 @@ class CarPark extends Component {
                                         return (
                                             <View
                                                 style={{
-                                                    marginBottom: pxToDp(30),
+                                                    marginBottom: scale(30),
                                                     backgroundColor: 'white',
-                                                    paddingBottom: pxToDp(5),
-                                                    paddingTop: pxToDp(10),
-                                                    borderRadius: pxToDp(10),
-                                                    paddingLeft: pxToDp(10),
+                                                    paddingBottom: scale(5),
+                                                    paddingTop: scale(10),
+                                                    borderRadius: scale(10),
+                                                    paddingLeft: scale(10),
                                                     ...COLOR_DIY.viewShadow,
                                                 }}>
                                                 <Text
                                                     style={{
                                                         color: black.third,
-                                                        paddingLeft: pxToDp(23),
+                                                        marginLeft: scale(15),
                                                         fontSize: 35,
                                                         fontWeight: '900',
                                                     }}>
@@ -363,11 +364,9 @@ class CarPark extends Component {
                                                 </Text>
                                                 <Text
                                                     style={{
-                                                        paddingHorizontal:
-                                                            pxToDp(13),
+                                                        marginHorizontal: scale(12),
                                                         fontSize: 19,
-                                                        paddingVertical:
-                                                            pxToDp(5),
+                                                        marginVertical: scale(5),
                                                         fontWeight: '600',
                                                         color: black.third,
                                                     }}>
@@ -395,7 +394,7 @@ class CarPark extends Component {
                                                                         <Text
                                                                             style={{
                                                                                 paddingLeft:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         13,
                                                                                     ),
                                                                                 color: COLOR_DIY.themeColor,
@@ -411,7 +410,7 @@ class CarPark extends Component {
                                                                         <Text
                                                                             style={{
                                                                                 paddingLeft:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         13,
                                                                                     ),
                                                                                 color: '#FF8627',
@@ -426,7 +425,7 @@ class CarPark extends Component {
                                                                         <Text
                                                                             style={{
                                                                                 paddingLeft:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         13,
                                                                                     ),
                                                                                 color: 'black',
@@ -434,11 +433,11 @@ class CarPark extends Component {
                                                                                     '400',
                                                                                 fontSize: 18,
                                                                                 paddingTop:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         5,
                                                                                     ),
                                                                                 paddingBottom:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         15,
                                                                                     ),
                                                                             }}>
@@ -455,7 +454,7 @@ class CarPark extends Component {
                                                                         <Text
                                                                             style={{
                                                                                 paddingLeft:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         13,
                                                                                     ),
                                                                                 color: COLOR_DIY.themeColor,
@@ -471,7 +470,7 @@ class CarPark extends Component {
                                                                         <Text
                                                                             style={{
                                                                                 paddingLeft:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         13,
                                                                                     ),
                                                                                 color: '#FF8627',
@@ -486,7 +485,7 @@ class CarPark extends Component {
                                                                         <Text
                                                                             style={{
                                                                                 paddingLeft:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         13,
                                                                                     ),
                                                                                 color: 'red',
@@ -494,11 +493,11 @@ class CarPark extends Component {
                                                                                     '400',
                                                                                 fontSize: 18,
                                                                                 marginTop:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         5,
                                                                                     ),
                                                                                 paddingBottom:
-                                                                                    pxToDp(
+                                                                                    scale(
                                                                                         15,
                                                                                     ),
                                                                             }}>
@@ -530,7 +529,7 @@ class CarPark extends Component {
                             <Loading />
                         </View>
                     )}
-                    <View style={{marginBottom: pxToDp(50)}}></View>
+                    <View style={{ marginBottom: scale(50) }}></View>
                 </ScrollView>
             </View>
         );

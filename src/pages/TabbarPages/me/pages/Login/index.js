@@ -15,7 +15,6 @@ import {
 
 // 本地工具
 import {COLOR_DIY} from '../../../../../utils/uiMap';
-import {pxToDp} from '../../../../../utils/stylesKits';
 import {handleLogin} from '../../../../../utils/storageKits';
 import {
     BASE_URI,
@@ -115,7 +114,7 @@ class LoginChoose extends Component {
                         text: this.state.title,
                         style: {
                             color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
+                            fontSize: scale(15),
                         },
                     }}
                     leftComponent={
@@ -128,7 +127,7 @@ class LoginChoose extends Component {
                                 disabled={disabledButton}>
                                 <Ionicons
                                     name="chevron-back-outline"
-                                    size={pxToDp(25)}
+                                    size={scale(25)}
                                     color={COLOR_DIY.black.main}
                                 />
                             </TouchableOpacity>
@@ -204,19 +203,19 @@ class LoginChoose extends Component {
                         <View
                             style={{
                                 alignItems: 'center',
-                                marginBottom: pxToDp(10),
+                                marginBottom: scale(10),
                             }}>
                             <Text
                                 style={{
                                     color: COLOR_DIY.black.third,
-                                    fontSize: pxToDp(18),
+                                    fontSize: scale(18),
                                 }}>
                                 Welcome To ARK ALL~
                             </Text>
                             <Text
                                 style={{
                                     color: COLOR_DIY.black.third,
-                                    fontSize: pxToDp(18),
+                                    fontSize: scale(18),
                                 }}>
                                 []~(￣▽￣)~*
                             </Text>
@@ -269,7 +268,7 @@ class LoginChoose extends Component {
                         {/* 登錄提示 */}
                         <View
                             style={{
-                                marginTop: pxToDp(10),
+                                marginTop: scale(10),
                                 alignItems: 'center',
                             }}>
                             <View
@@ -285,7 +284,7 @@ class LoginChoose extends Component {
                                     }}
                                     checkedIcon="dot-circle-o"
                                     uncheckedIcon="circle-o"
-                                    size={pxToDp(20)}
+                                    size={scale(20)}
                                     checked={this.state.ruleChoice}
                                     onPress={() => {
                                         ReactNativeHapticFeedback.trigger(
@@ -309,7 +308,7 @@ class LoginChoose extends Component {
                                     <Text
                                         style={{
                                             color: COLOR_DIY.black.third,
-                                            fontSize: pxToDp(13),
+                                            fontSize: scale(13),
                                         }}>
                                         我已閱讀且同意遵守
                                     </Text>
@@ -319,7 +318,7 @@ class LoginChoose extends Component {
                                     <Text
                                         style={{
                                             color: COLOR_DIY.themeColor,
-                                            fontSize: pxToDp(13),
+                                            fontSize: scale(13),
                                         }}
                                         activeOpacity={0.9}
                                         onPress={() => {
@@ -342,7 +341,7 @@ class LoginChoose extends Component {
                         <TouchableOpacity
                             onPress={() => Linking.openURL(USUAL_Q)}
                             style={{
-                                // marginTop: pxToDp(20),
+                                // marginTop: scale(20),
                                 alignSelf: 'center',
                             }}>
                             <Text
@@ -350,7 +349,7 @@ class LoginChoose extends Component {
                                     color: themeColor,
                                     fontSize: scale(12),
                                 }}>
-                                沒有賬號? 進駐ARK ALL!
+                                還沒有賬號? 進駐ARK ALL!
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -374,16 +373,16 @@ class LoginChoose extends Component {
 const s = StyleSheet.create({
     roleCardContainer: {
         flex: 1,
-        height: pxToDp(200),
-        margin: pxToDp(10),
-        borderRadius: pxToDp(15),
+        height: scale(160),
+        margin: scale(10),
+        borderRadius: scale(15),
         justifyContent: 'center',
         alignItems: 'center',
         ...COLOR_DIY.viewShadow,
     },
     roleCardText: {
         color: COLOR_DIY.white,
-        fontSize: pxToDp(17),
+        fontSize: scale(17),
     },
 });
 

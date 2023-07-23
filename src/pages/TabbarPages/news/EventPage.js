@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
 import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
@@ -144,7 +143,7 @@ class EventPage extends Component {
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        marginTop: pxToDp(8),
+                        marginTop: scale(8),
                         width: '100%',
                         backgroundColor: bg_color,
                     }}>
@@ -155,9 +154,9 @@ class EventPage extends Component {
                                 ? 'md-funnel'
                                 : 'md-funnel-outline'
                         }
-                        size={pxToDp(10)}
+                        size={scale(10)}
                         color={black.third}
-                        style={{marginLeft: pxToDp(5)}}
+                        style={{marginLeft: scale(5)}}
                     />
                 </TouchableOpacity>
 
@@ -268,8 +267,8 @@ class EventPage extends Component {
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginTop: pxToDp(10),
-                    marginBottom: pxToDp(50),
+                    marginTop: scale(10),
+                    marginBottom: scale(50),
                 }}>
                 {noMoreData ? (
                     <View style={{alignItems: 'center'}}>
@@ -283,7 +282,7 @@ class EventPage extends Component {
                         style={s.loadMore}
                         activeOpacity={0.8}
                         onPress={this.loadMoreData}>
-                        <Text style={{color: white, fontSize: pxToDp(14)}}>
+                        <Text style={{color: white, fontSize: scale(14)}}>
                             Load More
                         </Text>
                     </TouchableOpacity>
@@ -386,7 +385,7 @@ class EventPage extends Component {
                             {this.renderLoadMoreView()}
 
                             {/* 防止底部遮擋 */}
-                            {/* <View style={{marginBottom: pxToDp(50)}} /> */}
+                            {/* <View style={{marginBottom: scale(50)}} /> */}
                         </View>
                     )}
                 </ScrollView>
@@ -399,7 +398,7 @@ class EventPage extends Component {
                     textStyle={{color: white}}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
@@ -417,10 +416,10 @@ const s = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: themeColor,
-        paddingHorizontal: pxToDp(10),
-        paddingVertical: pxToDp(10),
-        borderRadius: pxToDp(15),
-        marginBottom: pxToDp(5),
+        paddingHorizontal: scale(10),
+        paddingVertical: scale(10),
+        borderRadius: scale(15),
+        marginBottom: scale(5),
         ...viewShadow,
     },
 });

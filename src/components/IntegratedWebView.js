@@ -9,13 +9,12 @@ import {
     Linking,
 } from 'react-native';
 
-import {pxToDp} from '../utils/stylesKits';
-
 import {WebView} from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CookieManager from '@react-native-cookies/cookies';
 import {NavigationContext} from '@react-navigation/native';
+import { scale } from 'react-native-size-matters';
 
 let URL = '';
 
@@ -221,7 +220,7 @@ const styles = StyleSheet.create({
         opacity: 0.9,
     },
     button: {
-        marginBottom: pxToDp(10),
+        marginBottom: scale(10),
     },
 });
 

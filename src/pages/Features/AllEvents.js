@@ -11,13 +11,13 @@ import {
 import Header from '../../components/Header';
 import EventCard from '../TabbarPages/news/components/EventCard';
 import {COLOR_DIY} from '../../utils/uiMap';
-import {pxToDp} from '../../utils/stylesKits';
 import {BASE_URI, BASE_HOST, GET} from '../../utils/pathMap';
 import Toast, {DURATION} from 'react-native-easy-toast';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import { scale } from 'react-native-size-matters';
 
 const {bg_color, white, black, viewShadow, themeColor} = COLOR_DIY;
 
@@ -94,23 +94,23 @@ class AllEvents extends Component {
                 style={{
                     flexDirection: 'row',
                     justifyContent: 'space-around',
-                    marginVertical: pxToDp(5),
+                    marginVertical: scale(5),
                 }}>
                 {/* 排序選擇 */}
                 <ModalDropdown
                     options={['option 1', 'option 2']}
                     dropdownStyle={{
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                         overflow: 'hidden',
-                        padding: pxToDp(10),
+                        padding: scale(10),
                     }}
                     dropdownTextStyle={{color: themeColor}}
                     // 調整下拉菜單展開的位置
                     adjustFrame={() => {
                         let s = {
-                            top: pxToDp(75),
+                            top: scale(75),
                             left: 0,
-                            height: pxToDp(90),
+                            height: scale(90),
                             width: '100%',
                         };
                         return s;
@@ -123,14 +123,14 @@ class AllEvents extends Component {
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            paddingHorizontal: pxToDp(20),
+                            paddingHorizontal: scale(20),
                         }}>
                         <Text
                             style={{
                                 color: this.state.openSort
                                     ? themeColor
                                     : black.third,
-                                fontSize: pxToDp(15),
+                                fontSize: scale(15),
                             }}>
                             排序
                         </Text>
@@ -140,8 +140,8 @@ class AllEvents extends Component {
                                     ? 'caret-up-outline'
                                     : 'caret-down-outline'
                             }
-                            size={pxToDp(12)}
-                            style={{marginLeft: pxToDp(5)}}
+                            size={scale(12)}
+                            style={{marginLeft: scale(5)}}
                             color={
                                 this.state.openSort ? themeColor : black.third
                             }
@@ -160,9 +160,9 @@ class AllEvents extends Component {
                                 ? 'md-funnel'
                                 : 'md-funnel-outline'
                         }
-                        size={pxToDp(10)}
+                        size={scale(10)}
                         color={black.third}
-                        style={{marginLeft: pxToDp(5)}}
+                        style={{marginLeft: scale(5)}}
                     />
                 </TouchableOpacity>
             </View>
@@ -184,8 +184,8 @@ class AllEvents extends Component {
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginTop: pxToDp(10),
-                    marginBottom: pxToDp(50),
+                    marginTop: scale(10),
+                    marginBottom: scale(50),
                 }}>
                 {noMoreData ? (
                     <View style={{alignItems: 'center'}}>
@@ -199,7 +199,7 @@ class AllEvents extends Component {
                         style={styles.loadMore}
                         activeOpacity={0.8}
                         onPress={this.loadMoreData}>
-                        <Text style={{color: white, fontSize: pxToDp(14)}}>
+                        <Text style={{color: white, fontSize: scale(14)}}>
                             Load More
                         </Text>
                     </TouchableOpacity>
@@ -223,8 +223,8 @@ class AllEvents extends Component {
                             <EventCard
                                 data={item}
                                 style={{
-                                    marginVertical: pxToDp(8),
-                                    marginHorizontal: pxToDp(4),
+                                    marginVertical: scale(8),
+                                    marginHorizontal: scale(4),
                                 }}
                             />
                         );
@@ -268,7 +268,7 @@ class AllEvents extends Component {
                     textStyle={{color: white}}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
@@ -281,10 +281,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: themeColor,
-        paddingHorizontal: pxToDp(10),
-        paddingVertical: pxToDp(10),
-        borderRadius: pxToDp(15),
-        marginBottom: pxToDp(5),
+        paddingHorizontal: scale(10),
+        paddingVertical: scale(10),
+        borderRadius: scale(15),
+        marginBottom: scale(5),
         ...viewShadow,
     },
 });

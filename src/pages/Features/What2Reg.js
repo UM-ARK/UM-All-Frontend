@@ -3,11 +3,11 @@ import React, {Component} from 'react';
 import {Text, View, TouchableOpacity} from 'react-native';
 
 import {COLOR_DIY} from '../../utils/uiMap';
-import {pxToDp} from '../../utils/stylesKits';
 
 import IntegratedWebView from '../../components/IntegratedWebView';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { scale } from 'react-native-size-matters';
 
 class UMWhole extends Component {
     constructor(props) {
@@ -34,7 +34,7 @@ class UMWhole extends Component {
                             onPress={() => this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
-                                size={pxToDp(25)}
+                                size={scale(25)}
                                 color={COLOR_DIY.white}
                             />
                         </TouchableOpacity>
@@ -43,14 +43,14 @@ class UMWhole extends Component {
                         text: '澳大選咩課',
                         style: {
                             color: COLOR_DIY.white,
-                            fontSize: pxToDp(15),
+                            fontSize: scale(15),
                         },
                     }}
                     rightComponent={
                         <TouchableOpacity onPress={() => this.triggerRefresh()}>
                             <Ionicons
                                 name="refresh"
-                                size={pxToDp(25)}
+                                size={scale(25)}
                                 color={COLOR_DIY.white}
                             />
                         </TouchableOpacity>

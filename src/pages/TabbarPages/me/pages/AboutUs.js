@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import Header from '../../../../components/Header';
-import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY} from '../../../../utils/uiMap';
 import {BASE_HOST} from '../../../../utils/pathMap';
 
@@ -48,7 +47,7 @@ class About extends Component {
                 <Header title={'關於我們'} />
 
                 <ScrollView
-                    contentContainerStyle={{paddingHorizontal: pxToDp(10)}}>
+                    contentContainerStyle={{paddingHorizontal: scale(10)}}>
                     {/* LOGO */}
                     <View style={{...s.logoContainer}}>
                         <FastImage
@@ -60,7 +59,7 @@ class About extends Component {
                     {/* APP標語 */}
                     <View
                         style={{
-                            marginTop: pxToDp(20),
+                            marginTop: scale(20),
                             alignSelf: 'center',
                             alignItems: 'center',
                         }}>
@@ -117,8 +116,8 @@ class About extends Component {
                     <TouchableOpacity
                         style={{
                             alignSelf: 'center',
-                            marginTop: pxToDp(20),
-                            marginBottom: pxToDp(50),
+                            marginTop: scale(20),
+                            marginBottom: scale(50),
                         }}
                         activeOpacity={0.8}
                         onPress={() => {
@@ -136,9 +135,9 @@ class About extends Component {
 
 const s = StyleSheet.create({
     logoContainer: {
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
-        borderRadius: pxToDp(15),
+        borderRadius: scale(15),
         overflow: 'hidden',
         ...COLOR_DIY.viewShadow,
     },

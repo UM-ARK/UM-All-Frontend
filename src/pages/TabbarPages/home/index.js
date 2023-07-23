@@ -14,7 +14,6 @@ import {
 
 // 本地工具
 import { COLOR_DIY } from '../../../utils/uiMap';
-import { pxToDp } from '../../../utils/stylesKits';
 import {
     UM_WHOLE,
     WHAT_2_REG,
@@ -376,7 +375,7 @@ class HomeScreen extends Component {
                 {icon}
                 <Text
                     style={{
-                        fontSize: pxToDp(11),
+                        fontSize: scale(11),
                         color: COLOR_DIY.black.second,
                     }}>
                     {function_name}
@@ -463,7 +462,7 @@ class HomeScreen extends Component {
                         text: 'ARK ALL',
                         style: {
                             color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
+                            fontSize: scale(15),
                         },
                     }}
                     statusBarProps={{
@@ -591,7 +590,7 @@ class HomeScreen extends Component {
                             <Text
                                 style={{
                                     color: black.third,
-                                    marginTop: pxToDp(5),
+                                    marginTop: scale(5),
                                     fontWeight: 'bold',
                                     // alignSelf: 'center',
                                 }}>
@@ -600,7 +599,7 @@ class HomeScreen extends Component {
                             <Text
                                 style={{
                                     color: black.third,
-                                    marginTop: pxToDp(5),
+                                    marginTop: scale(5),
                                     fontWeight: 'bold',
                                     // alignSelf: 'center',
                                 }}>
@@ -615,7 +614,7 @@ class HomeScreen extends Component {
                                 <Text
                                     style={{
                                         color: black.third,
-                                        marginTop: pxToDp(5),
+                                        marginTop: scale(5),
                                         fontWeight: 'bold',
                                         // alignSelf: 'center',
                                     }}>
@@ -633,7 +632,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                             }}>
                             {`ARK ALL源自FST同學為愛發電，`}
                             <Text style={{ fontWeight: 'bold' }}>
@@ -643,7 +642,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                                 fontWeight: 'bold',
                                 // alignSelf: 'center',
                             }}>
@@ -652,7 +651,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                                 fontWeight: 'bold',
                                 // alignSelf: 'center',
                             }}>
@@ -661,7 +660,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                                 fontWeight: 'bold',
                                 // alignSelf: 'center',
                             }}>
@@ -670,7 +669,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                                 fontWeight: 'bold',
                                 // alignSelf: 'center',
                             }}>
@@ -679,7 +678,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                                 fontWeight: 'bold',
                                 // alignSelf: 'center',
                             }}>
@@ -688,7 +687,7 @@ class HomeScreen extends Component {
                         <Text
                             style={{
                                 color: black.third,
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                                 fontWeight: 'bold',
                                 // alignSelf: 'center',
                             }}>
@@ -699,7 +698,7 @@ class HomeScreen extends Component {
                     {/* 其他提示 */}
                     <HomeCard>
                         <Text
-                            style={{ color: black.third, marginTop: pxToDp(5) }}>
+                            style={{ color: black.third, marginTop: scale(5) }}>
                             您可能想先了解：
                         </Text>
                         <TouchableOpacity
@@ -716,7 +715,7 @@ class HomeScreen extends Component {
                         </TouchableOpacity>
 
                         <Text
-                            style={{ color: black.third, marginTop: pxToDp(5) }}>
+                            style={{ color: black.third, marginTop: scale(5) }}>
                             如果你是新同學... (詳見服務頁新生推薦)
                         </Text>
                         <TouchableOpacity
@@ -742,7 +741,7 @@ class HomeScreen extends Component {
                         </TouchableOpacity>
 
                         <Text
-                            style={{ color: black.third, marginTop: pxToDp(5) }}>
+                            style={{ color: black.third, marginTop: scale(5) }}>
                             您可能還有很多疑問...
                         </Text>
                         <TouchableOpacity
@@ -800,9 +799,9 @@ class HomeScreen extends Component {
                     {/* <View
                         style={{
                             alignItems: 'center',
-                            marginTop: pxToDp(10),
+                            marginTop: scale(10),
                             backgroundColor: white,
-                            paddingVertical: pxToDp(10),
+                            paddingVertical: scale(10),
                         }}>
                         <Text style={{color: black.third}}>
                             {`UM Pass頁面需要重新輸入賬號？`}
@@ -828,24 +827,24 @@ class HomeScreen extends Component {
                     <ModalBottom cancel={this.tiggerModalBottom}>
                         <View
                             style={{
-                                padding: pxToDp(20),
+                                padding: scale(20),
                                 backgroundColor: COLOR_DIY.white,
                             }}>
                             <ScrollView
                                 contentContainerStyle={{
                                     alignItems: 'center',
-                                    marginBottom: pxToDp(30),
+                                    marginBottom: scale(30),
                                 }}>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(18),
+                                        fontSize: scale(18),
                                         color: COLOR_DIY.black.third,
                                     }}>
                                     歡迎來到ARK ALL~
                                 </Text>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(15),
+                                        fontSize: scale(15),
                                         color: COLOR_DIY.black.third,
                                     }}>
                                     登錄後體驗完整功能，現在去嗎？
@@ -854,10 +853,10 @@ class HomeScreen extends Component {
                                 <TouchableOpacity
                                     activeOpacity={0.8}
                                     style={{
-                                        marginTop: pxToDp(10),
+                                        marginTop: scale(10),
                                         backgroundColor: COLOR_DIY.themeColor,
-                                        padding: pxToDp(10),
-                                        borderRadius: pxToDp(10),
+                                        padding: scale(10),
+                                        borderRadius: scale(10),
                                         justifyContent: 'center',
                                         alignSelf: 'center',
                                     }}
@@ -872,7 +871,7 @@ class HomeScreen extends Component {
                                     }}>
                                     <Text
                                         style={{
-                                            fontSize: pxToDp(15),
+                                            fontSize: scale(15),
                                             color: 'white',
                                             fontWeight: '500',
                                         }}>
@@ -892,7 +891,7 @@ class HomeScreen extends Component {
                     textStyle={{ color: white }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
