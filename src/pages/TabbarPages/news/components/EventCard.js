@@ -35,6 +35,7 @@ class EventCard extends Component {
     state = {
         coverImgUrl: undefined,
         title: undefined,
+        clubName: undefined,
         startTimeStamp: undefined,
         finishTimeStamp: undefined,
         link: undefined,
@@ -50,6 +51,7 @@ class EventCard extends Component {
         this.setState({
             coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
+            clubName: eventData.club_name,
             startTimeStamp: eventData.startdatetime,
             finishTimeStamp: eventData.enddatetime,
             type: eventData.type,
@@ -97,6 +99,7 @@ class EventCard extends Component {
         const {
             coverImgUrl,
             title,
+            clubName,
             finishTimeStamp,
             startTimeStamp,
             link,
@@ -250,8 +253,8 @@ class EventCard extends Component {
                                             </View>
                                         )
                                     )}
-                                    {/* TODO: 獲取活動API附帶組織名 */}
-                                    {/* <View style={{
+                                    {/* 組織名 */}
+                                    <View style={{
                                         // marginLeft: isFinish ? null : scale(3),
                                         marginLeft: scale(3),
                                         width: isFinish ? '100%' : '80%',
@@ -262,9 +265,9 @@ class EventCard extends Component {
                                                 color: black.third,
                                                 fontSize: scale(9),
                                             }}>
-                                            澳門大學學生會機械工程學生會
+                                            {clubName}
                                         </Text>
-                                    </View> */}
+                                    </View>
                                 </View>
                             </View>
                         </View>
