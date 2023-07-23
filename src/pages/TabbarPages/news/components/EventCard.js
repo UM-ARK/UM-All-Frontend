@@ -202,28 +202,13 @@ class EventCard extends Component {
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
-
                                 {/* 標識 & 組織名 */}
                                 <View style={{
-                                    marginTop: isFinish ? null : scale(5),
+                                    marginTop: scale(5),
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     width: '100%'
                                 }}>
-                                    {/* <View style={{
-                                        borderWidth: scale(1),
-                                        borderColor: black.third,
-                                        borderRadius: scale(5),
-                                        padding: scale(1)
-                                    }}>
-                                        <Text
-                                            style={{
-                                                color: black.third,
-                                                fontSize: scale(8),
-                                            }}>
-                                            By
-                                        </Text>
-                                    </View> */}
                                     {/* 即將結束標識 */}
                                     {isAlmost ? (
                                         <View
@@ -240,7 +225,19 @@ class EventCard extends Component {
                                             </Text>
                                         </View>
                                     ) : (
-                                        isFinish ? null : (
+                                        isFinish ? (
+                                            <View style={{
+                                                paddingHorizontal: scale(1),
+                                                borderColor: black.third, borderWidth: scale(1), borderRadius: scale(4)
+                                            }}>
+                                                <Text style={{
+                                                    ...styles.stateNoticeText,
+                                                    color: black.third
+                                                }}>
+                                                    UP
+                                                </Text>
+                                            </View>
+                                        ) : (
                                             <View
                                                 // ...styles.rightTopIconPosition,
                                                 style={{ ...styles.unFinish }}>
@@ -255,7 +252,8 @@ class EventCard extends Component {
                                     )}
                                     {/* TODO: 獲取活動API附帶組織名 */}
                                     {/* <View style={{
-                                        marginLeft: isFinish ? null : scale(3),
+                                        // marginLeft: isFinish ? null : scale(3),
+                                        marginLeft: scale(3),
                                         width: isFinish ? '100%' : '80%',
                                     }}>
                                         <Text
@@ -269,14 +267,6 @@ class EventCard extends Component {
                                     </View> */}
                                 </View>
                             </View>
-
-                            {/* 點擊指示圖標 */}
-                            {/* <View style={{ backgroundColor: 'red' }}>
-                                <Ionicons
-                                    name="chevron-forward-outline"
-                                    color={black.third}
-                                    size={scale(15)} />
-                            </View> */}
                         </View>
                     </View>
                 ) : null}
