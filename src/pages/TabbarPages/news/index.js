@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { Text, View, Dimensions } from 'react-native';
+import { View } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
-import { pxToDp } from '../../../utils/stylesKits';
 import HomePage from '../home/index';
 import NewsPage from './NewsPage';
-import EventPage from './EventPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';
 

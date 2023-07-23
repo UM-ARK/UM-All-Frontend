@@ -97,18 +97,18 @@ class App extends Component {
                         />
                     }
                     backgroundColor={bg_color}>
-                    <SafeAreaProvider>
+                    {/* <SafeAreaProvider> */}
                         <Provider RootStore={RootStore}>
                             <NativeBaseProvider>
-                                <View style={{ flex: 1 }}>
+                                {/* <View style={{ flex: 1 }}> */}
                                     <Nav
                                         lock={this.state.versionLock}
                                         setLock={this.setLock}
                                     />
-                                </View>
+                                {/* </View> */}
                             </NativeBaseProvider>
                         </Provider>
-                    </SafeAreaProvider>
+                    {/* </SafeAreaProvider> */}
                 </AnimatedSplash>
             </SafeAreaView>
         );

@@ -1,7 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View, SafeAreaView} from 'react-native';
 
-import HomeScreen from './pages/TabbarPages/home';
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/news';
 import MessageScreen from './pages/TabbarPages/message';
@@ -15,7 +13,6 @@ import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
 import {inject} from 'mobx-react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 // 創建Tabbar的路由棧
 const Tabs = AnimatedTabBarNavigator();
@@ -91,7 +88,6 @@ class Tabbar extends Component {
                                         focused ? color : COLOR_DIY.black.main
                                     }
                                     focused={focused}
-                                    color={color}
                                 />
                             ),
                             title: '資訊',
@@ -112,7 +108,6 @@ class Tabbar extends Component {
                                         focused ? color : COLOR_DIY.black.main
                                     }
                                     focused={focused}
-                                    color={color}
                                 />
                             ),
                             title: '服務',
@@ -131,7 +126,6 @@ class Tabbar extends Component {
                                     size={size ? size : 24}
                                     color={focused ? color : '#222222'}
                                     focused={focused}
-                                    color={color}
                                 />
                             ),
                             title: '關注',
@@ -152,7 +146,6 @@ class Tabbar extends Component {
                                         focused ? color : COLOR_DIY.black.main
                                     }
                                     focused={focused}
-                                    color={color}
                                 />
                             ) : (
                                 <Icon
@@ -162,7 +155,6 @@ class Tabbar extends Component {
                                         focused ? color : COLOR_DIY.black.main
                                     }
                                     focused={focused}
-                                    color={color}
                                 />
                             ),
                         title: isClub ? '組織' : '我的',
