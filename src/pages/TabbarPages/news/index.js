@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Platform } from 'react-native';
+import { View, Platform, Text, Dimensions } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
 import HomePage from '../home/index';
@@ -13,6 +13,17 @@ import { scale } from 'react-native-size-matters';
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
+
+const tabWidth = scale(25);
+const numOfTabs = 4;
+
+const TestPage = () => {
+    return (
+        <View style={{ flex: 1 }}>
+            <Text>Test</Text>
+        </View>
+    )
+}
 
 class NewsScreen extends Component {
     render() {
@@ -43,17 +54,30 @@ class NewsScreen extends Component {
                 {/* 能左右切換的TabPage */}
                 <Tab.Navigator
                     screenOptions={{
-                        tabBarLabelStyle: { fontSize: scale(10) },
-                        tabBarStyle: { backgroundColor: bg_color },
+                        tabBarLabelStyle: { fontSize: scale(10), },
+                        tabBarStyle: {
+                            backgroundColor: bg_color,
+                            minHeight: scale(20),
+                            maxHeight: scale(30),
+                        },
+                        tabBarContentContainerStyle: {
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        },
                         tabBarBounces: false,
-                        tabBarLabelStyle: { fontSize: scale(10) },
                         tabBarActiveTintColor: COLOR_DIY.themeColor,
                         tabBarInactiveTintColor: COLOR_DIY.black.third,
                     }}
                     tabBarOptions={{
-                        indicatorStyle: { backgroundColor: COLOR_DIY.themeColor },
+                        pressColor: bg_color,
+                        indicatorStyle: {
+                            backgroundColor: COLOR_DIY.themeColor,
+                            width: tabWidth,
+                            left: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2,
+                        },
                     }}
-                    initialRouteName={'HomePage'}>
+                    initialRouteName={'HomePage'}
+                >
                     <Tab.Screen
                         name="HomePage"
                         component={HomePage}
