@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, Image, Dimensions, StyleSheet, SafeAreaView, Alert, Linking } from 'react-native';
+import { View, Image, Dimensions, StyleSheet, Alert, Linking } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -13,7 +13,6 @@ import { NativeBaseProvider } from 'native-base';
 import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { pxToDp } from './src/utils/stylesKits';
 import { scale } from 'react-native-size-matters';
 
 const { viewShadow, bg_color, white } = COLOR_DIY;
@@ -82,35 +81,35 @@ class App extends Component {
     render() {
         return (
             // 開屏動畫
-            <SafeAreaView style={{ flex: 1, backgroundColor: bg_color }}>
-                <AnimatedSplash
-                    translucent={true}
-                    isLoaded={this.state.isLoaded}
-                    customComponent={
-                        <Image
-                            source={require('./src/static/img/logo.png')}
-                            style={{
-                                width: LOGO_WIDTH,
-                                height: LOGO_WIDTH,
-                                borderRadius: scale(40)
-                            }}
-                        />
-                    }
-                    backgroundColor={bg_color}>
-                    {/* <SafeAreaProvider> */}
-                        <Provider RootStore={RootStore}>
-                            <NativeBaseProvider>
-                                {/* <View style={{ flex: 1 }}> */}
-                                    <Nav
-                                        lock={this.state.versionLock}
-                                        setLock={this.setLock}
-                                    />
-                                {/* </View> */}
-                            </NativeBaseProvider>
-                        </Provider>
-                    {/* </SafeAreaProvider> */}
-                </AnimatedSplash>
-            </SafeAreaView>
+            // <SafeAreaView style={{ flex: 1, backgroundColor: bg_color }}>
+            <AnimatedSplash
+                translucent={true}
+                isLoaded={this.state.isLoaded}
+                customComponent={
+                    <Image
+                        source={require('./src/static/img/logo.png')}
+                        style={{
+                            width: LOGO_WIDTH,
+                            height: LOGO_WIDTH,
+                            borderRadius: scale(40)
+                        }}
+                    />
+                }
+                backgroundColor={bg_color}>
+                <SafeAreaProvider>
+                    <Provider RootStore={RootStore}>
+                        <NativeBaseProvider>
+                            {/* <View style={{ flex: 1 }}> */}
+                            <Nav
+                                lock={this.state.versionLock}
+                                setLock={this.setLock}
+                            />
+                            {/* </View> */}
+                        </NativeBaseProvider>
+                    </Provider>
+                </SafeAreaProvider>
+            </AnimatedSplash>
+            // </SafeAreaView>
         );
     }
 }

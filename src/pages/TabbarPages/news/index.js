@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
 import HomePage from '../home/index';
@@ -30,6 +30,14 @@ class NewsScreen extends Component {
                     statusBarProps={{
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
+                    }}
+                    containerStyle={{
+                        // 修復頂部空白過多問題
+                        height: Platform.select({
+                            android: scale(38),
+                            default: scale(35),
+                        }),
+                        paddingTop: 0,
                     }}
                 />
                 {/* 能左右切換的TabPage */}
