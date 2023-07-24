@@ -93,7 +93,7 @@ class NewsCard extends Component {
                 {/* 文字居左，圖片居右 */}
                 <View style={styles.newsCardContentContainer}>
                     {/* 標題，有英文中文則顯示，無則顯示葡文 */}
-                    <View style={{ width: haveImage ? '65%' : '100%' }}>
+                    <View style={{ width: haveImage ? '75%' : '100%', alignSelf: 'flex-start' }}>
                         {/* 英文 */}
                         {title_en.length > 0 && (
                             <Text
@@ -141,19 +141,25 @@ class NewsCard extends Component {
                             </Text>
                         )}
 
-                        {/* 佔位 防止標題過長遮擋日期 */}
-                        <View style={{ marginTop: scale(25) }}></View>
+                        {/* 活動類型展示日期 */}
+                        {type === 'event' ? (
+                            <View>
 
-                        {/* 日期 */}
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                position: 'absolute',
-                                bottom: 0,
-                                color: dateColor,
-                            }}>
-                            @ {moment(beginDate).format('MM-DD')}
-                        </Text>
+                                {/* 佔位 防止標題過長遮擋日期 */}
+                                <View style={{ marginTop: scale(25) }}></View>
+
+                                {/* 日期 */}
+                                <Text
+                                    style={{
+                                        fontSize: scale(12),
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        color: dateColor,
+                                    }}>
+                                    @ {moment(beginDate).format('MM-DD')}
+                                </Text>
+                            </View>
+                        ) : null}
                     </View>
 
                     {/* 新聞卡片配圖 */}
@@ -218,7 +224,7 @@ const styles = StyleSheet.create({
         marginVertical: scale(5),
         marginHorizontal: scale(10),
         borderRadius: scale(10),
-        ...viewShadow,
+        // ...viewShadow,
     },
     newsCardContentContainer: {
         flexDirection: 'row',
@@ -227,8 +233,8 @@ const styles = StyleSheet.create({
         paddingVertical: scale(8),
     },
     newsCardImg: {
-        width: scale(100),
-        height: scale(100),
+        width: scale(60),
+        height: scale(60),
     },
 });
 
