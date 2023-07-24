@@ -19,6 +19,7 @@ import {scale} from 'react-native-size-matters';
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, themeColor} = COLOR_DIY;
+const IMG_SIZE = scale(45);
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -43,12 +44,10 @@ class EventCard extends Component {
             <TouchableOpacity
                 style={{
                     backgroundColor: white,
-                    borderRadius: scale(8),
+                    borderRadius: scale(20),
                     justifyContent: 'space-around',
                     alignItems: 'center',
-                    marginTop: scale(2),
-                    padding: scale(10),
-                    paddingHorizontal: scale(4),
+                    paddingVertical: scale(8),
                     ...viewShadow,
                 }}
                 activeOpacity={0.8}
@@ -56,11 +55,11 @@ class EventCard extends Component {
                 {/* 社團 / 組織 Logo */}
                 <View
                     style={{
-                        width: scale(70),
-                        height: scale(70),
+                        width: IMG_SIZE,
+                        height: IMG_SIZE,
                         borderRadius: 50,
                         backgroundColor: COLOR_DIY.white,
-                        ...viewShadow,
+                        // ...viewShadow,
                     }}>
                     <FastImage
                         source={{uri: logo_url}}
@@ -102,23 +101,24 @@ class EventCard extends Component {
                         justifyContent: 'center',
                         alignItems: 'center',
                         marginTop: scale(5),
+                        width:'80%'
                     }}>
                     <Text
-                        style={{color: black.main, fontSize: scale(11)}}
+                        style={{color: black.main, fontSize: scale(10)}}
                         numberOfLines={1}>
                         {name}
                     </Text>
                 </View>
 
                 {/* 組織標籤 */}
-                <Text
+                {/* <Text
                     style={{
                         color: themeColor,
                         fontSize: scale(10),
                         marginTop: scale(5),
                     }}>
                     #{clubTagMap(tag)}
-                </Text>
+                </Text> */}
             </TouchableOpacity>
         );
     }
