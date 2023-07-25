@@ -429,7 +429,7 @@ class ClubDetail extends Component {
                     ) : null}
 
                     {/* 編輯資料按鈕 只有管理員可見 */}
-                    {isAdmin ? (
+                    {/* {isAdmin ? (
                         <View
                             style={{
                                 position: 'absolute',
@@ -456,30 +456,29 @@ class ClubDetail extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                    ) : (
-                        // 公告
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: scale(65),
-                                right: scale(15),
+                    ) : null} */}
+                    {/* // 公告入口
+                    <View
+                        style={{
+                            position: 'absolute',
+                            top: scale(65),
+                            right: scale(15),
+                        }}>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => {
+                                this.props.navigation.navigate(
+                                    'ChatDetail',
+                                    {get: 'club', id: clubData.club_num},
+                                );
                             }}>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() => {
-                                    this.props.navigation.navigate(
-                                        'ChatDetail',
-                                        {get: 'club', id: clubData.club_num},
-                                    );
-                                }}>
-                                <Feather
-                                    name="message-circle"
-                                    size={scale(25)}
-                                    color={white}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                            <Feather
+                                name="message-circle"
+                                size={scale(25)}
+                                color={white}
+                            />
+                        </TouchableOpacity>
+                    </View> */}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity
@@ -522,12 +521,12 @@ class ClubDetail extends Component {
             }
             return (
                 <View style={{backgroundColor: bg_color}}>
-                    {/* 1.0 社團基本資料 */}
+                    {/* 社團基本資料 */}
                     <View style={{alignItems: 'center'}}>
                         {/* 建議使用社團名的簡稱 */}
                         <Text style={styles.clubNameText}>{name}</Text>
                         {/* 社團ID */}
-                        <Text
+                        {/* <Text
                             style={{
                                 color: black.third,
                                 fontSize: scale(13),
@@ -536,7 +535,7 @@ class ClubDetail extends Component {
                             {'@' +
                                 '000'.substr(club_num.toString().length) +
                                 club_num}
-                        </Text>
+                        </Text> */}
                         {/* 社團分類 */}
                         <Text
                             style={{
@@ -545,10 +544,43 @@ class ClubDetail extends Component {
                             }}>
                             {'#' + clubTagMap(tag)}
                         </Text>
+
+                        {/* 編輯資料按鈕 只有管理員可見 */}
+                        {isAdmin ? (
+                            <>
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() =>
+                                        this.props.navigation.navigate(
+                                            'ClubSetting',
+                                            {
+                                                refresh: this.getData.bind(
+                                                    this,
+                                                    clubData.club_num,
+                                                ),
+                                            },
+                                        )
+                                    }
+                                    style={{flexDirection:'row',alignItems:'center',
+                                        backgroundColor:themeColor, borderRadius:scale(15), padding:scale(10),
+                                        marginVertical:scale(10)
+                                    }}>
+                                    <Text style={{color:white, fontSize:scale(20)}}>賬號設置&新增活動 </Text>
+                                    <Ionicons
+                                        name="settings-outline"
+                                        size={scale(25)}
+                                        color={white}
+                                    />
+                                </TouchableOpacity>
+                                <View style={{alignItems:'center'}}>
+                                    <Text style={{fontSize:scale(12), color:black.main}}>Update組織資料&發佈新資訊請點我！↑</Text>
+                                </View>
+                            </>
+                        ) : null}
                     </View>
 
                     {/* Follow按鈕 */}
-                    {!isAdmin && false ? this.renderFollowButton() : null}
+                    {/* {!isAdmin && false ? this.renderFollowButton() : null} */}
 
                     {/* 照片 */}
                     {clubData.club_photos_list &&
@@ -717,6 +749,10 @@ class ClubDetail extends Component {
                             </View>
                         </View>
                     ) : null}
+
+                    {isAdmin && eventData != undefined && eventData.length > 0 && (
+                        <Text style={{fontSize:scale(12), color:black.main, alignSelf:'center'}}>Update活動資料請進入具體活動頁內修改！↓</Text>
+                    )}
 
                     {/* 舉辦的活動 */}
                     {eventData != undefined && eventData.length > 0 ? (

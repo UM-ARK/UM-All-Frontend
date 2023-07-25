@@ -419,7 +419,7 @@ class EventDetail extends Component {
                     </View>
                     {/* 設置按鈕 */}
                     {
-                        isClub ? (
+                        false && isClub ? (
                             <View
                                 style={{
                                     position: 'absolute',
@@ -556,6 +556,47 @@ class EventDetail extends Component {
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
+
+                    {/* 設置按鈕 */}
+                    { isClub ? (
+                        <>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    // this.props.navigation.navigate(
+                                    //     'ClubSetting',
+                                    //     {
+                                    //         eventID: eventData._id,
+                                    //         refresh:
+                                    //             this.onRefresh.bind(this),
+                                    //     },
+                                    // );
+
+                                    // 跳轉活動info編輯頁，並傳遞刷新函數
+                                    this.props.navigation.navigate(
+                                        'EventSetting', {
+                                            mode: 'edit',
+                                            eventData: {_id: eventData._id},
+                                            refresh: this.onRefresh.bind(this)
+                                        },
+                                    );
+                                }}
+                                style={{flexDirection:'row',alignItems:'center', justifyContent:'center',
+                                    backgroundColor:themeColor, borderRadius:scale(15), padding:scale(10), width:'auto',
+                                    margin:scale(70), marginVertical:scale(5)
+                                }}>
+                                <Text style={{color:white, fontSize:scale(20)}}>活動設置 </Text>
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={scale(25)}
+                                    color={white}
+                                />
+                            </TouchableOpacity>
+                            <View>
+                                <Text style={{fontSize:scale(12),color:black.main,alignSelf:'center'}}>Update活動資訊請點我！↑</Text>
+                            </View>
+                        </>
+                    ) : null }
 
                     {/* 詳情介紹 */}
                     {eventData != undefined &&
