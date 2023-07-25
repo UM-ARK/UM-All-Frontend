@@ -27,23 +27,20 @@ import {
     addHost,
 } from '../../../utils/pathMap';
 import EventPage from '../news/EventPage.js';
-// import ScrollImage from './components/ScrollImage';
 import ModalBottom from '../../../components/ModalBottom';
 import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
 import { versionStringCompare } from '../../../utils/versionKits';
 import packageInfo from '../../../../package.json';
-import UMCalendar from '../../../static/UMCalendar/UMCalendar.json';
+import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
 
 import { Header, Divider } from '@rneui/themed';
-import { PageControl, Card } from 'react-native-ui-lib';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Carousel from 'react-native-reanimated-carousel';
 import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import { inject } from 'mobx-react';
-import Toast, { DURATION } from 'react-native-easy-toast';
+import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -71,6 +68,8 @@ const iconTypes = {
     materialCommunityIcons: 'MaterialCommunityIcons',
     img: 'img',
 };
+
+const cal = UMCalendar;
 
 class HomeScreen extends Component {
     state = {
@@ -235,18 +234,22 @@ class HomeScreen extends Component {
     // 獲取日曆數據
     getCal = () => {
         // 先到網站獲取ics link，https://reg.um.edu.mo/university-almanac/?lang=zh-hant
-        // 使用工具轉為json格式，https://ical-to-json.herokuapp.com/
+        // 使用ical-to-json工具轉為json格式，https://github.com/cwlsn/ics-to-json/
         // 放入static/UMCalendar中覆蓋
         // ***務必注意key、value的大小寫！！**
-        let cal = UMCalendar.vcalendar[0].vevent;
         if (cal) {
             this.setState({ cal })
             let nowTimeStamp = moment(new Date());
             // 同日或未來的重要時間設為選中日
-            for (let i = 0; i < cal.length; i++) {
-                if (moment(cal[i].dtstart[0]).isSameOrAfter(nowTimeStamp)) {
-                    this.setState({ selectDay: i });
-                    break;
+            if (nowTimeStamp.isSameOrAfter(cal[cal.length - 1].startDate)) {
+                this.setState({ selectDay: cal.length });
+            }
+            else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
+                for (let i = 0; i < cal.length; i++) {
+                    if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
+                        this.setState({ selectDay: i });
+                        break;
+                    }
                 }
             }
         }
@@ -275,15 +278,17 @@ class HomeScreen extends Component {
 
     renderCal = (item, index) => {
         const { selectDay } = this.state;
+        let momentItm = moment(item.startDate).format("YYYYMMDD");
         return (
             <TouchableOpacity
                 style={{
+                    backgroundColor: themeColor,
                     borderRadius: scale(8),
-                    borderColor: selectDay == index ? COLOR_DIY.themeColor : null,
+                    borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
                     borderWidth: selectDay == index ? scale(2) : null,
-                    paddingHorizontal: scale(5),
-                    paddingVertical: scale(3),
-                    // ...COLOR_DIY.viewShadow,
+                    paddingHorizontal: scale(5), paddingVertical: scale(3),
+                    margin: scale(3),
+                    ...COLOR_DIY.viewShadow,
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
@@ -292,37 +297,37 @@ class HomeScreen extends Component {
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     {/* 年份 */}
                     <Text style={{
-                        color: COLOR_DIY.themeColor,
+                        color: white,
                         fontSize: scale(10),
                         fontWeight: selectDay == index ? 'bold' : null,
                     }}>
-                        {item.dtstart[0].substring(0, 4)}
+                        {momentItm.substring(0, 4)}
                     </Text>
                     {/* 月份 */}
                     <Text
                         style={{
-                            color: COLOR_DIY.themeColor,
+                            color: white,
                             fontSize: scale(22),
                             fontWeight: selectDay == index ? 'bold' : null,
                         }}>
-                        {item.dtstart[0].substring(4, 6)}
+                        {momentItm.substring(4, 6)}
                     </Text>
                     {/* 日期 */}
                     <Text
                         style={{
-                            color: COLOR_DIY.themeColor,
+                            color: white,
                             fontSize: scale(22),
                             fontWeight: selectDay == index ? 'bold' : null,
                         }}>
-                        {item.dtstart[0].substring(6, 8)}
+                        {momentItm.substring(6, 8)}
                     </Text>
                     {/* 星期幾 */}
                     <Text style={{
-                        color: COLOR_DIY.themeColor,
+                        color: white,
                         fontSize: scale(10),
                         fontWeight: selectDay == index ? 'bold' : null,
                     }}>
-                        {this.getWeek(item.dtstart[0])}
+                        {this.getWeek(item.startDate)}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -493,27 +498,26 @@ class HomeScreen extends Component {
                     <View style={{ backgroundColor: bg_color }}>
                         <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
                             {/* 校曆 */}
-                            {this.state.cal && this.state.cal.length > 0 ? (
+                            {cal && cal.length > 0 ? (
                                 <VirtualizedList
-                                    data={this.state.cal}
-                                    initialNumToRender={4}
+                                    data={cal}
+                                    initialNumToRender={9}
                                     initialScrollIndex={selectDay}
                                     getItemLayout={(data, index) => {
+                                        let layoutSize = scale(40);
                                         return {
-                                            length: scale(35),
-                                            offset: scale(35) * index,
+                                            length: layoutSize,
+                                            offset: layoutSize * index,
                                             index,
                                         };
                                     }}
-                                    renderItem={({ item, index }) => {
-                                        return this.renderCal(item, index);
-                                    }}
+                                    renderItem={({ item, index }) => this.renderCal(item, index)}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
                                     getItem={getItem}
                                     // 渲染項目數量
                                     getItemCount={getItemCount}
-                                    keyExtractor={item => item.uid}
+                                    keyExtractor={item => item.startDate}
                                     ListHeaderComponent={
                                         <View style={{ marginLeft: scale(10) }} />
                                     }
@@ -522,21 +526,9 @@ class HomeScreen extends Component {
                                     }
                                 />
                             ) : null}
-
-                            {/* 快捷功能入口 */}
-                            {/* <View style={{
-                                flex: 1,
-                                alignItems: 'center',
-                                justifyContent: 'space-around',
-                                marginRight: scale(5),
-                            }}>
-                                {
-                                    this.state.functionArray.map((itm) => this.GetFunctionIcon(itm))
-                                }
-                            </View> */}
                         </View>
                         {/* 校曆日期描述 */}
-                        {cal ? (
+                        {cal && cal.length > 0 ? (
                             <View
                                 style={{
                                     flex: 1,
@@ -551,15 +543,16 @@ class HomeScreen extends Component {
                                     {'\\' + '\\'}
                                 </Text>
                                 <View style={{
-                                    borderWidth: scale(1),
-                                    borderColor: COLOR_DIY.themeColor,
+                                    // borderWidth: scale(1),
+                                    // borderColor: COLOR_DIY.themeColor,
+                                    backgroundColor: themeColor,
                                     borderRadius: scale(5),
                                     paddingVertical: scale(2),
                                     paddingHorizontal: scale(5),
                                 }}>
                                     <Text
                                         selectable
-                                        style={{ color: COLOR_DIY.themeColor, textAlign: 'center' }}
+                                        style={{ color: white, textAlign: 'center' }}
                                     >
                                         {this.state.cal[selectDay].summary}
                                     </Text>
