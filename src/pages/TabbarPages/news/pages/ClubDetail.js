@@ -418,10 +418,11 @@ class ClubDetail extends Component {
                                 position: 'absolute',
                                 top: scale(65),
                                 left: scale(15),
+                                zIndex: 999
                             }}>
                             <Ionicons
-                                name="chevron-back-outline"
-                                size={scale(25)}
+                                name="chevron-back-circle"
+                                size={scale(30)}
                                 color={white}
                             />
                         </TouchableOpacity>
