@@ -44,7 +44,7 @@ class EventCard extends Component {
             <TouchableOpacity
                 style={{
                     backgroundColor: white,
-                    borderRadius: scale(20),
+                    borderRadius: scale(10),
                     justifyContent: 'space-around',
                     alignItems: 'center',
                     paddingVertical: scale(8),

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {
     Text,
     View,
-    Dimensions,
     RefreshControl,
     TouchableOpacity,
     Linking,
@@ -21,20 +20,36 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+import { FlatList } from 'react-native';
 
 const { themeColor, black, white } = COLOR_DIY;
+const COMPONENT_WIDTH = scale(105);
+// 65 寬度，一行3個
+let originClubDataList = [];
 
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-// const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
-const COMPONENT_WIDTH = scale(87);
+clubFilter = (clubDataList, tag) => {
+    // this.setState({ isLoading: true });
+    // const {clubDataList} = this.state;
 
-originClubDataList = [];
+    let filter = [tag];
+    let result = clubDataList.filter(a => {
+        return filter.some(f => f === a.tag);
+    });
+    // this.setState({ clubDataList: result, isLoading: false });
+    return result
+};
+
 class ClubPage extends Component {
     constructor() {
         super();
+        this.scrollViewRef = React.createRef();
+
         this.state = {
             clubDataList: undefined,
             isLoading: true,
+            scrollPosition: 0,
+            clubClassLayout: {},
+            scrollMaxItm: 'ARK',
         };
         // 獲取所有社團信息
         this.getData();
@@ -53,7 +68,10 @@ class ClubPage extends Component {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
                     originClubDataList = clubDataList;
-                    this.setState({ clubDataList, isLoading: false });
+                    this.setState({
+                        clubDataList: this.separateDataList(clubDataList),
+                        isLoading: false
+                    });
                 } else {
                     alert('Warning:', message);
                 }
@@ -63,82 +81,42 @@ class ClubPage extends Component {
             });
     }
 
-    renderClub = () => {
-        const { clubDataList } = this.state;
+    renderClub = (clubDataList, tag) => {
         return (
             <FlatGrid
                 // 每个项目的最小宽度或高度（像素）
                 itemDimension={COMPONENT_WIDTH}
                 data={clubDataList}
                 // 每個項目的間距
-                spacing={scale(12)}
+                // spacing={scale(12)}
                 renderItem={({ item }) => <ClubCard data={item} />}
-                // 所有項目末尾渲染，防Tabbar遮擋
-                ListFooterComponent={
-                    <View style={{ marginBottom: scale(60) }}>
-                        <Text
-                            style={{
-                                color: black.third,
-                                alignSelf: 'center',
-                                fontSize: scale(12),
-                            }}>
-                            {'已有 ' +
-                                originClubDataList.length +
-                                ' 個組織進駐~~'}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                alignSelf: 'center',
-                                fontSize: scale(12),
-                            }}>
-                            下拉可刷新頁面~
-                        </Text>
-                        {/* 進駐提示 */}
-                        <TouchableOpacity
-                            onPress={() => Linking.openURL(USUAL_Q)}
-                            style={{
-                                // marginTop: scale(20),
-                                alignSelf: 'center',
-                            }}>
-                            <Text
-                                style={{
-                                    color: themeColor,
-                                    fontSize: scale(12),
-                                }}>
-                                沒有賬號? 進駐ARK ALL!
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                }
-                refreshControl={
-                    <RefreshControl
-                        colors={[themeColor]}
-                        tintColor={themeColor}
-                        refreshing={this.state.isLoading}
-                        onRefresh={() => {
-                            // 展示Loading標識
-                            this.setState({ isLoading: true });
-                            this.getData();
-                        }}
-                    />
-                }
                 keyExtractor={item => item._id}
                 directionalLockEnabled
                 alwaysBounceHorizontal={false}
+                ListHeaderComponent={
+                    <View style={{
+                        marginLeft: scale(12),
+                        marginBottom: scale(5)
+                    }}>
+                        <Text style={{
+                            color: black.main,
+                            fontSize: scale(15)
+                        }}>
+                            {clubTagMap(tag)}
+                        </Text>
+                    </View>
+                }
+                // 獲取當前距離屏幕頂端的高度
+                onLayout={event => {
+                    const { layout } = event.nativeEvent;
+                    // console.log('height:', layout.height);
+                    // console.log('y:', layout.y);
+                    let clubClassLayout = this.state.clubClassLayout;
+                    clubClassLayout[tag] = layout.y;
+                    this.setState({ clubClassLayout })
+                }}
             />
         );
-    };
-
-    clubFilter = tag => {
-        this.setState({ isLoading: true });
-        // const {clubDataList} = this.state;
-
-        var filter = [tag];
-        var result = originClubDataList.filter(a => {
-            return filter.some(f => f === a.tag);
-        });
-        this.setState({ clubDataList: result, isLoading: false });
     };
 
     renderFilter = () => {
@@ -194,14 +172,168 @@ class ClubPage extends Component {
         );
     };
 
+    separateDataList = (clubDataList) => {
+        let newClubData = {};
+        if (clubDataList && clubDataList.length > 0) {
+            clubTagList.map((itm) => {
+                // console.log('過濾' + itm, clubFilter(clubDataList, itm));
+                newClubData[itm] = clubFilter(clubDataList, itm);
+            })
+        }
+        newClubData.ARK = clubFilter(clubDataList, 'ARK');
+        return newClubData
+        // console.log('newClubData', newClubData);
+    }
+
+    renderBottomInfo = () => {
+        return (
+            <View style={{ marginBottom: scale(60) }}>
+                <Text
+                    style={{
+                        color: black.third,
+                        alignSelf: 'center',
+                        fontSize: scale(12),
+                    }}>
+                    {'已有 ' +
+                        originClubDataList.length +
+                        ' 個組織進駐~~'}
+                </Text>
+                <Text
+                    style={{
+                        color: black.third,
+                        alignSelf: 'center',
+                        fontSize: scale(12),
+                    }}>
+                    下拉可刷新頁面~
+                </Text>
+                {/* 進駐提示 */}
+                <TouchableOpacity
+                    onPress={() => Linking.openURL(USUAL_Q)}
+                    style={{
+                        // marginTop: scale(20),
+                        alignSelf: 'center',
+                    }}>
+                    <Text
+                        style={{
+                            color: themeColor,
+                            fontSize: scale(12),
+                        }}>
+                        沒有賬號? 進駐ARK ALL!
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
     render() {
-        const { clubDataList, isLoading } = this.state;
+        const { clubDataList, isLoading, scrollMaxItm } = this.state;
+
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 {clubDataList != undefined && !isLoading ? (
-                    <View>
-                        {this.renderFilter()}
-                        {this.renderClub()}
+                    <View style={{ flexDirection: 'row' }}>
+                        {/* 側邊分類導航 */}
+                        <View style={{ width: scale(60) }}>
+                            <FlatList
+                                data={clubTagList}
+                                contentContainerStyle={{
+                                    height: '100%',
+                                    justifyContent: 'center', alignItems: 'flex-start',
+                                    paddingLeft: scale(10)
+                                }}
+                                ListHeaderComponent={() => {
+                                    return (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                this.scrollViewRef.current.scrollTo({ y: 0 });
+                                                this.setState({ scrollMaxItm: 'ARK' })
+                                            }}
+                                            style={{ marginBottom: scale(20) }}
+                                        >
+                                            <Text style={{
+                                                color: scrollMaxItm == 'ARK' ? black.main : black.third,
+                                                fontSize: scale(11)
+                                            }}
+                                            >
+                                                ARK
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )
+                                }}
+                                renderItem={(itm) => {
+                                    return (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                // 點擊自動滑動到對應分類的社團
+                                                const tag = itm.item;
+                                                this.scrollViewRef.current.scrollTo({
+                                                    y: this.state.clubClassLayout[tag]
+                                                })
+                                                this.setState({ scrollMaxItm: tag })
+                                            }}
+                                            style={{ marginBottom: scale(20) }}
+                                        >
+                                            <Text style={{
+                                                color: scrollMaxItm == itm.item ? black.main : black.third,
+                                                fontSize: scale(11)
+                                            }}>
+                                                {clubTagMap(itm.item)}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )
+                                }}
+                                keyExtractor={item => item.id}
+                                showsHorizontalScrollIndicator={false}
+                            />
+                        </View>
+                        {/* 組織展示 */}
+                        <View style={{ width: scale(290) }}>
+                            <ScrollView
+                                refreshControl={
+                                    <RefreshControl
+                                        colors={[themeColor]}
+                                        tintColor={themeColor}
+                                        refreshing={this.state.isLoading}
+                                        onRefresh={() => {
+                                            // 展示Loading標識
+                                            this.setState({ isLoading: true });
+                                            this.getData();
+                                        }}
+                                    />
+                                }
+                                ref={this.scrollViewRef}
+                                // onMomentumScrollEnd 拖到至鬆手才執行
+                                onScroll={({ nativeEvent }) => {
+                                    const { clubClassLayout } = this.state;
+                                    // the current offset, {x: number, y: number} 
+                                    const position = nativeEvent.contentOffset;
+
+                                    // 記錄已滑過的最大項
+                                    let scrollMaxIndex = 0;
+                                    Object.values(clubClassLayout).map((itm, idx) => {
+                                        if (itm <= position.y + 20) {
+                                            scrollMaxIndex = idx;
+                                        }
+                                    })
+                                    this.setState({
+                                        scrollMaxItm: Object.keys(clubClassLayout)[scrollMaxIndex]
+                                    })
+                                }}
+                            >
+                                {/* {this.renderFilter()} */}
+                                {'ARK' in clubDataList && (
+                                    <View>
+                                        {this.renderClub(clubDataList.ARK, 'ARK')}
+                                        {clubTagList.map((tag) => {
+                                            if (tag in clubDataList && clubDataList[tag].length > 0) {
+                                                return this.renderClub(clubDataList[tag], tag)
+                                            }
+                                        })}
+                                    </View>
+                                )}
+                                {this.renderBottomInfo()}
+                            </ScrollView>
+                        </View>
                     </View>
                 ) : (
                     <ScrollView
