@@ -248,10 +248,10 @@ class ClubPage extends Component {
                                                 this.scrollViewRef.current.scrollTo({ y: 0 });
                                                 this.setState({ scrollMaxItm: 'ARK' })
                                             }}
-                                            style={{ marginBottom: scale(20) }}
+                                            style={{ marginBottom: scale(20), width: '100%' }}
                                         >
                                             <Text style={{
-                                                color: scrollMaxItm == 'ARK' ? black.main : black.third,
+                                                color: scrollMaxItm == 'ARK' ? themeColor : black.third,
                                                 fontSize: scale(11)
                                             }}
                                             >
@@ -271,10 +271,10 @@ class ClubPage extends Component {
                                                 })
                                                 this.setState({ scrollMaxItm: tag })
                                             }}
-                                            style={{ marginBottom: scale(20) }}
+                                            style={{ marginBottom: scale(20), width: '100%' }}
                                         >
                                             <Text style={{
-                                                color: scrollMaxItm == itm.item ? black.main : black.third,
+                                                color: scrollMaxItm == itm.item ? themeColor : black.third,
                                                 fontSize: scale(11)
                                             }}>
                                                 {clubTagMap(itm.item)}
