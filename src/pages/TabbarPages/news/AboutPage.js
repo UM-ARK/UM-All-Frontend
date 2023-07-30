@@ -5,6 +5,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Linking,
+    Image,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -28,6 +29,7 @@ import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 
 const { black, themeColor, secondThemeColor, white } = COLOR_DIY;
+const IMG_WIDTH = scale(160);
 
 export default class AboutPage extends Component {
 
@@ -99,6 +101,14 @@ export default class AboutPage extends Component {
                                 fontWeight: 'bold',
                             }}>
                             {`本軟件代碼在Github開源，歡迎✨✨`}
+                        </Text>
+                        <Text
+                            style={{
+                                color: black.third,
+                                marginTop: scale(5),
+                                fontWeight: 'bold',
+                            }}>
+                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即Email聯繫我們！ umacark@gmail.com`}
                         </Text>
                         <TouchableOpacity
                             activeOpacity={0.8}
@@ -212,6 +222,45 @@ export default class AboutPage extends Component {
                                 {`清除圖片和Web緩存`}
                             </Text>
                         </TouchableOpacity>
+                    </HomeCard>
+
+                    {/* 請喝咖啡 */}
+                    <HomeCard>
+                        <Text style={{ color: black.third }}>
+                            {`為愛發電ing`}
+                        </Text>
+                        <Text style={{ color: black.third }}>
+                            {`請開發者團隊喝杯咖啡QAQ`}
+                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <View>
+                                <Image
+                                    source={require('../../../static/img/donate/boc.png')}
+                                    style={{
+                                        width: IMG_WIDTH,
+                                        height: IMG_WIDTH,
+                                    }}
+                                />
+                                <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                    {`中銀`}
+                                </Text>
+                            </View>
+                            <View>
+                                <Image
+                                    source={require('../../../static/img/donate/mpay.png')}
+                                    style={{
+                                        width: IMG_WIDTH - 15,
+                                        height: IMG_WIDTH - 15,
+                                    }}
+                                />
+                                <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                    {`Mpay`}
+                                </Text>
+                            </View>
+                        </View>
+                        <Text style={{ color: black.third, alignSelf: 'center' }}>
+                            {`如有捐贈，請留下您的暱稱和對本軟件的評價，我們可以在版本更新中留下您的足跡！`}
+                        </Text>
                     </HomeCard>
                 </ScrollView>
             </View>

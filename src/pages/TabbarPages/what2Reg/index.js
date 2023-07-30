@@ -487,8 +487,6 @@ export default class index extends Component {
                             <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>選咩課ARK版</Text>
                         </View>
 
-                        {/* TODO: 請開發者喝咖啡 */}
-
                         {/* 篩選課程功能 更新時間展示 */}
                         <View style={{ marginTop: scale(5), alignItems: 'center' }}>
                             <Text style={{ fontSize: scale(12), color: black.main }}>
