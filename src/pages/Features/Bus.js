@@ -129,7 +129,7 @@ class BusScreen extends Component {
 
     componentDidMount() {
         timer = setInterval(() => {
-            // this.onRefresh();
+            this.onRefresh();
         }, 7000);
     }
 
