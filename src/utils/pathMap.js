@@ -87,6 +87,28 @@ export const WHAT_2_REG = 'https://www.umeh.top';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
 
+// 選咩課API
+export const UMEH_URI = "https://mpserver.umeh.top/";
+export const UMEH_API = {
+    GET: {
+        // 根據課程編號返回信息
+        COURSE_INFO: "course_info?New_code=",
+        COURSE_COMMENT: {
+            CODE: "comment_info/?New_code=",
+            PROF: "&prof_name="
+        },
+        // 字母全大寫
+        PROF: "prof_info?name=",
+        // 模糊搜索
+        FUZZY: "fuzzy_search?text=Test&type=course/prof/title",
+        // 返回統計數據
+        STAT: "get_stat"
+    },
+    POST: {
+        SUBMIT_COMMENT: "submit_comment/"
+    }
+};
+
 // 澳大 - API 車位
 export const UM_API_CAR_PARK =
     'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
