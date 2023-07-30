@@ -235,7 +235,7 @@ export default class AboutPage extends Component {
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <View>
                                 <Image
-                                    source={require('../../../static/img/donate/boc.png')}
+                                    source={require('../../../static/img/donate/boc.jpg')}
                                     style={{
                                         width: IMG_WIDTH,
                                         height: IMG_WIDTH,
@@ -247,7 +247,7 @@ export default class AboutPage extends Component {
                             </View>
                             <View>
                                 <Image
-                                    source={require('../../../static/img/donate/mpay.png')}
+                                    source={require('../../../static/img/donate/mpay.jpg')}
                                     style={{
                                         width: IMG_WIDTH - 15,
                                         height: IMG_WIDTH - 15,
