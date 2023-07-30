@@ -51,17 +51,16 @@ class EventPage extends Component {
         dataPage = 1;
     }
 
-    async getData() {
+    getData = async () => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 20;
-        await axios
-            .get(URL, {
+        try {
+            await axios.get(URL, {
                 params: {
                     num_of_item,
                     page: dataPage,
                 },
-            })
-            .then(res => {
+            }).then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
                     let newDataArr = json.content;
@@ -92,7 +91,14 @@ class EventPage extends Component {
                     alert('數據出錯，請聯繫開發者');
                 }
             })
-            .catch(err => alert('請求錯誤!'));
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                // 網絡錯誤，自動重載
+                this.onRefresh();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     separateData = eventDataList => {

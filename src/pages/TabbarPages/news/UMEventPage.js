@@ -51,8 +51,8 @@ class UMEventPage extends Component {
 
     // 獲取澳大舉辦活動的資訊
     async getData() {
-        axios
-            .get(UM_API_EVENT, {
+        try {
+            axios.get(UM_API_EVENT, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
@@ -62,8 +62,7 @@ class UMEventPage extends Component {
                 // date_from: macauTime,
                 // TODO: 篩選是否有smart_point
                 // },
-            })
-            .then(res => {
+            }).then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
                 let nowMomentDate = moment(nowTimeStamp);
@@ -107,9 +106,15 @@ class UMEventPage extends Component {
                 resultList = resultList.concat(outdatedList);
                 this.setState({ data: resultList, isLoading: false });
             })
-            .catch(err => {
-                console.error(err);
-            });
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                this.setState({ isLoading: true });
+                // 網絡錯誤，自動重載
+                this.getData();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     // 渲染懸浮可拖動按鈕

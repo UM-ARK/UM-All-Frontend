@@ -89,16 +89,15 @@ class NewsPage extends Component {
     }
 
     // 請求澳大api返回新聞數據
-    async getData() {
-        axios
-            .get(UM_API_NEWS, {
+    getData = async () => {
+        try {
+            axios.get(UM_API_NEWS, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
-            })
-            .then(res => {
+            }).then(res => {
                 let result = res.data._embedded;
                 // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
                 let chooseTopNewsIndex = 0;
@@ -158,9 +157,15 @@ class NewsPage extends Component {
                     isLoading: false,
                 });
             })
-            .catch(err => {
-                console.error(err);
-            });
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                this.setState({ isLoading: true });
+                // 網絡錯誤，自動重載
+                this.getData();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     // 頭條新聞的渲染

@@ -56,11 +56,11 @@ class ClubPage extends Component {
     }
 
     // 請求所有社團的info
-    async getData() {
+    getData = async () => {
+        this.setState({ isLoading: true });
         let URL = BASE_URI + GET.CLUB_INFO_ALL;
-        await axios
-            .get(URL)
-            .then(res => {
+        try {
+            await axios.get(URL).then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
                     clubDataList = json.content;
@@ -76,9 +76,14 @@ class ClubPage extends Component {
                     alert('Warning:', message);
                 }
             })
-            .catch(err => {
-                console.log('err', err);
-            });
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                // 網絡錯誤，自動重載
+                this.getData();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     renderClub = (clubDataList, tag) => {
@@ -295,8 +300,6 @@ class ClubPage extends Component {
                                         tintColor={themeColor}
                                         refreshing={this.state.isLoading}
                                         onRefresh={() => {
-                                            // 展示Loading標識
-                                            this.setState({ isLoading: true });
                                             this.getData();
                                         }}
                                     />
