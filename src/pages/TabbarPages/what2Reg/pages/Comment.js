@@ -340,7 +340,11 @@ export default class Comment extends Component {
                             <Text style={{
                                 fontSize: scale(15),
                                 color: black.main
-                            }}>{name}</Text>
+                            }}
+                                selectable
+                            >
+                                {name}
+                            </Text>
                             {/* 評價數不等於0，渲染評分 */}
                             {num != 0 && (
                                 <View style={{ marginTop: scale(5), alignItems: 'center' }}>

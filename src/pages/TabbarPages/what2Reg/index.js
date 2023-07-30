@@ -234,6 +234,7 @@ export default class index extends Component {
                     <TextInput
                         style={{
                             paddingVertical: scale(3),
+                            color: black.main,
                         }}
                         onChangeText={(inputText) => {
                             inputText = inputText.toUpperCase()
