@@ -10,6 +10,7 @@ import UMEventPage from './UMEventPage';
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale } from 'react-native-size-matters';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
@@ -84,20 +85,19 @@ class NewsScreen extends Component {
                         options={{
                             title: '主頁',
                         }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
                     />
-                    {/* <Tab.Screen
-                        name="EventPage"
-                        component={EventPage}
-                        options={{
-                            title: '組織活動',
-                        }}
-                    /> */}
                     <Tab.Screen
                         name="ClubPage"
                         component={ClubPage}
                         options={{
                             title: '進駐組織',
                         }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
                     />
                     <Tab.Screen
                         name="NewsPage"
@@ -105,6 +105,9 @@ class NewsScreen extends Component {
                         options={{
                             title: '澳大新聞',
                         }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
                     />
                     <Tab.Screen
                         name="UMEventPage"
@@ -112,6 +115,9 @@ class NewsScreen extends Component {
                         options={{
                             title: '澳大活動',
                         }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
                     />
                 </Tab.Navigator>
             </View>

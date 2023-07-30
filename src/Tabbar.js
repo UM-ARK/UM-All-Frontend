@@ -1,18 +1,20 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/news';
 import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
+import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 
-import {COLOR_DIY} from './utils/uiMap';
+import { COLOR_DIY } from './utils/uiMap';
 import { scale } from 'react-native-size-matters';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {AnimatedTabBarNavigator} from 'react-native-animated-nav-tab-bar';
-import {inject} from 'mobx-react';
+import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
+import { inject } from 'mobx-react';
 
 // 創建Tabbar的路由棧
 const Tabs = AnimatedTabBarNavigator();
@@ -37,7 +39,7 @@ class Tabbar extends Component {
     }
 
     render() {
-        const {isClub, isLogin} = this.state;
+        const { isClub, isLogin } = this.state;
         return (
             <Tabs.Navigator
                 tabBarOptions={{
@@ -47,7 +49,6 @@ class Tabbar extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
                     tabBarBackground: 'transparent',
-                    horizontalPadding: scale(10),
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
                 {/* {isClub ? null : (
@@ -80,10 +81,10 @@ class Tabbar extends Component {
                         name="NewsTabbar"
                         component={NewsScreen}
                         options={{
-                            tabBarIcon: ({focused, color, size}) => (
+                            tabBarIcon: ({ focused, color, size }) => (
                                 <Icon
                                     name="pie-chart"
-                                    size={size ? size : 24}
+                                    size={size ? size : scale(20)}
                                     color={
                                         focused ? color : COLOR_DIY.black.main
                                     }
@@ -92,18 +93,46 @@ class Tabbar extends Component {
                             ),
                             title: '資訊',
                         }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
                     />
                 )}
 
+                {/* 選咩課 */}
+                {isClub ? null : (
+                    <Tabs.Screen
+                        name="What2RegTab"
+                        component={What2RegTabIndex}
+                        options={{
+                            tabBarIcon: ({ focused, color, size }) => (
+                                <MaterialCommunityIcons
+                                    name="database-search-outline"
+                                    size={size ? size : scale(30)}
+                                    color={
+                                        focused ? color : COLOR_DIY.black.main
+                                    }
+                                    focused={focused}
+                                />
+                            ),
+                            title: '選課',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                    />
+                )}
+
+                {/* 功能頁 */}
                 {isClub ? null : (
                     <Tabs.Screen
                         name="FeaturesTabbar"
                         component={FeaturesScreen}
                         options={{
-                            tabBarIcon: ({focused, color, size}) => (
+                            tabBarIcon: ({ focused, color, size }) => (
                                 <Icon
                                     name="grid"
-                                    size={size ? size : 24}
+                                    size={size ? size : scale(20)}
                                     color={
                                         focused ? color : COLOR_DIY.black.main
                                     }
@@ -112,15 +141,18 @@ class Tabbar extends Component {
                             ),
                             title: '服務',
                         }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
                     />
                 )}
 
-                {isLogin && !isClub ? (
+                {false && isLogin && !isClub ? (
                     <Tabs.Screen
                         name="MessageTabbar"
                         component={MessageScreen}
                         options={{
-                            tabBarIcon: ({focused, color, size}) => (
+                            tabBarIcon: ({ focused, color, size }) => (
                                 <Icon
                                     name="message-circle"
                                     size={size ? size : 24}
@@ -133,34 +165,39 @@ class Tabbar extends Component {
                     />
                 ) : null}
 
-                <Tabs.Screen
-                    name="MeTabbar"
-                    component={isClub ? ClubDetail : MeScreen}
-                    options={{
-                        tabBarIcon: ({focused, color, size}) =>
-                            isClub ? (
-                                <MaterialCommunityIcons
-                                    name="human-queue"
-                                    size={size ? size : 24}
-                                    color={
-                                        focused ? color : COLOR_DIY.black.main
-                                    }
-                                    focused={focused}
-                                />
-                            ) : (
-                                <Icon
-                                    name="smile"
-                                    size={size ? size : 24}
-                                    color={
-                                        focused ? color : COLOR_DIY.black.main
-                                    }
-                                    focused={focused}
-                                />
-                            ),
-                        title: isClub ? '組織' : '我的',
-                    }}
-                    initialParams={{setLock: this.props.route.params.setLock}}
-                />
+                {isClub ? (
+                    <Tabs.Screen
+                        name="MeTabbar"
+                        component={isClub ? ClubDetail : MeScreen}
+                        options={{
+                            tabBarIcon: ({ focused, color, size }) =>
+                                isClub ? (
+                                    <MaterialCommunityIcons
+                                        name="human-queue"
+                                        size={size ? size : scale(20)}
+                                        color={
+                                            focused ? color : COLOR_DIY.black.main
+                                        }
+                                        focused={focused}
+                                    />
+                                ) : (
+                                    <Icon
+                                        name="smile"
+                                        size={size ? size : scale(20)}
+                                        color={
+                                            focused ? color : COLOR_DIY.black.main
+                                        }
+                                        focused={focused}
+                                    />
+                                ),
+                            title: isClub ? '組織' : '我的',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                        initialParams={{ setLock: this.props.route.params.setLock }}
+                    />
+                ) : null}
             </Tabs.Navigator>
         );
     }
