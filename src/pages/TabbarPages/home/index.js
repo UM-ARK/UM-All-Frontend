@@ -91,38 +91,48 @@ class HomeScreen extends Component {
                     this.props.navigation.navigate('Bus');
                 },
             },
+            // {
+            //     icon_name: 'database-search',
+            //     icon_type: iconTypes.materialCommunityIcons,
+            //     function_name: '選咩課',
+            //     func: () => {
+            //         ReactNativeHapticFeedback.trigger('soft');
+            //         let webview_param = {
+            //             url: WHAT_2_REG,
+            //             title: '澳大選咩課',
+            //             text_color: '#fff',
+            //             bg_color_diy: '#1e558c',
+            //             isBarStyleBlack: false,
+            //         };
+            //         this.props.navigation.navigate('Webviewer', webview_param);
+            //         // this.props.navigation.jumpTo('NewsTabbar', {
+            //         //     screen: 'EventPage',
+            //         // });
+            //     },
+            // },
+            // {
+            //     icon_name: 'ghost',
+            //     icon_type: iconTypes.materialCommunityIcons,
+            //     function_name: '生存指南',
+            //     func: () => {
+            //         ReactNativeHapticFeedback.trigger('soft');
+            //         let webview_param = {
+            //             url: NEW_SCZN,
+            //             title: '新鮮人要知道的億些Tips',
+            //             text_color: COLOR_DIY.black.second,
+            //             bg_color_diy: '#ededed',
+            //         };
+            //         this.props.navigation.navigate('Webviewer', webview_param);
+            //     },
+            // },
             {
-                icon_name: 'database-search',
-                icon_type: iconTypes.materialCommunityIcons,
-                function_name: '選咩課',
+                icon_name: 'people',
+                icon_type: iconTypes.ionicons,
+                function_name: '組織登入',
                 func: () => {
                     ReactNativeHapticFeedback.trigger('soft');
-                    let webview_param = {
-                        url: WHAT_2_REG,
-                        title: '澳大選咩課',
-                        text_color: '#fff',
-                        bg_color_diy: '#1e558c',
-                        isBarStyleBlack: false,
-                    };
-                    this.props.navigation.navigate('Webviewer', webview_param);
-                    // this.props.navigation.jumpTo('NewsTabbar', {
-                    //     screen: 'EventPage',
-                    // });
-                },
-            },
-            {
-                icon_name: 'ghost',
-                icon_type: iconTypes.materialCommunityIcons,
-                function_name: '生存指南',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    let webview_param = {
-                        url: NEW_SCZN,
-                        title: '新鮮人要知道的億些Tips',
-                        text_color: COLOR_DIY.black.second,
-                        bg_color_diy: '#ededed',
-                    };
-                    this.props.navigation.navigate('Webviewer', webview_param);
+                    this.props.navigation.navigate('MeScreen');
+
                 },
             },
         ],
@@ -585,7 +595,6 @@ class HomeScreen extends Component {
                                     color: black.third,
                                     marginTop: scale(5),
                                     fontWeight: 'bold',
-                                    // alignSelf: 'center',
                                 }}>
                                 {`Lastest Version: ${this.state.app_version.lastest}`}
                             </Text>
@@ -594,7 +603,6 @@ class HomeScreen extends Component {
                                     color: black.third,
                                     marginTop: scale(5),
                                     fontWeight: 'bold',
-                                    // alignSelf: 'center',
                                 }}>
                                 {`Your App Version: ${this.state.app_version.local}`}
                             </Text>
@@ -606,10 +614,9 @@ class HomeScreen extends Component {
                                 }}>
                                 <Text
                                     style={{
-                                        color: black.third,
+                                        color: themeColor,
                                         marginTop: scale(5),
                                         fontWeight: 'bold',
-                                        // alignSelf: 'center',
                                     }}>
                                     {`Click me to update App 😉~`}
                                 </Text>
@@ -619,174 +626,6 @@ class HomeScreen extends Component {
 
                     {/* 活動頁 */}
                     <EventPage ref="eventPage" />
-
-                    {/* 提示資訊 */}
-                    <HomeCard>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
-                            {`ARK ALL源自FST同學為愛發電，`}
-                            <Text style={{ fontWeight: 'bold' }}>
-                                並非官方應用程式！
-                            </Text>
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`本軟件並非澳大官方應用‼️ x1`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`本軟件並非澳大官方應用‼️ x2`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`本軟件並非澳大官方應用‼️ x3`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`This APP is not an official APP of UM‼️`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`如您仍然信任本軟件，感謝您的認可 ♪(･ω･)ﾉ`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`本軟件代碼在Github開源，歡迎✨✨`}
-                        </Text>
-                    </HomeCard>
-
-                    {/* 其他提示 */}
-                    <HomeCard>
-                        <Text
-                            style={{ color: black.third, marginTop: scale(5) }}>
-                            您可能想先了解：
-                        </Text>
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                this.props.navigation.navigate('AboutUs');
-                            }}>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontWeight: '600',
-                                }}>{`這個APP是?`}</Text>
-                        </TouchableOpacity>
-
-                        <Text
-                            style={{ color: black.third, marginTop: scale(5) }}>
-                            如果你是新同學... (詳見服務頁新生推薦)
-                        </Text>
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: NEW_SCZN,
-                                    title: '新鮮人要知道的億些Tips',
-                                    text_color: COLOR_DIY.black.second,
-                                    bg_color_diy: '#ededed',
-                                };
-                                this.props.navigation.navigate(
-                                    'Webviewer',
-                                    webview_param,
-                                );
-                            }}>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontWeight: '600',
-                                }}>{`我是萌新`}</Text>
-                        </TouchableOpacity>
-
-                        <Text
-                            style={{ color: black.third, marginTop: scale(5) }}>
-                            您可能還有很多疑問...
-                        </Text>
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: USUAL_Q,
-                                    title: '常見問題',
-                                };
-                                this.props.navigation.navigate(
-                                    'Webviewer',
-                                    webview_param,
-                                );
-                            }}>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontWeight: '600',
-                                }}>{`我要怎麼...`}</Text>
-                        </TouchableOpacity>
-                    </HomeCard>
-
-                    {/* 清除緩存 */}
-                    <HomeCard>
-                        <Text style={{ color: black.third }}>
-                            {`圖片更新不及時？網站響應出錯？`}
-                        </Text>
-                        <Text style={{ color: black.third }}>
-                            {`‼️:您已登錄的界面可能會退出登錄`}
-                        </Text>
-                        <Text style={{ color: black.third }}>
-                            {`‼️:您可能需要重新加載圖片，會消耗流量`}
-                        </Text>
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                FastImage.clearDiskCache();
-                                FastImage.clearMemoryCache();
-                                CookieManager.clearAll();
-                                this.toast.show(`已清除所有緩存`, 2000);
-                            }}>
-                            <Text
-                                style={{
-                                    color: black.second,
-                                    fontWeight: '600',
-                                }}>
-                                {`清除圖片和Web緩存`}
-                            </Text>
-                        </TouchableOpacity>
-                    </HomeCard>
 
                     {/* 快速填充功能提示 */}
                     {/* <View

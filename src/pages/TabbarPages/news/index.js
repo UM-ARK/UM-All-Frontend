@@ -6,6 +6,7 @@ import HomePage from '../home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';
+import AboutPage from './AboutPage';
 
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -16,15 +17,7 @@ const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
 
 const tabWidth = scale(25);
-const numOfTabs = 4;
-
-const TestPage = () => {
-    return (
-        <View style={{ flex: 1 }}>
-            <Text>Test</Text>
-        </View>
-    )
-}
+const numOfTabs = 5;
 
 class NewsScreen extends Component {
     render() {
@@ -114,6 +107,16 @@ class NewsScreen extends Component {
                         component={UMEventPage}
                         options={{
                             title: '澳大活動',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                    />
+                    <Tab.Screen
+                        name="AboutPage"
+                        component={AboutPage}
+                        options={{
+                            title: '關於',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')
