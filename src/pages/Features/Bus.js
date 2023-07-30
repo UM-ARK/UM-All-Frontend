@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -12,21 +12,20 @@ import {
 } from 'react-native';
 
 // 引入本地工具
-import {pxToDp, pcHeightToNumHeight, rpx} from '../../utils/stylesKits';
-import {COLOR_DIY} from '../../utils/uiMap';
-import {UM_BUS_LOOP} from '../../utils/pathMap';
+import { COLOR_DIY } from '../../utils/uiMap';
+import { UM_BUS_LOOP } from '../../utils/pathMap';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 var DomParser = require('react-native-html-parser').DOMParser;
-import {scale, verticalScale} from 'react-native-size-matters';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import { scale, verticalScale } from 'react-native-size-matters';
+import Toast, { DURATION } from 'react-native-easy-toast';
 
-const {bg_color, white, black, themeColor, secondThemeColor, viewShadow} =
+const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
-const {width: PAGE_WIDTH} = Dimensions.get('window'); // screen 包括navi bar
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window'); // screen 包括navi bar
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 let busIcon = require('../../static/img/Bus/bus.png');
 let busRouteImg = require('../../static/img/Bus/bus_route.png');
@@ -130,7 +129,7 @@ class BusScreen extends Component {
 
     componentDidMount() {
         timer = setInterval(() => {
-            this.onRefresh();
+            // this.onRefresh();
         }, 7000);
     }
 
@@ -157,25 +156,25 @@ class BusScreen extends Component {
                     isLoading: false,
                 });
                 if (this.state.busPositionArr.length == 0) {
-                    this.setState({toastColor: COLOR_DIY.warning});
+                    this.setState({ toastColor: COLOR_DIY.warning });
                     this.toast.show(`當前沒有巴士~\n[]~(￣▽￣)~*`, 3000);
                 } else {
-                    this.setState({toastColor: themeColor});
+                    this.setState({ toastColor: themeColor });
                     this.toast.show(
-                        `不要著急~\nData is Loading~\n[]~(￣▽￣)~*`,
+                        `Data is Loading~\n[]~(￣▽￣)~*`,
                         1500,
                     );
                 }
             })
             .catch(error => {
-                this.setState({toastColor: COLOR_DIY.warning});
+                this.setState({ toastColor: COLOR_DIY.warning });
                 this.toast.show(`網絡錯誤`, 2000);
             });
     };
 
     // 巴士站點文字渲染
     renderBusStopText = (left, top, text, index) => {
-        const {busPositionArr} = this.state;
+        const { busPositionArr } = this.state;
         let borderColor = themeColor;
         if (busPositionArr.length > 0) {
             busPositionArr.map(item => {
@@ -192,14 +191,14 @@ class BusScreen extends Component {
                     position: 'absolute',
                     left: scale(left),
                     top: scale(top),
-                    paddingHorizontal: pxToDp(5),
-                    paddingVertical: pxToDp(2),
+                    paddingHorizontal: scale(5),
+                    paddingVertical: scale(2),
                     alignItems: 'center',
                     borderColor,
-                    borderRadius: pxToDp(20),
-                    borderWidth: pxToDp(2),
+                    borderRadius: scale(20),
+                    borderWidth: scale(2),
                 }}>
-                <Text style={{color: borderColor, fontSize: 12.5}}>{text}</Text>
+                <Text style={{ color: borderColor, fontSize: scale(11) }}>{text}</Text>
             </TouchableOpacity>
         );
     };
@@ -213,35 +212,35 @@ class BusScreen extends Component {
     };
 
     onRefresh = () => {
-        this.setState({isLoading: true});
+        this.setState({ isLoading: true });
         this.fetchBusInfo();
     };
 
     render() {
         let busStyleArr = [
             // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-            {position: 'absolute', left: scale(255), top: scale(450)}, // PGH
-            {position: 'absolute', left: scale(255), top: scale(380)}, // PGH ~ E4
-            {position: 'absolute', left: scale(255), top: scale(300)}, // E4
-            {position: 'absolute', left: scale(255), top: scale(200)}, // E4 ~ N2
-            {position: 'absolute', left: scale(255), top: scale(80)}, // N2
-            {position: 'absolute', left: scale(160), top: scale(30)}, // N2 ~ N6
-            {position: 'absolute', left: scale(75), top: scale(58)}, // N6
-            {position: 'absolute', left: scale(30), top: scale(120)}, // N6 ~ E11
-            {position: 'absolute', left: scale(30), top: scale(155)}, // E11
-            {position: 'absolute', left: scale(30), top: scale(210)}, // E11 ~ E21
-            {position: 'absolute', left: scale(30), top: scale(265)}, // N21
-            {position: 'absolute', left: scale(30), top: scale(330)}, // N21 ~ E32
-            {position: 'absolute', left: scale(30), top: scale(390)}, // E32
-            {position: 'absolute', left: scale(30), top: scale(500)}, // E32 ~ S4
-            {position: 'absolute', left: scale(190), top: scale(493)}, // s4
-            {position: 'absolute', left: scale(255), top: scale(500)}, // s4 ~ PGH
+            { position: 'absolute', left: scale(255), top: scale(450) }, // PGH
+            { position: 'absolute', left: scale(255), top: scale(380) }, // PGH ~ E4
+            { position: 'absolute', left: scale(255), top: scale(300) }, // E4
+            { position: 'absolute', left: scale(255), top: scale(200) }, // E4 ~ N2
+            { position: 'absolute', left: scale(255), top: scale(80) }, // N2
+            { position: 'absolute', left: scale(160), top: scale(30) }, // N2 ~ N6
+            { position: 'absolute', left: scale(75), top: scale(58) }, // N6
+            { position: 'absolute', left: scale(30), top: scale(120) }, // N6 ~ E11
+            { position: 'absolute', left: scale(30), top: scale(155) }, // E11
+            { position: 'absolute', left: scale(30), top: scale(210) }, // E11 ~ E21
+            { position: 'absolute', left: scale(30), top: scale(265) }, // N21
+            { position: 'absolute', left: scale(30), top: scale(330) }, // N21 ~ E32
+            { position: 'absolute', left: scale(30), top: scale(390) }, // E32
+            { position: 'absolute', left: scale(30), top: scale(500) }, // E32 ~ S4
+            { position: 'absolute', left: scale(190), top: scale(493) }, // s4
+            { position: 'absolute', left: scale(255), top: scale(500) }, // s4 ~ PGH
         ];
 
-        const {busPositionArr, busInfoArr, toastColor} = this.state;
+        const { busPositionArr, busInfoArr, toastColor } = this.state;
 
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'校園巴士'} />
 
                 <ScrollView
@@ -271,7 +270,7 @@ class BusScreen extends Component {
                                     top: scale(575),
                                 }}>
                                 <Text
-                                    style={{fontSize: 12, color: black.third}}>
+                                    style={{ fontSize: 12, color: black.third }}>
                                     Data From: cmdo.um.edu.mo
                                 </Text>
                             </View>
@@ -285,56 +284,41 @@ class BusScreen extends Component {
                                 }}>
                                 {busInfoArr.length > 0
                                     ? this.state.busInfoArr.map(item => (
-                                          <Text
-                                              style={{
-                                                  color: black.second,
-                                                  fontSize: scale(10.5),
-                                              }}>
-                                              {item}
-                                          </Text>
-                                      ))
+                                        <Text
+                                            style={{
+                                                color: black.second,
+                                                fontSize: scale(10.5),
+                                            }}>
+                                            {item}
+                                        </Text>
+                                    ))
                                     : null}
                             </View>
 
                             {/* 巴士圖標 */}
                             {busPositionArr.length > 0
                                 ? busPositionArr.map(item => (
-                                      <View style={busStyleArr[item.index]}>
-                                          <Image
-                                              source={busIcon}
-                                              style={{
-                                                  width: pxToDp(30),
-                                                  height: pxToDp(30),
-                                              }}
-                                          />
-                                      </View>
-                                  ))
+                                    <View style={busStyleArr[item.index]}>
+                                        <Image
+                                            source={busIcon}
+                                            style={{
+                                                width: scale(30),
+                                                height: scale(30),
+                                            }}
+                                        />
+                                    </View>
+                                ))
                                 : null}
 
                             {/* 巴士站點文字 */}
-                            {this.renderBusStopText(
-                                110,
-                                455,
-                                'PGH 研究生宿舍(起)',
-                                0,
-                            )}
-                            {this.renderBusStopText(153, 305, 'E4 劉少榮樓', 1)}
-                            {this.renderBusStopText(153, 83, 'N2 大學會堂', 2)}
-                            {this.renderBusStopText(52, 90, 'N6 行政樓', 3)}
+                            {this.renderBusStopText(115, 455, 'PGH 研究生宿舍(起)', 0)}
+                            {this.renderBusStopText(155, 305, 'E4 劉少榮樓', 1)}
+                            {this.renderBusStopText(155, 85, 'N2 大學會堂', 2)}
+                            {this.renderBusStopText(55, 87, 'N6 行政樓', 3)}
                             {this.renderBusStopText(79, 160, 'E11 科技學院', 4)}
-                            {this.renderBusStopText(
-                                79,
-                                265,
-                                'E21 人文社科樓',
-                                5,
-                            )}
+                            {this.renderBusStopText(79, 267, 'E21 人文社科樓', 5)}
                             {this.renderBusStopText(79, 395, 'E32 法學院', 6)}
-                            {this.renderBusStopText(
-                                79,
-                                547,
-                                'S4 研究生宿舍南四座(終)',
-                                7,
-                            )}
+                            {this.renderBusStopText(80, 547, 'S4 研究生宿舍南四座(終)', 7)}
                         </ImageBackground>
                     </ScrollView>
                 </ScrollView>
@@ -360,8 +344,9 @@ class BusScreen extends Component {
                         {/* 關閉圖標 - 引導用戶點擊背景關閉彈出層 */}
                         <TouchableOpacity
                             style={{
-                                paddingBottom: pxToDp(10),
-                                paddingLeft: pxToDp(280),
+                                position: 'absolute',
+                                right: scale(20),
+                                top: scale(20)
                             }}
                             onPress={this.toggleModal.bind(
                                 this,
@@ -369,13 +354,13 @@ class BusScreen extends Component {
                             )}>
                             <Ionicons
                                 name={'close-circle'}
-                                size={pxToDp(50)}
+                                size={scale(50)}
                                 color={themeColor}
                             />
                         </TouchableOpacity>
                         <Image
                             source={stopImgArr[this.state.clickStopIndex]}
-                            style={{height: '60%'}}
+                            style={{ height: '60%' }}
                             resizeMode="contain"
                         />
                     </View>
@@ -386,10 +371,10 @@ class BusScreen extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: toastColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
@@ -403,23 +388,23 @@ const s = StyleSheet.create({
         flexDirection: 'column',
     },
     arrowSize: {
-        width: pxToDp(35),
-        height: pxToDp(35),
+        width: scale(35),
+        height: scale(35),
         resizeMode: 'contain',
     },
     dotSize: {
-        width: pxToDp(21),
-        height: pxToDp(21),
+        width: scale(21),
+        height: scale(21),
         resizeMode: 'contain',
     },
     infoContainer: {
         position: 'absolute',
-        marginHorizontal: pxToDp(10),
+        marginHorizontal: scale(10),
         backgroundColor: white,
-        borderRadius: pxToDp(10),
+        borderRadius: scale(10),
         ...viewShadow,
-        paddingHorizontal: pxToDp(10),
-        paddingVertical: pxToDp(3),
+        paddingHorizontal: scale(10),
+        paddingVertical: scale(3),
     },
 });
 
