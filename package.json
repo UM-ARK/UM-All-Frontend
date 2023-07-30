@@ -1,6 +1,6 @@
 {
   "name": "umall",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
