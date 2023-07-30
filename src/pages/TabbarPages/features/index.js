@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     ScrollView,
     Text,
@@ -8,7 +8,7 @@ import {
     Linking,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
+import { COLOR_DIY } from '../../../utils/uiMap';
 import {
     UM_MAP,
     UM_RBS,
@@ -51,20 +51,23 @@ import {
     NEW_SCZN,
     NEW_MAINLAND,
     UM_COMMENTS,
+    UM_PRE_ENROLMENT_EXCEL,
+    UM_IMPORTANT_DATE,
+    UM_BULLETIN,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
-import {Header} from '@rneui/themed';
+import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {FlatGrid} from 'react-native-super-grid';
+import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {inject} from 'mobx-react';
+import { inject } from 'mobx-react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -287,6 +290,17 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'bullhorn',
+                        fn_name: '電子公告',
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_BULLETIN,
+                            title: '學生電子公告',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'view-grid-plus',
                         fn_name: '更多服務',
                         needLogin: false,
@@ -368,6 +382,17 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'file-table',
+                        fn_name: '預選表格',
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_PRE_ENROLMENT_EXCEL,
+                            title: '預選課(建議在電腦操作)',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bank-plus',
                         fn_name: 'Add Drop',
                         needLogin: false,
@@ -375,6 +400,17 @@ class Index extends Component {
                         webview_param: {
                             url: UM_ADD_DROP,
                             title: '增補選(建議在電腦操作)',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'timeline-alert',
+                        fn_name: '重要日期',
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_IMPORTANT_DATE,
+                            title: '重要日期',
                         },
                     },
                     {
@@ -572,7 +608,7 @@ class Index extends Component {
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
-            this.setState({isLogin: true});
+            this.setState({ isLogin: true });
         }
     }
 
@@ -584,8 +620,8 @@ class Index extends Component {
                     flex: 1,
                     backgroundColor: COLOR_DIY.bg_color,
                     borderRadius: scale(10),
-                    margin: scale(15),
-                    marginTop: scale(5),
+                    marginHorizontal: scale(10),
+                    marginTop: scale(10),
                     // 增加陰影
                     ...COLOR_DIY.viewShadow,
                 }}>
@@ -613,7 +649,7 @@ class Index extends Component {
                     itemDimension={scale(50)}
                     spacing={scale(10)}
                     data={fn_list}
-                    renderItem={({item}) => {
+                    renderItem={({ item }) => {
                         // 索引出相關服務的icon
                         let icon = null;
                         if (item.icon_type == 'ionicons') {
@@ -647,7 +683,7 @@ class Index extends Component {
                             );
                         }
 
-                        let {go_where, webview_param, needLogin} = item;
+                        let { go_where, webview_param, needLogin } = item;
                         return (
                             <TouchableOpacity
                                 style={{
@@ -675,7 +711,7 @@ class Index extends Component {
                                             );
                                         }
                                     } else {
-                                        this.setState({showDialog: true});
+                                        this.setState({ showDialog: true });
                                     }
                                 }}
                                 // 複製相關網站link
@@ -706,7 +742,7 @@ class Index extends Component {
 
     render() {
         return (
-            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     centerComponent={{
@@ -722,7 +758,7 @@ class Index extends Component {
                     }}
                 />
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <View style={{paddingHorizontal: scale(20)}}>
+                    <View style={{ paddingHorizontal: scale(20) }}>
                         <Text
                             style={{
                                 alignSelf: 'center',
@@ -743,7 +779,7 @@ class Index extends Component {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);
                     })}
 
-                    <View style={{marginBottom: scale(100)}} />
+                    <View style={{ marginBottom: scale(100) }} />
                 </ScrollView>
 
                 {/* 彈出層提示 */}
@@ -751,10 +787,10 @@ class Index extends Component {
                     showDialog={this.state.showDialog}
                     text={`此功能需要登錄後操作，現在去登錄嗎？\n[]~(￣▽￣)~*`}
                     handleConfirm={() => {
-                        this.setState({showDialog: false});
+                        this.setState({ showDialog: false });
                         this.props.navigation.navigate('MeTabbar');
                     }}
-                    handleCancel={() => this.setState({showDialog: false})}
+                    handleCancel={() => this.setState({ showDialog: false })}
                 />
             </View>
         );
