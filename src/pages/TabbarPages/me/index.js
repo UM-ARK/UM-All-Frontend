@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -9,8 +9,9 @@ import {
 } from 'react-native';
 
 // 本地工具
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {USUAL_Q} from '../../../utils/pathMap';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { USUAL_Q } from '../../../utils/pathMap';
+import Header from '../../../components/Header';
 
 // 本Tabbar相關頁面
 import Login from './pages/Login';
@@ -19,14 +20,13 @@ import AboutUs from './pages/AboutUs';
 import MyFollow from './pages/MyFollow';
 
 // 第三方庫
-import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {inject} from 'mobx-react';
+import { inject } from 'mobx-react';
 import { scale } from 'react-native-size-matters';
 
-const {black, white} = COLOR_DIY;
-const {bg_color, card_color} = COLOR_DIY.meScreenColor;
+const { black, white } = COLOR_DIY;
+const { bg_color, card_color } = COLOR_DIY.meScreenColor;
 
 // 循環渲染選項
 const optionsInfo = [
@@ -74,9 +74,9 @@ class MeScreen extends Component {
 
     // 渲染個人信息欄
     renderUserInfo = () => {
-        const {Student_email, icon_url, name, _id} = this.state.stdData;
+        const { Student_email, icon_url, name, _id } = this.state.stdData;
         return (
-            <View style={{...s.personalInfoContainer}}>
+            <View style={{ ...s.personalInfoContainer }}>
                 <View
                     style={{
                         height: '100%',
@@ -87,7 +87,7 @@ class MeScreen extends Component {
                     }}>
                     {/* 頭像 */}
                     <Image
-                        source={{uri: icon_url}}
+                        source={{ uri: icon_url }}
                         style={{
                             height: scale(70),
                             width: scale(70),
@@ -124,10 +124,10 @@ class MeScreen extends Component {
 
     // 渲染對應的選項
     renderOptions = optionsInfoIndex => {
-        const {title, iconPath, routeName} = optionsInfo[optionsInfoIndex];
+        const { title, iconPath, routeName } = optionsInfo[optionsInfoIndex];
         return (
             <TouchableOpacity
-                style={{...s.optionContainer}}
+                style={{ ...s.optionContainer }}
                 activeOpacity={0.8}
                 onPress={() => {
                     if (routeName == 'UsualQuestion') {
@@ -144,7 +144,7 @@ class MeScreen extends Component {
                     }
                 }}>
                 {/* 左側flex佈局 */}
-                <View style={{flexDirection: 'row'}}>
+                <View style={{ flexDirection: 'row' }}>
                     {/* 選項圖標 */}
                     <Ionicons
                         name={iconPath}
@@ -152,7 +152,7 @@ class MeScreen extends Component {
                         color={COLOR_DIY.themeColor}
                     />
                     {/* 選項標題 */}
-                    <Text style={{...s.optionTitle}}>{title}</Text>
+                    <Text style={{ ...s.optionTitle }}>{title}</Text>
                 </View>
 
                 {/* 右側flex佈局 */}
@@ -167,39 +167,31 @@ class MeScreen extends Component {
     };
 
     handleRootStoreChange = () => {
-        this.setState({RootStoreChange: !this.state.RootStoreChange});
+        this.setState({ RootStoreChange: !this.state.RootStoreChange });
     };
 
     render() {
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+                <Header title={'賬號登錄'} />
+
                 {/* 檢查是否登錄 */}
                 {this.state.isLogin ? (
                     // 展示學生個人系統頁面
                     <ScrollView>
-                        <Header
-                            backgroundColor={card_color}
-                            statusBarProps={{
-                                backgroundColor: 'transparent',
-                                barStyle: 'dark-content',
-                                translucent: true,
-                            }}
-                        />
                         {/* 個人信息欄 */}
                         {this.renderUserInfo()}
-
-                        <View style={{marginTop: scale(6)}} />
 
                         {/* 渲染選項 */}
                         {optionsInfo.map((_, index) =>
                             this.renderOptions(index),
                         )}
 
-                        <View style={{paddingBottom: scale(100)}} />
+                        <View style={{ paddingBottom: scale(100) }} />
                     </ScrollView>
                 ) : (
                     // 未登錄的用戶則展示登錄界面
-                    <Login></Login>
+                    <Login />
                 )}
             </View>
         );

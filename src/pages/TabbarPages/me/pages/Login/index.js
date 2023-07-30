@@ -1,5 +1,5 @@
 // 選擇賬號登錄頁
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -14,8 +14,8 @@ import {
 } from 'react-native';
 
 // 本地工具
-import {COLOR_DIY} from '../../../../../utils/uiMap';
-import {handleLogin} from '../../../../../utils/storageKits';
+import { COLOR_DIY } from '../../../../../utils/uiMap';
+import { handleLogin } from '../../../../../utils/storageKits';
 import {
     BASE_URI,
     POST,
@@ -23,21 +23,21 @@ import {
     USUAL_Q,
 } from '../../../../../utils/pathMap';
 import Webviewer from '../../../../../components/Webviewer';
-import {UM_Moodle} from '../../../../../utils/pathMap';
+import { UM_Moodle } from '../../../../../utils/pathMap';
 import DialogDIY from '../../../../../components/DialogDIY';
 import ClubLogin from './ClubLogin';
 
-import {Header, CheckBox} from '@rneui/themed';
-import {NavigationContext} from '@react-navigation/native';
+import { Header, CheckBox } from '@rneui/themed';
+import { NavigationContext } from '@react-navigation/native';
 import CookieManager from '@react-native-cookies/cookies';
 import WebView from 'react-native-webview';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
-const {bg_color, black, themeColor, white} = COLOR_DIY;
+const { bg_color, black, themeColor, white } = COLOR_DIY;
 
 class LoginChoose extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -66,7 +66,7 @@ class LoginChoose extends Component {
             const strUmPassInfo = await AsyncStorage.getItem('umPass');
             const UmPassInfo = strUmPassInfo ? JSON.parse(strUmPassInfo) : {};
             if (JSON.stringify(UmPassInfo) != '{}') {
-                this.setState({UmPassInfo});
+                this.setState({ UmPassInfo });
             }
         } catch (e) {
             alert(e);
@@ -100,10 +100,10 @@ class LoginChoose extends Component {
     };
 
     render() {
-        const {disabledButton} = this.state;
+        const { disabledButton } = this.state;
         return (
-            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
-                <Header
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+                {/* <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     statusBarProps={{
                         backgroundColor: 'transparent',
@@ -133,11 +133,11 @@ class LoginChoose extends Component {
                             </TouchableOpacity>
                         )
                     }
-                />
+                /> */}
 
                 {this.state.showMoodle ? (
                     <WebView
-                        source={{uri: UM_Moodle}}
+                        source={{ uri: UM_Moodle }}
                         ref={'webRef'}
                         startInLoadingState={true}
                         // 自動注入賬號密碼
@@ -194,35 +194,31 @@ class LoginChoose extends Component {
                         domStorageEnabled
                     />
                 ) : (
-                    <View
-                        style={{
-                            flex: 1,
-                            justifyContent: 'center',
+                    <View style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        <View style={{
                             alignItems: 'center',
+                            marginBottom: scale(10),
                         }}>
-                        <View
-                            style={{
-                                alignItems: 'center',
-                                marginBottom: scale(10),
+                            <Text style={{
+                                color: COLOR_DIY.black.third,
+                                fontSize: scale(18),
                             }}>
-                            <Text
-                                style={{
-                                    color: COLOR_DIY.black.third,
-                                    fontSize: scale(18),
-                                }}>
                                 Welcome To ARK ALL~
                             </Text>
-                            <Text
-                                style={{
-                                    color: COLOR_DIY.black.third,
-                                    fontSize: scale(18),
-                                }}>
+                            <Text style={{
+                                color: COLOR_DIY.black.third,
+                                fontSize: scale(18),
+                            }}>
                                 []~(￣▽￣)~*
                             </Text>
                         </View>
 
                         {/* 登錄按鈕卡片 */}
-                        <View style={{width: '100%', flexDirection: 'row'}}>
+                        <View style={{ width: '100%', flexDirection: 'row' }}>
                             {/* 社團賬號登錄 */}
                             <TouchableOpacity
                                 style={{
@@ -235,7 +231,7 @@ class LoginChoose extends Component {
                                     this.context.navigate('ClubLogin');
                                 }}
                                 disabled={!this.state.ruleChoice}>
-                                <Text style={{...s.roleCardText}}>
+                                <Text style={{ ...s.roleCardText }}>
                                     社團 / 組織賬號
                                 </Text>
                             </TouchableOpacity>
@@ -252,13 +248,13 @@ class LoginChoose extends Component {
                                         ReactNativeHapticFeedback.trigger(
                                             'soft',
                                         );
-                                        this.setState({showDialog: true});
+                                        this.setState({ showDialog: true });
                                     }}
                                     disabled={!this.state.ruleChoice}>
-                                    <Text style={{...s.roleCardText}}>
+                                    <Text style={{ ...s.roleCardText }}>
                                         UM PASS
                                     </Text>
-                                    <Text style={{...s.roleCardText}}>
+                                    <Text style={{ ...s.roleCardText }}>
                                         學生個人賬號
                                     </Text>
                                 </TouchableOpacity>
@@ -361,9 +357,9 @@ class LoginChoose extends Component {
                     text={`將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！\n請確定您已閱讀用戶條款`}
                     handleConfirm={() => {
                         this.getUmPass();
-                        this.setState({showDialog: false, showMoodle: true});
+                        this.setState({ showDialog: false, showMoodle: true });
                     }}
-                    handleCancel={() => this.setState({showDialog: false})}
+                    handleCancel={() => this.setState({ showDialog: false })}
                 />
             </View>
         );
