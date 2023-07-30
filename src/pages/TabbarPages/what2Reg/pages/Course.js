@@ -12,6 +12,7 @@ import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 
 import { scale } from "react-native-size-matters";
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 
@@ -23,6 +24,7 @@ export default class Course extends Component {
     }
 
     jumpToProf = async (data) => {
+        ReactNativeHapticFeedback.trigger('soft');
         this.setState({ isLoading: true })
 
         const res = data;

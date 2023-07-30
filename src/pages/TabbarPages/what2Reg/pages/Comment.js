@@ -39,7 +39,7 @@ export default class Comment extends Component {
 
         // 監聽畫面聚焦，第一次加載時也會執行
         this.focusSubscription = this.props.navigation.addListener('focus', () => {
-            console.log('刷新Comment.js');
+            // console.log('刷新Comment.js');
             this.getData(res);
         });
     }
@@ -295,7 +295,7 @@ export default class Comment extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={black.main}
+                            color={themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -372,6 +372,7 @@ export default class Comment extends Component {
                                     prof_name: res.prof_info.name,
                                 }
                                 this.props.navigation.navigate('What2RegNewComment', data)
+                                ReactNativeHapticFeedback.trigger('soft');
                             }}
                         >
                             <Text style={{ color: white }}>新增評論</Text>

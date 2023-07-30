@@ -151,7 +151,7 @@ export default class index extends Component {
         });
         filterCourseList = filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8) - b['Course Code'].substring(4, 8));
         this.setState({ filterCourseList })
-        console.log('篩選後數據', filterCourseList);
+        // console.log('篩選後數據', filterCourseList);
     }
 
     getCourseData = async (courseCode) => {
@@ -165,6 +165,7 @@ export default class index extends Component {
     };
 
     jumpToCoursePage = async (courseCOde) => {
+        ReactNativeHapticFeedback.trigger('soft');
         this.setState({ isLoading: true })
         if (courseCOde.length > 0) {
             let res = await this.getCourseData(courseCOde)
@@ -244,6 +245,7 @@ export default class index extends Component {
                         placeholder="e.g. ECEN1000"
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
+                        onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
                     />
                     {/* 清空搜索框按鈕 */}
                     {inputText.length > 0 ? (
@@ -272,6 +274,7 @@ export default class index extends Component {
                     }}
                     disabled={isLoading || !inputOK}
                     onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         this.jumpToCoursePage(inputText)
                     }}
                 >
@@ -419,7 +422,7 @@ export default class index extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={black.main}
+                            color={themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -512,6 +515,7 @@ export default class index extends Component {
                                 <TouchableOpacity
                                     style={{ marginHorizontal: scale(5) }}
                                     onPress={() => {
+                                        ReactNativeHapticFeedback.trigger('soft');
                                         this.setState({
                                             filterOptions: {
                                                 ...filterOptions,
@@ -526,6 +530,7 @@ export default class index extends Component {
                                 <TouchableOpacity
                                     style={{ marginHorizontal: 5 }}
                                     onPress={() => {
+                                        ReactNativeHapticFeedback.trigger('soft');
                                         this.setState({
                                             filterOptions: {
                                                 ...filterOptions,
@@ -556,7 +561,10 @@ export default class index extends Component {
                                         renderItem={({ item: itm }) => (
                                             <TouchableOpacity
                                                 style={{ marginHorizontal: scale(5), marginVertical: scale(3) }}
-                                                onPress={() => this.handleFilterFaculty(itm)}
+                                                onPress={() => {
+                                                    ReactNativeHapticFeedback.trigger('soft');
+                                                    this.handleFilterFaculty(itm)
+                                                }}
                                             >
                                                 <Text style={{ color: itm === filterOptions.facultyName ? secondThemeColor : black.third }}>{itm}</Text>
                                             </TouchableOpacity>
@@ -576,7 +584,10 @@ export default class index extends Component {
                                         {offerDepaList.map((itm) => {
                                             return (
                                                 <TouchableOpacity style={{ marginHorizontal: scale(5) }}
-                                                    onPress={() => this.handleFilterCourse(itm)}
+                                                    onPress={() => {
+                                                        ReactNativeHapticFeedback.trigger('soft');
+                                                        this.handleFilterCourse(itm)
+                                                    }}
                                                 >
                                                     <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third }}>{itm}</Text>
                                                 </TouchableOpacity>
@@ -594,7 +605,10 @@ export default class index extends Component {
                                     {offerGEList.length > 0 && offerGEList.map(itm => {
                                         return (
                                             <TouchableOpacity style={{ marginHorizontal: scale(5) }}
-                                                onPress={() => this.handleFilterCourse(itm)}
+                                                onPress={() => {
+                                                    ReactNativeHapticFeedback.trigger('soft');
+                                                    this.handleFilterCourse(itm)
+                                                }}
                                             >
                                                 <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third }}>{itm}</Text>
                                             </TouchableOpacity>
