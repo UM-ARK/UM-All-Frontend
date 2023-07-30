@@ -302,6 +302,7 @@ class HomeScreen extends Component {
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.setState({ selectDay: index });
                 }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>

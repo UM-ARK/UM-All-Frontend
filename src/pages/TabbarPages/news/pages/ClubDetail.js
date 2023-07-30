@@ -413,7 +413,10 @@ class ClubDetail extends Component {
                     {!isAdmin ? (
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() => this.props.navigation.goBack()}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.goBack()
+                            }}
                             style={{
                                 position: 'absolute',
                                 top: scale(65),
@@ -422,7 +425,7 @@ class ClubDetail extends Component {
                             }}>
                             <Ionicons
                                 name="chevron-back-circle"
-                                size={scale(30)}
+                                size={scale(35)}
                                 color={white}
                             />
                         </TouchableOpacity>

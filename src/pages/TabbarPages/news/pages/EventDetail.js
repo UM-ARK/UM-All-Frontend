@@ -409,10 +409,13 @@ class EventDetail extends Component {
                         }}>
                         <TouchableOpacity
                             activeOpacity={0.7}
-                            onPress={() => this.props.navigation.goBack()}>
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.goBack()
+                            }}>
                             <Ionicons
                                 name="chevron-back-circle"
-                                size={scale(30)}
+                                size={scale(35)}
                                 color={white}
                             />
                         </TouchableOpacity>

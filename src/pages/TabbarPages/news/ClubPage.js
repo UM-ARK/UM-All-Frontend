@@ -250,6 +250,7 @@ class ClubPage extends Component {
                                     return (
                                         <TouchableOpacity
                                             onPress={() => {
+                                                ReactNativeHapticFeedback.trigger('soft');
                                                 this.scrollViewRef.current.scrollTo({ y: 0 });
                                                 this.setState({ scrollMaxItm: 'ARK' })
                                             }}
@@ -269,6 +270,7 @@ class ClubPage extends Component {
                                     return (
                                         <TouchableOpacity
                                             onPress={() => {
+                                                ReactNativeHapticFeedback.trigger('soft');
                                                 // 點擊自動滑動到對應分類的社團
                                                 const tag = itm.item;
                                                 this.scrollViewRef.current.scrollTo({
