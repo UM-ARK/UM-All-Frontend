@@ -24,6 +24,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Interactable from 'react-native-interactable';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {KeyboardAvoidingView} from "native-base";
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 
@@ -207,7 +208,8 @@ export default class index extends Component {
     renderSearch = () => {
         const { inputText, isLoading, inputOK, } = this.state;
         return (
-            <View
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{
                     alignItems: 'center', justifyContent: 'center',
                     flexDirection: 'row',
@@ -281,7 +283,7 @@ export default class index extends Component {
                 >
                     <Text style={{ fontSize: scale(12), color: white }}>搜索</Text>
                 </TouchableOpacity>
-            </View>
+            </KeyboardAvoidingView>
         )
     }
 
