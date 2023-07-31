@@ -134,11 +134,16 @@ pod install
 npx react-native run-ios
 ```
 
+6. 在iOS设备上编译、运行
+```console
+npx react-native run-ios --device <设备名称>
+```
+
 ### 故障排除
 
 在此查看[Android 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android)
 與[iOS 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#ios)
-
+遇到iOS端YOGA不能编译问题[Yoga编译问题](https://github.com/facebook/react-native/issues/36758#issuecomment-1496210081)
 ---
 
 &nbsp;
