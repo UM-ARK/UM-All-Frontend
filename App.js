@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, Image, Dimensions, StyleSheet, Alert, Linking } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -79,6 +80,9 @@ class App extends Component {
     };
 
     render() {
+        const model = DeviceInfo.getModel();
+        const isDynamicIsland = model === 'iPhone 14 Pro' || model === 'iPhone 14 Pro Max';
+        const paddingTop = isDynamicIsland ? 40 : 0; // 示例值，可能需要调整
         return (
             // 開屏動畫
             // <SafeAreaView style={{ flex: 1, backgroundColor: bg_color }}>
@@ -96,6 +100,7 @@ class App extends Component {
                     />
                 }
                 backgroundColor={bg_color}>
+                <View style={{ flex: 1, backgroundColor: bg_color, paddingTop: paddingTop*0.3, paddingBottom: paddingTop }}>
                 <SafeAreaProvider>
                     <Provider RootStore={RootStore}>
                         <NativeBaseProvider>
@@ -108,6 +113,7 @@ class App extends Component {
                         </NativeBaseProvider>
                     </Provider>
                 </SafeAreaProvider>
+                </View>
             </AnimatedSplash>
             // </SafeAreaView>
         );
