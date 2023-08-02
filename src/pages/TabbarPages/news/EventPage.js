@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -11,9 +11,8 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
 
@@ -21,15 +20,15 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actionsheet';
 import axios from 'axios';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import Toast, { DURATION } from 'react-native-easy-toast';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
-const {black, white, themeColor, viewShadow, bg_color} = COLOR_DIY;
+const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
 
 // 返回數據的頁數
 let dataPage = 1;
@@ -52,30 +51,29 @@ class EventPage extends Component {
         dataPage = 1;
     }
 
-    async getData() {
+    getData = async () => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 20;
-        await axios
-            .get(URL, {
+        try {
+            await axios.get(URL, {
                 params: {
                     num_of_item,
                     page: dataPage,
                 },
-            })
-            .then(res => {
+            }).then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
                     let newDataArr = json.content;
                     if (newDataArr.length < num_of_item) {
-                        this.setState({noMoreData: true});
+                        this.setState({ noMoreData: true });
                     } else {
-                        this.setState({noMoreData: false});
+                        this.setState({ noMoreData: false });
                     }
 
                     if (dataPage == 1) {
                         this.separateData(newDataArr);
                         eventDataList = newDataArr;
-                        this.setState({isLoading: false});
+                        this.setState({ isLoading: false });
                     } else if (eventDataList.length > 0) {
                         newDataArr = eventDataList.concat(newDataArr);
                         if (this.state.needFilter) {
@@ -84,16 +82,23 @@ class EventPage extends Component {
                             this.separateData(newDataArr);
                         }
                         eventDataList = newDataArr;
-                        this.setState({isLoading: false});
+                        this.setState({ isLoading: false });
                     }
                 } else if (json.code == '2') {
                     alert('已無更多數據');
-                    this.setState({noMoreData: true});
+                    this.setState({ noMoreData: true });
                 } else {
                     alert('數據出錯，請聯繫開發者');
                 }
             })
-            .catch(err => alert('請求錯誤!'));
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                // 網絡錯誤，自動重載
+                this.onRefresh();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     separateData = eventDataList => {
@@ -144,20 +149,20 @@ class EventPage extends Component {
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        marginTop: pxToDp(8),
+                        marginTop: scale(8),
                         width: '100%',
                         backgroundColor: bg_color,
                     }}>
-                    <Text style={{color: black.third}}>篩選</Text>
+                    <Text style={{ color: black.third }}>篩選</Text>
                     <Ionicons
                         name={
                             this.state.applyFilter
                                 ? 'md-funnel'
                                 : 'md-funnel-outline'
                         }
-                        size={pxToDp(10)}
+                        size={scale(10)}
                         color={black.third}
-                        style={{marginLeft: pxToDp(5)}}
+                        style={{ marginLeft: scale(5) }}
                     />
                 </TouchableOpacity>
 
@@ -170,11 +175,11 @@ class EventPage extends Component {
                     onPress={index => {
                         if (index == 1) {
                             // 全部mode
-                            this.setState({needFilter: false});
+                            this.setState({ needFilter: false });
                             this.separateData(eventDataList);
                         } else if (index == 0) {
                             // 篩選未結束mode
-                            this.setState({needFilter: true});
+                            this.setState({ needFilter: true });
                             this.eventFilter(eventDataList);
                         }
                     }}
@@ -185,7 +190,7 @@ class EventPage extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const {white, black, viewShadow} = COLOR_DIY;
+        const { white, black, viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -195,19 +200,19 @@ class EventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -scale(140), y: -scale(220)},
-                    {x: scale(140), y: -scale(220)},
-                    {x: -scale(140), y: -scale(120)},
-                    {x: scale(140), y: -scale(120)},
-                    {x: -scale(140), y: scale(0)},
-                    {x: scale(140), y: scale(0)},
-                    {x: -scale(140), y: scale(120)},
-                    {x: scale(140), y: scale(120)},
-                    {x: -scale(140), y: scale(220)},
-                    {x: scale(140), y: scale(220)},
+                    { x: -scale(140), y: -scale(220) },
+                    { x: scale(140), y: -scale(220) },
+                    { x: -scale(140), y: -scale(120) },
+                    { x: scale(140), y: -scale(120) },
+                    { x: -scale(140), y: scale(0) },
+                    { x: scale(140), y: scale(0) },
+                    { x: -scale(140), y: scale(120) },
+                    { x: scale(140), y: scale(120) },
+                    { x: -scale(140), y: scale(220) },
+                    { x: scale(140), y: scale(220) },
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: scale(140), y: scale(220)}}>
+                initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -241,7 +246,7 @@ class EventPage extends Component {
     };
 
     loadMoreData = () => {
-        const {noMoreData} = this.state;
+        const { noMoreData } = this.state;
         dataPage++;
         if (!noMoreData) {
             this.toast.show('數據加載中，請稍等~', 2000);
@@ -262,28 +267,28 @@ class EventPage extends Component {
     };
 
     renderLoadMoreView = () => {
-        const {noMoreData} = this.state;
+        const { noMoreData } = this.state;
         return (
             <View
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginTop: pxToDp(10),
-                    marginBottom: pxToDp(50),
+                    marginTop: scale(10),
+                    marginBottom: scale(50),
                 }}>
                 {noMoreData ? (
-                    <View style={{alignItems: 'center'}}>
-                        <Text style={{color: black.third}}>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={{ color: black.third }}>
                             沒有更多活動了，過一段時間再來吧~
                         </Text>
-                        <Text style={{color: black.third}}>[]~(￣▽￣)~*</Text>
+                        <Text style={{ color: black.third }}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity
                         style={s.loadMore}
                         activeOpacity={0.8}
                         onPress={this.loadMoreData}>
-                        <Text style={{color: white, fontSize: pxToDp(14)}}>
+                        <Text style={{ color: white, fontSize: scale(14) }}>
                             Load More
                         </Text>
                     </TouchableOpacity>
@@ -294,14 +299,14 @@ class EventPage extends Component {
 
     // 渲染主要內容
     renderPage = () => {
-        const {leftDataList, rightDataList} = this.state;
+        const { leftDataList, rightDataList } = this.state;
         return (
             <View style={s.waterFlowContainer}>
                 {/* 左側的列 放置雙數下標的圖片 從0開始 */}
                 <View>
                     <FlatList
                         data={leftDataList}
-                        renderItem={({item}) => {
+                        renderItem={({ item }) => {
                             return <EventCard data={item} />;
                         }}
                         scrollEnabled={false}
@@ -309,11 +314,11 @@ class EventPage extends Component {
                     />
                 </View>
                 {/* 右側的列 放置單數下標的圖片 */}
-                <View style={{alignItems: 'center'}}>
+                <View style={{ alignItems: 'center' }}>
                     {rightDataList.length > 0 ? (
                         <FlatList
                             data={rightDataList}
-                            renderItem={({item}) => {
+                            renderItem={({ item }) => {
                                 return <EventCard data={item} />;
                             }}
                             scrollEnabled={false}
@@ -328,7 +333,7 @@ class EventPage extends Component {
     };
 
     render() {
-        const {leftDataList, rightDataList, isLoading} = this.state;
+        const { leftDataList, rightDataList, isLoading } = this.state;
         return (
             <View
                 style={{
@@ -353,11 +358,13 @@ class EventPage extends Component {
                             />
                         }
                         contentContainerStyle={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            alignItems: 'center',
+                            // flex: 1,
+                            // justifyContent: 'center',
+                            // alignItems: 'center',
                         }}>
-                        <Loading />
+                        <View style={{ width: '100%', height: scale(250) }}>
+                            <Loading />
+                        </View>
                     </ScrollView>
                 ) : null}
                 <ScrollView
@@ -386,7 +393,7 @@ class EventPage extends Component {
                             {this.renderLoadMoreView()}
 
                             {/* 防止底部遮擋 */}
-                            {/* <View style={{marginBottom: pxToDp(50)}} /> */}
+                            {/* <View style={{marginBottom: scale(50)}} /> */}
                         </View>
                     )}
                 </ScrollView>
@@ -396,10 +403,10 @@ class EventPage extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
@@ -417,10 +424,10 @@ const s = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: themeColor,
-        paddingHorizontal: pxToDp(10),
-        paddingVertical: pxToDp(10),
-        borderRadius: pxToDp(15),
-        marginBottom: pxToDp(5),
+        paddingHorizontal: scale(10),
+        paddingVertical: scale(10),
+        borderRadius: scale(15),
+        marginBottom: scale(5),
         ...viewShadow,
     },
 });

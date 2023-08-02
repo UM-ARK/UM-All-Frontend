@@ -13,7 +13,6 @@ import {
 
 // 本地工具
 import {COLOR_DIY, ToastText} from '../../../../../utils/uiMap';
-import {pxToDp} from '../../../../../utils/stylesKits';
 import Header from '../../../../../components/Header';
 import {ToastDIY} from '../../../../../components/ToastDIY';
 import {handleLogin} from '../../../../../utils/storageKits';
@@ -28,6 +27,7 @@ import {useToast} from 'native-base';
 import axios from 'axios';
 import qs from 'qs';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { scale } from 'react-native-size-matters';
 
 // 存入臨時變量，準備提交後端驗證
 let accountPassword = {
@@ -49,7 +49,7 @@ const NBTextInput = () => {
                 InputLeftElement={
                     <Icon
                         as={<MaterialIcons name="person" />}
-                        size={pxToDp(20)}
+                        size={scale(20)}
                         ml="2"
                         color="muted.400"
                     />
@@ -71,7 +71,7 @@ const NBTextInput = () => {
                                 name={show ? 'visibility' : 'visibility-off'}
                             />
                         }
-                        size={pxToDp(20)}
+                        size={scale(20)}
                         mr="2"
                         color="muted.400"
                         onPress={() => {
@@ -172,19 +172,19 @@ function RenderLoginButton(props) {
     return (
         <TouchableOpacity
             style={{
-                height: pxToDp(50),
-                width: pxToDp(100),
-                padding: pxToDp(10),
-                marginTop: pxToDp(20),
+                height: scale(50),
+                width: scale(100),
+                padding: scale(10),
+                marginTop: scale(20),
                 backgroundColor: COLOR_DIY.themeColor,
-                borderRadius: pxToDp(10),
+                borderRadius: scale(10),
                 justifyContent: 'center',
                 alignSelf: 'center',
             }}
             onPress={handleLoginPress}>
             <Text
                 style={{
-                    fontSize: pxToDp(20),
+                    fontSize: scale(20),
                     alignSelf: 'center',
                     color: 'white',
                     fontWeight: '500',
@@ -212,11 +212,11 @@ class ClubLogin extends Component {
                 cancel={() => this.setState({isModalBottomVisible: false})}
                 style={{height: '60%'}}>
                 <ScrollView>
-                    <View style={{padding: pxToDp(20)}}>
+                    <View style={{padding: scale(20)}}>
                         <Text
                             style={{
                                 color: COLOR_DIY.black.third,
-                                fontSize: pxToDp(13),
+                                fontSize: scale(13),
                             }}>
                             註冊須知:
                         </Text>
@@ -224,7 +224,7 @@ class ClubLogin extends Component {
                         <Text
                             style={{
                                 color: COLOR_DIY.black.second,
-                                fontSize: pxToDp(15),
+                                fontSize: scale(15),
                             }}>
                             {`歡迎各社團/組織使用ARK ALL~\n進駐ARK ALL，註冊一個“社團/組織”賬號，無需費用。\n進駐請將文件：1、組織頭像圖片。2、社團名字(簡稱)。3、需要設置的賬號&密碼。4、任何一種組織在澳大服務的證明。\n發送到郵箱xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n即有運營的同學幫忙註冊！`}
                         </Text>
@@ -245,14 +245,14 @@ class ClubLogin extends Component {
                 <ScrollView>
                     <Icon
                         as={<MaterialCommunityIcons name="human-queue" />}
-                        size={pxToDp(120)}
+                        size={scale(120)}
                         ml="2"
                         color="muted.400"
                         style={{alignSelf: 'center'}}
                     />
 
                     {/* 賬號密碼輸入框 */}
-                    <View style={{marginTop: pxToDp(20)}}>
+                    <View style={{marginTop: scale(20)}}>
                         <NBTextInput />
                     </View>
 

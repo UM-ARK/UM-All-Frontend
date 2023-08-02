@@ -12,10 +12,8 @@ import {
     Linking,
 } from 'react-native';
 
-import {pxToDp} from '../../../../utils/stylesKits';
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {BASE_URI, BASE_HOST, GET, POST, MAIL} from '../../../../utils/pathMap';
-import EventCard from '../components/EventCard';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import DialogDIY from '../../../../components/DialogDIY';
@@ -407,20 +405,24 @@ class EventDetail extends Component {
                             position: 'absolute',
                             top: scale(65),
                             left: scale(15),
+                            zIndex: 999
                         }}>
                         <TouchableOpacity
                             activeOpacity={0.7}
-                            onPress={() => this.props.navigation.goBack()}>
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.goBack()
+                            }}>
                             <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
+                                name="chevron-back-circle"
+                                size={scale(35)}
                                 color={white}
                             />
                         </TouchableOpacity>
                     </View>
                     {/* 設置按鈕 */}
                     {
-                        isClub ? (
+                        false && isClub ? (
                             <View
                                 style={{
                                     position: 'absolute',
@@ -441,7 +443,7 @@ class EventDetail extends Component {
                                     }}>
                                     <Ionicons
                                         name="settings-outline"
-                                        size={pxToDp(25)}
+                                        size={scale(25)}
                                         color={white}
                                     />
                                 </TouchableOpacity>
@@ -463,7 +465,7 @@ class EventDetail extends Component {
                         //         }}>
                         //         <Feather
                         //             name="message-circle"
-                        //             size={pxToDp(25)}
+                        //             size={scale(25)}
                         //             color={white}
                         //         />
                         //     </TouchableOpacity>
@@ -476,18 +478,18 @@ class EventDetail extends Component {
                         style={{
                             bottom: 0,
                             width: '100%',
-                            height: pxToDp(100),
+                            height: scale(100),
                             backgroundColor: bg_color,
                             position: 'absolute',
-                            borderTopLeftRadius: pxToDp(15),
-                            borderTopRightRadius: pxToDp(15),
+                            borderTopLeftRadius: scale(15),
+                            borderTopRightRadius: scale(15),
                         }}
                     />
                     {/* 活動基本信息 */}
                     <TouchableWithoutFeedback>
                         <View
                             style={{
-                                bottom: pxToDp(5),
+                                bottom: scale(5),
                                 position: 'absolute',
                                 width: '100%',
                             }}>
@@ -526,7 +528,7 @@ class EventDetail extends Component {
                                 <View style={{...styles.infoShowContainer}}>
                                     <Text
                                         style={{
-                                            fontSize: pxToDp(11),
+                                            fontSize: scale(11),
                                             color: COLOR_DIY.themeColor,
                                         }}>
                                         Created By
@@ -535,7 +537,7 @@ class EventDetail extends Component {
                                 <Text
                                     style={{
                                         alignSelf: 'center',
-                                        marginTop: pxToDp(5),
+                                        marginTop: scale(5),
                                         color: black.third,
                                     }}>
                                     {clubData == undefined ? '' : clubData.name}
@@ -558,17 +560,58 @@ class EventDetail extends Component {
                         </View>
                     </TouchableWithoutFeedback>
 
+                    {/* 設置按鈕 */}
+                    { isClub ? (
+                        <>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    // this.props.navigation.navigate(
+                                    //     'ClubSetting',
+                                    //     {
+                                    //         eventID: eventData._id,
+                                    //         refresh:
+                                    //             this.onRefresh.bind(this),
+                                    //     },
+                                    // );
+
+                                    // 跳轉活動info編輯頁，並傳遞刷新函數
+                                    this.props.navigation.navigate(
+                                        'EventSetting', {
+                                            mode: 'edit',
+                                            eventData: {_id: eventData._id},
+                                            refresh: this.onRefresh.bind(this)
+                                        },
+                                    );
+                                }}
+                                style={{flexDirection:'row',alignItems:'center', justifyContent:'center',
+                                    backgroundColor:themeColor, borderRadius:scale(15), padding:scale(10), width:'auto',
+                                    margin:scale(70), marginVertical:scale(5)
+                                }}>
+                                <Text style={{color:white, fontSize:scale(20)}}>活動設置 </Text>
+                                <Ionicons
+                                    name="settings-outline"
+                                    size={scale(25)}
+                                    color={white}
+                                />
+                            </TouchableOpacity>
+                            <View>
+                                <Text style={{fontSize:scale(12),color:black.main,alignSelf:'center'}}>Update活動資訊請點我！↑</Text>
+                            </View>
+                        </>
+                    ) : null }
+
                     {/* 詳情介紹 */}
                     {eventData != undefined &&
                         eventData.introduction.length > 0 && (
                             <View
                                 style={{
                                     backgroundColor: COLOR_DIY.white,
-                                    borderRadius: pxToDp(10),
-                                    marginHorizontal: pxToDp(15),
+                                    borderRadius: scale(10),
+                                    marginHorizontal: scale(15),
                                     // 增加陰影
-                                    marginBottom: pxToDp(8),
-                                    marginTop: pxToDp(10),
+                                    marginBottom: scale(8),
+                                    marginTop: scale(10),
                                     ...COLOR_DIY.viewShadow,
                                 }}>
                                 {/* 卡片標題 */}
@@ -577,13 +620,13 @@ class EventDetail extends Component {
                                         flexDirection: 'row',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        paddingVertical: pxToDp(10),
-                                        paddingHorizontal: pxToDp(10),
+                                        paddingVertical: scale(10),
+                                        paddingHorizontal: scale(10),
                                     }}
                                     activeOpacity={0.6}>
                                     <Text
                                         style={{
-                                            fontSize: pxToDp(12),
+                                            fontSize: scale(12),
                                             color: themeColor,
                                             fontWeight: 'bold',
                                         }}>
@@ -596,8 +639,8 @@ class EventDetail extends Component {
                                         justifyContent: 'space-between',
                                         alignItems: 'flex-start',
                                         flexDirection: 'row',
-                                        margin: pxToDp(10),
-                                        marginTop: pxToDp(0),
+                                        margin: scale(10),
+                                        marginTop: scale(0),
                                     }}>
                                     {/* 文字 */}
                                     <HyperlinkText
@@ -618,11 +661,11 @@ class EventDetail extends Component {
                         <TouchableOpacity
                             style={{
                                 backgroundColor: COLOR_DIY.white,
-                                borderRadius: pxToDp(10),
-                                marginHorizontal: pxToDp(15),
+                                borderRadius: scale(10),
+                                marginHorizontal: scale(15),
                                 // 增加陰影
-                                marginBottom: pxToDp(8),
-                                marginTop: pxToDp(10),
+                                marginBottom: scale(8),
+                                marginTop: scale(10),
                                 ...COLOR_DIY.viewShadow,
                             }}
                             activeOpacity={0.7}
@@ -636,13 +679,13 @@ class EventDetail extends Component {
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    paddingVertical: pxToDp(10),
-                                    paddingHorizontal: pxToDp(10),
+                                    paddingVertical: scale(10),
+                                    paddingHorizontal: scale(10),
                                 }}
                                 activeOpacity={0.6}>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(12),
+                                        fontSize: scale(12),
                                         color: themeColor,
                                         fontWeight: 'bold',
                                     }}>
@@ -656,8 +699,8 @@ class EventDetail extends Component {
                                     justifyContent: 'space-around',
                                     alignItems: 'flex-start',
                                     flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
+                                    margin: scale(10),
+                                    marginTop: scale(0),
                                 }}>
                                 {/* 圖片相冊 最多4張 */}
                                 {relateImgUrl.map((item, index) => {
@@ -679,13 +722,13 @@ class EventDetail extends Component {
                                                     //     .cacheControl.web,
                                                 }}
                                                 style={{
-                                                    width: pxToDp(
+                                                    width: scale(
                                                         CLUB_IMAGE_WIDTH,
                                                     ),
-                                                    height: pxToDp(
+                                                    height: scale(
                                                         CLUB_IMAGE_HEIGHT,
                                                     ),
-                                                    borderRadius: pxToDp(5),
+                                                    borderRadius: scale(5),
                                                     ...COLOR_DIY.viewShadow,
                                                 }}
                                             />
@@ -735,17 +778,17 @@ class EventDetail extends Component {
                     <ModalBottom cancel={this.tiggerModalBottom}>
                         <View
                             style={{
-                                padding: pxToDp(20),
+                                padding: scale(20),
                                 height: PAGE_HEIGHT * 0.7,
                             }}>
                             <Text
                                 style={{
                                     color: black.third,
-                                    fontSize: pxToDp(13),
+                                    fontSize: scale(13),
                                 }}>
                                 詳情
                             </Text>
-                            <ScrollView style={{marginTop: pxToDp(5)}}>
+                            <ScrollView style={{marginTop: scale(5)}}>
                                 <HyperlinkText
                                     linkStyle={{color: themeColor}}
                                     navigation={this.props.navigation}
@@ -753,7 +796,7 @@ class EventDetail extends Component {
                                     <Text
                                         style={{
                                             color: black.main,
-                                            fontSize: pxToDp(16),
+                                            fontSize: scale(16),
                                         }}
                                         selectable>
                                         {introduction}
@@ -800,7 +843,7 @@ class EventDetail extends Component {
                     textStyle={{color: white}}
                     style={{
                         backgroundColor: this.state.toastColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
 
@@ -837,7 +880,7 @@ class EventDetail extends Component {
                         {renderMainContent()}
                         <View
                             style={{
-                                height: pxToDp(200),
+                                height: scale(200),
                                 backgroundColor: bg_color,
                             }}
                         />

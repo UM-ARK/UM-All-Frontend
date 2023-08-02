@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import Header from '../../../../components/Header';
@@ -22,6 +21,7 @@ import FastImage from 'react-native-fast-image';
 import {FlatGrid} from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
+import { scale } from 'react-native-size-matters';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -252,7 +252,7 @@ class NewsDetail extends Component {
                         itemDimension={COMPONENT_WIDTH}
                         data={imageUrls}
                         // 每個項目的間距
-                        spacing={pxToDp(15)}
+                        spacing={scale(15)}
                         renderItem={({item, index}) => (
                             <TouchableOpacity
                                 activeOpacity={0.7}
@@ -260,7 +260,7 @@ class NewsDetail extends Component {
                                     width: COMPONENT_WIDTH,
                                     height: COMPONENT_WIDTH,
                                     backgroundColor: bg_color,
-                                    borderRadius: pxToDp(10),
+                                    borderRadius: scale(10),
                                     overflow: 'hidden',
                                     ...viewShadow,
                                 }}
@@ -321,7 +321,7 @@ class NewsDetail extends Component {
                         ref={'imageScrollViewer'}
                         imageUrls={imageUrls}
                     />
-                    <View style={{marginBottom: pxToDp(50)}} />
+                    <View style={{marginBottom: scale(50)}} />
                 </ScrollView>
             </View>
         );
@@ -331,29 +331,29 @@ class NewsDetail extends Component {
 const styles = StyleSheet.create({
     title: {
         alignSelf: 'center',
-        marginVertical: pxToDp(5),
-        marginHorizontal: pxToDp(10),
+        marginVertical: scale(5),
+        marginHorizontal: scale(10),
         fontWeight: 'bold',
-        fontSize: pxToDp(20),
+        fontSize: scale(20),
         color: themeColor,
     },
     date: {
         color: COLOR_DIY.secondThemeColor,
         alignSelf: 'flex-end',
-        marginRight: pxToDp(15),
+        marginRight: scale(15),
         fontWeight: '600',
     },
     languageModeButtonContainer: {
-        padding: pxToDp(10),
-        marginVertical: pxToDp(5),
-        borderRadius: pxToDp(10),
+        padding: scale(10),
+        marginVertical: scale(5),
+        borderRadius: scale(10),
         ...viewShadow,
     },
     contentContainer: {
-        marginHorizontal: pxToDp(10),
-        paddingHorizontal: pxToDp(15),
-        paddingVertical: pxToDp(10),
-        borderRadius: pxToDp(10),
+        marginHorizontal: scale(10),
+        paddingHorizontal: scale(15),
+        paddingVertical: scale(10),
+        borderRadius: scale(10),
         backgroundColor: white,
         ...viewShadow,
     },

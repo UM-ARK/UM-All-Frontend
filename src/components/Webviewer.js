@@ -4,7 +4,6 @@ import React, {Component} from 'react';
 import {Text, View, TouchableOpacity, Linking, StyleSheet} from 'react-native';
 
 import {COLOR_DIY} from '../utils/uiMap';
-import {pxToDp} from '../utils/stylesKits';
 import IntegratedWebView from './IntegratedWebView';
 import {WHAT_2_REG} from '../utils/pathMap';
 import ModalBottom from '../components/ModalBottom';
@@ -14,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { scale } from 'react-native-size-matters';
 
 class WebViewer extends Component {
     constructor(props) {
@@ -92,7 +92,7 @@ class WebViewer extends Component {
                             }}>
                             <Ionicons
                                 name="close"
-                                size={pxToDp(25)}
+                                size={scale(25)}
                                 color={text_color}
                             />
                         </TouchableOpacity>
@@ -101,14 +101,14 @@ class WebViewer extends Component {
                         text: title,
                         style: {
                             color: text_color,
-                            fontSize: pxToDp(15),
+                            fontSize: scale(15),
                         },
                     }}
                     rightComponent={
                         <TouchableOpacity onPress={this.tiggerModalBottom}>
                             <Feather
                                 name="more-horizontal"
-                                size={pxToDp(25)}
+                                size={scale(25)}
                                 color={text_color}
                             />
                         </TouchableOpacity>
@@ -127,8 +127,8 @@ class WebViewer extends Component {
                             style={{
                                 flexDirection: 'row',
                                 justifyContent: 'space-around',
-                                padding: pxToDp(20),
-                                marginBottom: pxToDp(10),
+                                padding: scale(20),
+                                marginBottom: scale(10),
                             }}>
                             {/* 瀏覽器打開 */}
                             {url && (
@@ -142,13 +142,13 @@ class WebViewer extends Component {
                                         onPress={() => Linking.openURL(url)}>
                                         <Ionicons
                                             name="navigate-outline"
-                                            size={pxToDp(30)}
+                                            size={scale(30)}
                                             color={COLOR_DIY.black.second}
                                         />
                                     </TouchableOpacity>
                                     <Text
                                         style={{
-                                            marginTop: pxToDp(5),
+                                            marginTop: scale(5),
                                             color: COLOR_DIY.themeColor,
                                         }}>
                                         瀏覽器打開
@@ -167,13 +167,13 @@ class WebViewer extends Component {
                                     onPress={this.triggerRefresh}>
                                     <Ionicons
                                         name="refresh"
-                                        size={pxToDp(30)}
+                                        size={scale(30)}
                                         color={COLOR_DIY.black.second}
                                     />
                                 </TouchableOpacity>
                                 <Text
                                     style={{
-                                        marginTop: pxToDp(2),
+                                        marginTop: scale(2),
                                         color: COLOR_DIY.themeColor,
                                     }}>
                                     刷新頁面
@@ -197,9 +197,9 @@ class WebViewer extends Component {
 const s = StyleSheet.create({
     iconContainer: {
         backgroundColor: COLOR_DIY.white,
-        width: pxToDp(60),
-        height: pxToDp(60),
-        borderRadius: pxToDp(20),
+        width: scale(60),
+        height: scale(60),
+        borderRadius: scale(20),
         justifyContent: 'center',
         alignItems: 'center',
     },

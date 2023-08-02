@@ -3,11 +3,11 @@ import React, { Component } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 
 import {COLOR_DIY} from '../../utils/uiMap'
-import {pxToDp} from '../../utils/stylesKits'
 
 import { WebView } from 'react-native-webview';
 import {Header} from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { scale } from "react-native-size-matters";
 
 class UMWhole extends Component{
     render() {
@@ -19,7 +19,7 @@ class UMWhole extends Component{
                         <TouchableOpacity onPress={()=>this.props.navigation.goBack()}>
                             <Ionicons
                                 name="chevron-back-outline"
-                                size={pxToDp(25)}
+                                size={scale(25)}
                                 color={COLOR_DIY.black.main}
                             />
                         </TouchableOpacity>
@@ -28,7 +28,7 @@ class UMWhole extends Component{
                         text: '澳大討論區',
                         style: {
                             color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(15),
+                            fontSize: scale(15),
                         },
                     }}
                     statusBarProps={{backgroundColor:'transparent', barStyle:'dark-content'}}

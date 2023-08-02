@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY} from '../utils/uiMap';
-import {pxToDp} from '../utils/stylesKits';
+import { scale } from 'react-native-size-matters';
 
 // 第三方庫
 import {Header} from '@rneui/themed';
@@ -31,7 +31,7 @@ class HeaderDIY extends Component {
                     <TouchableOpacity onPress={() => this.context.goBack()}>
                         <Ionicons
                             name="chevron-back-outline"
-                            size={pxToDp(25)}
+                            size={scale(25)}
                             color={COLOR_DIY.black.main}
                         />
                     </TouchableOpacity>
@@ -40,7 +40,7 @@ class HeaderDIY extends Component {
                     text: this.props.title,
                     style: {
                         color: COLOR_DIY.black.main,
-                        fontSize: pxToDp(15),
+                        fontSize: scale(15),
                     },
                 }}
                 statusBarProps={{

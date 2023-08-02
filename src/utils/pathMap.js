@@ -87,6 +87,28 @@ export const WHAT_2_REG = 'https://www.umeh.top';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
 
+// 選咩課API
+export const UMEH_URI = "https://mpserver.umeh.top/";
+export const UMEH_API = {
+    GET: {
+        // 根據課程編號返回信息
+        COURSE_INFO: "course_info?New_code=",
+        COURSE_COMMENT: {
+            CODE: "comment_info/?New_code=",
+            PROF: "&prof_name="
+        },
+        // 字母全大寫
+        PROF: "prof_info?name=",
+        // 模糊搜索
+        FUZZY: "fuzzy_search?text=Test&type=course/prof/title",
+        // 返回統計數據
+        STAT: "get_stat"
+    },
+    POST: {
+        SUBMIT_COMMENT: "submit_comment/"
+    }
+};
+
 // 澳大 - API 車位
 export const UM_API_CAR_PARK =
     'https://api.data.um.edu.mo/service/facilities/car_park_availability/v1.0.0/all';
@@ -129,6 +151,8 @@ export const UM_PASS = 'https://umpass.um.edu.mo';
 export const UM_COMMENTS = 'https://isw.umac.mo/qmweb/faces/app/addComments.jspx';
 // 澳大 - UM Portal
 export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
+// 澳大 - 學生公告
+export const UM_BULLETIN = 'https://www.um.edu.mo/zh-hant/um-students/e-bulletin/';
 
 // 學業發展分類
 // 澳大 - UM Moodle
@@ -152,6 +176,10 @@ export const UM_SCHOLARSHIP =
     'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
 // 澳大 - 證明文件
 export const UM_DOCUMENTS = 'https://ops.fo.um.edu.mo/services/?lang=zh-hant';
+// 澳大 - 預選課Excel表格
+export const UM_PRE_ENROLMENT_EXCEL = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/course-enrolment/pre-enrolment/?lang=zh-hant';
+// 澳大 - 重要日期
+export const UM_IMPORTANT_DATE = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/important-dates/?lang=zh-hant';
 
 // 澳大 - 失物認領
 export const UM_LOST_FOUND = 'https://um2.umac.mo/apps/com/umlostfound.nsf';

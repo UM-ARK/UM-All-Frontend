@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
-import { pxToDp } from '../../../../utils/stylesKits';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -94,14 +93,14 @@ class NewsCard extends Component {
                 {/* 文字居左，圖片居右 */}
                 <View style={styles.newsCardContentContainer}>
                     {/* 標題，有英文中文則顯示，無則顯示葡文 */}
-                    <View style={{ width: haveImage ? '61%' : '100%' }}>
+                    <View style={{ width: haveImage ? '75%' : '100%', alignSelf: 'flex-start' }}>
                         {/* 英文 */}
                         {title_en.length > 0 && (
                             <Text
                                 style={{
                                     fontWeight: 'bold',
                                     color: black.main,
-                                    fontSize: pxToDp(14),
+                                    fontSize: scale(14),
                                 }}
                                 numberOfLines={3}>
                                 {title_en}
@@ -113,8 +112,8 @@ class NewsCard extends Component {
                                 style={{
                                     fontSize:
                                         title_en.length > 0
-                                            ? pxToDp(13)
-                                            : pxToDp(14),
+                                            ? scale(13)
+                                            : scale(14),
                                     color:
                                         title_en.length > 0
                                             ? black.second
@@ -130,8 +129,8 @@ class NewsCard extends Component {
                                 style={{
                                     fontSize:
                                         title_en.length > 0
-                                            ? pxToDp(13)
-                                            : pxToDp(14),
+                                            ? scale(13)
+                                            : scale(14),
                                     color:
                                         title_en.length > 0
                                             ? black.second
@@ -142,19 +141,25 @@ class NewsCard extends Component {
                             </Text>
                         )}
 
-                        {/* 佔位 防止標題過長遮擋日期 */}
-                        <View style={{ marginTop: pxToDp(25) }}></View>
+                        {/* 活動類型展示日期 */}
+                        {type === 'event' ? (
+                            <View>
 
-                        {/* 日期 */}
-                        <Text
-                            style={{
-                                fontSize: pxToDp(12),
-                                position: 'absolute',
-                                bottom: 0,
-                                color: dateColor,
-                            }}>
-                            @ {moment(beginDate).format('MM-DD')}
-                        </Text>
+                                {/* 佔位 防止標題過長遮擋日期 */}
+                                <View style={{ marginTop: scale(25) }}></View>
+
+                                {/* 日期 */}
+                                <Text
+                                    style={{
+                                        fontSize: scale(12),
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        color: dateColor,
+                                    }}>
+                                    @ {moment(beginDate).format('MM-DD')}
+                                </Text>
+                            </View>
+                        ) : null}
                     </View>
 
                     {/* 新聞卡片配圖 */}
@@ -162,7 +167,7 @@ class NewsCard extends Component {
                         <View style={{ alignSelf: 'center' }}>
                             <View
                                 style={{
-                                    borderRadius: pxToDp(10),
+                                    borderRadius: scale(10),
                                     overflow: 'hidden',
                                     ...viewShadow,
                                     backgroundColor: white,
@@ -216,20 +221,20 @@ class NewsCard extends Component {
 const styles = StyleSheet.create({
     newsCardContainer: {
         backgroundColor: white,
-        marginVertical: pxToDp(7),
-        marginHorizontal: pxToDp(10),
-        borderRadius: pxToDp(10),
-        ...viewShadow,
+        marginVertical: scale(5),
+        marginHorizontal: scale(10),
+        borderRadius: scale(10),
+        // ...viewShadow,
     },
     newsCardContentContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: pxToDp(10),
-        paddingVertical: pxToDp(8),
+        padding: scale(10),
+        paddingVertical: scale(8),
     },
     newsCardImg: {
-        width: scale(125),
-        height: scale(100),
+        width: scale(60),
+        height: scale(60),
     },
 });
 

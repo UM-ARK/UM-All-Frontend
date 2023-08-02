@@ -28,6 +28,11 @@ import UMEventDetail from './pages/TabbarPages/news/pages/UMEventDetail';
 
 import ChatDetail from './pages/TabbarPages/message/ChatDetail';
 
+import What2RegTabIndex from './pages/TabbarPages/what2Reg';
+import What2RegCourse from './pages/TabbarPages/what2Reg/pages/Course';
+import What2RegComment from './pages/TabbarPages/what2Reg/pages/Comment';
+import What2RegNewComment from './pages/TabbarPages/what2Reg/pages/NewComment';
+
 import Webviewer from './components/Webviewer';
 import AllEvents from './pages/Features/AllEvents';
 import UMWhole from './pages/Features/UMWhole';
@@ -119,6 +124,12 @@ class Nav extends Component {
                         name="FollowersPage"
                         component={FollowersPage}
                     />
+
+                    {/* 選咩課ARK加強版 */}
+                    <Stack.Screen name="What2RegHome" component={What2RegTabIndex} />
+                    <Stack.Screen name="What2RegCourse" component={What2RegCourse} />
+                    <Stack.Screen name="What2RegComment" component={What2RegComment} />
+                    <Stack.Screen name="What2RegNewComment" component={What2RegNewComment} />
 
                     {/* 測試頁 */}
                     <Stack.Screen name="TestScreen" component={TestScreen} />

@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, { Component, useState } from 'react';
 import {
     Text,
     View,
@@ -11,9 +11,8 @@ import {
     VirtualizedList,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
-import {UM_API_EVENT, UM_API_TOKEN} from '../../../utils/pathMap';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
 import Loading from '../../../components/Loading';
@@ -23,12 +22,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
-const {black, white, themeColor} = COLOR_DIY;
+const { black, white, themeColor } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -52,8 +51,8 @@ class UMEventPage extends Component {
 
     // 獲取澳大舉辦活動的資訊
     async getData() {
-        axios
-            .get(UM_API_EVENT, {
+        try {
+            axios.get(UM_API_EVENT, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
@@ -63,8 +62,7 @@ class UMEventPage extends Component {
                 // date_from: macauTime,
                 // TODO: 篩選是否有smart_point
                 // },
-            })
-            .then(res => {
+            }).then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
                 let nowMomentDate = moment(nowTimeStamp);
@@ -72,12 +70,12 @@ class UMEventPage extends Component {
                 // 分隔今天/未來的活動 和 過往的活動
                 let resultList = [];
                 let outdatedList = [];
-                result.map((itm)=>{
+                result.map((itm) => {
                     let beginMomentDate = moment(itm.common.dateFrom);
-                    if ( nowMomentDate.isSame(beginMomentDate,'day') || beginMomentDate.isSameOrAfter(nowMomentDate) ) {
+                    if (nowMomentDate.isSame(beginMomentDate, 'day') || beginMomentDate.isSameOrAfter(nowMomentDate)) {
                         resultList.push(itm);
                     }
-                    else{
+                    else {
                         outdatedList.push(itm);
                     }
                 })
@@ -88,7 +86,7 @@ class UMEventPage extends Component {
                     ) >
                         Math.abs(
                             nowTimeStamp -
-                                new Date(b.common.dateFrom).getTime(),
+                            new Date(b.common.dateFrom).getTime(),
                         )
                         ? 1
                         : -1;
@@ -99,23 +97,29 @@ class UMEventPage extends Component {
                     ) >
                         Math.abs(
                             nowTimeStamp -
-                                new Date(b.common.dateFrom).getTime(),
+                            new Date(b.common.dateFrom).getTime(),
                         )
                         ? 1
                         : -1;
                 });
 
                 resultList = resultList.concat(outdatedList);
-                this.setState({data: resultList, isLoading: false});
+                this.setState({ data: resultList, isLoading: false });
             })
-            .catch(err => {
-                console.error(err);
-            });
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                this.setState({ isLoading: true });
+                // 網絡錯誤，自動重載
+                this.getData();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const {white, black, viewShadow} = COLOR_DIY;
+        const { white, black, viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -125,19 +129,19 @@ class UMEventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -scale(140), y: -scale(220)},
-                    {x: scale(140), y: -scale(220)},
-                    {x: -scale(140), y: -scale(120)},
-                    {x: scale(140), y: -scale(120)},
-                    {x: -scale(140), y: scale(0)},
-                    {x: scale(140), y: scale(0)},
-                    {x: -scale(140), y: scale(120)},
-                    {x: scale(140), y: scale(120)},
-                    {x: -scale(140), y: scale(220)},
-                    {x: scale(140), y: scale(220)},
+                    { x: -scale(140), y: -scale(220) },
+                    { x: scale(140), y: -scale(220) },
+                    { x: -scale(140), y: -scale(120) },
+                    { x: scale(140), y: -scale(120) },
+                    { x: -scale(140), y: scale(0) },
+                    { x: scale(140), y: scale(0) },
+                    { x: -scale(140), y: scale(120) },
+                    { x: scale(140), y: scale(120) },
+                    { x: -scale(140), y: scale(220) },
+                    { x: scale(140), y: scale(220) },
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: scale(140), y: scale(220)}}>
+                initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -172,14 +176,15 @@ class UMEventPage extends Component {
 
     // 渲染主要內容
     renderPage = () => {
-        const {data, isLoading} = this.state;
+        const { data, isLoading } = this.state;
         return (
             <VirtualizedList
                 data={data}
                 ref={'virtualizedList'}
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
-                renderItem={({item}) => <NewsCard data={item} type={'event'} />}
+                renderItem={({ item }) => <NewsCard data={item} type={'event'} />}
+                contentContainerStyle={{ width: '100%' }}
                 keyExtractor={itm => itm._id}
                 // 整理item數據
                 getItem={getItem}
@@ -192,7 +197,7 @@ class UMEventPage extends Component {
                             style={{
                                 color: black.third,
                                 alignSelf: 'center',
-                                marginTop: pxToDp(5),
+                                marginTop: scale(5),
                             }}>
                             Data From: data.um.edu.mo
                         </Text>
@@ -200,7 +205,7 @@ class UMEventPage extends Component {
                 )}
                 // 列表底部渲染，防止Tabbar遮擋
                 ListFooterComponent={() => (
-                    <View style={{marginBottom: pxToDp(50)}}></View>
+                    <View style={{ marginBottom: scale(50) }}></View>
                 )}
                 refreshControl={
                     <RefreshControl
@@ -209,7 +214,7 @@ class UMEventPage extends Component {
                         refreshing={isLoading}
                         onRefresh={() => {
                             // 展示Loading標識
-                            this.setState({isLoading: true});
+                            this.setState({ isLoading: true });
                             this.getData();
                         }}
                     />
@@ -221,7 +226,7 @@ class UMEventPage extends Component {
     };
 
     render() {
-        const {isLoading} = this.state;
+        const { isLoading } = this.state;
 
         return (
             <View
@@ -242,20 +247,10 @@ class UMEventPage extends Component {
                         }}>
                         <Loading />
                     </View>
-                ) : (
-                    this.renderPage()
-                )}
+                ) : (this.renderPage())}
             </View>
         );
     }
 }
-
-const s = StyleSheet.create({
-    // 活動卡片間距
-    cardContainer: {
-        marginVertical: pxToDp(6),
-        marginHorizontal: pxToDp(5),
-    },
-});
 
 export default UMEventPage;

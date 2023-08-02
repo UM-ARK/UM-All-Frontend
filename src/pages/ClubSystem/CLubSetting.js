@@ -16,6 +16,7 @@ import DialogDIY from '../../components/DialogDIY';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { scale } from 'react-native-size-matters';
 
 const {black, themeColor, white} = COLOR_DIY;
 
@@ -78,6 +79,7 @@ class ClubSetting extends Component {
                             </TouchableOpacity>
 
                             {/* Follower 選項 */}
+                            {false && (
                             <TouchableOpacity
                                 style={{...styles.optionContainer}}
                                 activeOpacity={0.8}
@@ -101,6 +103,7 @@ class ClubSetting extends Component {
                                     size={pxToDp(20)}
                                 />
                             </TouchableOpacity>
+                            )}
 
                             {/* 歷史公告 選項 */}
                             {false && (
@@ -131,7 +134,7 @@ class ClubSetting extends Component {
                     ) : (
                         // 社團設置
                         <View>
-                            {/* 社團主頁設置 選項 */}
+                            {/* 社團/組織面板設置 選項 */}
                             <TouchableOpacity
                                 style={{...styles.optionContainer}}
                                 activeOpacity={0.8}
@@ -147,7 +150,7 @@ class ClubSetting extends Component {
                                 }}>
                                 {/* 選項標題 */}
                                 <Text style={{...styles.optionTitle}}>
-                                    {'主頁信息編輯'}
+                                    {'社團/組織面板設置'}
                                 </Text>
 
                                 {/* 右側flex佈局 */}
@@ -160,6 +163,7 @@ class ClubSetting extends Component {
                             </TouchableOpacity>
 
                             {/* Follower 選項 */}
+                            {false&&(
                             <TouchableOpacity
                                 style={{...styles.optionContainer}}
                                 activeOpacity={0.8}
@@ -183,8 +187,10 @@ class ClubSetting extends Component {
                                     size={pxToDp(20)}
                                 />
                             </TouchableOpacity>
+                            )}
 
                             {/* 歷史公告 選項 */}
+                            {false&&(
                             <TouchableOpacity
                                 style={{...styles.optionContainer}}
                                 activeOpacity={0.8}
@@ -207,6 +213,7 @@ class ClubSetting extends Component {
                                     size={pxToDp(20)}
                                 />
                             </TouchableOpacity>
+                            )}
 
                             {/* 新增活動 選項 */}
                             <TouchableOpacity
@@ -237,27 +244,39 @@ class ClubSetting extends Component {
                                 />
                             </TouchableOpacity>
 
+                            {/* 刪除組織賬號 */}
+                            <TouchableOpacity
+                                style={{...styles.optionContainer}}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    this.setState({deleteChoice: true})
+                                }}>
+                                {/* 選項標題 */}
+                                <Text style={{...styles.optionTitle, color:black.third}}>
+                                    {'刪除組織賬號'}
+                                </Text>
+
+                                {/* 右側flex佈局 */}
+                                {/* 引導點擊的 > 箭頭 */}
+                                <Ionicons
+                                    name="close-sharp"
+                                    color={black.third}
+                                    size={pxToDp(20)}
+                                />
+                            </TouchableOpacity>
+
                             {/* 登出賬號 */}
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={() =>
                                     this.setState({logoutChoice: true})
                                 }
-                                style={styles.logoutButton}>
+                                style={{
+                                    ...styles.logoutButton, 
+                                    marginTop: scale(300), marginBottom:scale(20)
+                                }}>
                                 <Text style={{...styles.submitButtonText}}>
                                     登出賬號
-                                </Text>
-                            </TouchableOpacity>
-
-                            {/* 刪除賬號 */}
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() =>
-                                    this.setState({deleteChoice: true})
-                                }
-                                style={styles.logoutButton}>
-                                <Text style={{...styles.submitButtonText}}>
-                                    刪除組織賬號
                                 </Text>
                             </TouchableOpacity>
                         </View>

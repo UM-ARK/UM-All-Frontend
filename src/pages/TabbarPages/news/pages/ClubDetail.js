@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
 import {clubTagMap} from '../../../../utils/clubMap';
 import {setAPPInfo} from '../../../../utils/storageKits';
 import {
@@ -414,22 +413,26 @@ class ClubDetail extends Component {
                     {!isAdmin ? (
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() => this.props.navigation.goBack()}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.goBack()
+                            }}
                             style={{
                                 position: 'absolute',
                                 top: scale(65),
                                 left: scale(15),
+                                zIndex: 999
                             }}>
                             <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
+                                name="chevron-back-circle"
+                                size={scale(35)}
                                 color={white}
                             />
                         </TouchableOpacity>
                     ) : null}
 
                     {/* 編輯資料按鈕 只有管理員可見 */}
-                    {isAdmin ? (
+                    {/* {isAdmin ? (
                         <View
                             style={{
                                 position: 'absolute',
@@ -451,35 +454,34 @@ class ClubDetail extends Component {
                                 }>
                                 <Ionicons
                                     name="settings-outline"
-                                    size={pxToDp(25)}
+                                    size={scale(25)}
                                     color={white}
                                 />
                             </TouchableOpacity>
                         </View>
-                    ) : (
-                        // 公告
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: scale(65),
-                                right: scale(15),
+                    ) : null} */}
+                    {/* // 公告入口
+                    <View
+                        style={{
+                            position: 'absolute',
+                            top: scale(65),
+                            right: scale(15),
+                        }}>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => {
+                                this.props.navigation.navigate(
+                                    'ChatDetail',
+                                    {get: 'club', id: clubData.club_num},
+                                );
                             }}>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() => {
-                                    this.props.navigation.navigate(
-                                        'ChatDetail',
-                                        {get: 'club', id: clubData.club_num},
-                                    );
-                                }}>
-                                <Feather
-                                    name="message-circle"
-                                    size={pxToDp(25)}
-                                    color={white}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                            <Feather
+                                name="message-circle"
+                                size={scale(25)}
+                                color={white}
+                            />
+                        </TouchableOpacity>
+                    </View> */}
 
                     {/* 白邊，凸顯立體感 */}
                     <TouchableOpacity
@@ -522,33 +524,66 @@ class ClubDetail extends Component {
             }
             return (
                 <View style={{backgroundColor: bg_color}}>
-                    {/* 1.0 社團基本資料 */}
+                    {/* 社團基本資料 */}
                     <View style={{alignItems: 'center'}}>
                         {/* 建議使用社團名的簡稱 */}
                         <Text style={styles.clubNameText}>{name}</Text>
                         {/* 社團ID */}
-                        <Text
+                        {/* <Text
                             style={{
                                 color: black.third,
-                                fontSize: pxToDp(13),
-                                marginVertical: pxToDp(2),
+                                fontSize: scale(13),
+                                marginVertical: scale(2),
                             }}>
                             {'@' +
                                 '000'.substr(club_num.toString().length) +
                                 club_num}
-                        </Text>
+                        </Text> */}
                         {/* 社團分類 */}
                         <Text
                             style={{
                                 color: themeColor,
-                                fontSize: pxToDp(15),
+                                fontSize: scale(15),
                             }}>
                             {'#' + clubTagMap(tag)}
                         </Text>
+
+                        {/* 編輯資料按鈕 只有管理員可見 */}
+                        {isAdmin ? (
+                            <>
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() =>
+                                        this.props.navigation.navigate(
+                                            'ClubSetting',
+                                            {
+                                                refresh: this.getData.bind(
+                                                    this,
+                                                    clubData.club_num,
+                                                ),
+                                            },
+                                        )
+                                    }
+                                    style={{flexDirection:'row',alignItems:'center',
+                                        backgroundColor:themeColor, borderRadius:scale(15), padding:scale(10),
+                                        marginVertical:scale(10)
+                                    }}>
+                                    <Text style={{color:white, fontSize:scale(20)}}>賬號設置&新增活動 </Text>
+                                    <Ionicons
+                                        name="settings-outline"
+                                        size={scale(25)}
+                                        color={white}
+                                    />
+                                </TouchableOpacity>
+                                <View style={{alignItems:'center'}}>
+                                    <Text style={{fontSize:scale(12), color:black.main}}>Update組織資料&發佈新資訊請點我！↑</Text>
+                                </View>
+                            </>
+                        ) : null}
                     </View>
 
                     {/* Follow按鈕 */}
-                    {!isAdmin && false ? this.renderFollowButton() : null}
+                    {/* {!isAdmin && false ? this.renderFollowButton() : null} */}
 
                     {/* 照片 */}
                     {clubData.club_photos_list &&
@@ -616,8 +651,8 @@ class ClubDetail extends Component {
                                     justifyContent: 'space-between',
                                     alignItems: 'flex-start',
                                     flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
+                                    margin: scale(10),
+                                    marginTop: scale(0),
                                 }}>
                                 {/* 聯繫方式 */}
                                 <View>
@@ -628,7 +663,7 @@ class ClubDetail extends Component {
                                                     style={{
                                                         flexDirection: 'row',
                                                         alignItems: 'center',
-                                                        marginBottom: pxToDp(3),
+                                                        marginBottom: scale(3),
                                                     }}>
                                                     {/* 聯繫Type */}
                                                     <View
@@ -677,8 +712,8 @@ class ClubDetail extends Component {
                         ) : (
                             <View
                                 style={{
-                                    marginLeft: pxToDp(10),
-                                    marginBottom: pxToDp(10),
+                                    marginLeft: scale(10),
+                                    marginBottom: scale(10),
                                 }}>
                                 <Text style={{color: black.third}}>
                                     這個組織還未留下聯繫方式~
@@ -698,8 +733,8 @@ class ClubDetail extends Component {
                                     justifyContent: 'space-between',
                                     alignItems: 'flex-start',
                                     flexDirection: 'row',
-                                    margin: pxToDp(10),
-                                    marginTop: pxToDp(0),
+                                    margin: scale(10),
+                                    marginTop: scale(0),
                                 }}>
                                 {/* 服務圖標與文字 */}
                                 <HyperlinkText
@@ -717,6 +752,10 @@ class ClubDetail extends Component {
                             </View>
                         </View>
                     ) : null}
+
+                    {isAdmin && eventData != undefined && eventData.length > 0 && (
+                        <Text style={{fontSize:scale(12), color:black.main, alignSelf:'center'}}>Update活動資料請進入具體活動頁內修改！↓</Text>
+                    )}
 
                     {/* 舉辦的活動 */}
                     {eventData != undefined && eventData.length > 0 ? (
@@ -872,17 +911,17 @@ class ClubDetail extends Component {
                     <ModalBottom cancel={this.tiggerModalBottom}>
                         <View
                             style={{
-                                padding: pxToDp(20),
+                                padding: scale(20),
                                 height: PAGE_HEIGHT * 0.7,
                             }}>
                             <Text
                                 style={{
                                     color: black.third,
-                                    fontSize: pxToDp(13),
+                                    fontSize: scale(13),
                                 }}>
                                 簡介
                             </Text>
-                            <ScrollView style={{marginTop: pxToDp(5)}}>
+                            <ScrollView style={{marginTop: scale(5)}}>
                                 <HyperlinkText
                                     linkStyle={{color: themeColor}}
                                     navigation={this.props.navigation}
@@ -890,7 +929,7 @@ class ClubDetail extends Component {
                                     <Text
                                         style={{
                                             color: black.main,
-                                            fontSize: pxToDp(16),
+                                            fontSize: scale(16),
                                         }}
                                         selectable>
                                         {intro}
@@ -909,7 +948,7 @@ class ClubDetail extends Component {
                     textStyle={{color: white}}
                     style={{
                         backgroundColor: this.state.toastColor,
-                        borderRadius: pxToDp(10),
+                        borderRadius: scale(10),
                     }}
                 />
             </View>
@@ -920,31 +959,31 @@ class ClubDetail extends Component {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: COLOR_DIY.white,
-        borderRadius: pxToDp(10),
-        marginHorizontal: pxToDp(15),
+        borderRadius: scale(10),
+        marginHorizontal: scale(15),
         // 增加陰影
-        marginBottom: pxToDp(8),
-        marginTop: pxToDp(10),
+        marginBottom: scale(8),
+        marginTop: scale(10),
         ...COLOR_DIY.viewShadow,
     },
     cardTitleContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: pxToDp(10),
-        paddingHorizontal: pxToDp(10),
+        paddingVertical: scale(10),
+        paddingHorizontal: scale(10),
     },
     cardTitleText: {
-        fontSize: pxToDp(13),
+        fontSize: scale(13),
         color: themeColor,
         fontWeight: 'bold',
     },
     clubLogoContainer: {
         position: 'absolute',
-        bottom: pxToDp(5),
+        bottom: scale(5),
         alignSelf: 'center',
-        width: pxToDp(CLUB_LOGO_SIZE),
-        height: pxToDp(CLUB_LOGO_SIZE),
+        width: scale(CLUB_LOGO_SIZE),
+        height: scale(CLUB_LOGO_SIZE),
         borderRadius: 50,
         overflow: 'hidden',
         ...COLOR_DIY.viewShadow,
@@ -953,17 +992,17 @@ const styles = StyleSheet.create({
     clubLogoWhiteSpace: {
         bottom: 0,
         width: '100%',
-        height: pxToDp(20),
+        height: scale(20),
         backgroundColor: bg_color,
         position: 'absolute',
-        borderTopLeftRadius: pxToDp(15),
-        borderTopRightRadius: pxToDp(15),
+        borderTopLeftRadius: scale(15),
+        borderTopRightRadius: scale(15),
     },
     clubNameText: {
         color: black.main,
-        fontSize: pxToDp(20),
+        fontSize: scale(20),
         fontWeight: '500',
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
     },
     imageContainer: {
@@ -974,17 +1013,17 @@ const styles = StyleSheet.create({
         ...viewShadow,
     },
     checkMoreButton: {
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
-        padding: pxToDp(10),
-        borderRadius: pxToDp(15),
+        padding: scale(10),
+        borderRadius: scale(15),
         backgroundColor: themeColor,
     },
     followButton: {
-        marginTop: pxToDp(5),
+        marginTop: scale(5),
         alignSelf: 'center',
-        padding: pxToDp(10),
-        borderRadius: pxToDp(12),
+        padding: scale(10),
+        borderRadius: scale(12),
     },
 });
 

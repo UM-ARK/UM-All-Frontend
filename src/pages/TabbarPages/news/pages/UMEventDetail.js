@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Image,
@@ -10,22 +10,21 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {pxToDp} from '../../../../utils/stylesKits';
+import { COLOR_DIY } from '../../../../utils/uiMap';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import moment, {lang} from 'moment-timezone';
-import {scale} from 'react-native-size-matters';
+import moment, { lang } from 'moment-timezone';
+import { scale } from 'react-native-size-matters';
 
 // 解構全局ui設計顏色
-const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
+const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = scale(320);
 
 class UMEventDetail extends Component {
@@ -222,7 +221,7 @@ class UMEventDetail extends Component {
     }
 
     renderModeChoice = () => {
-        const {LanguageMode, chooseMode} = this.state;
+        const { LanguageMode, chooseMode } = this.state;
         return (
             <View
                 style={{
@@ -243,7 +242,7 @@ class UMEventDetail extends Component {
                                             : bg_color,
                                 }}
                                 onPress={() =>
-                                    this.setState({chooseMode: index})
+                                    this.setState({ chooseMode: index })
                                 }>
                                 <Text
                                     style={{
@@ -263,8 +262,8 @@ class UMEventDetail extends Component {
     };
 
     render() {
-        const {LanguageMode, chooseMode, data} = this.state;
-        const {imageUrls} = data;
+        const { LanguageMode, chooseMode, data } = this.state;
+        const { imageUrls } = data;
         const {
             //共通内容
             dateFrom,
@@ -442,14 +441,14 @@ class UMEventDetail extends Component {
         var contact = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
 
         return (
-            <View style={{backgroundColor: bg_color, flex: 1}}>
+            <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header title={'活動詳情'} />
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={imageUrls}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 <ScrollView>
@@ -458,15 +457,16 @@ class UMEventDetail extends Component {
                     {/* 活動大標題 */}
                     <View
                         style={{
-                            marginHorizontal: pxToDp(10),
-                            marginTop: pxToDp(10),
+                            marginHorizontal: scale(10),
+                            marginTop: scale(10),
                             alignItems: 'center',
                         }}>
                         <Text
                             style={{
                                 color: COLOR_DIY.themeColor,
                                 fontWeight: 'bold',
-                                fontSize: pxToDp(20),
+                                fontSize: scale(20),
+                                textAlign: 'center'
                             }}
                             selectable={true}>
                             {title[chooseMode]}
@@ -485,12 +485,12 @@ class UMEventDetail extends Component {
                                 uri: imageUrls,
                                 // cache: FastImage.cacheControl.web,
                             }}
-                            style={{width: '100%', height: '100%'}}
+                            style={{ width: '100%', height: '100%' }}
                             onLoadStart={() => {
-                                this.setState({imgLoading: true});
+                                this.setState({ imgLoading: true });
                             }}
                             onLoad={() => {
-                                this.setState({imgLoading: false});
+                                this.setState({ imgLoading: false });
                             }}
                         />
                         {this.state.imgLoading ? (
@@ -515,10 +515,10 @@ class UMEventDetail extends Component {
                         {/* 日期 */}
                         {/* 如果活動當天結束顯示活動日期，若為多日活動則顯示開始和結束日期 */}
                         {moment(dateFrom).format('MM-DD') ==
-                        moment(dateTo).format('MM-DD') ? (
+                            moment(dateTo).format('MM-DD') ? (
                             <Text
                                 style={{
-                                    fontSize: pxToDp(18),
+                                    fontSize: scale(18),
                                     fontWeight: '700',
                                     color: '#FF8627',
                                 }}>
@@ -529,7 +529,7 @@ class UMEventDetail extends Component {
                             <View>
                                 <Text
                                     style={{
-                                        fontSize: pxToDp(18),
+                                        fontSize: scale(18),
                                         fontWeight: '700',
                                         color: '#FF8627',
                                     }}>
@@ -542,7 +542,7 @@ class UMEventDetail extends Component {
                         {/* 時間 */}
                         <Text
                             style={{
-                                fontSize: pxToDp(18),
+                                fontSize: scale(18),
                                 fontWeight: '700',
                                 color: '#FF8627',
                             }}>
@@ -567,14 +567,11 @@ class UMEventDetail extends Component {
                         {venue[chooseMode] ? (
                             <View style={styles.contentContainer}>
                                 <Text
-                                    style={{
-                                        width: '15%',
-                                        ...styles.secondTitle,
-                                    }}
+                                    style={styles.secondTitle}
                                     selectable>
                                     {venue[chooseMode + 3]}
                                 </Text>
-                                <View style={{width: '75%'}}>
+                                <View style={{ width: '75%' }}>
                                     <HyperlinkText
                                         linkStyle={{
                                             color: COLOR_DIY.themeColor,
@@ -676,7 +673,7 @@ class UMEventDetail extends Component {
                     <View
                         style={{
                             ...styles.infoCardContainer,
-                            marginBottom: pxToDp(50),
+                            marginBottom: scale(50),
                         }}>
                         <Text
                             style={{
@@ -737,42 +734,42 @@ class UMEventDetail extends Component {
 
 const styles = StyleSheet.create({
     languageModeButtonContainer: {
-        padding: pxToDp(10),
-        marginVertical: pxToDp(5),
-        borderRadius: pxToDp(10),
+        padding: scale(10),
+        marginVertical: scale(5),
+        borderRadius: scale(10),
         ...viewShadow,
     },
     imgContainer: {
         width: COMPONENT_WIDTH,
         height: COMPONENT_WIDTH,
         backgroundColor: bg_color,
-        borderRadius: pxToDp(10),
+        borderRadius: scale(10),
         overflow: 'hidden',
         alignSelf: 'center',
-        marginVertical: pxToDp(10),
+        marginVertical: scale(10),
         ...viewShadow,
     },
     infoCardContainer: {
-        marginVertical: pxToDp(8),
-        marginHorizontal: pxToDp(20),
-        borderRadius: pxToDp(10),
+        marginVertical: scale(8),
+        marginHorizontal: scale(20),
+        borderRadius: scale(10),
         backgroundColor: white,
-        paddingHorizontal: pxToDp(15),
-        paddingVertical: pxToDp(10),
+        paddingHorizontal: scale(15),
+        paddingVertical: scale(10),
         ...viewShadow,
     },
     contentContainer: {
         flexDirection: 'row',
-        marginVertical: pxToDp(2),
+        marginVertical: scale(2),
     },
     secondTitle: {
         color: COLOR_DIY.themeColor,
-        fontSize: pxToDp(15),
+        fontSize: scale(15),
         fontWeight: '600',
     },
     content: {
         color: black.third,
-        fontSize: pxToDp(15),
+        fontSize: scale(15),
         fontWeight: 'normal',
     },
 });

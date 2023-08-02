@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -14,23 +14,22 @@ import {
 
 import NewsCard from './components/NewsCard';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
-import {UM_API_NEWS, UM_API_TOKEN} from '../../../utils/pathMap';
+import { COLOR_DIY } from '../../../utils/uiMap';
+import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {NavigationContext} from '@react-navigation/native';
-import ContentLoader, {Rect, Circle, Path} from 'react-content-loader/native';
+import { NavigationContext } from '@react-navigation/native';
+import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
 import axios from 'axios';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
-const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
+const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -90,16 +89,15 @@ class NewsPage extends Component {
     }
 
     // 請求澳大api返回新聞數據
-    async getData() {
-        axios
-            .get(UM_API_NEWS, {
+    getData = async () => {
+        try {
+            axios.get(UM_API_NEWS, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
-            })
-            .then(res => {
+            }).then(res => {
                 let result = res.data._embedded;
                 // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
                 let chooseTopNewsIndex = 0;
@@ -159,9 +157,15 @@ class NewsPage extends Component {
                     isLoading: false,
                 });
             })
-            .catch(err => {
-                console.error(err);
-            });
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK') {
+                this.setState({ isLoading: true });
+                // 網絡錯誤，自動重載
+                this.getData();
+            } else {
+                alert('未知錯誤，請聯繫開發者！')
+            }
+        }
     }
 
     // 頭條新聞的渲染
@@ -180,12 +184,12 @@ class NewsPage extends Component {
         } = this.state.topNews;
 
         return (
-            <View style={{marginTop: pxToDp(5)}}>
-                <Text style={{color: black.third, alignSelf: 'center'}}>
+            <View style={{ marginTop: scale(5) }}>
+                <Text style={{ color: black.third, alignSelf: 'center' }}>
                     Data From: data.um.edu.mo
                 </Text>
                 <View style={styles.topNewsContainer}>
-                    <View style={{width: '100%'}}>
+                    <View style={{ width: '100%' }}>
                         {/* 圖片背景 */}
                         {this.state.topNews.imageUrls && (
                             <TouchableOpacity
@@ -203,12 +207,12 @@ class NewsPage extends Component {
                                         ),
                                         // cache: FastImage.cacheControl.web,
                                     }}
-                                    style={{width: '100%', height: '100%'}}
+                                    style={{ width: '100%', height: '100%' }}
                                     onLoadStart={() => {
-                                        this.setState({imgLoading: true});
+                                        this.setState({ imgLoading: true });
                                     }}
                                     onLoad={() => {
-                                        this.setState({imgLoading: false});
+                                        this.setState({ imgLoading: false });
                                     }}>
                                     {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                     <View style={styles.topNewsOverlay}>
@@ -230,7 +234,7 @@ class NewsPage extends Component {
                                                 style={{
                                                     color: white,
                                                     fontWeight: 'bold',
-                                                    fontSize: pxToDp(18),
+                                                    fontSize: scale(18),
                                                 }}
                                                 numberOfLines={3}>
                                                 {title_en}
@@ -239,7 +243,7 @@ class NewsPage extends Component {
                                                 style={{
                                                     color: white,
                                                     fontWeight: 'bold',
-                                                    fontSize: pxToDp(13),
+                                                    fontSize: scale(13),
                                                 }}>
                                                 {title_cn}
                                             </Text>
@@ -272,7 +276,7 @@ class NewsPage extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const {white, black, viewShadow} = COLOR_DIY;
+        const { white, black, viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -282,19 +286,19 @@ class NewsPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    {x: -scale(140), y: -scale(220)},
-                    {x: scale(140), y: -scale(220)},
-                    {x: -scale(140), y: -scale(120)},
-                    {x: scale(140), y: -scale(120)},
-                    {x: -scale(140), y: scale(0)},
-                    {x: scale(140), y: scale(0)},
-                    {x: -scale(140), y: scale(120)},
-                    {x: scale(140), y: scale(120)},
-                    {x: -scale(140), y: scale(220)},
-                    {x: scale(140), y: scale(220)},
+                    { x: -scale(140), y: -scale(220) },
+                    { x: scale(140), y: -scale(220) },
+                    { x: -scale(140), y: -scale(120) },
+                    { x: scale(140), y: -scale(120) },
+                    { x: -scale(140), y: scale(0) },
+                    { x: scale(140), y: scale(0) },
+                    { x: -scale(140), y: scale(120) },
+                    { x: scale(140), y: scale(120) },
+                    { x: -scale(140), y: scale(220) },
+                    { x: scale(140), y: scale(220) },
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{x: scale(140), y: scale(220)}}>
+                initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
@@ -343,14 +347,14 @@ class NewsPage extends Component {
                 {this.state.isLoading ? (
                     // 渲染Loading時的骨架屏
                     <ScrollView
-                        contentContainerStyle={{backgroundColor: bg_color}}
+                        contentContainerStyle={{ backgroundColor: bg_color }}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
                                 tintColor={themeColor}
                                 refreshing={this.state.isScrollViewLoading}
                                 onRefresh={() => {
-                                    this.setState({isScrollViewLoading: true});
+                                    this.setState({ isScrollViewLoading: true });
                                     this.getData();
                                 }}
                             />
@@ -364,7 +368,8 @@ class NewsPage extends Component {
                         ref={'virtualizedList'}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
                         initialNumToRender={4}
-                        renderItem={({item}) => <NewsCard data={item} />}
+                        renderItem={({ item }) => <NewsCard data={item} />}
+                        contentContainerStyle={{ width: '100%' }}
                         keyExtractor={itm => itm._id}
                         // 整理item數據
                         getItem={getItem}
@@ -374,7 +379,7 @@ class NewsPage extends Component {
                         ListHeaderComponent={this.renderTopNews}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (
-                            <View style={{marginTop: pxToDp(200)}}></View>
+                            <View style={{ marginTop: scale(200) }}></View>
                         )}
                         refreshControl={
                             <RefreshControl
@@ -383,7 +388,7 @@ class NewsPage extends Component {
                                 refreshing={this.state.isLoading}
                                 onRefresh={() => {
                                     // 展示Loading標識
-                                    this.setState({isLoading: true});
+                                    this.setState({ isLoading: true });
                                     this.getData();
                                 }}
                             />
@@ -399,11 +404,11 @@ class NewsPage extends Component {
 
 const styles = StyleSheet.create({
     topNewsContainer: {
-        borderRadius: pxToDp(10),
+        borderRadius: scale(10),
         overflow: 'hidden',
-        marginHorizontal: pxToDp(10),
-        marginVertical: pxToDp(5),
-        height: pxToDp(200),
+        marginHorizontal: scale(10),
+        marginVertical: scale(5),
+        height: scale(200),
         backgroundColor: white,
         ...viewShadow,
     },
@@ -411,18 +416,18 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: pxToDp(15),
+        padding: scale(15),
         justifyContent: 'flex-end',
     },
     topNewsPosition: {
         position: 'absolute',
-        top: pxToDp(10),
-        left: pxToDp(15),
+        top: scale(10),
+        left: scale(15),
     },
     topNewsText: {
         color: white,
         fontWeight: 'bold',
-        fontSize: pxToDp(20),
+        fontSize: scale(20),
     },
 });
 
