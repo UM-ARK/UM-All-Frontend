@@ -10,6 +10,7 @@ import {
     Platform,
     FlatList,
     TouchableWithoutFeedback,
+    KeyboardAvoidingView,
 } from "react-native";
 
 import { UMEH_URI, UMEH_API } from "../../../utils/pathMap";
@@ -207,12 +208,13 @@ export default class index extends Component {
     renderSearch = () => {
         const { inputText, isLoading, inputOK, } = this.state;
         return (
-            <View
+            <KeyboardAvoidingView
                 style={{
                     alignItems: 'center', justifyContent: 'center',
                     flexDirection: 'row',
                     marginTop: scale(5)
                 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 {/* 搜索框 */}
                 <View
@@ -281,7 +283,7 @@ export default class index extends Component {
                 >
                     <Text style={{ fontSize: scale(12), color: white }}>搜索</Text>
                 </TouchableOpacity>
-            </View>
+            </KeyboardAvoidingView>
         )
     }
 
