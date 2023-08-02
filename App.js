@@ -12,12 +12,34 @@ import { Provider } from 'mobx-react';
 import { NativeBaseProvider } from 'native-base';
 import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 
 const { viewShadow, bg_color, white } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
+
+function SafeAreaDIY(props) {
+    const insets = useSafeAreaInsets();
+
+    return (
+        <View
+            style={{
+                backgroundColor: COLOR_DIY.bg_color,
+                flex: 1,
+
+                // Paddings to handle safe area
+                //paddingTop: insets.top,
+                paddingTop: insets.top == 59 ? 12 : 0,
+                paddingBottom: insets.top == 59 ? insets.bottom : 0,
+                paddingLeft: insets.left,
+                paddingRight: insets.right,
+            }}
+        >
+            {props.children}
+        </View>
+    );
+}
 
 class App extends Component {
     state = {
@@ -79,9 +101,9 @@ class App extends Component {
     };
 
     render() {
+
         return (
             // 開屏動畫
-            // <SafeAreaView style={{ flex: 1, backgroundColor: bg_color }}>
             <AnimatedSplash
                 translucent={true}
                 isLoaded={this.state.isLoaded}
@@ -97,19 +119,18 @@ class App extends Component {
                 }
                 backgroundColor={bg_color}>
                 <SafeAreaProvider>
-                    <Provider RootStore={RootStore}>
-                        <NativeBaseProvider>
-                            {/* <View style={{ flex: 1 }}> */}
-                            <Nav
-                                lock={this.state.versionLock}
-                                setLock={this.setLock}
-                            />
-                            {/* </View> */}
-                        </NativeBaseProvider>
-                    </Provider>
+                    <SafeAreaDIY>
+                        <Provider RootStore={RootStore}>
+                            <NativeBaseProvider>
+                                <Nav
+                                    lock={this.state.versionLock}
+                                    setLock={this.setLock}
+                                />
+                            </NativeBaseProvider>
+                        </Provider>
+                    </SafeAreaDIY>
                 </SafeAreaProvider>
             </AnimatedSplash>
-            // </SafeAreaView>
         );
     }
 }
