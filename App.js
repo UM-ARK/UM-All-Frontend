@@ -1,35 +1,32 @@
 import React, { Component } from 'react';
-import { View, Image, Dimensions, StyleSheet, Alert, Linking } from 'react-native';
+import { View, Image, Dimensions, Alert, Linking } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import { COLOR_DIY } from './src/utils/uiMap';
-// import { setAPPInfo, handleLogout } from './src/utils/storageKits';
 import { BASE_HOST } from './src/utils/pathMap';
 import { Provider } from 'mobx-react';
 
 import { NativeBaseProvider } from 'native-base';
 import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 
-const { viewShadow, bg_color, white } = COLOR_DIY;
+const { bg_color } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
 
+// 修復iOS靈動島的頂部底部問題
 function SafeAreaDIY(props) {
     const insets = useSafeAreaInsets();
-
     return (
         <View
             style={{
-                backgroundColor: COLOR_DIY.bg_color,
                 flex: 1,
-
-                // Paddings to handle safe area
-                //paddingTop: insets.top,
+                backgroundColor: bg_color,
+                // insets.top為59時，為iPhone 14 Pro Max機型等的靈動島區域
                 paddingTop: insets.top == 59 ? 12 : 0,
                 paddingBottom: insets.top == 59 ? insets.bottom : 0,
                 paddingLeft: insets.left,
@@ -69,14 +66,11 @@ class App extends Component {
                 this.setState({ isLogin: false });
             }
         } catch (e) {
-            console.error(e);
+            console.error('App error', e);
         }
     }
 
     setLock = app_version => {
-        // Alert.alert(
-        //     `APP版本和API更新，需使用新版本才能繼續~\n最新版本為：${app_version}\n[]~(￣▽￣)~*`,
-        // );
         Alert.alert(
             "Please update the app!",
             `Latest version: ${app_version}\nYou need the latest version to continue!\n\nDo you want to update it now?
@@ -101,7 +95,6 @@ class App extends Component {
     };
 
     render() {
-
         return (
             // 開屏動畫
             <AnimatedSplash
@@ -119,8 +112,11 @@ class App extends Component {
                 }
                 backgroundColor={bg_color}>
                 <SafeAreaProvider>
+                    {/* 修復iOS safe area問題 */}
                     <SafeAreaDIY>
+                        {/* 全局變量 */}
                         <Provider RootStore={RootStore}>
+                            {/* NativeBase庫需要Provider */}
                             <NativeBaseProvider>
                                 <Nav
                                     lock={this.state.versionLock}
