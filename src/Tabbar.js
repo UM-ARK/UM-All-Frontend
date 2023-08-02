@@ -84,7 +84,7 @@ class Tabbar extends Component {
                             tabBarIcon: ({ focused, color, size }) => (
                                 <Icon
                                     name="pie-chart"
-                                    size={size ? size : scale(20)}
+                                    size={scale(15)}
                                     color={
                                         focused ? color : COLOR_DIY.black.main
                                     }
@@ -108,7 +108,7 @@ class Tabbar extends Component {
                             tabBarIcon: ({ focused, color, size }) => (
                                 <MaterialCommunityIcons
                                     name="database-search-outline"
-                                    size={size ? size : scale(30)}
+                                    size={scale(18)}
                                     color={
                                         focused ? color : COLOR_DIY.black.main
                                     }
@@ -132,7 +132,7 @@ class Tabbar extends Component {
                             tabBarIcon: ({ focused, color, size }) => (
                                 <Icon
                                     name="grid"
-                                    size={size ? size : scale(20)}
+                                    size={scale(15)}
                                     color={
                                         focused ? color : COLOR_DIY.black.main
                                     }
