@@ -100,7 +100,8 @@ export const UMEH_API = {
         // 字母全大寫
         PROF: "prof_info?name=",
         // 模糊搜索
-        FUZZY: "fuzzy_search?text=Test&type=course/prof/title",
+        // FUZZY: "fuzzy_search?text=Test&type=course/prof/title",
+        FUZZY: "fuzzy_search?text=",
         // 返回統計數據
         STAT: "get_stat"
     },
@@ -187,6 +188,8 @@ export const UM_LOST_FOUND = 'https://um2.umac.mo/apps/com/umlostfound.nsf';
 export const UM_PARK_APPLY = 'https://isw.um.edu.mo/parkmpapp/application';
 // 澳大 - 職位空缺系統
 export const UM_JOB_SYSTEM = 'https://isw.um.edu.mo/umsjv/zh_TW';
+// 澳大 - 書院餐單
+export const UM_RC_MENU = 'https://rc.um.edu.mo/rcmenu/';
 
 // 書院 - 職位空缺系統
 export const CO_EPORTFOLIO = 'https://eportfolio.um.edu.mo';

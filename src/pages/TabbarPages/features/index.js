@@ -54,6 +54,7 @@ import {
     UM_PRE_ENROLMENT_EXCEL,
     UM_IMPORTANT_DATE,
     UM_BULLETIN,
+    UM_RC_MENU,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 
@@ -80,12 +81,12 @@ class Index extends Component {
     state = {
         functionArr: [
             {
-                title: '校园服务',
+                title: '校園服務',
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bus-stop',
-                        fn_name: '校园巴士',
+                        fn_name: '校園巴士',
                         needLogin: false,
                         go_where: 'Bus', // a function
                     },
@@ -551,6 +552,17 @@ class Index extends Component {
                             // bg_color_diy: '#23407d',
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'food',
+                        fn_name: '書院餐單',
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_RC_MENU,
+                            title: '書院餐單',
                         },
                     },
                 ],
