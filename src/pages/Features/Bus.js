@@ -9,11 +9,12 @@ import {
     ScrollView,
     Dimensions,
     RefreshControl,
+    Linking,
 } from 'react-native';
 
 // 引入本地工具
 import { COLOR_DIY } from '../../utils/uiMap';
-import { UM_BUS_LOOP } from '../../utils/pathMap';
+import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -21,6 +22,7 @@ import Modal from 'react-native-modal';
 var DomParser = require('react-native-html-parser').DOMParser;
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast, { DURATION } from 'react-native-easy-toast';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -258,7 +260,7 @@ class BusScreen extends Component {
                                 width: scale(310),
                                 height: scale(600),
                                 marginLeft: scale(25),
-                                marginBottom: scale(25),
+                                marginBottom: scale(40),
                             }}
                             source={busRouteImg}
                             resizeMode={'contain'}>
@@ -274,6 +276,20 @@ class BusScreen extends Component {
                                     Data From: cmdo.um.edu.mo
                                 </Text>
                             </View>
+                            {/* 澳大地圖 */}
+                            <TouchableOpacity
+                                style={{
+                                    ...s.infoContainer,
+                                    left: scale(110),
+                                    top: scale(600),
+                                }}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Linking.openURL(UM_MAP);
+                                }}
+                            >
+                                <Text style={{ fontSize: scale(10), color: themeColor }}>校園地圖</Text>
+                            </TouchableOpacity>
                             {/* Bus運行信息的渲染 */}
                             <View
                                 style={{
