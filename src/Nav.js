@@ -32,6 +32,7 @@ import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import What2RegCourse from './pages/TabbarPages/what2Reg/pages/Course';
 import What2RegComment from './pages/TabbarPages/what2Reg/pages/Comment';
 import What2RegNewComment from './pages/TabbarPages/what2Reg/pages/NewComment';
+import What2RegRelateCourses from './pages/TabbarPages/what2Reg/pages/RelateCourses';
 
 import Webviewer from './components/Webviewer';
 import AllEvents from './pages/Features/AllEvents';
@@ -130,6 +131,7 @@ class Nav extends Component {
                     <Stack.Screen name="What2RegCourse" component={What2RegCourse} />
                     <Stack.Screen name="What2RegComment" component={What2RegComment} />
                     <Stack.Screen name="What2RegNewComment" component={What2RegNewComment} />
+                    <Stack.Screen name="What2RegRelateCourses" component={What2RegRelateCourses} />
 
                     {/* 測試頁 */}
                     <Stack.Screen name="TestScreen" component={TestScreen} />

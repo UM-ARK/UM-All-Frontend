@@ -17,6 +17,7 @@ import { UMEH_URI, UMEH_API } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
 import offerCourse from '../../../static/UMCourses/offer courses.json';
 import Loading from '../../../components/Loading';
+import CourseCard from './component/CourseCard';
 
 import axios from "axios";
 import { scale } from "react-native-size-matters";
@@ -126,12 +127,6 @@ export default class index extends Component {
     handleFilterCourse = (depaName) => {
         const offerCourseList = offerCourse.Master;
         const { filterOptions } = this.state;
-        this.setState({
-            filterOptions: {
-                ...filterOptions,
-                depaName
-            }
-        })
 
         // 篩選所需課程
         let filterCourseList = offerCourseList.filter(itm => {
@@ -165,11 +160,11 @@ export default class index extends Component {
         }
     };
 
-    jumpToCoursePage = async (courseCOde) => {
+    jumpToCoursePage = async (courseCode) => {
         ReactNativeHapticFeedback.trigger('soft');
         this.setState({ isLoading: true })
-        if (courseCOde.length > 0) {
-            let res = await this.getCourseData(courseCOde)
+        if (courseCode.length > 0) {
+            let res = await this.getCourseData(courseCode)
             // 返回存在的課程
             if ('course_info' in res && typeof res.course_info == 'object') {
                 this.props.navigation.navigate('What2RegCourse', res);
@@ -237,6 +232,7 @@ export default class index extends Component {
                         style={{
                             paddingVertical: scale(3),
                             color: black.main,
+                            fontSize: scale(12)
                         }}
                         onChangeText={(inputText) => {
                             inputText = inputText.toUpperCase()
@@ -245,7 +241,7 @@ export default class index extends Component {
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder="e.g. ECEN1000"
+                        placeholder="e.g. ECEN1234"
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
@@ -278,104 +274,33 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        this.jumpToCoursePage(inputText)
+                        this.jumpToRelateCoursePage({ inputText, type: 'course' })
                     }}
                 >
-                    <Text style={{ fontSize: scale(12), color: white }}>搜索</Text>
+                    <Text style={{ fontSize: scale(12), color: white }}>查課</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: (isLoading || !inputOK) ? 'gray' : themeColor,
+                        borderRadius: scale(10),
+                        padding: scale(5), paddingHorizontal: scale(10),
+                        alignItems: 'center',
+                        marginLeft: scale(5)
+                    }}
+                    disabled={isLoading || !inputOK}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.jumpToRelateCoursePage({ inputText, type: 'prof' })
+                    }}
+                >
+                    <Text style={{ fontSize: scale(12), color: white }}>搵講師</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
         )
     }
 
-    // 渲染課程代號
-    renderCourseCode = (code) => {
-        let renderItm = null;
-        if (code.length == 8 && !code.includes('-')) {
-            renderItm = <>
-                {code.substring(0, 4) + ' '}
-                <Text style={{
-                    color: themeColor,
-                    fontWeight: '700',
-                    fontSize: scale(16)
-                }}>
-                    {code.substring(4, 8)}
-                </Text>
-            </>
-        }
-        // FLL MLS的課程代號有TLL123-A的格式
-        else if (code.length == 8 && code.includes('-')) {
-            renderItm = <>
-                {code.substring(0, 3) + ' '}
-                <Text style={{
-                    color: themeColor,
-                    fontWeight: '700',
-                    fontSize: scale(16)
-                }}>
-                    {code.substring(3, 8)}
-                </Text>
-            </>
-        }
-        else {
-            renderItm = code;
-        }
-
-        return (
-            <Text style={{
-                fontSize: scale(13),
-                fontWeight: '600',
-                color: black.main,
-            }}>
-                {renderItm}
-            </Text>
-        )
-    }
-
-    // 渲染篩選出的課程
-    renderFilterCourse = () => {
-        const { filterCourseList } = this.state;
-        const { Master: offerCourseList } = offerCourse;
-        return (
-            <FlatList
-                data={filterCourseList.length > 0 ? filterCourseList : offerCourseList}
-                numColumns={offerCourseList.length}
-                columnWrapperStyle={offerCourseList.length > 1 ? { flexWrap: 'wrap' } : null}
-                style={{ marginHorizontal: scale(5) }}
-                renderItem={({ item }) => {
-                    return (
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: COLOR_DIY.bg_color,
-                                borderRadius: scale(10),
-                                margin: scale(5),
-                                padding: scale(10), paddingVertical: scale(5),
-                                ...viewShadow,
-                            }}
-                            onPress={() => {
-                                this.jumpToCoursePage(item["Course Code"])
-                            }}
-                        >
-                            {this.renderCourseCode(item["Course Code"])}
-                            <Text style={{
-                                fontSize: scale(11),
-                                color: black.second,
-                            }}>{item['Course Title']}</Text>
-                            <Text style={{
-                                fontSize: scale(10),
-                                color: black.third,
-                            }}>
-                                {item['Offering Unit']}
-                                {item['Offering Department'] && ' - ' + item['Offering Department']}
-                            </Text>
-                            <Text style={{
-                                fontSize: scale(10),
-                                color: black.third,
-                            }}>{item['Credit Units']} Credit</Text>
-                        </TouchableOpacity>
-                    )
-                }}
-                keyExtractor={(item, index) => index}
-            />
-        )
+    jumpToRelateCoursePage = (searchData) => {
+        this.props.navigation.navigate('What2RegRelateCourses', searchData);
     }
 
     // 渲染懸浮可拖動按鈕
@@ -439,6 +364,7 @@ export default class index extends Component {
             offerFacultyList,
             offerDepaList,
             offerGEList,
+            filterCourseList
         } = this.state;
         const {
             updateTime,
@@ -476,9 +402,7 @@ export default class index extends Component {
                         <Loading />
                     </View>
                 ) : (<>
-                    <ScrollView
-                        ref={this.scrollViewRef}
-                    >
+                    <ScrollView ref={this.scrollViewRef} >
                         {/* 標題 */}
                         <View style={{
                             alignSelf: 'center',
@@ -512,42 +436,37 @@ export default class index extends Component {
                                     borderRadius: scale(10)
                                 }}>
                                 <Text style={{ fontSize: scale(12), color: black.second }}>課程類型: </Text>
+
                                 {/* CE/RE選項 */}
                                 <TouchableOpacity
-                                    style={{ marginHorizontal: scale(5) }}
+                                    style={{ paddingHorizontal: scale(5) }}
                                     onPress={() => {
                                         ReactNativeHapticFeedback.trigger('soft');
-                                        this.setState({
-                                            filterOptions: {
-                                                ...filterOptions,
-                                                option: 'CMRE'
-                                            }
-                                        })
+                                        filterOptions.option = 'CMRE';
+                                        this.setState({ filterOptions })
+                                        this.handleFilterCourse(filterOptions.depaName)
                                     }}
                                 >
-                                    <Text style={{ color: filterOptions.option === 'CMRE' ? secondThemeColor : black.third }}>CM/RE</Text>
+                                    <Text style={{ color: filterOptions.option === 'CMRE' ? secondThemeColor : black.third, fontSize: scale(12) }}>CM/RE</Text>
                                 </TouchableOpacity>
+
                                 {/* GE選項 */}
                                 <TouchableOpacity
-                                    style={{ marginHorizontal: 5 }}
+                                    style={{ paddingHorizontal: scale(5) }}
                                     onPress={() => {
                                         ReactNativeHapticFeedback.trigger('soft');
-                                        this.setState({
-                                            filterOptions: {
-                                                ...filterOptions,
-                                                option: 'GE'
-                                            }
-                                        })
+                                        filterOptions.option = 'GE';
+                                        this.setState({ filterOptions })
+                                        this.handleFilterCourse(filterOptions.GE)
                                     }}
                                 >
-                                    <Text style={{ color: filterOptions.option === 'GE' ? secondThemeColor : black.third }}>GE</Text>
+                                    <Text style={{ color: filterOptions.option === 'GE' ? secondThemeColor : black.third, fontSize: scale(12) }}>GE</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {filterOptions.option != 'GE' ? (<>
-                                {/* 學院分類選擇 */}
-                                {offerFacultyList.length > 0 ? (<>
-                                    {/* 渲染可選學院 */}
+                                {/* 學院分類選擇，例FST、FSS */}
+                                {offerFacultyList.length > 0 ? (
                                     <FlatList
                                         data={offerFacultyList}
                                         keyExtractor={(item, index) => index}
@@ -561,19 +480,19 @@ export default class index extends Component {
                                         }}
                                         renderItem={({ item: itm }) => (
                                             <TouchableOpacity
-                                                style={{ marginHorizontal: scale(5), marginVertical: scale(3) }}
+                                                style={{ paddingHorizontal: scale(5), marginVertical: scale(3) }}
                                                 onPress={() => {
                                                     ReactNativeHapticFeedback.trigger('soft');
-                                                    this.handleFilterFaculty(itm)
+                                                    this.handleFilterFaculty(itm);
                                                 }}
                                             >
-                                                <Text style={{ color: itm === filterOptions.facultyName ? secondThemeColor : black.third }}>{itm}</Text>
+                                                <Text style={{ color: itm === filterOptions.facultyName ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
                                             </TouchableOpacity>
                                         )}
                                     />
-                                </>) : null}
+                                ) : null}
 
-                                {/* 部門分類選擇 */}
+                                {/* 部門分類選擇，例ECE、EME */}
                                 {offerDepaList.length > 0 ? (
                                     <View
                                         style={{
@@ -584,13 +503,15 @@ export default class index extends Component {
                                         }}>
                                         {offerDepaList.map((itm) => {
                                             return (
-                                                <TouchableOpacity style={{ marginHorizontal: scale(5) }}
+                                                <TouchableOpacity style={{ paddingHorizontal: scale(5) }}
                                                     onPress={() => {
                                                         ReactNativeHapticFeedback.trigger('soft');
-                                                        this.handleFilterCourse(itm)
+                                                        filterOptions.depaName = itm;
+                                                        this.setState({ filterOptions })
+                                                        this.handleFilterCourse(itm);
                                                     }}
                                                 >
-                                                    <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third }}>{itm}</Text>
+                                                    <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
                                                 </TouchableOpacity>
                                             )
                                         })}
@@ -605,13 +526,15 @@ export default class index extends Component {
                                 }}>
                                     {offerGEList.length > 0 && offerGEList.map(itm => {
                                         return (
-                                            <TouchableOpacity style={{ marginHorizontal: scale(5) }}
+                                            <TouchableOpacity style={{ paddingHorizontal: scale(5) }}
                                                 onPress={() => {
                                                     ReactNativeHapticFeedback.trigger('soft');
-                                                    this.handleFilterCourse(itm)
+                                                    filterOptions.GE = itm;
+                                                    this.setState({ filterOptions })
+                                                    this.handleFilterCourse(itm);
                                                 }}
                                             >
-                                                <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third }}>{itm}</Text>
+                                                <Text style={{ color: filterOptions.GE === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
                                             </TouchableOpacity>
                                         )
                                     })}
@@ -620,7 +543,7 @@ export default class index extends Component {
                         </View>
 
                         {/* 渲染篩選出的課程 */}
-                        {this.renderFilterCourse()}
+                        {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} /> : null}
 
                         {/* 官網引流 */}
                         <View style={{

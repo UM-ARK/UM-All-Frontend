@@ -77,6 +77,7 @@ export default class Comment extends Component {
                 numColumns={schedulesArr.length}
                 columnWrapperStyle={schedulesArr.length > 1 ? { flexWrap: 'wrap' } : null}
                 contentContainerStyle={{ alignItems: 'center' }}
+                // style={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => {
                     return (
                         <View style={{
@@ -324,14 +325,13 @@ export default class Comment extends Component {
 
                 {isLoading ? null : this.renderGoTopButton()}
 
-                <ScrollView
-                    ref={this.scrollViewRef}
-                >
-                    {isLoading ? (
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <Loading />
-                        </View>
-                    ) : (<>
+                {isLoading ? (
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <Loading />
+                    </View>
+                ) : (
+                    <ScrollView ref={this.scrollViewRef} >
+                        {/* 教授基本信息 */}
                         <View style={{
                             marginHorizontal: scale(5),
                             borderRadius: scale(10),
@@ -339,10 +339,9 @@ export default class Comment extends Component {
                         }}>
                             <Text style={{
                                 fontSize: scale(15),
-                                color: black.main
-                            }}
-                                selectable
-                            >
+                                color: black.main,
+                                textAlign: 'center',
+                            }} selectable >
                                 {name}
                             </Text>
                             {/* 評價數不等於0，渲染評分 */}
@@ -395,10 +394,10 @@ export default class Comment extends Component {
                                     </Text>
                                 </View>)}
                         </View>
-                    </>)}
 
-                    <View style={{ marginBottom: scale(50) }} />
-                </ScrollView>
+                        <View style={{ marginBottom: scale(50) }} />
+                    </ScrollView>
+                )}
             </View>
         )
     }
