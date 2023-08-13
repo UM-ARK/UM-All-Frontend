@@ -534,7 +534,7 @@ class UMEventDetail extends Component {
                                         color: '#FF8627',
                                     }}>
                                     {date[chooseMode]}
-                                    {moment(dateFrom).format('MM-DD')}--
+                                    {moment(dateFrom).format('MM-DD') + ' ~ '}
                                     {moment(dateTo).format('MM-DD')}
                                 </Text>
                             </View>
@@ -547,7 +547,7 @@ class UMEventDetail extends Component {
                                 color: '#FF8627',
                             }}>
                             {time[chooseMode]}
-                            {moment(timeFrom).format('HH:SS')}--
+                            {moment(timeFrom).format('HH:SS') + ' ~ '}
                             {moment(timeTo).format('HH:SS')}
                         </Text>
                         {/* 講者 */}
