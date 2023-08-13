@@ -417,8 +417,8 @@ export default class index extends Component {
     };
 
     // 渲染首字母側邊導航
-    renderFirstLetterNav = () => {
-        const { filterCourseList, scrollData } = this.state;
+    renderFirstLetterNav = (filterCourseList) => {
+        const { scrollData } = this.state;
         let firstLetterList = [];
         filterCourseList.map((itm) => {
             const firstLetter = itm['Course Code'][0];
@@ -472,6 +472,8 @@ export default class index extends Component {
             sem,
         } = offerCourse;
 
+        const searchFilterCourseList = this.handleSearchFilterCourse(inputText);
+
         return (
             <View style={{
                 flex: 1,
@@ -515,8 +517,8 @@ export default class index extends Component {
                         </View>
 
                         {/* 搜索候選課程 */}
-                        {inputText.length > 2 && this.handleSearchFilterCourse(inputText).length > 0 ? (
-                            <CourseCard data={this.handleSearchFilterCourse(inputText)} mode={'json'} />
+                        {inputText.length > 2 && searchFilterCourseList.length > 0 ? (
+                            <CourseCard data={searchFilterCourseList} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
                         ) : (<>
                             {/* 篩選課程功能 更新時間展示 */}
                             <View style={{ marginTop: scale(5), alignItems: 'center' }}>
@@ -693,7 +695,11 @@ export default class index extends Component {
                         </View>
 
                     </ScrollView>
-                    {this.renderFirstLetterNav()}
+                    {inputText.length > 2 && searchFilterCourseList.length > 0 ? (
+                        this.renderFirstLetterNav(searchFilterCourseList)
+                    ) : (
+                        this.renderFirstLetterNav(filterCourseList)
+                    )}
                     {this.renderSearch()}
                 </>)}
             </View>

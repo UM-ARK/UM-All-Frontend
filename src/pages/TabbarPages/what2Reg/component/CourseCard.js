@@ -98,7 +98,7 @@ export default class CourseCard extends Component {
                             onLayout={event => {
                                 const { layout } = event.nativeEvent;
                                 // 記錄首個出現的首字母的高度
-                                this.props.handleSetLetterData({ [courseCode[0]]: layout.y })
+                                'handleSetLetterData' in this.props && this.props.handleSetLetterData({ [courseCode[0]]: layout.y })
                             }}
                         >
                             {/* 課程編號與開課標識 */}
