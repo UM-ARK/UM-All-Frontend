@@ -29,6 +29,62 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 
+// 學院名中文參考
+const unitMap = {
+    'FAH': '人文學院',
+    'FBA': '工商管理學院',
+    'FED': '教育學院',
+    'FST': '科技學院',
+    'FHS': '健康科學學院',
+    'FSS': '社會科學學院',
+    'FLL': '法學院',
+    'IAPME': '應用物理及材料工程研究院',
+    'ICMS': '中華醫藥研究院',
+    'IME': '微電子研究院',
+}
+
+// 部門/學系名中文參考
+const depaMap = {
+    // FAH
+    'CJS': '日本研究中心',
+    'DCH': '中國語言文學系',
+    'DENG': '英文系',
+    'DHIST': '歷史系',
+    'DPHIL': '哲學及宗教學系',
+    'DPT': '葡文系',
+    'ELC': '英語中心',
+
+    // FBA
+    'AIM': '會計及資訊管理學系',
+    'DRTM': '綜合度假村及旅遊管理學系',
+    'FBE': '金融及商業經濟學系',
+    'MMI': '管理及市場學系',
+
+    // FHS
+    'DBS': '生物醫學系',
+    'DPS': '藥物科學系',
+
+    // FLL
+    'GLS': '環球法律學系',
+    'MLS': '澳門法學系',
+
+    // FSS
+    'DCOM': '傳播系',
+    'DECO': '經濟學系',
+    'DGPA': '政府與行政學系',
+    'DPSY': '心理學系',
+    'DSOC': '社會學系',
+
+    // FST
+    'CEE': '土木及環境工程系',
+    'CIS': '電腦及資訊科學系',
+    // 'CSG': '',
+    'DPC': '物理及化學系',
+    'ECE': '電機及電腦工程系',
+    'EME': '機電工程系',
+    'MAT': '數學系',
+}
+
 // 檢測輸入是否包含數字
 function numContain(input) {
     let check = /\d/;
@@ -63,6 +119,7 @@ export default class index extends Component {
     }
 
     componentDidMount() {
+        const { filterOptions } = this.state;
         const offerCourseList = offerCourse.Master;
         // 開設課程的學院名列表
         let offerFacultyList = [];
@@ -88,20 +145,23 @@ export default class index extends Component {
         this.handleFilterFaculty('FST');
         // 默認篩選ECE可選課程
         this.handleFilterCourse('ECE');
+        filterOptions.facultyName = 'FST'; filterOptions.depaName = 'ECE';
+        this.setState({ filterOptions });
     };
 
     // 按選擇的學院名，從可選學系中篩選可選課程
     handleFilterFaculty = (facultyName) => {
         const { filterOptions } = this.state;
         filterOptions.facultyName = facultyName;
-        this.setState({ filterOptions })
         let depaList = this.handleFilterDepa(facultyName);
         if (depaList.length > 0) {
             // 有學系分類可選
+            filterOptions.depaName = depaList[0];
             this.handleFilterCourse(depaList[0])
         } else {
             this.handleFilterCourse('')
         }
+        this.setState({ filterOptions })
     }
 
     // 按選擇的學院名整理可供選擇的學系
@@ -145,7 +205,8 @@ export default class index extends Component {
                 return itm['Course Code'].substring(0, 4) == depaName
             }
         });
-        filterCourseList = filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8) - b['Course Code'].substring(4, 8));
+        // 按首字母排序
+        filterCourseList = filterCourseList.sort((a, b) => b['Course Code'].substring(0, 3) - a['Course Code'].substring(0, 3));
         this.setState({ filterCourseList })
         // console.log('篩選後數據', filterCourseList);
     }
@@ -178,25 +239,7 @@ export default class index extends Component {
 
     // 校驗輸入的code是否符合規則
     checkInput = (inputText) => {
-        let inputOK = false;
-        // TODO: 例如FLL MLS的課不止有8位Code
-        // if (numContain(inputText) && inputText.length == 8) {
-        //     const codeBegin = inputText.substring(0, 4);
-        //     const codeEnd = inputText.substring(4, 8);
-        //     if (!numContain(codeBegin) && !!Number(codeEnd)) {
-        //         inputOK = true;
-        //     } else {
-        //         inputOK = false;
-        //     }
-        // }
-        if (inputText.length > 0) {
-            inputOK = true;
-        }
-        // TODO: 教授姓名查詢
-        // else if (!numContain(inputText) && inputText.length >= 3) {
-        //     inputOK = true;
-        // }
-        this.setState({ inputOK })
+        this.setState({ inputOK: inputText.length > 0 })
     };
 
     // 搜索框
@@ -263,7 +306,7 @@ export default class index extends Component {
                     ) : null}
                 </View>
                 {/* TODO: 搜索候選 */}
-                {/* 搜索按鈕 */}
+                {/* 課程搜索按鈕 */}
                 <TouchableOpacity
                     style={{
                         backgroundColor: (isLoading || !inputOK) ? 'gray' : themeColor,
@@ -279,6 +322,7 @@ export default class index extends Component {
                 >
                     <Text style={{ fontSize: scale(12), color: white }}>查課</Text>
                 </TouchableOpacity>
+                {/* 教授搜索按鈕 */}
                 <TouchableOpacity
                     style={{
                         backgroundColor: (isLoading || !inputOK) ? 'gray' : themeColor,
@@ -299,6 +343,7 @@ export default class index extends Component {
         )
     }
 
+    // 模糊搜索跳轉到相關課程或教授頁
     jumpToRelateCoursePage = (searchData) => {
         this.props.navigation.navigate('What2RegRelateCourses', searchData);
     }
@@ -517,6 +562,15 @@ export default class index extends Component {
                                         })}
                                     </View>
                                 ) : null}
+
+                                {/* 展示學系的中文 */}
+                                <Text style={{ fontSize: scale(11), color: black.third }}>
+                                    {unitMap[filterOptions.facultyName]}
+                                    {offerDepaList
+                                        && offerDepaList.length > 0
+                                        && filterOptions.depaName in depaMap ?
+                                        (' - ' + depaMap[filterOptions.depaName]) : null}
+                                </Text>
                             </>) : (
                                 <View style={{
                                     flexDirection: 'row',
