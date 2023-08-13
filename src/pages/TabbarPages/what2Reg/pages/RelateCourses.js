@@ -4,7 +4,7 @@ import {
     View,
     ScrollView,
     TouchableOpacity,
-    FlatList
+    FlatList,
 } from 'react-native'
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
@@ -63,6 +63,45 @@ export default class RelateCourses extends Component {
         }
     }
 
+    renderProfCard = (prof_info) => {
+        return <FlatList
+            data={prof_info}
+            numColumns={prof_info.length}
+            columnWrapperStyle={prof_info.length > 1 ? { flexWrap: 'wrap' } : null}
+            contentContainerStyle={{ alignItems: 'center' }}
+            renderItem={({ item: itm }) => {
+                return (
+                    <TouchableOpacity
+                        style={{
+                            marginHorizontal: scale(5), marginVertical: scale(5),
+                            borderRadius: scale(10),
+                            backgroundColor: COLOR_DIY.bg_color,
+                            padding: scale(10),
+                            ...viewShadow
+                        }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            // 跳轉教授頁
+                            this.props.navigation.navigate('What2RegProf', itm.name);
+                        }}
+                    >
+                        <Text style={{
+                            alignSelf: 'center',
+                            color: black.main,
+                            fontSize: scale(12),
+                        }}>{itm.name}</Text>
+                        {'courses' in itm && itm.courses.length > 0 && (
+                            <View style={{ alignSelf: 'flex-end', flexDirection: 'row' }}>
+                                <Text style={{ fontSize: scale(10), color: themeColor }}>{itm.courses.length}</Text>
+                                <Text style={{ fontSize: scale(10), color: black.third }}> 節課</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                )
+            }}
+        />
+    }
+
     renderContent = () => {
         const { course_info, prof_info } = this.state;
         const { type } = this.state.searchData;
@@ -80,8 +119,10 @@ export default class RelateCourses extends Component {
         }
         else if (type == 'prof') {
             if (prof_info && prof_info.length > 0) {
-                // renderItem = <CourseCard data={prof_info} mode={'what2Reg'} />
-                // TODO: 教授內容
+                let data = prof_info;
+                // 排序，課多的在前
+                data = data.sort((a, b) => b.courses.length - a.courses.length);
+                renderItem = this.renderProfCard(data);
             } else {
                 alert('找不到相關內容！換個關鍵字再試試吧~');
                 this.props.navigation.goBack();

@@ -70,6 +70,11 @@ export default class Comment extends Component {
         }
     }
 
+    jumpToSearchProf = async (name) => {
+        ReactNativeHapticFeedback.trigger('soft');
+        this.props.navigation.navigate('What2RegRelateCourses', { inputText: name, type: 'prof' });
+    }
+
     renderSchedules = (schedulesArr) => {
         return (
             <FlatList
@@ -344,6 +349,16 @@ export default class Comment extends Component {
                             }} selectable >
                                 {name}
                             </Text>
+                            {/* 搵講師按鈕 */}
+                            <TouchableOpacity
+                                style={{
+                                    borderWidth: scale(1), borderColor: themeColor, borderRadius: scale(10),
+                                    paddingHorizontal: scale(5), paddingVertical: scale(2),
+                                }}
+                                onPress={() => this.jumpToSearchProf(name)}
+                            >
+                                <Text style={{ fontSize: scale(11), color: themeColor }}>☝️搵講師</Text>
+                            </TouchableOpacity>
                             {/* 評價數不等於0，渲染評分 */}
                             {num != 0 && (
                                 <View style={{ marginTop: scale(5), alignItems: 'center' }}>

@@ -81,14 +81,42 @@ export default class CourseCard extends Component {
                             }}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                this.context.navigate('What2RegCourse', courseCode)
+                                if (this.props.prof_info) {
+                                    // 進入搜索特定教授的課程模式，進入評論詳情頁
+                                    this.context.navigate('What2RegComment', {
+                                        New_code: item['New_code'],
+                                        prof_name: this.props.prof_info.name,
+                                        prof_info: this.props.prof_info,
+                                    })
+                                }
+                                else {
+                                    // 進入搜索課程代號模式
+                                    this.context.navigate('What2RegCourse', courseCode)
+                                }
                             }}
                         >
-                            {this.renderCourseCode(courseCode)}
+                            {/* 課程編號與開課標識 */}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {this.renderCourseCode(courseCode)}
+                                {mode == 'what2Reg' && item['is_offered'] && (
+                                    <MaterialCommunityIcons
+                                        style={{ marginLeft: scale(3) }}
+                                        name="account-check"
+                                        size={scale(18)}
+                                        color={themeColor}
+                                    />
+                                )}
+                            </View>
                             <Text style={{
                                 fontSize: scale(11),
                                 color: black.second,
                             }}>{title}</Text>
+                            {'courseTitleChi' in item && item.courseTitleChi.length > 0 ? (
+                                <Text style={{
+                                    fontSize: scale(11),
+                                    color: black.second,
+                                }}>{item.courseTitleChi}</Text>
+                            ) : null}
                             <Text style={{
                                 fontSize: scale(10),
                                 color: black.third,
@@ -102,16 +130,6 @@ export default class CourseCard extends Component {
                                     color: black.third,
                                 }}>{credit} Credit</Text>
                             ) : null}
-
-                            {/* 開課標識 */}
-                            {mode == 'what2Reg' && item['is_offered'] && (
-                                <MaterialCommunityIcons
-                                    style={{ position: 'absolute', right: scale(5), top: scale(5), }}
-                                    name="account-check"
-                                    size={scale(18)}
-                                    color={themeColor}
-                                />
-                            )}
                         </TouchableOpacity>
                     )
                 }}

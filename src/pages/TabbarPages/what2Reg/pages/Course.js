@@ -55,13 +55,11 @@ export default class Course extends Component {
         }
     }
 
-    jumpToProf = async (data) => {
+    jumpToProf = (data) => {
         ReactNativeHapticFeedback.trigger('soft');
-        this.setState({ isLoading: true })
 
         const res = data;
         this.props.navigation.navigate('What2RegComment', res)
-        this.setState({ isLoading: false })
     }
 
     // 渲染可選section
