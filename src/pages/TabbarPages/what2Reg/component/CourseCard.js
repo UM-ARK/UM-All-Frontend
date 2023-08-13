@@ -94,6 +94,12 @@ export default class CourseCard extends Component {
                                     this.context.navigate('What2RegCourse', courseCode)
                                 }
                             }}
+                            // 獲取當前位置距離屏幕頂端的高度
+                            onLayout={event => {
+                                const { layout } = event.nativeEvent;
+                                // 記錄首個出現的首字母的高度
+                                this.props.handleSetLetterData({ [courseCode[0]]: layout.y })
+                            }}
                         >
                             {/* 課程編號與開課標識 */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>

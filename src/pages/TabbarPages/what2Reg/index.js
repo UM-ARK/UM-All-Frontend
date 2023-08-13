@@ -113,6 +113,7 @@ export default class index extends Component {
             offerDepaList: [],
             offerGEList: [],
             filterCourseList: [],
+            scrollData: undefined,
         };
         this.textInputRef = React.createRef();
         this.scrollViewRef = React.createRef();
@@ -207,7 +208,7 @@ export default class index extends Component {
         });
         // 按首字母排序
         filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
-        this.setState({ filterCourseList })
+        this.setState({ filterCourseList, scrollData: {} })
         // console.log('篩選後數據', filterCourseList);
     }
 
@@ -305,6 +306,7 @@ export default class index extends Component {
                     {inputText.length > 0 ? (
                         <TouchableOpacity
                             onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
                                 this.setState({ inputText: '' })
                                 this.checkInput('');
                                 this.textInputRef.current.focus();
@@ -413,6 +415,47 @@ export default class index extends Component {
             </Interactable.View>
         );
     };
+
+    // 渲染首字母側邊導航
+    renderFirstLetterNav = () => {
+        const { filterCourseList, scrollData } = this.state;
+        let firstLetterList = [];
+        filterCourseList.map((itm) => {
+            const firstLetter = itm['Course Code'][0];
+            if (firstLetter != undefined && !firstLetterList.includes(firstLetter)) {
+                firstLetterList.push(firstLetter)
+            }
+        })
+        return firstLetterList.length > 1 ? (
+            <View style={{
+                position: 'absolute', right: scale(8),
+                justifyContent: 'center', alignItems: 'center',
+            }}>
+                {firstLetterList.map(itm => {
+                    return <TouchableOpacity
+                        style={{ padding: scale(3), }}
+                        onPress={() => {
+                            // 滑動到對應的首字母課程
+                            ReactNativeHapticFeedback.trigger('soft');
+                            this.scrollViewRef.current.scrollTo({
+                                y: scrollData[itm],
+                            });
+                        }}
+                    >
+                        <Text style={{ fontSize: scale(15), color: themeColor }}>{itm}</Text>
+                    </TouchableOpacity>
+                })}
+            </View>
+        ) : null
+    }
+
+    handleSetLetterData = (letterData) => {
+        const { scrollData } = this.state;
+        const letter = Object.keys(letterData)[0];
+        if (!(letter in scrollData)) {
+            scrollData[letter] = letterData[letter];
+        }
+    }
 
     render() {
         const { isLoading,
@@ -634,7 +677,7 @@ export default class index extends Component {
 
                             {/* 渲染篩選出的課程 */}
                             <View style={{ alignItems: 'center' }}>
-                                {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} /> : null}
+                                {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={this.handleSetLetterData} /> : null}
                             </View>
                         </>)}
 
@@ -650,6 +693,7 @@ export default class index extends Component {
                         </View>
 
                     </ScrollView>
+                    {this.renderFirstLetterNav()}
                     {this.renderSearch()}
                 </>)}
             </View>
