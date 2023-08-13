@@ -4,6 +4,7 @@ import {Text, Linking} from 'react-native';
 import {useToast} from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {COLOR_DIY, ToastText} from '../utils/uiMap';
 
 const HyperlinkText = ({
@@ -31,6 +32,7 @@ const HyperlinkText = ({
     };
 
     const handleHyperLink = (url, text) => {
+        ReactNativeHapticFeedback.trigger('soft');
         if (beforeJump) {
             beforeJump();
         }

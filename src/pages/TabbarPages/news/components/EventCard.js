@@ -16,6 +16,7 @@ import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import { inject } from 'mobx-react';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -66,6 +67,7 @@ class EventCard extends Component {
 
     handleJumpToDetail = () => {
         const { type, link, title, isAdmin } = this.state;
+        ReactNativeHapticFeedback.trigger('soft');
         let webview_param = {
             // import pathMap的鏈接進行跳轉
             url: link,

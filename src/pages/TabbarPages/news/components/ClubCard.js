@@ -16,6 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {NavigationContext} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import {scale} from 'react-native-size-matters';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow, themeColor} = COLOR_DIY;
@@ -33,6 +34,7 @@ class EventCard extends Component {
 
     // 處理點擊跳轉邏輯
     handleJumpToDetail = () => {
+        ReactNativeHapticFeedback.trigger('soft');
         this.context.navigate('ClubDetail', {
             data: this.state.data,
         });
