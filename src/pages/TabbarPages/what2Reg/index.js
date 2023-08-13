@@ -508,7 +508,11 @@ export default class index extends Component {
                                             this.handleFilterCourse(filterOptions.depaName)
                                         }}
                                     >
-                                        <Text style={{ color: filterOptions.option === 'CMRE' ? secondThemeColor : black.third, fontSize: scale(12) }}>CM/RE</Text>
+                                        <Text style={{
+                                            color: filterOptions.option === 'CMRE' ? secondThemeColor : black.third,
+                                            fontWeight: filterOptions.option === 'CMRE' ? 'bold' : 'normal',
+                                            fontSize: scale(12),
+                                        }}>CM/RE</Text>
                                     </TouchableOpacity>
 
                                     {/* GE選項 */}
@@ -521,7 +525,11 @@ export default class index extends Component {
                                             this.handleFilterCourse(filterOptions.GE)
                                         }}
                                     >
-                                        <Text style={{ color: filterOptions.option === 'GE' ? secondThemeColor : black.third, fontSize: scale(12) }}>GE</Text>
+                                        <Text style={{
+                                            color: filterOptions.option === 'GE' ? secondThemeColor : black.third,
+                                            fontWeight: filterOptions.option === 'GE' ? 'bold' : 'normal',
+                                            fontSize: scale(12)
+                                        }}>GE</Text>
                                     </TouchableOpacity>
                                 </View>
 
@@ -547,7 +555,11 @@ export default class index extends Component {
                                                         this.handleFilterFaculty(itm);
                                                     }}
                                                 >
-                                                    <Text style={{ color: itm === filterOptions.facultyName ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
+                                                    <Text style={{
+                                                        color: itm === filterOptions.facultyName ? secondThemeColor : black.third,
+                                                        fontWeight: itm === filterOptions.facultyName ? 'bold' : 'normal',
+                                                        fontSize: scale(12)
+                                                    }}>{itm}</Text>
                                                 </TouchableOpacity>
                                             )}
                                         />
@@ -572,7 +584,11 @@ export default class index extends Component {
                                                             this.handleFilterCourse(itm);
                                                         }}
                                                     >
-                                                        <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
+                                                        <Text style={{
+                                                            color: filterOptions.depaName === itm ? secondThemeColor : black.third,
+                                                            fontWeight: filterOptions.depaName === itm ? 'bold' : 'normal',
+                                                            fontSize: scale(12)
+                                                        }}>{itm}</Text>
                                                     </TouchableOpacity>
                                                 )
                                             })}
@@ -604,7 +620,11 @@ export default class index extends Component {
                                                         this.handleFilterCourse(itm);
                                                     }}
                                                 >
-                                                    <Text style={{ color: filterOptions.GE === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
+                                                    <Text style={{
+                                                        color: filterOptions.GE === itm ? secondThemeColor : black.third,
+                                                        fontWeight: filterOptions.GE === itm ? 'bold' : 'normal',
+                                                        fontSize: scale(12)
+                                                    }}>{itm}</Text>
                                                 </TouchableOpacity>
                                             )
                                         })}
@@ -613,7 +633,9 @@ export default class index extends Component {
                             </View>
 
                             {/* 渲染篩選出的課程 */}
-                            {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} /> : null}
+                            <View style={{ alignItems: 'center' }}>
+                                {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} /> : null}
+                            </View>
                         </>)}
 
                         {/* 官網引流 */}
