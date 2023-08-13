@@ -149,7 +149,7 @@ export default class Comment extends Component {
                         // id:25403為選咩課小程序特供評論
                         id,
                     } = itm;
-                    if (id != 25403) {
+                    if (id != 25403 && id != 27062) {
                         return (
                             <View style={{
                                 margin: scale(5),
@@ -311,6 +311,7 @@ export default class Comment extends Component {
 
     render() {
         const { res, isLoading } = this.state;
+        console.log(res);
         const {
             name,
             num,
@@ -342,6 +343,13 @@ export default class Comment extends Component {
                             borderRadius: scale(10),
                             alignItems: 'center'
                         }}>
+                            <Text style={{
+                                fontSize: scale(15),
+                                color: black.main,
+                                textAlign: 'center',
+                            }} selectable >
+                                {res.course_info.New_code}
+                            </Text>
                             <Text style={{
                                 fontSize: scale(15),
                                 color: black.main,
