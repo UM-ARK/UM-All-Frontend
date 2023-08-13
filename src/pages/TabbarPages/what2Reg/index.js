@@ -206,9 +206,21 @@ export default class index extends Component {
             }
         });
         // 按首字母排序
-        filterCourseList = filterCourseList.sort((a, b) => b['Course Code'].substring(0, 3) - a['Course Code'].substring(0, 3));
+        filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
         this.setState({ filterCourseList })
         // console.log('篩選後數據', filterCourseList);
+    }
+
+    // 搜索候選
+    handleSearchFilterCourse = (inputText) => {
+        const offerCourseList = offerCourse.Master;
+        // 篩選所需課程
+        let filterCourseList = offerCourseList.filter(itm => {
+            return itm['Course Code'].toUpperCase().includes(inputText)
+                || itm['Course Title'].toUpperCase().includes(inputText)
+        });
+        filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+        return filterCourseList
     }
 
     getCourseData = async (courseCode) => {
@@ -305,7 +317,6 @@ export default class index extends Component {
                         </TouchableOpacity>
                     ) : null}
                 </View>
-                {/* TODO: 搜索候選 */}
                 {/* 課程搜索按鈕 */}
                 <TouchableOpacity
                     style={{
@@ -409,7 +420,8 @@ export default class index extends Component {
             offerFacultyList,
             offerDepaList,
             offerGEList,
-            filterCourseList
+            filterCourseList,
+            inputText,
         } = this.state;
         const {
             updateTime,
@@ -459,145 +471,150 @@ export default class index extends Component {
                             <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>選咩課ARK版</Text>
                         </View>
 
-                        {/* 篩選課程功能 更新時間展示 */}
-                        <View style={{ marginTop: scale(5), alignItems: 'center' }}>
-                            <Text style={{ fontSize: scale(12), color: black.main }}>
-                                {academicYear}學年, Sem {sem} 開設課程
-                            </Text>
-                            <Text style={{ fontSize: scale(11), color: black.third }}>
-                                更新日期: {updateTime}
-                            </Text>
-                        </View>
-
-                        {/* 篩選列表 */}
-                        <View style={{ alignItems: 'center' }}>
-                            {/* 課程類型選擇 CMRE or GE */}
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    backgroundColor: white,
-                                    padding: scale(5), paddingHorizontal: scale(10),
-                                    margin: scale(5),
-                                    borderRadius: scale(10)
-                                }}>
-                                <Text style={{ fontSize: scale(12), color: black.second }}>課程類型: </Text>
-
-                                {/* CE/RE選項 */}
-                                <TouchableOpacity
-                                    style={{ paddingHorizontal: scale(5) }}
-                                    onPress={() => {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        filterOptions.option = 'CMRE';
-                                        this.setState({ filterOptions })
-                                        this.handleFilterCourse(filterOptions.depaName)
-                                    }}
-                                >
-                                    <Text style={{ color: filterOptions.option === 'CMRE' ? secondThemeColor : black.third, fontSize: scale(12) }}>CM/RE</Text>
-                                </TouchableOpacity>
-
-                                {/* GE選項 */}
-                                <TouchableOpacity
-                                    style={{ paddingHorizontal: scale(5) }}
-                                    onPress={() => {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        filterOptions.option = 'GE';
-                                        this.setState({ filterOptions })
-                                        this.handleFilterCourse(filterOptions.GE)
-                                    }}
-                                >
-                                    <Text style={{ color: filterOptions.option === 'GE' ? secondThemeColor : black.third, fontSize: scale(12) }}>GE</Text>
-                                </TouchableOpacity>
+                        {/* 搜索候選課程 */}
+                        {inputText.length > 2 && this.handleSearchFilterCourse(inputText).length > 0 ? (
+                            <CourseCard data={this.handleSearchFilterCourse(inputText)} mode={'json'} />
+                        ) : (<>
+                            {/* 篩選課程功能 更新時間展示 */}
+                            <View style={{ marginTop: scale(5), alignItems: 'center' }}>
+                                <Text style={{ fontSize: scale(12), color: black.main }}>
+                                    {academicYear}學年, Sem {sem} 開設課程
+                                </Text>
+                                <Text style={{ fontSize: scale(11), color: black.third }}>
+                                    更新日期: {updateTime}
+                                </Text>
                             </View>
 
-                            {filterOptions.option != 'GE' ? (<>
-                                {/* 學院分類選擇，例FST、FSS */}
-                                {offerFacultyList.length > 0 ? (
-                                    <FlatList
-                                        data={offerFacultyList}
-                                        keyExtractor={(item, index) => index}
-                                        numColumns={offerFacultyList.length}
-                                        columnWrapperStyle={offerFacultyList.length > 1 ? { flexWrap: 'wrap' } : null}
-                                        contentContainerStyle={{
-                                            flexDirection: 'row',
-                                            backgroundColor: white,
-                                            padding: scale(5), margin: scale(5), marginHorizontal: scale(10),
-                                            borderRadius: scale(10),
-                                        }}
-                                        renderItem={({ item: itm }) => (
-                                            <TouchableOpacity
-                                                style={{ paddingHorizontal: scale(5), marginVertical: scale(3) }}
-                                                onPress={() => {
-                                                    ReactNativeHapticFeedback.trigger('soft');
-                                                    this.handleFilterFaculty(itm);
-                                                }}
-                                            >
-                                                <Text style={{ color: itm === filterOptions.facultyName ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
-                                            </TouchableOpacity>
-                                        )}
-                                    />
-                                ) : null}
+                            {/* 篩選列表 */}
+                            <View style={{ alignItems: 'center' }}>
+                                {/* 課程類型選擇 CMRE or GE */}
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        backgroundColor: white,
+                                        padding: scale(5), paddingHorizontal: scale(10),
+                                        margin: scale(5),
+                                        borderRadius: scale(10)
+                                    }}>
+                                    <Text style={{ fontSize: scale(12), color: black.second }}>課程類型: </Text>
 
-                                {/* 部門分類選擇，例ECE、EME */}
-                                {offerDepaList.length > 0 ? (
-                                    <View
-                                        style={{
-                                            flexDirection: 'row',
-                                            backgroundColor: white,
-                                            padding: scale(5), margin: scale(5),
-                                            borderRadius: scale(10)
-                                        }}>
-                                        {offerDepaList.map((itm) => {
+                                    {/* CE/RE選項 */}
+                                    <TouchableOpacity
+                                        style={{ paddingHorizontal: scale(5) }}
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger('soft');
+                                            filterOptions.option = 'CMRE';
+                                            this.setState({ filterOptions })
+                                            this.handleFilterCourse(filterOptions.depaName)
+                                        }}
+                                    >
+                                        <Text style={{ color: filterOptions.option === 'CMRE' ? secondThemeColor : black.third, fontSize: scale(12) }}>CM/RE</Text>
+                                    </TouchableOpacity>
+
+                                    {/* GE選項 */}
+                                    <TouchableOpacity
+                                        style={{ paddingHorizontal: scale(5) }}
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger('soft');
+                                            filterOptions.option = 'GE';
+                                            this.setState({ filterOptions })
+                                            this.handleFilterCourse(filterOptions.GE)
+                                        }}
+                                    >
+                                        <Text style={{ color: filterOptions.option === 'GE' ? secondThemeColor : black.third, fontSize: scale(12) }}>GE</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {filterOptions.option != 'GE' ? (<>
+                                    {/* 學院分類選擇，例FST、FSS */}
+                                    {offerFacultyList.length > 0 ? (
+                                        <FlatList
+                                            data={offerFacultyList}
+                                            keyExtractor={(item, index) => index}
+                                            numColumns={offerFacultyList.length}
+                                            columnWrapperStyle={offerFacultyList.length > 1 ? { flexWrap: 'wrap' } : null}
+                                            contentContainerStyle={{
+                                                flexDirection: 'row',
+                                                backgroundColor: white,
+                                                padding: scale(5), margin: scale(5), marginHorizontal: scale(10),
+                                                borderRadius: scale(10),
+                                            }}
+                                            renderItem={({ item: itm }) => (
+                                                <TouchableOpacity
+                                                    style={{ paddingHorizontal: scale(5), marginVertical: scale(3) }}
+                                                    onPress={() => {
+                                                        ReactNativeHapticFeedback.trigger('soft');
+                                                        this.handleFilterFaculty(itm);
+                                                    }}
+                                                >
+                                                    <Text style={{ color: itm === filterOptions.facultyName ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        />
+                                    ) : null}
+
+                                    {/* 部門分類選擇，例ECE、EME */}
+                                    {offerDepaList.length > 0 ? (
+                                        <View
+                                            style={{
+                                                flexDirection: 'row',
+                                                backgroundColor: white,
+                                                padding: scale(5), margin: scale(5),
+                                                borderRadius: scale(10)
+                                            }}>
+                                            {offerDepaList.map((itm) => {
+                                                return (
+                                                    <TouchableOpacity style={{ paddingHorizontal: scale(5) }}
+                                                        onPress={() => {
+                                                            ReactNativeHapticFeedback.trigger('soft');
+                                                            filterOptions.depaName = itm;
+                                                            this.setState({ filterOptions })
+                                                            this.handleFilterCourse(itm);
+                                                        }}
+                                                    >
+                                                        <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            })}
+                                        </View>
+                                    ) : null}
+
+                                    {/* 展示學系的中文 */}
+                                    <Text style={{ fontSize: scale(11), color: black.third }}>
+                                        {unitMap[filterOptions.facultyName]}
+                                        {offerDepaList
+                                            && offerDepaList.length > 0
+                                            && filterOptions.depaName in depaMap ?
+                                            (' - ' + depaMap[filterOptions.depaName]) : null}
+                                    </Text>
+                                </>) : (
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        backgroundColor: white,
+                                        padding: scale(5), margin: scale(5),
+                                        borderRadius: scale(10)
+                                    }}>
+                                        {offerGEList.length > 0 && offerGEList.map(itm => {
                                             return (
                                                 <TouchableOpacity style={{ paddingHorizontal: scale(5) }}
                                                     onPress={() => {
                                                         ReactNativeHapticFeedback.trigger('soft');
-                                                        filterOptions.depaName = itm;
+                                                        filterOptions.GE = itm;
                                                         this.setState({ filterOptions })
                                                         this.handleFilterCourse(itm);
                                                     }}
                                                 >
-                                                    <Text style={{ color: filterOptions.depaName === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
+                                                    <Text style={{ color: filterOptions.GE === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
                                                 </TouchableOpacity>
                                             )
                                         })}
                                     </View>
-                                ) : null}
+                                )}
+                            </View>
 
-                                {/* 展示學系的中文 */}
-                                <Text style={{ fontSize: scale(11), color: black.third }}>
-                                    {unitMap[filterOptions.facultyName]}
-                                    {offerDepaList
-                                        && offerDepaList.length > 0
-                                        && filterOptions.depaName in depaMap ?
-                                        (' - ' + depaMap[filterOptions.depaName]) : null}
-                                </Text>
-                            </>) : (
-                                <View style={{
-                                    flexDirection: 'row',
-                                    backgroundColor: white,
-                                    padding: scale(5), margin: scale(5),
-                                    borderRadius: scale(10)
-                                }}>
-                                    {offerGEList.length > 0 && offerGEList.map(itm => {
-                                        return (
-                                            <TouchableOpacity style={{ paddingHorizontal: scale(5) }}
-                                                onPress={() => {
-                                                    ReactNativeHapticFeedback.trigger('soft');
-                                                    filterOptions.GE = itm;
-                                                    this.setState({ filterOptions })
-                                                    this.handleFilterCourse(itm);
-                                                }}
-                                            >
-                                                <Text style={{ color: filterOptions.GE === itm ? secondThemeColor : black.third, fontSize: scale(12) }}>{itm}</Text>
-                                            </TouchableOpacity>
-                                        )
-                                    })}
-                                </View>
-                            )}
-                        </View>
-
-                        {/* 渲染篩選出的課程 */}
-                        {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} /> : null}
+                            {/* 渲染篩選出的課程 */}
+                            {filterCourseList.length > 0 ? <CourseCard data={filterCourseList} mode={'json'} /> : null}
+                        </>)}
 
                         {/* 官網引流 */}
                         <View style={{
