@@ -477,7 +477,7 @@ export default class index extends Component {
                         ) : (<>
                             {/* 篩選課程功能 更新時間展示 */}
                             <View style={{ marginTop: scale(5), alignItems: 'center' }}>
-                                <Text style={{ fontSize: scale(12), color: black.main }}>
+                                <Text style={{ fontSize: scale(12), color: black.third }}>
                                     {academicYear}學年, Sem {sem} 開設課程
                                 </Text>
                                 <Text style={{ fontSize: scale(11), color: black.third }}>
@@ -496,7 +496,7 @@ export default class index extends Component {
                                         margin: scale(5),
                                         borderRadius: scale(10)
                                     }}>
-                                    <Text style={{ fontSize: scale(12), color: black.second }}>課程類型: </Text>
+                                    <Text style={{ fontSize: scale(12), color: black.third }}>課程類型: </Text>
 
                                     {/* CE/RE選項 */}
                                     <TouchableOpacity
