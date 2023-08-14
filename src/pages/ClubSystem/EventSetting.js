@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -11,12 +11,12 @@ import {
     Image,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../utils/uiMap';
-import {BASE_URI, BASE_HOST, POST, GET} from '../../utils/pathMap';
+import { COLOR_DIY } from '../../utils/uiMap';
+import { BASE_URI, BASE_HOST, POST, GET } from '../../utils/pathMap';
 import Header from '../../components/Header';
 import DialogDIY from '../../components/DialogDIY';
 import Loading from '../../components/Loading';
-import {handleImageSelect} from '../../utils/fileKits';
+import { handleImageSelect } from '../../utils/fileKits';
 
 import {
     Incubator,
@@ -25,25 +25,25 @@ import {
     RadioGroup,
     RadioButton,
 } from 'react-native-ui-lib';
-const {TextField} = Incubator;
+const { TextField } = Incubator;
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {FlatGrid} from 'react-native-super-grid';
+import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import FastImage from 'react-native-fast-image';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ImgComp from 'react-native-compressor';
 
-import {pxToDp} from '../../utils/stylesKits';
+import { pxToDp } from '../../utils/stylesKits';
 
-const {black, themeColor, white, bg_color, viewShadow} = COLOR_DIY;
+const { black, themeColor, white, bg_color, viewShadow } = COLOR_DIY;
 
 const floatingPlaceholderColor = {
     focus: themeColor,
     default: black.main,
 };
-const floatingPlaceholderStyle = {fontSize: pxToDp(15)};
+const floatingPlaceholderStyle = { fontSize: pxToDp(15) };
 
 let cover_image_file = {};
 let add_relate_image = [];
@@ -84,70 +84,68 @@ class EventSetting extends Component {
     componentDidMount() {
         // 檢查是create活動還是edit活動
         let mode = this.props.route.params.mode;
-        this.setState({mode});
+        this.setState({ mode });
         if (mode == 'edit') {
             let eventData = this.props.route.params.eventData;
             this.getData(eventData._id);
         } else {
-            this.setState({isLoading: false});
+            this.setState({ isLoading: false });
         }
     }
 
     // 獲取該活動信息
     async getData(eventID) {
-        await axios
-            .get(BASE_URI + GET.EVENT_INFO_EVENT_ID + eventID)
-            .then(res => {
-                let json = res.data;
-                if (json.message == 'success') {
-                    let eventData = json.content;
-                    eventData.cover_image_url =
-                        BASE_HOST + eventData.cover_image_url;
-                    // 渲染服務器已存的照片
-                    if (
-                        eventData.relate_image_url &&
-                        eventData.relate_image_url.length > 0
-                    ) {
-                        let addHostArr = [];
-                        eventData.relate_image_url.map(itm => {
-                            addHostArr.push(BASE_HOST + itm);
-                        });
-                        eventData.relate_image_url = addHostArr;
-                        let imgArr = eventData.relate_image_url;
-                        // 不夠4張則補充
-                        if (imgArr.length <= 4) {
-                            let pushArr = new Array(4 - imgArr.length).fill('');
-                            let arr = JSON.parse(JSON.stringify(imgArr));
-                            arr.push(...pushArr);
-                            this.setState({relateImgUrl: arr});
-                        } else {
-                            this.setState({relateImgUrl: imgArr});
+        try {
+            await axios.get(BASE_URI + GET.EVENT_INFO_EVENT_ID + eventID)
+                .then(res => {
+                    let json = res.data;
+                    if (json.message == 'success') {
+                        let eventData = json.content;
+                        eventData.cover_image_url =
+                            BASE_HOST + eventData.cover_image_url;
+                        // 渲染服務器已存的照片
+                        if (eventData.relate_image_url &&
+                            eventData.relate_image_url.length > 0
+                        ) {
+                            let addHostArr = [];
+                            eventData.relate_image_url.map(itm => {
+                                addHostArr.push(BASE_HOST + itm);
+                            });
+                            eventData.relate_image_url = addHostArr;
+                            let imgArr = eventData.relate_image_url;
+                            // 不夠4張則補充
+                            if (imgArr.length <= 4) {
+                                let pushArr = new Array(4 - imgArr.length).fill('');
+                                let arr = JSON.parse(JSON.stringify(imgArr));
+                                arr.push(...pushArr);
+                                this.setState({ relateImgUrl: arr });
+                            } else {
+                                this.setState({ relateImgUrl: imgArr });
+                            }
                         }
+                        this.setState({
+                            eventData,
+                            title: eventData.title,
+                            link: eventData.type == 'ACTIVITY' ? '' : eventData.link,
+                            place: 'location' in eventData ? eventData.location : '',
+                            introText: eventData.introduction,
+                            coverImgUrl: eventData.cover_image_url,
+                            allowFollow: eventData.can_follow,
+                            startDate: new Date(
+                                String(eventData.startdatetime).replace(' ', 'T'),
+                            ),
+                            finishDate: new Date(
+                                String(eventData.enddatetime).replace(' ', 'T'),
+                            ),
+                            type: eventData.type.toLowerCase(),
+                        });
                     }
-                    this.setState({
-                        eventData,
-                        title: eventData.title,
-                        place: eventData.place,
-                        link:
-                            eventData.type == 'ACTIVITY' ? '' : eventData.link,
-                        place: eventData.location,
-                        introText: eventData.introduction,
-                        coverImgUrl: eventData.cover_image_url,
-                        allowFollow: eventData.can_follow,
-                        startDate: new Date(
-                            String(eventData.startdatetime).replace(' ', 'T'),
-                        ),
-                        finishDate: new Date(
-                            String(eventData.enddatetime).replace(' ', 'T'),
-                        ),
-                        type: eventData.type.toLowerCase(),
-                        isLoading: false,
-                    });
-                }
-            })
-            .catch(err => {
-                console.error(err);
-            });
+                })
+        } catch (err) {
+            console.error(err);
+        } finally {
+            this.setState({ isLoading: false })
+        }
     }
 
     componentWillUnmount() {
@@ -172,7 +170,7 @@ class EventSetting extends Component {
 
     // 圖片選擇
     async handleSelect(index, type) {
-        const {eventData} = this.state;
+        const { eventData } = this.state;
         let imageUrl = '';
         let imageObj = {};
         let cancel = true;
@@ -205,20 +203,20 @@ class EventSetting extends Component {
             if (type == 'cover') {
                 // 如果選擇的是海報圖片
                 cover_image_file = imageObj;
-                this.setState({coverImgUrl: imageUrl});
+                this.setState({ coverImgUrl: imageUrl });
             } else if (!cancel) {
                 // 如果選擇的是其他相關圖片
                 let relateImgUrl = this.state.relateImgUrl;
                 relateImgUrl.splice(index, 1, imageUrl);
                 add_relate_image.push(imageObj);
-                this.setState({relateImgUrl});
+                this.setState({ relateImgUrl });
             }
         }
     }
 
     // 圖片刪除
     handleImageDelete = (index, needDelete, type) => {
-        const {mode, eventData} = this.state;
+        const { mode, eventData } = this.state;
         needDelete = mode == 'create' ? false : needDelete;
         let imageUrlArr = this.state.relateImgUrl;
         if (type != 'cover') {
@@ -240,12 +238,12 @@ class EventSetting extends Component {
             }
             imageUrlArr.splice(index, 1);
             imageUrlArr.push('');
-            this.setState({relateImgUrl: imageUrlArr});
+            this.setState({ relateImgUrl: imageUrlArr });
         }
     };
 
     renderImageSelectorItem = (index, type) => {
-        const {mode, eventData, relateImgUrl} = this.state;
+        const { mode, eventData, relateImgUrl } = this.state;
         let imageUrlArr = [];
         if (type == 'cover') {
             imageUrlArr = [this.state.coverImgUrl];
@@ -258,7 +256,7 @@ class EventSetting extends Component {
         if (mode == 'edit') {
             needDelete =
                 'relate_image_url' in eventData &&
-                eventData.relate_image_url.length == 0
+                    eventData.relate_image_url.length == 0
                     ? false
                     : true;
         }
@@ -304,12 +302,12 @@ class EventSetting extends Component {
                             uri: imageUrlArr[index],
                             // cache: FastImage.cacheControl.web,
                         }}
-                        style={{width: '100%', height: '100%'}}
+                        style={{ width: '100%', height: '100%' }}
                         onLoadStart={() => {
-                            this.setState({imgLoading: true});
+                            this.setState({ imgLoading: true });
                         }}
                         onLoad={() => {
-                            this.setState({imgLoading: false});
+                            this.setState({ imgLoading: false });
                         }}>
                         {this.state.imgLoading ? (
                             <View
@@ -351,7 +349,7 @@ class EventSetting extends Component {
                     color: this.state.borderColor,
                 }}
                 value={this.state.introText}
-                onChangeText={introText => this.setState({introText})}
+                onChangeText={introText => this.setState({ introText })}
                 onBlur={() => {
                     this.setState({
                         borderColor: black.third,
@@ -370,7 +368,7 @@ class EventSetting extends Component {
     renderExpandHeader1 = () => {
         return (
             <View
-                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text
                     style={{
                         ...styles.inputTitle,
@@ -466,7 +464,7 @@ class EventSetting extends Component {
             mode,
             eventData,
         } = this.state;
-        this.setState({isLoading: true, submitChoice: false});
+        this.setState({ isLoading: true, submitChoice: false });
 
         let data = new FormData();
         if (mode == 'edit') {
@@ -562,8 +560,8 @@ class EventSetting extends Component {
 
     // 刪除活動
     deleteEvent = async () => {
-        this.setState({isLoading: true, submitChoice: false});
-        const {eventData} = this.state;
+        this.setState({ isLoading: true, submitChoice: false });
+        const { eventData } = this.state;
         let data = new FormData();
         data.append('id', eventData._id);
 
@@ -605,21 +603,22 @@ class EventSetting extends Component {
             isStartDatePickerVisible,
             isEndDatePickerVisible,
         } = this.state;
+        const canSubmit = this.checkInfoOK();
 
         return (
-            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header title={'活動資訊編輯'} />
 
                 {!isLoading ? (
                     <KeyboardAwareScrollView
-                        contentContainerStyle={{marginHorizontal: pxToDp(10)}}>
+                        contentContainerStyle={{ marginHorizontal: pxToDp(10) }}>
                         {/* 活動類型選擇 */}
                         {!(mode == 'edit') && (
                             <View>
                                 <RadioGroup
                                     initialValue={type}
                                     onValueChange={type =>
-                                        this.setState({type})
+                                        this.setState({ type })
                                     }
                                     style={{
                                         flexDirection: 'row',
@@ -639,7 +638,7 @@ class EventSetting extends Component {
                                     />
                                 </RadioGroup>
                                 {/* type選擇的提示說明 */}
-                                <View style={{marginTop: pxToDp(5)}}>
+                                <View style={{ marginTop: pxToDp(5) }}>
                                     {type == 'activity' ? (
                                         <Text
                                             style={{
@@ -670,7 +669,7 @@ class EventSetting extends Component {
                             floatingPlaceholderColor={floatingPlaceholderColor}
                             floatingPlaceholderStyle={floatingPlaceholderStyle}
                             hint={'e.g. Python爬蟲工作坊'}
-                            dynamicFieldStyle={(context: FieldContextType) => {
+                            dynamicFieldStyle={(context) => {
                                 return {
                                     borderBottomWidth: pxToDp(1),
                                     paddingBottom: pxToDp(4),
@@ -681,7 +680,7 @@ class EventSetting extends Component {
                             }}
                             color={black.third}
                             value={this.state.title}
-                            onChangeText={title => this.setState({title})}
+                            onChangeText={title => this.setState({ title })}
                             showCharCounter
                             maxLength={50}
                         />
@@ -699,9 +698,7 @@ class EventSetting extends Component {
                                     floatingPlaceholderStyle
                                 }
                                 hint={'e.g. https://ark.boxz.dev/'}
-                                dynamicFieldStyle={(
-                                    context: FieldContextType,
-                                ) => {
+                                dynamicFieldStyle={(context) => {
                                     return {
                                         borderBottomWidth: pxToDp(1),
                                         paddingBottom: pxToDp(4),
@@ -712,7 +709,7 @@ class EventSetting extends Component {
                                 }}
                                 color={black.third}
                                 value={this.state.link}
-                                onChangeText={link => this.setState({link})}
+                                onChangeText={link => this.setState({ link })}
                             />
                         ) : (
                             // 活動地點輸入框
@@ -727,9 +724,7 @@ class EventSetting extends Component {
                                     floatingPlaceholderStyle
                                 }
                                 hint={'e.g. 圖書館4016、E6大堂、Zoom'}
-                                dynamicFieldStyle={(
-                                    context: FieldContextType,
-                                ) => {
+                                dynamicFieldStyle={(context) => {
                                     return {
                                         borderBottomWidth: 1,
                                         paddingBottom: 4,
@@ -740,14 +735,14 @@ class EventSetting extends Component {
                                 }}
                                 color={black.third}
                                 value={this.state.place}
-                                onChangeText={place => this.setState({place})}
+                                onChangeText={place => this.setState({ place })}
                                 showCharCounter
                                 maxLength={30}
                             />
                         )}
 
                         {/* 活動時間 */}
-                        <View style={{marginTop: pxToDp(10)}}>
+                        <View style={{ marginTop: pxToDp(10) }}>
                             <DateTimePickerModal
                                 isVisible={
                                     isStartDatePickerVisible ||
@@ -845,9 +840,9 @@ class EventSetting extends Component {
 
                         {/* 活動詳情說明 */}
                         {type == 'activity' && (
-                            <View style={{marginTop: pxToDp(10)}}>
+                            <View style={{ marginTop: pxToDp(10) }}>
                                 <Text
-                                    style={{color: black.third, fontSize: 12}}>
+                                    style={{ color: black.third, fontSize: 12 }}>
                                     *
                                     將問卷等Link直接寫到活動詳情，方便同學直接跳轉！
                                 </Text>
@@ -856,7 +851,7 @@ class EventSetting extends Component {
                         )}
 
                         {/* 封面圖片 */}
-                        <View style={{marginTop: pxToDp(20)}}>
+                        <View style={{ marginTop: pxToDp(20) }}>
                             <Text style={styles.inputTitle}>
                                 設定封面圖片 *
                             </Text>
@@ -865,7 +860,7 @@ class EventSetting extends Component {
 
                         {/* 其他圖片 */}
                         {type == 'activity' && (
-                            <View style={{marginTop: pxToDp(20)}}>
+                            <View style={{ marginTop: pxToDp(20) }}>
                                 <Text style={styles.inputTitle}>
                                     設定其他圖片
                                 </Text>
@@ -874,7 +869,7 @@ class EventSetting extends Component {
                                     itemDimension={pxToDp(50)}
                                     spacing={pxToDp(10)}
                                     data={this.state.relateImgUrl}
-                                    renderItem={({_, index}) =>
+                                    renderItem={({ _, index }) =>
                                         this.renderImageSelectorItem(
                                             index,
                                             'relate',
@@ -887,7 +882,7 @@ class EventSetting extends Component {
                         )}
 
                         {/* 允許Follow */}
-                        {type == 'activity' && false && (
+                        {false && type == 'activity' && (
                             <View
                                 style={{
                                     flexDirection: 'row',
@@ -899,10 +894,10 @@ class EventSetting extends Component {
                                 </Text>
                                 <Switch
                                     value={this.state.allowFollow}
-                                    onValueChange={(allowFollow: boolean) =>
-                                        this.setState({allowFollow})
+                                    onValueChange={(allowFollow) =>
+                                        this.setState({ allowFollow })
                                     }
-                                    style={{marginLeft: pxToDp(5)}}
+                                    style={{ marginLeft: pxToDp(5) }}
                                     onColor={themeColor}
                                 />
                             </View>
@@ -911,8 +906,9 @@ class EventSetting extends Component {
                         {/* 發佈按鈕 */}
                         <TouchableOpacity
                             activeOpacity={0.8}
+                            disabled={!canSubmit}
                             onPress={() => {
-                                if (this.checkInfoOK()) {
+                                if (canSubmit) {
                                     pressDelete = false;
                                     this.setState({
                                         submitChoice: true,
@@ -924,9 +920,10 @@ class EventSetting extends Component {
                             }}
                             style={{
                                 ...styles.submitButton,
+                                backgroundColor: canSubmit ? themeColor : black.third,
                                 marginVertical: pxToDp(30),
                             }}>
-                            <Text style={{...styles.submitButtonText}}>
+                            <Text style={{ ...styles.submitButtonText }}>
                                 {this.state.mode == 'create'
                                     ? '發佈'
                                     : '保存修改'}
@@ -948,7 +945,7 @@ class EventSetting extends Component {
                                     backgroundColor: COLOR_DIY.unread,
                                     marginBottom: pxToDp(50),
                                 }}>
-                                <Text style={{...styles.submitButtonText}}>
+                                <Text style={{ ...styles.submitButtonText }}>
                                     刪除
                                 </Text>
                             </TouchableOpacity>
@@ -972,7 +969,7 @@ class EventSetting extends Component {
                     handleConfirm={
                         pressDelete ? this.deleteEvent : this.postNewInfo
                     }
-                    handleCancel={() => this.setState({submitChoice: false})}
+                    handleCancel={() => this.setState({ submitChoice: false })}
                 />
             </View>
         );
