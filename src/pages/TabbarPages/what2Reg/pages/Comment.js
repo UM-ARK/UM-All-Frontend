@@ -311,7 +311,6 @@ export default class Comment extends Component {
 
     render() {
         const { res, isLoading } = this.state;
-        console.log(res);
         const {
             name,
             num,
@@ -348,7 +347,7 @@ export default class Comment extends Component {
                                 color: black.main,
                                 textAlign: 'center',
                             }} selectable >
-                                {res.course_info.New_code}
+                                {'course_info' in res ? res.course_info.New_code : res.New_code}
                             </Text>
                             <Text style={{
                                 fontSize: scale(15),
