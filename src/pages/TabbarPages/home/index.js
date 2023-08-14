@@ -593,7 +593,16 @@ class HomeScreen extends Component {
                         <HomeCard>
                             <Text
                                 style={{
-                                    color: black.third,
+                                    color: themeColor,
+                                    marginTop: scale(2),
+                                    alignSelf: 'center',
+                                    textAlign: 'center',
+                                }}>
+                                {`🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥`}
+                            </Text>
+                            <Text
+                                style={{
+                                    color: themeColor,
                                     marginTop: scale(5),
                                     fontWeight: 'bold',
                                 }}>
