@@ -66,8 +66,8 @@ export default class Prof extends Component {
                 ) : (
                     <ScrollView>
                         {/* 教授姓名 */}
-                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ fontSize: scale(18), color: black.main }}>{prof_name}</Text>
+                        <View style={{ alignItems: 'center', justifyContent: 'center', marginHorizontal: scale(5) }}>
+                            <Text style={{ fontSize: scale(18), color: black.main, textAlign: 'center' }}>{prof_name}</Text>
                         </View>
                         {/* 渲染負責授課課程 */}
                         {course_info

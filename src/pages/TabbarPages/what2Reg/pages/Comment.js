@@ -156,7 +156,6 @@ export default class Comment extends Component {
                                 padding: scale(10),
                                 borderRadius: scale(10),
                                 backgroundColor: white,
-                                ...viewShadow,
                             }}
                             >
                                 {content.length > 0 ? (

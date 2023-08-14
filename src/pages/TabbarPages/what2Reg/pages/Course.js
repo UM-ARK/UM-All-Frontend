@@ -108,9 +108,8 @@ export default class Course extends Component {
                             style={{
                                 marginHorizontal: scale(5), marginVertical: scale(5),
                                 borderRadius: scale(10),
-                                backgroundColor: COLOR_DIY.bg_color,
+                                backgroundColor: white,
                                 padding: scale(10),
-                                ...viewShadow
                             }}
                             onPress={() => {
                                 this.jumpToProf({

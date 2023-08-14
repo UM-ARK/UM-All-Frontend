@@ -73,11 +73,11 @@ export default class CourseCard extends Component {
                     return (
                         <TouchableOpacity
                             style={{
-                                backgroundColor: COLOR_DIY.bg_color,
+                                backgroundColor: COLOR_DIY.white,
                                 borderRadius: scale(10),
                                 margin: scale(5),
                                 padding: scale(10), paddingVertical: scale(5),
-                                ...viewShadow,
+                                // ...viewShadow,
                             }}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
