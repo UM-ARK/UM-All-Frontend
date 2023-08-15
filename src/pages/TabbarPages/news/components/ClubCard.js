@@ -50,7 +50,6 @@ class EventCard extends Component {
                     justifyContent: 'space-around',
                     alignItems: 'center',
                     paddingVertical: scale(8),
-                    ...viewShadow,
                 }}
                 activeOpacity={0.8}
                 onPress={this.handleJumpToDetail}>

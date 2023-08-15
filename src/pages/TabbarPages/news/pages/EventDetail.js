@@ -612,7 +612,7 @@ class EventDetail extends Component {
                                     // 增加陰影
                                     marginBottom: scale(8),
                                     marginTop: scale(10),
-                                    ...COLOR_DIY.viewShadow,
+                                    // ...COLOR_DIY.viewShadow,
                                 }}>
                                 {/* 卡片標題 */}
                                 <View
@@ -666,7 +666,7 @@ class EventDetail extends Component {
                                 // 增加陰影
                                 marginBottom: scale(8),
                                 marginTop: scale(10),
-                                ...COLOR_DIY.viewShadow,
+                                // ...COLOR_DIY.viewShadow,
                             }}
                             activeOpacity={0.7}
                             onPress={() => {

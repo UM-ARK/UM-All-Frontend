@@ -125,7 +125,6 @@ class EventCard extends Component {
                     backgroundColor: white,
                     borderRadius: BORDER_RADIUS,
                     margin: scale(5),
-                    ...viewShadow,
                 }}
                 activeOpacity={0.9}
                 onPress={this.handleJumpToDetail}>

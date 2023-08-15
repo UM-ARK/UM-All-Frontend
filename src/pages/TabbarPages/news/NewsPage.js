@@ -319,6 +319,7 @@ class NewsPage extends Component {
                             borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
+                            ...viewShadow
                         }}>
                         <Ionicons
                             name={'chevron-up'}
