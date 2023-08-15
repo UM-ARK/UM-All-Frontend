@@ -630,12 +630,12 @@ class Index extends Component {
             <View
                 style={{
                     flex: 1,
-                    backgroundColor: COLOR_DIY.bg_color,
+                    backgroundColor: COLOR_DIY.white,
                     borderRadius: scale(10),
                     marginHorizontal: scale(10),
                     marginTop: scale(10),
                     // 增加陰影
-                    ...COLOR_DIY.viewShadow,
+                    // ...COLOR_DIY.viewShadow,
                 }}>
                 {/* 服務分類標題 */}
                 <View
@@ -758,7 +758,7 @@ class Index extends Component {
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     centerComponent={{
-                        text: '（づ￣3￣）づ',
+                        text: '功能總覽（づ￣3￣）づ',
                         style: {
                             color: COLOR_DIY.black.main,
                             fontSize: scale(15),
@@ -770,7 +770,11 @@ class Index extends Component {
                     }}
                 />
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <View style={{ paddingHorizontal: scale(20) }}>
+                    {this.state.functionArr.map(fn_card => {
+                        return this.GetFunctionCard(fn_card.title, fn_card.fn);
+                    })}
+
+                    <View style={{ marginHorizontal: scale(20), marginVertical: scale(10) }}>
                         <Text
                             style={{
                                 alignSelf: 'center',
@@ -786,12 +790,6 @@ class Index extends Component {
                             長按圖標可複製對應的link ~
                         </Text>
                     </View>
-
-                    {this.state.functionArr.map(fn_card => {
-                        return this.GetFunctionCard(fn_card.title, fn_card.fn);
-                    })}
-
-                    <View style={{ marginBottom: scale(100) }} />
                 </ScrollView>
 
                 {/* 彈出層提示 */}
