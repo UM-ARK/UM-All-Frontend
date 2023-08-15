@@ -645,8 +645,7 @@ class EventSetting extends Component {
                                                 color: black.third,
                                                 alignSelf: 'flex-start',
                                             }}>
-                                            *
-                                            點擊活動卡片會進入詳情頁，允許其他人follow
+                                            * 點擊活動卡片會進入ARK的詳情頁，可以在活動詳情處填入問卷、報名link，讓同學一鍵直達
                                         </Text>
                                     ) : (
                                         <Text
@@ -654,7 +653,7 @@ class EventSetting extends Component {
                                                 color: black.third,
                                                 alignSelf: 'flex-end',
                                             }}>
-                                            * 點擊活動卡片會跳轉到您填寫的網址
+                                            * 點擊活動卡片會跳轉到您填寫的網址，適合公眾號推文、IG Post
                                         </Text>
                                     )}
                                 </View>
@@ -787,7 +786,7 @@ class EventSetting extends Component {
                                     });
                                 }}>
                                 <Text style={styles.inputTitle}>
-                                    {'開始時間 *  '}
+                                    {'設定開始時間 *  '}
                                     <Text
                                         style={{
                                             fontSize: pxToDp(15),
@@ -819,7 +818,7 @@ class EventSetting extends Component {
                                     })
                                 }>
                                 <Text style={styles.inputTitle}>
-                                    {'結束時間 *  '}
+                                    {'設定結束時間 *  '}
                                     <Text
                                         style={{
                                             fontSize: pxToDp(15),
@@ -862,7 +861,7 @@ class EventSetting extends Component {
                         {type == 'activity' && (
                             <View style={{ marginTop: pxToDp(20) }}>
                                 <Text style={styles.inputTitle}>
-                                    設定其他圖片
+                                    設定其他圖片(選填)
                                 </Text>
                                 <FlatGrid
                                     maxItemsPerRow={2}
