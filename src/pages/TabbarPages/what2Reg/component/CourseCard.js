@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Linking, } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
+import { WHAT_2_REG } from '../../../../utils/pathMap';
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
@@ -83,11 +84,13 @@ export default class CourseCard extends Component {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 if (this.props.prof_info) {
                                     // 進入搜索特定教授的課程模式，進入評論詳情頁
-                                    this.context.navigate('What2RegComment', {
-                                        New_code: item['New_code'],
-                                        prof_name: this.props.prof_info.name,
-                                        prof_info: this.props.prof_info,
-                                    })
+                                    // this.context.navigate('What2RegComment', {
+                                    //     New_code: item['New_code'],
+                                    //     prof_name: this.props.prof_info.name,
+                                    //     prof_info: this.props.prof_info,
+                                    // })
+                                    const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(item.New_code) + '/' + encodeURIComponent(this.props.prof_info.name)
+                                    Linking.openURL(URI);
                                 }
                                 else {
                                     // 進入搜索課程代號模式

@@ -4,13 +4,14 @@ import {
     View,
     ScrollView,
     TouchableOpacity,
-    FlatList
+    FlatList,
+    Linking,
 } from 'react-native'
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
-import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../../utils/pathMap";
 
 import axios from 'axios';
 import { scale } from "react-native-size-matters";
@@ -57,9 +58,8 @@ export default class Course extends Component {
 
     jumpToProf = (data) => {
         ReactNativeHapticFeedback.trigger('soft');
-
-        const res = data;
-        this.props.navigation.navigate('What2RegComment', res)
+        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(data.New_code) + '/' + encodeURIComponent(data.prof_name)
+        Linking.openURL(URI);
     }
 
     // 渲染可選section
