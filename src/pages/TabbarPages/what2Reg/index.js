@@ -750,17 +750,17 @@ export default class index extends Component {
                             <Text style={{ fontSize: scale(9), color: black.third }}>
                                 更新日期: {offerCourse.updateTime}
                             </Text>
+                            <Text style={{ fontSize: scale(9), color: themeColor }}>
+                                記得更新APP以獲得最新數據~
+                            </Text>
                         </View>
 
-                        {/* 官網引流 */}
                         <View style={{
                             margin: scale(10), marginBottom: scale(50),
                             padding: scale(10),
                             alignItems: 'center'
                         }}>
                             <Text style={{ color: black.third, fontSize: scale(12) }}>知識無價，評論只供參考~</Text>
-                            <Text style={{ color: black.third, fontSize: scale(12) }} selectable>Power by UMHelper <Text style={{ color: themeColor }}>umeh.top</Text></Text>
-                            <Text style={{ color: black.third, fontSize: scale(12) }}>Redesign by ARK</Text>
                         </View>
                     </ScrollView>
 

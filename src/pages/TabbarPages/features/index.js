@@ -346,7 +346,7 @@ class Index extends Component {
                         icon_name: 'database-search',
                         fn_name: '選咩課',
                         needLogin: false,
-                        go_where: 'Webview',
+                        go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: WHAT_2_REG,
@@ -481,24 +481,24 @@ class Index extends Component {
             {
                 title: '生活服務',
                 fn: [
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'coffee-outline',
-                        fn_name: '澳大論壇',
-                        needLogin: false,
-                        go_where: 'Webview',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_WHOLE,
-                            title: '澳大論壇',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
+                    // {
+                    //     icon_type: iconTypes.materialCommunityIcons,
+                    //     icon_name: 'coffee-outline',
+                    //     fn_name: '澳大論壇',
+                    //     needLogin: false,
+                    //     go_where: 'Webview',
+                    //     webview_param: {
+                    //         // import pathMap的鏈接進行跳轉
+                    //         url: UM_WHOLE,
+                    //         title: '澳大論壇',
+                    //         // 標題顏色，默認為black.main
+                    //         // text_color: '#fff',
+                    //         // 標題背景顏色，默認為bg_color
+                    //         // bg_color_diy: '#23407d',
+                    //         // 狀態欄字體是否黑色，默認true
+                    //         // isBarStyleBlack: false,
+                    //     },
+                    // },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',

@@ -115,7 +115,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: '選課',
+                            title: '搵課',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')

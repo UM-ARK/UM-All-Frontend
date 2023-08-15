@@ -225,43 +225,45 @@ export default class AboutPage extends Component {
                     </HomeCard>
 
                     {/* 請喝咖啡 */}
-                    <HomeCard>
-                        <Text style={{ color: black.third }}>
-                            {`為愛發電ing`}
-                        </Text>
-                        <Text style={{ color: black.third }}>
-                            {`請開發者團隊喝杯咖啡QAQ`}
-                        </Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <View>
-                                <Image
-                                    source={require('../../../static/img/donate/boc.jpg')}
-                                    style={{
-                                        width: IMG_WIDTH,
-                                        height: IMG_WIDTH,
-                                    }}
-                                />
-                                <Text style={{ color: black.third, alignSelf: 'center' }}>
-                                    {`中銀`}
-                                </Text>
+                    {false && (
+                        <HomeCard>
+                            <Text style={{ color: black.third }}>
+                                {`為愛發電ing`}
+                            </Text>
+                            <Text style={{ color: black.third }}>
+                                {`請開發者團隊喝杯咖啡QAQ`}
+                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                <View>
+                                    <Image
+                                        source={require('../../../static/img/donate/boc.jpg')}
+                                        style={{
+                                            width: IMG_WIDTH,
+                                            height: IMG_WIDTH,
+                                        }}
+                                    />
+                                    <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                        {`中銀`}
+                                    </Text>
+                                </View>
+                                <View>
+                                    <Image
+                                        source={require('../../../static/img/donate/mpay.jpg')}
+                                        style={{
+                                            width: IMG_WIDTH - 15,
+                                            height: IMG_WIDTH - 15,
+                                        }}
+                                    />
+                                    <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                        {`Mpay`}
+                                    </Text>
+                                </View>
                             </View>
-                            <View>
-                                <Image
-                                    source={require('../../../static/img/donate/mpay.jpg')}
-                                    style={{
-                                        width: IMG_WIDTH - 15,
-                                        height: IMG_WIDTH - 15,
-                                    }}
-                                />
-                                <Text style={{ color: black.third, alignSelf: 'center' }}>
-                                    {`Mpay`}
-                                </Text>
-                            </View>
-                        </View>
-                        <Text style={{ color: black.third, alignSelf: 'center' }}>
-                            {`如有捐贈，請留下您的暱稱和對本軟件的評價，我們可以在版本更新中留下您的足跡！`}
-                        </Text>
-                    </HomeCard>
+                            <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                {`如有捐贈，請留下您的暱稱和對本軟件的評價，我們可以在版本更新中留下您的足跡！`}
+                            </Text>
+                        </HomeCard>
+                    )}
                 </ScrollView>
             </View>
         );
