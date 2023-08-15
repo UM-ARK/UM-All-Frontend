@@ -9,7 +9,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { NavigationContext } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
+const { themeColor, black, } = COLOR_DIY;
 
 export default class CourseCard extends Component {
     static contextType = NavigationContext;
@@ -78,7 +78,6 @@ export default class CourseCard extends Component {
                                 borderRadius: scale(10),
                                 margin: scale(5),
                                 padding: scale(10), paddingVertical: scale(5),
-                                // ...viewShadow,
                             }}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
@@ -144,6 +143,8 @@ export default class CourseCard extends Component {
                 }}
                 key={data.length}
                 keyExtractor={(item, index) => index}
+                initialNumToRender={10}
+                windowSize={21}
             />
         );
     }

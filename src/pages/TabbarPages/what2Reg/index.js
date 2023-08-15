@@ -119,21 +119,17 @@ export default class index extends Component {
             offerDepaList: [],
             offerGEList: [],
             filterCourseList: [],
-            scrollData: undefined,
+            scrollData: {},
         };
 
         this.textInputRef = React.createRef();
         this.scrollViewRef = React.createRef();
+
+        // Excel開課數據按首字母排序
+        offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
     }
 
     componentDidMount() {
-        const { filterOptions } = this.state;
-
-        // 默認篩選FST可選學系
-        this.handleFilterFaculty(filterOptions.facultyName, filterOptions.depaName);
-        // 默認篩選ECE可選課程
-        this.handleFilterCourse(filterOptions.depaName);
-
         this.getClassifyCourse();
     };
 
@@ -147,6 +143,7 @@ export default class index extends Component {
         let offerDepaList = [];
         // 根據學院名，篩選各自部門/學系
         let offerFacultyDepaListObj = [];
+
         offerCourseList.map(itm => {
             const facultyName = itm['Offering Unit'];
             const depaName = itm['Offering Department'];
@@ -192,6 +189,8 @@ export default class index extends Component {
             });
         })
 
+        let filterCourseList = offerCourseByDepa['ECE'];
+
         this.setState({
             offerFacultyList,
             offerGEList,
@@ -200,11 +199,9 @@ export default class index extends Component {
             offerCourseByDepa,
             offerFacultyDepaListObj,
             offerCourseByGE,
-        })
 
-        // console.log('offerCourseByFaculty', offerCourseByFaculty);
-        // console.log('offerCourseByDepa', offerCourseByDepa);
-        // console.log('offerFacultyDepaListObj', offerFacultyDepaListObj);
+            filterCourseList,
+        })
     }
 
     renderClassifySwitch = () => {
@@ -244,7 +241,7 @@ export default class index extends Component {
                                     filterCourseList = offerCourseByFaculty[facultyName];
                                 }
                                 filterOptions.facultyName = facultyName;
-                                this.setState({ filterOptions, filterCourseList });
+                                this.setState({ filterOptions, filterCourseList, scrollData: {} });
                             }}
                         >
                             <Text style={{
@@ -266,50 +263,6 @@ export default class index extends Component {
                     // 學系分類選擇，例如 ECE、EME
                     ListFooterComponent={() => this.renderDepaFilter()}
                 />
-
-                {/* 部門分類選擇，例ECE、EME */}
-                {false && offerDepaList.length > 0 ? (
-                    <FlatList
-                        data={offerDepaList}
-                        key={offerDepaList.length}
-                        keyExtractor={(item, index) => index}
-                        numColumns={offerDepaList.length}
-                        columnWrapperStyle={offerDepaList.length > 1 ? { flexWrap: 'wrap' } : null}
-                        renderItem={({ item: itm }) => (
-                            <TouchableOpacity style={{
-                                paddingHorizontal: scale(5), paddingVertical: scale(2),
-                                ...s.classItm,
-                                backgroundColor: filterOptions.depaName === itm ? themeColor : null,
-                            }}
-                                onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
-                                    filterOptions.depaName = itm;
-                                    this.setState({ filterOptions })
-                                    this.handleFilterCourse(itm);
-                                }}
-                            >
-                                <Text style={{
-                                    color: filterOptions.depaName === itm ? white : black.third,
-                                    fontWeight: filterOptions.depaName === itm ? 'bold' : 'normal',
-                                    fontSize: scale(12)
-                                }}>{itm}</Text>
-                            </TouchableOpacity>
-                        )}
-                        // 展示學系中文名稱
-                        ListHeaderComponent={() =>
-                            offerDepaList
-                                && offerDepaList.length > 0
-                                && filterOptions.depaName in depaMap ?
-                                <Text style={{
-                                    fontSize: scale(13), color: black.third,
-                                    marginLeft: scale(5),
-                                    marginTop: scale(5),
-                                }}>
-                                    {depaMap[filterOptions.depaName]}
-                                </Text> : null
-                        }
-                    />
-                ) : null}
             </View>
         )
     }
@@ -342,7 +295,7 @@ export default class index extends Component {
                             let filterCourseList = [];
                             filterCourseList = offerCourseByDepa[depaName]
                             filterOptions.depaName = depaName;
-                            this.setState({ filterOptions, filterCourseList })
+                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
                         }}
                     >
                         <Text style={{
@@ -366,66 +319,6 @@ export default class index extends Component {
                         </Text> : null
                 }
             />
-    }
-
-    // 按選擇的學院名，從可選學系中篩選可選課程
-    handleFilterFaculty = (facultyName) => {
-        const { filterOptions } = this.state;
-        filterOptions.facultyName = facultyName;
-        let depaList = this.handleFilterDepa(facultyName);
-        if (depaList.length > 0) {
-            // 有學系分類可選
-            filterOptions.depaName = depaList[0];
-            this.handleFilterCourse(depaList[0])
-        } else {
-            this.handleFilterCourse('')
-        }
-        this.setState({ filterOptions })
-    }
-
-    // 按選擇的學院名整理可供選擇的學系
-    handleFilterDepa = (facultyName) => {
-        let classFaculty = offerCourseList.filter(itm => {
-            return itm['Offering Unit'] == facultyName
-        });
-
-        let depaList = [];
-        classFaculty.map((itm) => {
-            const depaName = itm['Offering Department'];
-            if (depaName != undefined && depaList.indexOf(depaName) == -1) {
-                depaList.push(depaName)
-            }
-        })
-
-        this.setState({ offerDepaList: depaList })
-        return depaList
-    }
-
-    // 篩選出可選課程
-    handleFilterCourse = (depaName) => {
-        const { filterOptions } = this.state;
-
-        // 篩選所需課程
-        let filterCourseList = offerCourseList.filter(itm => {
-            // CM/RE課Mode
-            if (filterOptions.option != 'GE') {
-                if (depaName == '') {
-                    // 無學系可選情況，篩選選擇學院的課程
-                    return itm['Offering Unit'] == filterOptions.facultyName
-                } else {
-                    // 有學系可選，篩選選擇學系的課程
-                    return itm['Offering Department'] == depaName
-                }
-            }
-            // GE課Mode，此時depaName為GELH、GEST等
-            else {
-                return itm['Course Code'].substring(0, 4) == depaName
-            }
-        });
-        // 按首字母排序
-        filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
-        this.setState({ filterCourseList, scrollData: {} })
-        // console.log('篩選後數據', filterCourseList);
     }
 
     // 渲染篩選總列表
@@ -472,9 +365,8 @@ export default class index extends Component {
                                     onPress={() => {
                                         ReactNativeHapticFeedback.trigger('soft');
                                         filterOptions.GE = itm;
-                                        const offerCourseList = offerCourseByGE[itm];
-                                        this.setState({ filterOptions, offerCourseList })
-                                        this.handleFilterCourse(itm);
+                                        let filterCourseList = offerCourseByGE[itm];
+                                        this.setState({ filterOptions, filterCourseList, scrollData: {} })
                                     }}
                                 >
                                     <Text style={{
@@ -527,7 +419,7 @@ export default class index extends Component {
                     filterCourseList = offerCourseByGE[filterOptions.GE]
                 }
                 filterOptions.option = filterName;
-                this.setState({ filterOptions, filterCourseList, })
+                this.setState({ filterOptions, filterCourseList, scrollData: {} })
             }}
         >
             <Text style={{
@@ -769,9 +661,10 @@ export default class index extends Component {
     }
 
     handleSetLetterData = (letterData) => {
-        const { scrollData } = this.state;
+        let { scrollData } = this.state;
         const letter = Object.keys(letterData)[0];
-        if (!(letter in scrollData) || letterData[letter] < scrollData[letter]) {
+        if (!(letter in scrollData)
+            || letterData[letter] < scrollData[letter]) {
             scrollData[letter] = letterData[letter];
         }
     }
@@ -781,8 +674,8 @@ export default class index extends Component {
             isLoading,
             filterCourseList,
             inputText,
-            offerFacultyDepaListObj,
         } = this.state;
+        const searchFilterCourse = inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
 
         return (
             <View style={{
@@ -821,15 +714,9 @@ export default class index extends Component {
                         // stickyHeaderHiddenOnScroll
                         showsVerticalScrollIndicator={false}
                     >
-                        {/* 標題，選咩課ARK版 */}
-                        <View style={{
-                            alignSelf: 'center',
-                            // borderRadius: scale(10),
-                            // borderWidth: scale(2),
-                            // borderColor: themeColor,
-                            paddingVertical: scale(5), paddingHorizontal: scale(10)
-                        }}>
-                            <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>選咩課ARK版</Text>
+                        {/* 標題 */}
+                        <View style={{ alignSelf: 'center', paddingVertical: scale(5), paddingHorizontal: scale(10) }}>
+                            <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
                         </View>
 
                         <>
@@ -837,8 +724,10 @@ export default class index extends Component {
                         </>
 
                         {/* 搜索候選課程 */}
-                        {inputText.length > 2 && handleSearchFilterCourse(inputText).length > 0 ? (
-                            <CourseCard data={handleSearchFilterCourse(inputText)} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
+                        {searchFilterCourse && searchFilterCourse.length > 0 ? (
+                            <CourseCard data={searchFilterCourse} mode={'json'}
+                                handleSetLetterData={this.handleSetLetterData}
+                            />
                         ) : (<>
                             {/* 篩選列表 */}
                             {this.renderFilterView()}
@@ -846,7 +735,9 @@ export default class index extends Component {
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
-                                    <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
+                                    <CourseCard data={filterCourseList} mode={'json'}
+                                        handleSetLetterData={this.handleSetLetterData}
+                                    />
                                 </View>
                             ) : null}
                         </>)}
@@ -874,8 +765,8 @@ export default class index extends Component {
                     </ScrollView>
 
                     {/* 渲染側邊首字母導航 */}
-                    {inputText.length > 2 && handleSearchFilterCourse(inputText).length > 0 ? (
-                        this.renderFirstLetterNav(handleSearchFilterCourse(inputText))
+                    {searchFilterCourse && searchFilterCourse.length > 0 ? (
+                        this.renderFirstLetterNav(searchFilterCourse)
                     ) : (
                         this.renderFirstLetterNav(filterCourseList)
                     )}
