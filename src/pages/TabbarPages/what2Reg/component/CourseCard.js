@@ -16,7 +16,7 @@ export default class CourseCard extends Component {
     // 渲染課程代號
     renderCourseCode = (code) => {
         let renderItm = null;
-        if (code.length == 8 && !code.includes('-')) {
+        if (code.length == 8 && code.indexOf('-') == -1) {
             renderItm = <>
                 {code.substring(0, 4) + ' '}
                 <Text style={{
@@ -29,7 +29,7 @@ export default class CourseCard extends Component {
             </>
         }
         // FLL MLS的課程代號有TLL123-A的格式
-        else if (code.length == 8 && code.includes('-')) {
+        else if (code.length == 8 && code.indexOf('-') != -1) {
             renderItm = <>
                 {code.substring(0, 3) + ' '}
                 <Text style={{
