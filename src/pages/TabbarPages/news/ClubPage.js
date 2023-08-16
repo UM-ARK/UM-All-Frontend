@@ -16,14 +16,12 @@ import ClubCard from './components/ClubCard';
 
 import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import ActionSheet from 'react-native-actionsheet';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import { FlatList } from 'react-native';
 
 const { themeColor, black, white } = COLOR_DIY;
-const COMPONENT_WIDTH = scale(105);
+const COMPONENT_WIDTH = scale(90);
 // 65 寬度，一行3個
 let originClubDataList = [];
 
@@ -124,59 +122,6 @@ class ClubPage extends Component {
         );
     };
 
-    renderFilter = () => {
-        let optionsList = [];
-        clubTagList.map(itm => {
-            optionsList.push(clubTagMap(itm));
-        });
-        optionsList.push('默認');
-        optionsList.push('取消');
-        return (
-            <View>
-                <TouchableOpacity
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        this.ActionSheet.show();
-                    }}
-                    activeOpacity={0.8}
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: scale(8),
-                        width: '100%',
-                    }}>
-                    <Text style={{ color: black.third }}>篩選</Text>
-                    <Ionicons
-                        name={
-                            this.state.applyFilter
-                                ? 'md-funnel'
-                                : 'md-funnel-outline'
-                        }
-                        size={scale(10)}
-                        color={black.third}
-                        style={{ marginLeft: scale(5) }}
-                    />
-                </TouchableOpacity>
-
-                {/* 選擇彈窗 */}
-                <ActionSheet
-                    ref={o => (this.ActionSheet = o)}
-                    options={optionsList}
-                    cancelButtonIndex={optionsList.length - 1}
-                    destructiveButtonIndex={optionsList.length - 1}
-                    onPress={index => {
-                        if (clubTagList[index]) {
-                            this.clubFilter(clubTagList[index]);
-                        } else if (index == optionsList.length - 2) {
-                            this.setState({ clubDataList: originClubDataList });
-                        }
-                    }}
-                />
-            </View>
-        );
-    };
-
     separateDataList = (clubDataList) => {
         let newClubData = {};
         if (clubDataList && clubDataList.length > 0) {
@@ -238,13 +183,17 @@ class ClubPage extends Component {
                 {clubDataList != undefined && !isLoading ? (
                     <View style={{ flexDirection: 'row' }}>
                         {/* 側邊分類導航 */}
-                        <View style={{ width: scale(60) }}>
+                        <View style={{
+                            // width: scale(60),
+                            position: 'absolute', zIndex: 99999, right: scale(10), top: scale(150),
+                            backgroundColor: white,
+                            borderRadius: scale(10),
+                            ...COLOR_DIY.viewShadow,
+                        }}>
                             <FlatList
                                 data={clubTagList}
                                 contentContainerStyle={{
-                                    height: '100%',
-                                    justifyContent: 'center', alignItems: 'flex-start',
-                                    paddingLeft: scale(10)
+                                    paddingHorizontal: scale(3),
                                 }}
                                 ListHeaderComponent={() => {
                                     return (
@@ -254,7 +203,10 @@ class ClubPage extends Component {
                                                 this.scrollViewRef.current.scrollTo({ y: 0 });
                                                 this.setState({ scrollMaxItm: 'ARK' })
                                             }}
-                                            style={{ marginBottom: scale(20), width: '100%' }}
+                                            style={{
+                                                padding: scale(5),
+                                                width: '100%'
+                                            }}
                                         >
                                             <Text style={{
                                                 color: scrollMaxItm == 'ARK' ? themeColor : black.third,
@@ -278,7 +230,10 @@ class ClubPage extends Component {
                                                 })
                                                 this.setState({ scrollMaxItm: tag })
                                             }}
-                                            style={{ marginBottom: scale(20), width: '100%' }}
+                                            style={{
+                                                padding: scale(5),
+                                                width: '100%',
+                                            }}
                                         >
                                             <Text style={{
                                                 color: scrollMaxItm == itm.item ? themeColor : black.third,
@@ -293,8 +248,11 @@ class ClubPage extends Component {
                                 showsHorizontalScrollIndicator={false}
                             />
                         </View>
+
                         {/* 組織展示 */}
-                        <View style={{ width: scale(290) }}>
+                        <View
+                        // style={{ width: scale(290) }}
+                        >
                             <ScrollView
                                 refreshControl={
                                     <RefreshControl
@@ -325,7 +283,6 @@ class ClubPage extends Component {
                                     })
                                 }}
                             >
-                                {/* {this.renderFilter()} */}
                                 {'ARK' in clubDataList && (
                                     <View>
                                         {this.renderClub(clubDataList.ARK, 'ARK')}
