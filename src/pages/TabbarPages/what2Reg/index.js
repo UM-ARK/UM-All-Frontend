@@ -398,6 +398,7 @@ export default class index extends Component {
             offerFacultyDepaListObj,
             offerCourseByDepa,
             offerCourseByGE,
+            offerCourseByFaculty,
         } = this.state;
 
         return <TouchableOpacity
