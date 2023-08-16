@@ -11,9 +11,10 @@ import {
     FlatList,
     TouchableWithoutFeedback,
     KeyboardAvoidingView,
+    Linking,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API } from "../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
 import offerCourse from '../../../static/UMCourses/offer courses.json';
 import Loading from '../../../components/Loading';
@@ -539,7 +540,8 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        this.jumpToRelateCoursePage({ inputText, type: 'course' })
+                        // this.jumpToRelateCoursePage({ inputText, type: 'course' })
+                        this.jumpToWebRelateCoursePage({ inputText, type: 'course' })
                     }}
                 >
                     <Text style={{ fontSize: scale(12), color: white }}>查課</Text>
@@ -556,7 +558,8 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        this.jumpToRelateCoursePage({ inputText, type: 'prof' })
+                        // this.jumpToRelateCoursePage({ inputText, type: 'prof' })
+                        this.jumpToWebRelateCoursePage({ inputText, type: 'prof' })
                     }}
                 >
                     <Text style={{ fontSize: scale(12), color: white }}>搵講師</Text>
@@ -568,6 +571,13 @@ export default class index extends Component {
     // 模糊搜索跳轉到相關課程或教授頁
     jumpToRelateCoursePage = (searchData) => {
         this.props.navigation.navigate('What2RegRelateCourses', searchData);
+    }
+
+    // 模糊搜索跳轉到網頁版選咩課
+    jumpToWebRelateCoursePage = (searchData) => {
+        const { inputText, type } = searchData;
+        const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
+        Linking.openURL(URI)
     }
 
     // 渲染懸浮可拖動按鈕

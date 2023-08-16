@@ -93,7 +93,9 @@ export default class CourseCard extends Component {
                                 }
                                 else {
                                     // 進入搜索課程代號模式
-                                    this.context.navigate('What2RegCourse', courseCode)
+                                    // this.context.navigate('What2RegCourse', courseCode)
+                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(item['Course Code'])}&instructor=${false}`
+                                    Linking.openURL(URI)
                                 }
                             }}
                             // 獲取當前位置距離屏幕頂端的高度
