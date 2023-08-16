@@ -767,11 +767,15 @@ class EventDetail extends Component {
 
         return (
             <View style={{flex: 1}}>
-                <StatusBar
-                    barStyle="light-content"
-                    backgroundColor={'transparent'}
-                    translucent={true}
-                />
+                {isLoading?(
+                    <Header title={'Loading...'} />
+                ):(
+                    <StatusBar
+                        barStyle="light-content"
+                        backgroundColor={'transparent'}
+                        translucent={true}
+                    />
+                )}
 
                 {/* Modal展示需要的信息 */}
                 {this.state.isShowModal && (
@@ -892,7 +896,6 @@ class EventDetail extends Component {
                             flex: 1,
                             backgroundColor: bg_color,
                         }}>
-                        <Header title={'Loading...'} />
                         <View
                             style={{
                                 flex: 1,
