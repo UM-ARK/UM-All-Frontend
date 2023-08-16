@@ -517,7 +517,9 @@ export default class index extends Component {
                                     scrollData: {},
                                 })
                                 this.textInputRef.current.focus();
-                            }}>
+                            }}
+                            style={{ padding: scale(3) }}
+                        >
                             <Ionicons
                                 name={'close-circle'}
                                 size={scale(15)}
