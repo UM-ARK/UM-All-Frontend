@@ -469,6 +469,7 @@ class HomeScreen extends Component {
 
     render() {
         const { selectDay, cal } = this.state;
+        const screenWidth = Dimensions.get('window').width;
         return (
             <View
                 style={{
@@ -556,6 +557,7 @@ class HomeScreen extends Component {
                                     flex: 1,
                                     alignItems: 'center',
                                     justifyContent: 'center',
+                                    width: screenWidth,
                                     marginVertical: scale(5),
                                     paddingHorizontal: scale(20),
                                     flexDirection: 'row'
@@ -573,6 +575,7 @@ class HomeScreen extends Component {
                                     // borderColor: COLOR_DIY.themeColor,
                                     backgroundColor: themeColor,
                                     borderRadius: scale(5),
+                                    //marginHorizontal:scale(5),
                                     paddingVertical: scale(2),
                                     paddingHorizontal: scale(5),
                                 }}>
