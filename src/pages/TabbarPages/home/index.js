@@ -50,7 +50,7 @@ import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { white, bg_color, black, themeColor } = COLOR_DIY;
+const { white, bg_color, black, themeColor,themeColorLight } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -292,10 +292,10 @@ class HomeScreen extends Component {
         return (
             <TouchableOpacity
                 style={{
-                    backgroundColor: themeColor,
+                    backgroundColor: selectDay == index ? themeColor : themeColorLight,
                     borderRadius: scale(8),
-                    borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
-                    borderWidth: selectDay == index ? scale(2) : null,
+                    //borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
+                    //borderWidth: selectDay == index ? scale(2) : null,
                     paddingHorizontal: scale(5), paddingVertical: scale(3),
                     margin: scale(3),
                     ...COLOR_DIY.viewShadow,
