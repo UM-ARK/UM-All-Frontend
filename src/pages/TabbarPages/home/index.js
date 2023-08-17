@@ -495,6 +495,7 @@ class HomeScreen extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {this.state.isLoading ? null : this.renderGoTopButton()}
 
+                {/* 主页本体 */}
                 <ScrollView
                     refreshControl={
                         <RefreshControl
@@ -511,8 +512,10 @@ class HomeScreen extends Component {
                     }
                     alwaysBounceHorizontal={false}
                     ref={'scrollView'}>
+
+                    {/* 校曆列表 */}
                     <View style={{ backgroundColor: bg_color }}>
-                        {/* 校曆列表 */}
+                        
                         <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
                             {cal && cal.length > 0 ? (
                                 <VirtualizedList
@@ -557,10 +560,14 @@ class HomeScreen extends Component {
                                     paddingHorizontal: scale(20),
                                     flexDirection: 'row'
                                 }}>
+
+                                {/*左衬线*/}
                                 <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
                                 >
                                     {'\\' + '\\'}
                                 </Text>
+
+                                {/*日历内容描述*/}
                                 <View style={{
                                     // borderWidth: scale(1),
                                     // borderColor: COLOR_DIY.themeColor,
@@ -576,10 +583,13 @@ class HomeScreen extends Component {
                                         {this.state.cal[selectDay].summary}
                                     </Text>
                                 </View>
+
+                                {/*右衬线*/}
                                 <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
                                 >
                                     {'//'}
                                 </Text>
+                                
                             </View>
                         ) : null}
 
