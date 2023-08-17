@@ -286,6 +286,7 @@ class HomeScreen extends Component {
         }
     }
 
+    // 渲染顶部校历图标
     renderCal = (item, index) => {
         const { selectDay } = this.state;
         let momentItm = moment(item.startDate).format("YYYYMMDD");
@@ -306,6 +307,7 @@ class HomeScreen extends Component {
                     this.setState({ selectDay: index });
                 }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                    
                     {/* 年份 */}
                     <Text style={{
                         color: white,
@@ -314,6 +316,7 @@ class HomeScreen extends Component {
                     }}>
                         {momentItm.substring(0, 4)}
                     </Text>
+                    
                     {/* 月份 */}
                     <Text
                         style={{
@@ -323,6 +326,7 @@ class HomeScreen extends Component {
                         }}>
                         {momentItm.substring(4, 6)}
                     </Text>
+                    
                     {/* 日期 */}
                     <Text
                         style={{
@@ -332,6 +336,7 @@ class HomeScreen extends Component {
                         }}>
                         {momentItm.substring(6, 8)}
                     </Text>
+                    
                     {/* 星期幾 */}
                     <Text style={{
                         color: white,
@@ -507,8 +512,8 @@ class HomeScreen extends Component {
                     alwaysBounceHorizontal={false}
                     ref={'scrollView'}>
                     <View style={{ backgroundColor: bg_color }}>
+                        {/* 校曆 */}
                         <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
-                            {/* 校曆 */}
                             {cal && cal.length > 0 ? (
                                 <VirtualizedList
                                     data={cal}
@@ -538,6 +543,7 @@ class HomeScreen extends Component {
                                 />
                             ) : null}
                         </View>
+                        
                         {/* 校曆日期描述 */}
                         {cal && cal.length > 0 ? (
                             <View
