@@ -512,7 +512,7 @@ class HomeScreen extends Component {
                     alwaysBounceHorizontal={false}
                     ref={'scrollView'}>
                     <View style={{ backgroundColor: bg_color }}>
-                        {/* 校曆 */}
+                        {/* 校曆列表 */}
                         <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
                             {cal && cal.length > 0 ? (
                                 <VirtualizedList
@@ -527,12 +527,14 @@ class HomeScreen extends Component {
                                             index,
                                         };
                                     }}
+                                    // 渲染每个列表项的方法
                                     renderItem={({ item, index }) => this.renderCal(item, index)}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
                                     getItem={getItem}
                                     // 渲染項目數量
                                     getItemCount={getItemCount}
+                                    // 列表primary key
                                     keyExtractor={item => item.startDate}
                                     ListHeaderComponent={
                                         <View style={{ marginLeft: scale(10) }} />
