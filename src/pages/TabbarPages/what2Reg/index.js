@@ -3,13 +3,11 @@ import {
     StyleSheet,
     Text,
     View,
-    Button,
     ScrollView,
     TextInput,
     TouchableOpacity,
     Platform,
     FlatList,
-    TouchableWithoutFeedback,
     KeyboardAvoidingView,
     Linking,
 } from "react-native";
@@ -23,12 +21,10 @@ import CourseCard from './component/CourseCard';
 import axios from "axios";
 import { scale } from "react-native-size-matters";
 import { Header } from '@rneui/themed';
-import { FlatGrid } from 'react-native-super-grid';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Interactable from 'react-native-interactable';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
-const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
+const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
 const offerCourseList = offerCourse.Master;
 
@@ -581,61 +577,6 @@ export default class index extends Component {
         Linking.openURL(URI)
     }
 
-    // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
-        const buttonSize = scale(50);
-        return (
-            <Interactable.View
-                style={{
-                    zIndex: 999,
-                    position: 'absolute',
-                }}
-                ref="headInstance"
-                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-                snapPoints={[
-                    { x: -scale(140), y: -scale(220) },
-                    { x: scale(140), y: -scale(220) },
-                    { x: -scale(140), y: -scale(120) },
-                    { x: scale(140), y: -scale(120) },
-                    { x: -scale(140), y: scale(0) },
-                    { x: scale(140), y: scale(0) },
-                    { x: -scale(140), y: scale(120) },
-                    { x: scale(140), y: scale(120) },
-                    { x: -scale(140), y: scale(220) },
-                    { x: scale(140), y: scale(220) },
-                ]}
-                // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: scale(220) }}>
-                {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        this.scrollViewRef.current.scrollTo({
-                            x: 0,
-                            y: 0,
-                            duration: 500, // 回頂時間
-                        });
-                    }}>
-                    <View
-                        style={{
-                            width: buttonSize, height: buttonSize,
-                            backgroundColor: white,
-                            borderRadius: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...viewShadow,
-                        }}>
-                        <Ionicons
-                            name={'chevron-up'}
-                            size={scale(40)}
-                            color={themeColor}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-            </Interactable.View>
-        );
-    };
-
     // 渲染首字母側邊導航
     renderFirstLetterNav = (filterCourseList) => {
         const { scrollData } = this.state;
@@ -712,8 +653,6 @@ export default class index extends Component {
                         paddingTop: 0,
                     }}
                 />
-
-                {isLoading ? null : this.renderGoTopButton()}
 
                 {isLoading ? (
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
