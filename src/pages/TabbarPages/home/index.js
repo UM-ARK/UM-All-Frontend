@@ -49,7 +49,6 @@ import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
 
-const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { white, bg_color, black, themeColor, themeColorLight } = COLOR_DIY;
 
 const getItem = (data, index) => {
@@ -72,86 +71,86 @@ const iconTypes = {
 const cal = UMCalendar;
 
 class HomeScreen extends Component {
-    state = {
-        // 首頁輪播圖數據
-        carouselImagesArr: [
-            {
-                url: UMALL_LOGO,
-            },
-        ],
+    constructor(props) {
+        super(props)
 
-        // 快捷功能入口
-        functionArray: [
-            {
-                icon_name: 'bus',
-                icon_type: iconTypes.ionicons,
-                function_name: '校園巴士',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.navigate('Bus');
+        this.state = {
+            // 快捷功能入口
+            functionArray: [
+                {
+                    icon_name: 'bus',
+                    icon_type: iconTypes.ionicons,
+                    function_name: '校園巴士',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.props.navigation.navigate('Bus');
+                    },
                 },
-            },
-            // {
-            //     icon_name: 'database-search',
-            //     icon_type: iconTypes.materialCommunityIcons,
-            //     function_name: '選咩課',
-            //     func: () => {
-            //         ReactNativeHapticFeedback.trigger('soft');
-            //         let webview_param = {
-            //             url: WHAT_2_REG,
-            //             title: '澳大選咩課',
-            //             text_color: '#fff',
-            //             bg_color_diy: '#1e558c',
-            //             isBarStyleBlack: false,
-            //         };
-            //         this.props.navigation.navigate('Webviewer', webview_param);
-            //         // this.props.navigation.jumpTo('NewsTabbar', {
-            //         //     screen: 'EventPage',
-            //         // });
-            //     },
-            // },
-            // {
-            //     icon_name: 'ghost',
-            //     icon_type: iconTypes.materialCommunityIcons,
-            //     function_name: '生存指南',
-            //     func: () => {
-            //         ReactNativeHapticFeedback.trigger('soft');
-            //         let webview_param = {
-            //             url: NEW_SCZN,
-            //             title: '新鮮人要知道的億些Tips',
-            //             text_color: COLOR_DIY.black.second,
-            //             bg_color_diy: '#ededed',
-            //         };
-            //         this.props.navigation.navigate('Webviewer', webview_param);
-            //     },
-            // },
-            {
-                icon_name: 'people',
-                icon_type: iconTypes.ionicons,
-                function_name: '組織登入',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.navigate('MeScreen');
+                // {
+                //     icon_name: 'database-search',
+                //     icon_type: iconTypes.materialCommunityIcons,
+                //     function_name: '選咩課',
+                //     func: () => {
+                //         ReactNativeHapticFeedback.trigger('soft');
+                //         let webview_param = {
+                //             url: WHAT_2_REG,
+                //             title: '澳大選咩課',
+                //             text_color: '#fff',
+                //             bg_color_diy: '#1e558c',
+                //             isBarStyleBlack: false,
+                //         };
+                //         this.props.navigation.navigate('Webviewer', webview_param);
+                //         // this.props.navigation.jumpTo('NewsTabbar', {
+                //         //     screen: 'EventPage',
+                //         // });
+                //     },
+                // },
+                // {
+                //     icon_name: 'ghost',
+                //     icon_type: iconTypes.materialCommunityIcons,
+                //     function_name: '生存指南',
+                //     func: () => {
+                //         ReactNativeHapticFeedback.trigger('soft');
+                //         let webview_param = {
+                //             url: NEW_SCZN,
+                //             title: '新鮮人要知道的億些Tips',
+                //             text_color: COLOR_DIY.black.second,
+                //             bg_color_diy: '#ededed',
+                //         };
+                //         this.props.navigation.navigate('Webviewer', webview_param);
+                //     },
+                // },
+                {
+                    icon_name: 'people',
+                    icon_type: iconTypes.ionicons,
+                    function_name: '組織登入',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.props.navigation.navigate('MeScreen');
 
+                    },
                 },
-            },
-        ],
+            ],
 
-        cal: undefined,
-        selectDay: 0,
+            cal: undefined,
+            selectDay: 0,
 
-        isShowModal: false,
+            isShowModal: false,
 
-        isLoading: true,
+            isLoading: true,
 
-        // 是否提示更新
-        showUpdateInfo: false,
+            // 是否提示更新
+            showUpdateInfo: false,
 
-        app_version: {
-            lastest: '',
-            local: '',
-        }
-    };
+            app_version: {
+                lastest: '',
+                local: '',
+            }
+        };
+
+        this.eventPage = React.createRef();
+        this.scrollView = React.createRef();
+    }
 
     componentDidMount() {
         let globalData = this.props.RootStore;
@@ -226,17 +225,6 @@ class HomeScreen extends Component {
             // console.error(e);
         }
         finally {
-            // 設定輪播圖
-            // if (
-            //     serverInfo.index_head_carousel &&
-            //     serverInfo.index_head_carousel.length > 0
-            // ) {
-            //     let imgUrlArr = serverInfo.index_head_carousel;
-            //     imgUrlArr.map(itm => {
-            //         itm.url = addHost(itm.url);
-            //     });
-            //     this.setState({carouselImagesArr: imgUrlArr});
-            // }
             this.setState({ isLoading: false });
         }
     };
@@ -412,7 +400,7 @@ class HomeScreen extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
+        const { viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -440,7 +428,7 @@ class HomeScreen extends Component {
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.refs.scrollView.scrollTo({
+                        this.scrollView.current.scrollTo({
                             x: 0,
                             y: 0,
                             duration: 500, // 回頂時間
@@ -469,14 +457,11 @@ class HomeScreen extends Component {
 
     render() {
         const { selectDay, cal } = this.state;
-        const screenWidth = Dimensions.get('window').width;
         return (
             <View
                 style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: bg_color,
+                    flex: 1, backgroundColor: bg_color,
+                    alignItems: 'center', justifyContent: 'center',
                 }}>
 
                 {/* 懸浮可拖動按鈕 */}
@@ -493,12 +478,12 @@ class HomeScreen extends Component {
                                 this.setState({ isLoading: true });
                                 this.getAppData();
                                 // 刷新重新請求活動頁數據
-                                this.refs.eventPage.onRefresh();
+                                this.eventPage.current.onRefresh()
                             }}
                         />
                     }
                     alwaysBounceHorizontal={false}
-                    ref={'scrollView'}>
+                    ref={this.scrollView}>
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
@@ -630,7 +615,7 @@ class HomeScreen extends Component {
                         : null}
 
                     {/* 活動頁 */}
-                    <EventPage ref="eventPage" />
+                    <EventPage ref={this.eventPage} />
 
                     {/* 快速填充功能提示 */}
                     {/* <View
