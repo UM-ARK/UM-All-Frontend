@@ -7,6 +7,7 @@ import {
     RefreshControl,
     VirtualizedList,
     TouchableWithoutFeedback,
+    Platform,
     Linking
 } from 'react-native';
 
@@ -19,7 +20,7 @@ import {
     BASE_HOST,
     BASE_URI,
     GET,
-    addHost,
+    addHost, APPSTORE_URL,
 } from '../../../utils/pathMap';
 import EventPage from '../news/EventPage.js';
 import ModalBottom from '../../../components/ModalBottom';
@@ -202,7 +203,7 @@ class HomeScreen extends Component {
                 versionStringCompare(
                     packageInfo.version,
                     serverInfo.app_version,
-                ) == -1
+                ) === -1
             ) {
                 this.setState({
                     showUpdateInfo: true,
@@ -378,7 +379,7 @@ class HomeScreen extends Component {
             </TouchableOpacity>
         );
     };
-
+    
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
         this.setState({ isShowModal: !this.state.isShowModal });
@@ -582,12 +583,13 @@ class HomeScreen extends Component {
                         <HomeCard>
                             <Text
                                 style={{
-                                    color: themeColor,
+                                    color: black,
+                                    fontWeight: 'bold',
                                     marginTop: scale(2),
                                     alignSelf: 'center',
                                     textAlign: 'center',
                                 }}>
-                                {`🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥`}
+                                {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
                             </Text>
                             <Text
                                 style={{
@@ -595,7 +597,7 @@ class HomeScreen extends Component {
                                     marginTop: scale(5),
                                     fontWeight: 'bold',
                                 }}>
-                                {`Lastest Version: ${this.state.app_version.lastest}`}
+                                {`最新版本: ${this.state.app_version.lastest}`}
                             </Text>
                             <Text
                                 style={{
@@ -603,13 +605,14 @@ class HomeScreen extends Component {
                                     marginTop: scale(5),
                                     fontWeight: 'bold',
                                 }}>
-                                {`Your App Version: ${this.state.app_version.local}`}
+                                {`你的版本: ${this.state.app_version.local}`}
                             </Text>
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL(BASE_HOST);
+                                    const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                    Linking.openURL(url);
                                 }}>
                                 <Text
                                     style={{
@@ -617,7 +620,7 @@ class HomeScreen extends Component {
                                         marginTop: scale(5),
                                         fontWeight: 'bold',
                                     }}>
-                                    {`Click me to update App 😉~`}
+                                    {`點我快速更新 😉~`}
                                 </Text>
                             </TouchableOpacity>
                         </HomeCard>
