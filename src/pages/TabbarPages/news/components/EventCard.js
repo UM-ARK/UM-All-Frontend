@@ -17,6 +17,7 @@ import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import { inject } from 'mobx-react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -195,6 +196,28 @@ class EventCard extends Component {
                                 </View>
                             ) : null}
                         </FastImage>
+
+                        {/*如果是Link的话就显示Link图标*/}
+                        <View
+                            style = {{
+                                position:'absolute',
+                                top:10,
+                                right:10,
+                                zIndex:2,
+                                transform:[{rotate:'-45deg'}],
+                                shadowColor: 'black',
+                                shadowOpacity:0.3,
+                                shadowRadius:5,
+                        }}
+                        >
+                            {this.state.type === 'WEBSITE'?(
+                                <Ionicons
+                                    name={'link'}
+                                    size={20}
+                                    color={COLOR_DIY.themeColorUltraLight}
+                                />
+                            ):null}
+                        </View>
 
                         {/* 活動簡單描述 */}
                         <View style={styles.title.container}>
