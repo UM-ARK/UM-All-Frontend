@@ -50,7 +50,7 @@ import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { white, bg_color, black, themeColor,themeColorLight } = COLOR_DIY;
+const { white, bg_color, black, themeColor, themeColorLight } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -307,7 +307,7 @@ class HomeScreen extends Component {
                     this.setState({ selectDay: index });
                 }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                    
+
                     {/* 年份 */}
                     <Text style={{
                         color: white,
@@ -316,7 +316,7 @@ class HomeScreen extends Component {
                     }}>
                         {momentItm.substring(0, 4)}
                     </Text>
-                    
+
                     {/* 月份 */}
                     <Text
                         style={{
@@ -326,7 +326,7 @@ class HomeScreen extends Component {
                         }}>
                         {momentItm.substring(4, 6)}
                     </Text>
-                    
+
                     {/* 日期 */}
                     <Text
                         style={{
@@ -336,7 +336,7 @@ class HomeScreen extends Component {
                         }}>
                         {momentItm.substring(6, 8)}
                     </Text>
-                    
+
                     {/* 星期幾 */}
                     <Text style={{
                         color: white,
@@ -478,20 +478,6 @@ class HomeScreen extends Component {
                     justifyContent: 'center',
                     backgroundColor: bg_color,
                 }}>
-                {/* <Header
-                    backgroundColor={white}
-                    centerComponent={{
-                        text: 'ARK ALL',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: scale(15),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                    }}
-                /> */}
 
                 {/* 懸浮可拖動按鈕 */}
                 {this.state.isLoading ? null : this.renderGoTopButton()}
@@ -515,52 +501,43 @@ class HomeScreen extends Component {
                     ref={'scrollView'}>
 
                     {/* 校曆列表 */}
-                    <View style={{ backgroundColor: bg_color }}>
-                        
-                        <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
-                            {cal && cal.length > 0 ? (
-                                <VirtualizedList
-                                    data={cal}
-                                    initialNumToRender={9}
-                                    initialScrollIndex={selectDay}
-                                    getItemLayout={(data, index) => {
-                                        let layoutSize = scale(40);
-                                        return {
-                                            length: layoutSize,
-                                            offset: layoutSize * index,
-                                            index,
-                                        };
-                                    }}
-                                    // 渲染每个列表项的方法
-                                    renderItem={({ item, index }) => this.renderCal(item, index)}
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    getItem={getItem}
-                                    // 渲染項目數量
-                                    getItemCount={getItemCount}
-                                    // 列表primary key
-                                    keyExtractor={item => item.startDate}
-                                    ListHeaderComponent={
-                                        <View style={{ marginLeft: scale(10) }} />
-                                    }
-                                    ListFooterComponent={
-                                        <View style={{ marginRight: scale(10) }} />
-                                    }
-                                />
-                            ) : null}
-                        </View>
-                        
-                        {/* 校曆日期描述 */}
-                        {cal && cal.length > 0 ? (
+                    {cal && cal.length > 0 ? (
+                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8) }}>
+                            <VirtualizedList
+                                data={cal}
+                                initialNumToRender={9}
+                                initialScrollIndex={selectDay}
+                                getItemLayout={(data, index) => {
+                                    let layoutSize = scale(40);
+                                    return {
+                                        length: layoutSize,
+                                        offset: layoutSize * index,
+                                        index,
+                                    };
+                                }}
+                                // 渲染每个列表项的方法
+                                renderItem={({ item, index }) => this.renderCal(item, index)}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                getItem={getItem}
+                                // 渲染項目數量
+                                getItemCount={getItemCount}
+                                // 列表primary key
+                                keyExtractor={item => item.startDate}
+                                ListHeaderComponent={
+                                    <View style={{ marginLeft: scale(10) }} />
+                                }
+                                ListFooterComponent={
+                                    <View style={{ marginRight: scale(10) }} />
+                                }
+                            />
+
+                            {/* 校曆日期描述 */}
                             <View
                                 style={{
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: screenWidth,
-                                    marginVertical: scale(5),
-                                    paddingHorizontal: scale(20),
-                                    flexDirection: 'row'
+                                    alignItems: 'center', justifyContent: 'center',
+                                    flexDirection: 'row',
+                                    marginTop: scale(5), marginHorizontal: scale(20),
                                 }}>
 
                                 {/*左衬线*/}
@@ -571,17 +548,14 @@ class HomeScreen extends Component {
 
                                 {/*日历内容描述*/}
                                 <View style={{
-                                    // borderWidth: scale(1),
-                                    // borderColor: COLOR_DIY.themeColor,
                                     backgroundColor: themeColor,
                                     borderRadius: scale(5),
-                                    //marginHorizontal:scale(5),
                                     paddingVertical: scale(2),
                                     paddingHorizontal: scale(5),
                                 }}>
                                     <Text
                                         selectable
-                                        style={{ color: white, textAlign: 'center' }}
+                                        style={{ color: white, textAlign: 'center', fontSize: scale(12) }}
                                     >
                                         {this.state.cal[selectDay].summary}
                                     </Text>
@@ -592,22 +566,22 @@ class HomeScreen extends Component {
                                 >
                                     {'//'}
                                 </Text>
-                                
-                            </View>
-                        ) : null}
 
-                        {/* 快捷功能圖標 */}
-                        <FlatGrid
-                            style={{ alignSelf: 'center' }}
-                            maxItemsPerRow={6}
-                            itemDimension={scale(50)}
-                            spacing={scale(5)}
-                            data={this.state.functionArray}
-                            renderItem={({ item }) => this.GetFunctionIcon(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    </View>
+                            </View>
+                        </View>
+                    ) : null}
+
+                    {/* 快捷功能圖標 */}
+                    <FlatGrid
+                        style={{ alignSelf: 'center' }}
+                        maxItemsPerRow={6}
+                        itemDimension={scale(50)}
+                        spacing={scale(5)}
+                        data={this.state.functionArray}
+                        renderItem={({ item }) => this.GetFunctionIcon(item)}
+                        showsVerticalScrollIndicator={false}
+                        scrollEnabled={false}
+                    />
 
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
