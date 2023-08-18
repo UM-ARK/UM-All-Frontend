@@ -361,8 +361,8 @@ class BusScreen extends Component {
                         <TouchableOpacity
                             style={{
                                 position: 'absolute',
-                                right: scale(20),
-                                top: scale(20)
+                                right: scale(5),
+                                top: scale(45)
                             }}
                             onPress={this.toggleModal.bind(
                                 this,
@@ -370,8 +370,8 @@ class BusScreen extends Component {
                             )}>
                             <Ionicons
                                 name={'close-circle'}
-                                size={scale(50)}
-                                color={themeColor}
+                                size={scale(35)}
+                                color={white}
                             />
                         </TouchableOpacity>
                         <Image
