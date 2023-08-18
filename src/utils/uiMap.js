@@ -48,6 +48,10 @@ export const COLOR_DIY = {
     },
 };
 
+export const VERSION_EMOJI = {
+    ve_Left : '⛱️',
+    ve_Right : '🕶️',
+}
 export const uiStyle = StyleSheet.create({
     toastContainer: {
         backgroundColor: COLOR_DIY.themeColor,

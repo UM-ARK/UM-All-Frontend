@@ -48,6 +48,8 @@ import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
+import {screenWidth} from '../../../utils/stylesKits';
+import {VERSION_EMOJI} from '../../../utils/uiMap';
 
 const { white, bg_color, black, themeColor, themeColorLight } = COLOR_DIY;
 
@@ -478,7 +480,7 @@ class HomeScreen extends Component {
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
-                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8) }}>
+                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8),justifyContent:'center', }}>
                             <VirtualizedList
                                 data={cal}
                                 initialNumToRender={11}
@@ -513,15 +515,24 @@ class HomeScreen extends Component {
                             {cal[selectDay] && 'summary' in cal[selectDay] ? (
                                 <View
                                     style={{
-                                        alignItems: 'center', justifyContent: 'center',
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
                                         flexDirection: 'row',
-                                        marginTop: scale(5), marginHorizontal: scale(20),
+                                        marginTop: scale(5), 
+                                        //marginHorizontal: scale(20),
+                                        width:screenWidth,
                                     }}>
 
-                                    {/*左衬线*/}
-                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center', fontSize: scale(12) }}
+                                    {/*左Emoji*/}
+                                    <Text
+                                        selectable
+                                        style={{ 
+                                            color: white, 
+                                            textAlign: 'center', 
+                                            fontSize: scale(12),
+                                    }}
                                     >
-                                        {'\\' + '\\'}
+                                            {VERSION_EMOJI.ve_Left+' '}
                                     </Text>
 
                                     {/*日历内容描述*/}
@@ -530,6 +541,7 @@ class HomeScreen extends Component {
                                         borderRadius: scale(5),
                                         paddingVertical: scale(2), paddingHorizontal: scale(5),
                                     }}>
+                                        
                                         <Text
                                             selectable
                                             style={{ color: white, textAlign: 'center', fontSize: scale(12) }}
@@ -538,10 +550,15 @@ class HomeScreen extends Component {
                                         </Text>
                                     </View>
 
-                                    {/*右衬线*/}
-                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center', fontSize: scale(12) }}
-                                    >
-                                        {'//'}
+                                    {/*右Emoji*/}
+                                    <Text
+                                        selectable
+                                        style={{ 
+                                            color: white, 
+                                            textAlign: 'center', 
+                                            fontSize: scale(12)
+                                    }}>
+                                        {' '+VERSION_EMOJI.ve_Right}
                                     </Text>
 
                                 </View>
