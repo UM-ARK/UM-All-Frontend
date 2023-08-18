@@ -6,7 +6,7 @@ import {
     FlatList,
     ScrollView,
     TouchableOpacity,
-    RefreshControl,
+    RefreshControl, Linking,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -161,9 +161,21 @@ class EventPage extends Component {
                 {noMoreData ? (
                     <View style={{ alignItems: 'center' }}>
                         <Text style={{ color: black.third }}>
-                            沒有更多活動了，過一段時間再來吧~
+                            恭喜你，達成『刨根問底』成就~
                         </Text>
                         <Text style={{ color: black.third }}>[]~(￣▽￣)~*</Text>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL('https://forms.gle/yC4SANickyNS5BAt7');
+                            }}>
+                            <Text
+                                style={{
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>{`\n領取獎品`}</Text>
+                        </TouchableOpacity>
                     </View>
                 ) : (
                     <TouchableOpacity
