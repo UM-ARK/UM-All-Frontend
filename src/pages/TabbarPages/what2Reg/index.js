@@ -27,9 +27,10 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
 const offerCourseList = offerCourse.Master;
-// Excel開課數據按首字母排序
-offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
-offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+// Excel開課數據按首字母排序，複製一份排序後的數據到offer courses.json，節省安卓端性能
+// offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
+// offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+// console.log('offerCourseList', JSON.stringify(offerCourseList));
 
 // 學院名中文參考
 const unitMap = {
