@@ -132,7 +132,6 @@ class HomeScreen extends Component {
                 },
             ],
 
-            cal: undefined,
             selectDay: 0,
 
             isShowModal: false,
@@ -159,9 +158,6 @@ class HomeScreen extends Component {
             this.setState({ isShowModal: false });
             this.getAppData(true);
         } else {
-            // setTimeout(() => {
-            //     this.setState({isShowModal: true});
-            // }, 1500);
             this.getAppData(false);
         }
         this.getCal();
@@ -235,19 +231,17 @@ class HomeScreen extends Component {
         // 使用ical-to-json工具轉為json格式，https://github.com/cwlsn/ics-to-json/
         // 放入static/UMCalendar中覆蓋
         // ***務必注意key、value的大小寫！！**
-        if (cal) {
-            this.setState({ cal })
-            let nowTimeStamp = moment(new Date());
-            // 同日或未來的重要時間設為選中日
-            if (nowTimeStamp.isSameOrAfter(cal[cal.length - 1].startDate)) {
-                this.setState({ selectDay: cal.length });
-            }
-            else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
-                for (let i = 0; i < cal.length; i++) {
-                    if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
-                        this.setState({ selectDay: i });
-                        break;
-                    }
+        const nowTimeStamp = moment(new Date());
+        const CAL_LENGTH = cal.length;
+        // 同日或未來的重要時間設為選中日
+        if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
+            this.setState({ selectDay: CAL_LENGTH - 1 });
+        }
+        else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
+            for (let i = 0; i < CAL_LENGTH; i++) {
+                if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
+                    this.setState({ selectDay: i });
+                    break;
                 }
             }
         }
@@ -277,17 +271,14 @@ class HomeScreen extends Component {
     // 渲染顶部校历图标
     renderCal = (item, index) => {
         const { selectDay } = this.state;
-        let momentItm = moment(item.startDate).format("YYYYMMDD");
+        const momentItm = moment(item.startDate).format("YYYYMMDD");
         return (
             <TouchableOpacity
                 style={{
                     backgroundColor: selectDay == index ? themeColor : themeColorLight,
                     borderRadius: scale(8),
-                    //borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
-                    //borderWidth: selectDay == index ? scale(2) : null,
                     paddingHorizontal: scale(5), paddingVertical: scale(3),
                     margin: scale(3),
-                    ...COLOR_DIY.viewShadow,
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
@@ -456,7 +447,7 @@ class HomeScreen extends Component {
     };
 
     render() {
-        const { selectDay, cal } = this.state;
+        const { selectDay, } = this.state;
         return (
             <View
                 style={{
@@ -490,13 +481,13 @@ class HomeScreen extends Component {
                         <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8) }}>
                             <VirtualizedList
                                 data={cal}
-                                initialNumToRender={9}
-                                initialScrollIndex={selectDay}
+                                initialNumToRender={11}
+                                initialScrollIndex={selectDay <= cal.length ? selectDay : 0}
                                 getItemLayout={(data, index) => {
-                                    let layoutSize = scale(40);
+                                    const layoutSize = scale(42);
                                     return {
-                                        length: layoutSize,
-                                        offset: layoutSize * index,
+                                        length: selectDay,
+                                        offset: layoutSize * index - selectDay,
                                         index,
                                     };
                                 }}
@@ -507,52 +498,55 @@ class HomeScreen extends Component {
                                 getItem={getItem}
                                 // 渲染項目數量
                                 getItemCount={getItemCount}
+                                key={'#'}
                                 // 列表primary key
-                                keyExtractor={item => item.startDate}
+                                keyExtractor={(item, index) => index}
                                 ListHeaderComponent={
-                                    <View style={{ marginLeft: scale(10) }} />
+                                    <View style={{ marginLeft: scale(20) }} />
                                 }
                                 ListFooterComponent={
-                                    <View style={{ marginRight: scale(10) }} />
+                                    <View style={{ marginRight: scale(20) }} />
                                 }
                             />
 
                             {/* 校曆日期描述 */}
-                            <View
-                                style={{
-                                    alignItems: 'center', justifyContent: 'center',
-                                    flexDirection: 'row',
-                                    marginTop: scale(5), marginHorizontal: scale(20),
-                                }}>
+                            {cal[selectDay] && 'summary' in cal[selectDay] ? (
+                                <View
+                                    style={{
+                                        alignItems: 'center', justifyContent: 'center',
+                                        flexDirection: 'row',
+                                        marginTop: scale(5), marginHorizontal: scale(20),
+                                    }}>
 
-                                {/*左衬线*/}
-                                <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
-                                >
-                                    {'\\' + '\\'}
-                                </Text>
-
-                                {/*日历内容描述*/}
-                                <View style={{
-                                    backgroundColor: themeColor,
-                                    borderRadius: scale(5),
-                                    paddingVertical: scale(2),
-                                    paddingHorizontal: scale(5),
-                                }}>
-                                    <Text
-                                        selectable
-                                        style={{ color: white, textAlign: 'center', fontSize: scale(12) }}
+                                    {/*左衬线*/}
+                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center', fontSize: scale(12) }}
                                     >
-                                        {this.state.cal[selectDay].summary}
+                                        {'\\' + '\\'}
                                     </Text>
+
+                                    {/*日历内容描述*/}
+                                    <View style={{
+                                        backgroundColor: themeColor,
+                                        borderRadius: scale(5),
+                                        paddingVertical: scale(2), paddingHorizontal: scale(5),
+                                    }}>
+                                        <Text
+                                            selectable
+                                            style={{ color: white, textAlign: 'center', fontSize: scale(12) }}
+                                        >
+                                            {cal[selectDay].summary}
+                                        </Text>
+                                    </View>
+
+                                    {/*右衬线*/}
+                                    <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center', fontSize: scale(12) }}
+                                    >
+                                        {'//'}
+                                    </Text>
+
                                 </View>
+                            ) : null}
 
-                                {/*右衬线*/}
-                                <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
-                                >
-                                    {'//'}
-                                </Text>
-
-                            </View>
                         </View>
                     ) : null}
 
