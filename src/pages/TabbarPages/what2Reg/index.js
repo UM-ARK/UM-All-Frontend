@@ -91,6 +91,7 @@ handleSearchFilterCourse = (inputText) => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
     });
+    filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
     filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
     return filterCourseList
 }
@@ -123,6 +124,7 @@ export default class index extends Component {
         this.scrollViewRef = React.createRef();
 
         // Excel開課數據按首字母排序
+        offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
         offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
     }
 
