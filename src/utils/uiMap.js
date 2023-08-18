@@ -3,7 +3,7 @@ import {StyleSheet, View, Text} from 'react-native';
 import {pxToDp} from './stylesKits';
 
 export const COLOR_DIY = {
-    // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定：#328ad1;
+    // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
     themeColor: '#4796d6',
     themeColorLight:'#7ca8cc',
     themeColorUltraLight:'#c9e1f5',
