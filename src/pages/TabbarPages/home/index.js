@@ -51,7 +51,7 @@ import moment from 'moment';
 import {screenWidth} from '../../../utils/stylesKits';
 import {VERSION_EMOJI} from '../../../utils/uiMap';
 
-const { white, bg_color, black, themeColor, themeColorLight } = COLOR_DIY;
+const { white, bg_color, black, themeColor, themeColorLight,themeColorUltraLight } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -537,14 +537,14 @@ class HomeScreen extends Component {
 
                                     {/*日历内容描述*/}
                                     <View style={{
-                                        backgroundColor: themeColor,
+                                        backgroundColor: themeColorUltraLight,
                                         borderRadius: scale(5),
                                         paddingVertical: scale(2), paddingHorizontal: scale(5),
                                     }}>
                                         
                                         <Text
                                             selectable
-                                            style={{ color: white, textAlign: 'center', fontSize: scale(12) }}
+                                            style={{ color: themeColor, textAlign: 'center', fontSize: scale(12) }}
                                         >
                                             {cal[selectDay].summary}
                                         </Text>
