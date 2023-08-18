@@ -244,7 +244,7 @@ export default class index extends Component {
                         >
                             <Text style={{
                                 color: itm === filterOptions.facultyName ? white : black.third,
-                                fontWeight: itm === filterOptions.facultyName ? 'bold' : 'normal',
+                                fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                                 fontSize: scale(12)
                             }}>{itm}</Text>
                         </TouchableOpacity>
@@ -298,7 +298,7 @@ export default class index extends Component {
                     >
                         <Text style={{
                             color: filterOptions.depaName === itm ? white : black.third,
-                            fontWeight: filterOptions.depaName === itm ? 'bold' : 'normal',
+                            fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
                             fontSize: scale(12)
                         }}>{itm}</Text>
                     </TouchableOpacity>
@@ -369,7 +369,7 @@ export default class index extends Component {
                                 >
                                     <Text style={{
                                         color: filterOptions.GE === itm ? white : black.third,
-                                        fontWeight: filterOptions.GE === itm ? 'bold' : 'normal',
+                                        fontWeight: filterOptions.GE === itm ? '900' : 'normal',
                                         fontSize: scale(12)
                                     }}>{itm}</Text>
                                 </TouchableOpacity>
@@ -423,7 +423,7 @@ export default class index extends Component {
         >
             <Text style={{
                 color: filterOptions.option === filterName ? white : black.third,
-                fontWeight: filterOptions.option === filterName ? 'bold' : 'normal',
+                fontWeight: filterOptions.option === filterName ? '900' : 'normal',
                 fontSize: scale(12),
             }}>{filterName === 'CMRE' ? 'CM/RE' : 'GE'}</Text>
         </TouchableOpacity>
