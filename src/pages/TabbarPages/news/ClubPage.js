@@ -5,7 +5,7 @@ import {
     RefreshControl,
     TouchableOpacity,
     Linking,
-    ScrollView
+    ScrollView,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -47,7 +47,6 @@ class ClubPage extends Component {
             isLoading: true,
             scrollPosition: 0,
             clubClassLayout: {},
-            scrollMaxItm: 'ARK',
         };
         // 獲取所有社團信息
         this.getData();
@@ -176,149 +175,106 @@ class ClubPage extends Component {
     }
 
     render() {
-        const { clubDataList, isLoading, scrollMaxItm } = this.state;
+        const { clubDataList, isLoading, } = this.state;
 
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
-                {clubDataList != undefined && !isLoading ? (
-                    <View style={{ flexDirection: 'row' }}>
-                        {/* 側邊分類導航 */}
-                        <View style={{
-                            // width: scale(60),
-                            position: 'absolute', zIndex: 99999, right: scale(10), top: scale(150),
-                            backgroundColor: white,
-                            borderRadius: scale(10),
-                            ...COLOR_DIY.viewShadow,
-                        }}>
-                            <FlatList
-                                data={clubTagList}
-                                contentContainerStyle={{
-                                    paddingHorizontal: scale(3),
-                                }}
-                                ListHeaderComponent={() => {
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                ReactNativeHapticFeedback.trigger('soft');
-                                                this.scrollViewRef.current.scrollTo({ y: 0 });
-                                                this.setState({ scrollMaxItm: 'ARK' })
-                                            }}
-                                            style={{
-                                                padding: scale(5),
-                                                width: '100%'
-                                            }}
-                                        >
-                                            <Text style={{
-                                                color: scrollMaxItm == 'ARK' ? themeColor : black.third,
-                                                fontSize: scale(11)
-                                            }}
-                                            >
-                                                ARK
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )
-                                }}
-                                renderItem={(itm) => {
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                ReactNativeHapticFeedback.trigger('soft');
-                                                // 點擊自動滑動到對應分類的社團
-                                                const tag = itm.item;
-                                                this.scrollViewRef.current.scrollTo({
-                                                    y: this.state.clubClassLayout[tag]
-                                                })
-                                                this.setState({ scrollMaxItm: tag })
-                                            }}
-                                            style={{
-                                                padding: scale(5),
-                                                width: '100%',
-                                            }}
-                                        >
-                                            <Text style={{
-                                                color: scrollMaxItm == itm.item ? themeColor : black.third,
-                                                fontSize: scale(11)
-                                            }}>
-                                                {clubTagMap(itm.item)}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )
-                                }}
-                                keyExtractor={item => item.id}
-                                showsHorizontalScrollIndicator={false}
-                            />
-                        </View>
-
-                        {/* 組織展示 */}
-                        <View
-                        // style={{ width: scale(290) }}
-                        >
-                            <ScrollView
-                                refreshControl={
-                                    <RefreshControl
-                                        colors={[themeColor]}
-                                        tintColor={themeColor}
-                                        refreshing={this.state.isLoading}
-                                        onRefresh={() => {
-                                            this.getData();
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center', justifyContent: 'center' }}>
+                {/* 側邊分類導航 */}
+                {clubDataList != undefined && 'ARK' in clubDataList ? (
+                    <View style={{
+                        position: 'absolute', zIndex: 99999, right: scale(10), top: scale(150),
+                        backgroundColor: white,
+                        borderRadius: scale(10),
+                        ...COLOR_DIY.viewShadow,
+                    }}>
+                        <FlatList
+                            data={clubTagList}
+                            contentContainerStyle={{
+                                paddingHorizontal: scale(3),
+                            }}
+                            ListHeaderComponent={() => {
+                                return (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger('soft');
+                                            this.scrollViewRef.current.scrollTo({ y: 0 });
                                         }}
-                                    />
-                                }
-                                ref={this.scrollViewRef}
-                                // onMomentumScrollEnd 拖到至鬆手才執行
-                                onScroll={({ nativeEvent }) => {
-                                    const { clubClassLayout } = this.state;
-                                    // the current offset, {x: number, y: number} 
-                                    const position = nativeEvent.contentOffset;
-
-                                    // 記錄已滑過的最大項
-                                    let scrollMaxIndex = 0;
-                                    Object.values(clubClassLayout).map((itm, idx) => {
-                                        if (itm <= position.y + 20) {
-                                            scrollMaxIndex = idx;
-                                        }
-                                    })
-                                    this.setState({
-                                        scrollMaxItm: Object.keys(clubClassLayout)[scrollMaxIndex]
-                                    })
-                                }}
-                            >
-                                {'ARK' in clubDataList && (
-                                    <View>
-                                        {this.renderClub(clubDataList.ARK, 'ARK')}
-                                        {clubTagList.map((tag) => {
-                                            if (tag in clubDataList && clubDataList[tag].length > 0) {
-                                                return this.renderClub(clubDataList[tag], tag)
-                                            }
-                                        })}
-                                    </View>
-                                )}
-                                {this.renderBottomInfo()}
-                            </ScrollView>
-                        </View>
+                                        style={{
+                                            padding: scale(5),
+                                            width: '100%'
+                                        }}
+                                    >
+                                        <Text style={{
+                                            color: black.third,
+                                            fontSize: scale(11)
+                                        }}
+                                        >
+                                            ARK
+                                        </Text>
+                                    </TouchableOpacity>
+                                )
+                            }}
+                            renderItem={(itm) => {
+                                return (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger('soft');
+                                            // 點擊自動滑動到對應分類的社團
+                                            const tag = itm.item;
+                                            this.scrollViewRef.current.scrollTo({
+                                                y: this.state.clubClassLayout[tag]
+                                            })
+                                        }}
+                                        style={{
+                                            padding: scale(5),
+                                            width: '100%',
+                                        }}
+                                    >
+                                        <Text style={{
+                                            color: black.third,
+                                            fontSize: scale(11)
+                                        }}>
+                                            {clubTagMap(itm.item)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )
+                            }}
+                            keyExtractor={item => item.id}
+                            showsHorizontalScrollIndicator={false}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
                     </View>
+                ) : null}
+
+                {/* 組織展示 */}
+                {clubDataList != undefined && !isLoading ? (
+                    'ARK' in clubDataList ?
+                        <ScrollView
+                            refreshControl={
+                                <RefreshControl
+                                    colors={[themeColor]}
+                                    tintColor={themeColor}
+                                    refreshing={this.state.isLoading}
+                                    onRefresh={() => {
+                                        this.getData();
+                                    }}
+                                />
+                            }
+                            ref={this.scrollViewRef}
+                        >
+                            <View>
+                                {this.renderClub(clubDataList.ARK, 'ARK')}
+                                {clubTagList.map((tag) => {
+                                    if (tag in clubDataList && clubDataList[tag].length > 0) {
+                                        return this.renderClub(clubDataList[tag], tag)
+                                    }
+                                })}
+                            </View>
+                            {this.renderBottomInfo()}
+                        </ScrollView> : null
                 ) : (
-                    <ScrollView
-                        contentContainerStyle={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={this.state.isLoading}
-                                onRefresh={() => {
-                                    // 展示Loading標識
-                                    this.setState({ isLoading: true });
-                                    this.getData();
-                                }}
-                            />
-                        }
-                    >
-                        <Loading />
-                    </ScrollView>
+                    <Loading />
                 )}
             </View>
         );
