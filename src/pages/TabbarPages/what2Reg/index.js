@@ -27,6 +27,9 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
 const offerCourseList = offerCourse.Master;
+// Excel開課數據按首字母排序
+offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
+offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
 
 // 學院名中文參考
 const unitMap = {
@@ -122,10 +125,6 @@ export default class index extends Component {
 
         this.textInputRef = React.createRef();
         this.scrollViewRef = React.createRef();
-
-        // Excel開課數據按首字母排序
-        offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
-        offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
     }
 
     componentDidMount() {
