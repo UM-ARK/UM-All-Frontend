@@ -520,7 +520,7 @@ class HomeScreen extends Component {
                                         flexDirection: 'row',
                                         marginTop: scale(5), 
                                         //marginHorizontal: scale(20),
-                                        width:screenWidth,
+                                        
                                     }}>
 
                                     {/*左Emoji*/}
@@ -532,7 +532,7 @@ class HomeScreen extends Component {
                                             fontSize: scale(12),
                                     }}
                                     >
-                                            {VERSION_EMOJI.ve_Left+' '}
+                                            {VERSION_EMOJI.ve_Left+'\n'}
                                     </Text>
 
                                     {/*日历内容描述*/}
@@ -540,6 +540,7 @@ class HomeScreen extends Component {
                                         backgroundColor: themeColorUltraLight,
                                         borderRadius: scale(5),
                                         paddingVertical: scale(2), paddingHorizontal: scale(5),
+                                        width:screenWidth * 0.8,
                                     }}>
                                         
                                         <Text
@@ -558,7 +559,7 @@ class HomeScreen extends Component {
                                             textAlign: 'center', 
                                             fontSize: scale(12)
                                     }}>
-                                        {' '+VERSION_EMOJI.ve_Right}
+                                        {'\n'+VERSION_EMOJI.ve_Right}
                                     </Text>
 
                                 </View>
