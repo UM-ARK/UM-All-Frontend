@@ -81,6 +81,13 @@ export default class CourseCard extends Component {
                             }}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
+                                let webview_param = {
+                                    url: '',
+                                    title: '',
+                                    text_color: '#FFF',
+                                    bg_color_diy: '#30548b',
+                                    isBarStyleBlack: false,
+                                };
                                 if (this.props.prof_info) {
                                     // 進入搜索特定教授的課程模式，進入評論詳情頁
                                     // this.context.navigate('What2RegComment', {
@@ -89,14 +96,19 @@ export default class CourseCard extends Component {
                                     //     prof_info: this.props.prof_info,
                                     // })
                                     const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(item.New_code) + '/' + encodeURIComponent(this.props.prof_info.name)
-                                    Linking.openURL(URI);
+                                    // Linking.openURL(URI);
+                                    webview_param.url = URI;
+                                    webview_param.title = item.New_code;
                                 }
                                 else {
                                     // 進入搜索課程代號模式
                                     // this.context.navigate('What2RegCourse', courseCode)
                                     const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(item['Course Code'])}&instructor=${false}`
-                                    Linking.openURL(URI)
+                                    // Linking.openURL(URI)
+                                    webview_param.url = URI;
+                                    webview_param.title = item['Course Code'];
                                 }
+                                this.context.navigate('Webviewer', webview_param);
                             }}
                             // 獲取當前位置距離屏幕頂端的高度
                             onLayout={event => {

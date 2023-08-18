@@ -574,7 +574,15 @@ export default class index extends Component {
     jumpToWebRelateCoursePage = (searchData) => {
         const { inputText, type } = searchData;
         const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
-        Linking.openURL(URI)
+        // Linking.openURL(URI)
+        const webview_param = {
+            url: URI,
+            title: inputText,
+            text_color: '#FFF',
+            bg_color_diy: '#30548b',
+            isBarStyleBlack: false,
+        };
+        this.props.navigation.navigate('Webviewer', webview_param);
     }
 
     // 渲染首字母側邊導航
