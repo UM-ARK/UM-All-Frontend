@@ -19,9 +19,6 @@ import { inject } from 'mobx-react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
-
 const IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
 
@@ -197,27 +194,23 @@ class EventCard extends Component {
                             ) : null}
                         </FastImage>
 
-                        {/*如果是Link的话就显示Link图标*/}
-                        <View
-                            style = {{
-                                position:'absolute',
-                                top:10,
-                                right:10,
-                                zIndex:2,
-                                transform:[{rotate:'-45deg'}],
-                                shadowColor: 'black',
-                                shadowOpacity:0.3,
-                                shadowRadius:5,
-                        }}
-                        >
-                            {this.state.type === 'WEBSITE'?(
+                        {/* website類型活動展示link圖標 */}
+                        {this.state.type === 'WEBSITE' ? (
+                            <View
+                                style={{
+                                    position: 'absolute', zIndex: 2,
+                                    top: 10, right: 10,
+                                    transform: [{ rotate: '-45deg' }],
+                                    ...viewShadow,
+                                }}
+                            >
                                 <Ionicons
                                     name={'link'}
                                     size={20}
-                                    color={COLOR_DIY.themeColorUltraLight}
+                                    color={COLOR_DIY.themeColor}
                                 />
-                            ):null}
-                        </View>
+                            </View>
+                        ) : null}
 
                         {/* 活動簡單描述 */}
                         <View style={styles.title.container}>
