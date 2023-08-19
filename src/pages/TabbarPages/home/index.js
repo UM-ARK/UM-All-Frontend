@@ -8,7 +8,8 @@ import {
     VirtualizedList,
     TouchableWithoutFeedback,
     Platform,
-    Linking
+    Linking,
+    Alert,
 } from 'react-native';
 
 // 本地工具
@@ -20,7 +21,8 @@ import {
     BASE_HOST,
     BASE_URI,
     GET,
-    addHost, APPSTORE_URL,
+    addHost,
+    APPSTORE_URL,
 } from '../../../utils/pathMap';
 import EventPage from '../news/EventPage.js';
 import ModalBottom from '../../../components/ModalBottom';
@@ -198,20 +200,34 @@ class HomeScreen extends Component {
                     setAPPInfo(serverInfo);
                 }
             }
+
             // APP版本滯後，提示下載新版本
-            if (
-                versionStringCompare(
-                    packageInfo.version,
-                    serverInfo.app_version,
-                ) === -1
-            ) {
+            const shouldUpdate = versionStringCompare(packageInfo.version, serverInfo.app_version) == -1;
+            if (shouldUpdate) {
                 this.setState({
-                    showUpdateInfo: true,
+                    showUpdateInfo: shouldUpdate,
                     app_version: {
                         lastest: serverInfo.app_version,
                         local: packageInfo.version,
                     }
                 })
+                Alert.alert(`ARK ${serverInfo.app_version} 現可更新！！`,
+                    'version_info' in serverInfo
+                        ? serverInfo.version_info
+                        : `新版有許多新特性，舊版APP可能會在某時刻不可用，現在前往更新嗎？🥺`,
+                    [
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                Linking.openURL(url);
+                            },
+                        },
+                        {
+                            text: "No",
+                        },
+                    ])
             }
         } catch (e) {
             // console.error(e);
@@ -379,7 +395,7 @@ class HomeScreen extends Component {
             </TouchableOpacity>
         );
     };
-    
+
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
         this.setState({ isShowModal: !this.state.isShowModal });
@@ -443,7 +459,7 @@ class HomeScreen extends Component {
     };
 
     render() {
-        const { selectDay, } = this.state;
+        const { selectDay, isLoading } = this.state;
         return (
             <View
                 style={{
@@ -452,7 +468,7 @@ class HomeScreen extends Component {
                 }}>
 
                 {/* 懸浮可拖動按鈕 */}
-                {this.state.isLoading ? null : this.renderGoTopButton()}
+                {isLoading ? null : this.renderGoTopButton()}
 
                 {/* 主页本体 */}
                 <ScrollView
@@ -581,53 +597,72 @@ class HomeScreen extends Component {
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
                         <HomeCard>
-                            <Text
-                                style={{
-                                    color: black,
-                                    fontWeight: 'bold',
-                                    marginTop: scale(2),
-                                    alignSelf: 'center',
-                                    textAlign: 'center',
-                                }}>
-                                {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: themeColor,
-                                    marginTop: scale(5),
-                                    fontWeight: 'bold',
-                                }}>
-                                {`最新版本: ${this.state.app_version.lastest}`}
-                            </Text>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    marginTop: scale(5),
-                                    fontWeight: 'bold',
-                                }}>
-                                {`你的版本: ${this.state.app_version.local}`}
-                            </Text>
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
-                                    const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                    Linking.openURL(url);
-                                }}>
+                            <View>
+                                <Text
+                                    style={{
+                                        color: black,
+                                        fontWeight: 'bold',
+                                        marginTop: scale(2),
+                                        alignSelf: 'center',
+                                        textAlign: 'center',
+                                    }}>
+                                    {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                                </Text>
                                 <Text
                                     style={{
                                         color: themeColor,
                                         marginTop: scale(5),
                                         fontWeight: 'bold',
                                     }}>
-                                    {`點我快速更新 😉~`}
+                                    {`最新版本: ${this.state.app_version.lastest}`}
                                 </Text>
-                            </TouchableOpacity>
+                                <Text
+                                    style={{
+                                        color: black.third,
+                                        marginTop: scale(5),
+                                        fontWeight: 'bold',
+                                    }}>
+                                    {`你的版本: ${this.state.app_version.local}`}
+                                </Text>
+                                {Platform.OS === 'ios' ? null : (
+                                    <Text
+                                        style={{
+                                            alignSelf: 'center', textAlign: 'center',
+                                            color: themeColor,
+                                            marginTop: scale(5),
+                                            fontWeight: 'bold',
+                                        }}>
+                                        {`無Google Play Store用戶可以通過APK方式安裝~`}
+                                    </Text>
+                                )}
+                                <TouchableOpacity
+                                    style={{
+                                        alignSelf: 'center',
+                                        marginTop: scale(5),
+                                        backgroundColor: themeColor,
+                                        borderRadius: scale(10),
+                                        paddingVertical: scale(5), paddingHorizontal: scale(8),
+                                    }}
+                                    activeOpacity={0.8}
+                                    onPress={() => {
+                                        ReactNativeHapticFeedback.trigger('soft');
+                                        const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                        Linking.openURL(url);
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: white,
+                                            fontWeight: 'bold',
+                                        }}>
+                                        {`點我更新 😉~`}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </HomeCard>
                         : null}
 
                     {/* 活動頁 */}
-                    <EventPage ref={this.eventPage} />
+                    {isLoading ? null : <EventPage ref={this.eventPage} />}
 
                     {/* 快速填充功能提示 */}
                     {/* <View
