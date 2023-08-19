@@ -18,6 +18,7 @@ import {
     UM_WHOLE,
     WHAT_2_REG,
     NEW_SCZN,
+    UM_MAP,
     BASE_HOST,
     BASE_URI,
     GET,
@@ -103,21 +104,21 @@ class HomeScreen extends Component {
                 //         // });
                 //     },
                 // },
-                // {
-                //     icon_name: 'ghost',
-                //     icon_type: iconTypes.materialCommunityIcons,
-                //     function_name: '生存指南',
-                //     func: () => {
-                //         ReactNativeHapticFeedback.trigger('soft');
-                //         let webview_param = {
-                //             url: NEW_SCZN,
-                //             title: '新鮮人要知道的億些Tips',
-                //             text_color: COLOR_DIY.black.second,
-                //             bg_color_diy: '#ededed',
-                //         };
-                //         this.props.navigation.navigate('Webviewer', webview_param);
-                //     },
-                // },
+                {
+                    icon_name: 'map',
+                    icon_type: iconTypes.materialCommunityIcons,
+                    function_name: '校園地圖',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        let webview_param = {
+                            url: UM_MAP,
+                            title: '校園地圖',
+                            text_color: COLOR_DIY.black.second,
+                            bg_color_diy: '#ededed',
+                        };
+                        this.props.navigation.navigate('Webviewer', webview_param);
+                    },
+                },
                 {
                     icon_name: 'people',
                     icon_type: iconTypes.ionicons,
