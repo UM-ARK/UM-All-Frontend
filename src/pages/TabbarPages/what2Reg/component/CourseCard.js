@@ -139,6 +139,12 @@ export default class CourseCard extends Component {
                                     color: black.second,
                                 }}>{item.courseTitleChi}</Text>
                             ) : null}
+                            {'Course Title Chi' in item && item['Course Title Chi'].length > 0 ? (
+                                <Text style={{
+                                    fontSize: scale(11),
+                                    color: black.second,
+                                }}>{item['Course Title Chi']}</Text>
+                            ) : null}
                             <Text style={{
                                 fontSize: scale(10),
                                 color: black.third,

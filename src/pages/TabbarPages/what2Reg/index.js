@@ -26,11 +26,27 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
-const offerCourseList = offerCourse.Master;
-// Excel開課數據按首字母排序，複製一份排序後的數據到offer courses.json，節省安卓端性能
+let offerCourseList = offerCourse.Courses;
+// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offer courses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
-// console.log('offerCourseList', JSON.stringify(offerCourseList));
+
+// 2. 複製替換原課程列表為排序後列表
+// const courseListStr = JSON.stringify(offerCourseList);
+
+// 3. 獲取英文課程標題
+// let enList = offerCourseList.map((itm) => itm['Course Title']);
+// const enListStr = JSON.stringify(enList);
+// console.log('enListStr', enListStr);
+
+// 4. 保存為docx翻譯為中文繁體，去除特殊符號 “” 《》 ，
+// const cnListStr = ;
+
+// 5. 插入原數組
+// offerCourseList.map((itm,idx)=>{
+//     itm['Course Title Chi'] = cnListStr[idx];
+// })
+// console.log(JSON.stringify(offerCourseList));
 
 // 學院名中文參考
 const unitMap = {
