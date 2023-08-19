@@ -3,9 +3,7 @@ import {
     ScrollView,
     View,
     Text,
-    Dimensions,
     TouchableOpacity,
-    StyleSheet,
     RefreshControl,
     VirtualizedList,
     TouchableWithoutFeedback,
@@ -18,10 +16,7 @@ import {
     UM_WHOLE,
     WHAT_2_REG,
     NEW_SCZN,
-    USUAL_Q,
     BASE_HOST,
-    ARK_LETTER_IMG,
-    UMALL_LOGO,
     BASE_URI,
     GET,
     addHost,
@@ -34,7 +29,6 @@ import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
 
-import { Header, Divider } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Interactable from 'react-native-interactable';
@@ -46,12 +40,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
-import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
-import {screenWidth} from '../../../utils/stylesKits';
-import {VERSION_EMOJI} from '../../../utils/uiMap';
+import { screenWidth } from '../../../utils/stylesKits';
+import { VERSION_EMOJI } from '../../../utils/uiMap';
 
-const { white, bg_color, black, themeColor, themeColorLight,themeColorUltraLight } = COLOR_DIY;
+const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -476,11 +469,13 @@ class HomeScreen extends Component {
                         />
                     }
                     alwaysBounceHorizontal={false}
-                    ref={this.scrollView}>
+                    ref={this.scrollView}
+                    showsVerticalScrollIndicator={false}
+                >
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
-                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8),justifyContent:'center', }}>
+                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8), justifyContent: 'center', }}>
                             <VirtualizedList
                                 data={cal}
                                 initialNumToRender={11}
@@ -515,24 +510,23 @@ class HomeScreen extends Component {
                             {cal[selectDay] && 'summary' in cal[selectDay] ? (
                                 <View
                                     style={{
-                                        alignItems: 'center', 
+                                        alignItems: 'center',
                                         justifyContent: 'center',
                                         flexDirection: 'row',
-                                        marginTop: scale(5), 
+                                        marginTop: scale(5),
                                         //marginHorizontal: scale(20),
-                                        
                                     }}>
 
                                     {/*左Emoji*/}
                                     <Text
                                         selectable
-                                        style={{ 
-                                            color: white, 
-                                            textAlign: 'center', 
+                                        style={{
+                                            color: white,
+                                            textAlign: 'center',
                                             fontSize: scale(12),
-                                    }}
+                                        }}
                                     >
-                                            {VERSION_EMOJI.ve_Left+'\n'}
+                                        {VERSION_EMOJI.ve_Left + '\n'}
                                     </Text>
 
                                     {/*日历内容描述*/}
@@ -540,26 +534,29 @@ class HomeScreen extends Component {
                                         backgroundColor: themeColorUltraLight,
                                         borderRadius: scale(5),
                                         paddingVertical: scale(2), paddingHorizontal: scale(5),
-                                        width:screenWidth * 0.8,
+                                        width: screenWidth * 0.8,
                                     }}>
-                                        
+
                                         <Text
                                             selectable
                                             style={{ color: themeColor, textAlign: 'center', fontSize: scale(12) }}
                                         >
                                             {cal[selectDay].summary}
+                                            {'summary_cn' in cal[selectDay] ? (
+                                                '\n' + cal[selectDay].summary_cn
+                                            ) : null}
                                         </Text>
                                     </View>
 
                                     {/*右Emoji*/}
                                     <Text
                                         selectable
-                                        style={{ 
-                                            color: white, 
-                                            textAlign: 'center', 
+                                        style={{
+                                            color: white,
+                                            textAlign: 'center',
                                             fontSize: scale(12)
-                                    }}>
-                                        {'\n'+VERSION_EMOJI.ve_Right}
+                                        }}>
+                                        {'\n' + VERSION_EMOJI.ve_Right}
                                     </Text>
 
                                 </View>
