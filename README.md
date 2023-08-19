@@ -119,20 +119,6 @@ pod install
 npx react-native run-ios
 ```
 
-## 打包方式
-### iOS打包
-1. 找到 ``./ios/UMALL.xcworkspace``，點擊打開Xcode。
-2. Build。
-- 點擊左側欄目找到``UMALL``項目，然後再中間的面板中輸入新的版本號（Version和Build通常一樣）。
-- 將設備設為"Any iOS Device"，並``command+B``來Build，並進行實機測試。
-3. 歸檔並發佈。
-- Build成功後，點擊頂欄 Product->Archive歸檔，隨後在彈出的頁面中一直點擊確認。
-- 最後點擊 Distribute App按鈕發佈。
-4. 到[Appstore Connect頁面](https://appstoreconnect.apple.com)查看並提交審核。
-5. 注意：
-- 一個Build號只能用一次。如果build失敗則更換build號，通常加一個小版本即可（如2.2.0->2.2.1）。
-- 檢查``Info.plist``的``App Uses Non-Exempt Encription``選項，必須設置為No，否則會被Apple禁止上傳。
-
 ### 故障排除
 
 在此查看[Android 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android)
