@@ -3,10 +3,8 @@ import {
     Text,
     View,
     StyleSheet,
-    Dimensions,
     FlatList,
     ScrollView,
-    TouchableWithoutFeedback,
     TouchableOpacity,
     RefreshControl,
 } from 'react-native';
@@ -16,34 +14,28 @@ import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
 
-import Interactable from 'react-native-interactable';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import ActionSheet from 'react-native-actionsheet';
 import axios from 'axios';
-import Toast, { DURATION } from 'react-native-easy-toast';
+import Toast from 'react-native-easy-toast';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
-
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
 
 // 返回數據的頁數
 let dataPage = 1;
-eventDataList = [];
+let eventDataList = [];
 class EventPage extends Component {
-    state = {
-        leftDataList: [],
-        rightDataList: [],
-        isLoading: true,
-        noMoreData: false,
-        needFilter: false,
-    };
-
     constructor() {
         super();
+        this.state = {
+            leftDataList: [],
+            rightDataList: [],
+            isLoading: true,
+            noMoreData: false,
+            needFilter: false,
+        };
+
         this.getData();
     }
 
@@ -133,116 +125,6 @@ class EventPage extends Component {
             }
         });
         this.separateData(newDataArr);
-    };
-
-    renderFilter = () => {
-        let optionsList = ['進行中', '全部', '取消'];
-        return (
-            <View>
-                <TouchableOpacity
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        this.ActionSheet.show();
-                    }}
-                    activeOpacity={0.8}
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: scale(8),
-                        width: '100%',
-                        backgroundColor: bg_color,
-                    }}>
-                    <Text style={{ color: black.third }}>篩選</Text>
-                    <Ionicons
-                        name={
-                            this.state.applyFilter
-                                ? 'md-funnel'
-                                : 'md-funnel-outline'
-                        }
-                        size={scale(10)}
-                        color={black.third}
-                        style={{ marginLeft: scale(5) }}
-                    />
-                </TouchableOpacity>
-
-                {/* 選擇彈窗 */}
-                <ActionSheet
-                    ref={o => (this.ActionSheet = o)}
-                    options={optionsList}
-                    cancelButtonIndex={optionsList.length - 1}
-                    destructiveButtonIndex={optionsList.length - 1}
-                    onPress={index => {
-                        if (index == 1) {
-                            // 全部mode
-                            this.setState({ needFilter: false });
-                            this.separateData(eventDataList);
-                        } else if (index == 0) {
-                            // 篩選未結束mode
-                            this.setState({ needFilter: true });
-                            this.eventFilter(eventDataList);
-                        }
-                    }}
-                />
-            </View>
-        );
-    };
-
-    // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
-        return (
-            <Interactable.View
-                style={{
-                    zIndex: 999,
-                    position: 'absolute',
-                }}
-                ref="headInstance"
-                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-                snapPoints={[
-                    { x: -scale(140), y: -scale(220) },
-                    { x: scale(140), y: -scale(220) },
-                    { x: -scale(140), y: -scale(120) },
-                    { x: scale(140), y: -scale(120) },
-                    { x: -scale(140), y: scale(0) },
-                    { x: scale(140), y: scale(0) },
-                    { x: -scale(140), y: scale(120) },
-                    { x: scale(140), y: scale(120) },
-                    { x: -scale(140), y: scale(220) },
-                    { x: scale(140), y: scale(220) },
-                ]}
-                // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: scale(220) }}>
-                {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.refs.scrollView.scrollTo({
-                            x: 0,
-                            y: 0,
-                            duration: 500, // 回頂時間
-                        });
-                    }}>
-                    <View
-                        style={{
-                            width: scale(50),
-                            height: scale(50),
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...viewShadow,
-                        }}>
-                        <Ionicons
-                            name={'chevron-up'}
-                            size={scale(40)}
-                            color={black.main}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-            </Interactable.View>
-        );
     };
 
     loadMoreData = () => {
@@ -337,66 +219,34 @@ class EventPage extends Component {
         return (
             <View
                 style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: bg_color,
-                    ...this.props.style
+                    flex: 1, backgroundColor: bg_color,
+                    alignItems: 'center', justifyContent: 'center',
+                    ...this.props.style,
                 }}>
-                {/* 懸浮可拖動按鈕 */}
-                {/* {isLoading ? null : this.renderGoTopButton()} */}
-
                 {/* 加載狀態渲染骨架屏 */}
                 {this.state.isLoading ? (
+                    <Loading />
+                ) : (leftDataList.length > 0 || rightDataList.length > 0 ?
                     <ScrollView
+                        ref={'scrollView'}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
                                 tintColor={themeColor}
-                                refreshing={this.state.isLoading}
+                                refreshing={isLoading}
                                 onRefresh={this.onRefresh}
                             />
                         }
-                        contentContainerStyle={{
-                            // flex: 1,
-                            // justifyContent: 'center',
-                            // alignItems: 'center',
-                        }}>
-                        <View style={{ width: '100%', height: scale(250) }}>
-                            <Loading />
-                        </View>
-                    </ScrollView>
-                ) : null}
-                <ScrollView
-                    ref={'scrollView'}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={isLoading}
-                            onRefresh={this.onRefresh}
-                        />
-                    }
-                    directionalLockEnabled
-                    alwaysBounceHorizontal={false}>
-                    {isLoading ? null : (
+                        directionalLockEnabled
+                        alwaysBounceHorizontal={false}>
                         <View>
-                            {/* 篩選 */}
-                            {/* {this.renderFilter()} */}
-
-                            {/* 仿瀑布屏展示 */}
-                            {/* 渲染主要內容 */}
-                            {leftDataList.length > 0 || rightDataList.length > 0
-                                ? this.renderPage()
-                                : null}
+                            {/* 瀑布流渲染主要內容 */}
+                            {this.renderPage()}
 
                             {this.renderLoadMoreView()}
-
-                            {/* 防止底部遮擋 */}
-                            {/* <View style={{marginBottom: scale(50)}} /> */}
                         </View>
-                    )}
-                </ScrollView>
+                    </ScrollView> : null
+                )}
 
                 {/* Tost */}
                 <Toast

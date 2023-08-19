@@ -48,9 +48,10 @@ import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import moment from 'moment';
+import {screenWidth} from '../../../utils/stylesKits';
+import {VERSION_EMOJI} from '../../../utils/uiMap';
 
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { white, bg_color, black, themeColor } = COLOR_DIY;
+const { white, bg_color, black, themeColor, themeColorLight,themeColorUltraLight } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -72,86 +73,85 @@ const iconTypes = {
 const cal = UMCalendar;
 
 class HomeScreen extends Component {
-    state = {
-        // 首頁輪播圖數據
-        carouselImagesArr: [
-            {
-                url: UMALL_LOGO,
-            },
-        ],
+    constructor(props) {
+        super(props)
 
-        // 快捷功能入口
-        functionArray: [
-            {
-                icon_name: 'bus',
-                icon_type: iconTypes.ionicons,
-                function_name: '校園巴士',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.navigate('Bus');
+        this.state = {
+            // 快捷功能入口
+            functionArray: [
+                {
+                    icon_name: 'bus',
+                    icon_type: iconTypes.ionicons,
+                    function_name: '校園巴士',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.props.navigation.navigate('Bus');
+                    },
                 },
-            },
-            // {
-            //     icon_name: 'database-search',
-            //     icon_type: iconTypes.materialCommunityIcons,
-            //     function_name: '選咩課',
-            //     func: () => {
-            //         ReactNativeHapticFeedback.trigger('soft');
-            //         let webview_param = {
-            //             url: WHAT_2_REG,
-            //             title: '澳大選咩課',
-            //             text_color: '#fff',
-            //             bg_color_diy: '#1e558c',
-            //             isBarStyleBlack: false,
-            //         };
-            //         this.props.navigation.navigate('Webviewer', webview_param);
-            //         // this.props.navigation.jumpTo('NewsTabbar', {
-            //         //     screen: 'EventPage',
-            //         // });
-            //     },
-            // },
-            // {
-            //     icon_name: 'ghost',
-            //     icon_type: iconTypes.materialCommunityIcons,
-            //     function_name: '生存指南',
-            //     func: () => {
-            //         ReactNativeHapticFeedback.trigger('soft');
-            //         let webview_param = {
-            //             url: NEW_SCZN,
-            //             title: '新鮮人要知道的億些Tips',
-            //             text_color: COLOR_DIY.black.second,
-            //             bg_color_diy: '#ededed',
-            //         };
-            //         this.props.navigation.navigate('Webviewer', webview_param);
-            //     },
-            // },
-            {
-                icon_name: 'people',
-                icon_type: iconTypes.ionicons,
-                function_name: '組織登入',
-                func: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    this.props.navigation.navigate('MeScreen');
+                // {
+                //     icon_name: 'database-search',
+                //     icon_type: iconTypes.materialCommunityIcons,
+                //     function_name: '選咩課',
+                //     func: () => {
+                //         ReactNativeHapticFeedback.trigger('soft');
+                //         let webview_param = {
+                //             url: WHAT_2_REG,
+                //             title: '澳大選咩課',
+                //             text_color: '#fff',
+                //             bg_color_diy: '#1e558c',
+                //             isBarStyleBlack: false,
+                //         };
+                //         this.props.navigation.navigate('Webviewer', webview_param);
+                //         // this.props.navigation.jumpTo('NewsTabbar', {
+                //         //     screen: 'EventPage',
+                //         // });
+                //     },
+                // },
+                // {
+                //     icon_name: 'ghost',
+                //     icon_type: iconTypes.materialCommunityIcons,
+                //     function_name: '生存指南',
+                //     func: () => {
+                //         ReactNativeHapticFeedback.trigger('soft');
+                //         let webview_param = {
+                //             url: NEW_SCZN,
+                //             title: '新鮮人要知道的億些Tips',
+                //             text_color: COLOR_DIY.black.second,
+                //             bg_color_diy: '#ededed',
+                //         };
+                //         this.props.navigation.navigate('Webviewer', webview_param);
+                //     },
+                // },
+                {
+                    icon_name: 'people',
+                    icon_type: iconTypes.ionicons,
+                    function_name: '組織登入',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.props.navigation.navigate('MeScreen');
 
+                    },
                 },
-            },
-        ],
+            ],
 
-        cal: undefined,
-        selectDay: 0,
+            selectDay: 0,
 
-        isShowModal: false,
+            isShowModal: false,
 
-        isLoading: true,
+            isLoading: true,
 
-        // 是否提示更新
-        showUpdateInfo: false,
+            // 是否提示更新
+            showUpdateInfo: false,
 
-        app_version: {
-            lastest: '',
-            local: '',
-        }
-    };
+            app_version: {
+                lastest: '',
+                local: '',
+            }
+        };
+
+        this.eventPage = React.createRef();
+        this.scrollView = React.createRef();
+    }
 
     componentDidMount() {
         let globalData = this.props.RootStore;
@@ -160,9 +160,6 @@ class HomeScreen extends Component {
             this.setState({ isShowModal: false });
             this.getAppData(true);
         } else {
-            // setTimeout(() => {
-            //     this.setState({isShowModal: true});
-            // }, 1500);
             this.getAppData(false);
         }
         this.getCal();
@@ -226,17 +223,6 @@ class HomeScreen extends Component {
             // console.error(e);
         }
         finally {
-            // 設定輪播圖
-            // if (
-            //     serverInfo.index_head_carousel &&
-            //     serverInfo.index_head_carousel.length > 0
-            // ) {
-            //     let imgUrlArr = serverInfo.index_head_carousel;
-            //     imgUrlArr.map(itm => {
-            //         itm.url = addHost(itm.url);
-            //     });
-            //     this.setState({carouselImagesArr: imgUrlArr});
-            // }
             this.setState({ isLoading: false });
         }
     };
@@ -247,19 +233,17 @@ class HomeScreen extends Component {
         // 使用ical-to-json工具轉為json格式，https://github.com/cwlsn/ics-to-json/
         // 放入static/UMCalendar中覆蓋
         // ***務必注意key、value的大小寫！！**
-        if (cal) {
-            this.setState({ cal })
-            let nowTimeStamp = moment(new Date());
-            // 同日或未來的重要時間設為選中日
-            if (nowTimeStamp.isSameOrAfter(cal[cal.length - 1].startDate)) {
-                this.setState({ selectDay: cal.length });
-            }
-            else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
-                for (let i = 0; i < cal.length; i++) {
-                    if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
-                        this.setState({ selectDay: i });
-                        break;
-                    }
+        const nowTimeStamp = moment(new Date());
+        const CAL_LENGTH = cal.length;
+        // 同日或未來的重要時間設為選中日
+        if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
+            this.setState({ selectDay: CAL_LENGTH - 1 });
+        }
+        else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
+            for (let i = 0; i < CAL_LENGTH; i++) {
+                if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
+                    this.setState({ selectDay: i });
+                    break;
                 }
             }
         }
@@ -286,19 +270,17 @@ class HomeScreen extends Component {
         }
     }
 
+    // 渲染顶部校历图标
     renderCal = (item, index) => {
         const { selectDay } = this.state;
-        let momentItm = moment(item.startDate).format("YYYYMMDD");
+        const momentItm = moment(item.startDate).format("YYYYMMDD");
         return (
             <TouchableOpacity
                 style={{
-                    backgroundColor: themeColor,
+                    backgroundColor: selectDay == index ? themeColor : themeColorLight,
                     borderRadius: scale(8),
-                    borderColor: selectDay == index ? COLOR_DIY.secondThemeColor : null,
-                    borderWidth: selectDay == index ? scale(2) : null,
                     paddingHorizontal: scale(5), paddingVertical: scale(3),
                     margin: scale(3),
-                    ...COLOR_DIY.viewShadow,
                 }}
                 activeOpacity={0.8}
                 onPress={() => {
@@ -306,6 +288,7 @@ class HomeScreen extends Component {
                     this.setState({ selectDay: index });
                 }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+
                     {/* 年份 */}
                     <Text style={{
                         color: white,
@@ -314,6 +297,7 @@ class HomeScreen extends Component {
                     }}>
                         {momentItm.substring(0, 4)}
                     </Text>
+
                     {/* 月份 */}
                     <Text
                         style={{
@@ -323,6 +307,7 @@ class HomeScreen extends Component {
                         }}>
                         {momentItm.substring(4, 6)}
                     </Text>
+
                     {/* 日期 */}
                     <Text
                         style={{
@@ -332,6 +317,7 @@ class HomeScreen extends Component {
                         }}>
                         {momentItm.substring(6, 8)}
                     </Text>
+
                     {/* 星期幾 */}
                     <Text style={{
                         color: white,
@@ -407,7 +393,7 @@ class HomeScreen extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
+        const { viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
                 style={{
@@ -435,7 +421,7 @@ class HomeScreen extends Component {
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.refs.scrollView.scrollTo({
+                        this.scrollView.current.scrollTo({
                             x: 0,
                             y: 0,
                             duration: 500, // 回頂時間
@@ -463,33 +449,18 @@ class HomeScreen extends Component {
     };
 
     render() {
-        const { selectDay, cal } = this.state;
+        const { selectDay, } = this.state;
         return (
             <View
                 style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: bg_color,
+                    flex: 1, backgroundColor: bg_color,
+                    alignItems: 'center', justifyContent: 'center',
                 }}>
-                {/* <Header
-                    backgroundColor={white}
-                    centerComponent={{
-                        text: 'ARK ALL',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: scale(15),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                    }}
-                /> */}
 
                 {/* 懸浮可拖動按鈕 */}
                 {this.state.isLoading ? null : this.renderGoTopButton()}
 
+                {/* 主页本体 */}
                 <ScrollView
                     refreshControl={
                         <RefreshControl
@@ -500,93 +471,114 @@ class HomeScreen extends Component {
                                 this.setState({ isLoading: true });
                                 this.getAppData();
                                 // 刷新重新請求活動頁數據
-                                this.refs.eventPage.onRefresh();
+                                this.eventPage.current.onRefresh()
                             }}
                         />
                     }
                     alwaysBounceHorizontal={false}
-                    ref={'scrollView'}>
-                    <View style={{ backgroundColor: bg_color }}>
-                        <View style={{ marginTop: scale(8), flexDirection: 'row' }}>
-                            {/* 校曆 */}
-                            {cal && cal.length > 0 ? (
-                                <VirtualizedList
-                                    data={cal}
-                                    initialNumToRender={9}
-                                    initialScrollIndex={selectDay}
-                                    getItemLayout={(data, index) => {
-                                        let layoutSize = scale(40);
-                                        return {
-                                            length: layoutSize,
-                                            offset: layoutSize * index,
-                                            index,
-                                        };
-                                    }}
-                                    renderItem={({ item, index }) => this.renderCal(item, index)}
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    getItem={getItem}
-                                    // 渲染項目數量
-                                    getItemCount={getItemCount}
-                                    keyExtractor={item => item.startDate}
-                                    ListHeaderComponent={
-                                        <View style={{ marginLeft: scale(10) }} />
-                                    }
-                                    ListFooterComponent={
-                                        <View style={{ marginRight: scale(10) }} />
-                                    }
-                                />
-                            ) : null}
-                        </View>
-                        {/* 校曆日期描述 */}
-                        {cal && cal.length > 0 ? (
-                            <View
-                                style={{
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    marginVertical: scale(5),
-                                    paddingHorizontal: scale(20),
-                                    flexDirection: 'row'
-                                }}>
-                                <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
-                                >
-                                    {'\\' + '\\'}
-                                </Text>
-                                <View style={{
-                                    // borderWidth: scale(1),
-                                    // borderColor: COLOR_DIY.themeColor,
-                                    backgroundColor: themeColor,
-                                    borderRadius: scale(5),
-                                    paddingVertical: scale(2),
-                                    paddingHorizontal: scale(5),
-                                }}>
+                    ref={this.scrollView}>
+
+                    {/* 校曆列表 */}
+                    {cal && cal.length > 0 ? (
+                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8),justifyContent:'center', }}>
+                            <VirtualizedList
+                                data={cal}
+                                initialNumToRender={11}
+                                initialScrollIndex={selectDay <= cal.length ? selectDay : 0}
+                                getItemLayout={(data, index) => {
+                                    const layoutSize = scale(42);
+                                    return {
+                                        length: selectDay,
+                                        offset: layoutSize * index - selectDay,
+                                        index,
+                                    };
+                                }}
+                                // 渲染每个列表项的方法
+                                renderItem={({ item, index }) => this.renderCal(item, index)}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                getItem={getItem}
+                                // 渲染項目數量
+                                getItemCount={getItemCount}
+                                key={'#'}
+                                // 列表primary key
+                                keyExtractor={(item, index) => index}
+                                ListHeaderComponent={
+                                    <View style={{ marginLeft: scale(20) }} />
+                                }
+                                ListFooterComponent={
+                                    <View style={{ marginRight: scale(20) }} />
+                                }
+                            />
+
+                            {/* 校曆日期描述 */}
+                            {cal[selectDay] && 'summary' in cal[selectDay] ? (
+                                <View
+                                    style={{
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                        marginTop: scale(5), 
+                                        //marginHorizontal: scale(20),
+                                        
+                                    }}>
+
+                                    {/*左Emoji*/}
                                     <Text
                                         selectable
-                                        style={{ color: white, textAlign: 'center' }}
+                                        style={{ 
+                                            color: white, 
+                                            textAlign: 'center', 
+                                            fontSize: scale(12),
+                                    }}
                                     >
-                                        {this.state.cal[selectDay].summary}
+                                            {VERSION_EMOJI.ve_Left+'\n'}
                                     </Text>
-                                </View>
-                                <Text style={{ marginHorizontal: scale(5), color: COLOR_DIY.themeColor, textAlign: 'center' }}
-                                >
-                                    {'//'}
-                                </Text>
-                            </View>
-                        ) : null}
 
-                        {/* 快捷功能圖標 */}
-                        <FlatGrid
-                            style={{ alignSelf: 'center' }}
-                            maxItemsPerRow={6}
-                            itemDimension={scale(50)}
-                            spacing={scale(5)}
-                            data={this.state.functionArray}
-                            renderItem={({ item }) => this.GetFunctionIcon(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    </View>
+                                    {/*日历内容描述*/}
+                                    <View style={{
+                                        backgroundColor: themeColorUltraLight,
+                                        borderRadius: scale(5),
+                                        paddingVertical: scale(2), paddingHorizontal: scale(5),
+                                        width:screenWidth * 0.8,
+                                    }}>
+                                        
+                                        <Text
+                                            selectable
+                                            style={{ color: themeColor, textAlign: 'center', fontSize: scale(12) }}
+                                        >
+                                            {cal[selectDay].summary}
+                                        </Text>
+                                    </View>
+
+                                    {/*右Emoji*/}
+                                    <Text
+                                        selectable
+                                        style={{ 
+                                            color: white, 
+                                            textAlign: 'center', 
+                                            fontSize: scale(12)
+                                    }}>
+                                        {'\n'+VERSION_EMOJI.ve_Right}
+                                    </Text>
+
+                                </View>
+                            ) : null}
+
+                        </View>
+                    ) : null}
+
+                    {/* 快捷功能圖標 */}
+                    <FlatGrid
+                        style={{ alignSelf: 'center' }}
+                        maxItemsPerRow={6}
+                        itemDimension={scale(50)}
+                        spacing={scale(5)}
+                        data={this.state.functionArray}
+                        renderItem={({ item }) => this.GetFunctionIcon(item)}
+                        showsVerticalScrollIndicator={false}
+                        scrollEnabled={false}
+                    />
 
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
@@ -635,7 +627,7 @@ class HomeScreen extends Component {
                         : null}
 
                     {/* 活動頁 */}
-                    <EventPage ref="eventPage" />
+                    <EventPage ref={this.eventPage} />
 
                     {/* 快速填充功能提示 */}
                     {/* <View
