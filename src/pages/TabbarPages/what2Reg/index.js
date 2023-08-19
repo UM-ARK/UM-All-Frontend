@@ -3,13 +3,11 @@ import {
     StyleSheet,
     Text,
     View,
-    Button,
     ScrollView,
     TextInput,
     TouchableOpacity,
     Platform,
     FlatList,
-    TouchableWithoutFeedback,
     KeyboardAvoidingView,
     Linking,
 } from "react-native";
@@ -23,14 +21,32 @@ import CourseCard from './component/CourseCard';
 import axios from "axios";
 import { scale } from "react-native-size-matters";
 import { Header } from '@rneui/themed';
-import { FlatGrid } from 'react-native-super-grid';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Interactable from 'react-native-interactable';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
-const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
+const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
-const offerCourseList = offerCourse.Master;
+let offerCourseList = offerCourse.Courses;
+// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offer courses.json，節省安卓端性能
+// offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
+// offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+
+// 2. 複製替換原課程列表為排序後列表
+// const courseListStr = JSON.stringify(offerCourseList);
+
+// 3. 獲取英文課程標題
+// let enList = offerCourseList.map((itm) => itm['Course Title']);
+// const enListStr = JSON.stringify(enList);
+// console.log('enListStr', enListStr);
+
+// 4. 保存為docx翻譯為中文繁體，去除特殊符號 “” 《》 ，
+// const cnListStr = ;
+
+// 5. 插入原數組
+// offerCourseList.map((itm,idx)=>{
+//     itm['Course Title Chi'] = cnListStr[idx];
+// })
+// console.log(JSON.stringify(offerCourseList));
 
 // 學院名中文參考
 const unitMap = {
@@ -95,6 +111,7 @@ handleSearchFilterCourse = (inputText) => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
     });
+    filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
     filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
     return filterCourseList
 }
@@ -125,9 +142,6 @@ export default class index extends Component {
 
         this.textInputRef = React.createRef();
         this.scrollViewRef = React.createRef();
-
-        // Excel開課數據按首字母排序
-        offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
     }
 
     componentDidMount() {
@@ -247,7 +261,7 @@ export default class index extends Component {
                         >
                             <Text style={{
                                 color: itm === filterOptions.facultyName ? white : black.third,
-                                fontWeight: itm === filterOptions.facultyName ? 'bold' : 'normal',
+                                fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                                 fontSize: scale(12)
                             }}>{itm}</Text>
                         </TouchableOpacity>
@@ -301,7 +315,7 @@ export default class index extends Component {
                     >
                         <Text style={{
                             color: filterOptions.depaName === itm ? white : black.third,
-                            fontWeight: filterOptions.depaName === itm ? 'bold' : 'normal',
+                            fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
                             fontSize: scale(12)
                         }}>{itm}</Text>
                     </TouchableOpacity>
@@ -372,7 +386,7 @@ export default class index extends Component {
                                 >
                                     <Text style={{
                                         color: filterOptions.GE === itm ? white : black.third,
-                                        fontWeight: filterOptions.GE === itm ? 'bold' : 'normal',
+                                        fontWeight: filterOptions.GE === itm ? '900' : 'normal',
                                         fontSize: scale(12)
                                     }}>{itm}</Text>
                                 </TouchableOpacity>
@@ -426,7 +440,7 @@ export default class index extends Component {
         >
             <Text style={{
                 color: filterOptions.option === filterName ? white : black.third,
-                fontWeight: filterOptions.option === filterName ? 'bold' : 'normal',
+                fontWeight: filterOptions.option === filterName ? '900' : 'normal',
                 fontSize: scale(12),
             }}>{filterName === 'CMRE' ? 'CM/RE' : 'GE'}</Text>
         </TouchableOpacity>
@@ -578,63 +592,16 @@ export default class index extends Component {
     jumpToWebRelateCoursePage = (searchData) => {
         const { inputText, type } = searchData;
         const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
-        Linking.openURL(URI)
+        // Linking.openURL(URI)
+        const webview_param = {
+            url: URI,
+            title: inputText,
+            text_color: '#FFF',
+            bg_color_diy: '#30548b',
+            isBarStyleBlack: false,
+        };
+        this.props.navigation.navigate('Webviewer', webview_param);
     }
-
-    // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
-        const buttonSize = scale(50);
-        return (
-            <Interactable.View
-                style={{
-                    zIndex: 999,
-                    position: 'absolute',
-                }}
-                ref="headInstance"
-                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-                snapPoints={[
-                    { x: -scale(140), y: -scale(220) },
-                    { x: scale(140), y: -scale(220) },
-                    { x: -scale(140), y: -scale(120) },
-                    { x: scale(140), y: -scale(120) },
-                    { x: -scale(140), y: scale(0) },
-                    { x: scale(140), y: scale(0) },
-                    { x: -scale(140), y: scale(120) },
-                    { x: scale(140), y: scale(120) },
-                    { x: -scale(140), y: scale(220) },
-                    { x: scale(140), y: scale(220) },
-                ]}
-                // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: scale(220) }}>
-                {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        this.scrollViewRef.current.scrollTo({
-                            x: 0,
-                            y: 0,
-                            duration: 500, // 回頂時間
-                        });
-                    }}>
-                    <View
-                        style={{
-                            width: buttonSize, height: buttonSize,
-                            backgroundColor: white,
-                            borderRadius: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...viewShadow,
-                        }}>
-                        <Ionicons
-                            name={'chevron-up'}
-                            size={scale(40)}
-                            color={themeColor}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-            </Interactable.View>
-        );
-    };
 
     // 渲染首字母側邊導航
     renderFirstLetterNav = (filterCourseList) => {
@@ -712,8 +679,6 @@ export default class index extends Component {
                         paddingTop: 0,
                     }}
                 />
-
-                {isLoading ? null : this.renderGoTopButton()}
 
                 {isLoading ? (
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
