@@ -7,6 +7,7 @@ import {
     ScrollView,
     TouchableOpacity,
     RefreshControl,
+    Linking,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -160,10 +161,10 @@ class EventPage extends Component {
                 }}>
                 {noMoreData ? (
                     <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: black.third }}>
-                            沒有更多活動了，過一段時間再來吧~
+                        <Text style={{ color: black.third, textAlign: 'center', fontSize: scale(12) }}>
+                            恭喜你，達成『刨根問底』成就~
                         </Text>
-                        <Text style={{ color: black.third }}>[]~(￣▽￣)~*</Text>
+                        <Text style={{ color: black.third, fontSize: scale(12) }}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity

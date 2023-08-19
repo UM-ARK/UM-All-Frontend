@@ -272,7 +272,7 @@ class BusScreen extends Component {
                                     top: scale(575),
                                 }}>
                                 <Text
-                                    style={{ fontSize: 12, color: black.third }}>
+                                    style={{ fontSize: scale(12), color: black.third }}>
                                     Data From: cmdo.um.edu.mo
                                 </Text>
                             </View>
@@ -281,14 +281,22 @@ class BusScreen extends Component {
                                 style={{
                                     ...s.infoContainer,
                                     left: scale(110),
-                                    top: scale(600),
+                                    top: scale(350),
                                 }}
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL(UM_MAP);
+                                    // Linking.openURL(UM_MAP);
+                                    const webview_param = {
+                                        url: UM_MAP,
+                                        title: '校園地圖',
+                                        text_color: black.main,
+                                        bg_color_diy: '#ffffff',
+                                        isBarStyleBlack: true,
+                                    };
+                                    this.props.navigation.navigate('Webviewer', webview_param);
                                 }}
                             >
-                                <Text style={{ fontSize: scale(10), color: themeColor }}>校園地圖</Text>
+                                <Text style={{ fontSize: scale(11), color: themeColor }}>校園地圖</Text>
                             </TouchableOpacity>
                             {/* Bus運行信息的渲染 */}
                             <View
@@ -361,8 +369,8 @@ class BusScreen extends Component {
                         <TouchableOpacity
                             style={{
                                 position: 'absolute',
-                                right: scale(20),
-                                top: scale(20)
+                                right: scale(5),
+                                top: scale(45)
                             }}
                             onPress={this.toggleModal.bind(
                                 this,
@@ -370,8 +378,8 @@ class BusScreen extends Component {
                             )}>
                             <Ionicons
                                 name={'close-circle'}
-                                size={scale(50)}
-                                color={themeColor}
+                                size={scale(35)}
+                                color={white}
                             />
                         </TouchableOpacity>
                         <Image

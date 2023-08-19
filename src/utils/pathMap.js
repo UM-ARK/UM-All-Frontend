@@ -5,6 +5,8 @@ export const BASE_URI = 'https://umall.one/api/';
 // 用適配API返回的圖片相對路徑
 export const BASE_HOST = 'https://umall.one';
 
+export const APPSTORE_URL = 'https://apps.apple.com/us/app/um-all/id1636670554';
+
 export const MAIL = 'umacark@gmail.com';
 
 export function addHost(itm) {
