@@ -119,6 +119,8 @@ pod install
 npx react-native run-ios
 ```
 
+---
+
 ## 打包方式
 ### iOS打包
 1. 找到 ``./ios/UMALL.xcworkspace``，點擊打開Xcode。
