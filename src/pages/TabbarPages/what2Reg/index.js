@@ -518,6 +518,7 @@ export default class index extends Component {
                             this.setState({
                                 inputText,
                                 inputOK: inputText.length > 0,
+                                scrollData: {},
                             });
                         }}
                         value={inputText}
@@ -534,11 +535,7 @@ export default class index extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                this.setState({
-                                    inputText: '',
-                                    inputOK: false,
-                                    scrollData: {},
-                                })
+                                this.setState({ inputText: '', inputOK: false, scrollData: {}, })
                                 this.textInputRef.current.focus();
                             }}
                             style={{ padding: scale(3) }}
@@ -648,8 +645,10 @@ export default class index extends Component {
     handleSetLetterData = (letterData) => {
         let { scrollData } = this.state;
         const letter = Object.keys(letterData)[0];
-        if (!(letter in scrollData)
-            || letterData[letter] < scrollData[letter]) {
+        if (
+            !(letter in scrollData)
+            || letterData[letter] < scrollData[letter]
+        ) {
             scrollData[letter] = letterData[letter];
         }
     }
