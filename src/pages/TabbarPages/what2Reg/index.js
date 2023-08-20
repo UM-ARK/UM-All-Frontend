@@ -15,6 +15,7 @@ import {
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
 import offerCourses from '../../../static/UMCourses/offerCourses.json';
+import coursePlan from '../../../static/UMCourses/coursePlan.json';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -27,6 +28,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
 const offerCourseList = offerCourses.Courses;
+// const coursePlanList = coursePlan.Courses;
 // 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
@@ -104,12 +106,19 @@ const depaMap = {
     'MAT': '數學系',
 }
 
+// 判斷字符串是否包含中文
+function hasChinese(str) {
+    return /[\u4E00-\u9FA5]+/g.test(str)
+}
+
 // 返回搜索候選所需的課程列表
 handleSearchFilterCourse = (inputText) => {
+    inputText = inputText.toUpperCase();
     // 篩選所需課程
     let filterCourseList = offerCourseList.filter(itm => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+            || itm['Course Title Chi'].indexOf(inputText) != -1
     });
     filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
     filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
@@ -509,7 +518,6 @@ export default class index extends Component {
                             width: scale(180),
                         }}
                         onChangeText={(inputText) => {
-                            inputText = inputText.toUpperCase()
                             this.setState({
                                 inputText,
                                 inputOK: inputText.length > 0,
@@ -517,10 +525,12 @@ export default class index extends Component {
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder="e.g. ECEN1234 or Electrical"
+                        placeholder="試試ECE or Electrical or 電氣"
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
+                        returnKeyType={'search'}
+                        selectionColor={themeColor}
                     />
                     {/* 清空搜索框按鈕 */}
                     {inputText.length > 0 ? (
@@ -555,7 +565,6 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // this.jumpToRelateCoursePage({ inputText, type: 'course' })
                         this.jumpToWebRelateCoursePage({ inputText, type: 'course' })
                     }}
                 >
@@ -573,7 +582,6 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // this.jumpToRelateCoursePage({ inputText, type: 'prof' })
                         this.jumpToWebRelateCoursePage({ inputText, type: 'prof' })
                     }}
                 >
@@ -655,7 +663,9 @@ export default class index extends Component {
             filterCourseList,
             inputText,
         } = this.state;
-        const searchFilterCourse = inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
+        const searchFilterCourse = hasChinese(inputText) ?
+            (inputText.length > 0 ? handleSearchFilterCourse(inputText) : null) :
+            inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
 
         return (
             <View style={{
@@ -703,9 +713,14 @@ export default class index extends Component {
 
                         {/* 搜索候選課程 */}
                         {searchFilterCourse && searchFilterCourse.length > 0 ? (
-                            <CourseCard data={searchFilterCourse} mode={'json'}
-                                handleSetLetterData={this.handleSetLetterData}
-                            />
+                            <>
+                                <View style={{ alignSelf: 'center' }}>
+                                    <Text style={{ fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
+                                </View>
+                                <CourseCard data={searchFilterCourse} mode={'json'}
+                                    handleSetLetterData={this.handleSetLetterData}
+                                />
+                            </>
                         ) : (<>
                             {/* 篩選列表 */}
                             {this.renderFilterView()}
