@@ -14,7 +14,7 @@ import {
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
-import offerCourse from '../../../static/UMCourses/offer courses.json';
+import offerCourses from '../../../static/UMCourses/offerCourses.json';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -26,8 +26,8 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
-let offerCourseList = offerCourse.Courses;
-// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offer courses.json，節省安卓端性能
+const offerCourseList = offerCourses.Courses;
+// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
 
@@ -723,10 +723,10 @@ export default class index extends Component {
                         {/* 篩選課程功能 更新時間 */}
                         <View style={{ marginTop: scale(10), alignItems: 'center' }}>
                             <Text style={{ fontSize: scale(10), color: black.third }}>
-                                {offerCourse.academicYear}學年, Sem {offerCourse.sem} 可供預選/開設課程
+                                {offerCourses.academicYear}學年, Sem {offerCourses.sem} 可供預選/開設課程
                             </Text>
                             <Text style={{ fontSize: scale(9), color: black.third }}>
-                                更新日期: {offerCourse.updateTime}
+                                更新日期: {offerCourses.updateTime}
                             </Text>
                             <Text style={{ fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
