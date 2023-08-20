@@ -6,6 +6,7 @@ import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
+import TimeTableIndex from './pages/TabbarPages/TimeTable';
 
 import { COLOR_DIY } from './utils/uiMap';
 import { scale } from 'react-native-size-matters';
@@ -99,7 +100,7 @@ class Tabbar extends Component {
                     />
                 )}
 
-                {/* 選咩課 */}
+                {/* 選課頁 */}
                 {isClub ? null : (
                     <Tabs.Screen
                         name="What2RegTab"
@@ -116,6 +117,30 @@ class Tabbar extends Component {
                                 />
                             ),
                             title: '搵課',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                    />
+                )}
+
+                {/* 課表模擬頁 */}
+                {isClub ? null : (
+                    <Tabs.Screen
+                        name="TimeTableTab"
+                        component={TimeTableIndex}
+                        options={{
+                            tabBarIcon: ({ focused, color, size }) => (
+                                <MaterialCommunityIcons
+                                    name="timetable"
+                                    size={scale(18)}
+                                    color={
+                                        focused ? color : COLOR_DIY.black.main
+                                    }
+                                    focused={focused}
+                                />
+                            ),
+                            title: '課表',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')
