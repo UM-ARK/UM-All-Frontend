@@ -47,6 +47,41 @@ export const COLOR_DIY = {
         // 適用於Android
         elevation: 4,
     },
+    
+    timeTableColor:{
+        blue:{
+            dark:'#3f8ad1',
+            light:'#87CEEB',
+        },
+        green:{
+            dark:'#528f4c',
+            light:'#b0d6ab',
+        },
+        yellow:{
+            dark:'#c2b659',
+            light:'#e3da9a',
+        },
+        purple:{
+            dark:'#8b68ad',
+            light:'#cfbae3',
+        },
+        orange:{
+            dark:'#e39440',
+            light:'#e6bc91',
+        },
+        pink:{
+            dark:'#c76392',
+            light:'#f0bbd4',
+        },
+        gray:{
+            dark:'#919191',
+            light:'#e0e0e0',
+        },
+        hat:{
+            dark:'#71852c',
+            light:'#c5d689',
+        },
+    },
 };
 
 export const VERSION_EMOJI = {
