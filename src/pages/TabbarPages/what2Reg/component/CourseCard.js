@@ -108,7 +108,11 @@ export default class CourseCard extends Component {
                                     webview_param.url = URI;
                                     webview_param.title = item['Course Code'];
                                 }
-                                    this.context.navigate('Webviewer', webview_param);
+                                this.context.navigate('Webviewer', webview_param);
+                            }}
+                            onLongPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.context.navigate('LocalCourse', courseCode)
                             }}
                             // 獲取當前位置距離屏幕頂端的高度
                             onLayout={event => {
