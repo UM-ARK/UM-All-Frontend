@@ -1,12 +1,16 @@
-## 最新版本號 `2.0.0`
+## 最新版本號 `2.2.0`
 
-- [環境安裝運行模擬器](#環境安裝運行模擬器)
+- [最新版本號 `2.2.0`](#最新版本號-220)
+- [環境安裝、運行模擬器](#環境安裝運行模擬器)
   - [Android 環境 Install](#android-環境-install)
   - [iOS 環境 Install](#ios-環境-install)
+  - [使用 Debugger （Web Console工具）](#使用-debugger-web-console工具)
 - [開發本倉庫項目準備](#開發本倉庫項目準備)
   - [安裝及運行流程](#安裝及運行流程)
+- [打包方式](#打包方式)
+  - [iOS打包](#ios打包)
+  - [Android打包](#android打包)
   - [故障排除](#故障排除)
-- [Git 方法](#git-方法)
 - [維護須知](#維護須知)
 
 ---
@@ -15,7 +19,7 @@
 
 ### Android 環境 [Install](https://reactnative.dev/docs/environment-setup)
 
-1. 確保自己是 `Android11` 的模擬器環境（其他安卓版本尚未測試）
+1. 確保自己是 `Android API 33` 的模擬器環境
 2. 本地運行指令 `npm i --legacy-peer-deps` 安裝依賴的 npm 包
 3. 敲入 `react-native run-android` or `npm run android` or `yarn android` 運行吧~
 
@@ -62,10 +66,10 @@ npx react-native run-ios
 
 ### 使用 Debugger （Web Console工具）
 
-當需要 log 出對象或者數組時，有 Chrome 的 Web Debugger 肯定更好用。
-舊版的項目可以在 Metro 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
-新版項目因為使用了組件 react-native-reanimated 導致不支持遠程調試，現在需要使用[Flipper](https://fbflipper.com/).
-下載 Flipper 後，Mac 和 Windows 可能還要安裝一兩個工具，比如 Windows 要安裝 OpenSSL，參考：https://www.cnblogs.com/dingshaohua/p/12271280.html
+* 當需要 log 出對象或者數組時，有 Chrome 的 Web Debugger 肯定更好用。
+* 舊版的項目可以在 Metro 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
+* 新版項目因為使用了組件 react-native-reanimated 導致不支持遠程調試，現在需要使用[Flipper](https://fbflipper.com/).
+* 下載 Flipper 後，Mac 和 Windows 可能還要安裝一兩個工具，比如 Windows 要安裝 OpenSSL，參考：https://www.cnblogs.com/dingshaohua/p/12271280.html
 
 ---
 
@@ -119,6 +123,28 @@ pod install
 npx react-native run-ios
 ```
 
+---
+
+## 打包方式
+### iOS打包
+1. 找到 ``./ios/UMALL.xcworkspace``，點擊打開Xcode。
+2. Build。
+- 點擊左側欄目找到``UMALL``項目，然後再中間的面板中輸入新的版本號（Version和Build通常一樣）。
+- 將設備設為"Any iOS Device"，並``command+B``來Build，並進行實機測試。
+3. 歸檔並發佈。
+- Build成功後，點擊頂欄 Product->Archive歸檔，隨後在彈出的頁面中一直點擊確認。
+- 最後點擊 Distribute App按鈕發佈。
+4. 到[Appstore Connect頁面](https://appstoreconnect.apple.com)查看並提交審核。
+5. 注意：
+- 一個Build號只能用一次。如果build失敗則更換build號，通常加一個小版本即可（如2.2.0->2.2.1）。
+- 檢查``Info.plist``的``App Uses Non-Exempt Encription``選項，必須設置為No，否則會被Apple禁止上傳。
+
+### Android打包
+1. Android端需保存好`.keystore`或`.jks`文件。編譯出包時，將該文件放置在`android/app`目錄下，以作App密鑰。
+2. Android打包，需要保證jdk版本為`18.0.2.1` 
+3. 在 `./android` 目錄下，使用 `gradlew assembleRelease` 打包APK文件，但似乎會出現密鑰不正確的問題無法繼承安裝。
+4. 在 `./android` 目錄下，使用 `gradlew bundleRelease` 打包Google Play Store所需的 `.adb` 文件。
+
 ### 故障排除
 
 在此查看[Android 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android)
@@ -128,19 +154,10 @@ npx react-native run-ios
 
 &nbsp;
 
-## Git 方法
-
-推薦使用[GitHub Desktop](https://desktop.github.com/)。
-
-基礎教程：[廖雪峰的 Git 教程](https://www.liaoxuefeng.com/wiki/896043488029600)。
-
----
-
-&nbsp;
-
 ## 維護須知
 
 1. 澳大日曆更新。從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 獲取 ics 文件；使用任何工具將 ics 轉為 json，例如 `https://ical-to-json.herokuapp.com/`。**務必注意最終 json 中的 key 必須為小寫**。覆蓋 `src/static/UMCalendar/UMCalendar.json` 中的內容即可。
-1. 輪播圖變更。登錄服務器後台，修改 `static/index` 下的文件，並且修改數據庫`app_info`表中輪播圖文本數組的文件名即可。
-1. Android端需保存好`.keystore`或`.jks`文件。編譯出包時，將該文件放置在`android/app`目錄下，以作App密鑰。
-2. Android打包，需要保證jdk版本為`18.0.2.1` 
+   * 按照程序注釋增加校曆的繁體中文翻譯內容。
+2. 澳大課程更新。使用預選課Excel，使用Excel to JSON工具獲得JSON數據，放入`src/static/UMCourses/offer courses.json`。
+   * 按照程序注釋增加開設課程的繁體中文翻譯內容。
+
