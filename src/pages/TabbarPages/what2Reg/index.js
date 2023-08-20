@@ -9,13 +9,11 @@ import {
     Platform,
     FlatList,
     KeyboardAvoidingView,
-    Linking,
 } from "react-native";
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
 import offerCourses from '../../../static/UMCourses/offerCourses.json';
-import coursePlan from '../../../static/UMCourses/coursePlan.json';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -28,7 +26,6 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
 const offerCourseList = offerCourses.Courses;
-// const coursePlanList = coursePlan.Courses;
 // 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
