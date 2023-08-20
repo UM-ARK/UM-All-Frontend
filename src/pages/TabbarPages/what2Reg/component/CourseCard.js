@@ -103,12 +103,12 @@ export default class CourseCard extends Component {
                                 else {
                                     // 進入搜索課程代號模式
                                     // this.context.navigate('What2RegCourse', courseCode)
-                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(item['Course Code'])}&instructor=${false}`
-                                    // Linking.openURL(URI)
-                                    webview_param.url = URI;
-                                    webview_param.title = item['Course Code'];
+                                    this.context.navigate('LocalCourse', courseCode)
+                                    // const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(item['Course Code'])}&instructor=${false}`
+                                    // webview_param.url = URI;
+                                    // webview_param.title = item['Course Code'];
                                 }
-                                this.context.navigate('Webviewer', webview_param);
+                                    // this.context.navigate('Webviewer', webview_param);
                             }}
                             // 獲取當前位置距離屏幕頂端的高度
                             onLayout={event => {
