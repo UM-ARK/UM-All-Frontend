@@ -24,7 +24,7 @@ class Loading extends Component {
                         color: themeColor,
                         marginTop: scale(2),
                     }}>
-                    Data is loading
+                    ARK ALL在瘋狂加載中
                 </Text>
                 <Text
                     style={{
@@ -33,7 +33,7 @@ class Loading extends Component {
                         color: themeColor,
                         marginTop: scale(3),
                     }}>
-                    Please wait
+                    耐心等待一下
                 </Text>
                 <ActivityIndicator size="large" color={themeColor} style={{
                     marginTop: scale(10),
