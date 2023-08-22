@@ -597,7 +597,7 @@ class HomeScreen extends Component {
 
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
-                        <HomeCard>
+                        <HomeCard style={{ alignSelf: 'center' }}>
                             <View>
                                 <Text
                                     style={{
