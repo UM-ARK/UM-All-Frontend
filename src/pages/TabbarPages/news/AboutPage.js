@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     Linking,
     Image,
+    Alert,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -20,15 +21,15 @@ import {
     UMALL_LOGO,
     BASE_URI,
     GET,
-    addHost, MAIL,
+    addHost,
+    MAIL,
+    GITHUB_PAGE,
 } from '../../../utils/pathMap';
 
 import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
-import Clipboard from "@react-native-clipboard/clipboard";
-import { Alert } from "react-native";
 
 const { black, themeColor, secondThemeColor, white } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
@@ -99,12 +100,7 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL('https://github.com/UM-ARK/');
-                                }}
-                                onLongPress={()=>{
-                                    ReactNativeHapticFeedback.trigger('soft');
-                                    Clipboard.setString('https://github.com/UM-ARK/');
-                                    Alert.alert('已複製鏈接到剪貼板！');
+                                    Linking.openURL(GITHUB_PAGE);
                                 }}
                             >
                                 <Text
@@ -141,7 +137,7 @@ export default class AboutPage extends Component {
                                     fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
-                                }}>{`umacark@gmail.com`}</Text>
+                                }}>{MAIL}</Text>
                         </TouchableOpacity>
                         <Text
                             style={{
@@ -154,12 +150,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL('https://umall.one');
-                            }}
-                            onLongPress={()=>{
-                                ReactNativeHapticFeedback.trigger('soft');
-                                Clipboard.setString('https://umall.one');
-                                Alert.alert('已複製鏈接到剪貼板！');
+                                Linking.openURL(BASE_HOST);
                             }}
                         >
                             <Text
@@ -167,7 +158,7 @@ export default class AboutPage extends Component {
                                     fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
-                                }}>{`umall.one`}</Text>
+                                }}>{BASE_HOST}</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
