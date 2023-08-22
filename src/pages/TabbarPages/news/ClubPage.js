@@ -148,9 +148,9 @@ class ClubPage extends Component {
                         alignSelf: 'center',
                         fontSize: scale(12),
                     }}>
-                    {'已有 ' +
+                    {'\n\n\n\n'+'已有 ' +
                         originClubDataList.length +
-                        ' 個組織進駐~~'}
+                        ' 個組織進駐~~\n'}
                 </Text>
                 <Text
                     style={{
@@ -158,7 +158,8 @@ class ClubPage extends Component {
                         alignSelf: 'center',
                         fontSize: scale(12),
                     }}>
-                    下拉可刷新頁面~
+                    {'下拉可刷新頁面~\n'}
+                    
                 </Text>
                 {/* 進駐提示 */}
                 <TouchableOpacity
@@ -171,8 +172,10 @@ class ClubPage extends Component {
                         style={{
                             color: themeColor,
                             fontSize: scale(12),
-                        }}>
-                        沒有賬號? 進駐ARK ALL!
+                            marginBottom:10
+                        }}
+                    >
+                        {'沒有賬號? 進駐ARK ALL!\n'}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -197,7 +200,7 @@ class ClubPage extends Component {
                         position: 'absolute',
                         zIndex: 2,
                         right: scale(10),
-                        top: scale(150),
+                        top: scale(410),
                         opacity: 0.9,
                         backgroundColor: white,
                         borderRadius: scale(10),
@@ -222,7 +225,8 @@ class ClubPage extends Component {
                                     >
                                         <Text style={{
                                             color: black.third,
-                                            fontSize: scale(11)
+                                            fontSize: scale(11),
+                                            fontWeight: 'bold'
                                         }}
                                         >
                                             ARK
@@ -248,7 +252,8 @@ class ClubPage extends Component {
                                     >
                                         <Text style={{
                                             color: black.third,
-                                            fontSize: scale(11)
+                                            fontSize: scale(11),
+                                            fontWeight:'bold'
                                         }}>
                                             {clubTagMap(itm.item)}
                                         </Text>
@@ -281,7 +286,7 @@ class ClubPage extends Component {
                             }
                             ref={this.scrollViewRef}
                             onScrollBeginDrag={this.handleScrollStart}
-                            onScrollEndDrag={this.handleScrollEnd}
+                            onMomentumScrollEnd={this.handleScrollEnd}
                         >
                             <View>
                                 {this.renderClub(clubDataList.ARK, 'ARK')}

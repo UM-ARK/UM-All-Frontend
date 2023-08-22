@@ -23,7 +23,7 @@ export function clubTagMap(tag) {
             return '書院';
             break;
         case 'OFFICIAL':
-            return '澳大官方';
+            return '澳大';
             break;
         case 'MEDIA':
             return '媒體';
