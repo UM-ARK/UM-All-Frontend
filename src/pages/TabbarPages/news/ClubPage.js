@@ -283,7 +283,7 @@ class ClubPage extends Component {
                             }
                             ref={this.scrollViewRef}
                             onScrollBeginDrag={this.handleScrollStart}
-                            onScrollEndDrag={this.handleScrollEnd}
+                            onMomentumScrollEnd={this.handleScrollEnd}
                         >
                             <View>
                                 {this.renderClub(clubDataList.ARK, 'ARK')}
