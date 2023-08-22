@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     Linking,
     Image,
+    Alert,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -21,6 +22,8 @@ import {
     BASE_URI,
     GET,
     addHost,
+    MAIL,
+    GITHUB_PAGE,
 } from '../../../utils/pathMap';
 
 import { scale } from 'react-native-size-matters';
@@ -35,8 +38,8 @@ export default class AboutPage extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
-                <ScrollView>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center' }}>
+                <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={{ alignItems: 'center' }}>
                         <Text style={{
                             fontSize: scale(18),
@@ -92,13 +95,14 @@ export default class AboutPage extends Component {
                                     color: black.third,
                                     marginTop: scale(5),
                                 }}>
-                                {`本軟件代碼在`}
+                                {`本軟件代碼在 `}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL('https://github.com/UM-ARK/');
-                                }}>
+                                    Linking.openURL(GITHUB_PAGE);
+                                }}
+                            >
                                 <Text
                                     style={{
                                         fontSize: scale(12),
@@ -112,7 +116,7 @@ export default class AboutPage extends Component {
                                     color: black.third,
                                     marginTop: scale(5),
                                 }}>
-                                {`開源，歡迎給個Star!!✨✨`}
+                                {` 開源，歡迎給個Star!!✨✨`}
                             </Text>
                         </View>
                         <Text
@@ -121,8 +125,41 @@ export default class AboutPage extends Component {
                                 color: black.third,
                                 marginTop: scale(5),
                             }}>
-                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即通過Email聯繫我們！ umacark@gmail.com`}
+                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即通過Email聯繫我們！`}
                         </Text>
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL('mailto:' + MAIL);
+                            }}>
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>{MAIL}</Text>
+                        </TouchableOpacity>
+                        <Text
+                            style={{
+                                fontSize: scale(12),
+                                color: black.third,
+                                marginTop: scale(5),
+                            }}>
+                            {`訪問我們的官網：`}
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL(BASE_HOST);
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>{BASE_HOST}</Text>
+                        </TouchableOpacity>
                     </HomeCard>
 
                     {/* 其他提示 */}
@@ -237,7 +274,7 @@ export default class AboutPage extends Component {
                                 FastImage.clearDiskCache();
                                 FastImage.clearMemoryCache();
                                 CookieManager.clearAll();
-                                alert('已清除所有緩存');
+                                Alert.alert('已清除所有緩存');
                             }}>
                             <Text
                                 style={{
@@ -290,6 +327,8 @@ export default class AboutPage extends Component {
                             </Text>
                         </HomeCard>
                     )}
+
+                    <View style={{ marginBottom: scale(20) }}></View>
                 </ScrollView>
             </View>
         );
