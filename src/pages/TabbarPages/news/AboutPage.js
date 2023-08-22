@@ -100,7 +100,13 @@ export default class AboutPage extends Component {
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     Linking.openURL('https://github.com/UM-ARK/');
-                                }}>
+                                }}
+                                onLongPress={()=>{
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Clipboard.setString('https://github.com/UM-ARK/');
+                                    Alert.alert('已複製鏈接到剪貼板！');
+                                }}
+                            >
                                 <Text
                                     style={{
                                         fontSize: scale(12),
@@ -149,7 +155,13 @@ export default class AboutPage extends Component {
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 Linking.openURL('https://umall.one');
-                            }}>
+                            }}
+                            onLongPress={()=>{
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Clipboard.setString('https://umall.one');
+                                Alert.alert('已複製鏈接到剪貼板！');
+                            }}
+                        >
                             <Text
                                 style={{
                                     fontSize: scale(12),
