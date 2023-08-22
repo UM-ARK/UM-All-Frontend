@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     Linking,
     ScrollView,
+    Alert,
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
@@ -47,6 +48,7 @@ class ClubPage extends Component {
             isLoading: true,
             scrollPosition: 0,
             clubClassLayout: {},
+            isOtherViewVisible: true,
         };
         // 獲取所有社團信息
         this.getData();
@@ -54,6 +56,7 @@ class ClubPage extends Component {
 
     // 請求所有社團的info
     getData = async () => {
+        this.handleScrollStart();
         this.setState({ isLoading: true });
         let URL = BASE_URI + GET.CLUB_INFO_ALL;
         try {
@@ -69,8 +72,9 @@ class ClubPage extends Component {
                         clubDataList: this.separateDataList(clubDataList),
                         isLoading: false
                     });
+                    this.handleScrollEnd();
                 } else {
-                    alert('Warning:', message);
+                    Alert.alert('Warning:', message);
                 }
             })
         } catch (error) {
@@ -78,7 +82,7 @@ class ClubPage extends Component {
                 // 網絡錯誤，自動重載
                 this.getData();
             } else {
-                alert('未知錯誤，請聯繫開發者！')
+                Alert.alert('未知錯誤，請聯繫開發者！')
             }
         }
     }
@@ -175,15 +179,26 @@ class ClubPage extends Component {
         )
     }
 
-    render() {
-        const { clubDataList, isLoading, } = this.state;
+    handleScrollStart = () => {
+        this.setState({ isOtherViewVisible: false });
+    };
 
+    handleScrollEnd = () => {
+        this.setState({ isOtherViewVisible: true });
+    };
+
+    render() {
+        const { clubDataList, isLoading, isOtherViewVisible } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center', justifyContent: 'center' }}>
                 {/* 側邊分類導航 */}
-                {clubDataList != undefined && 'ARK' in clubDataList ? (
+                {clubDataList != undefined && 'ARK' in clubDataList && isOtherViewVisible ? (
                     <View style={{
-                        position: 'absolute', zIndex: 99999, right: scale(10), top: scale(150),
+                        position: 'absolute',
+                        zIndex: 2,
+                        right: scale(10),
+                        top: scale(150),
+                        opacity: 0.9,
                         backgroundColor: white,
                         borderRadius: scale(10),
                         ...COLOR_DIY.viewShadow,
@@ -260,10 +275,13 @@ class ClubPage extends Component {
                                     refreshing={this.state.isLoading}
                                     onRefresh={() => {
                                         this.getData();
+                                        this.handleScrollStart();
                                     }}
                                 />
                             }
                             ref={this.scrollViewRef}
+                            onScrollBeginDrag={this.handleScrollStart}
+                            onScrollEndDrag={this.handleScrollEnd}
                         >
                             <View>
                                 {this.renderClub(clubDataList.ARK, 'ARK')}
