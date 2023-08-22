@@ -9,6 +9,7 @@ import {
     Platform,
     FlatList,
     KeyboardAvoidingView,
+    Keyboard,
 } from "react-native";
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
@@ -186,6 +187,22 @@ export default class index extends Component {
 
     componentDidMount() {
         this.getClassifyCourse();
+
+        // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
+        this.keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            this._keyboardDidHide,
+        );
+    };
+
+    componentWillUnmount() {
+        this.keyboardDidHideListener.remove();
+    }
+
+    // 鍵盤收起，使輸入框失焦
+    _keyboardDidHide = () => {
+        // 使输入框失去焦点
+        this.textInputRef.current.blur();
     };
 
     // 對開課數據進行分類
@@ -760,7 +777,7 @@ export default class index extends Component {
                                 fontSize: scale(10),
                                 color: black.third,
                             }}>
-                                短按看評論，長按看Section o(*￣3￣)o 
+                                短按看評論，長按看Section o(*￣3￣)o
                             </Text>
 
                             {/* 渲染篩選出的課程 */}
