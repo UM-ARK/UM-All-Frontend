@@ -20,7 +20,7 @@ import {
     UMALL_LOGO,
     BASE_URI,
     GET,
-    addHost,
+    addHost, MAIL,
 } from '../../../utils/pathMap';
 
 import { scale } from 'react-native-size-matters';
@@ -100,7 +100,13 @@ export default class AboutPage extends Component {
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     Linking.openURL('https://github.com/UM-ARK/');
-                                }}>
+                                }}
+                                onLongPress={()=>{
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Clipboard.setString('https://github.com/UM-ARK/');
+                                    Alert.alert('已複製鏈接到剪貼板！');
+                                }}
+                            >
                                 <Text
                                     style={{
                                         fontSize: scale(12),
@@ -128,8 +134,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                Clipboard.setString('umacark@gmail.com');
-                                Alert.alert('已經複製郵箱到剪貼板！');
+                                Linking.openURL('mailto:' + MAIL);
                             }}>
                             <Text
                                 style={{
@@ -150,7 +155,13 @@ export default class AboutPage extends Component {
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 Linking.openURL('https://umall.one');
-                            }}>
+                            }}
+                            onLongPress={()=>{
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Clipboard.setString('https://umall.one');
+                                Alert.alert('已複製鏈接到剪貼板！');
+                            }}
+                        >
                             <Text
                                 style={{
                                     fontSize: scale(12),
@@ -272,7 +283,7 @@ export default class AboutPage extends Component {
                                 FastImage.clearDiskCache();
                                 FastImage.clearMemoryCache();
                                 CookieManager.clearAll();
-                                alert('已清除所有緩存');
+                                Alert.alert('已清除所有緩存');
                             }}>
                             <Text
                                 style={{
