@@ -92,7 +92,7 @@ export default class AboutPage extends Component {
                                     color: black.third,
                                     marginTop: scale(5),
                                 }}>
-                                {`本軟件代碼在`}
+                                {`本軟件代碼在 `}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
@@ -112,7 +112,7 @@ export default class AboutPage extends Component {
                                     color: black.third,
                                     marginTop: scale(5),
                                 }}>
-                                {`開源，歡迎給個Star!!✨✨`}
+                                {` 開源，歡迎給個Star!!✨✨`}
                             </Text>
                         </View>
                         <Text
