@@ -20,7 +20,7 @@ import {
     UMALL_LOGO,
     BASE_URI,
     GET,
-    addHost,
+    addHost, MAIL,
 } from '../../../utils/pathMap';
 
 import { scale } from 'react-native-size-matters';
@@ -128,8 +128,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                Clipboard.setString('umacark@gmail.com');
-                                Alert.alert('已經複製郵箱到剪貼板！');
+                                Linking.openURL('mailto:' + MAIL);
                             }}>
                             <Text
                                 style={{
