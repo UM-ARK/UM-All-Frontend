@@ -27,6 +27,8 @@ import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
+import Clipboard from "@react-native-clipboard/clipboard";
+import {Alert} from "react-native";
 
 const { black, themeColor, secondThemeColor, white } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
@@ -121,8 +123,41 @@ export default class AboutPage extends Component {
                                 color: black.third,
                                 marginTop: scale(5),
                             }}>
-                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即通過Email聯繫我們！ umacark@gmail.com`}
+                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即通過Email聯繫我們！`}
                         </Text>
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Clipboard.setString('umacark@gmail.com');
+                                Alert.alert('已經複製郵箱到剪貼板！');
+                            }}>
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>{`umacark@gmail.com`}</Text>
+                        </TouchableOpacity>
+                        <Text
+                            style={{
+                                fontSize: scale(12),
+                                color: black.third,
+                                marginTop: scale(5),
+                            }}>
+                            {`訪問我們的官網：`}
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL('https://umall.one');
+                            }}>
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>{`umall.one`}</Text>
+                        </TouchableOpacity>
                     </HomeCard>
 
                     {/* 其他提示 */}
