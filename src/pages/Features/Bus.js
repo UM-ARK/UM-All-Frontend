@@ -131,7 +131,8 @@ class BusScreen extends Component {
 
     componentDidMount() {
         timer = setInterval(() => {
-            this.onRefresh();
+            // this.onRefresh();
+            this.fetchBusInfo();
         }, 7000);
     }
 
@@ -239,18 +240,19 @@ class BusScreen extends Component {
             { position: 'absolute', left: scale(255), top: scale(500) }, // s4 ~ PGH
         ];
 
-        const { busPositionArr, busInfoArr, toastColor } = this.state;
+        const { busPositionArr, busInfoArr, toastColor, isLoading } = this.state;
 
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'校園巴士'} />
 
                 <ScrollView
+                    bounces={false}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
                             tintColor={themeColor}
-                            refreshing={this.state.isLoading}
+                            refreshing={isLoading}
                             onRefresh={this.onRefresh}
                         />
                     }>

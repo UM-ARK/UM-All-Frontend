@@ -9,12 +9,13 @@ import {
     Platform,
     FlatList,
     KeyboardAvoidingView,
-    Linking,
+    Keyboard,
 } from "react-native";
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
-import offerCourse from '../../../static/UMCourses/offer courses.json';
+import offerCourses from '../../../static/UMCourses/offerCourses.json';
+// import coursePlan from '../../../static/UMCourses/coursePlan.json';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -26,13 +27,16 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
-let offerCourseList = offerCourse.Courses;
-// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offer courses.json，節省安卓端性能
+const offerCourseList = offerCourses.Courses;
+// const coursePlanList = coursePlan.Courses;
+
+// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
 
 // 2. 複製替換原課程列表為排序後列表
 // const courseListStr = JSON.stringify(offerCourseList);
+// console.log(courseListStr);
 
 // 3. 獲取英文課程標題
 // let enList = offerCourseList.map((itm) => itm['Course Title']);
@@ -48,6 +52,17 @@ let offerCourseList = offerCourse.Courses;
 // })
 // console.log(JSON.stringify(offerCourseList));
 
+// 6. 預選課程加入Pre 鍵值
+// offerCourseList.map((itm,idx)=>{
+//     itm['Pre'] = 'true';
+// })
+// console.log(JSON.stringify(offerCourseList));
+
+// 7. 加入課表時間Excel數據，去重
+// offerCourseList = offerCourseList.concat(coursePlanList);
+// offerCourseList = offerCourseList.filter((item, index) => offerCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+// console.log(JSON.stringify(offerCourseList));
+
 // 學院名中文參考
 const unitMap = {
     'FAH': '人文學院',
@@ -60,6 +75,9 @@ const unitMap = {
     'IAPME': '應用物理及材料工程研究院',
     'ICMS': '中華醫藥研究院',
     'IME': '微電子研究院',
+    'MSC': ' - ',
+    'RC': '書院',
+    'HC': '榮譽學院',
 }
 
 // 部門/學系名中文參考
@@ -104,15 +122,38 @@ const depaMap = {
     'MAT': '數學系',
 }
 
+// 判斷字符串是否包含中文
+function hasChinese(str) {
+    return /[\u4E00-\u9FA5]+/g.test(str)
+}
+
 // 返回搜索候選所需的課程列表
 handleSearchFilterCourse = (inputText) => {
+    inputText = inputText.toUpperCase();
     // 篩選所需課程
     let filterCourseList = offerCourseList.filter(itm => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+            || itm['Course Title Chi'].indexOf(inputText) != -1
     });
+
+    // 篩選課表時間Excel的數據
+    // let coursePlanSearchList = coursePlanList.filter(itm => {
+    //     return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+    //         || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+    //         || itm['Course Title Chi'].indexOf(inputText) != -1
+    // });
+
+    // 搜索合併
+    // filterCourseList = filterCourseList.concat(coursePlanSearchList)
+
+    // 搜索去重
+    // filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+
+    // 搜索結果排序
     filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
     filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+
     return filterCourseList
 }
 
@@ -146,6 +187,22 @@ export default class index extends Component {
 
     componentDidMount() {
         this.getClassifyCourse();
+
+        // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
+        this.keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            this._keyboardDidHide,
+        );
+    };
+
+    componentWillUnmount() {
+        this.keyboardDidHideListener.remove();
+    }
+
+    // 鍵盤收起，使輸入框失焦
+    _keyboardDidHide = () => {
+        // 使输入框失去焦点
+        this.textInputRef.current.blur();
     };
 
     // 對開課數據進行分類
@@ -509,29 +566,27 @@ export default class index extends Component {
                             width: scale(180),
                         }}
                         onChangeText={(inputText) => {
-                            inputText = inputText.toUpperCase()
                             this.setState({
                                 inputText,
                                 inputOK: inputText.length > 0,
+                                scrollData: {},
                             });
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder="e.g. ECEN1234 or Electrical"
+                        placeholder="試試ECE or Electrical or 電氣"
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
+                        returnKeyType={'search'}
+                        selectionColor={themeColor}
                     />
                     {/* 清空搜索框按鈕 */}
                     {inputText.length > 0 ? (
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                this.setState({
-                                    inputText: '',
-                                    inputOK: false,
-                                    scrollData: {},
-                                })
+                                this.setState({ inputText: '', inputOK: false, scrollData: {}, })
                                 this.textInputRef.current.focus();
                             }}
                             style={{ padding: scale(3) }}
@@ -555,7 +610,6 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // this.jumpToRelateCoursePage({ inputText, type: 'course' })
                         this.jumpToWebRelateCoursePage({ inputText, type: 'course' })
                     }}
                 >
@@ -573,7 +627,6 @@ export default class index extends Component {
                     disabled={isLoading || !inputOK}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // this.jumpToRelateCoursePage({ inputText, type: 'prof' })
                         this.jumpToWebRelateCoursePage({ inputText, type: 'prof' })
                     }}
                 >
@@ -643,8 +696,10 @@ export default class index extends Component {
     handleSetLetterData = (letterData) => {
         let { scrollData } = this.state;
         const letter = Object.keys(letterData)[0];
-        if (!(letter in scrollData)
-            || letterData[letter] < scrollData[letter]) {
+        if (
+            !(letter in scrollData)
+            || letterData[letter] < scrollData[letter]
+        ) {
             scrollData[letter] = letterData[letter];
         }
     }
@@ -655,7 +710,9 @@ export default class index extends Component {
             filterCourseList,
             inputText,
         } = this.state;
-        const searchFilterCourse = inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
+        const searchFilterCourse = hasChinese(inputText) ?
+            (inputText.length > 0 ? handleSearchFilterCourse(inputText) : null) :
+            inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
 
         return (
             <View style={{
@@ -703,12 +760,25 @@ export default class index extends Component {
 
                         {/* 搜索候選課程 */}
                         {searchFilterCourse && searchFilterCourse.length > 0 ? (
-                            <CourseCard data={searchFilterCourse} mode={'json'}
-                                handleSetLetterData={this.handleSetLetterData}
-                            />
+                            <>
+                                <View style={{ alignSelf: 'center' }}>
+                                    <Text style={{ fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
+                                </View>
+                                <CourseCard data={searchFilterCourse} mode={'json'}
+                                    handleSetLetterData={this.handleSetLetterData}
+                                />
+                            </>
                         ) : (<>
                             {/* 篩選列表 */}
                             {this.renderFilterView()}
+
+                            <Text style={{
+                                alignSelf: 'center',
+                                fontSize: scale(10),
+                                color: black.third,
+                            }}>
+                                短按看評論，長按看Section o(*￣3￣)o
+                            </Text>
 
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList.length > 0 ? (
@@ -723,10 +793,10 @@ export default class index extends Component {
                         {/* 篩選課程功能 更新時間 */}
                         <View style={{ marginTop: scale(10), alignItems: 'center' }}>
                             <Text style={{ fontSize: scale(10), color: black.third }}>
-                                {offerCourse.academicYear}學年, Sem {offerCourse.sem} 可供預選/開設課程
+                                {offerCourses.academicYear}學年, Sem {offerCourses.sem} 可供預選/開設課程
                             </Text>
                             <Text style={{ fontSize: scale(9), color: black.third }}>
-                                更新日期: {offerCourse.updateTime}
+                                更新日期: {offerCourses.updateTime}
                             </Text>
                             <Text style={{ fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
@@ -734,7 +804,7 @@ export default class index extends Component {
                         </View>
 
                         <View style={{
-                            margin: scale(10), marginBottom: scale(50),
+                            margin: scale(10),
                             padding: scale(10),
                             alignItems: 'center'
                         }}>

@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
-import {Dimensions, View, Text, ActivityIndicator} from 'react-native';
+import React, { Component } from 'react';
+import { Dimensions, View, Text, ActivityIndicator } from 'react-native';
 
-import {COLOR_DIY} from '../utils/uiMap';
-import {pxToDp} from '../utils/stylesKits';
+import { COLOR_DIY } from '../utils/uiMap';
+import { pxToDp } from '../utils/stylesKits';
 import ModalBottom from './ModalSave';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -11,8 +11,8 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('screen');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('screen');
 
 class ImageScrollViewer extends Component {
     state = {
@@ -45,18 +45,18 @@ class ImageScrollViewer extends Component {
     };
 
     render() {
-        const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
-        const {imageUrls} = this.props;
+        const { isModalVisible, isModalBottomVisible, imagesIndex } = this.state;
+        const { imageUrls } = this.props;
 
         let imageUrlsObjArr = [];
         if (typeof imageUrls == 'string') {
-            imageUrlsObjArr.push({url: imageUrls});
+            imageUrlsObjArr.push({ url: imageUrls });
         } else {
             imageUrls.map(item => {
                 if (typeof item == 'object' && item.url) {
                     imageUrlsObjArr.push(item);
                 } else {
-                    imageUrlsObjArr.push({url: item});
+                    imageUrlsObjArr.push({ url: item });
                 }
             });
         }
@@ -66,8 +66,9 @@ class ImageScrollViewer extends Component {
                 // 彈出層展示圖片查看器
                 isVisible={isModalVisible}
                 statusBarTranslucent
-                style={{margin: 0}}
+                style={{ margin: 0 }}
                 deviceHeight={PAGE_HEIGHT}
+                deviceWidth={PAGE_WIDTH}
                 backdropColor={'black'}
                 backdropOpacity={0.85}
                 onBackButtonPress={this.tiggerModal}
@@ -83,10 +84,10 @@ class ImageScrollViewer extends Component {
                             }}
                             style={props.style}
                             onLoadStart={() => {
-                                this.setState({isLoading: true});
+                                this.setState({ isLoading: true });
                             }}
                             onLoad={() => {
-                                this.setState({isLoading: false});
+                                this.setState({ isLoading: false });
                             }}
                         />
                     )}
@@ -98,7 +99,7 @@ class ImageScrollViewer extends Component {
                     enableSwipeDown={true}
                     onSwipeDown={this.tiggerModal}
                     // 自定義長按菜單
-                    menus={({cancel, _}) => {
+                    menus={({ cancel, _ }) => {
                         ReactNativeHapticFeedback.trigger('soft');
                         return (
                             <ModalBottom

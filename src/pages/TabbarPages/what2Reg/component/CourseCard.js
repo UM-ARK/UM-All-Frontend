@@ -103,12 +103,16 @@ export default class CourseCard extends Component {
                                 else {
                                     // 進入搜索課程代號模式
                                     // this.context.navigate('What2RegCourse', courseCode)
+                                    // this.context.navigate('LocalCourse', courseCode)
                                     const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(item['Course Code'])}&instructor=${false}`
-                                    // Linking.openURL(URI)
                                     webview_param.url = URI;
                                     webview_param.title = item['Course Code'];
                                 }
                                 this.context.navigate('Webviewer', webview_param);
+                            }}
+                            onLongPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.context.navigate('LocalCourse', courseCode)
                             }}
                             // 獲取當前位置距離屏幕頂端的高度
                             onLayout={event => {
@@ -120,14 +124,19 @@ export default class CourseCard extends Component {
                             {/* 課程編號與開課標識 */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                 {this.renderCourseCode(courseCode)}
-                                {mode == 'what2Reg' && item['is_offered'] && (
+                                {/* {mode == 'what2Reg' && item['is_offered'] && (
                                     <MaterialCommunityIcons
                                         style={{ marginLeft: scale(3) }}
                                         name="account-check"
                                         size={scale(18)}
                                         color={themeColor}
                                     />
-                                )}
+                                )} */}
+                                {mode == 'json' && 'Pre' in item && item.Pre ? (
+                                    <View style={{ marginLeft: scale(3) }}>
+                                        <Text style={{ fontSize: scale(10), color: themeColor, fontWeight: 'bold' }}>Pre</Text>
+                                    </View>
+                                ) : null}
                             </View>
                             <Text style={{
                                 fontSize: scale(11),

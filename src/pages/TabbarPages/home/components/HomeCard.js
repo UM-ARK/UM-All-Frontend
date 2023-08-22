@@ -13,6 +13,7 @@ import {COLOR_DIY} from '../../../../utils/uiMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import {scale} from 'react-native-size-matters';
+import {screenWidth} from "../../../../utils/stylesKits";
 
 // 解構全局ui設計顏色
 const {white, black, viewShadow} = COLOR_DIY;
@@ -185,6 +186,8 @@ const styles = StyleSheet.create({
     homeCard: {
         backgroundColor: white,
         marginTop: scale(10),
+        borderRadius:10,
+        width:screenWidth * 0.95,
     },
     userInformation: {
         flexDirection: 'row',

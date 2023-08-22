@@ -157,7 +157,7 @@ class EventPage extends Component {
                     justifyContent: 'center',
                     alignItems: 'center',
                     marginTop: scale(10),
-                    marginBottom: scale(50),
+                    marginBottom: scale(20),
                 }}>
                 {noMoreData ? (
                     <View style={{ alignItems: 'center' }}>

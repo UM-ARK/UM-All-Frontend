@@ -597,7 +597,7 @@ class HomeScreen extends Component {
 
                     {/* 更新提示 */}
                     {this.state.showUpdateInfo ?
-                        <HomeCard>
+                        <HomeCard style={{ alignSelf: 'center' }}>
                             <View>
                                 <Text
                                     style={{
@@ -665,31 +665,6 @@ class HomeScreen extends Component {
                     {/* 活動頁 */}
                     {isLoading ? null : <EventPage ref={this.eventPage} />}
 
-                    {/* 快速填充功能提示 */}
-                    {/* <View
-                        style={{
-                            alignItems: 'center',
-                            marginTop: scale(10),
-                            backgroundColor: white,
-                            paddingVertical: scale(10),
-                        }}>
-                        <Text style={{color: black.third}}>
-                            {`UM Pass頁面需要重新輸入賬號？`}
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.buttonContainer}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                this.props.navigation.navigate('LoginSetting');
-                            }}>
-                            <Text style={{color: white}}>
-                                {`啟用自動填充功能`}
-                            </Text>
-                        </TouchableOpacity>
-                    </View> */}
-
-                    <View style={{ marginBottom: scale(50) }} />
                 </ScrollView>
 
                 {/* 彈出提示登錄的Modal */}

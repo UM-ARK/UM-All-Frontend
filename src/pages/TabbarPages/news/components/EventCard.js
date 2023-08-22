@@ -169,6 +169,7 @@ class EventCard extends Component {
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,
                                 backgroundColor: white,
+                                opacity: isFinish? 0.5 : 1,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                             onLoadStart={() => {
@@ -207,7 +208,7 @@ class EventCard extends Component {
                                 <Ionicons
                                     name={'link'}
                                     size={20}
-                                    color={COLOR_DIY.themeColor}
+                                    color={white}
                                 />
                             </View>
                         ) : null}
@@ -217,7 +218,7 @@ class EventCard extends Component {
                             <View style={{ width: '100%' }}>
                                 {/* 活動標題 */}
                                 <Text
-                                    style={styles.title.text}
+                                    style={isFinish ? styles.title.disabledText : styles.title.text}
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
@@ -326,7 +327,13 @@ const styles = StyleSheet.create({
             color: black.main,
             fontWeight: '500',
             fontSize: scale(11),
+        },
+        disabledText:{
+            color: black.third,
+            fontWeight: '500',
+            fontSize: scale(11),
         }
+        
     },
 });
 
