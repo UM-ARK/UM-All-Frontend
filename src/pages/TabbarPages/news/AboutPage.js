@@ -271,7 +271,7 @@ export default class AboutPage extends Component {
                                 FastImage.clearDiskCache();
                                 FastImage.clearMemoryCache();
                                 CookieManager.clearAll();
-                                alert('已清除所有緩存');
+                                Alert.alert('已清除所有緩存');
                             }}>
                             <Text
                                 style={{
