@@ -169,6 +169,7 @@ class EventCard extends Component {
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,
                                 backgroundColor: white,
+                                opacity: isFinish? 0.5 : 1,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                             onLoadStart={() => {
@@ -207,7 +208,7 @@ class EventCard extends Component {
                                 <Ionicons
                                     name={'link'}
                                     size={20}
-                                    color={COLOR_DIY.themeColor}
+                                    color={white}
                                 />
                             </View>
                         ) : null}
