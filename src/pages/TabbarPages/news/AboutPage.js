@@ -37,10 +37,20 @@ export default class AboutPage extends Component {
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <ScrollView>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={{
+                            fontSize: scale(18),
+                            color: themeColor,
+                            fontWeight: 'bold',
+                            marginTop: scale(10),
+                        }}>關於 ARK ALL</Text>
+                    </View>
+
                     {/* 提示資訊 */}
                     <HomeCard>
                         <Text
                             style={{
+                                fontSize: scale(12),
                                 color: black.third,
                                 marginTop: scale(5),
                             }}>
@@ -51,83 +61,78 @@ export default class AboutPage extends Component {
                         </Text>
                         <Text
                             style={{
+                                fontSize: scale(12),
                                 color: black.third,
                                 marginTop: scale(5),
                                 fontWeight: 'bold',
-                                // alignSelf: 'center',
                             }}>
-                            {`本軟件並非澳大官方應用‼️ x1`}
+                            {`ARK ALL並非澳大官方應用‼️`}
                         </Text>
                         <Text
                             style={{
+                                fontSize: scale(12),
                                 color: black.third,
                                 marginTop: scale(5),
                                 fontWeight: 'bold',
-                                // alignSelf: 'center',
                             }}>
-                            {`本軟件並非澳大官方應用‼️ x2`}
+                            {`ARK ALL is not an official APP of UM‼️`}
                         </Text>
                         <Text
                             style={{
+                                fontSize: scale(12),
                                 color: black.third,
                                 marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
                             }}>
-                            {`本軟件並非澳大官方應用‼️ x3`}
+                            {`感謝您的認可和使用 ♪(･ω･)ﾉ`}
                         </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`This APP is not an official APP of UM‼️`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                                // alignSelf: 'center',
-                            }}>
-                            {`如您仍然信任本軟件，感謝您的認可 ♪(･ω･)ﾉ`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                            }}>
-                            {`本軟件代碼在Github開源，歡迎✨✨`}
-                        </Text>
-                        <Text
-                            style={{
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                            }}>
-                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即Email聯繫我們！ umacark@gmail.com`}
-                        </Text>
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL('https://github.com/UM-ARK/');
-                            }}>
+                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
                             <Text
                                 style={{
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{`點我前往`}</Text>
-                        </TouchableOpacity>
+                                    fontSize: scale(12),
+                                    color: black.third,
+                                    marginTop: scale(5),
+                                }}>
+                                {`本軟件代碼在`}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Linking.openURL('https://github.com/UM-ARK/');
+                                }}>
+                                <Text
+                                    style={{
+                                        fontSize: scale(12),
+                                        color: themeColor,
+                                        fontWeight: '600',
+                                    }}>{`Github`}</Text>
+                            </TouchableOpacity>
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: black.third,
+                                    marginTop: scale(5),
+                                }}>
+                                {`開源，歡迎給個Star!!✨✨`}
+                            </Text>
+                        </View>
+                        <Text
+                            style={{
+                                fontSize: scale(12),
+                                color: black.third,
+                                marginTop: scale(5),
+                            }}>
+                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即通過Email聯繫我們！ umacark@gmail.com`}
+                        </Text>
                     </HomeCard>
 
                     {/* 其他提示 */}
                     <HomeCard>
                         <Text
-                            style={{ color: black.third, marginTop: scale(5) }}>
+                            style={{
+                                fontSize: scale(12),
+                                color: black.third,
+                                marginTop: scale(5),
+                            }}>
                             您可能想先了解：
                         </Text>
                         <TouchableOpacity
@@ -138,13 +143,18 @@ export default class AboutPage extends Component {
                             }}>
                             <Text
                                 style={{
+                                    fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>{`這個APP是?`}</Text>
                         </TouchableOpacity>
 
                         <Text
-                            style={{ color: black.third, marginTop: scale(5) }}>
+                            style={{
+                                fontSize: scale(12),
+                                color: black.third,
+                                marginTop: scale(5),
+                            }}>
                             如果你是新同學... (詳見服務頁新生推薦)
                         </Text>
                         <TouchableOpacity
@@ -164,13 +174,18 @@ export default class AboutPage extends Component {
                             }}>
                             <Text
                                 style={{
+                                    fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>{`我是萌新`}</Text>
                         </TouchableOpacity>
 
                         <Text
-                            style={{ color: black.third, marginTop: scale(5) }}>
+                            style={{
+                                fontSize: scale(12),
+                                color: black.third,
+                                marginTop: scale(5),
+                            }}>
                             您可能還有很多疑問...
                         </Text>
                         <TouchableOpacity
@@ -188,6 +203,7 @@ export default class AboutPage extends Component {
                             }}>
                             <Text
                                 style={{
+                                    fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>{`我要怎麼...`}</Text>
@@ -196,13 +212,22 @@ export default class AboutPage extends Component {
 
                     {/* 清除緩存 */}
                     <HomeCard>
-                        <Text style={{ color: black.third }}>
+                        <Text style={{
+                            fontSize: scale(12),
+                            color: black.third
+                        }}>
                             {`圖片更新不及時？網站響應出錯？`}
                         </Text>
-                        <Text style={{ color: black.third }}>
+                        <Text style={{
+                            fontSize: scale(12),
+                            color: black.third
+                        }}>
                             {`‼️:您已登錄的界面可能會退出登錄`}
                         </Text>
-                        <Text style={{ color: black.third }}>
+                        <Text style={{
+                            fontSize: scale(12),
+                            color: black.third
+                        }}>
                             {`‼️:您可能需要重新加載圖片，會消耗流量`}
                         </Text>
                         <TouchableOpacity
@@ -216,6 +241,7 @@ export default class AboutPage extends Component {
                             }}>
                             <Text
                                 style={{
+                                    fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>
