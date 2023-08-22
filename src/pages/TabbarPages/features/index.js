@@ -25,25 +25,11 @@ import {
     UM_WHOLE_PERSON,
     UM_EXCHANGE,
     UM_SCHOLARSHIP,
-    UM_LOST_FOUND,
     UM_PARK_APPLY,
     UM_JOB_SYSTEM,
     UM_CLASSROOM_MAP,
     UM_PASS,
-    CO_EPORTFOLIO,
-    CO_CKPC,
-    CO_CYTC,
-    CO_CKLC,
-    CO_CKYC,
-    CO_HFPJC,
-    CO_LCWC,
-    CO_MLC,
-    CO_MCMC,
-    CO_SPC,
-    CO_SHEAC,
-    OF_BASE,
     UM_LIBRARY,
-    UM_WHOLE,
     UM_COURSE_SIMU,
     UM_ISW,
     NEW_INFOG,
@@ -113,11 +99,17 @@ class Index extends Component {
                         icon_name: 'map',
                         fn_name: '校園地圖',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_MAP,
                             title: 'UM 校園地圖',
+                            // 標題顏色，默認為black.main
+                            text_color: '#002c55',
+                            // 標題背景顏色，默認為bg_color
+                            bg_color_diy: '#fff',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
                         },
                     },
                     {
@@ -168,7 +160,7 @@ class Index extends Component {
                         icon_name: 'console-network',
                         fn_name: '公共電腦',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_COMPUTER_ROOM,
@@ -294,10 +286,13 @@ class Index extends Component {
                         icon_name: 'bullhorn',
                         fn_name: '電子公告',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             url: UM_BULLETIN,
                             title: '學生電子公告',
+                            text_color: COLOR_DIY.white,
+                            bg_color_diy: '#002c55',
+                            isBarStyleBlack: false,
                         },
                     },
                     {
@@ -346,7 +341,7 @@ class Index extends Component {
                         icon_name: 'database-search',
                         fn_name: '選咩課',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: WHAT_2_REG,
@@ -408,7 +403,7 @@ class Index extends Component {
                         icon_name: 'timeline-alert',
                         fn_name: '重要日期',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             url: UM_IMPORTANT_DATE,
                             title: '重要日期',
@@ -481,24 +476,6 @@ class Index extends Component {
             {
                 title: '生活服務',
                 fn: [
-                    // {
-                    //     icon_type: iconTypes.materialCommunityIcons,
-                    //     icon_name: 'coffee-outline',
-                    //     fn_name: '澳大論壇',
-                    //     needLogin: false,
-                    //     go_where: 'Webview',
-                    //     webview_param: {
-                    //         // import pathMap的鏈接進行跳轉
-                    //         url: UM_WHOLE,
-                    //         title: '澳大論壇',
-                    //         // 標題顏色，默認為black.main
-                    //         // text_color: '#fff',
-                    //         // 標題背景顏色，默認為bg_color
-                    //         // bg_color_diy: '#23407d',
-                    //         // 狀態欄字體是否黑色，默認true
-                    //         // isBarStyleBlack: false,
-                    //     },
-                    // },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',
@@ -559,7 +536,7 @@ class Index extends Component {
                         icon_name: 'food',
                         fn_name: '書院餐單',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             url: UM_RC_MENU,
                             title: '書院餐單',
@@ -601,7 +578,7 @@ class Index extends Component {
                         icon_name: 'account-heart',
                         fn_name: '圖文包',
                         needLogin: false,
-                        go_where: 'Linking',
+                        go_where: 'Webview',
                         webview_param: {
                             url: NEW_INFOG,
                             title: '澳大圖文包',
