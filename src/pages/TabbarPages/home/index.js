@@ -192,7 +192,7 @@ class HomeScreen extends Component {
 
     getAppData = async isLogin => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
-        this.toast.show(toastTextArr[toastTextIdx], 4000);
+        this.toast.show(toastTextArr[toastTextIdx], 3500);
 
         let URL = BASE_URI + GET.APP_INFO;
         await axios
@@ -762,11 +762,13 @@ class HomeScreen extends Component {
                 <Toast
                     ref={toast => (this.toast = toast)}
                     position="top"
-                    positionValue={'10%'}
-                    textStyle={{ color: white }}
+                    positionValue={'7%'}
+                    textStyle={{ color: COLOR_DIY.themeColor,fontWeight:'bold',textAlign:'center'}}
                     style={{
-                        backgroundColor: COLOR_DIY.themeColor,
+                        backgroundColor: COLOR_DIY.themeColorUltraLight,
                         borderRadius: scale(10),
+                        borderWidth: 2,
+                        borderColor: COLOR_DIY.themeColor,
                         ...viewShadow,
                     }}
                 />
