@@ -68,6 +68,34 @@ const iconTypes = {
 };
 
 const cal = UMCalendar;
+const toastTextArr = [
+    `ARK ALL全力加載中!!! (>ω･* )ﾉ`,
+    `點擊頂部校曆看看最近有什麼假期~ ヾ(ｏ･ω･)ﾉ`,
+    `多試試底部的功能頁有無驚喜更新~ ( • ̀ω•́ )✧`,
+    `ARK ALL為愛發電ing... (*/ω＼*)`,
+    `快喊上你心愛的社團進駐ARK!!! ヾ(❀^ω^)ﾉﾞ`,
+    `在關於頁找到我們的郵箱!!! (~o￣3￣)~ `,
+    `到底什麼才是ARK??? ∠( °ω°)／ `,
+    `今天也要加油!!! UMer!!! ＼\٩('ω')و/／`,
+    `快把ARK介紹給學弟學妹學長學姐 ✧⁺⸜(●˙▾˙●)⸝⁺✧ `,
+    `今天你更新ARK了嗎? (｡◝ᴗ◜｡)`,
+    `澳大資訊一次看完!!! ヽ(^ω^)ﾉ  `,
+    `快試試看校園巴士!!! (ﾟωﾟ)ﾉ☆ `,
+    `快試試看ARK找課!!! (*￣3￣)╭ `,
+    `又是選不上課的一天... (ಥ_ಥ) `,
+    `今天會下雨嗎 (￣.￣)`,
+    `我覺得和你挺有緣的，來App Store給個好評吧~\n٩(๑>◡<๑)۶ `,
+    `快去進駐組織頁看看有無你愛的社團!!! (oﾟ▽ﾟ)o  `,
+    `你在這裡刷新多少次了??? (▼へ▼メ)`,
+    `開發者這麼努力，不向朋友推薦一下ARK嗎...\n(T ^ T) `,
+    `朝著UMer人手一個ARK的目標努力著... ￣▽￣`,
+    `想來開發/學習? 歡迎聯繫我們!!! (*￣3￣)╭ `,
+    `已進駐的澳大組織就在隔壁的頁面~ (灬°ω°灬) `,
+    `UM Daily就在隔壁的隔壁的頁面~ (灬°ω°灬) `,
+    `UM 活動就在隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
+    `關於ARK ALL就在隔壁的隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
+    `再刷新我就累了... ㄟ( ▔, ▔ )ㄏ `,
+];
 
 class HomeScreen extends Component {
     constructor(props) {
@@ -163,7 +191,9 @@ class HomeScreen extends Component {
     }
 
     getAppData = async isLogin => {
-        this.toast.show(`ARK ALL全力加載中...`, 2000);
+        const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
+        this.toast.show(toastTextArr[toastTextIdx], 4000);
+
         let URL = BASE_URI + GET.APP_INFO;
         await axios
             .get(URL)
