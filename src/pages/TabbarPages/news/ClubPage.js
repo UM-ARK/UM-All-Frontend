@@ -47,7 +47,7 @@ class ClubPage extends Component {
             isLoading: true,
             scrollPosition: 0,
             clubClassLayout: {},
-            isSidebarViewVisible:true,
+            isSidebarViewVisible: true,
         };
         // 獲取所有社團信息
         this.getData();
@@ -176,11 +176,11 @@ class ClubPage extends Component {
     }
 
     handleScrollStart = (event) => {
-        this.setState({isOtherViewVisible:false});
+        this.setState({isOtherViewVisible: false});
     };
 
     handleScrollEnd = (event) => {
-        this.setState({isOtherViewVisible:true});
+        this.setState({isOtherViewVisible: true});
     };
     render() {
         const { clubDataList, isLoading,isOtherViewVisible } = this.state;
@@ -189,7 +189,11 @@ class ClubPage extends Component {
                 {/* 側邊分類導航 */}
                 {clubDataList != undefined && 'ARK' in clubDataList && this.state.isOtherViewVisible ? (
                     <View style={{
-                        position: 'absolute', zIndex: 99999, right: scale(10), top: scale(150),
+                        position: 'absolute', 
+                        zIndex: 2, 
+                        right: scale(10), 
+                        top: scale(150),
+                        opacity: 0.9,
                         backgroundColor: white,
                         borderRadius: scale(10),
                         ...COLOR_DIY.viewShadow,
@@ -265,6 +269,7 @@ class ClubPage extends Component {
                                     refreshing={this.state.isLoading}
                                     onRefresh={() => {
                                         this.getData();
+                                        this.handleScrollEnd();
                                     }}
                                 />
                             }
