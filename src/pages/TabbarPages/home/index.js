@@ -48,7 +48,7 @@ import moment from 'moment';
 import { screenWidth } from '../../../utils/stylesKits';
 import { VERSION_EMOJI } from '../../../utils/uiMap';
 
-const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight } = COLOR_DIY;
+const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -767,6 +767,7 @@ class HomeScreen extends Component {
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
                         borderRadius: scale(10),
+                        ...viewShadow,
                     }}
                 />
             </View>
