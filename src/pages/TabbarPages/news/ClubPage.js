@@ -117,6 +117,7 @@ class ClubPage extends Component {
                     clubClassLayout[tag] = layout.y;
                     this.setState({ clubClassLayout })
                 }}
+                showsVerticalScrollIndicator={false}
             />
         );
     };
@@ -251,6 +252,7 @@ class ClubPage extends Component {
                 {clubDataList != undefined && !isLoading ? (
                     'ARK' in clubDataList ?
                         <ScrollView
+                            showsVerticalScrollIndicator={false}
                             refreshControl={
                                 <RefreshControl
                                     colors={[themeColor]}

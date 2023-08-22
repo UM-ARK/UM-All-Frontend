@@ -28,7 +28,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import Clipboard from "@react-native-clipboard/clipboard";
-import {Alert} from "react-native";
+import { Alert } from "react-native";
 
 const { black, themeColor, secondThemeColor, white } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
@@ -37,8 +37,8 @@ export default class AboutPage extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color,alignItems:'center' }}>
-                <ScrollView>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center' }}>
+                <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={{ alignItems: 'center' }}>
                         <Text style={{
                             fontSize: scale(18),
