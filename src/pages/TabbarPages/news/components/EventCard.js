@@ -218,7 +218,7 @@ class EventCard extends Component {
                             <View style={{ width: '100%' }}>
                                 {/* 活動標題 */}
                                 <Text
-                                    style={styles.title.text}
+                                    style={isFinish ? styles.title.disabledText : styles.title.text}
                                     numberOfLines={3}>
                                     {title}
                                 </Text>
@@ -327,7 +327,13 @@ const styles = StyleSheet.create({
             color: black.main,
             fontWeight: '500',
             fontSize: scale(11),
+        },
+        disabledText:{
+            color: black.third,
+            fontWeight: '500',
+            fontSize: scale(11),
         }
+        
     },
 });
 
