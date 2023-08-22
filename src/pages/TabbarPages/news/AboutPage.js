@@ -35,7 +35,7 @@ export default class AboutPage extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color,alignItems:'center' }}>
                 <ScrollView>
                     <View style={{ alignItems: 'center' }}>
                         <Text style={{
