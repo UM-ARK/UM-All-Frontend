@@ -197,7 +197,7 @@ class ClubPage extends Component {
                         position: 'absolute',
                         zIndex: 2,
                         right: scale(10),
-                        top: scale(150),
+                        top: scale(280),
                         opacity: 0.9,
                         backgroundColor: white,
                         borderRadius: scale(10),
@@ -222,7 +222,8 @@ class ClubPage extends Component {
                                     >
                                         <Text style={{
                                             color: black.third,
-                                            fontSize: scale(11)
+                                            fontSize: scale(11),
+                                            fontWeight: 'bold'
                                         }}
                                         >
                                             ARK
@@ -248,7 +249,8 @@ class ClubPage extends Component {
                                     >
                                         <Text style={{
                                             color: black.third,
-                                            fontSize: scale(11)
+                                            fontSize: scale(11),
+                                            fontWeight:'bold'
                                         }}>
                                             {clubTagMap(itm.item)}
                                         </Text>
