@@ -69,5 +69,29 @@ target 'ProjectName' do
 ...
 end
 ```
+5. iOS遇到cpp編譯問題:
+```console
+The following build commands failed:
+    CompileC ......
+    Yoga.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'Yoga' from project 'Pods')
+(1 failure)
+```
+&emsp; 請到``./node_modules/react-native/ReactCommon/yoga/yoga/yoga.cpp``的大約3047行，找到：
+```cpp
+node->getLayout().hadOverflow() |
+```
+&emsp; 並改為:
+```cpp
+node->getLayout().hadOverflow() ||
+```
+&emsp; 然後重新回到```ios```目錄，並：
+```
+pod install
+```
+&emsp; 最後再：
+```
+react-native run-ios
+```
+&emsp; 即可正常編譯。
 
 ---
