@@ -48,7 +48,7 @@ class Tabbar extends Component {
                 appearance={{
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
-                    tabBarBackground: 'transparent',
+                    tabBarBackground: COLOR_DIY.bg_color,
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
                 {/* {isClub ? null : (
