@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component, useState} from 'react';
 import {
     Text,
     View,
@@ -47,6 +47,7 @@ class ClubPage extends Component {
             isLoading: true,
             scrollPosition: 0,
             clubClassLayout: {},
+            isSidebarViewVisible:true,
         };
         // 獲取所有社團信息
         this.getData();
@@ -174,13 +175,19 @@ class ClubPage extends Component {
         )
     }
 
-    render() {
-        const { clubDataList, isLoading, } = this.state;
+    handleScrollStart = (event) => {
+        this.setState({isOtherViewVisible:false});
+    };
 
+    handleScrollEnd = (event) => {
+        this.setState({isOtherViewVisible:true});
+    };
+    render() {
+        const { clubDataList, isLoading,isOtherViewVisible } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center', justifyContent: 'center' }}>
                 {/* 側邊分類導航 */}
-                {clubDataList != undefined && 'ARK' in clubDataList ? (
+                {clubDataList != undefined && 'ARK' in clubDataList && this.state.isOtherViewVisible ? (
                     <View style={{
                         position: 'absolute', zIndex: 99999, right: scale(10), top: scale(150),
                         backgroundColor: white,
@@ -262,6 +269,8 @@ class ClubPage extends Component {
                                 />
                             }
                             ref={this.scrollViewRef}
+                            onScrollBeginDrag={this.handleScrollStart}
+                            onScrollEndDrag={this.handleScrollEnd}
                         >
                             <View>
                                 {this.renderClub(clubDataList.ARK, 'ARK')}
