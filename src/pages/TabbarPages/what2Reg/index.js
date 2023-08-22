@@ -755,6 +755,14 @@ export default class index extends Component {
                             {/* 篩選列表 */}
                             {this.renderFilterView()}
 
+                            <Text style={{
+                                alignSelf: 'center',
+                                fontSize: scale(10),
+                                color: black.third,
+                            }}>
+                                短按看評論，長按看Section o(*￣3￣)o 
+                            </Text>
+
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
@@ -779,7 +787,7 @@ export default class index extends Component {
                         </View>
 
                         <View style={{
-                            margin: scale(10), marginBottom: scale(50),
+                            margin: scale(10),
                             padding: scale(10),
                             alignItems: 'center'
                         }}>

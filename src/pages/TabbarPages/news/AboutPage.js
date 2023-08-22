@@ -327,6 +327,8 @@ export default class AboutPage extends Component {
                             </Text>
                         </HomeCard>
                     )}
+
+                    <View style={{ marginBottom: scale(20) }}></View>
                 </ScrollView>
             </View>
         );

@@ -137,7 +137,7 @@ class ClubPage extends Component {
 
     renderBottomInfo = () => {
         return (
-            <View style={{ marginBottom: scale(60) }}>
+            <View style={{ marginBottom: scale(20) }}>
                 <Text
                     style={{
                         color: black.third,
