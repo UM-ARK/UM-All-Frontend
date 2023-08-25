@@ -176,7 +176,7 @@ class BusScreen extends Component {
     };
 
     // 巴士站點文字渲染
-    renderBusStopText = (left, top, text, index) => {
+    renderBusStopText = (left, top, buildingCode, text, index) => {
         const { busPositionArr } = this.state;
         let borderColor = themeColor;
         if (busPositionArr.length > 0) {
@@ -201,7 +201,10 @@ class BusScreen extends Component {
                     borderRadius: scale(20),
                     borderWidth: scale(2),
                 }}>
-                <Text style={{ color: borderColor, fontSize: scale(11) }}>{text}</Text>
+                <Text style={{ color: borderColor, fontSize: scale(11), fontWeight: 'bold' }}>
+                    {buildingCode}
+                    <Text style={{ fontWeight: 'normal' }}>{' ' + text}</Text>
+                </Text>
             </TouchableOpacity>
         );
     };
@@ -256,7 +259,7 @@ class BusScreen extends Component {
                             onRefresh={this.onRefresh}
                         />
                     }>
-                    <ScrollView horizontal>
+                    <ScrollView horizontal={false}>
                         <ImageBackground
                             style={{
                                 width: scale(310),
@@ -272,6 +275,7 @@ class BusScreen extends Component {
                                     ...s.infoContainer,
                                     left: scale(60),
                                     top: scale(575),
+                                    marginTop: scale(10),
                                 }}>
                                 <Text
                                     style={{ fontSize: scale(12), color: black.third }}>
@@ -298,7 +302,7 @@ class BusScreen extends Component {
                                     this.props.navigation.navigate('Webviewer', webview_param);
                                 }}
                             >
-                                <Text style={{ fontSize: scale(11), color: themeColor }}>校園地圖</Text>
+                                <Text style={{ fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>校園地圖</Text>
                             </TouchableOpacity>
                             {/* Bus運行信息的渲染 */}
                             <View
@@ -312,8 +316,8 @@ class BusScreen extends Component {
                                     ? this.state.busInfoArr.map(item => (
                                         <Text
                                             style={{
-                                                color: black.second,
-                                                fontSize: scale(10.5),
+                                                color: black.third,
+                                                fontSize: scale(10),
                                             }}>
                                             {item}
                                         </Text>
@@ -337,14 +341,14 @@ class BusScreen extends Component {
                                 : null}
 
                             {/* 巴士站點文字 */}
-                            {this.renderBusStopText(115, 455, 'PGH 研究生宿舍(起)', 0)}
-                            {this.renderBusStopText(155, 305, 'E4 劉少榮樓', 1)}
-                            {this.renderBusStopText(155, 85, 'N2 大學會堂', 2)}
-                            {this.renderBusStopText(55, 87, 'N6 行政樓', 3)}
-                            {this.renderBusStopText(79, 160, 'E11 科技學院', 4)}
-                            {this.renderBusStopText(79, 267, 'E21 人文社科樓', 5)}
-                            {this.renderBusStopText(79, 395, 'E32 法學院', 6)}
-                            {this.renderBusStopText(80, 547, 'S4 研究生宿舍南四座(終)', 7)}
+                            {this.renderBusStopText(115, 455, 'PGH', '研究生宿舍(起)', 0)}
+                            {this.renderBusStopText(155, 305, 'E4', '劉少榮樓', 1)}
+                            {this.renderBusStopText(155, 85, 'N2', '大學會堂', 2)}
+                            {this.renderBusStopText(55, 87, 'N6', '行政樓', 3)}
+                            {this.renderBusStopText(79, 160, 'E11', '科技學院', 4)}
+                            {this.renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
+                            {this.renderBusStopText(79, 395, 'E32', '法學院', 6)}
+                            {this.renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
                         </ImageBackground>
                     </ScrollView>
                 </ScrollView>
