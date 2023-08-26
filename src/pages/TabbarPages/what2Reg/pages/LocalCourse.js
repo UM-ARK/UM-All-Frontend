@@ -104,7 +104,12 @@ export default class LocalCourse extends Component {
                                             alignItems: 'center',
                                         }}>
                                             <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
-                                            <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
+                                            {'Classroom' in sameSection && sameSection['Classroom'] ? (
+                                                <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                            ) : null}
+                                            {'Time From' in sameSection && sameSection['Time From'] ? (
+                                                <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
+                                            ) : null}
                                         </View>
                                     )
                                 })}
