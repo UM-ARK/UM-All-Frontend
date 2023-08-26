@@ -1,12 +1,6 @@
 // 普通的只帶返回按鈕的白底黑字Header，需傳遞title屬性
 import React, { Component } from 'react';
 import {
-    ScrollView,
-    View,
-    Text,
-    SafeAreaView,
-    Dimensions,
-    StyleSheet,
     TouchableOpacity,
 } from 'react-native';
 
@@ -47,6 +41,7 @@ class HeaderDIY extends Component {
                         fontSize: scale(15),
                     },
                 }}
+                centerContainerStyle={{ justifyContent: 'center' }}
                 statusBarProps={{
                     backgroundColor: 'transparent',
                     barStyle: 'dark-content',

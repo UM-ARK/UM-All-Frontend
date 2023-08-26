@@ -1,14 +1,14 @@
 // 封裝：不用太多自定義的Webview，僅使用navigate跳轉
 // 網址可以參考pathMap.js
-import React, {Component} from 'react';
-import {Text, View, TouchableOpacity, Linking, StyleSheet} from 'react-native';
+import React, { Component } from 'react';
+import { Text, View, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 
-import {COLOR_DIY} from '../utils/uiMap';
+import { COLOR_DIY } from '../utils/uiMap';
 import IntegratedWebView from './IntegratedWebView';
-import {WHAT_2_REG} from '../utils/pathMap';
+import { WHAT_2_REG } from '../utils/pathMap';
 import ModalBottom from '../components/ModalBottom';
 
-import {Header} from '@rneui/themed';
+import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,7 +18,7 @@ import { scale } from 'react-native-size-matters';
 class WebViewer extends Component {
     constructor(props) {
         super(props);
-        const {bg_color, black, white} = COLOR_DIY;
+        const { bg_color, black, white } = COLOR_DIY;
 
         // 獲取上級頁面傳遞的數據
         let data = this.props.route.params;
@@ -52,7 +52,7 @@ class WebViewer extends Component {
             const strUmPassInfo = await AsyncStorage.getItem('umPass');
             const UmPassInfo = strUmPassInfo ? JSON.parse(strUmPassInfo) : {};
             if (JSON.stringify(UmPassInfo) != '{}') {
-                this.setState({UmPassInfo});
+                this.setState({ UmPassInfo });
             }
         } catch (e) {
             alert(e);
@@ -61,13 +61,13 @@ class WebViewer extends Component {
 
     // 切換Webview刷新標識
     triggerRefresh = () => {
-        this.setState({needRefresh: !this.state.needRefresh});
-        this.setState({isShowModal: false});
+        this.setState({ needRefresh: !this.state.needRefresh });
+        this.setState({ isShowModal: false });
     };
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
-        this.setState({isShowModal: !this.state.isShowModal});
+        this.setState({ isShowModal: !this.state.isShowModal });
     };
 
     render() {
@@ -81,7 +81,7 @@ class WebViewer extends Component {
         } = this.state;
 
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Header
                     backgroundColor={bg_color_diy}
                     leftComponent={
@@ -104,6 +104,7 @@ class WebViewer extends Component {
                             fontSize: scale(15),
                         },
                     }}
+                    centerContainerStyle={{ justifyContent: 'center' }}
                     rightComponent={
                         <TouchableOpacity onPress={this.tiggerModalBottom}>
                             <Feather
@@ -138,7 +139,7 @@ class WebViewer extends Component {
                                         alignItems: 'center',
                                     }}>
                                     <TouchableOpacity
-                                        style={{...s.iconContainer}}
+                                        style={{ ...s.iconContainer }}
                                         onPress={() => Linking.openURL(url)}>
                                         <Ionicons
                                             name="navigate-outline"
@@ -163,7 +164,7 @@ class WebViewer extends Component {
                                     alignItems: 'center',
                                 }}>
                                 <TouchableOpacity
-                                    style={{...s.iconContainer}}
+                                    style={{ ...s.iconContainer }}
                                     onPress={this.triggerRefresh}>
                                     <Ionicons
                                         name="refresh"
@@ -184,7 +185,7 @@ class WebViewer extends Component {
                 )}
 
                 <IntegratedWebView
-                    source={{uri: url}}
+                    source={{ uri: url }}
                     needRefresh={this.state.needRefresh}
                     triggerRefresh={this.triggerRefresh}
                     UmPassInfo={UmPassInfo}
