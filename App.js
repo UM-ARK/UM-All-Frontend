@@ -14,6 +14,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 
+// Initialize Clarity.
+// import { initialize } from 'react-native-clarity';
+// initialize("il9ynzl9gn");
+
 const { bg_color } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;

@@ -16,6 +16,8 @@
     "@react-native-clipboard/clipboard": "^1.11.1",
     "@react-native-community/datetimepicker": "^6.7.5",
     "@react-native-cookies/cookies": "^6.2.1",
+    "@react-native-firebase/analytics": "^18.5.0",
+    "@react-native-firebase/app": "^18.5.0",
     "@react-native/gradle-plugin": "^0.72.2",
     "@react-navigation/material-top-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.5",
