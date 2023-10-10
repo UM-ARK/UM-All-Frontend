@@ -381,7 +381,7 @@ class HomeScreen extends Component {
             icon = (
                 <Ionicons
                     name={icon_name}
-                    size={iconSize - 5}
+                    size={iconSize - 2}
                     color={COLOR_DIY.themeColor}
                 />
             );
@@ -418,7 +418,7 @@ class HomeScreen extends Component {
                 {icon}
                 <Text
                     style={{
-                        fontSize: scale(11),
+                        fontSize: scale(10),
                         color: COLOR_DIY.black.second,
                     }}>
                     {function_name}
@@ -609,7 +609,11 @@ class HomeScreen extends Component {
 
                     {/* 快捷功能圖標 */}
                     <FlatGrid
-                        style={{ alignSelf: 'center' }}
+                        style={{
+                            alignSelf: 'center',
+                            backgroundColor: white, borderRadius: scale(10),
+                            marginTop: scale(5),
+                        }}
                         maxItemsPerRow={6}
                         itemDimension={scale(50)}
                         spacing={scale(5)}
