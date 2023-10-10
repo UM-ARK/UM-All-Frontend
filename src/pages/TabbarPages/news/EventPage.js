@@ -46,7 +46,7 @@ class EventPage extends Component {
 
     getData = async () => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
-        let num_of_item = 20;
+        let num_of_item = 10;
         try {
             await axios.get(URL, {
                 params: {
