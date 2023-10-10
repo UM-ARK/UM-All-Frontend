@@ -93,20 +93,20 @@ class NewsScreen extends Component {
                         })}
                     />
                     <Tab.Screen
-                        name="NewsPage"
-                        component={NewsPage}
+                        name="UMEventPage"
+                        component={UMEventPage}
                         options={{
-                            title: '新聞',
+                            title: '活動',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')
                         })}
                     />
                     <Tab.Screen
-                        name="UMEventPage"
-                        component={UMEventPage}
+                        name="NewsPage"
+                        component={NewsPage}
                         options={{
-                            title: '活動',
+                            title: '新聞',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')
