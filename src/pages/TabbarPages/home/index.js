@@ -556,57 +556,51 @@ class HomeScreen extends Component {
 
                             {/* 校曆日期描述 */}
                             {cal[selectDay] && 'summary' in cal[selectDay] ? (
-                                <View
-                                    style={{
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                        marginTop: scale(5),
-                                        //marginHorizontal: scale(20),
-                                    }}>
-
-                                    {/*左Emoji*/}
-                                    <Text
-                                        selectable
-                                        style={{
-                                            color: white,
-                                            textAlign: 'center',
-                                            fontSize: scale(12),
-                                        }}
+                                <View style={{
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'row',
+                                    marginTop: scale(5),
+                                }}>
+                                    {/* 左Emoji */}
+                                    <Text selectable style={{
+                                        textAlign: 'center',
+                                        fontSize: scale(12),
+                                    }}
                                     >
                                         {VERSION_EMOJI.ve_Left + '\n'}
                                     </Text>
 
-                                    {/*日历内容描述*/}
+                                    {/* 校曆內容描述 */}
                                     <View style={{
                                         backgroundColor: themeColorUltraLight,
                                         borderRadius: scale(5),
                                         paddingVertical: scale(2), paddingHorizontal: scale(5),
                                         width: screenWidth * 0.8,
                                     }}>
-
                                         <Text
                                             selectable
                                             style={{ color: themeColor, textAlign: 'center', fontSize: scale(12) }}
                                         >
+                                            <Text style={{ fontSize: scale(10), fontWeight: 'bold' }}>
+                                                {'📅 Almanac 校曆' + '\n'}
+                                            </Text>
+
                                             {cal[selectDay].summary}
+
                                             {'summary_cn' in cal[selectDay] ? (
                                                 '\n' + cal[selectDay].summary_cn
                                             ) : null}
                                         </Text>
                                     </View>
 
-                                    {/*右Emoji*/}
-                                    <Text
-                                        selectable
-                                        style={{
-                                            color: white,
-                                            textAlign: 'center',
-                                            fontSize: scale(12)
-                                        }}>
+                                    {/* 右Emoji */}
+                                    <Text selectable style={{
+                                        textAlign: 'center',
+                                        fontSize: scale(12)
+                                    }}>
                                         {'\n' + VERSION_EMOJI.ve_Right}
                                     </Text>
-
                                 </View>
                             ) : null}
 
@@ -763,7 +757,7 @@ class HomeScreen extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'7%'}
-                    textStyle={{ color: COLOR_DIY.themeColor,fontWeight:'bold',textAlign:'center'}}
+                    textStyle={{ color: COLOR_DIY.themeColor, fontWeight: 'bold', textAlign: 'center' }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColorUltraLight,
                         borderRadius: scale(10),
