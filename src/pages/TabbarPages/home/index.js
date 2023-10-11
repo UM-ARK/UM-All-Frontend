@@ -179,6 +179,7 @@ class HomeScreen extends Component {
     }
 
     componentDidMount() {
+        this.onRefresh();
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
@@ -191,9 +192,6 @@ class HomeScreen extends Component {
     }
 
     getAppData = async isLogin => {
-        const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
-        this.toast.show(toastTextArr[toastTextIdx], 3500);
-
         let URL = BASE_URI + GET.APP_INFO;
         await axios
             .get(URL)
@@ -204,8 +202,8 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
-                this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
-                // console.log('err', err);
+                // this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
+                this.getAppData();
             });
     };
 
@@ -267,6 +265,11 @@ class HomeScreen extends Component {
             this.setState({ isLoading: false });
         }
     };
+
+    onRefresh = () => {
+        const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
+        this.toast.show(toastTextArr[toastTextIdx], 3500);
+    }
 
     // 獲取日曆數據
     getCal = () => {
@@ -510,6 +513,7 @@ class HomeScreen extends Component {
                             refreshing={this.state.isLoading}
                             onRefresh={() => {
                                 this.setState({ isLoading: true });
+                                this.onRefresh();
                                 this.getAppData();
                                 // 刷新重新請求活動頁數據
                                 this.eventPage.current.onRefresh()
@@ -691,7 +695,7 @@ class HomeScreen extends Component {
                         : null}
 
                     {/* 活動頁 */}
-                    {isLoading ? null : <EventPage ref={this.eventPage} />}
+                    <EventPage ref={this.eventPage} />
 
                 </ScrollView>
 
