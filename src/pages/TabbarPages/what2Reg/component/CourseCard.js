@@ -132,11 +132,6 @@ export default class CourseCard extends Component {
                                         color={themeColor}
                                     />
                                 )} */}
-                                {mode == 'json' && 'Pre' in item && item.Pre ? (
-                                    <View style={{ marginLeft: scale(3) }}>
-                                        <Text style={{ fontSize: scale(10), color: themeColor, fontWeight: 'bold' }}>Pre</Text>
-                                    </View>
-                                ) : null}
                             </View>
                             <Text style={{
                                 fontSize: scale(11),
