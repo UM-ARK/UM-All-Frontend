@@ -11,13 +11,32 @@ import { COLOR_DIY } from '../../../../utils/uiMap';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG } from "../../../../utils/pathMap";
-import coursePlan from "../../../../static/UMCourses/coursePlan.json";
+import coursePlan from "../../../../static/UMCourses/coursePlan";
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 const coursePlanList = coursePlan.Courses;
+
+const daySorter = {
+    'MON': 1,
+    'THE': 2,
+    'WED': 3,
+    'THU': 4,
+    'FRI': 5,
+    'SAT': 6,
+    'SUN': 7,
+}
+
+// 按星期一到星期天排序
+function daySort(objArr) {
+    return objArr.sort((a, b) => {
+        let day1 = a.Day;
+        let day2 = b.Day;
+        return daySorter[day1] - daySorter[day2];
+    })
+}
 
 export default class LocalCourse extends Component {
     state = {
@@ -67,6 +86,7 @@ export default class LocalCourse extends Component {
                 columnWrapperStyle={schedulesArr.length > 1 ? { flexWrap: 'wrap' } : null}
                 contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => {
+                    schedulesObj[itm] = daySort(schedulesObj[itm])
                     const courseInfo = schedulesObj[itm][0];
                     return (
                         <TouchableOpacity
