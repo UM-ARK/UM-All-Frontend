@@ -24,8 +24,10 @@ import { scale } from "react-native-size-matters";
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import FastImage from 'react-native-fast-image';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
+const iconSize = scale(25);
 
 const offerCourseList = offerCourses.Courses;
 const coursePlanList = coursePlan.Courses;
@@ -751,12 +753,21 @@ export default class index extends Component {
                         ref={this.scrollViewRef}
                         style={{ width: '100%' }}
                         stickyHeaderIndices={[1]}
-                        // stickyHeaderHiddenOnScroll
                         showsVerticalScrollIndicator={false}
                     >
-                        {/* 標題 */}
-                        <View style={{ alignSelf: 'center', paddingVertical: scale(5), paddingHorizontal: scale(10) }}>
-                            <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                            {/* ARK Logo */}
+                            <FastImage
+                                source={require('../../../static/img/logo.png')}
+                                style={{
+                                    height: iconSize, width: iconSize,
+                                    borderRadius: scale(5),
+                                }}
+                            />
+                            {/* 標題 */}
+                            <View style={{ marginLeft: scale(5) }}>
+                                <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                            </View>
                         </View>
 
                         <>

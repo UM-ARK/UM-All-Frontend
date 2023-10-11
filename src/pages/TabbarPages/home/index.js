@@ -42,7 +42,7 @@ import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { scale } from 'react-native-size-matters';
+import { ScaledSheet, scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import { screenWidth } from '../../../utils/stylesKits';
@@ -105,6 +105,18 @@ class HomeScreen extends Component {
             // 快捷功能入口
             functionArray: [
                 {
+                    icon_name: require('../../../static/img/logo.png'),
+                    icon_type: iconTypes.img,
+                    function_name: 'ARK',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.onRefresh();
+                        this.getAppData();
+                        // 刷新重新請求活動頁數據
+                        this.eventPage.current.onRefresh();
+                    },
+                },
+                {
                     icon_name: 'bus',
                     icon_type: iconTypes.ionicons,
                     function_name: '校園巴士',
@@ -113,25 +125,6 @@ class HomeScreen extends Component {
                         this.props.navigation.navigate('Bus');
                     },
                 },
-                // {
-                //     icon_name: 'database-search',
-                //     icon_type: iconTypes.materialCommunityIcons,
-                //     function_name: '選咩課',
-                //     func: () => {
-                //         ReactNativeHapticFeedback.trigger('soft');
-                //         let webview_param = {
-                //             url: WHAT_2_REG,
-                //             title: '澳大選咩課',
-                //             text_color: '#fff',
-                //             bg_color_diy: '#1e558c',
-                //             isBarStyleBlack: false,
-                //         };
-                //         this.props.navigation.navigate('Webviewer', webview_param);
-                //         // this.props.navigation.jumpTo('NewsTabbar', {
-                //         //     screen: 'EventPage',
-                //         // });
-                //     },
-                // },
                 {
                     icon_name: 'map',
                     icon_type: iconTypes.materialCommunityIcons,
@@ -193,6 +186,7 @@ class HomeScreen extends Component {
 
     getAppData = async isLogin => {
         let URL = BASE_URI + GET.APP_INFO;
+        this.setState({ isLoading: true })
         await axios
             .get(URL)
             .then(res => {
@@ -378,7 +372,7 @@ class HomeScreen extends Component {
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
-        let imageSize = scale(60);
+        let imageSize = scale(29);
         let iconSize = scale(30);
         if (icon_type == 'ionicons') {
             icon = (
@@ -399,13 +393,12 @@ class HomeScreen extends Component {
         } else if (icon_type == 'img') {
             icon = (
                 <FastImage
-                    source={{
-                        uri: icon_name,
-                        // cache: FastImage.cacheControl.web,
-                    }}
+                    source={icon_name}
                     style={{
                         height: imageSize,
                         width: imageSize,
+                        borderRadius: scale(10),
+                        marginBottom: scale(1),
                     }}
                 />
             );
@@ -416,16 +409,19 @@ class HomeScreen extends Component {
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
+                    marginBottom: scale(-5),
                 }}
                 onPress={func}>
                 {icon}
-                <Text
-                    style={{
-                        fontSize: scale(10),
-                        color: COLOR_DIY.black.second,
-                    }}>
-                    {function_name}
-                </Text>
+                {function_name && (
+                    <Text
+                        style={{
+                            fontSize: scale(10),
+                            color: COLOR_DIY.black.second,
+                        }}>
+                        {function_name}
+                    </Text>
+                )}
             </TouchableOpacity>
         );
     };
@@ -516,7 +512,7 @@ class HomeScreen extends Component {
                                 this.onRefresh();
                                 this.getAppData();
                                 // 刷新重新請求活動頁數據
-                                this.eventPage.current.onRefresh()
+                                this.eventPage.current.onRefresh();
                             }}
                         />
                     }
@@ -572,7 +568,7 @@ class HomeScreen extends Component {
                                         fontSize: scale(12),
                                     }}
                                     >
-                                        {VERSION_EMOJI.ve_Left + '\n'}
+                                        {VERSION_EMOJI.ve_Left + '\n\n'}
                                     </Text>
 
                                     {/* 校曆內容描述 */}
@@ -603,7 +599,7 @@ class HomeScreen extends Component {
                                         textAlign: 'center',
                                         fontSize: scale(12)
                                     }}>
-                                        {'\n' + VERSION_EMOJI.ve_Right}
+                                        {'\n\n' + VERSION_EMOJI.ve_Right}
                                     </Text>
                                 </View>
                             ) : null}
