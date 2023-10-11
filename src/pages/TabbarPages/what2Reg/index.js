@@ -14,8 +14,8 @@ import {
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
-import offerCourses from '../../../static/UMCourses/offerCourses.json';
-// import coursePlan from '../../../static/UMCourses/coursePlan.json';
+import offerCourses from '../../../static/UMCourses/offerCourses';
+import coursePlan from '../../../static/UMCourses/coursePlan';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -28,7 +28,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 
 const offerCourseList = offerCourses.Courses;
-// const coursePlanList = coursePlan.Courses;
+const coursePlanList = coursePlan.Courses;
 
 // 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
@@ -138,17 +138,22 @@ handleSearchFilterCourse = (inputText) => {
     });
 
     // 篩選課表時間Excel的數據
-    // let coursePlanSearchList = coursePlanList.filter(itm => {
-    //     return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-    //         || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-    //         || itm['Course Title Chi'].indexOf(inputText) != -1
-    // });
+    if (coursePlanList.length > 0) {
+        let coursePlanSearchList = coursePlanList.filter(itm => {
+            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+                || itm['Teacher Information'].toUpperCase().indexOf(inputText) != -1
+                || (itm['Day'] && itm['Day'].toUpperCase().indexOf(inputText) != -1)
+                || (itm['Offering Department'] && itm['Offering Department'].toUpperCase().indexOf(inputText) != -1)
+                || itm['Offering Unit'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title Chi'].indexOf(inputText) != -1
+        });
 
-    // 搜索合併
-    // filterCourseList = filterCourseList.concat(coursePlanSearchList)
-
-    // 搜索去重
-    // filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+        // 搜索合併
+        filterCourseList = filterCourseList.concat(coursePlanSearchList)
+        // 搜索去重
+        filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+    }
 
     // 搜索結果排序
     filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
