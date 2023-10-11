@@ -43,6 +43,7 @@ import {
     UM_RC_MENU,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
+import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -687,6 +688,7 @@ class Index extends Component {
                                 // 跳轉具體頁面
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
+                                    logToFirebase('funcUse', { funcName: item.fn_name });
                                     if (!needLogin || this.state.isLogin) {
                                         // Webview頁面，需附帶跳轉參數
                                         if (go_where == 'Webview') {

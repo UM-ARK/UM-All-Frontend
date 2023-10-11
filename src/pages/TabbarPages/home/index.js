@@ -29,6 +29,7 @@ import EventPage from '../news/EventPage.js';
 import ModalBottom from '../../../components/ModalBottom';
 import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
 import { versionStringCompare } from '../../../utils/versionKits';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
@@ -172,6 +173,7 @@ class HomeScreen extends Component {
     }
 
     componentDidMount() {
+        logToFirebase('openPage', { page: 'home' });
         this.onRefresh();
         let globalData = this.props.RootStore;
         // 已登錄學生賬號

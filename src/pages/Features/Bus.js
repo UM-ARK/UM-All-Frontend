@@ -15,6 +15,7 @@ import {
 // 引入本地工具
 import { COLOR_DIY } from '../../utils/uiMap';
 import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
+import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -130,6 +131,7 @@ class BusScreen extends Component {
     }
 
     componentDidMount() {
+        logToFirebase('openPage', { page: 'bus' });
         timer = setInterval(() => {
             // this.onRefresh();
             this.fetchBusInfo();

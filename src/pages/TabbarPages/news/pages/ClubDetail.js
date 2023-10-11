@@ -17,6 +17,7 @@ import {
 import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
 import {clubTagMap} from '../../../../utils/clubMap';
 import {setAPPInfo} from '../../../../utils/storageKits';
+import {logToFirebase} from '../../../../utils/firebaseAnalytics';
 import {
     BASE_URI,
     BASE_HOST,
@@ -148,6 +149,7 @@ class ClubDetail extends Component {
                         };
                         updateUserInfo(clubDataUpdate);
                         this.props.RootStore.setUserInfo(clubDataUpdate);
+                        logToFirebase('clubLogin',{club : clubData.name});
                     }
                 } else {
                     alert('Warning:', json.message);

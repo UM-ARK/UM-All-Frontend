@@ -14,6 +14,7 @@ import {
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
 import coursePlan from '../../../static/UMCourses/coursePlan';
 import Loading from '../../../components/Loading';
@@ -652,6 +653,8 @@ export default class index extends Component {
     jumpToWebRelateCoursePage = (searchData) => {
         const { inputText, type } = searchData;
         const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
+        logToFirebase('checkCourse', { searchText: inputText });
+
         // Linking.openURL(URI)
         const webview_param = {
             url: URI,

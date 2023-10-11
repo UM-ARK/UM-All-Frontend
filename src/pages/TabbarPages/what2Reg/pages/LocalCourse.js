@@ -11,6 +11,7 @@ import { COLOR_DIY } from '../../../../utils/uiMap';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG } from "../../../../utils/pathMap";
+import { logToFirebase } from "../../../../utils/firebaseAnalytics";
 import coursePlan from "../../../../static/UMCourses/coursePlan";
 
 import { scale } from "react-native-size-matters";
@@ -107,6 +108,10 @@ export default class LocalCourse extends Component {
                                     bg_color_diy: '#30548b',
                                     isBarStyleBlack: false,
                                 };
+                                logToFirebase('checkCourse', {
+                                    courseCode: courseInfo['Course Code'],
+                                    profName: courseInfo['Teacher Information'],
+                                });
                                 this.props.navigation.navigate('Webviewer', webview_param);
                             }}
                         >
