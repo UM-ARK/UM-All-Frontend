@@ -2,12 +2,23 @@ require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 pod 'Interactable', :path => '../node_modules/react-native-interactable'
 
-platform :ios, '11.0'
+platform :ios, '12.0'
 install! 'cocoapods', :deterministic_uuids => false
 
 target 'UMALL' do
   config = use_native_modules!
   project './UMALL.xcodeproj'
+
+  # GoogleUtilities need, when pod install firebase
+  use_modular_headers!
+  # use_frameworks! :linkage => :static
+  # pod 'FirebaseCore', :modular_headers => true
+  # pod 'FirebaseCoreExtension', :modular_headers => true
+  # pod 'FirebaseInstallations', :modular_headers => true
+  # pod 'GoogleDataTransport', :modular_headers => true
+  # pod 'GoogleUtilities', :modular_headers => true
+  # pod 'nanopb', :modular_headers => true
+  $RNFirebaseAsStaticFramework = true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -29,10 +40,9 @@ target 'UMALL' do
   end
 
   # Enables Flipper.
-  #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable the next line.
-  use_flipper!()
+  # use_flipper!()
 
   post_install do |installer|
     react_native_post_install(installer)
