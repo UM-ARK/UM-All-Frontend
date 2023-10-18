@@ -195,6 +195,7 @@ class NewsPage extends Component {
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
                                     this.context.navigate('NewsDetail', {
                                         data: topNews,
                                     });
