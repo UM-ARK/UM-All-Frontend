@@ -11,6 +11,8 @@ export const MAIL = 'umacark@gmail.com';
 
 export const GITHUB_PAGE = 'https://github.com/UM-ARK';
 
+export const ARK_WIKI = 'https://wiki.umall.one';
+
 export function addHost(itm) {
     if (itm.length > 0) {
         return BASE_HOST + itm;

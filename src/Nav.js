@@ -36,6 +36,8 @@ import What2RegRelateCourses from './pages/TabbarPages/what2Reg/pages/RelateCour
 import What2RegProf from './pages/TabbarPages/what2Reg/pages/Prof';
 import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 
+import ARKWiki from './pages/TabbarPages/arkwiki';
+
 import Webviewer from './components/Webviewer';
 import AllEvents from './pages/Features/AllEvents';
 import UMWhole from './pages/Features/UMWhole';
