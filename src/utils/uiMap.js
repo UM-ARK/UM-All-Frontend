@@ -33,6 +33,9 @@ export const COLOR_DIY = {
         card_color: 'white',
     },
 
+    // ARK Wiki配色
+    wiki_bg_color: '#eaecf0',
+
     // 提醒頁顏色
     messageScreenColor: {
         bg_color: '#fbfbfb',

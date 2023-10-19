@@ -20,9 +20,8 @@ import { COLOR_DIY } from '../../../utils/uiMap';
 import { ARK_WIKI } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
-const { themeColor, black, white, viewShadow } = COLOR_DIY;
+const { themeColor, black, white, wiki_bg_color } = COLOR_DIY;
 const iconSize = scale(25);
-const backgroundColor = '#eaecf0';
 
 export default class ARKWiki extends Component {
     constructor(props) {
@@ -57,7 +56,7 @@ export default class ARKWiki extends Component {
             <View style={{ flex: 1 }}>
                 <Header
                     // Wiki的默認配色
-                    backgroundColor={backgroundColor}
+                    backgroundColor={wiki_bg_color}
                     statusBarProps={{
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
@@ -76,7 +75,7 @@ export default class ARKWiki extends Component {
                 <View style={{
                     flexDirection: 'row', width: '100%',
                     alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: backgroundColor,
+                    backgroundColor: wiki_bg_color,
                     paddingBottom: scale(3),
                 }}>
                     {/* 回退 */}
