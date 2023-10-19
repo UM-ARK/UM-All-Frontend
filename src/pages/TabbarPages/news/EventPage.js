@@ -124,11 +124,11 @@ class EventPage extends Component {
 
         eventList.map((itm, idx) => {
             if (nowTime.isBefore(moment(itm.enddatetime))) {
-                if (idx > 1) {
+                if (idx >= 1) {
                     notFinishEvent.push(itm);
                 }
                 // 使將結束的頭兩個活動置頂，後面合併數組
-                else if (idx <= 1) {
+                else if (idx < 1) {
                     closeFinishEvent.push(itm);
                 }
             }
@@ -137,6 +137,12 @@ class EventPage extends Component {
         // 如果未結束活動超過1個，再進行隨機排序
         if (notFinishEvent.length > 1) {
             notFinishEvent.sort(() => {
+                return Math.random() - 0.5
+            })
+        }
+        // 如果將結束活動超過1個，再進行隨機排序
+        if (closeFinishEvent.length > 1) {
+            closeFinishEvent.sort(() => {
                 return Math.random() - 0.5
             })
         }
