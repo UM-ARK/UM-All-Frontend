@@ -16,7 +16,6 @@ import Header from '../../../components/Header';
 // 本Tabbar相關頁面
 import Login from './pages/Login';
 import AppSetting from './pages/AppSetting';
-import AboutUs from './pages/AboutUs';
 import MyFollow from './pages/MyFollow';
 
 // 第三方庫
@@ -39,11 +38,6 @@ const optionsInfo = [
         title: '常見問題',
         iconPath: 'at-circle-outline',
         routeName: 'UsualQuestion',
-    },
-    {
-        title: '關於我們',
-        iconPath: 'chatbubbles-outline',
-        routeName: 'AboutUs',
     },
     {
         title: '設置',
