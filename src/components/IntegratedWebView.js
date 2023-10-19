@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect, useCallback} from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
     Text,
     StyleSheet,
@@ -9,12 +9,13 @@ import {
     Linking,
 } from 'react-native';
 
-import {WebView} from 'react-native-webview';
+import { WebView } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CookieManager from '@react-native-cookies/cookies';
-import {NavigationContext} from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
+import { COLOR_DIY } from '../utils/uiMap';
 
 let URL = '';
 
@@ -101,6 +102,7 @@ const IntegratedWebView = ({
                         borderRadius={0}
                         width={null} // null -> 寬度為全屏
                         height={2}
+                        color={COLOR_DIY.themeColor}
                     />
                 ) : null
             }
@@ -175,7 +177,7 @@ const NavigationView = ({
             <Animated.View
                 style={[
                     styles.container,
-                    {transform: [{translateY: translateY}]},
+                    { transform: [{ translateY: translateY }] },
                 ]}>
                 {/* 後退按鈕 */}
                 <TouchableOpacity
