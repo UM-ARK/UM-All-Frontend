@@ -15,6 +15,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import * as Progress from 'react-native-progress';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
 import { ARK_WIKI } from '../../../utils/pathMap';
@@ -29,6 +30,9 @@ export default class ARKWiki extends Component {
         this.state = {
             currentURL: ARK_WIKI,
             canGoBack: false,
+            canGoForward: false,
+            progress: 0,
+            isLoaded: false,
         };
         this.webviewRef = React.createRef();
     }
@@ -40,18 +44,19 @@ export default class ARKWiki extends Component {
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
     onNavigationStateChange = (webViewState) => {
         const currentURL = webViewState.url;
-        const canGoBack = webViewState.canGoBack;
-        this.setState({ currentURL, canGoBack })
+        const { canGoBack, canGoForward } = webViewState;
+        this.setState({ currentURL, canGoBack, canGoForward })
     }
 
     // 返回ARK Wiki的主頁
     returnWikiHome = () => {
+        ReactNativeHapticFeedback.trigger('soft');
         this.setState({ currentURL: ARK_WIKI })
         this.toast.show(`正全力返回主頁！`, 2000);
     }
 
     render() {
-        const { canGoBack, currentURL } = this.state;
+        const { canGoBack, canGoForward, currentURL, progress, isLoaded } = this.state;
         return (
             <View style={{ flex: 1 }}>
                 <Header
@@ -78,7 +83,7 @@ export default class ARKWiki extends Component {
                     backgroundColor: wiki_bg_color,
                     paddingBottom: scale(3),
                 }}>
-                    {/* 回退 */}
+                    {/* 回退按鈕 */}
                     {canGoBack ? (
                         <TouchableOpacity
                             style={{
@@ -93,6 +98,26 @@ export default class ARKWiki extends Component {
                         >
                             <MaterialCommunityIcons
                                 name="arrow-left-circle-outline"
+                                size={scale(25)}
+                                color={themeColor}
+                            />
+                        </TouchableOpacity>
+                    ) : null}
+                    {/* 前進按鈕 */}
+                    {canGoForward ? (
+                        <TouchableOpacity
+                            style={{
+                                alignSelf: 'center',
+                                position: 'absolute',
+                                left: scale(45),
+                            }}
+                            onPress={() => {
+                                this.webviewRef.current.goForward();
+                                ReactNativeHapticFeedback.trigger('soft');
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name="arrow-right-circle-outline"
                                 size={scale(25)}
                                 color={themeColor}
                             />
@@ -117,7 +142,7 @@ export default class ARKWiki extends Component {
                         </View>
                     </TouchableOpacity>
 
-                    {/* 刷新 */}
+                    {/* 刷新按鈕 */}
                     <TouchableOpacity
                         style={{
                             alignSelf: 'center',
@@ -136,7 +161,7 @@ export default class ARKWiki extends Component {
                         />
                     </TouchableOpacity>
 
-                    {/* 分享 */}
+                    {/* 分享按鈕 */}
                     <TouchableOpacity
                         style={{
                             alignSelf: 'center',
@@ -157,6 +182,17 @@ export default class ARKWiki extends Component {
                     </TouchableOpacity>
                 </View>
 
+                {!isLoaded ? (
+                    <Progress.Bar
+                        progress={progress}
+                        borderWidth={0}
+                        borderRadius={0}
+                        width={null} // null -> 寬度為全屏
+                        height={2}
+                        color={themeColor}
+                    />
+                ) : null}
+
                 <WebView
                     ref={this.webviewRef}
                     source={{ uri: currentURL }}
@@ -175,6 +211,15 @@ export default class ARKWiki extends Component {
                     cacheMode={'LOAD_NO_CACHE'}
                     // 其他邏輯
                     onNavigationStateChange={this.onNavigationStateChange}
+                    onLoadProgress={event => {
+                        this.setState({ progress: event.nativeEvent.progress })
+                    }}
+                    onLoadStart={() => {
+                        this.setState({ isLoaded: false, progress: 0 })
+                    }}
+                    onLoadEnd={() => {
+                        this.setState({ isLoaded: true })
+                    }}
                 />
 
                 {/* Tost */}
