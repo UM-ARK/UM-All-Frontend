@@ -419,7 +419,8 @@ class HomeScreen extends Component {
                     <Text
                         style={{
                             fontSize: scale(10),
-                            color: COLOR_DIY.black.second,
+                            fontWeight: 'bold',
+                            color: COLOR_DIY.themeColor,
                         }}>
                         {function_name}
                     </Text>

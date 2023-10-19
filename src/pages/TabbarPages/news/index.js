@@ -19,6 +19,7 @@ const Tab = createMaterialTopTabNavigator();
 const tabWidth = scale(25);
 const numOfTabs = 5;
 
+
 class NewsScreen extends Component {
     render() {
         return (
@@ -48,7 +49,10 @@ class NewsScreen extends Component {
                 {/* 能左右切換的TabPage */}
                 <Tab.Navigator
                     screenOptions={{
-                        tabBarLabelStyle: { fontSize: scale(10), },
+                        tabBarLabelStyle: {
+                            fontSize: scale(10), 
+                            fontWeight: 'bold',
+                        },
                         tabBarStyle: {
                             backgroundColor: bg_color,
                             minHeight: scale(20),
