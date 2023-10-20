@@ -29,6 +29,7 @@ import EventPage from '../news/EventPage.js';
 import ModalBottom from '../../../components/ModalBottom';
 import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
 import { versionStringCompare } from '../../../utils/versionKits';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
@@ -42,7 +43,7 @@ import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { scale } from 'react-native-size-matters';
+import { ScaledSheet, scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import { screenWidth } from '../../../utils/stylesKits';
@@ -70,6 +71,10 @@ const iconTypes = {
 const cal = UMCalendar;
 const toastTextArr = [
     `ARK ALL全力加載中!!! (>ω･* )ﾉ`,
+    `已進駐的澳大組織就在隔壁的頁面~ (灬°ω°灬) `,
+    `UM 活動就在隔壁的隔壁的頁面~ (灬°ω°灬) `,
+    `UM Daily就在隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
+    `關於ARK ALL就在隔壁的隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
     `點擊頂部校曆看看最近有什麼假期~ ヾ(ｏ･ω･)ﾉ`,
     `多試試底部的功能頁有無驚喜更新~ ( • ̀ω•́ )✧`,
     `ARK ALL為愛發電ing... (*/ω＼*)`,
@@ -90,10 +95,6 @@ const toastTextArr = [
     `開發者這麼努力，不向朋友推薦一下ARK嗎...\n(T ^ T) `,
     `朝著UMer人手一個ARK的目標努力著... ￣▽￣`,
     `想來開發/學習? 歡迎聯繫我們!!! (*￣3￣)╭ `,
-    `已進駐的澳大組織就在隔壁的頁面~ (灬°ω°灬) `,
-    `UM Daily就在隔壁的隔壁的頁面~ (灬°ω°灬) `,
-    `UM 活動就在隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
-    `關於ARK ALL就在隔壁的隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
     `再刷新我就累了... ㄟ( ▔, ▔ )ㄏ `,
 ];
 
@@ -105,6 +106,18 @@ class HomeScreen extends Component {
             // 快捷功能入口
             functionArray: [
                 {
+                    icon_name: require('../../../static/img/logo.png'),
+                    icon_type: iconTypes.img,
+                    function_name: 'ARK',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.onRefresh();
+                        this.getAppData();
+                        // 刷新重新請求活動頁數據
+                        this.eventPage.current.onRefresh();
+                    },
+                },
+                {
                     icon_name: 'bus',
                     icon_type: iconTypes.ionicons,
                     function_name: '校園巴士',
@@ -113,25 +126,6 @@ class HomeScreen extends Component {
                         this.props.navigation.navigate('Bus');
                     },
                 },
-                // {
-                //     icon_name: 'database-search',
-                //     icon_type: iconTypes.materialCommunityIcons,
-                //     function_name: '選咩課',
-                //     func: () => {
-                //         ReactNativeHapticFeedback.trigger('soft');
-                //         let webview_param = {
-                //             url: WHAT_2_REG,
-                //             title: '澳大選咩課',
-                //             text_color: '#fff',
-                //             bg_color_diy: '#1e558c',
-                //             isBarStyleBlack: false,
-                //         };
-                //         this.props.navigation.navigate('Webviewer', webview_param);
-                //         // this.props.navigation.jumpTo('NewsTabbar', {
-                //         //     screen: 'EventPage',
-                //         // });
-                //     },
-                // },
                 {
                     icon_name: 'map',
                     icon_type: iconTypes.materialCommunityIcons,
@@ -179,6 +173,8 @@ class HomeScreen extends Component {
     }
 
     componentDidMount() {
+        logToFirebase('openPage', { page: 'home' });
+        this.onRefresh();
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
@@ -191,10 +187,8 @@ class HomeScreen extends Component {
     }
 
     getAppData = async isLogin => {
-        const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
-        this.toast.show(toastTextArr[toastTextIdx], 3500);
-
         let URL = BASE_URI + GET.APP_INFO;
+        this.setState({ isLoading: true })
         await axios
             .get(URL)
             .then(res => {
@@ -204,8 +198,8 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
-                this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
-                // console.log('err', err);
+                // this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
+                this.getAppData();
             });
     };
 
@@ -267,6 +261,11 @@ class HomeScreen extends Component {
             this.setState({ isLoading: false });
         }
     };
+
+    onRefresh = () => {
+        const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
+        this.toast.show(toastTextArr[toastTextIdx], 3500);
+    }
 
     // 獲取日曆數據
     getCal = () => {
@@ -375,13 +374,13 @@ class HomeScreen extends Component {
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
-        let imageSize = scale(60);
+        let imageSize = scale(29);
         let iconSize = scale(30);
         if (icon_type == 'ionicons') {
             icon = (
                 <Ionicons
                     name={icon_name}
-                    size={iconSize - 5}
+                    size={iconSize - 2}
                     color={COLOR_DIY.themeColor}
                 />
             );
@@ -396,13 +395,12 @@ class HomeScreen extends Component {
         } else if (icon_type == 'img') {
             icon = (
                 <FastImage
-                    source={{
-                        uri: icon_name,
-                        // cache: FastImage.cacheControl.web,
-                    }}
+                    source={icon_name}
                     style={{
                         height: imageSize,
                         width: imageSize,
+                        borderRadius: scale(10),
+                        marginBottom: scale(1),
                     }}
                 />
             );
@@ -413,16 +411,19 @@ class HomeScreen extends Component {
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
+                    marginBottom: scale(-5),
                 }}
                 onPress={func}>
                 {icon}
-                <Text
-                    style={{
-                        fontSize: scale(11),
-                        color: COLOR_DIY.black.second,
-                    }}>
-                    {function_name}
-                </Text>
+                {function_name && (
+                    <Text
+                        style={{
+                            fontSize: scale(10),
+                            color: COLOR_DIY.black.second,
+                        }}>
+                        {function_name}
+                    </Text>
+                )}
             </TouchableOpacity>
         );
     };
@@ -510,9 +511,10 @@ class HomeScreen extends Component {
                             refreshing={this.state.isLoading}
                             onRefresh={() => {
                                 this.setState({ isLoading: true });
+                                this.onRefresh();
                                 this.getAppData();
                                 // 刷新重新請求活動頁數據
-                                this.eventPage.current.onRefresh()
+                                this.eventPage.current.onRefresh();
                             }}
                         />
                     }
@@ -556,57 +558,51 @@ class HomeScreen extends Component {
 
                             {/* 校曆日期描述 */}
                             {cal[selectDay] && 'summary' in cal[selectDay] ? (
-                                <View
-                                    style={{
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                        marginTop: scale(5),
-                                        //marginHorizontal: scale(20),
-                                    }}>
-
-                                    {/*左Emoji*/}
-                                    <Text
-                                        selectable
-                                        style={{
-                                            color: white,
-                                            textAlign: 'center',
-                                            fontSize: scale(12),
-                                        }}
+                                <View style={{
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'row',
+                                    marginTop: scale(5),
+                                }}>
+                                    {/* 左Emoji */}
+                                    <Text selectable style={{
+                                        textAlign: 'center',
+                                        fontSize: scale(12),
+                                    }}
                                     >
-                                        {VERSION_EMOJI.ve_Left + '\n'}
+                                        {VERSION_EMOJI.ve_Left + '\n\n'}
                                     </Text>
 
-                                    {/*日历内容描述*/}
+                                    {/* 校曆內容描述 */}
                                     <View style={{
                                         backgroundColor: themeColorUltraLight,
                                         borderRadius: scale(5),
                                         paddingVertical: scale(2), paddingHorizontal: scale(5),
                                         width: screenWidth * 0.8,
                                     }}>
-
                                         <Text
                                             selectable
                                             style={{ color: themeColor, textAlign: 'center', fontSize: scale(12) }}
                                         >
+                                            <Text style={{ fontSize: scale(10), fontWeight: 'bold' }}>
+                                                {'📅 Almanac 校曆' + '\n'}
+                                            </Text>
+
                                             {cal[selectDay].summary}
+
                                             {'summary_cn' in cal[selectDay] ? (
                                                 '\n' + cal[selectDay].summary_cn
                                             ) : null}
                                         </Text>
                                     </View>
 
-                                    {/*右Emoji*/}
-                                    <Text
-                                        selectable
-                                        style={{
-                                            color: white,
-                                            textAlign: 'center',
-                                            fontSize: scale(12)
-                                        }}>
-                                        {'\n' + VERSION_EMOJI.ve_Right}
+                                    {/* 右Emoji */}
+                                    <Text selectable style={{
+                                        textAlign: 'center',
+                                        fontSize: scale(12)
+                                    }}>
+                                        {'\n\n' + VERSION_EMOJI.ve_Right}
                                     </Text>
-
                                 </View>
                             ) : null}
 
@@ -615,7 +611,11 @@ class HomeScreen extends Component {
 
                     {/* 快捷功能圖標 */}
                     <FlatGrid
-                        style={{ alignSelf: 'center' }}
+                        style={{
+                            alignSelf: 'center',
+                            backgroundColor: white, borderRadius: scale(10),
+                            marginTop: scale(5),
+                        }}
                         maxItemsPerRow={6}
                         itemDimension={scale(50)}
                         spacing={scale(5)}
@@ -693,7 +693,7 @@ class HomeScreen extends Component {
                         : null}
 
                     {/* 活動頁 */}
-                    {isLoading ? null : <EventPage ref={this.eventPage} />}
+                    <EventPage ref={this.eventPage} />
 
                 </ScrollView>
 
@@ -763,7 +763,7 @@ class HomeScreen extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'7%'}
-                    textStyle={{ color: COLOR_DIY.themeColor,fontWeight:'bold',textAlign:'center'}}
+                    textStyle={{ color: COLOR_DIY.themeColor, fontWeight: 'bold', textAlign: 'center' }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColorUltraLight,
                         borderRadius: scale(10),

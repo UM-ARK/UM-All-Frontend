@@ -43,6 +43,7 @@ import {
     UM_RC_MENU,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
+import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -62,6 +63,10 @@ const iconTypes = {
     materialCommunityIcons: 'MaterialCommunityIcons',
     img: 'img',
 };
+
+const { themeColor } = COLOR_DIY;
+
+const iconSize = scale(25);
 
 class Index extends Component {
     state = {
@@ -683,6 +688,7 @@ class Index extends Component {
                                 // 跳轉具體頁面
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
+                                    logToFirebase('funcUse', { funcName: item.fn_name });
                                     if (!needLogin || this.state.isLogin) {
                                         // Webview頁面，需附帶跳轉參數
                                         if (go_where == 'Webview') {
@@ -734,19 +740,36 @@ class Index extends Component {
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
-                    centerComponent={{
-                        text: '功能總覽（づ￣3￣）づ',
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: scale(15),
-                        },
-                    }}
                     statusBarProps={{
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
                     }}
+                    containerStyle={{
+                        // 修復頂部空白過多問題
+                        height: Platform.select({
+                            android: scale(38),
+                            default: scale(35),
+                        }),
+                        paddingTop: 0,
+                    }}
                 />
+
                 <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                        {/* ARK Logo */}
+                        <FastImage
+                            source={require('../../../static/img/logo.png')}
+                            style={{
+                                height: iconSize, width: iconSize,
+                                borderRadius: scale(5),
+                            }}
+                        />
+                        {/* 標題 */}
+                        <View style={{ marginLeft: scale(5), }}>
+                            <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>服務一覽</Text>
+                        </View>
+                    </View>
+
                     {this.state.functionArr.map(fn_card => {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);
                     })}

@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Linking, } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { WHAT_2_REG } from '../../../../utils/pathMap';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
@@ -95,23 +96,35 @@ export default class CourseCard extends Component {
                                     //     prof_name: this.props.prof_info.name,
                                     //     prof_info: this.props.prof_info,
                                     // })
-                                    const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(item.New_code) + '/' + encodeURIComponent(this.props.prof_info.name)
+                                    const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(this.props.prof_info.name)
                                     // Linking.openURL(URI);
                                     webview_param.url = URI;
-                                    webview_param.title = item.New_code;
+                                    webview_param.title = courseCode;
+                                    logToFirebase('checkCourse', {
+                                        courseCode: courseCode,
+                                        profName: this.props.prof_info.name,
+                                    });
                                 }
                                 else {
                                     // 進入搜索課程代號模式
                                     // this.context.navigate('What2RegCourse', courseCode)
                                     // this.context.navigate('LocalCourse', courseCode)
-                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(item['Course Code'])}&instructor=${false}`
+                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(courseCode)}&instructor=${false}`
                                     webview_param.url = URI;
-                                    webview_param.title = item['Course Code'];
+                                    webview_param.title = courseCode;
+                                    logToFirebase('checkCourse', {
+                                        courseCode: courseCode,
+                                        onLongPress: 0,
+                                    });
                                 }
                                 this.context.navigate('Webviewer', webview_param);
                             }}
                             onLongPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
+                                logToFirebase('checkCourse', {
+                                    courseCode: courseCode,
+                                    onLongPress: 1,
+                                });
                                 this.context.navigate('LocalCourse', courseCode)
                             }}
                             // 獲取當前位置距離屏幕頂端的高度
@@ -132,11 +145,6 @@ export default class CourseCard extends Component {
                                         color={themeColor}
                                     />
                                 )} */}
-                                {mode == 'json' && 'Pre' in item && item.Pre ? (
-                                    <View style={{ marginLeft: scale(3) }}>
-                                        <Text style={{ fontSize: scale(10), color: themeColor, fontWeight: 'bold' }}>Pre</Text>
-                                    </View>
-                                ) : null}
                             </View>
                             <Text style={{
                                 fontSize: scale(11),

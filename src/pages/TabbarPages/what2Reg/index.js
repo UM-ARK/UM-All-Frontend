@@ -14,8 +14,9 @@ import {
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
-import offerCourses from '../../../static/UMCourses/offerCourses.json';
-// import coursePlan from '../../../static/UMCourses/coursePlan.json';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import offerCourses from '../../../static/UMCourses/offerCourses';
+import coursePlan from '../../../static/UMCourses/coursePlan';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -24,11 +25,13 @@ import { scale } from "react-native-size-matters";
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import FastImage from 'react-native-fast-image';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
+const iconSize = scale(25);
 
 const offerCourseList = offerCourses.Courses;
-// const coursePlanList = coursePlan.Courses;
+const coursePlanList = coursePlan.Courses;
 
 // 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
@@ -138,17 +141,22 @@ handleSearchFilterCourse = (inputText) => {
     });
 
     // 篩選課表時間Excel的數據
-    // let coursePlanSearchList = coursePlanList.filter(itm => {
-    //     return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-    //         || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-    //         || itm['Course Title Chi'].indexOf(inputText) != -1
-    // });
+    if (coursePlanList.length > 0) {
+        let coursePlanSearchList = coursePlanList.filter(itm => {
+            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+                || itm['Teacher Information'].toUpperCase().indexOf(inputText) != -1
+                || (itm['Day'] && itm['Day'].toUpperCase().indexOf(inputText) != -1)
+                || (itm['Offering Department'] && itm['Offering Department'].toUpperCase().indexOf(inputText) != -1)
+                || itm['Offering Unit'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title Chi'].indexOf(inputText) != -1
+        });
 
-    // 搜索合併
-    // filterCourseList = filterCourseList.concat(coursePlanSearchList)
-
-    // 搜索去重
-    // filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+        // 搜索合併
+        filterCourseList = filterCourseList.concat(coursePlanSearchList)
+        // 搜索去重
+        filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+    }
 
     // 搜索結果排序
     filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
@@ -645,6 +653,8 @@ export default class index extends Component {
     jumpToWebRelateCoursePage = (searchData) => {
         const { inputText, type } = searchData;
         const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
+        logToFirebase('checkCourse', { searchText: inputText });
+
         // Linking.openURL(URI)
         const webview_param = {
             url: URI,
@@ -746,12 +756,21 @@ export default class index extends Component {
                         ref={this.scrollViewRef}
                         style={{ width: '100%' }}
                         stickyHeaderIndices={[1]}
-                        // stickyHeaderHiddenOnScroll
                         showsVerticalScrollIndicator={false}
                     >
-                        {/* 標題 */}
-                        <View style={{ alignSelf: 'center', paddingVertical: scale(5), paddingHorizontal: scale(10) }}>
-                            <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                            {/* ARK Logo */}
+                            <FastImage
+                                source={require('../../../static/img/logo.png')}
+                                style={{
+                                    height: iconSize, width: iconSize,
+                                    borderRadius: scale(5),
+                                }}
+                            />
+                            {/* 標題 */}
+                            <View style={{ marginLeft: scale(5) }}>
+                                <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                            </View>
                         </View>
 
                         <>

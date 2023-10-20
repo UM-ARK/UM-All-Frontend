@@ -6,6 +6,7 @@ import MessageScreen from './pages/TabbarPages/message';
 import MeScreen from './pages/TabbarPages/me';
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
+import ARKWiki from './pages/TabbarPages/arkwiki';
 
 import { COLOR_DIY } from './utils/uiMap';
 import { scale } from 'react-native-size-matters';
@@ -92,6 +93,30 @@ class Tabbar extends Component {
                                 />
                             ),
                             title: '資訊',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                    />
+                )}
+
+                {/* ARK Wiki */}
+                {isClub ? null : (
+                    <Tabs.Screen
+                        name="Wiki"
+                        component={ARKWiki}
+                        options={{
+                            tabBarIcon: ({ focused, color, size }) => (
+                                <MaterialCommunityIcons
+                                    name="file-document-edit-outline"
+                                    size={scale(18)}
+                                    color={
+                                        focused ? color : COLOR_DIY.black.main
+                                    }
+                                    focused={focused}
+                                />
+                            ),
+                            title: 'Wiki',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')

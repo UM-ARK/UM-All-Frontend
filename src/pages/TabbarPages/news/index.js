@@ -86,17 +86,7 @@ class NewsScreen extends Component {
                         name="ClubPage"
                         component={ClubPage}
                         options={{
-                            title: '進駐組織',
-                        }}
-                        listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
-                        })}
-                    />
-                    <Tab.Screen
-                        name="NewsPage"
-                        component={NewsPage}
-                        options={{
-                            title: '澳大新聞',
+                            title: '組織',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')
@@ -106,7 +96,17 @@ class NewsScreen extends Component {
                         name="UMEventPage"
                         component={UMEventPage}
                         options={{
-                            title: '澳大活動',
+                            title: '活動',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                    />
+                    <Tab.Screen
+                        name="NewsPage"
+                        component={NewsPage}
+                        options={{
+                            title: '新聞',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')

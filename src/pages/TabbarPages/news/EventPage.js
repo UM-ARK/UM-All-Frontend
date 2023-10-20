@@ -34,7 +34,6 @@ class EventPage extends Component {
             rightDataList: [],
             isLoading: true,
             noMoreData: false,
-            needFilter: false,
         };
 
         this.getData();
@@ -46,7 +45,8 @@ class EventPage extends Component {
 
     getData = async () => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
-        let num_of_item = 20;
+        let num_of_item = 10;
+        let noMoreData = true;
         try {
             await axios.get(URL, {
                 params: {
@@ -58,24 +58,18 @@ class EventPage extends Component {
                 if (json.message == 'success') {
                     let newDataArr = json.content;
                     if (newDataArr.length < num_of_item) {
-                        this.setState({ noMoreData: true });
+                        noMoreData = true;
                     } else {
-                        this.setState({ noMoreData: false });
+                        noMoreData = false;
                     }
 
                     if (dataPage == 1) {
-                        this.separateData(newDataArr);
+                        this.separateData(this.getNotFinishEvent(newDataArr));
                         eventDataList = newDataArr;
-                        this.setState({ isLoading: false });
                     } else if (eventDataList.length > 0) {
                         newDataArr = eventDataList.concat(newDataArr);
-                        if (this.state.needFilter) {
-                            this.eventFilter(newDataArr);
-                        } else {
-                            this.separateData(newDataArr);
-                        }
+                        this.separateData(this.getNotFinishEvent(newDataArr));
                         eventDataList = newDataArr;
-                        this.setState({ isLoading: false });
                     }
                 } else if (json.code == '2') {
                     alert('已無更多數據');
@@ -91,14 +85,20 @@ class EventPage extends Component {
             } else {
                 alert('未知錯誤，請聯繫開發者！')
             }
+        } finally {
+            this.setState({
+                isLoading: false,
+                noMoreData,
+            });
         }
     }
 
-    separateData = eventDataList => {
+    separateData = eventList => {
         // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
         let leftDataList = [];
         let rightDataList = [];
-        eventDataList.map((itm, idx) => {
+
+        eventList.map((itm, idx) => {
             // 圖片類型服務器返回相對路徑，請記住加上域名
             if (itm.cover_image_url.indexOf(BASE_HOST) == -1) {
                 itm.cover_image_url = BASE_HOST + itm.cover_image_url;
@@ -115,17 +115,43 @@ class EventPage extends Component {
         });
     };
 
-    // 篩選尚未結束的活動
-    eventFilter = eventDataList => {
-        let newDataArr = [];
+    // 篩選尚未結束的活動，並隨機亂序，最後與原數組合併去重
+    getNotFinishEvent = eventList => {
+        let notFinishEvent = [];
+        let closeFinishEvent = [];
         // 當前時刻時間戳
-        let nowTimeStamp = moment(new Date()).valueOf();
-        eventDataList.map(itm => {
-            if (nowTimeStamp < moment(itm.enddatetime).valueOf()) {
-                newDataArr.push(itm);
+        let nowTime = moment(new Date());
+
+        eventList.map((itm, idx) => {
+            if (nowTime.isBefore(moment(itm.enddatetime))) {
+                if (idx >= 1) {
+                    notFinishEvent.push(itm);
+                }
+                // 使將結束的頭兩個活動置頂，後面合併數組
+                else if (idx < 1) {
+                    closeFinishEvent.push(itm);
+                }
             }
         });
-        this.separateData(newDataArr);
+
+        // 如果未結束活動超過1個，再進行隨機排序
+        if (notFinishEvent.length > 1) {
+            notFinishEvent.sort(() => {
+                return Math.random() - 0.5
+            })
+        }
+        // 如果將結束活動超過1個，再進行隨機排序
+        if (closeFinishEvent.length > 1) {
+            closeFinishEvent.sort(() => {
+                return Math.random() - 0.5
+            })
+        }
+        return Array.from(
+            new Set(
+                closeFinishEvent.concat(
+                    notFinishEvent.concat(eventList)
+                )
+            ))
     };
 
     loadMoreData = () => {
@@ -142,10 +168,7 @@ class EventPage extends Component {
         if (dataPage > 1) {
             dataPage = 1;
         }
-        this.setState({
-            isLoading: true,
-            needFilter: false,
-        });
+        this.setState({ isLoading: true });
         this.getData();
     };
 

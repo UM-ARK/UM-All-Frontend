@@ -24,6 +24,7 @@ import {
     addHost,
     MAIL,
     GITHUB_PAGE,
+    ARK_WIKI_ABOUT_ARK,
 } from '../../../utils/pathMap';
 
 import { scale } from 'react-native-size-matters';
@@ -31,7 +32,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 
-const { black, themeColor, secondThemeColor, white } = COLOR_DIY;
+const { black, themeColor, secondThemeColor, white, wiki_bg_color } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
 
 export default class AboutPage extends Component {
@@ -176,7 +177,14 @@ export default class AboutPage extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                this.props.navigation.navigate('AboutUs');
+                                let webview_param = {
+                                    url: ARK_WIKI_ABOUT_ARK,
+                                    title: 'ARK Wiki',
+                                    text_color: black.main,
+                                    bg_color_diy: wiki_bg_color,
+                                    isBarStyleBlack: true,
+                                };
+                                this.props.navigation.navigate('Webviewer', webview_param);
                             }}>
                             <Text
                                 style={{
@@ -184,37 +192,6 @@ export default class AboutPage extends Component {
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>{`這個APP是?`}</Text>
-                        </TouchableOpacity>
-
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
-                            如果你是新同學... (詳見服務頁新生推薦)
-                        </Text>
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: NEW_SCZN,
-                                    title: '新鮮人要知道的億些Tips',
-                                    text_color: COLOR_DIY.black.second,
-                                    bg_color_diy: '#ededed',
-                                };
-                                this.props.navigation.navigate(
-                                    'Webviewer',
-                                    webview_param,
-                                );
-                            }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{`我是萌新`}</Text>
                         </TouchableOpacity>
 
                         <Text
@@ -231,7 +208,7 @@ export default class AboutPage extends Component {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 let webview_param = {
                                     url: USUAL_Q,
-                                    title: '常見問題',
+                                    title: 'ARK ALL常見問題',
                                 };
                                 this.props.navigation.navigate(
                                     'Webviewer',
@@ -243,7 +220,7 @@ export default class AboutPage extends Component {
                                     fontSize: scale(12),
                                     color: themeColor,
                                     fontWeight: '600',
-                                }}>{`我要怎麼...`}</Text>
+                                }}>{`ARK ALL常見問題`}</Text>
                         </TouchableOpacity>
                     </HomeCard>
 

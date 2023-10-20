@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -92,6 +93,10 @@ class EventCard extends Component {
                 data: this.state.eventData,
             });
         }
+        logToFirebase('clickEvent', {
+            title: title,
+            clubName: this.state.clubName,
+        })
     };
 
     render() {
@@ -169,7 +174,7 @@ class EventCard extends Component {
                                 width: IMAGE_SIZE,
                                 height: IMAGE_SIZE,
                                 backgroundColor: white,
-                                opacity: isFinish? 0.5 : 1,
+                                opacity: isFinish ? 0.5 : 1,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                             onLoadStart={() => {
@@ -328,12 +333,12 @@ const styles = StyleSheet.create({
             fontWeight: '500',
             fontSize: scale(11),
         },
-        disabledText:{
+        disabledText: {
             color: black.third,
             fontWeight: '500',
             fontSize: scale(11),
         }
-        
+
     },
 });
 

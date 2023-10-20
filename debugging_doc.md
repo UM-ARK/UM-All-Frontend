@@ -5,10 +5,14 @@
 - [環境安裝與運行模擬器時的問題](#環境安裝與運行模擬器時的問題)
   - [Android開發環境](#android開發環境)
 <!--   - [iOS開發環境](#ios開發環境) -->
-- [開發本倉庫項目時的問題](#開發本倉庫項目時的問題)
-  - [通用方案](#通用方案)
-  - [Android](#android)
-  - [iOS](#ios)
+- [Debugging Documentation for UM-All-Frontend](#debugging-documentation-for-um-all-frontend)
+  - [內容](#內容)
+  - [環境安裝與運行模擬器時的問題](#環境安裝與運行模擬器時的問題)
+    - [Android開發環境](#android開發環境)
+  - [開發本倉庫項目時的問題](#開發本倉庫項目時的問題)
+    - [通用方案](#通用方案)
+    - [Android](#android)
+    - [iOS](#ios)
 
 ---
 &nbsp;
@@ -69,29 +73,23 @@ target 'ProjectName' do
 ...
 end
 ```
-5. iOS遇到cpp編譯問題:
+5. Build時遇到`yoga.cpp`編譯問題:
 ```console
 The following build commands failed:
     CompileC ......
     Yoga.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'Yoga' from project 'Pods')
 (1 failure)
 ```
-&emsp; 請到``./node_modules/react-native/ReactCommon/yoga/yoga/yoga.cpp``的大約3047行，找到：
-```cpp
-node->getLayout().hadOverflow() |
-```
-&emsp; 並改為:
-```cpp
-node->getLayout().hadOverflow() ||
-```
-&emsp; 然後重新回到```ios```目錄，並：
-```
-pod install
-```
-&emsp; 最後再：
-```
-react-native run-ios
-```
-&emsp; 即可正常編譯。
+&emsp; 使用Xcode Build，雙擊該錯誤提示定位到錯誤發生位置，點按`Fix`快速修復錯誤。即可正常編譯。
+
+6. Build時遇到`hash`編譯問題：
+&emsp; 與上一點修復方式相同。
+
+7. 再莫名遇到`CompileC`錯誤：
+刪除`./package-lock.json`，刪除`./ios`下的`Pods`和`build`文件夾。
+刪除`~/Library/Developer/Xcode/DerivedData/`目錄下的所有文件。
+回到`./`使用`npm i --legacy-peer-deps`重新安裝依賴包。
+到`./ios`使用`pod install --repo-update;`安裝Pod相關包，**該步驟可能會使電腦重裝iOS模擬器**。
+使用Xcode嘗試Build，Fix`yoga.cpp`和`hash`問題後，應該可以正常Build。
 
 ---
