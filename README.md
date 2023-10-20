@@ -1,9 +1,10 @@
-## 最新版本號 `2.2.0`
+## 最新版本號 `2.4.0`
 
-- [最新版本號 `2.2.0`](#最新版本號-220)
-- [環境安裝、運行模擬器](#環境安裝運行模擬器)
+- [最新版本號 `2.4.0`](#最新版本號-240)
+- [React Native 初始化新項目](#react-native-初始化新項目)
   - [Android 環境 Install](#android-環境-install)
   - [iOS 環境 Install](#ios-環境-install)
+    - [初始化React Native新項目](#初始化react-native新項目)
   - [使用 Debugger （Web Console工具）](#使用-debugger-web-console工具)
 - [開發本倉庫項目準備](#開發本倉庫項目準備)
   - [安裝及運行流程](#安裝及運行流程)
@@ -15,7 +16,7 @@
 
 ---
 
-## 環境安裝、運行模擬器
+## React Native 初始化新項目
 
 ### Android 環境 [Install](https://reactnative.dev/docs/environment-setup)
 
@@ -30,7 +31,9 @@
 
 ### iOS 環境 [Install](https://reactnative.dev/docs/environment-setup)
 
-> 基於 React Native CLI 下的安裝流程
+> 基於 React Native CLI 下的安裝流程，iOS APP目前只能在Mac開發調試
+
+#### 初始化React Native新項目
 
 1. 先安裝`node`包，方便之後使用指令`npm`和`npx`
 
@@ -67,7 +70,7 @@ npx react-native run-ios
 ### 使用 Debugger （Web Console工具）
 
 * 當需要 log 出對象或者數組時，有 Chrome 的 Web Debugger 肯定更好用。
-* 舊版的項目可以在 Metro 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
+* 舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
 * 新版項目因為使用了組件 react-native-reanimated 導致不支持遠程調試，現在需要使用[Flipper](https://fbflipper.com/).
 * 下載 Flipper 後，Mac 和 Windows 可能還要安裝一兩個工具，比如 Windows 要安裝 OpenSSL，參考：https://www.cnblogs.com/dingshaohua/p/12271280.html
 
@@ -106,11 +109,11 @@ yarn android
 or
 npm run android
 or
-（已開啟App的情況下）
+（已開啟Debug版App的情況下）
 npx react-native start --reset-cache
 ```
 
-4. 安裝 ios 模擬器需要的依賴包
+1. 在 ios 上編譯/運行App
 
 ```console
 cd ios
@@ -121,6 +124,10 @@ pod install
 
 ```console
 npx react-native run-ios
+or
+yarn ios
+or
+yarn ios --simulator="iPhone 15"
 ```
 
 ---
