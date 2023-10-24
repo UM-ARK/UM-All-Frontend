@@ -4,13 +4,17 @@ import { View, Text, FlatList, TouchableOpacity, Linking, } from 'react-native';
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { WHAT_2_REG } from '../../../../utils/pathMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import offerCourses from '../../../../static/UMCourses/offerCourses';
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { NavigationContext } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const { themeColor, black, } = COLOR_DIY;
+const { themeColor, black, secondThemeColor } = COLOR_DIY;
+
+// 是否處在PreEnrollment期間
+const preEn = offerCourses.preEn;
 
 export default class CourseCard extends Component {
     static contextType = NavigationContext;
@@ -145,6 +149,13 @@ export default class CourseCard extends Component {
                                         color={themeColor}
                                     />
                                 )} */}
+                                {preEn && item['Pre'] ? (
+                                    <Text style={{
+                                        fontSize: scale(10),
+                                        marginLeft: scale(5),
+                                        color: secondThemeColor,
+                                    }}>PreEn</Text>
+                                ) : null}
                             </View>
                             <Text style={{
                                 fontSize: scale(11),
