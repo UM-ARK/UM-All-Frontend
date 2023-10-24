@@ -1,6 +1,6 @@
-## 最新版本號 `2.4.0`
+## 最新版本號 `2.4.1`
 
-- [最新版本號 `2.4.0`](#最新版本號-240)
+- [最新版本號 `2.4.1`](#最新版本號-241)
 - [React Native 初始化新項目](#react-native-初始化新項目)
   - [Android 環境 Install](#android-環境-install)
   - [iOS 環境 Install](#ios-環境-install)
@@ -145,6 +145,9 @@ yarn ios --simulator="iPhone 15"
 5. 注意：
 - 一個Build號只能用一次。如果build失敗則更換build號，通常加一個小版本即可（如2.2.0->2.2.1）。
 - 檢查``Info.plist``的``App Uses Non-Exempt Encription``選項，必須設置為No，否則會被Apple禁止上傳。
+6. 發佈注意：
+- 切換Any iOS Device arm64 進行Build
+- 使用Product - Archive進行封包，如提示`React-Core.common`字樣的問題，在Pods中刪除非`React-Core.common-CoreModulesHeaders`的相似文件，再進行Build與Archive
 
 ### Android打包
 1. Android端需保存好`.keystore`或`.jks`文件。編譯出包時，將該文件放置在`android/app`目錄下，以作App密鑰。

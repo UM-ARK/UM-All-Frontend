@@ -103,6 +103,7 @@ const depaMap = {
     // FHS
     'DBS': '生物醫學系',
     'DPS': '藥物科學系',
+    'DPM': ' - ',
 
     // FLL
     'GLS': '環球法律學系',

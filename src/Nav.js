@@ -46,10 +46,15 @@ import LostAndFound from './pages/Features/LostAndFound';
 import CarPark from './pages/Features/CarPark';
 
 import TestScreen from '../test/test';
+import {Text} from "react-native";
 
 // 創建一個頁面導航棧
 const Stack = createStackNavigator();
 // 頭部標題配置：http://www.himeizi.cn/reactnavigation/api/navigators/createStackNavigator.html#options
+
+Text.defaultProps={
+    allowFontScaling: false
+};
 
 class Nav extends Component {
     render() {

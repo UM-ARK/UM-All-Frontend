@@ -1,10 +1,11 @@
-import React, { Component, useRef } from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
     Platform,
     StyleSheet,
     TouchableOpacity,
+    BackHandler,
 } from 'react-native';
 
 import { WebView } from 'react-native-webview';
@@ -39,6 +40,23 @@ export default class ARKWiki extends Component {
 
     componentDidMount() {
         logToFirebase('openPage', { page: 'wiki' });
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPress);
+        }
+    }
+    componentWillUnmount() {
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
+        }
+    }
+
+    onAndroidBackPress = () => {
+        const { canGoBack } = this.state;
+        if (canGoBack && this.webviewRef && this.webviewRef.current) {
+            this.webviewRef.current.goBack();
+            return true;
+        }
+        return false;
     }
 
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
@@ -52,6 +70,7 @@ export default class ARKWiki extends Component {
     returnWikiHome = () => {
         ReactNativeHapticFeedback.trigger('soft');
         this.setState({ currentURL: ARK_WIKI })
+        this.webviewRef.current.reload();
         this.toast.show(`正全力返回主頁！`, 2000);
     }
 
@@ -61,7 +80,7 @@ export default class ARKWiki extends Component {
             <View style={{ flex: 1 }}>
                 <Header
                     // Wiki的默認配色
-                    backgroundColor={wiki_bg_color}
+                    backgroundColor={white}
                     statusBarProps={{
                         backgroundColor: 'transparent',
                         barStyle: 'dark-content',
@@ -80,7 +99,7 @@ export default class ARKWiki extends Component {
                 <View style={{
                     flexDirection: 'row', width: '100%',
                     alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: wiki_bg_color,
+                    backgroundColor: white,
                     paddingBottom: scale(3),
                 }}>
                     {/* 回退按鈕 */}
@@ -208,9 +227,9 @@ export default class ARKWiki extends Component {
                     // Android
                     thirdPartyCookiesEnabled
                     domStorageEnabled={true}
-                    cacheMode={'LOAD_NO_CACHE'}
-                    // 其他邏輯
+                    // 前進、回退按鈕所需判斷邏輯
                     onNavigationStateChange={this.onNavigationStateChange}
+                    // 進度條展示
                     onLoadProgress={event => {
                         this.setState({ progress: event.nativeEvent.progress })
                     }}

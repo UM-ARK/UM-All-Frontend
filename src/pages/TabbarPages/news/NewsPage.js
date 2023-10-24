@@ -316,7 +316,6 @@ class NewsPage extends Component {
                             width: scale(50),
                             height: scale(50),
                             backgroundColor: COLOR_DIY.white,
-                            backgroundColor: COLOR_DIY.white,
                             borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
