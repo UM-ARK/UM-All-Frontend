@@ -311,7 +311,12 @@ export default class index extends Component {
                 key={offerFacultyList.length}
                 keyExtractor={(item, index) => index}
                 numColumns={offerFacultyList.length}
-                columnWrapperStyle={offerFacultyList.length > 1 ? { flexWrap: 'wrap' } : null}
+                columnWrapperStyle={
+                    offerFacultyList.length > 1 ? {
+                        flexWrap: 'wrap', justifyContent: 'center'
+                    } : null
+                }
+                contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
                     <TouchableOpacity
                         style={{
@@ -368,11 +373,17 @@ export default class index extends Component {
                 key={offerDepaList.length}
                 keyExtractor={(item, index) => index}
                 numColumns={offerDepaList.length}
-                columnWrapperStyle={offerDepaList.length > 1 ? { flexWrap: 'wrap' } : null}
+                columnWrapperStyle={
+                    offerDepaList.length > 1 ? {
+                        flexWrap: 'wrap', justifyContent: 'center'
+                    } : null
+                }
+                style={{ marginTop: scale(5) }}
+                contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
                     <TouchableOpacity style={{
-                        paddingHorizontal: scale(5), paddingVertical: scale(2),
                         ...s.classItm,
+                        paddingHorizontal: scale(5), paddingVertical: scale(2),
                         backgroundColor: filterOptions.depaName === itm ? themeColor : null,
                     }}
                         onPress={() => {
@@ -393,13 +404,8 @@ export default class index extends Component {
                 )}
                 // 展示學系中文名稱
                 ListHeaderComponent={() =>
-                    offerDepaList
-                        && offerDepaList.length > 0
-                        && filterOptions.depaName in depaMap ?
-                        <Text style={{
-                            ...s.classItmTitleText,
-                            marginTop: scale(5),
-                        }}>
+                    filterOptions.depaName in depaMap ?
+                        <Text style={{ ...s.classItmTitleText }}>
                             {depaMap[filterOptions.depaName]}
                         </Text> : null
                 }
@@ -418,7 +424,7 @@ export default class index extends Component {
         return (
             <View
                 style={{
-                    alignItems: 'flex-start', backgroundColor: white,
+                    backgroundColor: white,
                     borderRadius: scale(10),
                     padding: scale(5),
                     margin: scale(5), marginHorizontal: scale(10),
@@ -430,17 +436,18 @@ export default class index extends Component {
 
                 {/* 渲染分類課程選擇按鈕 */}
                 {filterOptions.option == 'GE' ? (
-                    <View style={{ marginTop: scale(5), }}>
+                    <View style={{ marginTop: scale(5), alignItems: 'center' }}>
                         {/* GE課描述 */}
                         <Text style={{ ...s.classItmTitleText }}>
                             {geClassMap[filterOptions.GE]}
                         </Text>
+                        {/* 具體GE課程分類按鈕 */}
                         <View style={{ flexDirection: 'row', }}>
                             {offerGEList.length > 0 && offerGEList.map(itm => {
                                 return (
                                     <TouchableOpacity style={{
-                                        paddingHorizontal: scale(5), paddingVertical: scale(3),
                                         ...s.classItm,
+                                        paddingHorizontal: scale(5), paddingVertical: scale(3),
                                         borderColor: filterOptions.GE === itm ? themeColor : black.third,
                                         backgroundColor: filterOptions.GE === itm ? themeColor : null,
                                     }}
@@ -492,7 +499,10 @@ export default class index extends Component {
                 key={CMGEList.length}
                 keyExtractor={(item, index) => index}
                 numColumns={CMGEList.length}
-                columnWrapperStyle={CMGEList.length > 1 ? { flexWrap: 'wrap' } : null}
+                columnWrapperStyle={CMGEList.length > 1 ? {
+                    flexWrap: 'wrap', justifyContent: 'center'
+                } : null}
+                contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
                     <TouchableOpacity
                         style={{
@@ -876,6 +886,7 @@ const s = StyleSheet.create({
         fontSize: scale(13),
         color: black.third,
         fontWeight: '600',
+        alignSelf: 'center',
         marginLeft: scale(5),
     }
 })
