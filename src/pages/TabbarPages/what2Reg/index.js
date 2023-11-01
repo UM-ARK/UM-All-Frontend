@@ -17,6 +17,7 @@ import { COLOR_DIY } from '../../../utils/uiMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
 import coursePlan from '../../../static/UMCourses/coursePlan';
+import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -33,7 +34,7 @@ const iconSize = scale(25);
 // preEnroll
 let COURSE_MODE = 'ad';
 
-const coursePlanList = coursePlan.Courses;
+const coursePlanList = coursePlanTime.Courses;
 // const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
 
 // ***** 需到getClassifyCourse函數處運行 *****
@@ -52,7 +53,7 @@ const coursePlanList = coursePlan.Courses;
 // console.log(JSON.stringify(offerCourseList));
 
 // 加入課表時間Excel數據，去重
-// offerCourseList = offerCourseList.concat(coursePlanList);
+// offerCourseList = offerCourseList.concat(xxxList);
 // offerCourseList = offerCourseList.filter((item, index) => offerCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
 // console.log(JSON.stringify(offerCourseList));
 
@@ -148,7 +149,7 @@ handleSearchFilterCourse = (inputText) => {
     });
 
     // 篩選課表時間Excel的數據
-    if (false && coursePlanList.length > 0) {
+    if (coursePlanList.length > 0) {
         let coursePlanSearchList = coursePlanList.filter(itm => {
             return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
@@ -204,7 +205,7 @@ export default class index extends Component {
     componentDidMount() {
         this.getClassifyCourse();
 
-        // TODO: 匯報Firebase打開該頁面
+        logToFirebase('openPage', { page: 'chooseCourses' });
 
         // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
         this.keyboardDidHideListener = Keyboard.addListener(
@@ -227,8 +228,6 @@ export default class index extends Component {
     getClassifyCourse = () => {
         const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
         const { filterOptions } = this.state;
-
-        // TODO: Add Drop數據長按沒有課程信息
 
         // 開設課程的學院名列表
         let offerFacultyList = [];

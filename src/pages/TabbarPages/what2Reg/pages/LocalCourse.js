@@ -12,13 +12,13 @@ import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG } from "../../../../utils/pathMap";
 import { logToFirebase } from "../../../../utils/firebaseAnalytics";
-import coursePlan from "../../../../static/UMCourses/coursePlan";
+import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
-const coursePlanList = coursePlan.Courses;
+const coursePlanList = coursePlanTime.Courses;
 
 const daySorter = {
     'MON': 1,

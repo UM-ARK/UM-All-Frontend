@@ -138,14 +138,7 @@ export default class CourseCard extends Component {
                             {/* 課程編號與開課標識 */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                 {this.renderCourseCode(courseCode)}
-                                {/* {mode == 'what2Reg' && item['is_offered'] && (
-                                    <MaterialCommunityIcons
-                                        style={{ marginLeft: scale(3) }}
-                                        name="account-check"
-                                        size={scale(18)}
-                                        color={themeColor}
-                                    />
-                                )} */}
+                                {/* Pre Enroll標記 */}
                                 {preEnroll ? (
                                     <Text style={{
                                         fontSize: scale(10),
