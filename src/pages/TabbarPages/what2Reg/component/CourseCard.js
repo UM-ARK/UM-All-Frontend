@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Linking, } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Linking, Alert } from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
-import { WHAT_2_REG } from '../../../../utils/pathMap';
+import { WHAT_2_REG, ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import { scale } from "react-native-size-matters";
@@ -83,42 +83,74 @@ export default class CourseCard extends Component {
                             }}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: '',
-                                    title: '',
-                                    text_color: '#FFF',
-                                    bg_color_diy: '#30548b',
-                                    isBarStyleBlack: false,
-                                };
-                                if (this.props.prof_info) {
-                                    // 進入搜索特定教授的課程模式，進入評論詳情頁
-                                    // this.context.navigate('What2RegComment', {
-                                    //     New_code: item['New_code'],
-                                    //     prof_name: this.props.prof_info.name,
-                                    //     prof_info: this.props.prof_info,
-                                    // })
-                                    const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(this.props.prof_info.name)
-                                    // Linking.openURL(URI);
-                                    webview_param.url = URI;
-                                    webview_param.title = courseCode;
-                                    logToFirebase('checkCourse', {
-                                        courseCode: courseCode,
-                                        profName: this.props.prof_info.name,
-                                    });
-                                }
-                                else {
-                                    // 進入搜索課程代號模式
-                                    // this.context.navigate('What2RegCourse', courseCode)
-                                    // this.context.navigate('LocalCourse', courseCode)
-                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(courseCode)}&instructor=${false}`
-                                    webview_param.url = URI;
-                                    webview_param.title = courseCode;
-                                    logToFirebase('checkCourse', {
-                                        courseCode: courseCode,
-                                        onLongPress: 0,
-                                    });
-                                }
-                                this.context.navigate('Webviewer', webview_param);
+                                Alert.alert(null,
+                                    `想打開哪個平台查課？\n來為澳大人建設Wiki！\n現在就到Wiki留下你的足跡~\nヽ(ﾟ∀ﾟ)ﾒ(ﾟ∀ﾟ)ﾉ `,
+                                    [
+                                        {
+                                            text: "Close",
+                                        },
+                                        {
+                                            text: "打開ARK Wiki",
+                                            onPress: () => {
+                                                ReactNativeHapticFeedback.trigger('soft');
+                                                let webview_param = {
+                                                    url: ARK_WIKI_SEARCH + encodeURIComponent(courseCode),
+                                                    title: 'ARK Wiki',
+                                                    text_color: COLOR_DIY.black.main,
+                                                    bg_color_diy: COLOR_DIY.wiki_bg_color,
+                                                    isBarStyleBlack: true,
+                                                };
+                                                if (this.props.prof_info) {
+                                                    webview_param.url = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
+                                                    logToFirebase('checkCourse', {
+                                                        courseCode: courseCode,
+                                                        profName: this.props.prof_info.name,
+                                                    });
+                                                }
+                                                else {
+                                                    logToFirebase('checkCourse', {
+                                                        courseCode: courseCode,
+                                                        onLongPress: 0,
+                                                    });
+                                                }
+                                                this.context.navigate('Webviewer', webview_param);
+                                            },
+                                        },
+                                        {
+                                            text: "打開選咩課",
+                                            onPress: () => {
+                                                ReactNativeHapticFeedback.trigger('soft');
+                                                let webview_param = {
+                                                    url: '',
+                                                    title: '',
+                                                    text_color: COLOR_DIY.white,
+                                                    bg_color_diy: COLOR_DIY.what2reg_color,
+                                                    isBarStyleBlack: false,
+                                                };
+                                                if (this.props.prof_info) {
+                                                    // 進入搜索特定教授的課程模式，進入評論詳情頁
+                                                    const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(this.props.prof_info.name)
+                                                    webview_param.url = URI;
+                                                    webview_param.title = courseCode;
+                                                    logToFirebase('checkCourse', {
+                                                        courseCode: courseCode,
+                                                        profName: this.props.prof_info.name,
+                                                    });
+                                                }
+                                                else {
+                                                    // 進入搜索課程代號模式
+                                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(courseCode)}&instructor=${false}`
+                                                    webview_param.url = URI;
+                                                    webview_param.title = courseCode;
+                                                    logToFirebase('checkCourse', {
+                                                        courseCode: courseCode,
+                                                        onLongPress: 0,
+                                                    });
+                                                }
+                                                this.context.navigate('Webviewer', webview_param);
+                                            },
+                                        },
+                                    ])
                             }}
                             onLongPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');

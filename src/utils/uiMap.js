@@ -1,13 +1,13 @@
-import React, {Component} from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {pxToDp} from './stylesKits';
+import React, { Component } from 'react';
+import { StyleSheet, View, Text } from 'react-native';
+import { pxToDp } from './stylesKits';
 
 export const COLOR_DIY = {
     // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
     themeColor: '#4796d6',
-    themeColorLight:'#7ca8cc',
-    themeColorUltraLight:'#c9e1f5',
-    secondThemeColor:'#FF8627',
+    themeColorLight: '#7ca8cc',
+    themeColorUltraLight: '#c9e1f5',
+    secondThemeColor: '#FF8627',
     // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
     black: {
         // 最高層級，類似大標題
@@ -34,7 +34,10 @@ export const COLOR_DIY = {
     },
 
     // ARK Wiki配色
-    wiki_bg_color: '#eaecf0',
+    wiki_bg_color: '#ffffff',
+
+    // What2Reg，選咩課配色
+    what2reg_color: '#30548b',
 
     // 提醒頁顏色
     messageScreenColor: {
@@ -44,7 +47,7 @@ export const COLOR_DIY = {
     // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
     viewShadow: {
         shadowColor: '#000',
-        shadowOffset: {width: 1, height: 1},
+        shadowOffset: { width: 1, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 3,
         // 適用於Android
@@ -53,8 +56,8 @@ export const COLOR_DIY = {
 };
 
 export const VERSION_EMOJI = {
-    ve_Left : '⛱️',
-    ve_Right : '🕶️',
+    ve_Left: '⛱️',
+    ve_Right: '🕶️',
 }
 export const uiStyle = StyleSheet.create({
     toastContainer: {
@@ -76,8 +79,8 @@ export const ToastText = props => {
         textColor = props.textColor;
     }
     return (
-        <View style={{...uiStyle.toastContainer, backgroundColor}}>
-            <Text style={{color: textColor}}>{props.text}</Text>
+        <View style={{ ...uiStyle.toastContainer, backgroundColor }}>
+            <Text style={{ color: textColor }}>{props.text}</Text>
         </View>
     );
 };

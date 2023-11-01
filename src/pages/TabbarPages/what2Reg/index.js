@@ -803,8 +803,8 @@ export default class index extends Component {
         const webview_param = {
             url: URI,
             title: inputText,
-            text_color: '#FFF',
-            bg_color_diy: '#30548b',
+            text_color: white,
+            bg_color_diy: COLOR_DIY.what2reg_color,
             isBarStyleBlack: false,
         };
         this.props.navigation.navigate('Webviewer', webview_param);
