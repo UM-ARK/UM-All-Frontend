@@ -5,7 +5,7 @@ import { Text, View, TouchableOpacity, Linking, StyleSheet } from 'react-native'
 
 import { COLOR_DIY } from '../utils/uiMap';
 import IntegratedWebView from './IntegratedWebView';
-import { WHAT_2_REG } from '../utils/pathMap';
+import { ARK_WIKI } from '../utils/pathMap';
 import ModalBottom from '../components/ModalBottom';
 
 import { Header } from '@rneui/themed';
@@ -24,7 +24,7 @@ class WebViewer extends Component {
         let data = this.props.route.params;
 
         // 定義默認參數
-        let url = 'url' in data ? data.url : WHAT_2_REG;
+        let url = 'url' in data ? data.url : ARK_WIKI;
         let title = 'title' in data ? data.title : '網址詳情';
         let text_color = 'text_color' in data ? data.text_color : black.main;
         let isBarStyleBlack =
