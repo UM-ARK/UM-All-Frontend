@@ -12,7 +12,7 @@ import {
     Keyboard,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
@@ -973,6 +973,24 @@ export default class index extends Component {
                         }}>
                             <Text style={{ color: black.third, fontSize: scale(12) }}>知識無價，評論只供參考~</Text>
                         </View>
+
+                        <TouchableOpacity style={{
+                            marginTop: scale(10),
+                            alignItems: 'center'
+                        }}
+                            onPress={() => {
+                                let webview_param = {
+                                    url: USER_AGREE,
+                                    title: 'ARK ALL 隱私政策 & 用戶協議',
+                                };
+                                this.props.navigation.navigate(
+                                    'Webviewer',
+                                    webview_param,
+                                );
+                            }}
+                        >
+                            <Text style={{ color: themeColor, fontSize: scale(10) }}>ARK ALL 隱私政策 & 用戶協議</Text>
+                        </TouchableOpacity>
                     </ScrollView>
 
                     {/* 渲染側邊首字母導航 */}

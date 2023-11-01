@@ -16,6 +16,7 @@ import {
     WHAT_2_REG,
     NEW_SCZN,
     USUAL_Q,
+    USER_AGREE,
     BASE_HOST,
     ARK_LETTER_IMG,
     UMALL_LOGO,
@@ -221,6 +222,27 @@ export default class AboutPage extends Component {
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>{`ARK ALL常見問題`}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                let webview_param = {
+                                    url: USER_AGREE,
+                                    title: 'ARK ALL 隱私政策 & 用戶協議',
+                                };
+                                this.props.navigation.navigate(
+                                    'Webviewer',
+                                    webview_param,
+                                );
+                            }}>
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
