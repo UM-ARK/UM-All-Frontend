@@ -30,38 +30,28 @@ import FastImage from 'react-native-fast-image';
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 const iconSize = scale(25);
 
-const offerCourseList = offerCourses.Courses;
-const coursePlanList = coursePlan.Courses;
+// preEnroll
+let COURSE_MODE = 'ad';
 
-// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
+const coursePlanList = coursePlan.Courses;
+// const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+
+// ***** 需到getClassifyCourse函數處運行 *****
+// Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
 
-// 2. 複製替換原課程列表為排序後列表
+// 複製替換原課程列表為排序後列表
 // const courseListStr = JSON.stringify(offerCourseList);
 // console.log(courseListStr);
 
-// 3. 獲取英文課程標題
-// let enList = offerCourseList.map((itm) => itm['Course Title']);
-// const enListStr = JSON.stringify(enList);
-// console.log('enListStr', enListStr);
-
-// 4. 保存為docx翻譯為中文繁體，去除特殊符號 “” 《》 ，
-// const cnListStr = ;
-
-// 5. 插入原數組
-// offerCourseList.map((itm,idx)=>{
-//     itm['Course Title Chi'] = cnListStr[idx];
-// })
-// console.log(JSON.stringify(offerCourseList));
-
-// 6. 預選課程加入Pre 鍵值
+// 預選課程加入Pre 鍵值
 // offerCourseList.map((itm,idx)=>{
 //     itm['Pre'] = 'true';
 // })
 // console.log(JSON.stringify(offerCourseList));
 
-// 7. 加入課表時間Excel數據，去重
+// 加入課表時間Excel數據，去重
 // offerCourseList = offerCourseList.concat(coursePlanList);
 // offerCourseList = offerCourseList.filter((item, index) => offerCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
 // console.log(JSON.stringify(offerCourseList));
@@ -134,6 +124,12 @@ const geClassMap = {
     'GEST': '科學和技術 - Science and Technology',
 }
 
+// add drop, pre enroll 中文參考
+const adpeMap = {
+    'ad': '增退選',
+    'preEnroll': '預選課',
+}
+
 // 判斷字符串是否包含中文
 function hasChinese(str) {
     return /[\u4E00-\u9FA5]+/g.test(str)
@@ -141,6 +137,8 @@ function hasChinese(str) {
 
 // 返回搜索候選所需的課程列表
 handleSearchFilterCourse = (inputText) => {
+    const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+
     inputText = inputText.toUpperCase();
     // 篩選所需課程
     let filterCourseList = offerCourseList.filter(itm => {
@@ -150,7 +148,7 @@ handleSearchFilterCourse = (inputText) => {
     });
 
     // 篩選課表時間Excel的數據
-    if (coursePlanList.length > 0) {
+    if (false && coursePlanList.length > 0) {
         let coursePlanSearchList = coursePlanList.filter(itm => {
             return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
@@ -185,10 +183,11 @@ export default class index extends Component {
             isLoading: false,
 
             filterOptions: {
+                mode: 'ad', // preEnroll
                 option: 'CMRE',
                 facultyName: 'FST',
                 depaName: 'ECE',
-                GE: 'GEST'
+                GE: 'GEST',
             },
 
             offerFacultyList: [],
@@ -226,6 +225,11 @@ export default class index extends Component {
 
     // 對開課數據進行分類
     getClassifyCourse = () => {
+        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+        const { filterOptions } = this.state;
+
+        // TODO: Add Drop數據長按沒有課程信息
+
         // 開設課程的學院名列表
         let offerFacultyList = [];
         // GE課程代號列表
@@ -280,7 +284,18 @@ export default class index extends Component {
             });
         })
 
-        let filterCourseList = offerCourseByDepa['ECE'];
+        // 還原/初始化需要渲染的課程列表
+        let filterCourseList = [];
+        if (filterOptions.option == 'CMRE') {
+            const facultyName = filterOptions.facultyName;
+            if (offerFacultyDepaListObj[facultyName].length > 0) {
+                filterCourseList = offerCourseByDepa[filterOptions.depaName];
+            } else {
+                filterCourseList = offerCourseByFaculty[facultyName];
+            }
+        } else if (filterOptions.option == 'GE') {
+            filterCourseList = offerCourseByGE[filterOptions.GE]
+        }
 
         this.setState({
             offerFacultyList,
@@ -293,6 +308,76 @@ export default class index extends Component {
 
             filterCourseList,
         })
+    }
+
+    renderADPESwitch = () => {
+        const {
+            filterOptions,
+            offerFacultyDepaListObj,
+            offerCourseByDepa,
+            offerCourseByGE,
+            offerCourseByFaculty, } = this.state;
+        const modeList = Object.keys(adpeMap);
+        const modeENStr = {
+            'ad': 'Add Drop',
+            'preEnroll': 'Pre Enroll',
+        }
+
+        return (
+            <FlatList
+                data={modeList}
+                key={modeList.length}
+                keyExtractor={(item, index) => index}
+                numColumns={modeList.length}
+                columnWrapperStyle={modeList.length > 1 ? {
+                    flexWrap: 'wrap', justifyContent: 'center'
+                } : null}
+                contentContainerStyle={{ alignItems: 'center' }}
+                renderItem={({ item: itm }) => (
+                    <TouchableOpacity
+                        style={{
+                            ...s.classItm,
+                            paddingHorizontal: scale(5), paddingVertical: scale(2),
+                            backgroundColor: filterOptions.mode === itm ? themeColor : null,
+                        }}
+                        onPress={async () => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            try {
+                                filterOptions.mode = itm;
+                                COURSE_MODE = itm;
+                                this.getClassifyCourse();
+                                this.setState({ filterOptions })
+                            } catch (error) {
+                                let filterCourseList = [];
+                                if (filterOptions.option == 'CMRE') {
+                                    const facultyName = filterOptions.facultyName;
+                                    if (offerFacultyDepaListObj[facultyName].length > 0) {
+                                        filterCourseList = offerCourseByDepa[filterOptions.depaName];
+                                    } else {
+                                        filterCourseList = offerCourseByFaculty[facultyName];
+                                    }
+                                } else if (filterOptions.option == 'GE') {
+                                    filterCourseList = offerCourseByGE[filterOptions.GE]
+                                }
+                                this.setState({ filterCourseList, scrollData: {} })
+                            }
+                        }}
+                    >
+                        <Text style={{
+                            color: filterOptions.mode === itm ? white : black.third,
+                            fontWeight: filterOptions.mode === itm ? '900' : 'normal',
+                            fontSize: scale(12),
+                        }}>{modeENStr[itm]}</Text>
+                    </TouchableOpacity>
+                )}
+                // 展示CM GE中文名稱
+                ListHeaderComponent={() =>
+                    <Text style={{ ...s.classItmTitleText }}>
+                        {adpeMap[filterOptions.mode]}
+                    </Text>
+                }
+            />
+        )
     }
 
     // 學院分類選擇，例FST、FSS
@@ -358,6 +443,7 @@ export default class index extends Component {
         )
     }
 
+    // 學系分類選擇，例ECE、CIS
     renderDepaFilter = () => {
         const {
             filterOptions,
@@ -429,8 +515,11 @@ export default class index extends Component {
                     padding: scale(5),
                     margin: scale(5), marginHorizontal: scale(10),
                 }}>
+                {/* 渲染Add Drop，Pre Enroll選擇 */}
+                {this.renderADPESwitch()}
+
                 {/* 渲染CMRE GE選擇 */}
-                <View style={{ width: '100%', }}>
+                <View style={{ width: '100%', marginTop: scale(5), }}>
                     {this.renderCMGEFilter()}
                 </View>
 
@@ -816,7 +905,7 @@ export default class index extends Component {
                                 <View style={{ alignSelf: 'center' }}>
                                     <Text style={{ fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                                 </View>
-                                <CourseCard data={searchFilterCourse} mode={'json'}
+                                <CourseCard data={searchFilterCourse} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
                                     handleSetLetterData={this.handleSetLetterData}
                                 />
                             </>
@@ -835,7 +924,7 @@ export default class index extends Component {
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
-                                    <CourseCard data={filterCourseList} mode={'json'}
+                                    <CourseCard data={filterCourseList} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
                                         handleSetLetterData={this.handleSetLetterData}
                                     />
                                 </View>
