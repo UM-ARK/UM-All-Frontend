@@ -130,7 +130,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: require('../../../static/img/logo.png'),
                     icon_type: iconTypes.img,
-                    function_name: 'ARK',
+                    function_name: '澳大方舟',
                     func: () => {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.onRefresh();
@@ -142,7 +142,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: 'file-document-edit',
                     icon_type: iconTypes.materialCommunityIcons,
-                    function_name: 'Wiki',
+                    function_name: '方舟百科',
                     func: () => {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.props.navigation.navigate('Wiki');
