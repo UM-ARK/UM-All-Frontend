@@ -343,6 +343,13 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'file-document-edit-outline',
+                        fn_name: 'Wiki',
+                        needLogin: false,
+                        go_where: 'Wiki', // a function
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'database-search',
                         fn_name: '選咩課',
                         needLogin: false,
