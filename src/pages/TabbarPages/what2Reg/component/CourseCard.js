@@ -93,15 +93,9 @@ export default class CourseCard extends Component {
                                             text: "打開ARK Wiki",
                                             onPress: () => {
                                                 ReactNativeHapticFeedback.trigger('soft');
-                                                let webview_param = {
-                                                    url: ARK_WIKI_SEARCH + encodeURIComponent(courseCode),
-                                                    title: 'ARK Wiki',
-                                                    text_color: COLOR_DIY.black.main,
-                                                    bg_color_diy: COLOR_DIY.wiki_bg_color,
-                                                    isBarStyleBlack: true,
-                                                };
+                                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
                                                 if (this.props.prof_info) {
-                                                    webview_param.url = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
+                                                    URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
                                                     logToFirebase('checkCourse', {
                                                         courseCode: courseCode,
                                                         profName: this.props.prof_info.name,
@@ -113,7 +107,7 @@ export default class CourseCard extends Component {
                                                         onLongPress: 0,
                                                     });
                                                 }
-                                                this.context.navigate('Webviewer', webview_param);
+                                                this.context.navigate('Wiki', { url: URL });
                                             },
                                         },
                                         {

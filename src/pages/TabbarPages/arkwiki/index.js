@@ -50,6 +50,16 @@ export default class ARKWiki extends Component {
         }
     }
 
+    componentDidUpdate(prevProps) {
+        const params = this.props.route.params;
+        if (prevProps.route.params != params) {
+            if (params && params.url) {
+                this.setState({ currentURL: params.url })
+                this.webviewRef.current.reload();
+            }
+        }
+    }
+
     onAndroidBackPress = () => {
         const { canGoBack } = this.state;
         if (canGoBack && this.webviewRef && this.webviewRef.current) {
