@@ -27,6 +27,7 @@ import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 const iconSize = scale(25);
@@ -136,6 +137,17 @@ function hasChinese(str) {
     return /[\u4E00-\u9FA5]+/g.test(str)
 }
 
+// 設置本地緩存
+async function setLocalOpitons(filterOptions) {
+    try {
+        const strFilterOptions = JSON.stringify(filterOptions);
+        await AsyncStorage.setItem('ARK_Courses_filterOptions', strFilterOptions)
+            .catch(e => console.log('AsyncStorage Error', e));
+    } catch (e) {
+        alert(e);
+    }
+}
+
 // 返回搜索候選所需的課程列表
 handleSearchFilterCourse = (inputText) => {
     const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
@@ -202,10 +214,23 @@ export default class index extends Component {
         this.scrollViewRef = React.createRef();
     }
 
-    componentDidMount() {
-        this.getClassifyCourse();
-
+    async componentDidMount() {
         logToFirebase('openPage', { page: 'chooseCourses' });
+
+        try {
+            const strFilterOptions = await AsyncStorage.getItem('ARK_Courses_filterOptions');
+            const filterOptions = strFilterOptions ? JSON.parse(strFilterOptions) : undefined;
+            if (filterOptions) {
+                this.setState({ filterOptions });
+                COURSE_MODE = filterOptions.mode;
+            } else {
+                setLocalOpitons(this.state.filterOptions);
+            }
+        } catch (e) {
+            console.error('ARK Courses error', e);
+        } finally {
+            this.getClassifyCourse();
+        }
 
         // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
         this.keyboardDidHideListener = Keyboard.addListener(
@@ -306,6 +331,7 @@ export default class index extends Component {
             offerCourseByGE,
 
             filterCourseList,
+            scrollData: {},
         })
     }
 
@@ -345,20 +371,10 @@ export default class index extends Component {
                                 filterOptions.mode = itm;
                                 COURSE_MODE = itm;
                                 this.getClassifyCourse();
-                                this.setState({ filterOptions })
+                                this.setState({ filterOptions });
+                                setLocalOpitons(filterOptions);
                             } catch (error) {
-                                let filterCourseList = [];
-                                if (filterOptions.option == 'CMRE') {
-                                    const facultyName = filterOptions.facultyName;
-                                    if (offerFacultyDepaListObj[facultyName].length > 0) {
-                                        filterCourseList = offerCourseByDepa[filterOptions.depaName];
-                                    } else {
-                                        filterCourseList = offerCourseByFaculty[facultyName];
-                                    }
-                                } else if (filterOptions.option == 'GE') {
-                                    filterCourseList = offerCourseByGE[filterOptions.GE]
-                                }
-                                this.setState({ filterCourseList, scrollData: {} })
+                                alert(error)
                             }
                         }}
                     >
@@ -421,6 +437,7 @@ export default class index extends Component {
                             }
                             filterOptions.facultyName = facultyName;
                             this.setState({ filterOptions, filterCourseList, scrollData: {} });
+                            setLocalOpitons(filterOptions);
                         }}
                     >
                         <Text style={{
@@ -478,6 +495,7 @@ export default class index extends Component {
                             filterCourseList = offerCourseByDepa[depaName]
                             filterOptions.depaName = depaName;
                             this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                            setLocalOpitons(filterOptions);
                         }}
                     >
                         <Text style={{
@@ -544,6 +562,7 @@ export default class index extends Component {
                                             filterOptions.GE = itm;
                                             let filterCourseList = offerCourseByGE[itm];
                                             this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                                            setLocalOpitons(filterOptions);
                                         }}
                                     >
                                         <Text style={{
@@ -613,6 +632,7 @@ export default class index extends Component {
                             }
                             filterOptions.option = itm;
                             this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                            setLocalOpitons(filterOptions);
                         }}
                     >
                         <Text style={{
