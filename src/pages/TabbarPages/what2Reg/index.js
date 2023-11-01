@@ -499,6 +499,7 @@ export default class index extends Component {
                         }}
                     >
                         <Text style={{
+                            alignSelf: 'center',
                             color: filterOptions.depaName === itm ? white : black.third,
                             fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
                             fontSize: scale(12)
