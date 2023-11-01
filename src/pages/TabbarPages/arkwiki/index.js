@@ -35,7 +35,15 @@ export default class ARKWiki extends Component {
             progress: 0,
             isLoaded: false,
         };
+
         this.webviewRef = React.createRef();
+        // 未打開Wiki的狀態下從別的頁面跳轉至Wiki
+        const params = this.props.route.params;
+        if (this.props.route.params) {
+            this.state.currentURL = params.url;
+            // this.setState({ currentURL: params.url })
+            // this.webviewRef.current.reload();
+        }
     }
 
     componentDidMount() {
@@ -47,6 +55,16 @@ export default class ARKWiki extends Component {
     componentWillUnmount() {
         if (Platform.OS === 'android') {
             BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        const params = this.props.route.params;
+        if (prevProps.route.params != params) {
+            if (params && params.url) {
+                this.setState({ currentURL: params.url })
+                this.webviewRef.current.reload();
+            }
         }
     }
 

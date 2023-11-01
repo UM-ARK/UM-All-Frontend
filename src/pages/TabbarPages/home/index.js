@@ -71,10 +71,6 @@ const iconTypes = {
 const cal = UMCalendar;
 const toastTextArr = [
     `ARK ALL全力加載中!!! (>ω･* )ﾉ`,
-    `已進駐的澳大組織就在隔壁的頁面~ (灬°ω°灬) `,
-    `UM 活動就在隔壁的隔壁的頁面~ (灬°ω°灬) `,
-    `UM Daily就在隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
-    `關於ARK ALL就在隔壁的隔壁的隔壁的隔壁的頁面~ (灬°ω°灬) `,
     `點擊頂部校曆看看最近有什麼假期~ ヾ(ｏ･ω･)ﾉ`,
     `多試試底部的功能頁有無驚喜更新~ ( • ̀ω•́ )✧`,
     `ARK ALL為愛發電ing... (*/ω＼*)`,
@@ -87,6 +83,8 @@ const toastTextArr = [
     `澳大資訊一次看完!!! ヽ(^ω^)ﾉ  `,
     `快試試看校園巴士!!! (ﾟωﾟ)ﾉ☆ `,
     `快試試看ARK找課!!! (*￣3￣)╭ `,
+    `快試試看ARK Wiki!!! (*￣3￣)╭ `,
+    `多想從前就有Wiki... (ಥ_ಥ)`,
     `又是選不上課的一天... (ಥ_ಥ) `,
     `今天會下雨嗎 (￣.￣)`,
     `我覺得和你挺有緣的，來App Store給個好評吧~\n٩(๑>◡<๑)۶ `,
@@ -105,18 +103,6 @@ class HomeScreen extends Component {
         this.state = {
             // 快捷功能入口
             functionArray: [
-                {
-                    icon_name: require('../../../static/img/logo.png'),
-                    icon_type: iconTypes.img,
-                    function_name: 'ARK',
-                    func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        this.onRefresh();
-                        this.getAppData();
-                        // 刷新重新請求活動頁數據
-                        this.eventPage.current.onRefresh();
-                    },
-                },
                 {
                     icon_name: 'bus',
                     icon_type: iconTypes.ionicons,
@@ -142,13 +128,33 @@ class HomeScreen extends Component {
                     },
                 },
                 {
+                    icon_name: require('../../../static/img/logo.png'),
+                    icon_type: iconTypes.img,
+                    function_name: '澳大方舟',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.onRefresh();
+                        this.getAppData();
+                        // 刷新重新請求活動頁數據
+                        this.eventPage.current.onRefresh();
+                    },
+                },
+                {
+                    icon_name: 'file-document-edit',
+                    icon_type: iconTypes.materialCommunityIcons,
+                    function_name: '方舟百科',
+                    func: () => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.props.navigation.navigate('Wiki');
+                    },
+                },
+                {
                     icon_name: 'people',
                     icon_type: iconTypes.ionicons,
                     function_name: '組織登入',
                     func: () => {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.props.navigation.navigate('MeScreen');
-
                     },
                 },
             ],

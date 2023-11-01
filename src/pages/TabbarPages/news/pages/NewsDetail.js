@@ -15,6 +15,7 @@ import {COLOR_DIY} from '../../../../utils/uiMap';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import Header from '../../../../components/Header';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
@@ -43,6 +44,8 @@ const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
 class NewsDetail extends Component {
     constructor(props) {
         super(props);
+
+        logToFirebase('openPage', { page: 'UMNews' });
 
         // 獲取上級路由傳遞的參數
         const newsData = this.props.route.params.data;

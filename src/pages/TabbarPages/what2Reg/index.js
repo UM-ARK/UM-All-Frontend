@@ -12,11 +12,12 @@ import {
     Keyboard,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE } from "../../../utils/pathMap";
 import { COLOR_DIY } from '../../../utils/uiMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
 import coursePlan from '../../../static/UMCourses/coursePlan';
+import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 
@@ -26,43 +27,34 @@ import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 const iconSize = scale(25);
 
-const offerCourseList = offerCourses.Courses;
-const coursePlanList = coursePlan.Courses;
+// preEnroll
+let COURSE_MODE = 'ad';
 
-// 1. Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
+const coursePlanList = coursePlanTime.Courses;
+// const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+
+// ***** 需到getClassifyCourse函數處運行 *****
+// Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
 // offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
 
-// 2. 複製替換原課程列表為排序後列表
+// 複製替換原課程列表為排序後列表
 // const courseListStr = JSON.stringify(offerCourseList);
 // console.log(courseListStr);
 
-// 3. 獲取英文課程標題
-// let enList = offerCourseList.map((itm) => itm['Course Title']);
-// const enListStr = JSON.stringify(enList);
-// console.log('enListStr', enListStr);
-
-// 4. 保存為docx翻譯為中文繁體，去除特殊符號 “” 《》 ，
-// const cnListStr = ;
-
-// 5. 插入原數組
-// offerCourseList.map((itm,idx)=>{
-//     itm['Course Title Chi'] = cnListStr[idx];
-// })
-// console.log(JSON.stringify(offerCourseList));
-
-// 6. 預選課程加入Pre 鍵值
+// 預選課程加入Pre 鍵值
 // offerCourseList.map((itm,idx)=>{
 //     itm['Pre'] = 'true';
 // })
 // console.log(JSON.stringify(offerCourseList));
 
-// 7. 加入課表時間Excel數據，去重
-// offerCourseList = offerCourseList.concat(coursePlanList);
+// 加入課表時間Excel數據，去重
+// offerCourseList = offerCourseList.concat(xxxList);
 // offerCourseList = offerCourseList.filter((item, index) => offerCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
 // console.log(JSON.stringify(offerCourseList));
 
@@ -103,7 +95,7 @@ const depaMap = {
     // FHS
     'DBS': '生物醫學系',
     'DPS': '藥物科學系',
-    'DPM': ' - ',
+    'DPM': '藥學系',
 
     // FLL
     'GLS': '環球法律學系',
@@ -119,11 +111,25 @@ const depaMap = {
     // FST
     'CEE': '土木及環境工程系',
     'CIS': '電腦及資訊科學系',
-    'CSG': ' - ',
+    'CSG': '化學支持小組',
     'DPC': '物理及化學系',
     'ECE': '電機及電腦工程系',
     'EME': '機電工程系',
     'MAT': '數學系',
+}
+
+// GE課中文參考
+const geClassMap = {
+    'GEGA': '全球意識 - Global Awareness',
+    'GELH': '文學與人文 - Literature and Humanities',
+    'GESB': '社會與行為 - Society and Behaviour',
+    'GEST': '科學和技術 - Science and Technology',
+}
+
+// add drop, pre enroll 中文參考
+const adpeMap = {
+    'ad': '增退選',
+    'preEnroll': '預選課',
 }
 
 // 判斷字符串是否包含中文
@@ -131,8 +137,21 @@ function hasChinese(str) {
     return /[\u4E00-\u9FA5]+/g.test(str)
 }
 
+// 設置本地緩存
+async function setLocalOpitons(filterOptions) {
+    try {
+        const strFilterOptions = JSON.stringify(filterOptions);
+        await AsyncStorage.setItem('ARK_Courses_filterOptions', strFilterOptions)
+            .catch(e => console.log('AsyncStorage Error', e));
+    } catch (e) {
+        alert(e);
+    }
+}
+
 // 返回搜索候選所需的課程列表
 handleSearchFilterCourse = (inputText) => {
+    const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+
     inputText = inputText.toUpperCase();
     // 篩選所需課程
     let filterCourseList = offerCourseList.filter(itm => {
@@ -177,10 +196,11 @@ export default class index extends Component {
             isLoading: false,
 
             filterOptions: {
+                mode: 'ad', // preEnroll
                 option: 'CMRE',
                 facultyName: 'FST',
                 depaName: 'ECE',
-                GE: 'GEST'
+                GE: 'GEST',
             },
 
             offerFacultyList: [],
@@ -194,8 +214,23 @@ export default class index extends Component {
         this.scrollViewRef = React.createRef();
     }
 
-    componentDidMount() {
-        this.getClassifyCourse();
+    async componentDidMount() {
+        logToFirebase('openPage', { page: 'chooseCourses' });
+
+        try {
+            const strFilterOptions = await AsyncStorage.getItem('ARK_Courses_filterOptions');
+            const filterOptions = strFilterOptions ? JSON.parse(strFilterOptions) : undefined;
+            if (filterOptions) {
+                this.setState({ filterOptions });
+                COURSE_MODE = filterOptions.mode;
+            } else {
+                setLocalOpitons(this.state.filterOptions);
+            }
+        } catch (e) {
+            console.error('ARK Courses error', e);
+        } finally {
+            this.getClassifyCourse();
+        }
 
         // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
         this.keyboardDidHideListener = Keyboard.addListener(
@@ -216,6 +251,9 @@ export default class index extends Component {
 
     // 對開課數據進行分類
     getClassifyCourse = () => {
+        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+        const { filterOptions } = this.state;
+
         // 開設課程的學院名列表
         let offerFacultyList = [];
         // GE課程代號列表
@@ -270,7 +308,18 @@ export default class index extends Component {
             });
         })
 
-        let filterCourseList = offerCourseByDepa['ECE'];
+        // 還原/初始化需要渲染的課程列表
+        let filterCourseList = [];
+        if (filterOptions.option == 'CMRE') {
+            const facultyName = filterOptions.facultyName;
+            if (offerFacultyDepaListObj[facultyName].length > 0) {
+                filterCourseList = offerCourseByDepa[filterOptions.depaName];
+            } else {
+                filterCourseList = offerCourseByFaculty[facultyName];
+            }
+        } else if (filterOptions.option == 'GE') {
+            filterCourseList = offerCourseByGE[filterOptions.GE]
+        }
 
         this.setState({
             offerFacultyList,
@@ -282,10 +331,139 @@ export default class index extends Component {
             offerCourseByGE,
 
             filterCourseList,
+            scrollData: {},
         })
     }
 
-    renderClassifySwitch = () => {
+    // Add Drop / Pre Enroll 模式選擇
+    renderADPESwitch = () => {
+        const {
+            filterOptions,
+            offerFacultyDepaListObj,
+            offerCourseByDepa,
+            offerCourseByGE,
+            offerCourseByFaculty, } = this.state;
+        const modeList = Object.keys(adpeMap);
+        const modeENStr = {
+            'ad': 'Add Drop',
+            'preEnroll': 'Pre Enroll',
+        }
+
+        return (
+            <FlatList
+                data={modeList}
+                key={modeList.length}
+                keyExtractor={(item, index) => index}
+                numColumns={modeList.length}
+                columnWrapperStyle={modeList.length > 1 ? {
+                    flexWrap: 'wrap', justifyContent: 'center'
+                } : null}
+                contentContainerStyle={{ alignItems: 'center' }}
+                renderItem={({ item: itm }) => (
+                    <TouchableOpacity
+                        style={{
+                            ...s.classItm,
+                            paddingHorizontal: scale(5), paddingVertical: scale(2),
+                            backgroundColor: filterOptions.mode === itm ? themeColor : null,
+                        }}
+                        onPress={async () => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            try {
+                                filterOptions.mode = itm;
+                                COURSE_MODE = itm;
+                                this.getClassifyCourse();
+                                this.setState({ filterOptions });
+                                setLocalOpitons(filterOptions);
+                            } catch (error) {
+                                alert(error)
+                            }
+                        }}
+                    >
+                        <Text style={{
+                            color: filterOptions.mode === itm ? white : black.third,
+                            fontWeight: filterOptions.mode === itm ? '900' : 'normal',
+                            fontSize: scale(12),
+                        }}>{modeENStr[itm]}</Text>
+                    </TouchableOpacity>
+                )}
+                // 展示CM GE中文名稱
+                ListHeaderComponent={() =>
+                    <Text style={{ ...s.classItmTitleText }}>
+                        {adpeMap[filterOptions.mode]}
+                    </Text>
+                }
+            />
+        )
+    }
+
+    // CERE / GE 模式選擇
+    renderCMGESwitch = () => {
+        const {
+            filterOptions,
+            offerFacultyDepaListObj,
+            offerCourseByDepa,
+            offerCourseByGE,
+            offerCourseByFaculty,
+        } = this.state;
+        const CMGEList = [
+            'CMRE',
+            'GE'
+        ];
+
+        return (
+            <FlatList
+                data={CMGEList}
+                key={CMGEList.length}
+                keyExtractor={(item, index) => index}
+                numColumns={CMGEList.length}
+                columnWrapperStyle={CMGEList.length > 1 ? {
+                    flexWrap: 'wrap', justifyContent: 'center'
+                } : null}
+                contentContainerStyle={{ alignItems: 'center' }}
+                renderItem={({ item: itm }) => (
+                    <TouchableOpacity
+                        style={{
+                            ...s.classItm,
+                            paddingHorizontal: scale(5), paddingVertical: scale(2),
+                            backgroundColor: filterOptions.option === itm ? themeColor : null,
+                        }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            let filterCourseList = [];
+                            if (itm == 'CMRE') {
+                                const facultyName = filterOptions.facultyName;
+                                if (offerFacultyDepaListObj[facultyName].length > 0) {
+                                    filterCourseList = offerCourseByDepa[filterOptions.depaName];
+                                } else {
+                                    filterCourseList = offerCourseByFaculty[facultyName];
+                                }
+                            } else if (itm == 'GE') {
+                                filterCourseList = offerCourseByGE[filterOptions.GE]
+                            }
+                            filterOptions.option = itm;
+                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                            setLocalOpitons(filterOptions);
+                        }}
+                    >
+                        <Text style={{
+                            color: filterOptions.option === itm ? white : black.third,
+                            fontWeight: filterOptions.option === itm ? '900' : 'normal',
+                            fontSize: scale(12),
+                        }}>{itm}</Text>
+                    </TouchableOpacity>
+                )}
+                // 展示CM GE中文名稱
+                ListHeaderComponent={() =>
+                    <Text style={{ ...s.classItmTitleText }}>
+                        {filterOptions.option == 'GE' ? '通識課' : '必修課 與 選修課'}
+                    </Text>
+                }
+            />
+        )
+    }
+
+    // 學院分類選擇，例FST、FSS
+    renderFacultySwitch = () => {
         const {
             filterOptions,
             offerFacultyDepaListObj,
@@ -295,111 +473,114 @@ export default class index extends Component {
         const offerFacultyList = Object.keys(offerFacultyDepaListObj);
 
         return (
-            <View>
-                {/* 學院分類選擇，例FST、FSS */}
-                <FlatList
-                    data={offerFacultyList}
-                    key={offerFacultyList.length}
-                    keyExtractor={(item, index) => index}
-                    numColumns={offerFacultyList.length}
-                    columnWrapperStyle={offerFacultyList.length > 1 ? { flexWrap: 'wrap' } : null}
-                    renderItem={({ item: itm }) => (
-                        <TouchableOpacity
-                            style={{
-                                ...s.classItm,
-                                backgroundColor: itm === filterOptions.facultyName ? themeColor : null,
-                                paddingHorizontal: scale(5), paddingVertical: scale(2),
-                            }}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                const facultyName = itm;
-                                let filterCourseList = [];
-                                if (offerFacultyDepaListObj[facultyName].length > 0) {
-                                    const depaName = offerFacultyDepaListObj[facultyName][0];
-                                    filterOptions.depaName = depaName;
-                                    filterCourseList = offerCourseByDepa[depaName];
-                                } else {
-                                    filterCourseList = offerCourseByFaculty[facultyName];
-                                }
-                                filterOptions.facultyName = facultyName;
-                                this.setState({ filterOptions, filterCourseList, scrollData: {} });
-                            }}
-                        >
-                            <Text style={{
-                                color: itm === filterOptions.facultyName ? white : black.third,
-                                fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
-                                fontSize: scale(12)
-                            }}>{itm}</Text>
-                        </TouchableOpacity>
-                    )}
-                    ListHeaderComponent={() =>
-                        <Text style={{
-                            fontSize: scale(13),
-                            color: black.third,
-                            marginLeft: scale(5),
-                        }}>
-                            {unitMap[filterOptions.facultyName]}
-                        </Text>
-                    }
-                    // 學系分類選擇，例如 ECE、EME
-                    ListFooterComponent={() => this.renderDepaFilter()}
-                />
-            </View>
-        )
-    }
-
-    renderDepaFilter = () => {
-        const {
-            filterOptions,
-            offerFacultyDepaListObj,
-            offerCourseByDepa,
-        } = this.state;
-
-        const offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
-
-        return offerDepaList.length > 0 &&
             <FlatList
-                data={offerDepaList}
-                key={offerDepaList.length}
+                data={offerFacultyList}
+                key={offerFacultyList.length}
                 keyExtractor={(item, index) => index}
-                numColumns={offerDepaList.length}
-                columnWrapperStyle={offerDepaList.length > 1 ? { flexWrap: 'wrap' } : null}
+                numColumns={offerFacultyList.length}
+                columnWrapperStyle={
+                    offerFacultyList.length > 1 ? {
+                        flexWrap: 'wrap', justifyContent: 'center'
+                    } : null
+                }
+                contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
-                    <TouchableOpacity style={{
-                        paddingHorizontal: scale(5), paddingVertical: scale(2),
-                        ...s.classItm,
-                        backgroundColor: filterOptions.depaName === itm ? themeColor : null,
-                    }}
+                    <TouchableOpacity
+                        style={{
+                            ...s.classItm,
+                            backgroundColor: itm === filterOptions.facultyName ? themeColor : null,
+                            paddingHorizontal: scale(5), paddingVertical: scale(2),
+                        }}
                         onPress={() => {
                             ReactNativeHapticFeedback.trigger('soft');
-                            const depaName = itm;
+                            const facultyName = itm;
                             let filterCourseList = [];
-                            filterCourseList = offerCourseByDepa[depaName]
-                            filterOptions.depaName = depaName;
-                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                            if (offerFacultyDepaListObj[facultyName].length > 0) {
+                                const depaName = offerFacultyDepaListObj[facultyName][0];
+                                filterOptions.depaName = depaName;
+                                filterCourseList = offerCourseByDepa[depaName];
+                            } else {
+                                filterCourseList = offerCourseByFaculty[facultyName];
+                            }
+                            filterOptions.facultyName = facultyName;
+                            this.setState({ filterOptions, filterCourseList, scrollData: {} });
+                            setLocalOpitons(filterOptions);
                         }}
                     >
                         <Text style={{
-                            color: filterOptions.depaName === itm ? white : black.third,
-                            fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
+                            color: itm === filterOptions.facultyName ? white : black.third,
+                            fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                             fontSize: scale(12)
                         }}>{itm}</Text>
                     </TouchableOpacity>
                 )}
-                // 展示學系中文名稱
+                // 展示學院中文名稱
                 ListHeaderComponent={() =>
-                    offerDepaList
-                        && offerDepaList.length > 0
-                        && filterOptions.depaName in depaMap ?
-                        <Text style={{
-                            fontSize: scale(13), color: black.third,
-                            marginLeft: scale(5),
-                            marginTop: scale(5),
-                        }}>
-                            {depaMap[filterOptions.depaName]}
-                        </Text> : null
+                    <Text style={{ ...s.classItmTitleText }}>
+                        {unitMap[filterOptions.facultyName]}
+                    </Text>
+                }
+                // 學系分類選擇，例如 ECE、EME
+                ListFooterComponent={() => {
+                    const offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
+                    return offerDepaList.length > 0 && this.renderDepaSwitch(offerDepaList)
+                }
                 }
             />
+        )
+    }
+
+    // 學系分類選擇，例ECE、CIS
+    renderDepaSwitch = (offerDepaList) => {
+        const {
+            filterOptions,
+            offerCourseByDepa,
+        } = this.state;
+
+        return <FlatList
+            data={offerDepaList}
+            key={offerDepaList.length}
+            keyExtractor={(item, index) => index}
+            numColumns={offerDepaList.length}
+            columnWrapperStyle={
+                offerDepaList.length > 1 ? {
+                    flexWrap: 'wrap', justifyContent: 'center'
+                } : null
+            }
+            style={{ marginTop: scale(5) }}
+            contentContainerStyle={{ alignItems: 'center' }}
+            renderItem={({ item: itm }) => (
+                <TouchableOpacity style={{
+                    ...s.classItm,
+                    paddingHorizontal: scale(5), paddingVertical: scale(2),
+                    backgroundColor: filterOptions.depaName === itm ? themeColor : null,
+                }}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        const depaName = itm;
+                        let filterCourseList = [];
+                        filterCourseList = offerCourseByDepa[depaName]
+                        filterOptions.depaName = depaName;
+                        this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                        setLocalOpitons(filterOptions);
+                    }}
+                >
+                    <Text style={{
+                        alignSelf: 'center',
+                        color: filterOptions.depaName === itm ? white : black.third,
+                        fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
+                        fontSize: scale(12)
+                    }}>{itm}</Text>
+                </TouchableOpacity>
+            )}
+            // 展示學系中文名稱
+            ListHeaderComponent={() =>
+                filterOptions.depaName in depaMap ?
+                    <Text style={{ ...s.classItmTitleText }}>
+                        {depaMap[filterOptions.depaName]}
+                    </Text> : null
+            }
+        />
     }
 
     // 渲染篩選總列表
@@ -414,102 +595,64 @@ export default class index extends Component {
         return (
             <View
                 style={{
-                    alignItems: 'center', backgroundColor: white,
+                    backgroundColor: white,
                     borderRadius: scale(10),
                     padding: scale(5),
                     margin: scale(5), marginHorizontal: scale(10),
                 }}>
-                {/* 課程類型選擇 CMRE or GE */}
-                <Text style={{
-                    fontSize: scale(13),
-                    color: black.third,
-                }}>
-                    {filterOptions.option == 'GE' ? '通識課' : '必修課 / 選修課'}
-                </Text>
-                <View style={{ flexDirection: 'row', marginTop: scale(3) }}>
-                    {/* CE/RE選項 */}
-                    {this.renderFirstFilter('CMRE')}
-                    {this.renderFirstFilter('GE')}
+                {/* 渲染Add Drop，Pre Enroll選擇 */}
+                {this.renderADPESwitch()}
+
+                {/* 渲染CMRE GE選擇 */}
+                <View style={{ width: '100%', marginTop: scale(5), }}>
+                    {this.renderCMGESwitch()}
                 </View>
 
                 {/* 渲染分類課程選擇按鈕 */}
                 {filterOptions.option == 'GE' ? (
-                    <View style={{ flexDirection: 'row', marginTop: scale(5), }}>
-                        {offerGEList.length > 0 && offerGEList.map(itm => {
-                            return (
-                                <TouchableOpacity style={{
-                                    paddingHorizontal: scale(5), paddingVertical: scale(3),
-                                    ...s.classItm,
-                                    borderColor: filterOptions.GE === itm ? themeColor : black.third,
-                                    backgroundColor: filterOptions.GE === itm ? themeColor : null,
-                                }}
-                                    onPress={() => {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        filterOptions.GE = itm;
-                                        let filterCourseList = offerCourseByGE[itm];
-                                        this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                    <View style={{ marginTop: scale(5), alignItems: 'center' }}>
+                        {/* GE課描述 */}
+                        <Text style={{ ...s.classItmTitleText }}>
+                            {geClassMap[filterOptions.GE]}
+                        </Text>
+                        {/* 具體GE課程分類按鈕 */}
+                        <View style={{ flexDirection: 'row', }}>
+                            {offerGEList.length > 0 && offerGEList.map(itm => {
+                                return (
+                                    <TouchableOpacity style={{
+                                        ...s.classItm,
+                                        paddingHorizontal: scale(5), paddingVertical: scale(3),
+                                        borderColor: filterOptions.GE === itm ? themeColor : black.third,
+                                        backgroundColor: filterOptions.GE === itm ? themeColor : null,
                                     }}
-                                >
-                                    <Text style={{
-                                        color: filterOptions.GE === itm ? white : black.third,
-                                        fontWeight: filterOptions.GE === itm ? '900' : 'normal',
-                                        fontSize: scale(12)
-                                    }}>{itm}</Text>
-                                </TouchableOpacity>
-                            )
-                        })}
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger('soft');
+                                            filterOptions.GE = itm;
+                                            let filterCourseList = offerCourseByGE[itm];
+                                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                                            setLocalOpitons(filterOptions);
+                                        }}
+                                    >
+                                        <Text style={{
+                                            color: filterOptions.GE === itm ? white : black.third,
+                                            fontWeight: filterOptions.GE === itm ? '900' : 'normal',
+                                            fontSize: scale(12)
+                                        }}>{itm}</Text>
+                                    </TouchableOpacity>
+                                )
+                            })}
+                        </View>
                     </View>
                 ) : (
                     <View style={{
                         marginTop: scale(5),
                         width: '100%',
                     }} >
-                        {offerFacultyDepaListObj ? this.renderClassifySwitch() : null}
+                        {offerFacultyDepaListObj ? this.renderFacultySwitch() : null}
                     </View>
                 )}
             </View>
         )
-    }
-
-    // 渲染第一級的filter
-    renderFirstFilter = (filterName) => {
-        const {
-            filterOptions,
-            offerFacultyDepaListObj,
-            offerCourseByDepa,
-            offerCourseByGE,
-            offerCourseByFaculty,
-        } = this.state;
-
-        return <TouchableOpacity
-            style={{
-                ...s.classItm,
-                padding: scale(8),
-                backgroundColor: filterOptions.option === filterName ? themeColor : null,
-            }}
-            onPress={() => {
-                ReactNativeHapticFeedback.trigger('soft');
-                let filterCourseList = [];
-                if (filterName == 'CMRE') {
-                    const facultyName = filterOptions.facultyName;
-                    if (offerFacultyDepaListObj[facultyName].length > 0) {
-                        filterCourseList = offerCourseByDepa[filterOptions.depaName];
-                    } else {
-                        filterCourseList = offerCourseByFaculty[facultyName];
-                    }
-                } else if (filterName == 'GE') {
-                    filterCourseList = offerCourseByGE[filterOptions.GE]
-                }
-                filterOptions.option = filterName;
-                this.setState({ filterOptions, filterCourseList, scrollData: {} })
-            }}
-        >
-            <Text style={{
-                color: filterOptions.option === filterName ? white : black.third,
-                fontWeight: filterOptions.option === filterName ? '900' : 'normal',
-                fontSize: scale(12),
-            }}>{filterName === 'CMRE' ? 'CM/RE' : 'GE'}</Text>
-        </TouchableOpacity>
     }
 
     getCourseData = async (courseCode) => {
@@ -660,8 +803,8 @@ export default class index extends Component {
         const webview_param = {
             url: URI,
             title: inputText,
-            text_color: '#FFF',
-            bg_color_diy: '#30548b',
+            text_color: white,
+            bg_color_diy: COLOR_DIY.what2reg_color,
             isBarStyleBlack: false,
         };
         this.props.navigation.navigate('Webviewer', webview_param);
@@ -784,7 +927,7 @@ export default class index extends Component {
                                 <View style={{ alignSelf: 'center' }}>
                                     <Text style={{ fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                                 </View>
-                                <CourseCard data={searchFilterCourse} mode={'json'}
+                                <CourseCard data={searchFilterCourse} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
                                     handleSetLetterData={this.handleSetLetterData}
                                 />
                             </>
@@ -803,7 +946,7 @@ export default class index extends Component {
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
-                                    <CourseCard data={filterCourseList} mode={'json'}
+                                    <CourseCard data={filterCourseList} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
                                         handleSetLetterData={this.handleSetLetterData}
                                     />
                                 </View>
@@ -830,6 +973,24 @@ export default class index extends Component {
                         }}>
                             <Text style={{ color: black.third, fontSize: scale(12) }}>知識無價，評論只供參考~</Text>
                         </View>
+
+                        <TouchableOpacity style={{
+                            marginTop: scale(10),
+                            alignItems: 'center'
+                        }}
+                            onPress={() => {
+                                let webview_param = {
+                                    url: USER_AGREE,
+                                    title: 'ARK ALL 隱私政策 & 用戶協議',
+                                };
+                                this.props.navigation.navigate(
+                                    'Webviewer',
+                                    webview_param,
+                                );
+                            }}
+                        >
+                            <Text style={{ color: themeColor, fontSize: scale(10) }}>ARK ALL 隱私政策 & 用戶協議</Text>
+                        </TouchableOpacity>
                     </ScrollView>
 
                     {/* 渲染側邊首字母導航 */}
@@ -849,5 +1010,12 @@ const s = StyleSheet.create({
         borderRadius: scale(10),
         borderColor: black.third,
         marginHorizontal: scale(2),
+    },
+    classItmTitleText: {
+        fontSize: scale(13),
+        color: themeColor,
+        fontWeight: '600',
+        alignSelf: 'center',
+        marginLeft: scale(5),
     }
 })

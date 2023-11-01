@@ -13,7 +13,9 @@ export const GITHUB_PAGE = 'https://github.com/UM-ARK';
 
 export const ARK_WIKI = 'https://wiki.umall.one';
 
-export const ARK_WIKI_ABOUT_ARK = 'https://wiki.umall.one/?title=ARK_ALL';
+export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';
+
+export const ARK_WIKI_ABOUT_ARK = ARK_WIKI + '/wiki/ARK_ALL';
 
 export function addHost(itm) {
     if (itm.length > 0) {

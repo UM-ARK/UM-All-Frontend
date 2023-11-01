@@ -14,6 +14,7 @@ import { COLOR_DIY } from '../../../../utils/uiMap';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
@@ -30,6 +31,8 @@ const COMPONENT_WIDTH = scale(320);
 class UMEventDetail extends Component {
     constructor(props) {
         super(props);
+
+        logToFirebase('openPage', { page: 'UMEvent' });
 
         // 獲取上級路由傳遞的參數
         const eventData = this.props.route.params.data;
@@ -240,7 +243,7 @@ class UMEventDetail extends Component {
                                         chooseMode == index
                                             ? themeColor
                                             : bg_color,
-                                    marginHorizontal : scale(120),
+                                    marginHorizontal: scale(120),
                                 }}
                                 onPress={() =>
                                     this.setState({ chooseMode: index })

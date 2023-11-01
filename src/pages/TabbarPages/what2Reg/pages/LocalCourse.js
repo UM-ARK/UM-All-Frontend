@@ -12,13 +12,13 @@ import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG } from "../../../../utils/pathMap";
 import { logToFirebase } from "../../../../utils/firebaseAnalytics";
-import coursePlan from "../../../../static/UMCourses/coursePlan";
+import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
-const coursePlanList = coursePlan.Courses;
+const coursePlanList = coursePlanTime.Courses;
 
 const daySorter = {
     'MON': 1,
@@ -59,8 +59,8 @@ export default class LocalCourse extends Component {
             const webview_param = {
                 url: URI,
                 title: courseCode,
-                text_color: '#FFF',
-                bg_color_diy: '#30548b',
+                text_color: white,
+                bg_color_diy: COLOR_DIY.what2reg_color,
                 isBarStyleBlack: false,
             };
             this.props.navigation.navigate('Webviewer', webview_param);
@@ -104,8 +104,8 @@ export default class LocalCourse extends Component {
                                 const webview_param = {
                                     url: URI,
                                     title: courseInfo['Course Code'],
-                                    text_color: '#FFF',
-                                    bg_color_diy: '#30548b',
+                                    text_color: white,
+                                    bg_color_diy: COLOR_DIY.what2reg_color,
                                     isBarStyleBlack: false,
                                 };
                                 logToFirebase('checkCourse', {
