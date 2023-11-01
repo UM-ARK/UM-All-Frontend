@@ -1,6 +1,6 @@
-## 最新版本號 `2.4.1`
+## 最新版本號 `2.4.2`
 
-- [最新版本號 `2.4.1`](#最新版本號-241)
+- [最新版本號 `2.4.2`](#最新版本號-242)
 - [React Native 初始化新項目](#react-native-初始化新項目)
   - [Android 環境 Install](#android-環境-install)
   - [iOS 環境 Install](#ios-環境-install)
