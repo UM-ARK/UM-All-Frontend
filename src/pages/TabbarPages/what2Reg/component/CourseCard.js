@@ -90,28 +90,7 @@ export default class CourseCard extends Component {
                                             text: "Close",
                                         },
                                         {
-                                            text: "打開ARK Wiki",
-                                            onPress: () => {
-                                                ReactNativeHapticFeedback.trigger('soft');
-                                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                                                if (this.props.prof_info) {
-                                                    URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
-                                                    logToFirebase('checkCourse', {
-                                                        courseCode: courseCode,
-                                                        profName: this.props.prof_info.name,
-                                                    });
-                                                }
-                                                else {
-                                                    logToFirebase('checkCourse', {
-                                                        courseCode: courseCode,
-                                                        onLongPress: 0,
-                                                    });
-                                                }
-                                                this.context.navigate('Wiki', { url: URL });
-                                            },
-                                        },
-                                        {
-                                            text: "打開選咩課",
+                                            text: "選咩課搜索",
                                             onPress: () => {
                                                 ReactNativeHapticFeedback.trigger('soft');
                                                 let webview_param = {
@@ -142,6 +121,27 @@ export default class CourseCard extends Component {
                                                     });
                                                 }
                                                 this.context.navigate('Webviewer', webview_param);
+                                            },
+                                        },
+                                        {
+                                            text: "ARK Wiki搜索",
+                                            onPress: () => {
+                                                ReactNativeHapticFeedback.trigger('soft');
+                                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+                                                if (this.props.prof_info) {
+                                                    URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
+                                                    logToFirebase('checkCourse', {
+                                                        courseCode: courseCode,
+                                                        profName: this.props.prof_info.name,
+                                                    });
+                                                }
+                                                else {
+                                                    logToFirebase('checkCourse', {
+                                                        courseCode: courseCode,
+                                                        onLongPress: 0,
+                                                    });
+                                                }
+                                                this.context.navigate('Wiki', { url: URL });
                                             },
                                         },
                                     ])
