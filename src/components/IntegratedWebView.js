@@ -17,13 +17,12 @@ import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
 import { COLOR_DIY } from '../utils/uiMap';
 
-let URL = '';
-
 const IntegratedWebView = ({
     source,
     needRefresh,
     triggerRefresh,
     UmPassInfo,
+    setOutsideCurrentURL,
 }) => {
     // 記錄網站加載進度和是否加載完成
     const [progress, setProgress] = useState(0);
@@ -33,12 +32,14 @@ const IntegratedWebView = ({
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
 
-    // 動畫的參數設定
+    const [currentURL, setCurrentURL] = useState(source.uri);
+
+    // iOS前進後退按鈕的動畫參數設定
     const scrollY = new Animated.Value(0);
-    const diffClamp = Animated.diffClamp(scrollY, 0, window.height * 0.08);
+    const diffClamp = Animated.diffClamp(scrollY, 0, NAVI_HEIGHT);
     const translateY = diffClamp.interpolate({
-        inputRange: [0, window.height * 0.08],
-        outputRange: [0, window.height * 0.08],
+        inputRange: [0, NAVI_HEIGHT],
+        outputRange: [0, NAVI_HEIGHT],
     });
 
     // 創建對webview組件的DOM方法引用
@@ -74,47 +75,46 @@ const IntegratedWebView = ({
     useEffect(() => {
         // Android平台返回按鈕監聽
         if (Platform.OS === 'android') {
-            BackHandler.addEventListener(
-                'hardwareBackPress',
-                onAndroidBackPress,
-            );
+            BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
             return () => {
-                BackHandler.removeEventListener(
-                    'hardwareBackPress',
-                    onAndroidBackPress,
-                );
+                BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
             };
         }
-
-        return function cleanup() {
-            URL = '';
-        };
     }, [onAndroidBackPress]);
+
+    const onNavigationStateChange = (webViewState) => {
+        const currentURL = webViewState.url;
+        const { canGoBack, canGoForward } = webViewState;
+        // TODO: 仍有部分頁面例如Github，沒有改變navigation狀態，使URL沒有及時更新
+        setCurrentURL(currentURL);
+        setOutsideCurrentURL(currentURL);
+        setCanGoBack(canGoBack);
+        setCanGoForward(canGoForward);
+    }
 
     return (
         <>
-            {
-                // 判斷: 網站加載完成則隱藏進度條
-                !isLoaded ? (
-                    <Progress.Bar
-                        progress={progress}
-                        borderWidth={0}
-                        borderRadius={0}
-                        width={null} // null -> 寬度為全屏
-                        height={2}
-                        color={COLOR_DIY.themeColor}
-                    />
-                ) : null
-            }
+            {/* 判斷: 網站加載完成則隱藏進度條 */}
+            {!isLoaded ? (
+                <Progress.Bar
+                    progress={progress}
+                    borderWidth={0}
+                    borderRadius={0}
+                    width={null} // null -> 寬度為全屏
+                    height={2}
+                    color={COLOR_DIY.themeColor}
+                />
+            ) : null}
+
             <WebView
                 ref={webViewRef}
-                source={source}
+                source={{ uri: currentURL }}
                 originWhitelist={['*']}
                 startInLoadingState={true}
                 onLoadProgress={event => {
                     setProgress(event.nativeEvent.progress);
-                    setCanGoBack(event.nativeEvent.canGoBack);
-                    setCanGoForward(event.nativeEvent.canGoForward);
+                    // setCanGoBack(event.nativeEvent.canGoBack);
+                    // setCanGoForward(event.nativeEvent.canGoForward);
                 }}
                 onLoadStart={() => {
                     setLoaded(false);
@@ -122,15 +122,15 @@ const IntegratedWebView = ({
                 }}
                 onLoadEnd={e => {
                     setLoaded(true);
-                    if (e.nativeEvent && e.nativeEvent.code == -10) {
-                        URL = source.uri;
-                        Linking.openURL(URL);
+                    if (e.nativeEvent && (e.nativeEvent.code == -10 || e.nativeEvent.code == -1022)) {
+                        Linking.openURL(currentURL);
                         navigation.goBack();
                     }
                 }}
                 onScroll={e => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}
+                onNavigationStateChange={onNavigationStateChange}
                 pullToRefreshEnabled
                 allowFileAccess
                 allowUniversalAccessFromFileURLs
@@ -208,12 +208,13 @@ const NavigationView = ({
 
 // 取得手機螢幕的size
 const window = Dimensions.get('window');
+const NAVI_HEIGHT = window.height * 0.08;
 
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
         bottom: 0,
-        height: window.height * 0.08,
+        height: NAVI_HEIGHT,
         width: window.width,
         backgroundColor: '#d9d9d9',
         flexDirection: 'row',

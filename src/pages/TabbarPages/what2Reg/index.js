@@ -60,19 +60,19 @@ const coursePlanList = coursePlanTime.Courses;
 
 // 學院名中文參考
 const unitMap = {
-    'FAH': '人文學院',
-    'FBA': '工商管理學院',
-    'FED': '教育學院',
-    'FST': '科技學院',
-    'FHS': '健康科學學院',
-    'FSS': '社會科學學院',
-    'FLL': '法學院',
-    'IAPME': '應用物理及材料工程研究院',
-    'ICMS': '中華醫藥研究院',
-    'IME': '微電子研究院',
+    'FAH': '人文學院 - Arts and Humanities',
+    'FBA': '工商管理學院 - Business Administration',
+    'FED': '教育學院 - Education',
+    'FST': '科技學院 - Science and Technology',
+    'FHS': '健康科學學院 - Health Sciences',
+    'FSS': '社會科學學院 - Social Sciences',
+    'FLL': '法學院 - Law',
+    'IAPME': '應用物理及材料工程研究院 - Institute of Applied Physics and Materials Engineering',
+    'ICMS': '中華醫藥研究院 - Institute of Chinese Medical Sciences',
+    'IME': '微電子研究院 - Institute of Microelectronics',
     'MSC': ' - ',
-    'RC': '書院',
-    'HC': '榮譽學院',
+    'RC': '書院 - Residential College',
+    'HC': '榮譽學院 - Honours College',
 }
 
 // 部門/學系名中文參考
@@ -227,7 +227,7 @@ export default class index extends Component {
                 setLocalOpitons(this.state.filterOptions);
             }
         } catch (e) {
-            console.error('ARK Courses error', e);
+            alert('ARK Courses error, 請聯繫開發者！', e)
         } finally {
             this.getClassifyCourse();
         }
@@ -252,7 +252,7 @@ export default class index extends Component {
     // 對開課數據進行分類
     getClassifyCourse = () => {
         const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
-        const { filterOptions } = this.state;
+        let { filterOptions } = this.state;
 
         // 開設課程的學院名列表
         let offerFacultyList = [];
@@ -312,10 +312,16 @@ export default class index extends Component {
         let filterCourseList = [];
         if (filterOptions.option == 'CMRE') {
             const facultyName = filterOptions.facultyName;
-            if (offerFacultyDepaListObj[facultyName].length > 0) {
+            if (facultyName in offerFacultyDepaListObj && offerFacultyDepaListObj[facultyName].length > 0) {
                 filterCourseList = offerCourseByDepa[filterOptions.depaName];
             } else {
-                filterCourseList = offerCourseByFaculty[facultyName];
+                if (facultyName in offerCourseByFaculty) {
+                    filterCourseList = offerCourseByFaculty[facultyName];
+                } else {
+                    filterCourseList = offerCourseByFaculty[offerFacultyList[0]];
+                    filterOptions.facultyName = offerFacultyList[0];
+                    filterOptions.depaName = offerFacultyDepaListObj[offerFacultyList[0]][0];
+                }
             }
         } else if (filterOptions.option == 'GE') {
             filterCourseList = offerCourseByGE[filterOptions.GE]
@@ -332,7 +338,10 @@ export default class index extends Component {
 
             filterCourseList,
             scrollData: {},
+
+            filterOptions,
         })
+        setLocalOpitons(filterOptions);
     }
 
     // Add Drop / Pre Enroll 模式選擇
@@ -404,6 +413,7 @@ export default class index extends Component {
             offerCourseByDepa,
             offerCourseByGE,
             offerCourseByFaculty,
+            offerFacultyList,
         } = this.state;
         const CMGEList = [
             'CMRE',
@@ -430,19 +440,28 @@ export default class index extends Component {
                         onPress={() => {
                             ReactNativeHapticFeedback.trigger('soft');
                             let filterCourseList = [];
-                            if (itm == 'CMRE') {
-                                const facultyName = filterOptions.facultyName;
-                                if (offerFacultyDepaListObj[facultyName].length > 0) {
-                                    filterCourseList = offerCourseByDepa[filterOptions.depaName];
-                                } else {
-                                    filterCourseList = offerCourseByFaculty[facultyName];
+                            try {
+                                if (itm == 'CMRE') {
+                                    const facultyName = filterOptions.facultyName;
+                                    if (facultyName in offerFacultyDepaListObj && offerFacultyDepaListObj[facultyName].length > 0) {
+                                        filterCourseList = offerCourseByDepa[filterOptions.depaName];
+                                    } else {
+                                        if (facultyName in offerCourseByFaculty) {
+                                            filterCourseList = offerCourseByFaculty[facultyName];
+                                        } else {
+                                            filterCourseList = offerCourseByFaculty[offerFacultyList[0]];
+                                            filterOptions.facultyName = offerFacultyList[0];
+                                            filterOptions.depaName = offerFacultyDepaListObj[offerFacultyList[0]][0];
+                                        }
+                                    }
+                                } else if (itm == 'GE') {
+                                    filterCourseList = offerCourseByGE[filterOptions.GE]
                                 }
-                            } else if (itm == 'GE') {
-                                filterCourseList = offerCourseByGE[filterOptions.GE]
+                            } catch (error) { alert(error) } finally {
+                                filterOptions.option = itm;
+                                this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                                setLocalOpitons(filterOptions);
                             }
-                            filterOptions.option = itm;
-                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
-                            setLocalOpitons(filterOptions);
                         }}
                     >
                         <Text style={{
@@ -522,7 +541,10 @@ export default class index extends Component {
                 }
                 // 學系分類選擇，例如 ECE、EME
                 ListFooterComponent={() => {
-                    const offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
+                    let offerDepaList = [];
+                    if (filterOptions.facultyName in offerFacultyDepaListObj) {
+                        offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
+                    }
                     return offerDepaList.length > 0 && this.renderDepaSwitch(offerDepaList)
                 }
                 }
@@ -1017,5 +1039,6 @@ const s = StyleSheet.create({
         fontWeight: '600',
         alignSelf: 'center',
         marginLeft: scale(5),
+        textAlign: 'center',
     }
 })

@@ -11,6 +11,10 @@ export const MAIL = 'umacark@gmail.com';
 
 export const GITHUB_PAGE = 'https://github.com/UM-ARK';
 
+export const GITHUB_DONATE = 'https://github.com/UM-ARK/Donate';
+
+export const GITHUB_UPDATE_PLAN = 'https://github.com/UM-ARK/UM-All-Frontend/issues';
+
 export const ARK_WIKI = 'https://wiki.umall.one';
 
 export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';

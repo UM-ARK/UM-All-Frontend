@@ -33,7 +33,7 @@ class NewsCard extends Component {
         const newsData = this.props.data;
         let type = this.props.type ? this.props.type : 'news';
         // 開始日期
-        let beginDate = newsData.common.dateFrom;
+        let beginDate = type == 'event' ? newsData.common.dateFrom : newsData.common.publishDate;
         // 最後更新時間
         // let lastModified= newsData.lastModified;
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
@@ -77,6 +77,14 @@ class NewsCard extends Component {
             imageUrls = haveImage ? newsData.common.imageUrls : '';
         }
 
+        if (haveImage) {
+            if (type == 'event') {
+                imageUrls = imageUrls.replace('http:', 'https:',);
+            } else {
+                imageUrls = imageUrls[0].replace('http:', 'https:',);
+            }
+        }
+
         return (
             <TouchableOpacity
                 style={styles.newsCardContainer}
@@ -95,9 +103,9 @@ class NewsCard extends Component {
                 {/* 文字居左，圖片居右 */}
                 <View style={styles.newsCardContentContainer}>
                     {/* 標題，有英文中文則顯示，無則顯示葡文 */}
-                    <View style={{ width: haveImage ? '75%' : '100%', alignSelf: 'flex-start' }}>
+                    <View style={{ width: haveImage ? '70%' : '100%', flexDirection: 'column' }}>
                         {/* 英文 */}
-                        {title_en.length > 0 && (
+                        {title_en.length > 0 ? (
                             <Text
                                 style={{
                                     fontWeight: 'bold',
@@ -107,9 +115,9 @@ class NewsCard extends Component {
                                 numberOfLines={3}>
                                 {title_en}
                             </Text>
-                        )}
+                        ) : null}
                         {/* 中文 */}
-                        {title_cn.length > 0 && (
+                        {title_cn.length > 0 ? (
                             <Text
                                 style={{
                                     fontSize:
@@ -124,9 +132,9 @@ class NewsCard extends Component {
                                 numberOfLines={2}>
                                 {title_cn}
                             </Text>
-                        )}
+                        ) : null}
                         {/* 葡文 */}
-                        {(title_en.length == 0 || title_cn.length == 0) && (
+                        {(title_en.length == 0 || title_cn.length == 0) ? (
                             <Text
                                 style={{
                                     fontSize:
@@ -141,31 +149,22 @@ class NewsCard extends Component {
                                 numberOfLines={2}>
                                 {title_pt}
                             </Text>
-                        )}
+                        ) : null}
 
                         {/* 活動類型展示日期 */}
-                        {type === 'event' ? (
-                            <View>
-
-                                {/* 佔位 防止標題過長遮擋日期 */}
-                                <View style={{ marginTop: scale(25) }}></View>
-
-                                {/* 日期 */}
-                                <Text
-                                    style={{
-                                        fontSize: scale(12),
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        color: dateColor,
-                                    }}>
-                                    @ {moment(beginDate).format('MM-DD')}
-                                </Text>
-                            </View>
-                        ) : null}
+                        <Text style={{
+                            fontSize: scale(12),
+                            fontWeight: 'bold',
+                            position: 'absolute',
+                            bottom: 0,
+                            color: dateColor,
+                        }}>
+                            @ {moment(beginDate).format('MM-DD')}
+                        </Text>
                     </View>
 
                     {/* 新聞卡片配圖 */}
-                    {haveImage && (
+                    {haveImage ? (
                         <View style={{ alignSelf: 'center' }}>
                             <View
                                 style={{
@@ -176,16 +175,7 @@ class NewsCard extends Component {
                                 }}>
                                 <FastImage
                                     source={{
-                                        uri:
-                                            type == 'event'
-                                                ? imageUrls.replace(
-                                                    'http:',
-                                                    'https:',
-                                                )
-                                                : imageUrls[0].replace(
-                                                    'http:',
-                                                    'https:',
-                                                ),
+                                        uri: imageUrls,
                                         // cache: FastImage.cacheControl.web,
                                     }}
                                     onLoadStart={() => {
@@ -195,6 +185,7 @@ class NewsCard extends Component {
                                         this.setState({ imgLoading: false });
                                     }}
                                     style={styles.newsCardImg}
+                                    // resizeMode={FastImage.resizeMode.cover}
                                     resizeMode={FastImage.resizeMode.cover}
                                 />
                                 {this.state.imgLoading ? (
@@ -213,7 +204,7 @@ class NewsCard extends Component {
                                 ) : null}
                             </View>
                         </View>
-                    )}
+                    ) : null}
                 </View>
             </TouchableOpacity>
         );
@@ -235,8 +226,8 @@ const styles = StyleSheet.create({
         paddingVertical: scale(8),
     },
     newsCardImg: {
-        width: scale(60),
-        height: scale(60),
+        width: scale(80),
+        height: scale(112),
     },
 });
 

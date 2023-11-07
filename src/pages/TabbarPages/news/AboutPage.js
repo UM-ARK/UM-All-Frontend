@@ -25,6 +25,8 @@ import {
     addHost,
     MAIL,
     GITHUB_PAGE,
+    GITHUB_DONATE,
+    GITHUB_UPDATE_PLAN,
     ARK_WIKI_ABOUT_ARK,
 } from '../../../utils/pathMap';
 
@@ -161,6 +163,32 @@ export default class AboutPage extends Component {
                                     color: themeColor,
                                     fontWeight: '600',
                                 }}>{BASE_HOST}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL(GITHUB_UPDATE_PLAN);
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>更新計劃、問題區</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Linking.openURL(GITHUB_DONATE);
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                }}>Donate/捐贈/贊助/支持我們！</Text>
                         </TouchableOpacity>
                     </HomeCard>
 

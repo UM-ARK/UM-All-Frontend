@@ -33,7 +33,7 @@ const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
     return data[index];
 };
-// // 返回數據數組的長度
+// 返回數據數組的長度
 const getItemCount = data => {
     return data.length;
 };
