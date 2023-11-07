@@ -49,12 +49,18 @@ export default class ARKWiki extends Component {
     componentDidMount() {
         logToFirebase('openPage', { page: 'wiki' });
         if (Platform.OS === 'android') {
-            BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPress);
+            this.AndroidOnFocus = this.props.navigation.addListener('focus', () => {
+                BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPress);
+            });
+            this.AndroidOnBlur = this.props.navigation.addListener('blur', () => {
+                BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
+            });
         }
     }
     componentWillUnmount() {
         if (Platform.OS === 'android') {
-            BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
+            this.AndroidOnFocus();
+            this.AndroidOnBlur();
         }
     }
 
