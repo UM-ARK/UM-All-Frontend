@@ -65,6 +65,11 @@ class WebViewer extends Component {
         this.setState({ isShowModal: false });
     };
 
+    // 設定當前URL
+    setOutsideCurrentURL = (currentURL) => {
+        this.setState({ url: currentURL });
+    }
+
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
         this.setState({ isShowModal: !this.state.isShowModal });
@@ -188,7 +193,9 @@ class WebViewer extends Component {
                     source={{ uri: url }}
                     needRefresh={this.state.needRefresh}
                     triggerRefresh={this.triggerRefresh}
+                    setOutsideCurrentURL={this.setOutsideCurrentURL}
                     UmPassInfo={UmPassInfo}
+                    ref={this.webviewerRef}
                 />
             </View>
         );

@@ -17,13 +17,12 @@ import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
 import { COLOR_DIY } from '../utils/uiMap';
 
-let URL = '';
-
 const IntegratedWebView = ({
     source,
     needRefresh,
     triggerRefresh,
     UmPassInfo,
+    setOutsideCurrentURL,
 }) => {
     // 記錄網站加載進度和是否加載完成
     const [progress, setProgress] = useState(0);
@@ -32,6 +31,8 @@ const IntegratedWebView = ({
     // 網站能否返回前面的網址
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
+
+    const [currentURL, setCurrentURL] = useState(source.uri);
 
     // 動畫的參數設定
     const scrollY = new Animated.Value(0);
@@ -74,22 +75,22 @@ const IntegratedWebView = ({
     useEffect(() => {
         // Android平台返回按鈕監聽
         if (Platform.OS === 'android') {
-            BackHandler.addEventListener(
-                'hardwareBackPress',
-                onAndroidBackPress,
-            );
+            BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
             return () => {
-                BackHandler.removeEventListener(
-                    'hardwareBackPress',
-                    onAndroidBackPress,
-                );
+                BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
             };
         }
-
-        return function cleanup() {
-            URL = '';
-        };
     }, [onAndroidBackPress]);
+
+    const onNavigationStateChange = (webViewState) => {
+        const currentURL = webViewState.url;
+        const { canGoBack, canGoForward } = webViewState;
+        setCurrentURL(currentURL);
+        setOutsideCurrentURL(currentURL);
+        setCanGoBack(canGoBack);
+        setCanGoForward(canGoForward);
+        // this.setState({ currentURL, canGoBack, canGoForward })
+    }
 
     return (
         <>
@@ -108,13 +109,13 @@ const IntegratedWebView = ({
             }
             <WebView
                 ref={webViewRef}
-                source={source}
+                source={{ uri: currentURL }}
                 originWhitelist={['*']}
                 startInLoadingState={true}
                 onLoadProgress={event => {
                     setProgress(event.nativeEvent.progress);
-                    setCanGoBack(event.nativeEvent.canGoBack);
-                    setCanGoForward(event.nativeEvent.canGoForward);
+                    // setCanGoBack(event.nativeEvent.canGoBack);
+                    // setCanGoForward(event.nativeEvent.canGoForward);
                 }}
                 onLoadStart={() => {
                     setLoaded(false);
@@ -123,14 +124,14 @@ const IntegratedWebView = ({
                 onLoadEnd={e => {
                     setLoaded(true);
                     if (e.nativeEvent && e.nativeEvent.code == -10) {
-                        URL = source.uri;
-                        Linking.openURL(URL);
+                        Linking.openURL(currentURL);
                         navigation.goBack();
                     }
                 }}
                 onScroll={e => {
                     scrollY.setValue(e.nativeEvent.contentOffset.y);
                 }}
+                onNavigationStateChange={onNavigationStateChange}
                 pullToRefreshEnabled
                 allowFileAccess
                 allowUniversalAccessFromFileURLs
