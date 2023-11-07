@@ -19,6 +19,7 @@ import {
     WHAT_2_REG,
     NEW_SCZN,
     UM_MAP,
+    GITHUB_DONATE,
     BASE_HOST,
     BASE_URI,
     GET,
@@ -113,16 +114,17 @@ class HomeScreen extends Component {
                     },
                 },
                 {
-                    icon_name: 'map',
+                    icon_name: 'coffee',
                     icon_type: iconTypes.materialCommunityIcons,
-                    function_name: '校園地圖',
+                    function_name: '支持我們',
                     func: () => {
                         ReactNativeHapticFeedback.trigger('soft');
                         let webview_param = {
-                            url: UM_MAP,
-                            title: '校園地圖',
-                            text_color: COLOR_DIY.black.second,
-                            bg_color_diy: '#ededed',
+                            url: GITHUB_DONATE,
+                            title: '支持我們',
+                            text_color: white,
+                            bg_color_diy: themeColor,
+                            isBarStyleBlack: false,
                         };
                         this.props.navigation.navigate('Webviewer', webview_param);
                     },
