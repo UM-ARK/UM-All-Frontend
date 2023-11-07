@@ -117,7 +117,8 @@ class NewsPage extends Component {
 
                 // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
                 let newsList = [];
-                for (let i = 0; i < result.length; i++) {
+                const newsNum = 25;
+                for (let i = 0; i < (result.length >= newsNum ? newsNum : result.length); i++) {
                     if (result[i].details.length > 0) {
                         newsList.push(result[i]);
                     }
@@ -380,7 +381,7 @@ class NewsPage extends Component {
                         ListHeaderComponent={this.renderTopNews}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (
-                            <View style={{ marginTop: scale(200) }}></View>
+                            <View style={{ marginTop: scale(100) }}></View>
                         )}
                         refreshControl={
                             <RefreshControl

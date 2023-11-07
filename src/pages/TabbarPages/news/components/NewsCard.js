@@ -33,7 +33,7 @@ class NewsCard extends Component {
         const newsData = this.props.data;
         let type = this.props.type ? this.props.type : 'news';
         // 開始日期
-        let beginDate = newsData.common.dateFrom;
+        let beginDate = type == 'event' ? newsData.common.dateFrom : newsData.common.publishDate;
         // 最後更新時間
         // let lastModified= newsData.lastModified;
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
