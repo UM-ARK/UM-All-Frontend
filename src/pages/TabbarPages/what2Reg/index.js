@@ -60,19 +60,19 @@ const coursePlanList = coursePlanTime.Courses;
 
 // 學院名中文參考
 const unitMap = {
-    'FAH': '人文學院',
-    'FBA': '工商管理學院',
-    'FED': '教育學院',
-    'FST': '科技學院',
-    'FHS': '健康科學學院',
-    'FSS': '社會科學學院',
-    'FLL': '法學院',
-    'IAPME': '應用物理及材料工程研究院',
-    'ICMS': '中華醫藥研究院',
-    'IME': '微電子研究院',
+    'FAH': '人文學院 - Arts and Humanities',
+    'FBA': '工商管理學院 - Business Administration',
+    'FED': '教育學院 - Education',
+    'FST': '科技學院 - Science and Technology',
+    'FHS': '健康科學學院 - Health Sciences',
+    'FSS': '社會科學學院 - Social Sciences',
+    'FLL': '法學院 - Law',
+    'IAPME': '應用物理及材料工程研究院 - Institute of Applied Physics and Materials Engineering',
+    'ICMS': '中華醫藥研究院 - Institute of Chinese Medical Sciences',
+    'IME': '微電子研究院 - Institute of Microelectronics',
     'MSC': ' - ',
-    'RC': '書院',
-    'HC': '榮譽學院',
+    'RC': '書院 - Residential College',
+    'HC': '榮譽學院 - Honours College',
 }
 
 // 部門/學系名中文參考
@@ -227,7 +227,7 @@ export default class index extends Component {
                 setLocalOpitons(this.state.filterOptions);
             }
         } catch (e) {
-            console.error('ARK Courses error', e);
+            alert('ARK Courses error, 請聯繫開發者！', e)
         } finally {
             this.getClassifyCourse();
         }
@@ -377,7 +377,6 @@ export default class index extends Component {
                         }}
                         onPress={async () => {
                             ReactNativeHapticFeedback.trigger('soft');
-                            // TODO: iOS處在Pre Enroll模式下，頂部Pre Enroll字樣消失。
                             try {
                                 filterOptions.mode = itm;
                                 COURSE_MODE = itm;
@@ -458,7 +457,7 @@ export default class index extends Component {
                                 } else if (itm == 'GE') {
                                     filterCourseList = offerCourseByGE[filterOptions.GE]
                                 }
-                            } catch (error) { console.log('error', error); } finally {
+                            } catch (error) { alert(error) } finally {
                                 filterOptions.option = itm;
                                 this.setState({ filterOptions, filterCourseList, scrollData: {} })
                                 setLocalOpitons(filterOptions);
@@ -1040,5 +1039,6 @@ const s = StyleSheet.create({
         fontWeight: '600',
         alignSelf: 'center',
         marginLeft: scale(5),
+        textAlign: 'center',
     }
 })
