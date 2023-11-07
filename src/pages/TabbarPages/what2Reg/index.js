@@ -252,7 +252,7 @@ export default class index extends Component {
     // 對開課數據進行分類
     getClassifyCourse = () => {
         const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
-        const { filterOptions } = this.state;
+        let { filterOptions } = this.state;
 
         // 開設課程的學院名列表
         let offerFacultyList = [];
@@ -312,10 +312,16 @@ export default class index extends Component {
         let filterCourseList = [];
         if (filterOptions.option == 'CMRE') {
             const facultyName = filterOptions.facultyName;
-            if (offerFacultyDepaListObj[facultyName].length > 0) {
+            if (facultyName in offerFacultyDepaListObj && offerFacultyDepaListObj[facultyName].length > 0) {
                 filterCourseList = offerCourseByDepa[filterOptions.depaName];
             } else {
-                filterCourseList = offerCourseByFaculty[facultyName];
+                if (facultyName in offerCourseByFaculty) {
+                    filterCourseList = offerCourseByFaculty[facultyName];
+                } else {
+                    filterCourseList = offerCourseByFaculty[offerFacultyList[0]];
+                    filterOptions.facultyName = offerFacultyList[0];
+                    filterOptions.depaName = offerFacultyDepaListObj[offerFacultyList[0]][0];
+                }
             }
         } else if (filterOptions.option == 'GE') {
             filterCourseList = offerCourseByGE[filterOptions.GE]
@@ -332,7 +338,10 @@ export default class index extends Component {
 
             filterCourseList,
             scrollData: {},
+
+            filterOptions,
         })
+        setLocalOpitons(filterOptions);
     }
 
     // Add Drop / Pre Enroll 模式選擇
@@ -368,6 +377,7 @@ export default class index extends Component {
                         }}
                         onPress={async () => {
                             ReactNativeHapticFeedback.trigger('soft');
+                            // TODO: iOS處在Pre Enroll模式下，頂部Pre Enroll字樣消失。
                             try {
                                 filterOptions.mode = itm;
                                 COURSE_MODE = itm;
@@ -404,6 +414,7 @@ export default class index extends Component {
             offerCourseByDepa,
             offerCourseByGE,
             offerCourseByFaculty,
+            offerFacultyList,
         } = this.state;
         const CMGEList = [
             'CMRE',
@@ -430,19 +441,28 @@ export default class index extends Component {
                         onPress={() => {
                             ReactNativeHapticFeedback.trigger('soft');
                             let filterCourseList = [];
-                            if (itm == 'CMRE') {
-                                const facultyName = filterOptions.facultyName;
-                                if (offerFacultyDepaListObj[facultyName].length > 0) {
-                                    filterCourseList = offerCourseByDepa[filterOptions.depaName];
-                                } else {
-                                    filterCourseList = offerCourseByFaculty[facultyName];
+                            try {
+                                if (itm == 'CMRE') {
+                                    const facultyName = filterOptions.facultyName;
+                                    if (facultyName in offerFacultyDepaListObj && offerFacultyDepaListObj[facultyName].length > 0) {
+                                        filterCourseList = offerCourseByDepa[filterOptions.depaName];
+                                    } else {
+                                        if (facultyName in offerCourseByFaculty) {
+                                            filterCourseList = offerCourseByFaculty[facultyName];
+                                        } else {
+                                            filterCourseList = offerCourseByFaculty[offerFacultyList[0]];
+                                            filterOptions.facultyName = offerFacultyList[0];
+                                            filterOptions.depaName = offerFacultyDepaListObj[offerFacultyList[0]][0];
+                                        }
+                                    }
+                                } else if (itm == 'GE') {
+                                    filterCourseList = offerCourseByGE[filterOptions.GE]
                                 }
-                            } else if (itm == 'GE') {
-                                filterCourseList = offerCourseByGE[filterOptions.GE]
+                            } catch (error) { console.log('error', error); } finally {
+                                filterOptions.option = itm;
+                                this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                                setLocalOpitons(filterOptions);
                             }
-                            filterOptions.option = itm;
-                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
-                            setLocalOpitons(filterOptions);
                         }}
                     >
                         <Text style={{
@@ -522,7 +542,10 @@ export default class index extends Component {
                 }
                 // 學系分類選擇，例如 ECE、EME
                 ListFooterComponent={() => {
-                    const offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
+                    let offerDepaList = [];
+                    if (filterOptions.facultyName in offerFacultyDepaListObj) {
+                        offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
+                    }
                     return offerDepaList.length > 0 && this.renderDepaSwitch(offerDepaList)
                 }
                 }
