@@ -807,7 +807,7 @@ export default class index extends Component {
     // 模糊搜索跳轉到網頁版選咩課
     jumpToWebRelateCoursePage = (searchData) => {
         const { inputText, type } = searchData;
-        const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
+        const URI = `${WHAT_2_REG}/search/` + (type == 'prof' ? 'instructor' : 'course') + `/${encodeURIComponent(inputText)}`;
         logToFirebase('checkCourse', { searchText: inputText });
 
         // Linking.openURL(URI)

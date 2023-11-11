@@ -115,7 +115,7 @@ export default class CourseCard extends Component {
                                                 }
                                                 else {
                                                     // 進入搜索課程代號模式
-                                                    const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(courseCode)}&instructor=${false}`
+                                                    const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`
                                                     webview_param.url = URI;
                                                     webview_param.title = courseCode;
                                                     logToFirebase('checkCourse', {
