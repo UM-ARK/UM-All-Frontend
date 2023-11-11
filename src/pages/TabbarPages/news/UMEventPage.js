@@ -11,7 +11,7 @@ import {
     VirtualizedList,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
@@ -195,6 +195,7 @@ class UMEventPage extends Component {
                     <View>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: black.third,
                                 alignSelf: 'center',
                                 marginTop: scale(5),

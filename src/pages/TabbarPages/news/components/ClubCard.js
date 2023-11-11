@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Image,
@@ -9,17 +9,17 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
-import {clubTagMap} from '../../../../utils/clubMap';
+import { COLOR_DIY, uiStyle } from '../../../../utils/uiMap';
+import { clubTagMap } from '../../../../utils/clubMap';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {NavigationContext} from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 解構全局ui設計顏色
-const {white, black, viewShadow, themeColor} = COLOR_DIY;
+const { white, black, viewShadow, themeColor } = COLOR_DIY;
 const IMG_SIZE = scale(45);
 
 class EventCard extends Component {
@@ -41,7 +41,7 @@ class EventCard extends Component {
     };
 
     render() {
-        const {logo_url, name, tag} = this.state.data;
+        const { logo_url, name, tag } = this.state.data;
         return (
             <TouchableOpacity
                 style={{
@@ -63,7 +63,7 @@ class EventCard extends Component {
                         // ...viewShadow,
                     }}>
                     <FastImage
-                        source={{uri: logo_url}}
+                        source={{ uri: logo_url }}
                         style={{
                             width: '100%',
                             height: '100%',
@@ -72,10 +72,10 @@ class EventCard extends Component {
                         }}
                         resizeMode={FastImage.resizeMode.contain}
                         onLoadStart={() => {
-                            this.setState({imgLoading: true});
+                            this.setState({ imgLoading: true });
                         }}
                         onLoad={() => {
-                            this.setState({imgLoading: false});
+                            this.setState({ imgLoading: false });
                         }}>
                         {this.state.imgLoading ? (
                             <View
@@ -102,10 +102,10 @@ class EventCard extends Component {
                         justifyContent: 'center',
                         alignItems: 'center',
                         marginTop: scale(5),
-                        width:'80%'
+                        width: '80%'
                     }}>
                     <Text
-                        style={{color: black.main, fontSize: scale(10)}}
+                        style={{ ...uiStyle.defaultText, color: black.main, fontSize: scale(10) }}
                         numberOfLines={1}>
                         {name}
                     </Text>
@@ -114,6 +114,7 @@ class EventCard extends Component {
                 {/* 組織標籤 */}
                 {/* <Text
                     style={{
+                        ...uiStyle.defaultText,
                         color: themeColor,
                         fontSize: scale(10),
                         marginTop: scale(5),

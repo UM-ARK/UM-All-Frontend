@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 
-import { COLOR_DIY } from '../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import IntegratedWebView from './IntegratedWebView';
 import { ARK_WIKI } from '../utils/pathMap';
 import ModalBottom from '../components/ModalBottom';
@@ -105,6 +105,7 @@ class WebViewer extends Component {
                     centerComponent={{
                         text: title,
                         style: {
+                            ...uiStyle.defaultText,
                             color: text_color,
                             fontSize: scale(15),
                         },
@@ -154,8 +155,9 @@ class WebViewer extends Component {
                                     </TouchableOpacity>
                                     <Text
                                         style={{
+                                            ...uiStyle.defaultText,
                                             marginTop: scale(5),
-                                            color: COLOR_DIY.themeColor,
+                                            color: COLOR_DIY.black.main,
                                         }}>
                                         瀏覽器打開
                                     </Text>
@@ -179,8 +181,9 @@ class WebViewer extends Component {
                                 </TouchableOpacity>
                                 <Text
                                     style={{
+                                        ...uiStyle.defaultText,
                                         marginTop: scale(2),
-                                        color: COLOR_DIY.themeColor,
+                                        color: COLOR_DIY.black.main,
                                     }}>
                                     刷新頁面
                                 </Text>

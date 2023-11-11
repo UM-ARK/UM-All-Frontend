@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Linking, Alert } from 'react-native';
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
@@ -22,6 +22,7 @@ export default class CourseCard extends Component {
             renderItm = <>
                 {code.substring(0, 4) + ' '}
                 <Text style={{
+                    ...uiStyle.defaultText,
                     color: themeColor,
                     fontWeight: '700',
                     fontSize: scale(16)
@@ -35,6 +36,7 @@ export default class CourseCard extends Component {
             renderItm = <>
                 {code.substring(0, 3) + ' '}
                 <Text style={{
+                    ...uiStyle.defaultText,
                     color: themeColor,
                     fontWeight: '700',
                     fontSize: scale(16)
@@ -49,6 +51,7 @@ export default class CourseCard extends Component {
 
         return (
             <Text style={{
+                ...uiStyle.defaultText,
                 fontSize: scale(13),
                 fontWeight: '600',
                 color: black.main,
@@ -167,6 +170,7 @@ export default class CourseCard extends Component {
                                 {/* Pre Enroll標記 */}
                                 {preEnroll ? (
                                     <Text style={{
+                                        ...uiStyle.defaultText,
                                         fontSize: scale(10),
                                         fontWeight: 'bold',
                                         marginLeft: scale(5),
@@ -175,22 +179,26 @@ export default class CourseCard extends Component {
                                 ) : null}
                             </View>
                             <Text style={{
+                                ...uiStyle.defaultText,
                                 fontSize: scale(11),
                                 color: black.second,
                             }}>{title}</Text>
                             {'courseTitleChi' in item && item.courseTitleChi.length > 0 ? (
                                 <Text style={{
+                                    ...uiStyle.defaultText,
                                     fontSize: scale(11),
                                     color: black.second,
                                 }}>{item.courseTitleChi}</Text>
                             ) : null}
                             {'Course Title Chi' in item && item['Course Title Chi'].length > 0 ? (
                                 <Text style={{
+                                    ...uiStyle.defaultText,
                                     fontSize: scale(11),
                                     color: black.second,
                                 }}>{item['Course Title Chi']}</Text>
                             ) : null}
                             <Text style={{
+                                ...uiStyle.defaultText,
                                 fontSize: scale(10),
                                 color: black.third,
                             }}>
@@ -199,6 +207,7 @@ export default class CourseCard extends Component {
                             </Text>
                             {credit ? (
                                 <Text style={{
+                                    ...uiStyle.defaultText,
                                     fontSize: scale(10),
                                     color: black.third,
                                 }}>{credit} Credit</Text>

@@ -8,7 +8,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 // import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -284,6 +284,7 @@ class EventCard extends Component {
                                         <Text
                                             numberOfLines={1}
                                             style={{
+                                                ...uiStyle.defaultText,
                                                 color: black.third,
                                                 fontSize: scale(9),
                                             }}>
@@ -318,7 +319,8 @@ const styles = StyleSheet.create({
         // ...COLOR_DIY.viewShadow,
     },
     stateNoticeText: {
-        fontSize: scale(7)
+        ...uiStyle.defaultText,
+        fontSize: scale(7),
     },
     title: {
         container: {
@@ -329,11 +331,13 @@ const styles = StyleSheet.create({
             // alignItems: 'center',
         },
         text: {
+            ...uiStyle.defaultText,
             color: black.main,
             fontWeight: '500',
             fontSize: scale(11),
         },
         disabledText: {
+            ...uiStyle.defaultText,
             color: black.third,
             fontWeight: '500',
             fontSize: scale(11),

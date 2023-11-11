@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, VERSION_EMOJI } from '../../../utils/uiMap';
 import {
     UM_WHOLE,
     WHAT_2_REG,
@@ -48,7 +48,6 @@ import { ScaledSheet, scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import { screenWidth } from '../../../utils/stylesKits';
-import { VERSION_EMOJI } from '../../../utils/uiMap';
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 
@@ -339,9 +338,10 @@ class HomeScreen extends Component {
 
                     {/* 年份 */}
                     <Text style={{
+                        ...uiStyle.defaultText,
                         color: white,
                         fontSize: scale(10),
-                        fontWeight: selectDay == index ? 'bold' : null,
+                        fontWeight: selectDay == index ? 'bold' : 'normal',
                     }}>
                         {momentItm.substring(0, 4)}
                     </Text>
@@ -349,9 +349,10 @@ class HomeScreen extends Component {
                     {/* 月份 */}
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             color: white,
                             fontSize: scale(22),
-                            fontWeight: selectDay == index ? 'bold' : null,
+                            fontWeight: selectDay == index ? 'bold' : 'normal',
                         }}>
                         {momentItm.substring(4, 6)}
                     </Text>
@@ -359,18 +360,20 @@ class HomeScreen extends Component {
                     {/* 日期 */}
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             color: white,
                             fontSize: scale(22),
-                            fontWeight: selectDay == index ? 'bold' : null,
+                            fontWeight: selectDay == index ? 'bold' : 'normal',
                         }}>
                         {momentItm.substring(6, 8)}
                     </Text>
 
                     {/* 星期幾 */}
                     <Text style={{
+                        ...uiStyle.defaultText,
                         color: white,
                         fontSize: scale(10),
-                        fontWeight: selectDay == index ? 'bold' : null,
+                        fontWeight: selectDay == index ? 'bold' : 'normal',
                     }}>
                         {this.getWeek(item.startDate)}
                     </Text>
@@ -426,6 +429,7 @@ class HomeScreen extends Component {
                 {function_name && (
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             fontSize: scale(10),
                             fontWeight: 'bold',
                             color: COLOR_DIY.themeColor,
@@ -575,6 +579,7 @@ class HomeScreen extends Component {
                                 }}>
                                     {/* 左Emoji */}
                                     <Text selectable style={{
+                                        ...uiStyle.defaultText,
                                         textAlign: 'center',
                                         fontSize: scale(12),
                                     }}
@@ -591,9 +596,9 @@ class HomeScreen extends Component {
                                     }}>
                                         <Text
                                             selectable
-                                            style={{ color: themeColor, textAlign: 'center', fontSize: scale(12) }}
+                                            style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: scale(12) }}
                                         >
-                                            <Text style={{ fontSize: scale(10), fontWeight: 'bold' }}>
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), fontWeight: 'bold' }}>
                                                 {'📅 Almanac 校曆' + '\n'}
                                             </Text>
 
@@ -607,6 +612,7 @@ class HomeScreen extends Component {
 
                                     {/* 右Emoji */}
                                     <Text selectable style={{
+                                        ...uiStyle.defaultText,
                                         textAlign: 'center',
                                         fontSize: scale(12)
                                     }}>
@@ -616,7 +622,8 @@ class HomeScreen extends Component {
                             ) : null}
 
                         </View>
-                    ) : null}
+                    ) : null
+                    }
 
                     {/* 快捷功能圖標 */}
                     <FlatGrid
@@ -635,137 +642,149 @@ class HomeScreen extends Component {
                     />
 
                     {/* 更新提示 */}
-                    {this.state.showUpdateInfo ?
-                        <HomeCard style={{ alignSelf: 'center' }}>
-                            <View>
-                                <Text
-                                    style={{
-                                        color: black,
-                                        fontWeight: 'bold',
-                                        marginTop: scale(2),
-                                        alignSelf: 'center',
-                                        textAlign: 'center',
-                                    }}>
-                                    {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
-                                </Text>
-                                <Text
-                                    style={{
-                                        color: themeColor,
-                                        marginTop: scale(5),
-                                        fontWeight: 'bold',
-                                    }}>
-                                    {`最新版本: ${this.state.app_version.lastest}`}
-                                </Text>
-                                <Text
-                                    style={{
-                                        color: black.third,
-                                        marginTop: scale(5),
-                                        fontWeight: 'bold',
-                                    }}>
-                                    {`你的版本: ${this.state.app_version.local}`}
-                                </Text>
-                                {Platform.OS === 'ios' ? null : (
+                    {
+                        this.state.showUpdateInfo ?
+                            <HomeCard style={{ alignSelf: 'center' }}>
+                                <View>
                                     <Text
                                         style={{
-                                            alignSelf: 'center', textAlign: 'center',
+                                            ...uiStyle.defaultText,
+                                            color: black,
+                                            fontWeight: 'bold',
+                                            marginTop: scale(2),
+                                            alignSelf: 'center',
+                                            textAlign: 'center',
+                                        }}>
+                                        {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
                                             color: themeColor,
                                             marginTop: scale(5),
                                             fontWeight: 'bold',
                                         }}>
-                                        {`無Google Play Store用戶可以通過APK方式安裝~`}
+                                        {`最新版本: ${this.state.app_version.lastest}`}
                                     </Text>
-                                )}
-                                <TouchableOpacity
-                                    style={{
-                                        alignSelf: 'center',
-                                        marginTop: scale(5),
-                                        backgroundColor: themeColor,
-                                        borderRadius: scale(10),
-                                        paddingVertical: scale(5), paddingHorizontal: scale(8),
-                                    }}
-                                    activeOpacity={0.8}
-                                    onPress={() => {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                        Linking.openURL(url);
-                                    }}>
                                     <Text
                                         style={{
-                                            color: white,
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            marginTop: scale(5),
                                             fontWeight: 'bold',
                                         }}>
-                                        {`點我更新 😉~`}
+                                        {`你的版本: ${this.state.app_version.local}`}
                                     </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </HomeCard>
-                        : null}
+                                    {Platform.OS === 'ios' ? null : (
+                                        <Text
+                                            style={{
+                                                ...uiStyle.defaultText,
+                                                alignSelf: 'center', textAlign: 'center',
+                                                color: themeColor,
+                                                marginTop: scale(5),
+                                                fontWeight: 'bold',
+                                            }}>
+                                            {`無Google Play Store用戶可以通過APK方式安裝~`}
+                                        </Text>
+                                    )}
+                                    <TouchableOpacity
+                                        style={{
+                                            alignSelf: 'center',
+                                            marginTop: scale(5),
+                                            backgroundColor: themeColor,
+                                            borderRadius: scale(10),
+                                            paddingVertical: scale(5), paddingHorizontal: scale(8),
+                                        }}
+                                        activeOpacity={0.8}
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger('soft');
+                                            const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                            Linking.openURL(url);
+                                        }}>
+                                        <Text
+                                            style={{
+                                                ...uiStyle.defaultText,
+                                                color: white,
+                                                fontWeight: 'bold',
+                                            }}>
+                                            {`點我更新 😉~`}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </HomeCard>
+                            : null
+                    }
 
                     {/* 活動頁 */}
                     <EventPage ref={this.eventPage} />
 
-                </ScrollView>
+                </ScrollView >
 
                 {/* 彈出提示登錄的Modal */}
-                {this.state.isShowModal && (
-                    <ModalBottom cancel={this.tiggerModalBottom}>
-                        <View
-                            style={{
-                                padding: scale(20),
-                                backgroundColor: COLOR_DIY.white,
-                            }}>
-                            <ScrollView
-                                contentContainerStyle={{
-                                    alignItems: 'center',
-                                    marginBottom: scale(30),
+                {
+                    this.state.isShowModal && (
+                        <ModalBottom cancel={this.tiggerModalBottom}>
+                            <View
+                                style={{
+                                    padding: scale(20),
+                                    backgroundColor: COLOR_DIY.white,
                                 }}>
-                                <Text
-                                    style={{
-                                        fontSize: scale(18),
-                                        color: COLOR_DIY.black.third,
-                                    }}>
-                                    歡迎來到ARK ALL~
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: scale(15),
-                                        color: COLOR_DIY.black.third,
-                                    }}>
-                                    登錄後體驗完整功能，現在去嗎？
-                                </Text>
-                                {/* 登錄按鈕 */}
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        marginTop: scale(10),
-                                        backgroundColor: COLOR_DIY.themeColor,
-                                        padding: scale(10),
-                                        borderRadius: scale(10),
-                                        justifyContent: 'center',
-                                        alignSelf: 'center',
-                                    }}
-                                    onPress={() => {
-                                        ReactNativeHapticFeedback.trigger(
-                                            'soft',
-                                        );
-                                        this.setState({ isShowModal: false });
-                                        this.props.navigation.jumpTo(
-                                            'MeTabbar',
-                                        );
+                                <ScrollView
+                                    contentContainerStyle={{
+                                        alignItems: 'center',
+                                        marginBottom: scale(30),
                                     }}>
                                     <Text
                                         style={{
-                                            fontSize: scale(15),
-                                            color: 'white',
-                                            fontWeight: '500',
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(18),
+                                            color: COLOR_DIY.black.third,
                                         }}>
-                                        現在登錄
+                                        歡迎來到ARK ALL~
                                     </Text>
-                                </TouchableOpacity>
-                            </ScrollView>
-                        </View>
-                    </ModalBottom>
-                )}
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(15),
+                                            color: COLOR_DIY.black.third,
+                                        }}>
+                                        登錄後體驗完整功能，現在去嗎？
+                                    </Text>
+                                    {/* 登錄按鈕 */}
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        style={{
+                                            marginTop: scale(10),
+                                            backgroundColor: COLOR_DIY.themeColor,
+                                            padding: scale(10),
+                                            borderRadius: scale(10),
+                                            justifyContent: 'center',
+                                            alignSelf: 'center',
+                                        }}
+                                        onPress={() => {
+                                            ReactNativeHapticFeedback.trigger(
+                                                'soft',
+                                            );
+                                            this.setState({ isShowModal: false });
+                                            this.props.navigation.jumpTo(
+                                                'MeTabbar',
+                                            );
+                                        }}>
+                                        <Text
+                                            style={{
+                                                ...uiStyle.defaultText,
+                                                fontSize: scale(15),
+                                                color: 'white',
+                                                fontWeight: '500',
+                                            }}>
+                                            現在登錄
+                                        </Text>
+                                    </TouchableOpacity>
+                                </ScrollView>
+                            </View>
+                        </ModalBottom>
+                    )
+                }
 
                 {/* Tost */}
                 <Toast
@@ -781,7 +800,7 @@ class HomeScreen extends Component {
                         ...viewShadow,
                     }}
                 />
-            </View>
+            </View >
         );
     }
 }

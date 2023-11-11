@@ -11,7 +11,7 @@ import {
     Image,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import { BASE_URI, BASE_HOST, POST, GET } from '../../utils/pathMap';
 import Header from '../../components/Header';
 import DialogDIY from '../../components/DialogDIY';
@@ -642,6 +642,7 @@ class EventSetting extends Component {
                                     {type == 'activity' ? (
                                         <Text
                                             style={{
+                                                ...uiStyle.defaultText,
                                                 color: black.third,
                                                 alignSelf: 'flex-start',
                                             }}>
@@ -650,6 +651,7 @@ class EventSetting extends Component {
                                     ) : (
                                         <Text
                                             style={{
+                                                ...uiStyle.defaultText,
                                                 color: black.third,
                                                 alignSelf: 'flex-end',
                                             }}>
@@ -789,6 +791,7 @@ class EventSetting extends Component {
                                     {'設定開始時間 *  '}
                                     <Text
                                         style={{
+                                            ...uiStyle.defaultText,
                                             fontSize: pxToDp(15),
                                             color: black.third,
                                         }}>
@@ -821,6 +824,7 @@ class EventSetting extends Component {
                                     {'設定結束時間 *  '}
                                     <Text
                                         style={{
+                                            ...uiStyle.defaultText,
                                             fontSize: pxToDp(15),
                                             color: black.third,
                                         }}>
@@ -841,7 +845,7 @@ class EventSetting extends Component {
                         {type == 'activity' && (
                             <View style={{ marginTop: pxToDp(10) }}>
                                 <Text
-                                    style={{ color: black.third, fontSize: 12 }}>
+                                    style={{ ...uiStyle.defaultText,color: black.third, fontSize: 12 }}>
                                     *
                                     將問卷等Link直接寫到活動詳情，方便同學直接跳轉！
                                 </Text>
@@ -977,10 +981,12 @@ class EventSetting extends Component {
 
 const styles = StyleSheet.create({
     inputTitle: {
+        ...uiStyle.defaultText,
         color: themeColor,
         fontSize: pxToDp(16),
     },
     inputArea: {
+        ...uiStyle.defaultText,
         textAlignVertical: 'top',
         borderWidth: pxToDp(1),
         paddingVertical: pxToDp(10),
@@ -1001,6 +1007,7 @@ const styles = StyleSheet.create({
         ...COLOR_DIY.viewShadow,
     },
     submitButtonText: {
+        ...uiStyle.defaultText,
         color: white,
         fontSize: pxToDp(18),
         fontWeight: '500',

@@ -1,15 +1,15 @@
 // 自定義底部彈出層，用於保存圖片等
-import React, {Component} from 'react';
-import {Dimensions, View, Text, Button, TouchableOpacity} from 'react-native';
+import React, { Component } from 'react';
+import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
 
 import Modal from 'react-native-modal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import {COLOR_DIY} from '../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import { scale } from 'react-native-size-matters';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('screen');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('screen');
 
 class ModalBottom extends Component {
     static defaultProps = {
@@ -22,12 +22,12 @@ class ModalBottom extends Component {
 
     // 開啟/關閉Modal
     tiggerModal = () => {
-        this.setState({isModalBottomVisible: !this.state.isModalBottomVisible});
+        this.setState({ isModalBottomVisible: !this.state.isModalBottomVisible });
         this.props.cancel();
     };
 
     render() {
-        const {isModalBottomVisible} = this.state;
+        const { isModalBottomVisible } = this.state;
         return (
             <Modal
                 isVisible={isModalBottomVisible}

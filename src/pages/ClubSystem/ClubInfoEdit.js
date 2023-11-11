@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -9,31 +9,31 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import {pxToDp} from '../../utils/stylesKits';
-import {COLOR_DIY} from '../../utils/uiMap';
-import {handleImageSelect} from '../../utils/fileKits';
+import { pxToDp } from '../../utils/stylesKits';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { handleImageSelect } from '../../utils/fileKits';
 import Header from '../../components/Header';
-import {BASE_URI, BASE_HOST, POST, GET, addHost} from '../../utils/pathMap';
+import { BASE_URI, BASE_HOST, POST, GET, addHost } from '../../utils/pathMap';
 import DialogDIY from '../../components/DialogDIY';
 import Loading from '../../components/Loading';
 
-import {FlatGrid} from 'react-native-super-grid';
-import {Incubator, ExpandableSection} from 'react-native-ui-lib';
-const {TextField} = Incubator;
-import {inject} from 'mobx-react';
+import { FlatGrid } from 'react-native-super-grid';
+import { Incubator, ExpandableSection } from 'react-native-ui-lib';
+const { TextField } = Incubator;
+import { inject } from 'mobx-react';
 import axios from 'axios';
 import FastImage from 'react-native-fast-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ImgComp from 'react-native-compressor';
 
-const {black, themeColor, white, bg_color} = COLOR_DIY;
+const { black, themeColor, white, bg_color } = COLOR_DIY;
 
 const floatingPlaceholderColor = {
     focus: themeColor,
     default: black.main,
 };
-const floatingPlaceholderStyle = {fontSize: pxToDp(15)};
+const floatingPlaceholderStyle = { fontSize: pxToDp(15) };
 
 let add_club_photos = [];
 let del_club_photos = [];
@@ -45,12 +45,12 @@ class ClubInfoEdit extends Component {
         imageUrlArr: ['', '', '', '', ''],
         introTextInput: '',
         contactInput: [
-            {type: 'Wechat', num: ''},
-            {type: 'Email', num: ''},
-            {type: 'Phone', num: ''},
-            {type: 'IG', num: ''},
-            {type: 'Facebook', num: ''},
-            {type: 'Website', num: ''},
+            { type: 'Wechat', num: '' },
+            { type: 'Email', num: '' },
+            { type: 'Phone', num: '' },
+            { type: 'IG', num: '' },
+            { type: 'Facebook', num: '' },
+            { type: 'Website', num: '' },
         ],
         clubData: undefined,
         isLoading: true,
@@ -90,7 +90,7 @@ class ClubInfoEdit extends Component {
 
     setData = clubData => {
         if ('intro' in clubData) {
-            this.setState({introTextInput: clubData.intro});
+            this.setState({ introTextInput: clubData.intro });
         }
         // 渲染服務器已存的照片
         if (
@@ -112,17 +112,17 @@ class ClubInfoEdit extends Component {
             newImgArr.map(itm => {
                 addHostArr.push(addHost(itm));
             });
-            this.setState({imageUrlArr: addHostArr});
+            this.setState({ imageUrlArr: addHostArr });
         }
         if ('contact' in clubData && clubData.contact.length > 0) {
-            this.setState({contactInput: clubData.contact});
+            this.setState({ contactInput: clubData.contact });
         }
-        this.setState({clubData, isLoading: false});
+        this.setState({ clubData, isLoading: false });
     };
 
     // 圖片選擇
     async handleSelect(index) {
-        const {clubData} = this.state;
+        const { clubData } = this.state;
         let imageUrl = '';
         let imageObj = {};
         let cancel = true;
@@ -138,7 +138,7 @@ class ClubInfoEdit extends Component {
                 imgFileObj.uri = compUri;
                 // 僅允許小於10M的圖片
                 if (imgFileObj.fileSize / 1000 / 1024 < 10) {
-                    const {imageUrlArr} = this.state;
+                    const { imageUrlArr } = this.state;
                     imageObj = selectResult.assets[0];
                     imageUrl = imageObj.uri;
                     cancel = false;
@@ -162,7 +162,7 @@ class ClubInfoEdit extends Component {
                 let imageUrlArr = this.state.imageUrlArr;
                 imageUrlArr.splice(index, 1, imageUrl);
                 add_club_photos.push(imageObj);
-                this.setState({imageUrlArr});
+                this.setState({ imageUrlArr });
             }
         }
     }
@@ -183,13 +183,13 @@ class ClubInfoEdit extends Component {
         }
         imageUrlArr.splice(index, 1);
         imageUrlArr.push('');
-        this.setState({imageUrlArr});
+        this.setState({ imageUrlArr });
     };
 
     // 上傳資料到服務器
     postNewInfo = async () => {
-        const {introTextInput, clubData, contactInput} = this.state;
-        this.setState({isLoading: true, submitChoice: false});
+        const { introTextInput, clubData, contactInput } = this.state;
+        this.setState({ isLoading: true, submitChoice: false });
 
         let data = new FormData();
         data.append('intro', introTextInput);
@@ -252,13 +252,13 @@ class ClubInfoEdit extends Component {
     };
 
     renderImageSelectorItem = index => {
-        const {imageUrlArr, clubData} = this.state;
+        const { imageUrlArr, clubData } = this.state;
 
         // 服務器照片庫無數據，del數組留空[]，所有選圖都加入add數組
         let needDelete =
             clubData &&
-            'club_photos_list' in clubData &&
-            clubData.club_photos_list.length == 0
+                'club_photos_list' in clubData &&
+                clubData.club_photos_list.length == 0
                 ? false
                 : true;
 
@@ -300,12 +300,12 @@ class ClubInfoEdit extends Component {
                             uri: imageUrlArr[index],
                             // cache: FastImage.cacheControl.web,
                         }}
-                        style={{width: '100%', height: '100%'}}
+                        style={{ width: '100%', height: '100%' }}
                         onLoadStart={() => {
-                            this.setState({imgLoading: true});
+                            this.setState({ imgLoading: true });
                         }}
                         onLoad={() => {
-                            this.setState({imgLoading: false});
+                            this.setState({ imgLoading: false });
                         }}>
                         {this.state.imgLoading ? (
                             <View
@@ -336,7 +336,7 @@ class ClubInfoEdit extends Component {
 
     renderContactInput = (item, index) => {
         let hint = '';
-        const {type} = item;
+        const { type } = item;
         if (type == 'Website') {
             hint = 'https://umall.one';
         } else if (type == 'Facebook') {
@@ -352,7 +352,7 @@ class ClubInfoEdit extends Component {
                 floatingPlaceholderColor={floatingPlaceholderColor}
                 floatingPlaceholderStyle={floatingPlaceholderStyle}
                 hint={hint}
-                dynamicFieldStyle={(context: FieldContextType) => {
+                dynamicFieldStyle={(context) => {
                     return {
                         borderBottomWidth: pxToDp(1),
                         paddingBottom: pxToDp(4),
@@ -365,9 +365,9 @@ class ClubInfoEdit extends Component {
                 value={item.num}
                 onChangeText={input => {
                     let contactInput = this.state.contactInput;
-                    let obj = {type: item.type, num: input};
+                    let obj = { type: item.type, num: input };
                     contactInput.splice(index, 1, obj);
-                    this.setState({contactInput});
+                    this.setState({ contactInput });
                 }}
             />
         );
@@ -385,7 +385,7 @@ class ClubInfoEdit extends Component {
                     color: this.state.borderColor,
                 }}
                 value={this.state.introTextInput}
-                onChangeText={introTextInput => this.setState({introTextInput})}
+                onChangeText={introTextInput => this.setState({ introTextInput })}
                 onBlur={() => {
                     this.setState({
                         borderColor: black.third,
@@ -481,7 +481,7 @@ class ClubInfoEdit extends Component {
 
     // 渲染圖片選擇
     renderImageSelector = () => {
-        const {imageUrlArr} = this.state;
+        const { imageUrlArr } = this.state;
 
         return (
             <View>
@@ -490,7 +490,7 @@ class ClubInfoEdit extends Component {
                     itemDimension={pxToDp(50)}
                     spacing={pxToDp(10)}
                     data={imageUrlArr}
-                    renderItem={({_, index}) =>
+                    renderItem={({ _, index }) =>
                         this.renderImageSelectorItem(index)
                     }
                     showsVerticalScrollIndicator={false}
@@ -501,18 +501,18 @@ class ClubInfoEdit extends Component {
     };
 
     render() {
-        const {clubData, submitChoice, isLoading} = this.state;
+        const { clubData, submitChoice, isLoading } = this.state;
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
                     <KeyboardAwareScrollView
-                        contentContainerStyle={{paddingHorizontal: pxToDp(10)}}>
+                        contentContainerStyle={{ paddingHorizontal: pxToDp(10) }}>
                         {/* 圖片修改 */}
                         <View>
                             <Text style={styles.title}>照片修改</Text>
-                            <Text style={{color: black.third}}>
+                            <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                                 *首張圖片將作為主頁背景圖
                             </Text>
                             {this.renderImageSelector()}
@@ -522,16 +522,16 @@ class ClubInfoEdit extends Component {
                         {this.renderExpandSection1()}
 
                         {/* 聯繫方式 */}
-                        <View style={{marginTop: pxToDp(20)}}>
+                        <View style={{ marginTop: pxToDp(20) }}>
                             {this.renderExpandSection2()}
                         </View>
 
                         {/* 保存修改 */}
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() => this.setState({submitChoice: true})}
+                            onPress={() => this.setState({ submitChoice: true })}
                             style={styles.submitButton}>
-                            <Text style={{...styles.submitButtonText}}>
+                            <Text style={{ ...styles.submitButtonText }}>
                                 保存修改
                             </Text>
                         </TouchableOpacity>
@@ -553,7 +553,7 @@ class ClubInfoEdit extends Component {
                     showDialog={submitChoice}
                     text={'確定要保存修改嗎？'}
                     handleConfirm={this.postNewInfo}
-                    handleCancel={() => this.setState({submitChoice: false})}
+                    handleCancel={() => this.setState({ submitChoice: false })}
                 />
             </View>
         );
@@ -562,15 +562,18 @@ class ClubInfoEdit extends Component {
 
 const styles = StyleSheet.create({
     title: {
+        ...uiStyle.defaultText,
         alignSelf: 'center',
         color: black.main,
         fontSize: pxToDp(18),
     },
     inputTitle: {
+        ...uiStyle.defaultText,
         color: black.main,
         fontSize: pxToDp(16),
     },
     inputArea: {
+        ...uiStyle.defaultText,
         textAlignVertical: 'top',
         borderWidth: pxToDp(1),
         paddingVertical: pxToDp(10),
@@ -591,6 +594,7 @@ const styles = StyleSheet.create({
         ...COLOR_DIY.viewShadow,
     },
     submitButtonText: {
+        ...uiStyle.defaultText,
         color: white,
         fontSize: pxToDp(18),
         fontWeight: '500',

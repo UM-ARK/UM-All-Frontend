@@ -1,17 +1,17 @@
 // 自定義底部彈出層，用於保存圖片等
-import React, {Component} from 'react';
-import {Dimensions, View, Text, Button, TouchableOpacity} from 'react-native';
+import React, { Component } from 'react';
+import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
 
-import {COLOR_DIY} from '../utils/uiMap';
-import {handleImageDownload} from '../utils/fileKits';
+import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { handleImageDownload } from '../utils/fileKits';
 
 import Modal from 'react-native-modal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('screen');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('screen');
 
 class ModalSave extends Component {
     state = {
@@ -19,12 +19,12 @@ class ModalSave extends Component {
     };
 
     tiggerModal = () => {
-        this.setState({isModalBottomVisible: !this.state.isModalBottomVisible});
+        this.setState({ isModalBottomVisible: !this.state.isModalBottomVisible });
         this.props.cancel();
     };
 
     render() {
-        const {isModalBottomVisible} = this.state;
+        const { isModalBottomVisible } = this.state;
         return (
             <Modal
                 isVisible={isModalBottomVisible}
@@ -48,7 +48,7 @@ class ModalSave extends Component {
                         borderTopRightRadius: scale(15),
                         overflow: 'hidden',
                     }}>
-                    <View style={{padding: scale(20)}}>
+                    <View style={{ padding: scale(20) }}>
                         <View
                             style={{
                                 justifyContent: 'center',
@@ -77,6 +77,7 @@ class ModalSave extends Component {
                             </TouchableOpacity>
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     marginTop: scale(2),
                                     color: COLOR_DIY.themeColor,
                                 }}>

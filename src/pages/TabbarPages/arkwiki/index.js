@@ -18,7 +18,7 @@ import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { ARK_WIKI } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
@@ -283,6 +283,7 @@ export default class ARKWiki extends Component {
 
 const s = StyleSheet.create({
     titleText: {
+        ...uiStyle.defaultText,
         fontSize: scale(18),
         color: themeColor,
         fontWeight: '600'

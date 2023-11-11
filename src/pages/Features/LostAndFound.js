@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 // 引入本地工具
-import { COLOR_DIY } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import { UM_LOST_FOUND } from '../../utils/pathMap';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
@@ -20,7 +20,7 @@ import Loading from '../../components/Loading';
 import axios from 'axios';
 import { scale } from 'react-native-size-matters';
 
-const { black, white, themeColor, bg_color } = COLOR_DIY;
+const { black, white, themeColor, secondThemeColor, bg_color } = COLOR_DIY;
 
 // 失物招領網頁數據轉json  (Lost and found)
 function LaF_to_Json(html_source_data) {
@@ -92,7 +92,7 @@ const getItem = (data, index) => {
     return data[index];
 };
 
-// // 返回數據數組的長度
+// 返回數據數組的長度
 const getItemCount = data => {
     return data.length;
 };
@@ -147,6 +147,7 @@ class LostAndFound extends Component {
                     }}>
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             color: themeColor,
                             fontSize: scale(23),
                             fontWeight: 'bold',
@@ -155,7 +156,8 @@ class LostAndFound extends Component {
                     </Text>
                     <Text
                         style={{
-                            color: '#FF8627',
+                            ...uiStyle.defaultText,
+                            color: secondThemeColor,
                             fontSize: scale(23),
                             fontWeight: 'bold',
                             marginLeft: scale(9)
@@ -210,6 +212,7 @@ class LostAndFound extends Component {
                     }}>
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             color: black.third,
                             fontSize: scale(12),
                             marginLeft: scale(80),
@@ -227,26 +230,6 @@ class LostAndFound extends Component {
             <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'失物招領'} />
 
-                <Text
-                    style={{
-                        alignSelf: 'center',
-                        color: black.third,
-                    }}>
-                    Data from: um2.umac.mo
-                </Text>
-
-                <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => Linking.openURL(UM_LOST_FOUND)}>
-                    <Text
-                        style={{
-                            alignSelf: 'center',
-                            color: themeColor,
-                            marginBottom: scale(5),
-                        }}>
-                        Check all
-                    </Text>
-                </TouchableOpacity>
                 {!isLoading && data.length > 0 ? (
                     <VirtualizedList
                         data={data}
@@ -260,6 +243,32 @@ class LostAndFound extends Component {
                         getItem={getItem}
                         // 渲染項目數量
                         getItemCount={getItemCount}
+                        ListHeaderComponent={() => (
+                            <>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        alignSelf: 'center',
+                                        color: black.third,
+                                    }}>
+                                    Data from: um2.umac.mo
+                                </Text>
+
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => Linking.openURL(UM_LOST_FOUND)}>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            alignSelf: 'center',
+                                            color: themeColor,
+                                            marginBottom: scale(5),
+                                        }}>
+                                        Check all
+                                    </Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (
                             <View style={{ marginBottom: scale(50) }}></View>
@@ -296,11 +305,13 @@ class LostAndFound extends Component {
 
 const styles = StyleSheet.create({
     titleText: {
+        ...uiStyle.defaultText,
         fontWeight: 'bold',
         color: themeColor,
         fontSize: scale(15),
     },
     contentText: {
+        ...uiStyle.defaultText,
         fontSize: scale(14),
         color: black.third,
     },

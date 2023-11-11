@@ -1,11 +1,11 @@
 // 體育設施頁
-import React, {Component} from 'react';
-import {Text, View, TouchableOpacity} from 'react-native';
+import React, { Component } from 'react';
+import { Text, View, TouchableOpacity } from 'react-native';
 
-import {COLOR_DIY} from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 
 import IntegratedWebView from '../../components/IntegratedWebView';
-import {Header} from '@rneui/themed';
+import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale } from 'react-native-size-matters';
 
@@ -21,12 +21,12 @@ class UMWhole extends Component {
 
     // 切換刷新標識
     triggerRefresh = () => {
-        this.setState({needRefresh: !this.state.needRefresh});
+        this.setState({ needRefresh: !this.state.needRefresh });
     };
 
     render() {
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Header
                     backgroundColor={'#1f5288'}
                     leftComponent={
@@ -42,6 +42,7 @@ class UMWhole extends Component {
                     centerComponent={{
                         text: '澳大選咩課',
                         style: {
+                            ...uiStyle.defaultText,
                             color: COLOR_DIY.white,
                             fontSize: scale(15),
                         },
@@ -61,7 +62,7 @@ class UMWhole extends Component {
                     }}
                 />
                 <IntegratedWebView
-                    source={{uri: 'https://www.umeh.top/'}}
+                    source={{ uri: 'https://www.umeh.top/' }}
                     needRefresh={this.state.needRefresh}
                     triggerRefresh={this.triggerRefresh}
                 />

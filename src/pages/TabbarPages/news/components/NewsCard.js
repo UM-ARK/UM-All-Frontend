@@ -7,7 +7,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../../utils/uiMap';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -108,6 +108,7 @@ class NewsCard extends Component {
                         {title_en.length > 0 ? (
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     fontWeight: 'bold',
                                     color: black.main,
                                     fontSize: scale(14),
@@ -120,6 +121,7 @@ class NewsCard extends Component {
                         {title_cn.length > 0 ? (
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     fontSize:
                                         title_en.length > 0
                                             ? scale(13)
@@ -137,6 +139,7 @@ class NewsCard extends Component {
                         {(title_en.length == 0 || title_cn.length == 0) ? (
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     fontSize:
                                         title_en.length > 0
                                             ? scale(13)
@@ -153,6 +156,7 @@ class NewsCard extends Component {
 
                         {/* 活動類型展示日期 */}
                         <Text style={{
+                            ...uiStyle.defaultText,
                             fontSize: scale(12),
                             fontWeight: 'bold',
                             position: 'absolute',

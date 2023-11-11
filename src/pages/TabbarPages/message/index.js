@@ -1,5 +1,5 @@
 // 信息頁 - 2022.08.07臨時改為Follow頁
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -11,21 +11,21 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
-import {BASE_URI, BASE_HOST, GET} from '../../../utils/pathMap';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
+import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
 import ChatCard from './ChatCard';
 import ClubCard from '../news/components/ClubCard';
 import EventCard from '../news/components/EventCard';
 
 import axios from 'axios';
-import {Header} from '@rneui/themed';
+import { Header } from '@rneui/themed';
 // import {SpringScrollView} from 'react-native-spring-scrollview';
-import {FlatGrid} from 'react-native-super-grid';
+import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 
-const {bg_color, themeColor, white, viewShadow, black} = COLOR_DIY;
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { bg_color, themeColor, white, viewShadow, black } = COLOR_DIY;
+const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 
 class MesgScreen extends Component {
@@ -41,7 +41,7 @@ class MesgScreen extends Component {
     }
 
     async getFollowClubs() {
-        const {clubDataList} = this.state;
+        const { clubDataList } = this.state;
         let URL = BASE_URI + GET.FOLLOW_CLUB;
         await axios
             .get(URL)
@@ -52,14 +52,14 @@ class MesgScreen extends Component {
                     clubDataList.map(itm => {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
-                    this.setState({clubDataList, isLoading: false});
+                    this.setState({ clubDataList, isLoading: false });
                 }
             })
             .catch(err => console.log('err', err));
     }
 
     async getFollowEvents() {
-        const {eventData} = this.state;
+        const { eventData } = this.state;
         let URL = BASE_URI + GET.FOLLOW_EVENT;
         let num_of_item = 5;
         await axios
@@ -75,7 +75,7 @@ class MesgScreen extends Component {
                     newDataArr.map(itm => {
                         itm.cover_image_url = BASE_HOST + itm.cover_image_url;
                     });
-                    this.setState({eventData: newDataArr});
+                    this.setState({ eventData: newDataArr });
                 }
             })
             .catch(err => console.log('err', err));
@@ -93,20 +93,21 @@ class MesgScreen extends Component {
                     }
                 }}
                 style={styles.seeMoreButton}>
-                <Text style={{color: white, fontSize: 14}}>查看全部</Text>
+                <Text style={{ ...uiStyle.defaultText, color: white, fontSize: 14 }}>查看全部</Text>
             </TouchableOpacity>
         );
     };
 
     render() {
-        const {clubDataList, eventData, isLoading} = this.state;
+        const { clubDataList, eventData, isLoading } = this.state;
         return (
-            <View style={{backgroundColor: bg_color, flex: 1}}>
+            <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header
                     backgroundColor={bg_color}
                     centerComponent={{
                         text: '關注',
                         style: {
+                            ...uiStyle.defaultText,
                             color: COLOR_DIY.black.main,
                             fontSize: pxToDp(15),
                         },
@@ -124,7 +125,7 @@ class MesgScreen extends Component {
                             tintColor={themeColor}
                             refreshing={isLoading}
                             onRefresh={() => {
-                                this.setState({isLoading: true});
+                                this.setState({ isLoading: true });
                                 this.getFollowClubs();
                                 this.getFollowEvents();
                             }}
@@ -139,7 +140,7 @@ class MesgScreen extends Component {
                                     data={clubDataList}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
-                                    renderItem={({item}) => {
+                                    renderItem={({ item }) => {
                                         return (
                                             <TouchableOpacity
                                                 style={{
@@ -184,6 +185,7 @@ class MesgScreen extends Component {
                                                     }}>
                                                     <Text
                                                         style={{
+                                                            ...uiStyle.defaultText,
                                                             fontSize: 12,
                                                             color: black.third,
                                                         }}
@@ -199,11 +201,11 @@ class MesgScreen extends Component {
                                 {this.renderGoToAll('club')}
                             </View>
                         ) : (
-                            <View style={{alignItems: 'center'}}>
-                                <Text style={{color: black.third}}>
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                                     你還沒有follow的組織，快去follow一些吧~
                                 </Text>
-                                <Text style={{color: black.third}}>
+                                <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                                     []~(￣▽￣)~*
                                 </Text>
                             </View>
@@ -222,7 +224,7 @@ class MesgScreen extends Component {
                                     data={eventData}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
-                                    renderItem={({item}) => {
+                                    renderItem={({ item }) => {
                                         return (
                                             <EventCard
                                                 data={item}
@@ -238,11 +240,11 @@ class MesgScreen extends Component {
                                 {this.renderGoToAll('event')}
                             </View>
                         ) : (
-                            <View style={{alignItems: 'center'}}>
-                                <Text style={{color: black.third}}>
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                                     你還沒有follow的活動，快去follow一些吧~
                                 </Text>
-                                <Text style={{color: black.third}}>
+                                <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                                     []~(￣▽￣)~*
                                 </Text>
                             </View>
@@ -264,6 +266,7 @@ const styles = StyleSheet.create({
         ...viewShadow,
     },
     title: {
+        ...uiStyle.defaultText,
         color: themeColor,
         alignSelf: 'center',
         fontSize: 16,

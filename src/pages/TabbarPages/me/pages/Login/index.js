@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY } from '../../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../../utils/uiMap';
 import { handleLogin } from '../../../../../utils/storageKits';
 import {
     BASE_URI,
@@ -204,12 +204,14 @@ class LoginChoose extends Component {
                             marginBottom: scale(10),
                         }}>
                             <Text style={{
+                                ...uiStyle.defaultText,
                                 color: COLOR_DIY.black.third,
                                 fontSize: scale(18),
                             }}>
                                 Welcome To ARK ALL~
                             </Text>
                             <Text style={{
+                                ...uiStyle.defaultText,
                                 color: COLOR_DIY.black.third,
                                 fontSize: scale(18),
                             }}>
@@ -303,6 +305,7 @@ class LoginChoose extends Component {
                                     }}>
                                     <Text
                                         style={{
+                                            ...uiStyle.defaultText,
                                             color: COLOR_DIY.black.third,
                                             fontSize: scale(13),
                                         }}>
@@ -313,6 +316,7 @@ class LoginChoose extends Component {
                                 <TouchableOpacity>
                                     <Text
                                         style={{
+                                            ...uiStyle.defaultText,
                                             color: COLOR_DIY.themeColor,
                                             fontSize: scale(13),
                                         }}
@@ -342,6 +346,7 @@ class LoginChoose extends Component {
                             }}>
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     color: themeColor,
                                     fontSize: scale(12),
                                 }}>
@@ -377,6 +382,7 @@ const s = StyleSheet.create({
         ...COLOR_DIY.viewShadow,
     },
     roleCardText: {
+        ...uiStyle.defaultText,
         color: COLOR_DIY.white,
         fontSize: scale(17),
     },

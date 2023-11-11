@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { pxToDp } from './stylesKits';
+import { scale } from 'react-native-size-matters';
 
 export const COLOR_DIY = {
     // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
@@ -59,7 +60,12 @@ export const VERSION_EMOJI = {
     ve_Left: '⛱️',
     ve_Right: '🕶️',
 }
+
 export const uiStyle = StyleSheet.create({
+    defaultText: {
+        fontWeight: 'normal',
+        fontSize: scale(12),
+    },
     toastContainer: {
         backgroundColor: COLOR_DIY.themeColor,
         padding: pxToDp(10),
