@@ -186,7 +186,7 @@ const NavigationView = ({
                     onPress={onBackPress}
                     disabled={canGoBack ? false : true}>
                     <Icon
-                        name={'left'}
+                        name={'leftcircle'}
                         size={22}
                         color={canGoBack ? 'black' : 'grey'}
                     />
@@ -197,7 +197,7 @@ const NavigationView = ({
                     onPress={onForwardPress}
                     disabled={canGoForward ? false : true}>
                     <Icon
-                        name={'right'}
+                        name={'rightcircle'}
                         size={22}
                         color={canGoForward ? 'black' : 'grey'}
                     />
