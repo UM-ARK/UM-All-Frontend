@@ -968,13 +968,16 @@ export default class index extends Component {
                         {/* 篩選課程功能 更新時間 */}
                         <View style={{ marginTop: scale(10), alignItems: 'center' }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
-                                {offerCourses.academicYear}學年, Sem {offerCourses.sem} 可供預選/開設課程
+                                可供預選/開設課程
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                                更新日期: {offerCourses.updateTime}
+                                數據更新日期: {offerCourses.updateTime}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
+                            </Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }} selectable>
+                                遇到BUG可聯繫umacark@gmail.com
                             </Text>
                         </View>
 
