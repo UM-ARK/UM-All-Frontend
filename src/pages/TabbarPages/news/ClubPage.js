@@ -9,7 +9,7 @@ import {
     Alert,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import Loading from '../../../components/Loading';
@@ -105,6 +105,7 @@ class ClubPage extends Component {
                         marginBottom: scale(5)
                     }}>
                         <Text style={{
+                            ...uiStyle.defaultText,
                             color: black.main,
                             fontSize: scale(15)
                         }}>
@@ -144,22 +145,24 @@ class ClubPage extends Component {
             <View style={{ marginBottom: scale(20) }}>
                 <Text
                     style={{
+                        ...uiStyle.defaultText,
                         color: black.third,
                         alignSelf: 'center',
                         fontSize: scale(12),
                     }}>
-                    {'\n\n\n\n'+'已有 ' +
+                    {'\n\n\n\n' + '已有 ' +
                         originClubDataList.length +
                         ' 個組織進駐~~\n'}
                 </Text>
                 <Text
                     style={{
+                        ...uiStyle.defaultText,
                         color: black.third,
                         alignSelf: 'center',
                         fontSize: scale(12),
                     }}>
                     {'下拉可刷新頁面~\n'}
-                    
+
                 </Text>
                 {/* 進駐提示 */}
                 <TouchableOpacity
@@ -170,9 +173,10 @@ class ClubPage extends Component {
                     }}>
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             color: themeColor,
                             fontSize: scale(12),
-                            marginBottom:10
+                            marginBottom: 10
                         }}
                     >
                         {'沒有賬號? 進駐ARK ALL!\n'}
@@ -224,11 +228,11 @@ class ClubPage extends Component {
                                         }}
                                     >
                                         <Text style={{
+                                            ...uiStyle.defaultText,
                                             color: black.third,
                                             fontSize: scale(11),
                                             fontWeight: 'bold'
-                                        }}
-                                        >
+                                        }}>
                                             ARK
                                         </Text>
                                     </TouchableOpacity>
@@ -251,9 +255,10 @@ class ClubPage extends Component {
                                         }}
                                     >
                                         <Text style={{
+                                            ...uiStyle.defaultText,
                                             color: black.third,
                                             fontSize: scale(11),
-                                            fontWeight:'bold'
+                                            fontWeight: 'bold'
                                         }}>
                                             {clubTagMap(itm.item)}
                                         </Text>

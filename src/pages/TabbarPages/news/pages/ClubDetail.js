@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, { Component, useState } from 'react';
 import {
     View,
     Text,
@@ -14,10 +14,10 @@ import {
     Linking,
 } from 'react-native';
 
-import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-import {clubTagMap} from '../../../../utils/clubMap';
-import {setAPPInfo} from '../../../../utils/storageKits';
-import {logToFirebase} from '../../../../utils/firebaseAnalytics';
+import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
+import { clubTagMap } from '../../../../utils/clubMap';
+import { setAPPInfo } from '../../../../utils/storageKits';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import {
     BASE_URI,
     BASE_HOST,
@@ -27,7 +27,7 @@ import {
     MAIL,
 } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
-import {handleLogout} from '../../../../utils/storageKits';
+import { handleLogout } from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
@@ -35,10 +35,10 @@ import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
-import {updateUserInfo} from '../../../../utils/storageKits';
-import {versionStringCompare} from '../../../../utils/versionKits';
+import { updateUserInfo } from '../../../../utils/storageKits';
+import { versionStringCompare } from '../../../../utils/versionKits';
 
-import {Header} from '@rneui/themed';
+import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -47,19 +47,19 @@ import {
     TriggeringView,
 } from 'react-native-image-header-scroll-view';
 import FastImage from 'react-native-fast-image';
-import {useToast} from 'native-base';
-import {inject} from 'mobx-react';
+import { useToast } from 'native-base';
+import { inject } from 'mobx-react';
 import axios from 'axios';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import Toast, { DURATION } from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 解構uiMap的數據
-const {bg_color, white, black, themeColor, viewShadow} = COLOR_DIY;
+const { bg_color, white, black, themeColor, viewShadow } = COLOR_DIY;
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const CLUB_LOGO_SIZE = scale(80);
 const CLUB_IMAGE_WIDTH = scale(66);
 const CLUB_IMAGE_HEIGHT = scale(55);
@@ -101,13 +101,13 @@ class ClubDetail extends Component {
         // 管理員賬號登錄
         if (globalData.userInfo && globalData.userInfo.isClub) {
             let clubData = globalData.userInfo.clubData;
-            this.setState({isAdmin: true});
+            this.setState({ isAdmin: true });
             this.getData(clubData.club_num);
             this.getAppData();
         }
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
-            this.setState({isLogin: true});
+            this.setState({ isLogin: true });
         }
     }
 
@@ -149,7 +149,7 @@ class ClubDetail extends Component {
                         };
                         updateUserInfo(clubDataUpdate);
                         this.props.RootStore.setUserInfo(clubDataUpdate);
-                        logToFirebase('clubLogin',{club : clubData.name});
+                        logToFirebase('clubLogin', { club: clubData.name });
                     }
                 } else {
                     alert('Warning:', json.message);
@@ -183,7 +183,7 @@ class ClubDetail extends Component {
                                 BASE_HOST + itm.cover_image_url;
                         });
                     }
-                    this.setState({eventData});
+                    this.setState({ eventData });
                 }
             })
             .catch(err => {
@@ -215,7 +215,7 @@ class ClubDetail extends Component {
                     );
                 } else if (json.code == '400') {
                     // json.code=="400" 已經關注
-                    this.setState({toastColor: COLOR_DIY.warning});
+                    this.setState({ toastColor: COLOR_DIY.warning });
                     this.toast.show(`您已經關注過了~`, 2000);
                 }
             })
@@ -301,11 +301,11 @@ class ClubDetail extends Component {
 
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
-        const {isFollow, isLogin, showDialog, clubData} = this.state;
+        const { isFollow, isLogin, showDialog, clubData } = this.state;
         let club_num = clubData.club_num;
         // 如果沒有登錄，觸發登錄提示
         if (!isLogin) {
-            this.setState({showDialog: true});
+            this.setState({ showDialog: true });
         } else {
             // 未follow，addFollow
             if (!isFollow) {
@@ -318,7 +318,7 @@ class ClubDetail extends Component {
     };
 
     renderFollowButton = () => {
-        const {isFollow} = this.state;
+        const { isFollow } = this.state;
         return (
             <TouchableOpacity
                 style={{
@@ -327,7 +327,7 @@ class ClubDetail extends Component {
                 }}
                 activeOpacity={0.8}
                 onPress={this.handleFollow}>
-                <Text style={{color: white}}>
+                <Text style={{ ...uiStyle.defaultText, color: white }}>
                     {isFollow ? 'Del Follow' : 'Follow'}
                 </Text>
             </TouchableOpacity>
@@ -336,7 +336,7 @@ class ClubDetail extends Component {
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
-        this.setState({isShow: !this.state.isShow});
+        this.setState({ isShow: !this.state.isShow });
     };
 
     // 下拉刷新組件
@@ -347,7 +347,7 @@ class ClubDetail extends Component {
             refreshing={this.state.isLoading}
             progressViewOffset={scale(150)}
             onRefresh={() => {
-                this.setState({isLoading: true});
+                this.setState({ isLoading: true });
                 this.getData(this.state.clubData.club_num);
             }}
         />
@@ -364,7 +364,7 @@ class ClubDetail extends Component {
 
     render() {
         // 解構state數據
-        const {clubData, isFollow, isAdmin, isLoading, imageUrls, isLogin} =
+        const { clubData, isFollow, isAdmin, isLoading, imageUrls, isLogin } =
             this.state;
         let logo_url,
             name,
@@ -395,7 +395,7 @@ class ClubDetail extends Component {
         renderForeground = () => {
             return (
                 <TouchableOpacity
-                    style={{flex: 1, position: 'relative'}}
+                    style={{ flex: 1, position: 'relative' }}
                     onPress={() => {
                         // 查看背景圖片大圖
                         if (
@@ -406,7 +406,7 @@ class ClubDetail extends Component {
                                 imageUrls: clubData.club_photos_list,
                             });
                         } else {
-                            this.setState({imageUrls: bgImgUrl});
+                            this.setState({ imageUrls: bgImgUrl });
                         }
                         this.refs.imageScrollViewer.handleOpenImage(0);
                     }}
@@ -493,7 +493,7 @@ class ClubDetail extends Component {
                     {/* 社團LOGO */}
                     <TouchableWithoutFeedback
                         onPress={() => {
-                            this.setState({imageUrls: logo_url});
+                            this.setState({ imageUrls: logo_url });
                             this.refs.imageScrollViewer.tiggerModal();
                         }}>
                         <View style={styles.clubLogoContainer}>
@@ -502,7 +502,7 @@ class ClubDetail extends Component {
                                     uri: logo_url,
                                     // cache: FastImage.cacheControl.web,
                                 }}
-                                style={{width: '100%', height: '100%'}}
+                                style={{ width: '100%', height: '100%' }}
                                 resizeMode={FastImage.resizeMode.contain}
                             />
                         </View>
@@ -513,7 +513,7 @@ class ClubDetail extends Component {
 
         // 渲染頁面主要內容
         renderMainContent = () => {
-            const {eventData} = this.state;
+            const { eventData } = this.state;
             // 是否需要展示聯繫信息
             let showContact = false;
             if (contact && contact.length > 0) {
@@ -525,14 +525,15 @@ class ClubDetail extends Component {
                 }
             }
             return (
-                <View style={{backgroundColor: bg_color}}>
+                <View style={{ backgroundColor: bg_color }}>
                     {/* 社團基本資料 */}
-                    <View style={{alignItems: 'center'}}>
+                    <View style={{ alignItems: 'center' }}>
                         {/* 建議使用社團名的簡稱 */}
                         <Text style={styles.clubNameText}>{name}</Text>
                         {/* 社團ID */}
                         {/* <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: black.third,
                                 fontSize: scale(13),
                                 marginVertical: scale(2),
@@ -544,6 +545,7 @@ class ClubDetail extends Component {
                         {/* 社團分類 */}
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: themeColor,
                                 fontSize: scale(15),
                             }}>
@@ -566,19 +568,20 @@ class ClubDetail extends Component {
                                             },
                                         )
                                     }
-                                    style={{flexDirection:'row',alignItems:'center',
-                                        backgroundColor:themeColor, borderRadius:scale(15), padding:scale(10),
-                                        marginVertical:scale(10)
+                                    style={{
+                                        flexDirection: 'row', alignItems: 'center',
+                                        backgroundColor: themeColor, borderRadius: scale(15), padding: scale(10),
+                                        marginVertical: scale(10)
                                     }}>
-                                    <Text style={{color:white, fontSize:scale(20)}}>賬號設置&新增活動 </Text>
+                                    <Text style={{ ...uiStyle.defaultText, color: white, fontSize: scale(20) }}>賬號設置&新增活動 </Text>
                                     <Ionicons
                                         name="settings-outline"
                                         size={scale(25)}
                                         color={white}
                                     />
                                 </TouchableOpacity>
-                                <View style={{alignItems:'center'}}>
-                                    <Text style={{fontSize:scale(12), color:black.main}}>Update組織資料&發佈新資訊請點我！↑</Text>
+                                <View style={{ alignItems: 'center' }}>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.main }}>Update組織資料&發佈新資訊請點我！↑</Text>
                                 </View>
                             </>
                         ) : null}
@@ -589,7 +592,7 @@ class ClubDetail extends Component {
 
                     {/* 照片 */}
                     {clubData.club_photos_list &&
-                    clubData.club_photos_list.length > 1 ? (
+                        clubData.club_photos_list.length > 1 ? (
                         <View style={styles.cardContainer}>
                             {/* 卡片標題 */}
                             {this.renderCardTitle('照片')}
@@ -669,38 +672,27 @@ class ClubDetail extends Component {
                                                     }}>
                                                     {/* 聯繫Type */}
                                                     <View
-                                                        style={{width: '22%'}}>
+                                                        style={{ width: '22%' }}>
                                                         <Text
                                                             style={{
+                                                                ...uiStyle.defaultText,
                                                                 color: black.second,
-                                                                fontSize:
-                                                                    scale(13),
+                                                                fontSize: scale(13),
                                                             }}>
                                                             {item.type + ': '}
                                                         </Text>
                                                     </View>
                                                     {/* 相關號碼、id */}
                                                     <View
-                                                        style={{width: '78%'}}>
+                                                        style={{ width: '78%' }}>
                                                         <HyperlinkText
-                                                            linkStyle={{
-                                                                color: COLOR_DIY.themeColor,
-                                                            }}
-                                                            navigation={
-                                                                this.props
-                                                                    .navigation
-                                                            }>
-                                                            <Text
-                                                                style={{
-                                                                    color: black.third,
-                                                                    fontSize:
-                                                                        scale(
-                                                                            12.5,
-                                                                        ),
-                                                                }}
-                                                                selectable={
-                                                                    true
-                                                                }>
+                                                            linkStyle={{ color: COLOR_DIY.themeColor, }}
+                                                            navigation={this.props.navigation}>
+                                                            <Text style={{
+                                                                ...uiStyle.defaultText,
+                                                                color: black.third,
+                                                                fontSize: scale(12.5),
+                                                            }} selectable={true}>
                                                                 {item.num}
                                                             </Text>
                                                         </HyperlinkText>
@@ -717,7 +709,7 @@ class ClubDetail extends Component {
                                     marginLeft: scale(10),
                                     marginBottom: scale(10),
                                 }}>
-                                <Text style={{color: black.third}}>
+                                <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                                     這個組織還未留下聯繫方式~
                                 </Text>
                             </View>
@@ -740,10 +732,11 @@ class ClubDetail extends Component {
                                 }}>
                                 {/* 服務圖標與文字 */}
                                 <HyperlinkText
-                                    linkStyle={{color: themeColor}}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={this.props.navigation}>
                                     <Text
                                         style={{
+                                            ...uiStyle.defaultText,
                                             color: black.second,
                                             fontSize: scale(13),
                                         }}
@@ -756,7 +749,7 @@ class ClubDetail extends Component {
                     ) : null}
 
                     {isAdmin && eventData != undefined && eventData.length > 0 && (
-                        <Text style={{fontSize:scale(12), color:black.main, alignSelf:'center'}}>Update活動資料請進入具體活動頁內修改！↓</Text>
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.main, alignSelf: 'center' }}>Update活動資料請進入具體活動頁內修改！↓</Text>
                     )}
 
                     {/* 舉辦的活動 */}
@@ -767,7 +760,7 @@ class ClubDetail extends Component {
                                 justifyContent: 'center',
                             }}
                             data={eventData}
-                            renderItem={({item, index}) => {
+                            renderItem={({ item, index }) => {
                                 if (index != 4) {
                                     return <EventCard data={item} />;
                                 }
@@ -785,10 +778,10 @@ class ClubDetail extends Component {
                                             );
                                             this.props.navigation.navigate(
                                                 'AllEvents',
-                                                {clubData},
+                                                { clubData },
                                             );
                                         }}>
-                                        <Text style={{color: white}}>
+                                        <Text style={{ ...uiStyle.defaultText, color: white }}>
                                             查看全部
                                         </Text>
                                     </TouchableOpacity>
@@ -808,27 +801,27 @@ class ClubDetail extends Component {
                         }}
                         activeOpacity={0.8}
                         onPress={() => {
-                            this.setState({reportChoice: true});
+                            this.setState({ reportChoice: true });
                         }}>
                         <EvilIcons
                             name="exclamation"
                             size={scale(20)}
                             color={black.third}
                         />
-                        <Text style={{color: black.third, fontSize: scale(13)}}>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(13) }}>
                             向管理員舉報該組織
                         </Text>
                     </TouchableOpacity>
 
                     <View
-                        style={{height: scale(50), backgroundColor: bg_color}}
+                        style={{ height: scale(50), backgroundColor: bg_color }}
                     />
                 </View>
             );
         };
 
         return (
-            <View style={{flex: 1, backgroundColor: bg_color}}>
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <StatusBar
                     barStyle="light-content"
                     backgroundColor={'transparent'}
@@ -854,7 +847,7 @@ class ClubDetail extends Component {
                                     uri: bgImgUrl,
                                     // cache: FastImage.cacheControl.web,
                                 }}
-                                style={{width: '100%', height: '100%'}}
+                                style={{ width: '100%', height: '100%' }}
                             />
                         )}
                         // 前景固定內容
@@ -862,7 +855,7 @@ class ClubDetail extends Component {
                         showsVerticalScrollIndicator={false}
                         refreshControl={this.renderRefreshCompo()}
                         alwaysBounceHorizontal={false}
-                        // bounces={false}
+                    // bounces={false}
                     >
                         {/* 渲染主要頁面內容 */}
                         {renderMainContent()}
@@ -884,8 +877,8 @@ class ClubDetail extends Component {
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={imageUrls}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 {/* 彈出層提示 */}
@@ -893,19 +886,19 @@ class ClubDetail extends Component {
                     showDialog={this.state.showDialog}
                     text={'登錄後能Follow社團和接收最新消息，現在去登錄嗎？'}
                     handleConfirm={() => {
-                        this.setState({showDialog: false});
+                        this.setState({ showDialog: false });
                         this.props.navigation.navigate('MeTabbar');
                     }}
-                    handleCancel={() => this.setState({showDialog: false})}
+                    handleCancel={() => this.setState({ showDialog: false })}
                 />
                 <DialogDIY
                     showDialog={this.state.reportChoice}
                     text={'請在郵件中說明需舉報組織、舉報的原因。'}
                     handleConfirm={() => {
                         Linking.openURL('mailto:' + MAIL);
-                        this.setState({reportChoice: false});
+                        this.setState({ reportChoice: false });
                     }}
-                    handleCancel={() => this.setState({reportChoice: false})}
+                    handleCancel={() => this.setState({ reportChoice: false })}
                 />
 
                 {/* 展示簡介的Modal */}
@@ -918,22 +911,22 @@ class ClubDetail extends Component {
                             }}>
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     color: black.third,
                                     fontSize: scale(13),
                                 }}>
                                 簡介
                             </Text>
-                            <ScrollView style={{marginTop: scale(5)}}>
+                            <ScrollView style={{ marginTop: scale(5) }}>
                                 <HyperlinkText
-                                    linkStyle={{color: themeColor}}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={this.props.navigation}
                                     beforeJump={this.tiggerModalBottom}>
-                                    <Text
-                                        style={{
-                                            color: black.main,
-                                            fontSize: scale(16),
-                                        }}
-                                        selectable>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.main,
+                                        fontSize: scale(16),
+                                    }} selectable>
                                         {intro}
                                     </Text>
                                 </HyperlinkText>
@@ -947,7 +940,7 @@ class ClubDetail extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: this.state.toastColor,
                         borderRadius: scale(10),
@@ -976,6 +969,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(10),
     },
     cardTitleText: {
+        ...uiStyle.defaultText,
         fontSize: scale(13),
         color: themeColor,
         fontWeight: 'bold',
@@ -1001,6 +995,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: scale(15),
     },
     clubNameText: {
+        ...uiStyle.defaultText,
         color: black.main,
         fontSize: scale(20),
         fontWeight: '500',

@@ -14,7 +14,7 @@ import {
 
 import NewsCard from './components/NewsCard';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import FastImage from 'react-native-fast-image';
@@ -186,7 +186,7 @@ class NewsPage extends Component {
 
         return (
             <View style={{ marginTop: scale(5) }}>
-                <Text style={{ color: black.third, alignSelf: 'center' }}>
+                <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center' }}>
                     Data From: data.um.edu.mo
                 </Text>
                 <View style={styles.topNewsContainer}>
@@ -234,6 +234,7 @@ class NewsPage extends Component {
                                             }}>
                                             <Text
                                                 style={{
+                                                    ...uiStyle.defaultText,
                                                     color: white,
                                                     fontWeight: 'bold',
                                                     fontSize: scale(18),
@@ -243,6 +244,7 @@ class NewsPage extends Component {
                                             </Text>
                                             <Text
                                                 style={{
+                                                    ...uiStyle.defaultText,
                                                     color: white,
                                                     fontWeight: 'bold',
                                                     fontSize: scale(13),
@@ -427,6 +429,7 @@ const styles = StyleSheet.create({
         left: scale(15),
     },
     topNewsText: {
+        ...uiStyle.defaultText,
         color: white,
         fontWeight: 'bold',
         fontSize: scale(20),

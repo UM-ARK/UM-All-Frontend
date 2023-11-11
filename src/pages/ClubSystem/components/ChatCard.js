@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -8,12 +8,12 @@ import {
     ImageBackground,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../utils/uiMap';
-import {pxToDp} from '../../../utils/stylesKits';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { pxToDp } from '../../../utils/stylesKits';
 
-import {NavigationContext} from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 
-const {bg_color, black, white} = COLOR_DIY;
+const { bg_color, black, white } = COLOR_DIY;
 
 class ChatCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -40,7 +40,7 @@ class ChatCard extends Component {
                     }}>
                     <View style={styles.infoContainer}>
                         <Text
-                            style={{fontSize: pxToDp(14), color: black.second}}
+                            style={{ ...uiStyle.defaultText, fontSize: pxToDp(14), color: black.second }}
                             numberOfLines={2}>
                             {eventData.title}
                         </Text>
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         // 些許陰影
         shadowColor: '#000',
-        shadowOffset: {width: 1, height: 1},
+        shadowOffset: { width: 1, height: 1 },
         shadowOpacity: 0.4,
         shadowRadius: 2,
         // 適用於Android

@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, { Component, useState } from 'react';
 import {
     View,
     Text,
@@ -12,8 +12,8 @@ import {
     Linking,
 } from 'react-native';
 
-import {COLOR_DIY, ToastText} from '../../../../utils/uiMap';
-import {BASE_URI, BASE_HOST, GET, POST, MAIL} from '../../../../utils/pathMap';
+import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
+import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import DialogDIY from '../../../../components/DialogDIY';
@@ -29,21 +29,21 @@ import {
     TriggeringView,
 } from 'react-native-image-header-scroll-view';
 import FastImage from 'react-native-fast-image';
-import {inject} from 'mobx-react';
+import { inject } from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import Toast, { DURATION } from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const CLUB_LOGO_SIZE = 80;
 const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
 const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 // 解構uiMap的數據
-const {bg_color, white, black, themeColor} = COLOR_DIY;
+const { bg_color, white, black, themeColor } = COLOR_DIY;
 
 class EventDetail extends Component {
     state = {
@@ -65,10 +65,10 @@ class EventDetail extends Component {
         // 已登錄
         if (globalData.userInfo) {
             if (globalData.userInfo.stdData) {
-                this.setState({isLogin: true});
+                this.setState({ isLogin: true });
             }
             if (globalData.userInfo.isClub) {
-                this.setState({isClub: true});
+                this.setState({ isClub: true });
             }
         }
 
@@ -91,7 +91,7 @@ class EventDetail extends Component {
                 if (json.message == 'success') {
                     let clubData = json.content;
                     clubData.logo_url = BASE_HOST + clubData.logo_url;
-                    this.setState({clubData});
+                    this.setState({ clubData });
                 }
             })
             .catch(err => {
@@ -130,7 +130,7 @@ class EventDetail extends Component {
                         imageUrls: eventData.cover_image_url,
                         relateImgUrl:
                             eventData.relate_image_url &&
-                            eventData.relate_image_url.length > 0
+                                eventData.relate_image_url.length > 0
                                 ? eventData.relate_image_url
                                 : [],
                         location: eventData.location,
@@ -147,16 +147,16 @@ class EventDetail extends Component {
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
-        this.setState({isShowModal: !this.state.isShowModal});
+        this.setState({ isShowModal: !this.state.isShowModal });
     };
 
     // 點擊Follow按鈕響應事件
     handleFollow = () => {
-        const {isFollow, isLogin, showDialog, eventData} = this.state;
+        const { isFollow, isLogin, showDialog, eventData } = this.state;
         let eventID = eventData._id;
         // 如果沒有登錄，觸發登錄提示
         if (!isLogin) {
-            this.setState({showDialog: true});
+            this.setState({ showDialog: true });
         } else {
             // 未follow，addFollow
             if (!isFollow) {
@@ -192,7 +192,7 @@ class EventDetail extends Component {
                     );
                 } else if (json.code == '400') {
                     // json.code=="400" 已經關注
-                    this.setState({toastColor: COLOR_DIY.warning});
+                    this.setState({ toastColor: COLOR_DIY.warning });
                     this.toast.show(`您已經關注過了~`, 2000);
                 }
             })
@@ -230,7 +230,7 @@ class EventDetail extends Component {
     }
 
     renderFollowButton = () => {
-        const {isFollow} = this.state;
+        const { isFollow } = this.state;
         return (
             <TouchableOpacity
                 style={{
@@ -239,7 +239,7 @@ class EventDetail extends Component {
                 }}
                 activeOpacity={0.8}
                 onPress={this.handleFollow}>
-                <Text style={{color: white}}>
+                <Text style={{ ...uiStyle.defaultText, color: white }}>
                     {isFollow ? 'Del Follow' : 'Follow'}
                 </Text>
             </TouchableOpacity>
@@ -258,7 +258,7 @@ class EventDetail extends Component {
     );
 
     onRefresh = () => {
-        this.setState({isLoading: true});
+        this.setState({ isLoading: true });
         this.getEventData(this.state.eventData._id);
     };
 
@@ -296,9 +296,10 @@ class EventDetail extends Component {
                         ...COLOR_DIY.viewShadow,
                     }}>
                     {/* 活動名 */}
-                    <View style={{marginBottom: scale(15)}}>
+                    <View style={{ marginBottom: scale(15) }}>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: black.main,
                                 fontWeight: 'bold',
                                 fontSize: scale(15),
@@ -308,21 +309,22 @@ class EventDetail extends Component {
                     </View>
 
                     {/* 活動地點 */}
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <View style={{width: scale(25)}}>
-                            <View style={{...styles.infoShowContainer}}>
-                                <Text
-                                    style={{
-                                        fontSize: scale(11),
-                                        color: COLOR_DIY.themeColor,
-                                    }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ width: scale(25) }}>
+                            <View style={{ ...styles.infoShowContainer }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(11),
+                                    color: COLOR_DIY.themeColor,
+                                }}>
                                     @
                                 </Text>
                             </View>
                         </View>
-                        <View style={{marginLeft: scale(5), width: '90%'}}>
+                        <View style={{ marginLeft: scale(5), width: '90%' }}>
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     color: COLOR_DIY.black.third,
                                 }}>
                                 {location}
@@ -331,22 +333,22 @@ class EventDetail extends Component {
                     </View>
 
                     {/* 活動時間 */}
-                    <View style={{marginTop: scale(5)}}>
-                        <View style={{flexDirection: 'row'}}>
-                            <View style={{...styles.infoShowContainer}}>
-                                <Text
-                                    style={{
-                                        fontSize: scale(11),
-                                        color: COLOR_DIY.themeColor,
-                                    }}>
+                    <View style={{ marginTop: scale(5) }}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View style={{ ...styles.infoShowContainer }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(11),
+                                    color: COLOR_DIY.themeColor,
+                                }}>
                                     from
                                 </Text>
                             </View>
-                            <Text
-                                style={{
-                                    marginHorizontal: scale(5),
-                                    color: COLOR_DIY.black.third,
-                                }}>
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                marginHorizontal: scale(5),
+                                color: COLOR_DIY.black.third,
+                            }}>
                                 {moment(startTimeStamp).format(
                                     'YYYY/MM/DD, HH:mm',
                                 )}
@@ -357,20 +359,20 @@ class EventDetail extends Component {
                                 flexDirection: 'row',
                                 marginTop: scale(5),
                             }}>
-                            <View style={{...styles.infoShowContainer}}>
-                                <Text
-                                    style={{
-                                        fontSize: scale(11),
-                                        color: COLOR_DIY.themeColor,
-                                    }}>
+                            <View style={{ ...styles.infoShowContainer }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(11),
+                                    color: COLOR_DIY.themeColor,
+                                }}>
                                     to
                                 </Text>
                             </View>
-                            <Text
-                                style={{
-                                    marginLeft: scale(5),
-                                    color: COLOR_DIY.black.third,
-                                }}>
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                marginLeft: scale(5),
+                                color: COLOR_DIY.black.third,
+                            }}>
                                 {moment(finishTimeStamp).format(
                                     'YYYY/MM/DD, HH:mm',
                                 )}
@@ -380,9 +382,9 @@ class EventDetail extends Component {
 
                     {/* Follow按鈕 帶Toast */}
                     {eventData != undefined &&
-                    eventData.can_follow &&
-                    !isClub &&
-                    false
+                        eventData.can_follow &&
+                        !isClub &&
+                        false
                         ? this.renderFollowButton()
                         : null}
                 </View>
@@ -393,9 +395,9 @@ class EventDetail extends Component {
         renderForeground = () => {
             return (
                 <TouchableOpacity
-                    style={{flex: 1, position: 'relative'}}
+                    style={{ flex: 1, position: 'relative' }}
                     onPress={() => {
-                        this.setState({imageUrls: coverImgUrl});
+                        this.setState({ imageUrls: coverImgUrl });
                         this.refs.imageScrollViewer.handleOpenImage(0);
                     }}
                     activeOpacity={1}>
@@ -502,9 +504,9 @@ class EventDetail extends Component {
 
         // 渲染頁面主要內容
         renderMainContent = () => {
-            const {relateImgUrl, clubData, eventData} = this.state;
+            const { relateImgUrl, clubData, eventData } = this.state;
             return (
-                <View style={{backgroundColor: bg_color, flex: 1}}>
+                <View style={{ backgroundColor: bg_color, flex: 1 }}>
                     {/* 舉辦方頭像 */}
                     <TouchableWithoutFeedback
                         onPress={() => {
@@ -525,21 +527,21 @@ class EventDetail extends Component {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}>
-                                <View style={{...styles.infoShowContainer}}>
-                                    <Text
-                                        style={{
-                                            fontSize: scale(11),
-                                            color: COLOR_DIY.themeColor,
-                                        }}>
+                                <View style={{ ...styles.infoShowContainer }}>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(11),
+                                        color: COLOR_DIY.themeColor,
+                                    }}>
                                         Created By
                                     </Text>
                                 </View>
-                                <Text
-                                    style={{
-                                        alignSelf: 'center',
-                                        marginTop: scale(5),
-                                        color: black.third,
-                                    }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    alignSelf: 'center',
+                                    marginTop: scale(5),
+                                    color: black.third,
+                                }}>
                                     {clubData == undefined ? '' : clubData.name}
                                 </Text>
                             </View>
@@ -553,7 +555,7 @@ class EventDetail extends Component {
                                                 : clubData.logo_url,
                                         // cache: FastImage.cacheControl.web,
                                     }}
-                                    style={{width: '100%', height: '100%'}}
+                                    style={{ width: '100%', height: '100%' }}
                                     resizeMode={FastImage.resizeMode.contain}
                                 />
                             </View>
@@ -561,7 +563,7 @@ class EventDetail extends Component {
                     </TouchableWithoutFeedback>
 
                     {/* 設置按鈕 */}
-                    { isClub ? (
+                    {isClub ? (
                         <>
                             <TouchableOpacity
                                 activeOpacity={0.7}
@@ -578,17 +580,18 @@ class EventDetail extends Component {
                                     // 跳轉活動info編輯頁，並傳遞刷新函數
                                     this.props.navigation.navigate(
                                         'EventSetting', {
-                                            mode: 'edit',
-                                            eventData: {_id: eventData._id},
-                                            refresh: this.onRefresh.bind(this)
-                                        },
+                                        mode: 'edit',
+                                        eventData: { _id: eventData._id },
+                                        refresh: this.onRefresh.bind(this)
+                                    },
                                     );
                                 }}
-                                style={{flexDirection:'row',alignItems:'center', justifyContent:'center',
-                                    backgroundColor:themeColor, borderRadius:scale(15), padding:scale(10), width:'auto',
-                                    margin:scale(70), marginVertical:scale(5)
+                                style={{
+                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                                    backgroundColor: themeColor, borderRadius: scale(15), padding: scale(10), width: 'auto',
+                                    margin: scale(70), marginVertical: scale(5)
                                 }}>
-                                <Text style={{color:white, fontSize:scale(20)}}>活動設置 </Text>
+                                <Text style={{ ...uiStyle.defaultText, color: white, fontSize: scale(20) }}>活動設置 </Text>
                                 <Ionicons
                                     name="settings-outline"
                                     size={scale(25)}
@@ -596,10 +599,10 @@ class EventDetail extends Component {
                                 />
                             </TouchableOpacity>
                             <View>
-                                <Text style={{fontSize:scale(12),color:black.main,alignSelf:'center'}}>Update活動資訊請點我！↑</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.main, alignSelf: 'center' }}>Update活動資訊請點我！↑</Text>
                             </View>
                         </>
-                    ) : null }
+                    ) : null}
 
                     {/* 詳情介紹 */}
                     {eventData != undefined &&
@@ -624,12 +627,12 @@ class EventDetail extends Component {
                                         paddingHorizontal: scale(10),
                                     }}
                                     activeOpacity={0.6}>
-                                    <Text
-                                        style={{
-                                            fontSize: scale(12),
-                                            color: themeColor,
-                                            fontWeight: 'bold',
-                                        }}>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(12),
+                                        color: themeColor,
+                                        fontWeight: 'bold',
+                                    }}>
                                         詳情
                                     </Text>
                                 </View>
@@ -644,11 +647,9 @@ class EventDetail extends Component {
                                     }}>
                                     {/* 文字 */}
                                     <HyperlinkText
-                                        linkStyle={{color: themeColor}}
+                                        linkStyle={{ color: themeColor }}
                                         navigation={this.props.navigation}>
-                                        <Text
-                                            style={{color: black.second}}
-                                            selectable>
+                                        <Text style={{ ...uiStyle.defaultText, color: black.second }} selectable>
                                             {eventData.introduction}
                                         </Text>
                                     </HyperlinkText>
@@ -670,7 +671,7 @@ class EventDetail extends Component {
                             }}
                             activeOpacity={0.7}
                             onPress={() => {
-                                this.setState({imageUrls: relateImgUrl});
+                                this.setState({ imageUrls: relateImgUrl });
                                 this.refs.imageScrollViewer.tiggerModal();
                             }}>
                             {/* 卡片標題 */}
@@ -683,12 +684,12 @@ class EventDetail extends Component {
                                     paddingHorizontal: scale(10),
                                 }}
                                 activeOpacity={0.6}>
-                                <Text
-                                    style={{
-                                        fontSize: scale(12),
-                                        color: themeColor,
-                                        fontWeight: 'bold',
-                                    }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(12),
+                                    color: themeColor,
+                                    fontWeight: 'bold',
+                                }}>
                                     相關照片
                                 </Text>
                             </View>
@@ -750,14 +751,14 @@ class EventDetail extends Component {
                         }}
                         activeOpacity={0.8}
                         onPress={() => {
-                            this.setState({reportChoice: true});
+                            this.setState({ reportChoice: true });
                         }}>
                         <EvilIcons
                             name="exclamation"
                             size={scale(20)}
                             color={black.third}
                         />
-                        <Text style={{color: black.third, fontSize: scale(13)}}>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(13) }}>
                             向管理員舉報該活動
                         </Text>
                     </TouchableOpacity>
@@ -766,10 +767,10 @@ class EventDetail extends Component {
         };
 
         return (
-            <View style={{flex: 1}}>
-                {isLoading?(
+            <View style={{ flex: 1 }}>
+                {isLoading ? (
                     <Header title={'Loading...'} />
-                ):(
+                ) : (
                     <StatusBar
                         barStyle="light-content"
                         backgroundColor={'transparent'}
@@ -785,23 +786,23 @@ class EventDetail extends Component {
                                 padding: scale(20),
                                 height: PAGE_HEIGHT * 0.7,
                             }}>
-                            <Text
-                                style={{
-                                    color: black.third,
-                                    fontSize: scale(13),
-                                }}>
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                color: black.third,
+                                fontSize: scale(13),
+                            }}>
                                 詳情
                             </Text>
-                            <ScrollView style={{marginTop: scale(5)}}>
+                            <ScrollView style={{ marginTop: scale(5) }}>
                                 <HyperlinkText
-                                    linkStyle={{color: themeColor}}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={this.props.navigation}
                                     beforeJump={this.tiggerModalBottom}>
-                                    <Text
-                                        style={{
-                                            color: black.main,
-                                            fontSize: scale(16),
-                                        }}
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.main,
+                                        fontSize: scale(16),
+                                    }}
                                         selectable>
                                         {introduction}
                                     </Text>
@@ -815,8 +816,8 @@ class EventDetail extends Component {
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={imageUrls}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 {/* Dialog提示登錄 */}
@@ -824,19 +825,19 @@ class EventDetail extends Component {
                     showDialog={this.state.showDialog}
                     text={'登錄後能Follow活動和接收最新消息，現在去登錄嗎？'}
                     handleConfirm={() => {
-                        this.setState({showDialog: false});
+                        this.setState({ showDialog: false });
                         this.props.navigation.navigate('MeTabbar');
                     }}
-                    handleCancel={() => this.setState({showDialog: false})}
+                    handleCancel={() => this.setState({ showDialog: false })}
                 />
                 <DialogDIY
                     showDialog={this.state.reportChoice}
                     text={'請在郵件中說明需舉報活動的標題，和舉報的原因。'}
                     handleConfirm={() => {
                         Linking.openURL('mailto:' + MAIL);
-                        this.setState({reportChoice: false});
+                        this.setState({ reportChoice: false });
                     }}
-                    handleCancel={() => this.setState({reportChoice: false})}
+                    handleCancel={() => this.setState({ reportChoice: false })}
                 />
 
                 {/* Tost */}
@@ -844,7 +845,7 @@ class EventDetail extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: this.state.toastColor,
                         borderRadius: scale(10),
@@ -870,7 +871,7 @@ class EventDetail extends Component {
                                     uri: coverImgUrl.replace('http:', 'https:'),
                                     // cache: FastImage.cacheControl.web,
                                 }}
-                                style={{width: '100%', height: '100%'}}
+                                style={{ width: '100%', height: '100%' }}
                             />
                         )}
                         // 前景固定內容
@@ -878,7 +879,7 @@ class EventDetail extends Component {
                         showsVerticalScrollIndicator={false}
                         refreshControl={this.renderRefreshCompo()}
                         alwaysBounceHorizontal={false}
-                        // bounces={false}
+                    // bounces={false}
                     >
                         {/* 主要頁面內容 */}
                         {renderMainContent()}

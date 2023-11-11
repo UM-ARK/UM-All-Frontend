@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 // 引入本地工具
-import { COLOR_DIY } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
@@ -203,9 +203,9 @@ class BusScreen extends Component {
                     borderRadius: scale(20),
                     borderWidth: scale(2),
                 }}>
-                <Text style={{ color: borderColor, fontSize: scale(11), fontWeight: 'bold' }}>
+                <Text style={{ ...uiStyle.defaultText, color: borderColor, fontSize: scale(11), fontWeight: 'bold' }}>
                     {buildingCode}
-                    <Text style={{ fontWeight: 'normal' }}>{' ' + text}</Text>
+                    <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
                 </Text>
             </TouchableOpacity>
         );
@@ -280,7 +280,7 @@ class BusScreen extends Component {
                                     marginTop: scale(10),
                                 }}>
                                 <Text
-                                    style={{ fontSize: scale(12), color: black.third }}>
+                                    style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>
                                     Data From: cmdo.um.edu.mo
                                 </Text>
                             </View>
@@ -304,7 +304,7 @@ class BusScreen extends Component {
                                     this.props.navigation.navigate('Webviewer', webview_param);
                                 }}
                             >
-                                <Text style={{ fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>校園地圖</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>校園地圖</Text>
                             </TouchableOpacity>
                             {/* Bus運行信息的渲染 */}
                             <View
@@ -318,6 +318,7 @@ class BusScreen extends Component {
                                     ? this.state.busInfoArr.map(item => (
                                         <Text
                                             style={{
+                                                ...uiStyle.defaultText,
                                                 color: black.third,
                                                 fontSize: scale(10),
                                             }}>

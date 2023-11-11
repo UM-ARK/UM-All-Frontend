@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
-import {Text, View, TouchableOpacity} from 'react-native';
+import React, { Component } from 'react';
+import { Text, View, TouchableOpacity } from 'react-native';
 
-import {COLOR_DIY} from '../utils/uiMap';
-import {pxToDp} from '../utils/stylesKits';
+import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { pxToDp } from '../utils/stylesKits';
 
-import {Dialog} from '@rneui/themed';
+import { Dialog } from '@rneui/themed';
 
 class DialogDIY extends Component {
     state = {};
@@ -15,9 +15,9 @@ class DialogDIY extends Component {
                 onBackdropPress={this.props.handleCancel}>
                 <Dialog.Title
                     title="ARK ALL 提示"
-                    titleStyle={{color: COLOR_DIY.black.main}}
+                    titleStyle={{ color: COLOR_DIY.black.main }}
                 />
-                <Text style={{color: COLOR_DIY.black.second}}>
+                <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.black.second }}>
                     {this.props.text}
                 </Text>
                 <Dialog.Actions>

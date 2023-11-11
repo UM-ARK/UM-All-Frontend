@@ -8,7 +8,7 @@ import {
     Linking,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import {
     UM_MAP,
     UM_RBS,
@@ -637,6 +637,7 @@ class Index extends Component {
                     }}>
                     <Text
                         style={{
+                            ...uiStyle.defaultText,
                             fontSize: scale(12),
                             color: COLOR_DIY.black.main,
                             fontWeight: 'bold',
@@ -727,6 +728,7 @@ class Index extends Component {
                                 {icon}
                                 <Text
                                     style={{
+                                        ...uiStyle.defaultText,
                                         fontSize: scale(10),
                                         color: COLOR_DIY.black.second,
                                     }}>
@@ -773,7 +775,7 @@ class Index extends Component {
                         />
                         {/* 標題 */}
                         <View style={{ marginLeft: scale(5), }}>
-                            <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>服務一覽</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>服務一覽</Text>
                         </View>
                     </View>
 
@@ -784,6 +786,7 @@ class Index extends Component {
                     <View style={{ marginHorizontal: scale(20), marginVertical: scale(10) }}>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 alignSelf: 'center',
                                 color: COLOR_DIY.black.third,
                             }}>
@@ -791,6 +794,7 @@ class Index extends Component {
                         </Text>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 alignSelf: 'center',
                                 color: COLOR_DIY.black.third,
                             }}>

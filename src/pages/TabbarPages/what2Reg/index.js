@@ -13,7 +13,7 @@ import {
 } from "react-native";
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE } from "../../../utils/pathMap";
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
 import coursePlan from '../../../static/UMCourses/coursePlan';
@@ -316,6 +316,7 @@ export default class index extends Component {
                 filterCourseList = offerCourseByDepa[filterOptions.depaName];
             } else {
                 if (facultyName in offerCourseByFaculty) {
+                    // 學院下無具體學係分類的情況
                     filterCourseList = offerCourseByFaculty[facultyName];
                 } else {
                     filterCourseList = offerCourseByFaculty[offerFacultyList[0]];
@@ -346,12 +347,7 @@ export default class index extends Component {
 
     // Add Drop / Pre Enroll 模式選擇
     renderADPESwitch = () => {
-        const {
-            filterOptions,
-            offerFacultyDepaListObj,
-            offerCourseByDepa,
-            offerCourseByGE,
-            offerCourseByFaculty, } = this.state;
+        const { filterOptions, } = this.state;
         const modeList = Object.keys(adpeMap);
         const modeENStr = {
             'ad': 'Add Drop',
@@ -364,9 +360,6 @@ export default class index extends Component {
                 key={modeList.length}
                 keyExtractor={(item, index) => index}
                 numColumns={modeList.length}
-                columnWrapperStyle={modeList.length > 1 ? {
-                    flexWrap: 'wrap', justifyContent: 'center'
-                } : null}
                 contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
                     <TouchableOpacity
@@ -389,6 +382,7 @@ export default class index extends Component {
                         }}
                     >
                         <Text style={{
+                            ...uiStyle.defaultText,
                             color: filterOptions.mode === itm ? white : black.third,
                             fontWeight: filterOptions.mode === itm ? '900' : 'normal',
                             fontSize: scale(12),
@@ -426,9 +420,6 @@ export default class index extends Component {
                 key={CMGEList.length}
                 keyExtractor={(item, index) => index}
                 numColumns={CMGEList.length}
-                columnWrapperStyle={CMGEList.length > 1 ? {
-                    flexWrap: 'wrap', justifyContent: 'center'
-                } : null}
                 contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
                     <TouchableOpacity
@@ -465,6 +456,7 @@ export default class index extends Component {
                         }}
                     >
                         <Text style={{
+                            ...uiStyle.defaultText,
                             color: filterOptions.option === itm ? white : black.third,
                             fontWeight: filterOptions.option === itm ? '900' : 'normal',
                             fontSize: scale(12),
@@ -527,6 +519,7 @@ export default class index extends Component {
                         }}
                     >
                         <Text style={{
+                            ...uiStyle.defaultText,
                             color: itm === filterOptions.facultyName ? white : black.third,
                             fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                             fontSize: scale(12)
@@ -538,15 +531,6 @@ export default class index extends Component {
                     <Text style={{ ...s.classItmTitleText }}>
                         {unitMap[filterOptions.facultyName]}
                     </Text>
-                }
-                // 學系分類選擇，例如 ECE、EME
-                ListFooterComponent={() => {
-                    let offerDepaList = [];
-                    if (filterOptions.facultyName in offerFacultyDepaListObj) {
-                        offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
-                    }
-                    return offerDepaList.length > 0 && this.renderDepaSwitch(offerDepaList)
-                }
                 }
             />
         )
@@ -563,12 +547,10 @@ export default class index extends Component {
             data={offerDepaList}
             key={offerDepaList.length}
             keyExtractor={(item, index) => index}
-            numColumns={offerDepaList.length}
-            columnWrapperStyle={
-                offerDepaList.length > 1 ? {
-                    flexWrap: 'wrap', justifyContent: 'center'
-                } : null
-            }
+            horizontal
+            scrollEnabled
+            // BUG: columnWrapperStyle會引發部分機型無法顯示最後一個元素，原因未知
+            // BUG: 機型有:三星S22,iPhone 14 Pro Max等
             style={{ marginTop: scale(5) }}
             contentContainerStyle={{ alignItems: 'center' }}
             renderItem={({ item: itm }) => (
@@ -588,6 +570,7 @@ export default class index extends Component {
                     }}
                 >
                     <Text style={{
+                        ...uiStyle.defaultText,
                         alignSelf: 'center',
                         color: filterOptions.depaName === itm ? white : black.third,
                         fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
@@ -595,13 +578,6 @@ export default class index extends Component {
                     }}>{itm}</Text>
                 </TouchableOpacity>
             )}
-            // 展示學系中文名稱
-            ListHeaderComponent={() =>
-                filterOptions.depaName in depaMap ?
-                    <Text style={{ ...s.classItmTitleText }}>
-                        {depaMap[filterOptions.depaName]}
-                    </Text> : null
-            }
         />
     }
 
@@ -613,6 +589,11 @@ export default class index extends Component {
             offerFacultyDepaListObj,
             offerCourseByGE,
         } = this.state;
+
+        let offerDepaList = [];
+        if (filterOptions.option != 'GE' && offerFacultyDepaListObj && filterOptions.facultyName in offerFacultyDepaListObj) {
+            offerDepaList = offerFacultyDepaListObj[filterOptions.facultyName];
+        }
 
         return (
             <View
@@ -656,6 +637,7 @@ export default class index extends Component {
                                         }}
                                     >
                                         <Text style={{
+                                            ...uiStyle.defaultText,
                                             color: filterOptions.GE === itm ? white : black.third,
                                             fontWeight: filterOptions.GE === itm ? '900' : 'normal',
                                             fontSize: scale(12)
@@ -666,11 +648,17 @@ export default class index extends Component {
                         </View>
                     </View>
                 ) : (
-                    <View style={{
-                        marginTop: scale(5),
-                        width: '100%',
-                    }} >
+                    <View style={{ marginTop: scale(5), width: '100%' }}>
                         {offerFacultyDepaListObj ? this.renderFacultySwitch() : null}
+                        {offerDepaList.length > 0 ? <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                            {/* 展示學系中文名稱 */}
+                            {filterOptions.depaName in depaMap ?
+                                <Text style={{ ...s.classItmTitleText, marginBottom: scale(-5) }}>
+                                    {depaMap[filterOptions.depaName]}
+                                </Text> : null}
+                            {/* 渲染學系選項 */}
+                            {this.renderDepaSwitch(offerFacultyDepaListObj[filterOptions.facultyName])}
+                        </View> : null}
                     </View>
                 )}
             </View>
@@ -734,6 +722,7 @@ export default class index extends Component {
                     />
                     <TextInput
                         style={{
+                            ...uiStyle.defaultText,
                             paddingVertical: scale(3),
                             color: black.main,
                             fontSize: scale(12),
@@ -787,7 +776,7 @@ export default class index extends Component {
                         this.jumpToWebRelateCoursePage({ inputText, type: 'course' })
                     }}
                 >
-                    <Text style={{ fontSize: scale(12), color: white }}>查課</Text>
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>查課</Text>
                 </TouchableOpacity>
                 {/* 教授搜索按鈕 */}
                 <TouchableOpacity
@@ -804,7 +793,7 @@ export default class index extends Component {
                         this.jumpToWebRelateCoursePage({ inputText, type: 'prof' })
                     }}
                 >
-                    <Text style={{ fontSize: scale(12), color: white }}>搵講師</Text>
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>搵講師</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
         )
@@ -818,7 +807,7 @@ export default class index extends Component {
     // 模糊搜索跳轉到網頁版選咩課
     jumpToWebRelateCoursePage = (searchData) => {
         const { inputText, type } = searchData;
-        const URI = `${WHAT_2_REG}/search.html?keyword=${encodeURIComponent(inputText)}&instructor=${type == 'prof' ? true : false}`
+        const URI = `${WHAT_2_REG}/search/` + (type == 'prof' ? 'instructor' : 'course') + `/${encodeURIComponent(inputText)}`;
         logToFirebase('checkCourse', { searchText: inputText });
 
         // Linking.openURL(URI)
@@ -862,7 +851,7 @@ export default class index extends Component {
                             });
                         }}
                     >
-                        <Text style={{ fontSize: scale(15), color: themeColor }}>{itm}</Text>
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(15), color: themeColor }}>{itm}</Text>
                     </TouchableOpacity>
                 })}
             </View>
@@ -935,7 +924,7 @@ export default class index extends Component {
                             />
                             {/* 標題 */}
                             <View style={{ marginLeft: scale(5) }}>
-                                <Text style={{ fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
                             </View>
                         </View>
 
@@ -947,7 +936,7 @@ export default class index extends Component {
                         {searchFilterCourse && searchFilterCourse.length > 0 ? (
                             <>
                                 <View style={{ alignSelf: 'center' }}>
-                                    <Text style={{ fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                                 </View>
                                 <CourseCard data={searchFilterCourse} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
                                     handleSetLetterData={this.handleSetLetterData}
@@ -958,6 +947,7 @@ export default class index extends Component {
                             {this.renderFilterView()}
 
                             <Text style={{
+                                ...uiStyle.defaultText,
                                 alignSelf: 'center',
                                 fontSize: scale(10),
                                 color: black.third,
@@ -966,7 +956,7 @@ export default class index extends Component {
                             </Text>
 
                             {/* 渲染篩選出的課程 */}
-                            {filterCourseList.length > 0 ? (
+                            {filterCourseList && filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
                                     <CourseCard data={filterCourseList} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
                                         handleSetLetterData={this.handleSetLetterData}
@@ -977,14 +967,17 @@ export default class index extends Component {
 
                         {/* 篩選課程功能 更新時間 */}
                         <View style={{ marginTop: scale(10), alignItems: 'center' }}>
-                            <Text style={{ fontSize: scale(10), color: black.third }}>
-                                {offerCourses.academicYear}學年, Sem {offerCourses.sem} 可供預選/開設課程
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
+                                可供預選/開設課程
                             </Text>
-                            <Text style={{ fontSize: scale(9), color: black.third }}>
-                                更新日期: {offerCourses.updateTime}
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
+                                數據更新日期: {offerCourses.updateTime}
                             </Text>
-                            <Text style={{ fontSize: scale(9), color: themeColor }}>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
+                            </Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }} selectable>
+                                遇到BUG可聯繫umacark@gmail.com
                             </Text>
                         </View>
 
@@ -993,7 +986,7 @@ export default class index extends Component {
                             padding: scale(10),
                             alignItems: 'center'
                         }}>
-                            <Text style={{ color: black.third, fontSize: scale(12) }}>知識無價，評論只供參考~</Text>
+                            <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>知識無價，評論只供參考~</Text>
                         </View>
 
                         <TouchableOpacity style={{
@@ -1011,7 +1004,7 @@ export default class index extends Component {
                                 );
                             }}
                         >
-                            <Text style={{ color: themeColor, fontSize: scale(10) }}>ARK ALL 隱私政策 & 用戶協議</Text>
+                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>ARK ALL 隱私政策 & 用戶協議</Text>
                         </TouchableOpacity>
                     </ScrollView>
 
@@ -1019,7 +1012,8 @@ export default class index extends Component {
                     {searchFilterCourse && searchFilterCourse.length > 0 ? (
                         this.renderFirstLetterNav(searchFilterCourse)
                     ) : (
-                        this.renderFirstLetterNav(filterCourseList)
+                        filterCourseList && filterCourseList.length > 0 ?
+                            this.renderFirstLetterNav(filterCourseList) : null
                     )}
                 </>)}
             </View>
@@ -1034,6 +1028,7 @@ const s = StyleSheet.create({
         marginHorizontal: scale(2),
     },
     classItmTitleText: {
+        ...uiStyle.defaultText,
         fontSize: scale(13),
         color: themeColor,
         fontWeight: '600',

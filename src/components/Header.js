@@ -4,7 +4,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-import { COLOR_DIY } from '../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import { scale } from 'react-native-size-matters';
 
 // 第三方庫
@@ -37,6 +37,7 @@ class HeaderDIY extends Component {
                 centerComponent={{
                     text: this.props.title,
                     style: {
+                        ...uiStyle.defaultText,
                         color: COLOR_DIY.black.main,
                         fontSize: scale(15),
                     },

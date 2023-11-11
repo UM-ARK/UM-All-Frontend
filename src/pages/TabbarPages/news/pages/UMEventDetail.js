@@ -10,7 +10,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
@@ -250,6 +250,7 @@ class UMEventDetail extends Component {
                                 }>
                                 <Text
                                     style={{
+                                        ...uiStyle.defaultText,
                                         color:
                                             chooseMode == index
                                                 ? bg_color
@@ -467,6 +468,7 @@ class UMEventDetail extends Component {
                         }}>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: COLOR_DIY.themeColor,
                                 fontWeight: 'bold',
                                 fontSize: scale(20),
@@ -522,6 +524,7 @@ class UMEventDetail extends Component {
                             moment(dateTo).format('MM-DD') ? (
                             <Text
                                 style={{
+                                    ...uiStyle.defaultText,
                                     fontSize: scale(18),
                                     fontWeight: '700',
                                     color: '#FF8627',
@@ -533,6 +536,7 @@ class UMEventDetail extends Component {
                             <View>
                                 <Text
                                     style={{
+                                        ...uiStyle.defaultText,
                                         fontSize: scale(18),
                                         fontWeight: '700',
                                         color: '#FF8627',
@@ -546,6 +550,7 @@ class UMEventDetail extends Component {
                         {/* 時間 */}
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 fontSize: scale(18),
                                 fontWeight: '700',
                                 color: '#FF8627',
@@ -681,6 +686,7 @@ class UMEventDetail extends Component {
                         }}>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 fontSize: 18,
                                 fontWeight: '700',
                                 color: '#FF8627',
@@ -767,11 +773,13 @@ const styles = StyleSheet.create({
         marginVertical: scale(2),
     },
     secondTitle: {
+        ...uiStyle.defaultText,
         color: COLOR_DIY.themeColor,
         fontSize: scale(15),
         fontWeight: '600',
     },
     content: {
+        ...uiStyle.defaultText,
         color: black.third,
         fontSize: scale(15),
         fontWeight: 'normal',

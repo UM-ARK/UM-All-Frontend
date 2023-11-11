@@ -1,5 +1,5 @@
 // 社團登錄頁
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -12,18 +12,18 @@ import {
 } from 'react-native';
 
 // 本地工具
-import {COLOR_DIY, ToastText} from '../../../../../utils/uiMap';
+import { COLOR_DIY, ToastText, uiStyle, } from '../../../../../utils/uiMap';
 import Header from '../../../../../components/Header';
-import {ToastDIY} from '../../../../../components/ToastDIY';
-import {handleLogin} from '../../../../../utils/storageKits';
+import { ToastDIY } from '../../../../../components/ToastDIY';
+import { handleLogin } from '../../../../../utils/storageKits';
 import ModalBottom from '../../../../../components/ModalBottom';
-import {BASE_URI, GET, USUAL_Q} from '../../../../../utils/pathMap';
+import { BASE_URI, GET, USUAL_Q } from '../../../../../utils/pathMap';
 
-import {NavigationContext} from '@react-navigation/native';
-import {Input, Box, Center, Stack, Icon} from 'native-base';
+import { NavigationContext } from '@react-navigation/native';
+import { Input, Box, Center, Stack, Icon } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useToast} from 'native-base';
+import { useToast } from 'native-base';
 import axios from 'axios';
 import qs from 'qs';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
@@ -90,7 +90,7 @@ const NBTextInput = () => {
 // 渲染登錄按鈕，帶Toast提示
 function RenderLoginButton(props) {
     const toast = useToast();
-    const {unread, white, black, success} = COLOR_DIY;
+    const { unread, white, black, success } = COLOR_DIY;
 
     handleLoginPress = () => {
         ReactNativeHapticFeedback.trigger('soft');
@@ -184,6 +184,7 @@ function RenderLoginButton(props) {
             onPress={handleLoginPress}>
             <Text
                 style={{
+                    ...uiStyle.defaultText,
                     fontSize: scale(20),
                     alignSelf: 'center',
                     color: 'white',
@@ -209,12 +210,13 @@ class ClubLogin extends Component {
     renderContactHelp = () => {
         return (
             <ModalBottom
-                cancel={() => this.setState({isModalBottomVisible: false})}
-                style={{height: '60%'}}>
+                cancel={() => this.setState({ isModalBottomVisible: false })}
+                style={{ height: '60%' }}>
                 <ScrollView>
-                    <View style={{padding: scale(20)}}>
+                    <View style={{ padding: scale(20) }}>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: COLOR_DIY.black.third,
                                 fontSize: scale(13),
                             }}>
@@ -223,6 +225,7 @@ class ClubLogin extends Component {
                         {/* TODO: 跳轉聯繫我們網頁 */}
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: COLOR_DIY.black.second,
                                 fontSize: scale(15),
                             }}>
@@ -236,7 +239,7 @@ class ClubLogin extends Component {
 
     render() {
         return (
-            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header title={'社團 | 組織 | 登錄'} />
 
                 {/* 聯繫我們彈出框 */}
@@ -248,11 +251,11 @@ class ClubLogin extends Component {
                         size={scale(120)}
                         ml="2"
                         color="muted.400"
-                        style={{alignSelf: 'center'}}
+                        style={{ alignSelf: 'center' }}
                     />
 
                     {/* 賬號密碼輸入框 */}
-                    <View style={{marginTop: scale(20)}}>
+                    <View style={{ marginTop: scale(20) }}>
                         <NBTextInput />
                     </View>
 

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Image,
@@ -11,7 +11,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import Header from '../../../../components/Header';
@@ -19,7 +19,7 @@ import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import {FlatGrid} from 'react-native-super-grid';
+import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
@@ -36,10 +36,10 @@ function repalceHtmlToText(str) {
     return str;
 }
 
-const {height: PAGE_HEIGHT} = Dimensions.get('window');
-const {width: PAGE_WIDTH} = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('window');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
 let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
-const {white, black, viewShadow, bg_color, themeColor} = COLOR_DIY;
+const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 class NewsDetail extends Component {
     constructor(props) {
@@ -135,7 +135,7 @@ class NewsDetail extends Component {
 
     // 文本語言模式選擇
     renderModeChoice = () => {
-        const {LanguageMode, chooseMode, data} = this.state;
+        const { LanguageMode, chooseMode, data } = this.state;
         return (
             <View
                 style={{
@@ -156,15 +156,15 @@ class NewsDetail extends Component {
                                             : bg_color,
                                 }}
                                 onPress={() =>
-                                    this.setState({chooseMode: index})
+                                    this.setState({ chooseMode: index })
                                 }>
-                                <Text
-                                    style={{
-                                        color:
-                                            chooseMode == index
-                                                ? bg_color
-                                                : themeColor,
-                                    }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color:
+                                        chooseMode == index
+                                            ? bg_color
+                                            : themeColor,
+                                }}>
                                     {item.name}
                                 </Text>
                             </TouchableOpacity>
@@ -192,7 +192,7 @@ class NewsDetail extends Component {
 
     render() {
         // 解構全局ui設計顏色
-        const {LanguageMode, chooseMode, data} = this.state;
+        const { LanguageMode, chooseMode, data } = this.state;
         // 結構this.state的新聞數據
         const {
             // 發佈日期
@@ -231,7 +231,7 @@ class NewsDetail extends Component {
         let content = [content_cn, content_en, content_pt];
 
         return (
-            <View style={{backgroundColor: bg_color, flex: 1}}>
+            <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header title={'新聞詳情'} />
 
                 <ScrollView>
@@ -256,7 +256,7 @@ class NewsDetail extends Component {
                         data={imageUrls}
                         // 每個項目的間距
                         spacing={scale(15)}
-                        renderItem={({item, index}) => (
+                        renderItem={({ item, index }) => (
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 style={{
@@ -278,12 +278,12 @@ class NewsDetail extends Component {
                                         uri: item,
                                         // cache: FastImage.cacheControl.web,
                                     }}
-                                    style={{width: '100%', height: '100%'}}
+                                    style={{ width: '100%', height: '100%' }}
                                     onLoadStart={() => {
-                                        this.setState({imgLoading: true});
+                                        this.setState({ imgLoading: true });
                                     }}
                                     onLoad={() => {
-                                        this.setState({imgLoading: false});
+                                        this.setState({ imgLoading: false });
                                     }}
                                 />
                                 {this.state.imgLoading ? (
@@ -314,7 +314,7 @@ class NewsDetail extends Component {
                         <HTMLView
                             value={repalceHtmlToText(content[chooseMode])}
                             onLinkPress={url => this.handleHyperLink(url)}
-                            nodeComponentProps={{selectable: true}}
+                            nodeComponentProps={{ selectable: true }}
                             stylesheet={htmlStyles}
                         />
                     </View>
@@ -324,7 +324,7 @@ class NewsDetail extends Component {
                         ref={'imageScrollViewer'}
                         imageUrls={imageUrls}
                     />
-                    <View style={{marginBottom: scale(50)}} />
+                    <View style={{ marginBottom: scale(50) }} />
                 </ScrollView>
             </View>
         );
@@ -333,6 +333,7 @@ class NewsDetail extends Component {
 
 const styles = StyleSheet.create({
     title: {
+        ...uiStyle.defaultText,
         alignSelf: 'center',
         marginVertical: scale(5),
         marginHorizontal: scale(10),
@@ -341,6 +342,7 @@ const styles = StyleSheet.create({
         color: themeColor,
     },
     date: {
+        ...uiStyle.defaultText,
         color: COLOR_DIY.secondThemeColor,
         alignSelf: 'flex-end',
         marginRight: scale(15),
@@ -364,17 +366,25 @@ const styles = StyleSheet.create({
 
 const htmlStyles = StyleSheet.create({
     p: {
+        ...uiStyle.defaultText,
         color: black.second,
     },
     span: {
+        ...uiStyle.defaultText,
         color: black.second,
     },
     div: {
+        ...uiStyle.defaultText,
         color: black.second,
     },
     td: {
+        ...uiStyle.defaultText,
         color: black.third,
     },
+    a: {
+        ...uiStyle.defaultText,
+        color: themeColor,
+    }
 });
 
 export default NewsDetail;

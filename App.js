@@ -53,7 +53,7 @@ class App extends Component {
         // 開屏動畫
         setTimeout(() => {
             this.setState({ isLoaded: true });
-        }, 1000);
+        }, 500);
 
         // 獲取緩存中的用戶數據
         try {

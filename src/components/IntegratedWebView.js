@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     BackHandler,
     Linking,
+    Platform,
 } from 'react-native';
 
 import { WebView } from 'react-native-webview';
@@ -35,12 +36,12 @@ const IntegratedWebView = ({
     const [currentURL, setCurrentURL] = useState(source.uri);
 
     // iOS前進後退按鈕的動畫參數設定
-    const scrollY = new Animated.Value(0);
-    const diffClamp = Animated.diffClamp(scrollY, 0, NAVI_HEIGHT);
-    const translateY = diffClamp.interpolate({
-        inputRange: [0, NAVI_HEIGHT],
-        outputRange: [0, NAVI_HEIGHT],
-    });
+    // const scrollY = new Animated.Value(0);
+    // const diffClamp = Animated.diffClamp(scrollY, 0, NAVI_HEIGHT);
+    // const translateY = diffClamp.interpolate({
+    //     inputRange: [0, NAVI_HEIGHT],
+    //     outputRange: [0, NAVI_HEIGHT],
+    // });
 
     // 創建對webview組件的DOM方法引用
     const webViewRef = useRef();
@@ -127,9 +128,9 @@ const IntegratedWebView = ({
                         navigation.goBack();
                     }
                 }}
-                onScroll={e => {
-                    scrollY.setValue(e.nativeEvent.contentOffset.y);
-                }}
+                // onScroll={e => {
+                //     scrollY.setValue(e.nativeEvent.contentOffset.y);
+                // }}
                 onNavigationStateChange={onNavigationStateChange}
                 pullToRefreshEnabled
                 allowFileAccess
@@ -156,7 +157,7 @@ const IntegratedWebView = ({
                     onForwardPress={handleForwardPress}
                     canGoBack={canGoBack}
                     canGoForward={canGoForward}
-                    translateY={translateY}
+                    // translateY={translateY}
                 />
             )}
         </>
@@ -177,7 +178,7 @@ const NavigationView = ({
             <Animated.View
                 style={[
                     styles.container,
-                    { transform: [{ translateY: translateY }] },
+                    // { transform: [{ translateY: translateY }] },
                 ]}>
                 {/* 後退按鈕 */}
                 <TouchableOpacity
@@ -185,7 +186,7 @@ const NavigationView = ({
                     onPress={onBackPress}
                     disabled={canGoBack ? false : true}>
                     <Icon
-                        name={'left'}
+                        name={'leftcircle'}
                         size={22}
                         color={canGoBack ? 'black' : 'grey'}
                     />
@@ -196,7 +197,7 @@ const NavigationView = ({
                     onPress={onForwardPress}
                     disabled={canGoForward ? false : true}>
                     <Icon
-                        name={'right'}
+                        name={'rightcircle'}
                         size={22}
                         color={canGoForward ? 'black' : 'grey'}
                     />
@@ -207,15 +208,15 @@ const NavigationView = ({
 };
 
 // 取得手機螢幕的size
-const window = Dimensions.get('window');
-const NAVI_HEIGHT = window.height * 0.08;
+// const window = Dimensions.get('window');
+// const NAVI_HEIGHT = window.height * 0.08;
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
+        // position: 'absolute',
         bottom: 0,
-        height: NAVI_HEIGHT,
-        width: window.width,
+        height: scale(50),
+        width: '100%',
         backgroundColor: '#d9d9d9',
         flexDirection: 'row',
         justifyContent: 'space-evenly',
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
         opacity: 0.9,
     },
     button: {
-        marginBottom: scale(10),
+        // marginBottom: scale(10),
     },
 });
 

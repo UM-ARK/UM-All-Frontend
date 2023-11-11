@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -10,16 +10,16 @@ import {
 
 import Header from '../../components/Header';
 import EventCard from '../TabbarPages/news/components/EventCard';
-import {COLOR_DIY} from '../../utils/uiMap';
-import {BASE_URI, BASE_HOST, GET} from '../../utils/pathMap';
-import Toast, {DURATION} from 'react-native-easy-toast';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { BASE_URI, BASE_HOST, GET } from '../../utils/pathMap';
+import Toast, { DURATION } from 'react-native-easy-toast';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { scale } from 'react-native-size-matters';
 
-const {bg_color, white, black, viewShadow, themeColor} = COLOR_DIY;
+const { bg_color, white, black, viewShadow, themeColor } = COLOR_DIY;
 
 // 返回數據的頁數
 let dataPage = 1;
@@ -37,7 +37,7 @@ class AllEvents extends Component {
         // 由社團詳情頁跳轉
         if (params.clubData) {
             let clubData = params.clubData;
-            this.setState({club_num: clubData.club_num});
+            this.setState({ club_num: clubData.club_num });
             this.getEventData(clubData.club_num);
         }
     }
@@ -47,7 +47,7 @@ class AllEvents extends Component {
     }
 
     async getEventData(club_num, sort, filter) {
-        const {eventData} = this.state;
+        const { eventData } = this.state;
         let URL = BASE_URI + GET.EVENT_INFO_CLUB_NUM_P;
         let num_of_item = 10;
         await axios
@@ -66,27 +66,27 @@ class AllEvents extends Component {
                         itm.cover_image_url = BASE_HOST + itm.cover_image_url;
                     });
                     if (newDataArr.length < num_of_item) {
-                        this.setState({noMoreData: true});
+                        this.setState({ noMoreData: true });
                     } else {
-                        this.setState({noMoreData: false});
+                        this.setState({ noMoreData: false });
                     }
                     if (dataPage == 1) {
-                        this.setState({eventData: newDataArr});
+                        this.setState({ eventData: newDataArr });
                     } else if (eventData.length > 0) {
                         newDataArr = eventData.concat(newDataArr);
-                        this.setState({eventData: newDataArr});
+                        this.setState({ eventData: newDataArr });
                     }
                 } else if (json.code == '2') {
                     alert('已無更多數據');
-                    this.setState({noMoreData: true});
+                    this.setState({ noMoreData: true });
                 }
-                this.setState({isLoading: false});
+                this.setState({ isLoading: false });
             })
             .catch(err => console.log('err', err));
     }
 
     triggerSort = () => {
-        this.setState({openSort: !this.state.openSort});
+        this.setState({ openSort: !this.state.openSort });
     };
     renderDropDown = () => {
         return (
@@ -104,7 +104,7 @@ class AllEvents extends Component {
                         overflow: 'hidden',
                         padding: scale(10),
                     }}
-                    dropdownTextStyle={{color: themeColor}}
+                    dropdownTextStyle={{ color: themeColor }}
                     // 調整下拉菜單展開的位置
                     adjustFrame={() => {
                         let s = {
@@ -127,6 +127,7 @@ class AllEvents extends Component {
                         }}>
                         <Text
                             style={{
+                                ...uiStyle.defaultText,
                                 color: this.state.openSort
                                     ? themeColor
                                     : black.third,
@@ -141,7 +142,7 @@ class AllEvents extends Component {
                                     : 'caret-down-outline'
                             }
                             size={scale(12)}
-                            style={{marginLeft: scale(5)}}
+                            style={{ marginLeft: scale(5) }}
                             color={
                                 this.state.openSort ? themeColor : black.third
                             }
@@ -152,8 +153,8 @@ class AllEvents extends Component {
                 <TouchableOpacity
                     onPress={() => alert('打開篩選')}
                     activeOpacity={0.8}
-                    style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Text style={{color: black.third}}>篩選</Text>
+                    style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ ...uiStyle.defaultText, color: black.third }}>篩選</Text>
                     <Ionicons
                         name={
                             this.state.applyFilter
@@ -162,7 +163,7 @@ class AllEvents extends Component {
                         }
                         size={scale(10)}
                         color={black.third}
-                        style={{marginLeft: scale(5)}}
+                        style={{ marginLeft: scale(5) }}
                     />
                 </TouchableOpacity>
             </View>
@@ -171,14 +172,14 @@ class AllEvents extends Component {
 
     loadMoreData = () => {
         this.toast.show(`Data is Loading...`, 2000);
-        const {club_num, noMoreData} = this.state;
+        const { club_num, noMoreData } = this.state;
         dataPage++;
         if (!noMoreData) {
             this.getEventData(club_num);
         }
     };
     renderLoadMoreView = () => {
-        const {noMoreData} = this.state;
+        const { noMoreData } = this.state;
         return (
             <View
                 style={{
@@ -188,18 +189,18 @@ class AllEvents extends Component {
                     marginBottom: scale(50),
                 }}>
                 {noMoreData ? (
-                    <View style={{alignItems: 'center'}}>
-                        <Text style={{color: black.third}}>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                             沒有更多活動了，過一段時間再來吧~
                         </Text>
-                        <Text>[]~(￣▽￣)~*</Text>
+                        <Text style={{ ...uiStyle.defaultText, }}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity
                         style={styles.loadMore}
                         activeOpacity={0.8}
                         onPress={this.loadMoreData}>
-                        <Text style={{color: white, fontSize: scale(14)}}>
+                        <Text style={{ ...uiStyle.defaultText, color: white, fontSize: scale(14) }}>
                             Load More
                         </Text>
                     </TouchableOpacity>
@@ -208,7 +209,7 @@ class AllEvents extends Component {
         );
     };
     renderEvent = () => {
-        const {eventData, club_num} = this.state;
+        const { eventData, club_num } = this.state;
         return (
             eventData != undefined &&
             eventData.length > 0 && (
@@ -218,7 +219,7 @@ class AllEvents extends Component {
                         justifyContent: 'center',
                     }}
                     data={eventData}
-                    renderItem={({item}) => {
+                    renderItem={({ item }) => {
                         return (
                             <EventCard
                                 data={item}
@@ -240,7 +241,7 @@ class AllEvents extends Component {
                                 if (dataPage > 1) {
                                     dataPage = 1;
                                 }
-                                this.setState({isLoading: true});
+                                this.setState({ isLoading: true });
                                 this.getEventData(club_num);
                             }}
                         />
@@ -252,7 +253,7 @@ class AllEvents extends Component {
 
     render() {
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Header title={'所有活動查看'} />
                 {/* TODO: 排序與篩選 選擇器 */}
                 {/* {this.renderDropDown()} */}
@@ -265,7 +266,7 @@ class AllEvents extends Component {
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'10%'}
-                    textStyle={{color: white}}
+                    textStyle={{ color: white }}
                     style={{
                         backgroundColor: COLOR_DIY.themeColor,
                         borderRadius: scale(10),

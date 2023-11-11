@@ -7,7 +7,7 @@ import {
     FlatList,
 } from 'react-native'
 
-import { COLOR_DIY } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG } from "../../../../utils/pathMap";
@@ -116,9 +116,9 @@ export default class LocalCourse extends Component {
                             }}
                         >
                             <View style={{ alignItems: 'center', }}>
-                                <Text style={{ fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
-                                <Text style={{ fontSize: scale(12), color: black.third }}>{courseInfo.Section}</Text>
-                                <Text style={{ fontSize: scale(10), color: black.third }}>{courseInfo['Medium of Instruction']}</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>{courseInfo.Section}</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Medium of Instruction']}</Text>
                             </View>
 
                             <View style={{ flexDirection: 'row', }}>
@@ -128,12 +128,12 @@ export default class LocalCourse extends Component {
                                             margin: scale(5),
                                             alignItems: 'center',
                                         }}>
-                                            <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
                                             {'Classroom' in sameSection && sameSection['Classroom'] ? (
-                                                <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
                                             ) : null}
                                             {'Time From' in sameSection && sameSection['Time From'] ? (
-                                                <Text style={{ fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
+                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
                                             ) : null}
                                         </View>
                                     )
@@ -163,13 +163,13 @@ export default class LocalCourse extends Component {
                         {/* 課程基礎信息 */}
                         {courseInfo ? (
                             <View style={{ alignItems: 'center' }}>
-                                <Text style={{ fontSize: scale(13), color: black.main, textAlign: 'center', }}>{courseInfo['Course Title']}</Text>
-                                <Text style={{ fontSize: scale(13), color: black.third, textAlign: 'center', }}>{courseInfo['Course Title Chi']}</Text>
-                                <Text style={{ fontSize: scale(10), color: black.third }}>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.main, textAlign: 'center', }}>{courseInfo['Course Title']}</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center', }}>{courseInfo['Course Title Chi']}</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
                                     {courseInfo['Offering Unit']}
                                     {courseInfo['Offering Department'] ? <Text>{' - ' + courseInfo['Offering Department']}</Text> : null}
                                 </Text>
-                                <Text style={{ fontSize: scale(10), color: black.third }}>{courseInfo['Course Type']}</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Course Type']}</Text>
                             </View>
                         ) : null}
 

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Dimensions,
     View,
@@ -11,20 +11,20 @@ import {
     ScrollView,
 } from 'react-native';
 
-import {COLOR_DIY} from '../src/utils/uiMap';
-import {pxToDp} from '../src/utils/stylesKits';
+import { COLOR_DIY, uiStyle } from '../src/utils/uiMap';
+import { pxToDp } from '../src/utils/stylesKits';
 
 // 文檔：https://github.com/dohooo/react-native-reanimated-carousel/
 import Carousel from 'react-native-reanimated-carousel';
-import {Header} from '@rneui/themed';
-import {NavigationContext} from '@react-navigation/native';
+import { Header } from '@rneui/themed';
+import { NavigationContext } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
 
-const {width: PAGE_WIDTH} = Dimensions.get('window');
-const {height: PAGE_HEIGHT} = Dimensions.get('screen');
+const { width: PAGE_WIDTH } = Dimensions.get('window');
+const { height: PAGE_HEIGHT } = Dimensions.get('screen');
 
 const images = [
     {
@@ -67,16 +67,16 @@ class TestScreen extends Component {
     };
 
     tiggerModalBottom = () => {
-        this.setState({isShow: !this.state.isShow});
+        this.setState({ isShow: !this.state.isShow });
     };
 
     render() {
-        const {isModalVisible, isModalBottomVisible, imagesIndex} = this.state;
+        const { isModalVisible, isModalBottomVisible, imagesIndex } = this.state;
 
         console.log(this.state.isShow);
 
         return (
-            <View style={{flex: 1, backgroundColor: COLOR_DIY.bg_color}}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     leftComponent={
@@ -92,6 +92,7 @@ class TestScreen extends Component {
                     centerComponent={{
                         text: '測試頁',
                         style: {
+                            ...uiStyle.defaultText,
                             color: COLOR_DIY.black.main,
                             fontSize: pxToDp(22),
                         },
@@ -106,8 +107,8 @@ class TestScreen extends Component {
                 <ImageScrollViewer
                     ref={'imageScrollViewer'}
                     imageUrls={images}
-                    // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                    // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
+                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 {/* 圖片展示 */}
@@ -116,7 +117,7 @@ class TestScreen extends Component {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                     }}>
-                    {images.map(({url}, index) => (
+                    {images.map(({ url }, index) => (
                         <TouchableOpacity
                             onPress={() =>
                                 this.refs.imageScrollViewer.handleOpenImage(
@@ -124,8 +125,8 @@ class TestScreen extends Component {
                                 )
                             }>
                             <Image
-                                source={{uri: url}}
-                                style={{width: 100, height: 100}}></Image>
+                                source={{ uri: url }}
+                                style={{ width: 100, height: 100 }}></Image>
                         </TouchableOpacity>
                     ))}
                 </View>

@@ -5,23 +5,21 @@ import {
     View,
     TouchableOpacity,
     StyleSheet,
-    Image,
     ScrollView,
     RefreshControl,
 } from 'react-native';
 
 // 引入本地工具
-import { COLOR_DIY } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 import { UM_API_CAR_PARK, UM_API_TOKEN } from '../../utils/pathMap';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
-import { color } from 'react-native-reanimated';
 import { scale } from 'react-native-size-matters';
 
-const { black, white, themeColor, bg_color } = COLOR_DIY;
+const { black, white, themeColor, secondThemeColor, bg_color } = COLOR_DIY;
 
 class CarPark extends Component {
     state = {
@@ -93,26 +91,16 @@ class CarPark extends Component {
                     {!isLoading ? (
                         <View>
                             {/* Data From */}
-                            <Text
-                                style={{
-                                    alignSelf: 'center',
-                                    marginBottom: scale(10),
-                                    color: black.third,
-                                }}>
-                                Data from: data.um.edu.mo
-                            </Text>
+                            <Text style={{ ...s.UMText, }}>Data from: data.um.edu.mo</Text>
 
                             {/* 渲染車位數據 */}
                             {data.length > 0 && (
                                 <View>
                                     {/* 更新時間 */}
-                                    <Text
-                                        style={{
-                                            alignSelf: 'center',
-                                            marginBottom: scale(10),
-                                            color: black.third,
-                                            marginTop: scale(-5),
-                                        }}>
+                                    <Text style={{
+                                        ...s.UMText,
+                                        marginBottom: scale(10),
+                                    }}>
                                         數據更新時間:
                                         {moment
                                             .tz(
@@ -138,49 +126,23 @@ class CarPark extends Component {
                                             onPress={() =>
                                                 this.setState({ Sort: 'All' })
                                             }>
-                                            {Sort == 'All' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    All
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    All
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Sort == 'All' ? secondThemeColor : themeColor,
+                                            }}>
+                                                All
+                                            </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
                                                 this.setState({ Sort: 'Staff' })
                                             }>
-                                            {Sort == 'Staff' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    Staff
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    Staff
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Sort == 'Staff' ? secondThemeColor : themeColor,
+                                            }}>
+                                                Staff
+                                            </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
@@ -188,51 +150,26 @@ class CarPark extends Component {
                                                     Sort: 'Monthly Pass',
                                                 })
                                             }>
-                                            {Sort == 'Monthly Pass' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    Monthly Pass
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    Monthly Pass
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Sort == 'Monthly Pass' ? secondThemeColor : themeColor,
+                                            }}>
+                                                Monthly Pass
+                                            </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
                                                 this.setState({ Sort: 'Visitor' })
                                             }>
-                                            {Sort == 'Visitor' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    Visitor
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    Visitor
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Sort == 'Visitor' ? secondThemeColor : themeColor,
+                                            }}>
+                                                Visitor
+                                            </Text>
                                         </TouchableOpacity>
                                     </View>
+
                                     {/* 车辆类型筛选器 */}
                                     <View
                                         style={{
@@ -248,25 +185,12 @@ class CarPark extends Component {
                                             onPress={() =>
                                                 this.setState({ Type: 'All' })
                                             }>
-                                            {Type == 'All' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    All
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    All
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Type == 'All' ? secondThemeColor : themeColor,
+                                            }}>
+                                                All
+                                            </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
@@ -274,25 +198,12 @@ class CarPark extends Component {
                                                     Type: 'Light Vehicle',
                                                 })
                                             }>
-                                            {Type == 'Light Vehicle' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    Light Vehicle
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    Light Vehicle
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Type == 'Light Vehicle' ? secondThemeColor : themeColor,
+                                            }}>
+                                                Light Vehicle
+                                            </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() =>
@@ -300,25 +211,12 @@ class CarPark extends Component {
                                                     Type: 'Motorcycle',
                                                 })
                                             }>
-                                            {Type == 'Motorcycle' ? (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: '#FF8627',
-                                                    }}>
-                                                    Motorcycle
-                                                </Text>
-                                            ) : (
-                                                <Text
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        fontSize: scale(13),
-                                                        color: COLOR_DIY.themeColor,
-                                                    }}>
-                                                    Motorcycle
-                                                </Text>
-                                            )}
+                                            <Text style={{
+                                                ...s.choiceText,
+                                                color: Type == 'Motorcycle' ? secondThemeColor : themeColor,
+                                            }}>
+                                                Motorcycle
+                                            </Text>
                                         </TouchableOpacity>
                                     </View>
 
@@ -355,6 +253,7 @@ class CarPark extends Component {
                                                 }}>
                                                 <Text
                                                     style={{
+                                                        ...uiStyle.defaultText,
                                                         color: black.third,
                                                         marginLeft: scale(15),
                                                         fontSize: 35,
@@ -364,6 +263,7 @@ class CarPark extends Component {
                                                 </Text>
                                                 <Text
                                                     style={{
+                                                        ...uiStyle.defaultText,
                                                         marginHorizontal: scale(12),
                                                         fontSize: 19,
                                                         marginVertical: scale(5),
@@ -373,143 +273,46 @@ class CarPark extends Component {
                                                     {place}
                                                 </Text>
                                                 {item.records.map(itm => {
-                                                    // console.log('itm', itm);
-                                                    var people =
-                                                        itm.parkingType;
-                                                    var cartype =
-                                                        itm.vehicleType;
-                                                    var rest =
-                                                        itm.noOfAvailableSpace;
-                                                    if (
-                                                        Sort == 'All' ||
-                                                        people == Sort
-                                                    ) {
-                                                        if (
-                                                            Type == 'All' ||
-                                                            cartype == Type
-                                                        )
-                                                            if (rest >= 10) {
-                                                                return (
-                                                                    <View>
-                                                                        <Text
-                                                                            style={{
-                                                                                paddingLeft:
-                                                                                    scale(
-                                                                                        13,
-                                                                                    ),
-                                                                                color: COLOR_DIY.themeColor,
-                                                                                fontWeight:
-                                                                                    '900',
-                                                                                fontSize: 20,
-                                                                            }}>
-                                                                            For{' '}
-                                                                            {
-                                                                                people
-                                                                            }
-                                                                        </Text>
-                                                                        <Text
-                                                                            style={{
-                                                                                paddingLeft:
-                                                                                    scale(
-                                                                                        13,
-                                                                                    ),
-                                                                                color: '#FF8627',
-                                                                                fontWeight:
-                                                                                    '500',
-                                                                                fontSize: 18,
-                                                                            }}>
-                                                                            {
-                                                                                cartype
-                                                                            }
-                                                                        </Text>
-                                                                        <Text
-                                                                            style={{
-                                                                                paddingLeft:
-                                                                                    scale(
-                                                                                        13,
-                                                                                    ),
-                                                                                color: 'black',
-                                                                                fontWeight:
-                                                                                    '400',
-                                                                                fontSize: 18,
-                                                                                paddingTop:
-                                                                                    scale(
-                                                                                        5,
-                                                                                    ),
-                                                                                paddingBottom:
-                                                                                    scale(
-                                                                                        15,
-                                                                                    ),
-                                                                            }}>
-                                                                            剩餘車位：
-                                                                            {
-                                                                                rest
-                                                                            }
-                                                                        </Text>
-                                                                    </View>
-                                                                );
-                                                            } else {
-                                                                return (
-                                                                    <View>
-                                                                        <Text
-                                                                            style={{
-                                                                                paddingLeft:
-                                                                                    scale(
-                                                                                        13,
-                                                                                    ),
-                                                                                color: COLOR_DIY.themeColor,
-                                                                                fontWeight:
-                                                                                    '900',
-                                                                                fontSize: 20,
-                                                                            }}>
-                                                                            For{' '}
-                                                                            {
-                                                                                people
-                                                                            }
-                                                                        </Text>
-                                                                        <Text
-                                                                            style={{
-                                                                                paddingLeft:
-                                                                                    scale(
-                                                                                        13,
-                                                                                    ),
-                                                                                color: '#FF8627',
-                                                                                fontWeight:
-                                                                                    '500',
-                                                                                fontSize: 18,
-                                                                            }}>
-                                                                            {
-                                                                                cartype
-                                                                            }
-                                                                        </Text>
-                                                                        <Text
-                                                                            style={{
-                                                                                paddingLeft:
-                                                                                    scale(
-                                                                                        13,
-                                                                                    ),
-                                                                                color: 'red',
-                                                                                fontWeight:
-                                                                                    '400',
-                                                                                fontSize: 18,
-                                                                                marginTop:
-                                                                                    scale(
-                                                                                        5,
-                                                                                    ),
-                                                                                paddingBottom:
-                                                                                    scale(
-                                                                                        15,
-                                                                                    ),
-                                                                            }}>
-                                                                            剩餘車位：
-                                                                            {
-                                                                                rest
-                                                                            }{' '}
-                                                                            餘位緊張
-                                                                        </Text>
-                                                                    </View>
-                                                                );
-                                                            }
+                                                    var people = itm.parkingType;
+                                                    var cartype = itm.vehicleType;
+                                                    var rest = itm.noOfAvailableSpace;
+                                                    if (Sort == 'All' || people == Sort) {
+                                                        if (Type == 'All' || cartype == Type)
+                                                            return <View>
+                                                                <Text
+                                                                    style={{
+                                                                        ...uiStyle.defaultText,
+                                                                        paddingLeft: scale(13),
+                                                                        color: COLOR_DIY.themeColor,
+                                                                        fontWeight: '900',
+                                                                        fontSize: 20,
+                                                                    }}>
+                                                                    For{' '}
+                                                                    {people}
+                                                                </Text>
+                                                                <Text
+                                                                    style={{
+                                                                        ...uiStyle.defaultText,
+                                                                        paddingLeft: scale(13),
+                                                                        color: secondThemeColor,
+                                                                        fontWeight: '500',
+                                                                        fontSize: 18,
+                                                                    }}>
+                                                                    {cartype}
+                                                                </Text>
+                                                                <Text
+                                                                    style={{
+                                                                        ...uiStyle.defaultText,
+                                                                        paddingLeft: scale(13),
+                                                                        color: 'black',
+                                                                        fontWeight: '400',
+                                                                        fontSize: 18,
+                                                                        paddingTop: scale(5),
+                                                                        paddingBottom: scale(15),
+                                                                    }}>
+                                                                    剩餘車位：{rest} {rest<=10?'  餘位緊張':null}
+                                                                </Text>
+                                                            </View>
                                                     }
                                                 })}
                                             </View>
@@ -528,12 +331,26 @@ class CarPark extends Component {
                             }}>
                             <Loading />
                         </View>
-                    )}
+                    )
+                    }
                     <View style={{ marginBottom: scale(50) }}></View>
-                </ScrollView>
-            </View>
+                </ScrollView >
+            </View >
         );
     }
 }
 
 export default CarPark;
+
+const s = StyleSheet.create({
+    UMText: {
+        ...uiStyle.defaultText,
+        alignSelf: 'center',
+        color: black.third,
+    },
+    choiceText: {
+        ...uiStyle.defaultText,
+        fontWeight: 'bold',
+        fontSize: scale(13),
+    },
+})

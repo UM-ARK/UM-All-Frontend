@@ -10,7 +10,7 @@ import {
     Linking,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
@@ -184,17 +184,17 @@ class EventPage extends Component {
                 }}>
                 {noMoreData ? (
                     <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: black.third, textAlign: 'center', fontSize: scale(12) }}>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third, textAlign: 'center', fontSize: scale(12) }}>
                             恭喜你，達成『刨根問底』成就~
                         </Text>
-                        <Text style={{ color: black.third, fontSize: scale(12) }}>[]~(￣▽￣)~*</Text>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>[]~(￣▽￣)~*</Text>
                     </View>
                 ) : (
                     <TouchableOpacity
                         style={s.loadMore}
                         activeOpacity={0.8}
                         onPress={this.loadMoreData}>
-                        <Text style={{ color: white, fontSize: scale(14) }}>
+                        <Text style={{ ...uiStyle.defaultText, color: white, fontSize: scale(14) }}>
                             Load More
                         </Text>
                     </TouchableOpacity>
@@ -231,7 +231,7 @@ class EventPage extends Component {
                             keyExtractor={item => item._id}
                         />
                     ) : (
-                        <Text>No more data</Text>
+                        <Text style={{ ...uiStyle.defaultText, }}>No more data</Text>
                     )}
                 </View>
             </View>

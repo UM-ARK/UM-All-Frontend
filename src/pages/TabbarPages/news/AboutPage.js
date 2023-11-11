@@ -7,9 +7,10 @@ import {
     Linking,
     Image,
     Alert,
+    StyleSheet,
 } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import HomeCard from '../home/components/HomeCard';
 import {
     UM_WHOLE,
@@ -34,6 +35,8 @@ import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNRestart from 'react-native-restart';
 
 const { black, themeColor, secondThemeColor, white, wiki_bg_color } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
@@ -55,51 +58,21 @@ export default class AboutPage extends Component {
 
                     {/* 提示資訊 */}
                     <HomeCard>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
-                            {`ARK ALL源自FST同學為愛發電，`}
-                            <Text style={{ fontWeight: 'bold' }}>
-                                並非官方應用程式！
-                            </Text>
+                        <Text style={{ ...s.bodyText, }}>
+                            {`ARK ALL源自FST同學為愛發電，並非官方應用程式！`}
                         </Text>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                            }}>
+                        <Text style={{ ...s.bodyText, }}>
                             {`ARK ALL並非澳大官方應用‼️`}
                         </Text>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                                fontWeight: 'bold',
-                            }}>
+                        <Text style={{ ...s.bodyText, }}>
                             {`ARK ALL is not an official APP of UM‼️`}
                         </Text>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
+                        <Text style={{ ...s.bodyText, }}>
                             {`感謝您的認可和使用 ♪(･ω･)ﾉ`}
                         </Text>
                         <View style={{ alignItems: 'center', flexDirection: 'row', }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: black.third,
-                                    marginTop: scale(5),
-                                }}>
-                                {`本軟件代碼在 `}
+                            <Text style={{ ...s.bodyText, }}>
+                                {`本軟件在 `}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
@@ -107,75 +80,48 @@ export default class AboutPage extends Component {
                                     Linking.openURL(GITHUB_PAGE);
                                 }}
                             >
-                                <Text
-                                    style={{
-                                        fontSize: scale(12),
-                                        color: themeColor,
-                                        fontWeight: '600',
-                                    }}>{`Github`}</Text>
+                                <Text style={{ ...s.highlightText }}>{`Github`}</Text>
                             </TouchableOpacity>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: black.third,
-                                    marginTop: scale(5),
-                                }}>
+                            <Text style={{ ...s.bodyText }}>
                                 {` 開源，歡迎給個Star!!✨✨`}
                             </Text>
                         </View>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
-                            {`歡迎澳大同學加入ARK的設計、開發、運營、宣傳 ~\n立即通過Email聯繫我們！`}
+                        <Text style={{ ...s.bodyText, }}>
+                            {`歡迎澳大同學齊來建造ARK！`}
                         </Text>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL('mailto:' + MAIL);
-                            }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{MAIL}</Text>
-                        </TouchableOpacity>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
-                            {`訪問我們的官網：`}
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL(BASE_HOST);
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{BASE_HOST}</Text>
-                        </TouchableOpacity>
+                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
+                            <Text style={{ ...s.bodyText, }}>
+                                {`立即通過Email聯繫我們：`}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Linking.openURL('mailto:' + MAIL);
+                                }}>
+                                <Text style={{ ...s.highlightText, }}>{MAIL}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
+                            <Text style={{ ...s.bodyText, }}>
+                                {`訪問我們的官網：`}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Linking.openURL(BASE_HOST);
+                                }}
+                            >
+                                <Text style={{ ...s.highlightText, }}>{BASE_HOST}</Text>
+                            </TouchableOpacity>
+                        </View>
+
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 Linking.openURL(GITHUB_UPDATE_PLAN);
                             }}
                         >
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>更新計劃、問題區</Text>
+                            <Text style={{ ...s.highlightText, }}>更新計劃、問題區</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
@@ -184,22 +130,13 @@ export default class AboutPage extends Component {
                             }}
                         >
                             <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>Donate/捐贈/贊助/支持我們！</Text>
+                                style={{ ...s.highlightText, }}>Donate/捐贈/贊助/支持我們！</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
                     {/* 其他提示 */}
                     <HomeCard>
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
+                        <Text style={{ ...s.bodyText, }}>
                             您可能想先了解：
                         </Text>
                         <TouchableOpacity
@@ -215,20 +152,10 @@ export default class AboutPage extends Component {
                                 };
                                 this.props.navigation.navigate('Webviewer', webview_param);
                             }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{`這個APP是?`}</Text>
+                            <Text style={{ ...s.highlightText, }}>{`這個APP是?`}</Text>
                         </TouchableOpacity>
 
-                        <Text
-                            style={{
-                                fontSize: scale(12),
-                                color: black.third,
-                                marginTop: scale(5),
-                            }}>
+                        <Text style={{ ...s.bodyText, }}>
                             您可能還有很多疑問...
                         </Text>
                         <TouchableOpacity
@@ -244,12 +171,7 @@ export default class AboutPage extends Component {
                                     webview_param,
                                 );
                             }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{`ARK ALL常見問題`}</Text>
+                            <Text style={{ ...s.highlightText, }}>{`ARK ALL常見問題`}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -265,30 +187,28 @@ export default class AboutPage extends Component {
                                     webview_param,
                                 );
                             }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
+                            <Text style={{ ...s.highlightText }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
                     {/* 清除緩存 */}
                     <HomeCard>
                         <Text style={{
+                            ...uiStyle.defaultText,
                             fontSize: scale(12),
                             color: black.third
                         }}>
                             {`圖片更新不及時？網站響應出錯？`}
                         </Text>
                         <Text style={{
+                            ...uiStyle.defaultText,
                             fontSize: scale(12),
                             color: black.third
                         }}>
                             {`‼️:您已登錄的界面可能會退出登錄`}
                         </Text>
                         <Text style={{
+                            ...uiStyle.defaultText,
                             fontSize: scale(12),
                             color: black.third
                         }}>
@@ -298,17 +218,33 @@ export default class AboutPage extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                FastImage.clearDiskCache();
-                                FastImage.clearMemoryCache();
-                                CookieManager.clearAll();
-                                Alert.alert('已清除所有緩存');
+                                Alert.alert(
+                                    "關鍵操作!!",
+                                    `將清除所有緩存並重啟，您確定繼續嗎？`,
+                                    [
+                                        {
+                                            text: "Yes",
+                                            onPress: async () => {
+                                                ReactNativeHapticFeedback.trigger('soft');
+                                                await FastImage.clearDiskCache();
+                                                await FastImage.clearMemoryCache();
+                                                await CookieManager.clearAll();
+                                                await AsyncStorage.clear();
+                                                RNRestart.Restart();
+                                                Alert.alert('已清除所有緩存');
+                                            },
+                                        },
+                                        {
+                                            text: "No",
+                                            onPress: () => {
+                                                ReactNativeHapticFeedback.trigger('soft');
+                                            }
+                                        },
+                                    ]
+                                );
+
                             }}>
-                            <Text
-                                style={{
-                                    fontSize: scale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                }}>
+                            <Text style={{ ...s.highlightText }}>
                                 {`清除圖片和Web緩存`}
                             </Text>
                         </TouchableOpacity>
@@ -317,10 +253,10 @@ export default class AboutPage extends Component {
                     {/* 請喝咖啡 */}
                     {false && (
                         <HomeCard>
-                            <Text style={{ color: black.third }}>
+                            <Text style={{ ...s.bodyText, color: black.third }}>
                                 {`為愛發電ing`}
                             </Text>
-                            <Text style={{ color: black.third }}>
+                            <Text style={{ ...s.bodyText, color: black.third }}>
                                 {`請開發者團隊喝杯咖啡QAQ`}
                             </Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -332,7 +268,7 @@ export default class AboutPage extends Component {
                                             height: IMG_WIDTH,
                                         }}
                                     />
-                                    <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                    <Text style={{ ...s.bodyText, color: black.third, alignSelf: 'center' }}>
                                         {`中銀`}
                                     </Text>
                                 </View>
@@ -344,20 +280,32 @@ export default class AboutPage extends Component {
                                             height: IMG_WIDTH - 15,
                                         }}
                                     />
-                                    <Text style={{ color: black.third, alignSelf: 'center' }}>
+                                    <Text style={{ ...s.bodyText, color: black.third, alignSelf: 'center' }}>
                                         {`Mpay`}
                                     </Text>
                                 </View>
                             </View>
-                            <Text style={{ color: black.third, alignSelf: 'center' }}>
+                            <Text style={{ ...s.bodyText, color: black.third, alignSelf: 'center' }}>
                                 {`如有捐贈，請留下您的暱稱和對本軟件的評價，我們可以在版本更新中留下您的足跡！`}
                             </Text>
                         </HomeCard>
                     )}
-
-                    <View style={{ marginBottom: scale(20) }}></View>
                 </ScrollView>
-            </View>
+            </View >
         );
     }
 }
+
+const s = StyleSheet.create({
+    highlightText: {
+        fontSize: scale(12),
+        color: themeColor,
+        fontWeight: '600',
+    },
+    bodyText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        color: black.third,
+        marginTop: scale(3),
+    },
+})
