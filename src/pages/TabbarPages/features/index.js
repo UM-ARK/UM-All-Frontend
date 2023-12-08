@@ -701,10 +701,11 @@ class Index extends Component {
                                     if (!needLogin || this.state.isLogin) {
                                         // Webview頁面，需附帶跳轉參數
                                         if (go_where == 'Webview') {
-                                            this.props.navigation.navigate(
-                                                'Webviewer',
-                                                webview_param,
-                                            );
+                                            // this.props.navigation.navigate(
+                                            //     'Webviewer',
+                                            //     webview_param,
+                                            // );
+                                            openLink(webview_param.url);
                                         } else if (go_where == 'Linking') {
                                             // 使用默認瀏覽器打開
                                             // Linking.openURL(webview_param.url);
