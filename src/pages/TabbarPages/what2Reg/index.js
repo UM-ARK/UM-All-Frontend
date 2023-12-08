@@ -28,6 +28,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { openLink } from '../../../utils/browser';
 
 const { themeColor, black, white, viewShadow } = COLOR_DIY;
 const iconSize = scale(25);
@@ -1012,14 +1013,15 @@ export default class index extends Component {
                             alignItems: 'center'
                         }}
                             onPress={() => {
-                                let webview_param = {
-                                    url: USER_AGREE,
-                                    title: 'ARK ALL 隱私政策 & 用戶協議',
-                                };
-                                this.props.navigation.navigate(
-                                    'Webviewer',
-                                    webview_param,
-                                );
+                                // let webview_param = {
+                                //     url: USER_AGREE,
+                                //     title: 'ARK ALL 隱私政策 & 用戶協議',
+                                // };
+                                // this.props.navigation.navigate(
+                                //     'Webviewer',
+                                //     webview_param,
+                                // );
+                                openLink(USER_AGREE);
                             }}
                         >
                             <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>ARK ALL 隱私政策 & 用戶協議</Text>
