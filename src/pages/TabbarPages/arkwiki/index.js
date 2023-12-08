@@ -124,7 +124,7 @@ export default class ARKWiki extends Component {
                     flexDirection: 'row', width: '100%',
                     alignItems: 'center', justifyContent: 'center',
                     backgroundColor: white,
-                    paddingBottom: scale(3),
+                    paddingVertical: scale(5),
                 }}>
                     {/* 回退按鈕 */}
                     {canGoBack ? (

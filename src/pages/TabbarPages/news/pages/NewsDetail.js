@@ -16,6 +16,7 @@ import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import Header from '../../../../components/Header';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import { openLink } from '../../../../utils/browser';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
@@ -179,14 +180,15 @@ class NewsDetail extends Component {
         if (url.includes('mailto:')) {
             Linking.openURL(url);
         } else if (url.includes('http')) {
-            let webview_param = {
-                url: url,
-                title: 'ARK ALL 集成瀏覽器',
-                text_color: '#FFF',
-                bg_color_diy: COLOR_DIY.themeColor,
-                isBarStyleBlack: false,
-            };
-            this.props.navigation.navigate('Webviewer', webview_param);
+            // let webview_param = {
+            //     url: url,
+            //     title: 'ARK ALL 集成瀏覽器',
+            //     text_color: '#FFF',
+            //     bg_color_diy: COLOR_DIY.themeColor,
+            //     isBarStyleBlack: false,
+            // };
+            // this.props.navigation.navigate('Webviewer', webview_param);
+            openLink(url);
         }
     };
 

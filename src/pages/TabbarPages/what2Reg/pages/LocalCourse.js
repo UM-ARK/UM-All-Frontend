@@ -10,12 +10,14 @@ import {
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
-import { WHAT_2_REG } from "../../../../utils/pathMap";
+import { WHAT_2_REG, ARK_WIKI_SEARCH } from "../../../../utils/pathMap";
+import { openLink } from "../../../../utils/browser";
 import { logToFirebase } from "../../../../utils/firebaseAnalytics";
 import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { NavigationContext } from '@react-navigation/native';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 const coursePlanList = coursePlanTime.Courses;
@@ -40,6 +42,7 @@ function daySort(objArr) {
 }
 
 export default class LocalCourse extends Component {
+    static contextType = NavigationContext;
     state = {
         courseCode: this.props.route.params,
         isLoading: true,
@@ -54,16 +57,18 @@ export default class LocalCourse extends Component {
 
         // 預選有，但課表時間Excel沒有的課程，直接跳轉選咩課
         if (relateCourseList.length == 0) {
+            let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
             this.props.navigation.goBack();
-            const URI = WHAT_2_REG + '/course/' + encodeURIComponent(courseCode);
-            const webview_param = {
-                url: URI,
-                title: courseCode,
-                text_color: white,
-                bg_color_diy: COLOR_DIY.what2reg_color,
-                isBarStyleBlack: false,
-            };
-            this.props.navigation.navigate('Webviewer', webview_param);
+            this.context.navigate('Wiki', { url: URL });
+            // const URI = WHAT_2_REG + '/course/' + encodeURIComponent(courseCode);
+            // const webview_param = {
+            //     url: URI,
+            //     title: courseCode,
+            //     text_color: white,
+            //     bg_color_diy: COLOR_DIY.what2reg_color,
+            //     isBarStyleBlack: false,
+            // };
+            // this.props.navigation.navigate('Webviewer', webview_param);
         }
         else {
             // 按section分離課程數據
@@ -100,19 +105,21 @@ export default class LocalCourse extends Component {
                             }}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseInfo['Course Code']) + '/' + encodeURIComponent(courseInfo['Teacher Information'])
-                                const webview_param = {
-                                    url: URI,
-                                    title: courseInfo['Course Code'],
-                                    text_color: white,
-                                    bg_color_diy: COLOR_DIY.what2reg_color,
-                                    isBarStyleBlack: false,
-                                };
+                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
+                                // const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseInfo['Course Code']) + '/' + encodeURIComponent(courseInfo['Teacher Information'])
+                                // const webview_param = {
+                                //     url: URI,
+                                //     title: courseInfo['Course Code'],
+                                //     text_color: white,
+                                //     bg_color_diy: COLOR_DIY.what2reg_color,
+                                //     isBarStyleBlack: false,
+                                // };
                                 logToFirebase('checkCourse', {
                                     courseCode: courseInfo['Course Code'],
                                     profName: courseInfo['Teacher Information'],
                                 });
-                                this.props.navigation.navigate('Webviewer', webview_param);
+                                this.context.navigate('Wiki', { url: URL });
+                                // this.props.navigation.navigate('Webviewer', webview_param);
                             }}
                         >
                             <View style={{ alignItems: 'center', }}>

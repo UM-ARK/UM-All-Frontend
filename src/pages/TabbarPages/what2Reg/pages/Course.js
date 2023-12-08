@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
+import { openLink } from '../../../../utils/browser';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../../utils/pathMap";
@@ -59,7 +60,7 @@ export default class Course extends Component {
     jumpToProf = (data) => {
         ReactNativeHapticFeedback.trigger('soft');
         const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(data.New_code) + '/' + encodeURIComponent(data.prof_name)
-        Linking.openURL(URI);
+        openLink(URI);
     }
 
     // 渲染可選section

@@ -10,6 +10,7 @@ import {
 
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import { openLink } from '../../../../utils/browser';
 
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -67,17 +68,17 @@ class EventCard extends Component {
     handleJumpToDetail = () => {
         const { type, link, title, isAdmin } = this.state;
         ReactNativeHapticFeedback.trigger('soft');
-        let webview_param = {
-            // import pathMap的鏈接進行跳轉
-            url: link,
-            title: title,
-            // 標題顏色，默認為black.main
-            // text_color: '#002c55',
-            // 標題背景顏色，默認為bg_color
-            // bg_color_diy: '#fff',
-            // 狀態欄字體是否黑色，默認true
-            // isBarStyleBlack: false,
-        };
+        // let webview_param = {
+        //     // import pathMap的鏈接進行跳轉
+        //     url: link,
+        //     title: title,
+        //     // 標題顏色，默認為black.main
+        //     // text_color: '#002c55',
+        //     // 標題背景顏色，默認為bg_color
+        //     // bg_color_diy: '#fff',
+        //     // 狀態欄字體是否黑色，默認true
+        //     // isBarStyleBlack: false,
+        // };
         if (type == 'WEBSITE') {
             if (isAdmin) {
                 // 跳轉活動info編輯頁，並傳遞刷新函數
@@ -86,7 +87,8 @@ class EventCard extends Component {
                     eventData: { _id: this.state.eventData._id },
                 });
             } else {
-                this.context.navigate('Webviewer', webview_param);
+                // this.context.navigate('Webviewer', webview_param);
+                openLink(link);
             }
         } else {
             this.context.navigate('EventDetail', {

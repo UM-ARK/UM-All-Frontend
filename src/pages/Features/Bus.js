@@ -15,6 +15,7 @@ import {
 // 引入本地工具
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
+import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
 
@@ -294,14 +295,15 @@ class BusScreen extends Component {
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     // Linking.openURL(UM_MAP);
-                                    const webview_param = {
-                                        url: UM_MAP,
-                                        title: '校園地圖',
-                                        text_color: black.main,
-                                        bg_color_diy: '#ffffff',
-                                        isBarStyleBlack: true,
-                                    };
-                                    this.props.navigation.navigate('Webviewer', webview_param);
+                                    // const webview_param = {
+                                    //     url: UM_MAP,
+                                    //     title: '校園地圖',
+                                    //     text_color: black.main,
+                                    //     bg_color_diy: '#ffffff',
+                                    //     isBarStyleBlack: true,
+                                    // };
+                                    // this.props.navigation.navigate('Webviewer', webview_param);
+                                    openLink(UM_MAP);
                                 }}
                             >
                                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>校園地圖</Text>
@@ -344,10 +346,10 @@ class BusScreen extends Component {
                                 : null}
 
                             {/* 巴士站點文字 */}
-                            {this.renderBusStopText(115, 455, 'PGH', '研究生宿舍(起)', 0)}
-                            {this.renderBusStopText(155, 305, 'E4', '劉少榮樓', 1)}
-                            {this.renderBusStopText(155, 85, 'N2', '大學會堂', 2)}
-                            {this.renderBusStopText(55, 87, 'N6', '行政樓', 3)}
+                            {this.renderBusStopText(108, 455, 'PGH', '研究生宿舍(起)', 0)}
+                            {this.renderBusStopText(150, 302, 'E4', '劉少榮樓', 1)}
+                            {this.renderBusStopText(150, 82, 'N2', '大學會堂', 2)}
+                            {this.renderBusStopText(51, 88, 'N6', '行政樓', 3)}
                             {this.renderBusStopText(79, 160, 'E11', '科技學院', 4)}
                             {this.renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
                             {this.renderBusStopText(79, 395, 'E32', '法學院', 6)}
