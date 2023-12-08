@@ -12,7 +12,7 @@ import {
     Keyboard,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE } from "../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH } from "../../../utils/pathMap";
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
@@ -712,7 +712,7 @@ export default class index extends Component {
                         flexDirection: 'row', alignItems: 'center',
                         marginHorizontal: scale(5),
                         paddingHorizontal: scale(5), paddingVertical: scale(3),
-                        width: '65%',
+                        width: '81%',
                     }}>
                     {/* 搜索圖標，引導用戶 */}
                     <Ionicons
@@ -726,7 +726,8 @@ export default class index extends Component {
                             paddingVertical: scale(3),
                             color: black.main,
                             fontSize: scale(12),
-                            width: scale(180),
+                            // width: scale(180),
+                            width: '88%',
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
@@ -737,7 +738,7 @@ export default class index extends Component {
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder="試試ECE or Electrical or 電氣"
+                        placeholder="試試ECE or Electrical or 電氣（區分簡繁）"
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
@@ -762,8 +763,25 @@ export default class index extends Component {
                         </TouchableOpacity>
                     ) : null}
                 </View>
-                {/* 課程搜索按鈕 */}
+                {/* ARK Wiki搜索 */}
                 <TouchableOpacity
+                    style={{
+                        backgroundColor: inputOK ? themeColor : 'gray',
+                        borderRadius: scale(10),
+                        padding: scale(5), paddingHorizontal: scale(8),
+                        alignItems: 'center'
+                    }}
+                    disabled={isLoading || !inputOK}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        let URL = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
+                        this.props.navigation.navigate('Wiki', { url: URL });
+                    }}
+                >
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>搜索</Text>
+                </TouchableOpacity>
+                {/* 課程搜索按鈕 */}
+                {/* <TouchableOpacity
                     style={{
                         backgroundColor: inputOK ? themeColor : 'gray',
                         borderRadius: scale(10),
@@ -777,9 +795,9 @@ export default class index extends Component {
                     }}
                 >
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>查課</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 {/* 教授搜索按鈕 */}
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={{
                         backgroundColor: inputOK ? themeColor : 'gray',
                         borderRadius: scale(10),
@@ -794,7 +812,7 @@ export default class index extends Component {
                     }}
                 >
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>搵講師</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </KeyboardAvoidingView>
         )
     }
