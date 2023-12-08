@@ -1,11 +1,12 @@
 import React from 'react';
-import {Text, Linking} from 'react-native';
+import { Text, Linking } from 'react-native';
 
-import {useToast} from 'native-base';
+import { useToast } from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import {COLOR_DIY, ToastText} from '../utils/uiMap';
+import { COLOR_DIY, ToastText } from '../utils/uiMap';
+import { openLink } from '../utils/browser';
 
 const HyperlinkText = ({
     children,
@@ -44,7 +45,9 @@ const HyperlinkText = ({
                 webview_param.url = url;
                 webview_param.title = title ? title : 'ARK ALL 集成瀏覽器';
 
-                navigation.navigate('Webviewer', webview_param);
+                // navigation.navigate('Webviewer', webview_param);
+                // 使用瀏覽器選項卡打開
+                openLink(url);
             }
         }
     };

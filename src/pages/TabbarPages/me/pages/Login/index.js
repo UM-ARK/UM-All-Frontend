@@ -24,6 +24,7 @@ import {
 } from '../../../../../utils/pathMap';
 import Webviewer from '../../../../../components/Webviewer';
 import { UM_Moodle } from '../../../../../utils/pathMap';
+import { openLink } from '../../../../../utils/browser';
 import DialogDIY from '../../../../../components/DialogDIY';
 import ClubLogin from './ClubLogin';
 
@@ -322,14 +323,15 @@ class LoginChoose extends Component {
                                         }}
                                         activeOpacity={0.9}
                                         onPress={() => {
-                                            let webview_param = {
-                                                url: USER_AGREE,
-                                                title: '用戶協議',
-                                            };
-                                            this.context.navigate(
-                                                'Webviewer',
-                                                webview_param,
-                                            );
+                                            // let webview_param = {
+                                            //     url: USER_AGREE,
+                                            //     title: '用戶協議',
+                                            // };
+                                            // this.context.navigate(
+                                            //     'Webviewer',
+                                            //     webview_param,
+                                            // );
+                                            openLink(USER_AGREE);
                                         }}>
                                         《隱私政策與用戶協議》
                                     </Text>
@@ -339,7 +341,7 @@ class LoginChoose extends Component {
 
                         {/* 進駐提示 */}
                         <TouchableOpacity
-                            onPress={() => Linking.openURL(USUAL_Q)}
+                            onPress={() => openLink(USUAL_Q)}
                             style={{
                                 // marginTop: scale(20),
                                 alignSelf: 'center',

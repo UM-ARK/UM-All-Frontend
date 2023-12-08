@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
+import { openLink } from '../../../utils/browser';
 import HomeCard from '../home/components/HomeCard';
 import {
     UM_WHOLE,
@@ -77,7 +78,7 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL(GITHUB_PAGE);
+                                    openLink(GITHUB_PAGE);
                                 }}
                             >
                                 <Text style={{ ...s.highlightText }}>{`Github`}</Text>
@@ -96,7 +97,7 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL('mailto:' + MAIL);
+                                    openLink('mailto:' + MAIL);
                                 }}>
                                 <Text style={{ ...s.highlightText, }}>{MAIL}</Text>
                             </TouchableOpacity>
@@ -108,7 +109,7 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL(BASE_HOST);
+                                    openLink(BASE_HOST);
                                 }}
                             >
                                 <Text style={{ ...s.highlightText, }}>{BASE_HOST}</Text>
@@ -118,7 +119,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL(GITHUB_UPDATE_PLAN);
+                                openLink(GITHUB_UPDATE_PLAN);
                             }}
                         >
                             <Text style={{ ...s.highlightText, }}>更新計劃、問題區</Text>
@@ -126,7 +127,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                Linking.openURL(GITHUB_DONATE);
+                                openLink(GITHUB_DONATE);
                             }}
                         >
                             <Text
@@ -143,14 +144,15 @@ export default class AboutPage extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: ARK_WIKI_ABOUT_ARK,
-                                    title: 'ARK Wiki',
-                                    text_color: black.main,
-                                    bg_color_diy: wiki_bg_color,
-                                    isBarStyleBlack: true,
-                                };
-                                this.props.navigation.navigate('Webviewer', webview_param);
+                                // let webview_param = {
+                                //     url: ARK_WIKI_ABOUT_ARK,
+                                //     title: 'ARK Wiki',
+                                //     text_color: black.main,
+                                //     bg_color_diy: wiki_bg_color,
+                                //     isBarStyleBlack: true,
+                                // };
+                                // this.props.navigation.navigate('Webviewer', webview_param);
+                                openLink(ARK_WIKI_ABOUT_ARK);
                             }}>
                             <Text style={{ ...s.highlightText, }}>{`這個APP是?`}</Text>
                         </TouchableOpacity>
@@ -162,14 +164,15 @@ export default class AboutPage extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: USUAL_Q,
-                                    title: 'ARK ALL常見問題',
-                                };
-                                this.props.navigation.navigate(
-                                    'Webviewer',
-                                    webview_param,
-                                );
+                                // let webview_param = {
+                                //     url: USUAL_Q,
+                                //     title: 'ARK ALL常見問題',
+                                // };
+                                // this.props.navigation.navigate(
+                                //     'Webviewer',
+                                //     webview_param,
+                                // );
+                                openLink(USUAL_Q);
                             }}>
                             <Text style={{ ...s.highlightText, }}>{`ARK ALL常見問題`}</Text>
                         </TouchableOpacity>
@@ -178,14 +181,15 @@ export default class AboutPage extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                let webview_param = {
-                                    url: USER_AGREE,
-                                    title: 'ARK ALL 隱私政策 & 用戶協議',
-                                };
-                                this.props.navigation.navigate(
-                                    'Webviewer',
-                                    webview_param,
-                                );
+                                // let webview_param = {
+                                //     url: USER_AGREE,
+                                //     title: 'ARK ALL 隱私政策 & 用戶協議',
+                                // };
+                                // this.props.navigation.navigate(
+                                //     'Webviewer',
+                                //     webview_param,
+                                // );
+                                openLink(USER_AGREE);
                             }}>
                             <Text style={{ ...s.highlightText }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
                         </TouchableOpacity>
@@ -198,21 +202,7 @@ export default class AboutPage extends Component {
                             fontSize: scale(12),
                             color: black.third
                         }}>
-                            {`圖片更新不及時？網站響應出錯？`}
-                        </Text>
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(12),
-                            color: black.third
-                        }}>
-                            {`‼️:您已登錄的界面可能會退出登錄`}
-                        </Text>
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(12),
-                            color: black.third
-                        }}>
-                            {`‼️:您可能需要重新加載圖片，會消耗流量`}
+                            {`圖片更新不及時？網站響應出錯？\n‼️:您已登錄的界面可能會退出登錄\n‼️:您可能需要重新加載圖片，會消耗流量\n‼️:瀏覽器選項卡問題可以前往對應瀏覽器清除緩存~`}
                         </Text>
                         <TouchableOpacity
                             activeOpacity={0.8}
@@ -245,7 +235,7 @@ export default class AboutPage extends Component {
 
                             }}>
                             <Text style={{ ...s.highlightText }}>
-                                {`清除圖片和Web緩存`}
+                                {`清除APP內的圖片和Web緩存`}
                             </Text>
                         </TouchableOpacity>
                     </HomeCard>

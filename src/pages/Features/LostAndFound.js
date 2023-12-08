@@ -14,6 +14,7 @@ import {
 // 引入本地工具
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import { UM_LOST_FOUND } from '../../utils/pathMap';
+import { openLink } from '../../utils/browser';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 
@@ -256,7 +257,8 @@ class LostAndFound extends Component {
 
                                 <TouchableOpacity
                                     activeOpacity={0.8}
-                                    onPress={() => Linking.openURL(UM_LOST_FOUND)}>
+                                    // onPress={() => Linking.openURL(UM_LOST_FOUND)}>
+                                    onPress={() => openLink(UM_LOST_FOUND)}>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,

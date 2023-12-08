@@ -44,6 +44,7 @@ import {
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
+import { openLink } from "../../../utils/browser";
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -705,7 +706,10 @@ class Index extends Component {
                                                 webview_param,
                                             );
                                         } else if (go_where == 'Linking') {
-                                            Linking.openURL(webview_param.url);
+                                            // 使用默認瀏覽器打開
+                                            // Linking.openURL(webview_param.url);
+                                            // 使用應用內瀏覽器選項卡打開
+                                            openLink(webview_param.url);
                                         }
                                         // 跳轉對應本地頁面
                                         else {

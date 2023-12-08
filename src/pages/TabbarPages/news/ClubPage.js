@@ -12,6 +12,7 @@ import {
 import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
+import { openLink } from '../../../utils/browser';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
 
@@ -166,7 +167,7 @@ class ClubPage extends Component {
                 </Text>
                 {/* 進駐提示 */}
                 <TouchableOpacity
-                    onPress={() => Linking.openURL(USUAL_Q)}
+                    onPress={() => openLink(USUAL_Q)}
                     style={{
                         // marginTop: scale(20),
                         alignSelf: 'center',
