@@ -63,7 +63,7 @@ const HyperlinkText = ({
             placement: 'top',
             duration: 1000,
             render: () => (
-                <ToastText backgroundColor={'#748DA6'} text={'Text Copied'} />
+                <ToastText backgroundColor={'#748DA6'} text={'已複製到剪貼板!'} />
             ),
         });
     };
