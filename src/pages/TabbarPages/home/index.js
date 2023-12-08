@@ -49,7 +49,6 @@ import axios from 'axios';
 import { ScaledSheet, scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
-import { InAppBrowser } from 'react-native-inappbrowser-reborn'
 import { screenWidth } from '../../../utils/stylesKits';
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
@@ -153,7 +152,6 @@ class HomeScreen extends Component {
                     function_name: '澳大方舟',
                     func: () => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // this.openLink()
                         this.onRefresh();
                         this.getAppData();
                         // 刷新重新請求活動頁數據
@@ -292,49 +290,6 @@ class HomeScreen extends Component {
     onRefresh = () => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
         this.toast.show(toastTextArr[toastTextIdx], 3500);
-    }
-
-    async openLink() {
-        try {
-            const url = 'https://github.com/proyecto26'
-            if (await InAppBrowser.isAvailable()) {
-                const result = await InAppBrowser.open(url, {
-                    // iOS Properties
-                    dismissButtonStyle: 'cancel',
-                    preferredBarTintColor: themeColor,
-                    preferredControlTintColor: 'white',
-                    readerMode: false,
-                    animated: true,
-                    modalPresentationStyle: 'fullScreen',
-                    modalTransitionStyle: 'coverVertical',
-                    modalEnabled: true,
-                    enableBarCollapsing: false,
-                    // Android Properties
-                    showTitle: true,
-                    toolbarColor: themeColor,
-                    secondaryToolbarColor: themeColor,
-                    navigationBarColor: themeColor,
-                    navigationBarDividerColor: white,
-                    enableUrlBarHiding: true,
-                    enableDefaultShare: true,
-                    forceCloseOnRedirection: false,
-                    // Specify full animation resource identifier(package:anim/name)
-                    // or only resource name(in case of animation bundled with app).
-                    animations: {
-                        startEnter: 'slide_in_right',
-                        startExit: 'slide_out_left',
-                        endEnter: 'slide_in_left',
-                        endExit: 'slide_out_right'
-                    },
-                    // headers: {
-                    //     'my-custom-header': 'my custom header value'
-                    // }
-                })
-            }
-            else Linking.openURL(url)
-        } catch (error) {
-            Alert.alert(error.message)
-        }
     }
 
     // 獲取日曆數據
