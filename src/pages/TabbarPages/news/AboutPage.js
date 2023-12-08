@@ -97,7 +97,7 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 onPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    openLink('mailto:' + MAIL);
+                                    Linking.openURL('mailto:' + MAIL);
                                 }}>
                                 <Text style={{ ...s.highlightText, }}>{MAIL}</Text>
                             </TouchableOpacity>

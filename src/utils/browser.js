@@ -15,9 +15,9 @@ export async function openLink(URL) {
         if (await InAppBrowser.isAvailable()) {
             const result = await InAppBrowser.open(url, {
                 // iOS Properties
-                dismissButtonStyle: 'cancel',
+                dismissButtonStyle: 'close',
                 preferredBarTintColor: themeColor,
-                preferredControlTintColor: 'white',
+                preferredControlTintColor: white,
                 readerMode: false,
                 animated: true,
                 modalPresentationStyle: 'fullScreen',
@@ -71,7 +71,12 @@ export async function openLink(URL) {
                 )
             }
         }
-    } catch (error) {
-        Alert.alert(error.message)
+    } catch (e) {
+        // 當沒有指定https、需要當前位置權限或其他情況時會觸發Unable to open url.
+        try {
+            Linking.openURL(URL);
+        } catch (error) {
+            Alert.alert(error.message);
+        }
     }
 }
