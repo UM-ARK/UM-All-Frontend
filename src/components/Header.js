@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import {
     TouchableOpacity,
+    Appearance,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
@@ -45,7 +46,7 @@ class HeaderDIY extends Component {
                 centerContainerStyle={{ justifyContent: 'center' }}
                 statusBarProps={{
                     backgroundColor: 'transparent',
-                    barStyle: 'dark-content',
+                    barStyle: COLOR_DIY.barStyle,
                 }}
             />
         );

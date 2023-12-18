@@ -1,7 +1,7 @@
 // 封裝：不用太多自定義的Webview，僅使用navigate跳轉
 // 網址可以參考pathMap.js
 import React, { Component } from 'react';
-import { Text, View, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, Linking, StyleSheet, Appearance, } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import IntegratedWebView from './IntegratedWebView';
@@ -14,6 +14,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+
+const isLight = Appearance.getColorScheme() == 'light';
 
 class WebViewer extends Component {
     constructor(props) {
@@ -28,7 +30,7 @@ class WebViewer extends Component {
         let title = 'title' in data ? data.title : '網址詳情';
         let text_color = 'text_color' in data ? data.text_color : black.main;
         let isBarStyleBlack =
-            'isBarStyleBlack' in data ? data.isBarStyleBlack : true; // 狀態欄字體是否黑色
+            'isBarStyleBlack' in data ? data.isBarStyleBlack : (isLight ? true : false); // 狀態欄字體是否黑色
         let bg_color_diy =
             'bg_color_diy' in data ? data.bg_color_diy : bg_color;
 
