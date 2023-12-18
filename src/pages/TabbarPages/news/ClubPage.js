@@ -83,7 +83,7 @@ class ClubPage extends Component {
                 // 網絡錯誤，自動重載
                 this.getData();
             } else {
-                Alert.alert('未知錯誤，請聯繫開發者！')
+                Alert.alert('未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
             }
         }
     }
