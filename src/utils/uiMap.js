@@ -22,8 +22,9 @@ export const COLOR_DIY = {
     },
     // 當想用純白，或其他顏色背景，白色文字時用white的色值
     white: isLight ? '#fff' : '#272729',
+    trueWhite: '#fff',
     // 全局背景白色(偏灰)
-    bg_color: isLight ? '#F5F5F7' : '#010101',
+    bg_color: isLight ? '#F5F5F7' : '#121212',
 
     // 綠色，用在Toast上
     success: '#27ae60',
