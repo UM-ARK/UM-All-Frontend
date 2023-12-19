@@ -987,10 +987,10 @@ export default class index extends Component {
                         {/* 篩選課程功能 更新時間 */}
                         <View style={{ marginTop: scale(10), alignItems: 'center' }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
-                                可供預選/開設課程
+                                {`${COURSE_MODE == 'ad' ? '開設' : '預選'}課程:`}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                                數據更新日期: {offerCourses.updateTime}
+                                數據更新日期: {COURSE_MODE == 'ad' ? coursePlan.updateTime : offerCourses.updateTime}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
