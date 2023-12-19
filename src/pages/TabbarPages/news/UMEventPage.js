@@ -235,6 +235,7 @@ class UMEventPage extends Component {
                     flex: 1,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    backgroundColor: COLOR_DIY.bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}

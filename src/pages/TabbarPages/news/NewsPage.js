@@ -235,7 +235,7 @@ class NewsPage extends Component {
                                             <Text
                                                 style={{
                                                     ...uiStyle.defaultText,
-                                                    color: white,
+                                                    color: COLOR_DIY.trueWhite,
                                                     fontWeight: 'bold',
                                                     fontSize: scale(18),
                                                 }}
@@ -245,7 +245,7 @@ class NewsPage extends Component {
                                             <Text
                                                 style={{
                                                     ...uiStyle.defaultText,
-                                                    color: white,
+                                                    color: COLOR_DIY.trueWhite,
                                                     fontWeight: 'bold',
                                                     fontSize: scale(13),
                                                 }}>
@@ -342,6 +342,7 @@ class NewsPage extends Component {
                     flex: 1,
                     justifyContent: 'center',
                     alignItems: 'center',
+                    backgroundColor: COLOR_DIY.bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.renderGoTopButton()}
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
     },
     topNewsText: {
         ...uiStyle.defaultText,
-        color: white,
+        color: COLOR_DIY.trueWhite,
         fontWeight: 'bold',
         fontSize: scale(20),
     },

@@ -28,11 +28,12 @@ export async function openLink(URL) {
                 showTitle: true,
                 toolbarColor: themeColor,
                 secondaryToolbarColor: themeColor,
-                navigationBarColor: themeColor,
+                navigationBarColor: COLOR_DIY.white,
                 navigationBarDividerColor: white,
                 enableUrlBarHiding: true,
                 enableDefaultShare: true,
                 forceCloseOnRedirection: false,
+                showInRecents: true,
                 // Specify full animation resource identifier(package:anim/name)
                 // or only resource name(in case of animation bundled with app).
                 animations: {

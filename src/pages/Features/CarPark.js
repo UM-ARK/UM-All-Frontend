@@ -244,7 +244,7 @@ class CarPark extends Component {
                                             <View
                                                 style={{
                                                     marginBottom: scale(30),
-                                                    backgroundColor: 'white',
+                                                    backgroundColor: white,
                                                     paddingBottom: scale(5),
                                                     paddingTop: scale(10),
                                                     borderRadius: scale(10),
@@ -304,13 +304,13 @@ class CarPark extends Component {
                                                                     style={{
                                                                         ...uiStyle.defaultText,
                                                                         paddingLeft: scale(13),
-                                                                        color: 'black',
+                                                                        color: black.main,
                                                                         fontWeight: '400',
                                                                         fontSize: 18,
                                                                         paddingTop: scale(5),
                                                                         paddingBottom: scale(15),
                                                                     }}>
-                                                                    剩餘車位：{rest} {rest<=10?'  餘位緊張':null}
+                                                                    剩餘車位：{rest} {rest <= 10 ? '  餘位緊張' : null}
                                                                 </Text>
                                                             </View>
                                                     }

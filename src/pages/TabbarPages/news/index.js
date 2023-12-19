@@ -19,7 +19,6 @@ const Tab = createMaterialTopTabNavigator();
 const tabWidth = scale(25);
 const numOfTabs = 5;
 
-
 class NewsScreen extends Component {
     render() {
         return (
@@ -35,7 +34,7 @@ class NewsScreen extends Component {
                     // }}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
+                        barStyle: COLOR_DIY.barStyle,
                     }}
                     containerStyle={{
                         // 修復頂部空白過多問題
@@ -50,7 +49,7 @@ class NewsScreen extends Component {
                 <Tab.Navigator
                     screenOptions={{
                         tabBarLabelStyle: {
-                            fontSize: scale(10), 
+                            fontSize: scale(10),
                             fontWeight: 'bold',
                         },
                         tabBarStyle: {

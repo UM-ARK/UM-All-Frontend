@@ -22,7 +22,7 @@ import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { ARK_WIKI } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
-const { themeColor, black, white, wiki_bg_color } = COLOR_DIY;
+const { themeColor, black, white, wiki_bg_color, barStyle } = COLOR_DIY;
 const iconSize = scale(25);
 
 export default class ARKWiki extends Component {
@@ -107,7 +107,7 @@ export default class ARKWiki extends Component {
                     backgroundColor={white}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
+                        barStyle: barStyle,
                     }}
                     containerStyle={{
                         // 修復頂部空白過多問題

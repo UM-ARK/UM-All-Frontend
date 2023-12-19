@@ -83,7 +83,7 @@ class EventPage extends Component {
                 // 網絡錯誤，自動重載
                 this.onRefresh();
             } else {
-                alert('未知錯誤，請聯繫開發者！')
+                alert('未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
             }
         } finally {
             this.setState({
