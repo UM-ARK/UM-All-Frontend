@@ -43,7 +43,11 @@ class HeaderDIY extends Component {
                         fontSize: scale(15),
                     },
                 }}
-                centerContainerStyle={{ justifyContent: 'center' }}
+                centerContainerStyle={{
+                    justifyContent: 'center',
+                    // 修復深色模式頂部小白條問題
+                    borderBottomWidth: 0,
+                }}
                 statusBarProps={{
                     backgroundColor: 'transparent',
                     barStyle: COLOR_DIY.barStyle,

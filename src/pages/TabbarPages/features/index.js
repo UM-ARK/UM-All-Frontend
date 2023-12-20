@@ -765,6 +765,8 @@ class Index extends Component {
                             default: scale(35),
                         }),
                         paddingTop: 0,
+                        // 修復深色模式頂部小白條問題
+                        borderBottomWidth: 0,
                     }}
                 />
 
