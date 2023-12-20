@@ -909,7 +909,7 @@ export default class index extends Component {
                     backgroundColor={COLOR_DIY.bg_color}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
+                        barStyle: COLOR_DIY.barStyle,
                     }}
                     containerStyle={{
                         // 修復頂部空白過多問題
