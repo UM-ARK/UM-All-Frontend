@@ -20,6 +20,7 @@ export const COLOR_DIY = {
         // 次次標題
         third: isLight ? '#666666' : '#e1e1e3',
     },
+    trueBlack: '#121212',
     // 當想用純白，或其他顏色背景，白色文字時用white的色值
     white: isLight ? '#fff' : '#272729',
     trueWhite: '#fff',
@@ -60,6 +61,18 @@ export const COLOR_DIY = {
 
     barStyle: isLight ? 'dark-content' : 'light-content',
 };
+
+export const TIME_TABLE_COLOR = [
+    '#D6BEB8',
+    '#8FCACA',
+    '#BEC8D3',
+    '#B6CFB6',
+    '#97C1A9',
+    '#f5b6e0',
+    '#f7cd50',
+    '#6dbed6',
+    '#C6DBDA',
+]
 
 export const VERSION_EMOJI = {
     ve_Left: '⛱️',
