@@ -106,20 +106,11 @@ export default class LocalCourse extends Component {
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
-                                // const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseInfo['Course Code']) + '/' + encodeURIComponent(courseInfo['Teacher Information'])
-                                // const webview_param = {
-                                //     url: URI,
-                                //     title: courseInfo['Course Code'],
-                                //     text_color: white,
-                                //     bg_color_diy: COLOR_DIY.what2reg_color,
-                                //     isBarStyleBlack: false,
-                                // };
                                 logToFirebase('checkCourse', {
                                     courseCode: courseInfo['Course Code'],
                                     profName: courseInfo['Teacher Information'],
                                 });
                                 this.context.navigate('Wiki', { url: URL });
-                                // this.props.navigation.navigate('Webviewer', webview_param);
                             }}
                         >
                             <View style={{ alignItems: 'center', }}>

@@ -970,10 +970,11 @@ export default class index extends Component {
                             <Text style={{
                                 ...uiStyle.defaultText,
                                 alignSelf: 'center',
-                                fontSize: scale(10),
+                                // fontSize: scale(13),
                                 color: black.third,
+                                // fontWeight: 'bold',
                             }}>
-                                短按看評論，長按看Section o(*￣3￣)o
+                                短按查Wiki，長按選課/看Section !!!
                             </Text>
 
                             {/* 渲染篩選出的課程 */}

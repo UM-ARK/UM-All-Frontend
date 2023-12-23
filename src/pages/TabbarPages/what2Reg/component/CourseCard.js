@@ -176,6 +176,7 @@ export default class CourseCard extends Component {
                                 });
                                 this.context.navigate('LocalCourse', courseCode)
                             }}
+                            delayLongPress={200}
                             // 獲取當前位置距離屏幕頂端的高度
                             onLayout={event => {
                                 const { layout } = event.nativeEvent;
