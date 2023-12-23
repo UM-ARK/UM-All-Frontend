@@ -430,6 +430,7 @@ export default class courseSim extends Component {
     }
 
     clearCourse = () => {
+        // TODO: BUG: 清空後，篩選課表長度等於1時，會出現清空前的課表內容
         Alert.alert(``, `確定要清空當前的模擬課表嗎？`, [
             {
                 text: '確定清空',
@@ -532,12 +533,12 @@ export default class courseSim extends Component {
                             </View>) : (
                                 // 首次使用提示
                                 <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
-                                    <Text style={{ ...s.firstUseText, }}>{`🎊 (ﾉ>ω<)ﾉ (ﾉ>ω<)ﾉ (ﾉ>ω<)ﾉ 🎊\n\n我可以：`}</Text>
+                                    <Text style={{ ...s.firstUseText, }}>{`如何開始使用模擬課表？\n`}</Text>
 
-                                    {/* TODO: Add課按鈕 */}
-                                    <Text style={{ ...s.firstUseText, }}>{`1. 右上角“Add”按鈕，自己動手！\n\n或者\n`}</Text>
+                                    {/* Add課按鈕提示 */}
+                                    <Text style={{ ...s.firstUseText, }}>{`選項1：右上角“Add”按鈕，自己動手！\n`}</Text>
 
-                                    <Text style={{ ...s.firstUseText, }}>{`2. 複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
+                                    <Text style={{ ...s.firstUseText, }}>{`選項2：全選、複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
 
                                     {/* 跳轉ISW按鈕 */}
                                     <TouchableOpacity style={{ ...s.buttonContainer, }}
@@ -553,7 +554,7 @@ export default class courseSim extends Component {
                                         onChangeText={text => {
                                             this.setState({ importTimeTableText: text });
                                         }}
-                                        placeholder={`全選、複製、粘貼真實課表到這裡，例如：
+                                        placeholder={`Example：
 TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
 9:00	09:00-10:45 ECEN0000(001)
 E11-0000
