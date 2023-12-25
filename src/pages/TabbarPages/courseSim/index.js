@@ -7,6 +7,7 @@ import {
     Alert,
     StyleSheet,
     TextInput,
+    Keyboard,
 } from 'react-native';
 
 import { scale } from 'react-native-size-matters';
@@ -65,7 +66,7 @@ function parseImportData(inputText) {
         return courseCodeList;
     }
     else {
-        alert('輸入的數據有誤！\n請再嘗試！')
+        return null
     }
 }
 
@@ -87,7 +88,11 @@ handleSearchFilterCourse = (inputText) => {
 // * 查看某時間段可選的CourseCode、Section
 // TODO: Press 震動
 export default class courseSim extends Component {
-    verScroll = React.createRef();
+    constructor() {
+        super();
+        this.verScroll = React.createRef();
+        this.textSearchRef = React.createRef();
+    }
 
     state = {
         // 導入課表功能
@@ -141,7 +146,22 @@ export default class courseSim extends Component {
         if (courseCodeList && courseCodeList.length > 0) {
             this.handleCourseList(courseCodeList);
         }
+
+        this.keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            this._keyboardDidHide,
+        );
     }
+
+    componentWillUnmount() {
+        this.keyboardDidHideListener.remove();
+    }
+
+    // 鍵盤收起，使輸入框失焦
+    _keyboardDidHide = () => {
+        // 使输入框失去焦点
+        this.textSearchRef.current.blur();
+    };
 
     // 處理課表數據，分析出用於render的數據
     handleCourseList = (courseCodeList) => {
@@ -350,7 +370,12 @@ export default class courseSim extends Component {
     importCourseData = () => {
         const { importTimeTableText } = this.state;
         let parseRes = parseImportData(importTimeTableText);
-        this.handleCourseList(parseRes);
+        if (parseRes) {
+            this.handleCourseList(parseRes);
+        }
+        else {
+            Alert.alert(``, `您輸入的格式有誤，\n有正確全選複製Timetable嗎？`)
+        }
     }
 
     addCourse = (course) => {
@@ -411,6 +436,9 @@ export default class courseSim extends Component {
                     this.setState({
                         allCourseAllTime: [],
                         courseCodeList: [],
+
+                        importTimeTableText: null,
+                        searchText: null,
                     });
                     setLocalStorage([]);
                 },
@@ -441,7 +469,8 @@ export default class courseSim extends Component {
                 </TouchableOpacity>
                 {/* 粘貼課表數據 */}
                 <TextInput
-                    editable
+                    ref={this.textSearchRef}
+                    // editable
                     multiline
                     numberOfLines={6}
                     onChangeText={text => {
@@ -591,6 +620,7 @@ E11-0000
                             }}>
                                 {/* Add課搜索框 */}
                                 <TextInput
+                                    ref={this.textSearchRef}
                                     style={{
                                         ...uiStyle.defaultText,
                                         color: black.main,
