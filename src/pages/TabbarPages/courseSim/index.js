@@ -323,7 +323,6 @@ export default class courseSim extends Component {
                                 },
                                 {
                                     text: "取消",
-                                    style: 'cancel',
                                 },
                             ],
                             { cancelable: true, }
@@ -430,14 +429,17 @@ export default class courseSim extends Component {
     }
 
     clearCourse = () => {
-        // TODO: BUG: 清空後，篩選課表長度等於1時，會出現清空前的課表內容
         Alert.alert(``, `確定要清空當前的模擬課表嗎？`, [
             {
                 text: '確定清空',
                 onPress: () => {
-                    this.setState({ allCourseAllTime: [] });
+                    this.setState({
+                        allCourseAllTime: [],
+                        courseCodeList: [],
+                    });
                     setLocalStorage([]);
-                }
+                },
+                style: 'destructive',
             },
             {
                 text: 'No',
