@@ -3,7 +3,6 @@ import {
     View,
     Text,
     ScrollView,
-    Button,
     TouchableOpacity,
     Alert,
     StyleSheet,
@@ -24,7 +23,7 @@ import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, } from "../../../utils/pathMap";
 
-const { themeColor, black, white, viewShadow, bg_color, unread, } = COLOR_DIY;
+const { themeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
 const courseTimeList = coursePlanTimeFile.Courses;
 const coursePlanList = coursePlanFile.Courses;
@@ -78,29 +77,8 @@ handleSearchFilterCourse = (inputText) => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title Chi'].indexOf(inputText) != -1
+            || itm['Teacher Information'].indexOf(inputText) != -1
     });
-
-    // 篩選課表時間Excel的數據
-    // if (courseTimeList.length > 0) {
-    //     let coursePlanSearchList = courseTimeList.filter(itm => {
-    //         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-    //             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-    //             || itm['Teacher Information'].toUpperCase().indexOf(inputText) != -1
-    //             || (itm['Day'] && itm['Day'].toUpperCase().indexOf(inputText) != -1)
-    //             || (itm['Offering Department'] && itm['Offering Department'].toUpperCase().indexOf(inputText) != -1)
-    //             || itm['Offering Unit'].toUpperCase().indexOf(inputText) != -1
-    //             || itm['Course Title Chi'].indexOf(inputText) != -1
-    //     });
-
-    //     // 搜索合併
-    //     filterCourseList = filterCourseList.concat(coursePlanSearchList)
-    //     // 搜索去重
-    //     filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
-    // }
-
-    // // 搜索結果排序
-    // filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
-    // filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
 
     return filterCourseList
 }
@@ -109,6 +87,8 @@ handleSearchFilterCourse = (inputText) => {
 // * 查看某時間段可選的CourseCode、Section
 // TODO: Press 震動
 export default class courseSim extends Component {
+    verScroll = React.createRef();
+
     state = {
         // 導入課表功能
         importTimeTableText: null,
@@ -213,7 +193,7 @@ export default class courseSim extends Component {
             });
 
             return (
-                <View style={{ width: scale(135), }}>
+                <View style={{ width: scale(135), marginBottom: dayCourseList.length < 4 ? ((4 - dayCourseList.length) * scale(140)) : null }}>
                     {/* 星期幾 */}
                     <Text style={{
                         ...uiStyle.defaultText,
@@ -410,11 +390,6 @@ export default class courseSim extends Component {
         this.handleCourseList(courseCodeList);
     }
 
-    changeCourse = (changeCourseInfo) => {
-        // TODO: Firebase
-        alert('Change課')
-    }
-
     // 刪除所選課程
     dropCourse = (course) => {
         // TODO: Firebase
@@ -506,7 +481,7 @@ export default class courseSim extends Component {
                     <TouchableOpacity style={{
                         position: 'absolute',
                         right: scale(10),
-                        backgroundColor: themeColor,
+                        backgroundColor: this.state.addMode ? 'gray' : themeColor,
                         borderRadius: scale(10),
                         padding: scale(5),
                     }}
@@ -515,48 +490,50 @@ export default class courseSim extends Component {
                             this.setState({ addMode: !this.state.addMode })
                         }}
                     >
-                        <Text style={{ color: white, }}>Add</Text>
+                        <Text style={{ ...uiStyle.defaultText, color: white, }}>{this.state.addMode ? 'Close' : 'Add'}</Text>
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView>
-                    <View style={{ flexDirection: 'row', width: '100%' }}>
-                        <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
-                            {allCourseAllTime && allCourseAllTime.length > 0 ? (<View >
-                                {/* 渲染已保存的課表數據 */}
-                                <ScrollView
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    style={{ marginHorizontal: scale(5) }}>
-                                    {dayList.map(day => {
-                                        return this.renderDay(day);
-                                    })}
-                                </ScrollView>
-                            </View>) : (
-                                // 首次使用提示
-                                <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
-                                    <Text style={{ ...s.firstUseText, }}>{`如何開始使用模擬課表？\n`}</Text>
+                <ScrollView
+                    ref={this.verScroll}
+                    contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
+                >
+                    <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
+                        {allCourseAllTime && allCourseAllTime.length > 0 ? (<View >
+                            {/* 渲染已保存的課表數據 */}
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={{ marginHorizontal: scale(5) }}>
+                                {dayList.map(day => {
+                                    return this.renderDay(day);
+                                })}
+                            </ScrollView>
+                        </View>) : (
+                            // 首次使用提示
+                            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
+                                <Text style={{ ...s.firstUseText, }}>{`\n如何開始使用模擬課表？\n`}</Text>
 
-                                    {/* Add課按鈕提示 */}
-                                    <Text style={{ ...s.firstUseText, }}>{`選項1：右上角“Add”按鈕，自己動手！\n`}</Text>
+                                {/* Add課按鈕提示 */}
+                                <Text style={{ ...s.firstUseText, }}>{`選項1：右上角“Add”按鈕，自己動手！\n`}</Text>
 
-                                    <Text style={{ ...s.firstUseText, }}>{`選項2：全選、複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
+                                <Text style={{ ...s.firstUseText, }}>{`選項2：全選、複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
 
-                                    {/* 跳轉ISW按鈕 */}
-                                    <TouchableOpacity style={{ ...s.buttonContainer, }}
-                                        onPress={() => { openLink(UM_ISW); }}
-                                    >
-                                        <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
-                                    </TouchableOpacity>
-                                    {/* 粘貼課表數據 */}
-                                    <TextInput
-                                        editable
-                                        multiline
-                                        numberOfLines={6}
-                                        onChangeText={text => {
-                                            this.setState({ importTimeTableText: text });
-                                        }}
-                                        placeholder={`Example：
+                                {/* 跳轉ISW按鈕 */}
+                                <TouchableOpacity style={{ ...s.buttonContainer, }}
+                                    onPress={() => { openLink(UM_ISW); }}
+                                >
+                                    <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
+                                </TouchableOpacity>
+                                {/* 粘貼課表數據 */}
+                                <TextInput
+                                    editable
+                                    multiline
+                                    numberOfLines={6}
+                                    onChangeText={text => {
+                                        this.setState({ importTimeTableText: text });
+                                    }}
+                                    placeholder={`Example：
 TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
 9:00	09:00-10:45 ECEN0000(001)
 E11-0000
@@ -566,64 +543,47 @@ E11-0000
 9:30	-	-	-	-	-
 18:30	-	-	-	-	-
                                 `}
-                                        placeholderTextColor={black.third}
-                                        value={this.state.importTimeTableText}
-                                        style={{
-                                            backgroundColor: white,
-                                            padding: 10,
-                                            borderRadius: scale(10),
-                                            width: '90%',
-                                            color: black.main,
-                                        }}
-                                    />
-                                    {/* 導入課表按鈕 */}
-                                    <TouchableOpacity
-                                        style={{
-                                            ...s.buttonContainer,
-                                            backgroundColor: this.state.importTimeTableText ? COLOR_DIY.success : 'gray',
-                                        }}
-                                        onPress={this.importCourseData}
-                                        disabled={!this.state.importTimeTableText}
-                                    >
-                                        <Text style={{ ...s.firstUseText, color: white, }}>2.2 一鍵導入到模擬課表</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        </View>
-
-                        {/* 渲染選課的篩選列表 */}
-                        {this.state.addMode && (<View style={{ width: '35%' }}>
-                            {/* TODO: 時間篩選 */}
-                            {false && (
-                                <View>
-                                    <Text>時間篩選</Text>
-                                    {/* <DateTimePickerModal
-                                    isVisible={this.state.addMode}
-                                    // date={startDate}
-                                    mode="time"
-                                    onConfirm={date => {
-                                        
+                                    placeholderTextColor={black.third}
+                                    value={this.state.importTimeTableText}
+                                    style={{
+                                        backgroundColor: white,
+                                        padding: scale(10),
+                                        borderRadius: scale(10),
+                                        width: '90%',
+                                        color: black.main,
                                     }}
-                                    onCancel={() => {
-                                        
+                                />
+                                {/* 導入課表按鈕 */}
+                                <TouchableOpacity
+                                    style={{
+                                        ...s.buttonContainer,
+                                        backgroundColor: this.state.importTimeTableText ? COLOR_DIY.success : 'gray',
                                     }}
-                                /> */}
-                                </View>
-                            )}
+                                    onPress={this.importCourseData}
+                                    disabled={!this.state.importTimeTableText}
+                                >
+                                    <Text style={{ ...s.firstUseText, color: white, }}>2.2 一鍵導入到模擬課表</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
 
+                    {/* 渲染選課的篩選列表 */}
+                    {this.state.addMode && (
+                        <View style={{ width: '35%', marginTop: scale(5), }}>
                             {/* 輸入框 */}
                             <View style={{
                                 borderColor: themeColor,
                                 borderWidth: scale(1), borderRadius: scale(10),
                                 marginHorizontal: scale(3),
                             }}>
-                                {/* <Text>Add課輸入框</Text> */}
+                                {/* Add課搜索框 */}
                                 <TextInput
                                     style={{
                                         ...uiStyle.defaultText,
                                         color: black.main,
                                         fontSize: scale(12),
-                                        paddingVertical: scale(2),
+                                        padding: scale(5),
                                     }}
                                     onChangeText={(inputText) => {
                                         this.setState({ searchText: inputText.toUpperCase(), });
@@ -693,6 +653,7 @@ E11-0000
                                                 borderColor: themeColor,
                                             }}
                                             onPress={() => {
+                                                // TODO: 震動
                                                 this.addAllSectionCourse(i['Course Code'], sectionObj);
                                                 // 切換searchText為點擊的Code
                                                 this.setState({ searchText: i['Course Code'] });
@@ -715,7 +676,9 @@ E11-0000
                                                 return <TouchableOpacity
                                                     style={{ marginBottom: scale(5), }}
                                                     onPress={() => {
+                                                        // TODO: 震動
                                                         this.addCourse(sectionObj[key][0]);
+                                                        this.verScroll.current.scrollTo({ y: 0 });
                                                     }}
                                                 >
                                                     {/* Section號碼 */}
@@ -735,8 +698,8 @@ E11-0000
                                     </View>)
                                 })
                                 ) : null}
-                        </View>)}
-                    </View>
+                        </View>
+                    )}
                 </ScrollView>
             </View >
         );
