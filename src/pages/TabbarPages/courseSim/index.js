@@ -431,7 +431,7 @@ export default class courseSim extends Component {
                 {/* Add課按鈕提示 */}
                 <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項1：</Text>{`望向右上角自己動手“Add”！\n`}</Text>
 
-                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
+                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n到下方框框中粘貼，\n然後一鍵導入！`}</Text>
 
                 {/* 跳轉ISW按鈕 */}
                 <TouchableOpacity style={{ ...s.buttonContainer, }}
@@ -478,6 +478,14 @@ E11-0000
                 >
                     <Text style={{ ...s.firstUseText, color: white, }}>2.2 一鍵導入到模擬課表</Text>
                 </TouchableOpacity>
+
+                <Text style={{ ...s.firstUseText, fontSize: scale(12), marginTop: scale(25) }}>
+                    {`如有問題，立即聯繫umacark@gmail.com`}
+                </Text>
+                {/* 靈感來源 */}
+                <Text style={{ ...s.firstUseText, fontSize: scale(12) }}>
+                    {`\n靈感源自kchomacau, Raywong前輩的\n“課表模擬”開源倉庫！`}
+                </Text>
             </View>
         )
     }

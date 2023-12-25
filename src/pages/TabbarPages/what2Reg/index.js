@@ -974,7 +974,7 @@ export default class index extends Component {
                                 color: black.third,
                                 // fontWeight: 'bold',
                             }}>
-                                短按查Wiki，長按選課/看Section !!!
+                                短按查Wiki，長按查Section !!!
                             </Text>
 
                             {/* 渲染篩選出的課程 */}
