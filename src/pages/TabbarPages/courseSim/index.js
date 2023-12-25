@@ -422,6 +422,66 @@ export default class courseSim extends Component {
         ], { cancelable: true })
     }
 
+    // 渲染首次使用文字提示
+    renderFirstUse = () => {
+        return (
+            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
+                <Text style={{ ...s.firstUseText, }}>{`\n如何開始使用模擬課表？\n`}</Text>
+
+                {/* Add課按鈕提示 */}
+                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項1：</Text>{`望向右上角自己動手“Add”！\n`}</Text>
+
+                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
+
+                {/* 跳轉ISW按鈕 */}
+                <TouchableOpacity style={{ ...s.buttonContainer, }}
+                    onPress={() => { openLink(UM_ISW); }}
+                >
+                    <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
+                </TouchableOpacity>
+                {/* 粘貼課表數據 */}
+                <TextInput
+                    editable
+                    multiline
+                    numberOfLines={6}
+                    onChangeText={text => {
+                        this.setState({ importTimeTableText: text });
+                    }}
+                    placeholder={`Example：
+TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
+9:00	09:00-10:45 ECEN0000(001)
+E11-0000
+(Lecture)	-	-	09:00-10:45 ECEN0000(001)
+E11-0000
+(Lab/Tutorial)	-	-	-
+9:30	-	-	-	-	-
+18:30	-	-	-	-	-
+                                `}
+                    placeholderTextColor={black.third}
+                    value={this.state.importTimeTableText}
+                    style={{
+                        backgroundColor: white,
+                        padding: scale(10),
+                        borderRadius: scale(10),
+                        width: '90%',
+                        color: black.main,
+                    }}
+                />
+                {/* 導入課表按鈕 */}
+                <TouchableOpacity
+                    style={{
+                        ...s.buttonContainer,
+                        backgroundColor: this.state.importTimeTableText ? COLOR_DIY.success : 'gray',
+                    }}
+                    onPress={this.importCourseData}
+                    disabled={!this.state.importTimeTableText}
+                >
+                    <Text style={{ ...s.firstUseText, color: white, }}>2.2 一鍵導入到模擬課表</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
     render() {
         const { allCourseAllTime, } = this.state;
         const filterCourseList = handleSearchFilterCourse(this.state.searchText);
@@ -509,63 +569,7 @@ export default class courseSim extends Component {
                                     return this.renderDay(day);
                                 })}
                             </ScrollView>
-                        </View>) : (
-                            // 首次使用提示
-                            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
-                                <Text style={{ ...s.firstUseText, }}>{`\n如何開始使用模擬課表？\n`}</Text>
-
-                                {/* Add課按鈕提示 */}
-                                <Text style={{ ...s.firstUseText, }}>{`選項1：右上角“Add”按鈕，自己動手！\n`}</Text>
-
-                                <Text style={{ ...s.firstUseText, }}>{`選項2：全選、複製ISW真正課表，\n到下方框框粘貼，\n然後一鍵導入！`}</Text>
-
-                                {/* 跳轉ISW按鈕 */}
-                                <TouchableOpacity style={{ ...s.buttonContainer, }}
-                                    onPress={() => { openLink(UM_ISW); }}
-                                >
-                                    <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
-                                </TouchableOpacity>
-                                {/* 粘貼課表數據 */}
-                                <TextInput
-                                    editable
-                                    multiline
-                                    numberOfLines={6}
-                                    onChangeText={text => {
-                                        this.setState({ importTimeTableText: text });
-                                    }}
-                                    placeholder={`Example：
-TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
-9:00	09:00-10:45 ECEN0000(001)
-E11-0000
-(Lecture)	-	-	09:00-10:45 ECEN0000(001)
-E11-0000
-(Lab/Tutorial)	-	-	-
-9:30	-	-	-	-	-
-18:30	-	-	-	-	-
-                                `}
-                                    placeholderTextColor={black.third}
-                                    value={this.state.importTimeTableText}
-                                    style={{
-                                        backgroundColor: white,
-                                        padding: scale(10),
-                                        borderRadius: scale(10),
-                                        width: '90%',
-                                        color: black.main,
-                                    }}
-                                />
-                                {/* 導入課表按鈕 */}
-                                <TouchableOpacity
-                                    style={{
-                                        ...s.buttonContainer,
-                                        backgroundColor: this.state.importTimeTableText ? COLOR_DIY.success : 'gray',
-                                    }}
-                                    onPress={this.importCourseData}
-                                    disabled={!this.state.importTimeTableText}
-                                >
-                                    <Text style={{ ...s.firstUseText, color: white, }}>2.2 一鍵導入到模擬課表</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
+                        </View>) : (this.renderFirstUse())}
                     </View>
 
                     {/* 渲染選課的篩選列表 */}
@@ -709,7 +713,7 @@ E11-0000
 const s = StyleSheet.create({
     firstUseText: {
         ...uiStyle.defaultText,
-        color: themeColor,
+        color: black.third,
         fontWeight: 'bold',
         fontSize: scale(20),
         textAlign: 'center',
