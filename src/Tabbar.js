@@ -134,7 +134,7 @@ class Tabbar extends Component {
                         options={{
                             tabBarIcon: ({ focused, color, size }) => (
                                 <MaterialCommunityIcons
-                                    name="database-search-outline"
+                                    name="table-clock"
                                     size={scale(18)}
                                     color={
                                         focused ? color : COLOR_DIY.black.main
