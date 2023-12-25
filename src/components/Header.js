@@ -46,11 +46,15 @@ class HeaderDIY extends Component {
                 centerContainerStyle={{
                     justifyContent: 'center',
                     // 修復深色模式頂部小白條問題
-                    borderBottomWidth: 0,
+                    // borderBottomWidth: 0,
                 }}
                 statusBarProps={{
                     backgroundColor: 'transparent',
                     barStyle: COLOR_DIY.barStyle,
+                }}
+                containerStyle={{
+                    // 修復深色模式頂部小白條問題
+                    borderBottomWidth: 0,
                 }}
             />
         );
