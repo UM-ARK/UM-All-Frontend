@@ -165,4 +165,5 @@ yarn ios --simulator="iPhone 15"
    * 按照程序注釋增加校曆的繁體中文翻譯內容。
 2. 澳大課程更新。使用預選課Excel，使用Excel to JSON工具獲得JSON數據，放入`src/static/UMCourses/offer courses.json`。
    * 按照程序注釋增加開設課程的繁體中文翻譯內容。
+3. icon更新。使用 `https://www.appicon.co/` 生成iOS icon文件，使用 `Android Studio` 生成Android icon文件（Studio生成的文件最全面，適配各個廠商的UI）。
 
