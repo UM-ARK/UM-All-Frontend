@@ -23,6 +23,7 @@ import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, } from "../../../utils/pathMap";
+import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
 const { themeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -85,8 +86,7 @@ handleSearchFilterCourse = (inputText) => {
     return filterCourseList
 }
 
-// TODO: 目標
-// * 查看某時間段可選的CourseCode、Section
+// TODO: 查看某時間段可選的CourseCode、Section
 export default class courseSim extends Component {
     constructor() {
         super();
@@ -97,40 +97,6 @@ export default class courseSim extends Component {
     state = {
         // 導入課表功能
         importTimeTableText: null,
-        // importTimeTableText: `
-        // TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
-        // 9:00	09:00-10:45 ECEN3019(001)
-        // E11-1018
-        // (Lecture)	-	-	09:00-10:45 ECEN3019(001)
-        // E11-1018
-        // (Lab/Tutorial)	-	-	-
-        // 9:30	-	-	-	-	-
-        // 10:00	-	-	-	-	-
-        // 10:30	-	-	-	-	-
-        // 11:00	-	-	-	-	-	-	-
-        // 11:30	-	-	-	-	-	-	-
-        // 12:00	-	-	-	-	-	-	-
-        // 12:30	-	-	-	-	-	-	-
-        // 13:00	-	-	-	-	-	-	-
-        // 13:30	-	-	-	-	-	-	-
-        // 14:00	-	-	-	-	-	-	-
-        // 14:30	-	14:30-15:45 COMM2003(002)
-        // E22-4004
-        // (Lecture)	-	-	14:30-15:45 COMM2003(002)
-        // E22-4004
-        // (Lecture)	-	-
-        // 15:00	-	-	-	-	-
-        // 15:30	-	-	-	-	-
-        // 16:00	-	-	-	-	-	-	-
-        // 16:30	-	-	-	-	-	-	-
-        // 17:00	-	17:00-18:45 ECEN3025(001)
-        // E11-1028
-        // (Lecture)	-	-	17:00-18:45 ECEN3025(001)
-        // E11-1028
-        // (Lab/Tutorial)	-	-
-        // 17:30	-	-	-	-	-
-        // 18:00	-	-	-	-	-
-        // 18:30	-	-	-	-	-`,
 
         courseCodeList: [],
         allCourseAllTime: [],
@@ -140,6 +106,8 @@ export default class courseSim extends Component {
     }
 
     async componentDidMount() {
+        logToFirebase('openPage', { page: 'courseSim' });
+
         const strCourseCodeList = await AsyncStorage.getItem('ARK_Timetable_Storage');
         const courseCodeList = strCourseCodeList ? JSON.parse(strCourseCodeList) : null;
 
@@ -292,7 +260,6 @@ export default class courseSim extends Component {
                     activeOpacity={0.8}
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // TODO: Firebase
                         Alert.alert("", `想知道關於${course['Course Code']}的...\n(長按可以刪除課程...)`,
                             [
                                 {
@@ -319,7 +286,6 @@ export default class courseSim extends Component {
                     }}
                     onLongPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // TODO: Firebase
                         Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}-${course['Section']}嗎？`,
                             [
                                 {
@@ -389,7 +355,6 @@ export default class courseSim extends Component {
 
     addCourse = (course) => {
         ReactNativeHapticFeedback.trigger('soft');
-        // TODO: Firebase
         let { courseCodeList } = this.state;
         let tempArr = [];
         courseCodeList.map(i => {
@@ -428,7 +393,6 @@ export default class courseSim extends Component {
     // 刪除所選課程
     dropCourse = (course) => {
         ReactNativeHapticFeedback.trigger('soft');
-        // TODO: Firebase
         const { courseCodeList } = this.state;
         let newList = [];
         courseCodeList.map(i => {
@@ -472,7 +436,7 @@ export default class courseSim extends Component {
                 {/* Add課按鈕提示 */}
                 <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項1：</Text>{`望向右上角自己動手“Add”！\n`}</Text>
 
-                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n到下方框框中粘貼，\n然後一鍵導入！`}</Text>
+                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n(ISW課表是文字不是圖片!)\n到下方框框中粘貼，\n然後一鍵導入！`}</Text>
 
                 {/* 跳轉ISW按鈕 */}
                 <TouchableOpacity style={{ ...s.buttonContainer, }}
