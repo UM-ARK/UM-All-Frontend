@@ -8,6 +8,7 @@ import {
     StyleSheet,
     TextInput,
     Keyboard,
+    FlatList,
 } from 'react-native';
 
 import { scale } from 'react-native-size-matters';
@@ -17,6 +18,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -101,8 +103,15 @@ export default class courseSim extends Component {
         courseCodeList: [],
         allCourseAllTime: [],
 
-        addMode: false,
+        addMode: true,
         searchText: '',
+
+        dayFilter: 'ALL',
+        // timeFilter: 'ALL',
+        // timeFilterFrom: '08:30',
+        // timeFilterTo: '22:00',
+        // showTimePickerFrom: false,
+        // showTimePickerTo: false,
     }
 
     async componentDidMount() {
@@ -496,6 +505,109 @@ E11-0000
         )
     }
 
+    renderDayFilter = () => {
+        const { dayFilter } = this.state;
+        return (<View style={{ margin: scale(5), }}>
+            <FlatList
+                data={dayList}
+                horizontal
+                scrollEnabled
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item: itm }) => (
+                    <TouchableOpacity style={{
+                        ...s.filterButtonContainer,
+                        backgroundColor: dayFilter == itm ? themeColor : white,
+                    }}
+                        onPress={() => {
+                            this.setState({ dayFilter: itm })
+                        }}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: dayFilter == itm ? white : black.third,
+                        }}>{itm}</Text>
+                    </TouchableOpacity>
+                )}
+                ListHeaderComponent={() => (
+                    <TouchableOpacity style={{
+                        ...s.filterButtonContainer,
+                        backgroundColor: dayFilter == 'ALL' ? themeColor : white,
+                    }}
+                        onPress={() => {
+                            this.setState({ dayFilter: 'ALL' })
+                        }}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: dayFilter == 'ALL' ? white : black.third,
+                        }}>ALL</Text>
+                    </TouchableOpacity>
+                )}
+            />
+        </View>)
+    }
+
+    renderTimeFilter = () => {
+        const { timeFilter, timeFilterFrom, timeFilterTo, showTimePickerFrom, showTimePickerTo } = this.state;
+        return (<View style={{ flexDirection: 'row', marginHorizontal: scale(5) }}>
+            {/* ALL選項 */}
+            <TouchableOpacity style={{
+                ...s.filterButtonContainer,
+                backgroundColor: timeFilter == 'ALL' ? themeColor : white,
+            }}
+                onPress={() => {
+                    this.setState({ timeFilter: 'ALL' })
+                }}
+            >
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: timeFilter == 'ALL' ? white : black.third,
+                }}>ALL</Text>
+            </TouchableOpacity>
+
+            {/* 時間選項 */}
+            <TouchableOpacity style={{
+                flexDirection: 'row',
+                ...s.filterButtonContainer,
+                backgroundColor: timeFilter == 'TIME' ? themeColor : white,
+            }}
+                onPress={() => {
+                    this.setState({ timeFilter: 'TIME', showTimePickerFrom: true })
+                }}
+            >
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: timeFilter == 'TIME' ? white : black.third,
+                }}>{timeFilterFrom + ' - ' + timeFilterTo}</Text>
+            </TouchableOpacity>
+
+            <DateTimePickerModal
+                isVisible={showTimePickerFrom || showTimePickerTo}
+                // date={Date(timeFilterFrom)}
+                mode='time'
+                // onConfirm={date => {
+                //     if (showTimePickerFrom) {
+                //         this.setState({
+                //             timeFilterFrom: date,
+                //             timeFilterTo: date,
+                //             showTimePickerFrom: false,
+                //         });
+                //     }
+                //     else if (showTimePickerTo) {
+                //         this.setState({
+                //             timeFilterTo: date,
+                //             showTimePickerTo: false,
+                //         });
+                //     }
+                // }}
+                onCancel={() => {
+                    this.setState({ showTimePickerFrom: false, showTimePickerTo: false });
+                }}
+            />
+        </View>
+        )
+    }
+
     renderCourseSearch = () => {
         const filterCourseList = handleSearchFilterCourse(this.state.searchText);
         return (
@@ -507,11 +619,17 @@ E11-0000
                 backgroundColor: white,
                 ...COLOR_DIY.viewShadow,
             }}>
+                {/* 星期篩選 */}
+                {/* {this.renderDayFilter()} */}
+
+                {/* 時間篩選 */}
+                {/* {this.renderTimeFilter()} */}
+
                 {/* 輸入框 */}
                 <View style={{
                     borderColor: themeColor,
                     borderWidth: scale(1), borderRadius: scale(10),
-                    margin: scale(3),
+                    margin: scale(5),
                 }}>
                     {/* Add課搜索框 */}
                     <TextInput
@@ -715,6 +833,7 @@ E11-0000
                 <ScrollView
                     ref={this.verScroll}
                     contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
+                    showsVerticalScrollIndicator={false}
                 >
                     {/* 課表 / 首次使用提示 */}
                     <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
@@ -752,6 +871,10 @@ const s = StyleSheet.create({
         borderRadius: scale(10),
         padding: scale(10),
         margin: scale(10),
+    },
+    filterButtonContainer: {
+        paddingHorizontal: scale(5), paddingVertical: scale(2),
+        borderRadius: scale(5),
     },
     searchResultText: {
         ...uiStyle.defaultText,
