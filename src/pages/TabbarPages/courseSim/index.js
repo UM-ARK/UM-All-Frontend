@@ -103,7 +103,7 @@ export default class courseSim extends Component {
         courseCodeList: [],
         allCourseAllTime: [],
 
-        addMode: true,
+        addMode: false,
         searchText: '',
 
         dayFilter: 'ALL',
