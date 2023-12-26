@@ -92,4 +92,18 @@ The following build commands failed:
 到`./ios`使用`pod install --repo-update;`安裝Pod相關包，**該步驟可能會使電腦重裝iOS模擬器**。
 使用Xcode嘗試Build，Fix`yoga.cpp`和`hash`問題後，應該可以正常Build。
 
+8. Build、Archive等步驟出現問題。提示`Multiple commands produce`。
+
+<img width="844" alt="Snipaste_2023-12-20_00-50-41" src="https://github.com/UM-ARK/UM-All-Frontend/assets/55580370/7a8b6b21-6e0b-44a9-9586-12c4e7c397a1">
+
+在Xcode中 點選目錄中的`Pods`，選擇`Signing & Capabilities`選擇正確的`Team`。
+
+<img width="960" alt="Snipaste_2023-12-20_00-51-06" src="https://github.com/UM-ARK/UM-All-Frontend/assets/55580370/665b0ea6-b5be-488f-87b3-2d5b2b43baf2">
+
+在`TARGETS`中使用底部的篩選輸入框，輸入`Core`定位重複的文件，右鍵`Delete` `React-Core.common-Access`。
+
+<img width="320" alt="Snipaste_2023-12-20_00-51-31" src="https://github.com/UM-ARK/UM-All-Frontend/assets/55580370/0e29a0bf-8469-419d-bf2b-377b8936b106">
+
+然後重新Run和Build試試。
+
 ---
