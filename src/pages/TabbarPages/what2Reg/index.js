@@ -153,7 +153,6 @@ async function setLocalOpitons(filterOptions) {
 handleSearchFilterCourse = (inputText) => {
     const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
 
-    inputText = inputText.toUpperCase();
     // 篩選所需課程
     let filterCourseList = offerCourseList.filter(itm => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
@@ -732,7 +731,7 @@ export default class index extends Component {
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
-                                inputText,
+                                inputText: inputText.toUpperCase(),
                                 inputOK: inputText.length > 0,
                                 scrollData: {},
                             });
@@ -909,7 +908,7 @@ export default class index extends Component {
                     backgroundColor={COLOR_DIY.bg_color}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
+                        barStyle: COLOR_DIY.barStyle,
                     }}
                     containerStyle={{
                         // 修復頂部空白過多問題
@@ -918,6 +917,8 @@ export default class index extends Component {
                             default: scale(35),
                         }),
                         paddingTop: 0,
+                        // 修復深色模式頂部小白條問題
+                        borderBottomWidth: 0,
                     }}
                 />
 
@@ -968,10 +969,11 @@ export default class index extends Component {
                             <Text style={{
                                 ...uiStyle.defaultText,
                                 alignSelf: 'center',
-                                fontSize: scale(10),
+                                // fontSize: scale(13),
                                 color: black.third,
+                                // fontWeight: 'bold',
                             }}>
-                                短按看評論，長按看Section o(*￣3￣)o
+                                短按查Wiki，長按查Section !!!
                             </Text>
 
                             {/* 渲染篩選出的課程 */}

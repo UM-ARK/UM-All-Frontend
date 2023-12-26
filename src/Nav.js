@@ -35,6 +35,8 @@ import What2RegRelateCourses from './pages/TabbarPages/what2Reg/pages/RelateCour
 import What2RegProf from './pages/TabbarPages/what2Reg/pages/Prof';
 import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 
+import courseSimIndex from './pages/TabbarPages/courseSim';
+
 import ARKWiki from './pages/TabbarPages/arkwiki';
 
 import Webviewer from './components/Webviewer';
@@ -133,7 +135,7 @@ class Nav extends Component {
                         component={FollowersPage}
                     />
 
-                    {/* 選咩課ARK加強版 */}
+                    {/* ARK選課 */}
                     <Stack.Screen name="What2RegHome" component={What2RegTabIndex} />
                     <Stack.Screen name="What2RegCourse" component={What2RegCourse} />
                     <Stack.Screen name="What2RegComment" component={What2RegComment} />
@@ -141,6 +143,9 @@ class Nav extends Component {
                     <Stack.Screen name="What2RegRelateCourses" component={What2RegRelateCourses} />
                     <Stack.Screen name="What2RegProf" component={What2RegProf} />
                     <Stack.Screen name="LocalCourse" component={LocalCourse} />
+
+                    {/* 課表模擬 */}
+                    <Stack.Screen name="courseSimIndex" component={courseSimIndex} />
 
                     {/* 測試頁 */}
                     <Stack.Screen name="TestScreen" component={TestScreen} />

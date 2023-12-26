@@ -7421,8 +7421,8 @@
             "Teacher Information": "MARIA JOSÉ DOS REIS GROSSO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "17:30",
-            "Time To": "18:45",
+            "Time From": "14:30",
+            "Time To": "15:45",
             "Classroom": "E21-2114",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17 / PTS19\n",
             "Course Title Chi": "畢業設計"
@@ -7437,8 +7437,8 @@
             "Teacher Information": "MARIA JOSÉ DOS REIS GROSSO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "17:30",
-            "Time To": "18:45",
+            "Time From": "14:30",
+            "Time To": "15:45",
             "Classroom": "E21-2114",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17 / PTS19\n",
             "Course Title Chi": "畢業設計"
@@ -14296,7 +14296,7 @@
             "Time To": "11:15",
             "Classroom": "E22-3013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
-            "Course Title Chi": "網站設計與網路商務應用"
+            "Course Title Chi": "網站設計與網路商業應用"
         },
         {
             "Offering Unit": "FBA",
@@ -24118,10 +24118,10 @@
             "Notes for Course Enrolment": "Course not for students who have completed GEGC212-001 in 2015/2016.",
             "Teacher Information": "HO HENG MAN",
             "Lecture / Lab": "Lecture",
-            "Day": "TBA",
-            "Time From": "TBA",
-            "Time To": "TBA",
-            "Classroom": "TBA",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "20:15",
+            "Classroom": "E4-G068",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FLL\n",
             "Course Title Chi": "澳門法及其現實生活中的應用"
         },
@@ -24136,10 +24136,10 @@
             "Notes for Course Enrolment": "Course not for students who have completed GEGC212-001 in 2015/2016.",
             "Teacher Information": "HO HENG MAN",
             "Lecture / Lab": "Lecture",
-            "Day": "TBA",
-            "Time From": "TBA",
-            "Time To": "TBA",
-            "Classroom": "TBA",
+            "Day": "THU",
+            "Time From": "19:00",
+            "Time To": "20:15",
+            "Classroom": "E4-G068",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FLL\n",
             "Course Title Chi": "澳門法及其現實生活中的應用"
         },
@@ -28489,7 +28489,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -28505,7 +28505,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -30311,7 +30311,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E11-1025",
+            "Classroom": "E34-G011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST\n",
             "Course Title Chi": "人機互動"
         },
@@ -30327,7 +30327,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E11-1025",
+            "Classroom": "E34-G011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST\n",
             "Course Title Chi": "人機互動"
         },
@@ -30598,7 +30598,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E34-G011",
+            "Classroom": "E12-G004",
             "Course Title Chi": "自然語言處理"
         },
         {
@@ -30613,7 +30613,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E34-G011",
+            "Classroom": "E12-G004",
             "Course Title Chi": "自然語言處理"
         },
         {
@@ -35906,7 +35906,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "W11-1051",
+            "Classroom": "E11-1012",
             "Course Title Chi": "住宿學院體驗式學習"
         },
         {
@@ -35921,7 +35921,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "W11-1051",
+            "Classroom": "E11-1012",
             "Course Title Chi": "住宿學院體驗式學習"
         },
         {

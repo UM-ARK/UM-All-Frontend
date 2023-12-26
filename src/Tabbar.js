@@ -7,6 +7,7 @@ import MeScreen from './pages/TabbarPages/me';
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import ARKWiki from './pages/TabbarPages/arkwiki';
+import CourseSim from './pages/TabbarPages/courseSim';
 
 import { COLOR_DIY } from './utils/uiMap';
 import { scale } from 'react-native-size-matters';
@@ -52,29 +53,6 @@ class Tabbar extends Component {
                     tabBarBackground: COLOR_DIY.bg_color,
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
-                {/* {isClub ? null : (
-                    <Tabs.Screen
-                        name="HomeTabbar"
-                        component={HomeScreen}
-                        options={{
-                            tabBarIcon: ({focused, color, size}) => (
-                                <Icon
-                                    name="home"
-                                    size={size ? size : 24}
-                                    color={
-                                        focused ? color : COLOR_DIY.black.main
-                                    }
-                                    focused={focused}
-                                    color={color}
-                                />
-                            ),
-                            title: '主頁',
-                        }}
-                        initialParams={{
-                            setLock: this.props.route.params.setLock,
-                        }}
-                    />
-                )} */}
 
                 {/* 社團賬號登錄，進入簡潔模式 */}
                 {isClub ? null : (
@@ -124,7 +102,7 @@ class Tabbar extends Component {
                     />
                 )}
 
-                {/* 選咩課 */}
+                {/* ARK選課 */}
                 {isClub ? null : (
                     <Tabs.Screen
                         name="What2RegTab"
@@ -141,6 +119,30 @@ class Tabbar extends Component {
                                 />
                             ),
                             title: '搵課',
+                        }}
+                        listeners={() => ({
+                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                        })}
+                    />
+                )}
+
+                {/* 課表模擬 */}
+                {isClub ? null : (
+                    <Tabs.Screen
+                        name="CourseSimTab"
+                        component={CourseSim}
+                        options={{
+                            tabBarIcon: ({ focused, color, size }) => (
+                                <MaterialCommunityIcons
+                                    name="table-clock"
+                                    size={scale(18)}
+                                    color={
+                                        focused ? color : COLOR_DIY.black.main
+                                    }
+                                    focused={focused}
+                                />
+                            ),
+                            title: '課表',
                         }}
                         listeners={() => ({
                             tabPress: () => ReactNativeHapticFeedback.trigger('soft')

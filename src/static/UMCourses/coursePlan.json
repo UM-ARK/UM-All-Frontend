@@ -1061,7 +1061,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E11-1025",
+            "Classroom": "E34-G011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST\n",
             "Course Title Chi": "人機互動"
         },
@@ -1182,7 +1182,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E34-G011",
+            "Classroom": "E12-G004",
             "Course Title Chi": "自然語言處理"
         },
         {
@@ -4896,10 +4896,10 @@
             "Notes for Course Enrolment": "Course not for students who have completed GEGC212-001 in 2015/2016.",
             "Teacher Information": "HO HENG MAN",
             "Lecture / Lab": "Lecture",
-            "Day": "TBA",
-            "Time From": "TBA",
-            "Time To": "TBA",
-            "Classroom": "TBA",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "20:15",
+            "Classroom": "E4-G068",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FLL\n",
             "Course Title Chi": "澳門法及其現實生活中的應用"
         },
@@ -8367,7 +8367,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -8762,7 +8762,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2023-12-19",
+    "updateTime": "2023-12-21",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"

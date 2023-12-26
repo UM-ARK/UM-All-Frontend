@@ -351,6 +351,17 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'table-clock',
+                        fn_name: '課表模擬',
+                        needLogin: false,
+                        go_where: 'CourseSimTab',
+                        // webview_param: {
+                        //     url: UM_COURSE_SIMU,
+                        //     title: '課表模擬(建議在電腦操作)',
+                        // },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'database-search',
                         fn_name: '選咩課',
                         needLogin: false,
@@ -420,17 +431,6 @@ class Index extends Component {
                         webview_param: {
                             url: UM_IMPORTANT_DATE,
                             title: '重要日期',
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'clipboard-edit',
-                        fn_name: '課表模擬',
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            url: UM_COURSE_SIMU,
-                            title: '課表模擬(建議在電腦操作)',
                         },
                     },
                     {
@@ -765,6 +765,8 @@ class Index extends Component {
                             default: scale(35),
                         }),
                         paddingTop: 0,
+                        // 修復深色模式頂部小白條問題
+                        borderBottomWidth: 0,
                     }}
                 />
 
