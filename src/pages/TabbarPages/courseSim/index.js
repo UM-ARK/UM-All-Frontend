@@ -792,7 +792,7 @@ E11-0000
                         }}
                             onPress={this.clearCourse}
                         >
-                            <Text style={{ color: white, }}>Clear</Text>
+                            <Text style={{ ...uiStyle.defaultText, color: white, }}>Clear</Text>
                         </TouchableOpacity>
                     )}
 
