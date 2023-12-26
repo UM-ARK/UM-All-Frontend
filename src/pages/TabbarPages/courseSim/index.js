@@ -16,6 +16,7 @@ import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -86,7 +87,6 @@ handleSearchFilterCourse = (inputText) => {
 
 // TODO: 目標
 // * 查看某時間段可選的CourseCode、Section
-// TODO: Press 震動
 export default class courseSim extends Component {
     constructor() {
         super();
@@ -291,18 +291,21 @@ export default class courseSim extends Component {
                     }}
                     activeOpacity={0.8}
                     onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         // TODO: Firebase
                         Alert.alert("", `想知道關於${course['Course Code']}的...\n(長按可以刪除課程...)`,
                             [
                                 {
                                     text: "可選Section/老師",
                                     onPress: () => {
+                                        ReactNativeHapticFeedback.trigger('soft');
                                         this.props.navigation.navigate('LocalCourse', course['Course Code']);
                                     },
                                 },
                                 {
                                     text: "課程Wiki",
                                     onPress: () => {
+                                        ReactNativeHapticFeedback.trigger('soft');
                                         const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
                                         this.props.navigation.navigate('Wiki', { url: URL });
                                     },
@@ -315,6 +318,7 @@ export default class courseSim extends Component {
                         );
                     }}
                     onLongPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         // TODO: Firebase
                         Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}-${course['Section']}嗎？`,
                             [
@@ -372,6 +376,7 @@ export default class courseSim extends Component {
 
     // 導入ISW課表數據
     importCourseData = () => {
+        ReactNativeHapticFeedback.trigger('soft');
         const { importTimeTableText } = this.state;
         let parseRes = parseImportData(importTimeTableText);
         if (parseRes) {
@@ -383,6 +388,7 @@ export default class courseSim extends Component {
     }
 
     addCourse = (course) => {
+        ReactNativeHapticFeedback.trigger('soft');
         // TODO: Firebase
         let { courseCodeList } = this.state;
         let tempArr = [];
@@ -421,6 +427,7 @@ export default class courseSim extends Component {
 
     // 刪除所選課程
     dropCourse = (course) => {
+        ReactNativeHapticFeedback.trigger('soft');
         // TODO: Firebase
         const { courseCodeList } = this.state;
         let newList = [];
@@ -433,10 +440,12 @@ export default class courseSim extends Component {
     }
 
     clearCourse = () => {
+        ReactNativeHapticFeedback.trigger('soft');
         Alert.alert(``, `確定要清空當前的模擬課表嗎？`, [
             {
                 text: '確定清空',
                 onPress: () => {
+                    ReactNativeHapticFeedback.trigger('soft');
                     this.setState({
                         allCourseAllTime: [],
                         courseCodeList: [],
@@ -474,7 +483,7 @@ export default class courseSim extends Component {
                 {/* 粘貼課表數據 */}
                 <TextInput
                     ref={this.textSearchRef}
-                    // editable
+                    selectTextOnFocus
                     multiline
                     numberOfLines={6}
                     onChangeText={text => {
@@ -587,6 +596,7 @@ E11-0000
                                         padding: scale(3),
                                     }}
                                     onPress={() => {
+                                        ReactNativeHapticFeedback.trigger('soft');
                                         let { courseCodeList } = this.state;
                                         let tempArr = [];
                                         courseCodeList.map(itm => {
@@ -617,7 +627,7 @@ E11-0000
                                     borderColor: themeColor,
                                 }}
                                 onPress={() => {
-                                    // TODO: 震動
+                                    ReactNativeHapticFeedback.trigger('soft');
                                     this.addAllSectionCourse(i['Course Code'], sectionObj);
                                     // 切換searchText為點擊的Code
                                     this.setState({ searchText: i['Course Code'] });
@@ -640,7 +650,6 @@ E11-0000
                                     return <TouchableOpacity
                                         style={{ marginBottom: scale(5), }}
                                         onPress={() => {
-                                            // TODO: 震動
                                             this.addCourse(sectionObj[key][0]);
                                             this.verScroll.current.scrollTo({ y: 0 });
                                         }}
@@ -729,8 +738,10 @@ E11-0000
                         padding: scale(5),
                     }}
                         onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
                             // 切換加課模式
-                            this.setState({ addMode: !this.state.addMode })
+                            this.setState({ addMode: !this.state.addMode });
+                            this.verScroll.current.scrollTo({ y: 0 });
                         }}
                     >
                         <Text style={{ ...uiStyle.defaultText, color: white, }}>{this.state.addMode ? 'Close' : 'Add'}</Text>
