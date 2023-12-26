@@ -16,7 +16,6 @@ import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -79,6 +78,7 @@ handleSearchFilterCourse = (inputText) => {
             || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
             || itm['Course Title Chi'].indexOf(inputText) != -1
             || itm['Teacher Information'].indexOf(inputText) != -1
+            || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1)
     });
 
     return filterCourseList
@@ -158,9 +158,13 @@ export default class courseSim extends Component {
     }
 
     // 鍵盤收起，使輸入框失焦
-    _keyboardDidHide = () => {
+    _keyboardDidHide = async () => {
         // 使输入框失去焦点
-        this.textSearchRef.current.blur();
+        try {
+            this.textSearchRef.current.blur();
+        } catch (error) {
+            console.log('error', error);
+        }
     };
 
     // 處理課表數據，分析出用於render的數據
@@ -519,9 +523,151 @@ E11-0000
         )
     }
 
+    renderCourseSearch = () => {
+        const filterCourseList = handleSearchFilterCourse(this.state.searchText);
+        return (
+            <View style={{
+                width: '34%',
+                marginRight: scale(5),
+                marginTop: scale(5), marginBottom: scale(10),
+                borderWidth: scale(1), borderColor: themeColor, borderRadius: scale(10),
+                backgroundColor: white,
+                ...COLOR_DIY.viewShadow,
+            }}>
+                {/* 輸入框 */}
+                <View style={{
+                    borderColor: themeColor,
+                    borderWidth: scale(1), borderRadius: scale(10),
+                    margin: scale(3),
+                }}>
+                    {/* Add課搜索框 */}
+                    <TextInput
+                        ref={this.textSearchRef}
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            fontSize: scale(12),
+                            padding: scale(5),
+                        }}
+                        onChangeText={(inputText) => {
+                            this.setState({ searchText: inputText.toUpperCase(), });
+                        }}
+                        value={this.state.searchText}
+                        selectTextOnFocus
+                        placeholder="ECE, 電氣, AIM..."
+                        placeholderTextColor={black.third}
+                        returnKeyType={'search'}
+                        selectionColor={themeColor}
+                    />
+                </View>
+
+                {/* 渲染搜索課程的結果 */}
+                {this.state.searchText && filterCourseList.length > 0
+                    ? (filterCourseList.map(i => {
+                        // 從courseTimeList篩選所有的課程的Section、時間、老師
+                        let sectionObj = {};
+                        if (filterCourseList.length == 1) {
+                            let codeRes = courseTimeList.filter(itm => {
+                                return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
+                            });
+                            codeRes.map(itm => {
+                                let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
+                                tempArr.push(itm);
+                                sectionObj[itm['Section']] = tempArr;
+                            })
+                        }
+
+                        return (<View>
+                            {/* 刪除該Code課程按鈕 */}
+                            {filterCourseList.length == 1 && sectionObj && (
+                                <TouchableOpacity
+                                    style={{
+                                        ...s.buttonContainer,
+                                        backgroundColor: unread,
+                                        padding: scale(3),
+                                    }}
+                                    onPress={() => {
+                                        let { courseCodeList } = this.state;
+                                        let tempArr = [];
+                                        courseCodeList.map(itm => {
+                                            if (itm['Course Code'] != i['Course Code']) {
+                                                tempArr.push(itm);
+                                            }
+                                        })
+                                        courseCodeList = tempArr;
+                                        this.handleCourseList(courseCodeList);
+                                    }}
+                                >
+                                    <Text style={{
+                                        ...s.searchResultText,
+                                        color: COLOR_DIY.trueWhite,
+                                    }} >{`刪除所有${i['Course Code']}`}</Text>
+                                </TouchableOpacity>
+                            )}
+
+                            {filterCourseList.length == 1 && sectionObj && (
+                                <Text style={{ ...s.searchResultText, }}>↓ 全部放入課表</Text>
+                            )}
+
+                            {/* 課程標題 */}
+                            <TouchableOpacity
+                                style={{
+                                    marginBottom: scale(10),
+                                    borderBottomWidth: scale(1),
+                                    borderColor: themeColor,
+                                }}
+                                onPress={() => {
+                                    // TODO: 震動
+                                    this.addAllSectionCourse(i['Course Code'], sectionObj);
+                                    // 切換searchText為點擊的Code
+                                    this.setState({ searchText: i['Course Code'] });
+                                }}
+                            >
+                                <Text style={{
+                                    ...s.searchResultText,
+                                    fontSize: scale(15),
+                                    color: filterCourseList.length == 1 ? themeColor : black.third,
+                                    fontWeight: 'bold',
+                                }}>{i['Course Code']}</Text>
+                                <Text style={{ ...s.searchResultText, }}>{i['Course Title']}</Text>
+                                <Text style={{ ...s.searchResultText, }}>{i['Course Title Chi']}</Text>
+                            </TouchableOpacity>
+
+                            {/* 只剩一節候選課程時，展示可選Section */}
+                            {filterCourseList.length == 1 && sectionObj && (<>
+                                <Text style={{ ...s.searchResultText, }}>↓ 選取單節</Text>
+                                {Object.keys(sectionObj).map(key => {
+                                    return <TouchableOpacity
+                                        style={{ marginBottom: scale(5), }}
+                                        onPress={() => {
+                                            // TODO: 震動
+                                            this.addCourse(sectionObj[key][0]);
+                                            this.verScroll.current.scrollTo({ y: 0 });
+                                        }}
+                                    >
+                                        {/* Section號碼 */}
+                                        <Text style={{ ...s.searchResultText, color: themeColor, fontSize: scale(15), }}>{key}</Text>
+                                        {/* 老師名 */}
+                                        <Text style={{ ...s.searchResultText, }}>{sectionObj[key][0]['Teacher Information']}</Text>
+                                        {/* 該Section上課時間 */}
+                                        {sectionObj[key].map(itm => {
+                                            return <View>
+                                                <Text style={{ ...s.searchResultText, }}>{itm['Day'] + ' ' + itm['Time From'] + ' ~ ' + itm['Time To']}</Text>
+                                                {/* <Text>{itm['Time From'] + '~' + itm['Time To']}</Text> */}
+                                            </View>
+                                        })}
+                                    </TouchableOpacity>
+                                })}
+                            </>)}
+                        </View>)
+                    })
+                    ) : null}
+            </View>
+        )
+    }
+
     render() {
         const { allCourseAllTime, } = this.state;
-        const filterCourseList = handleSearchFilterCourse(this.state.searchText);
         return (
             <View style={{ flex: 1, backgroundColor: bg_color, }}>
                 <Header
@@ -595,6 +741,7 @@ E11-0000
                     ref={this.verScroll}
                     contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
                 >
+                    {/* 課表 / 首次使用提示 */}
                     <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
                         {allCourseAllTime && allCourseAllTime.length > 0 ? (<View >
                             {/* 渲染已保存的課表數據 */}
@@ -610,138 +757,7 @@ E11-0000
                     </View>
 
                     {/* 渲染選課的篩選列表 */}
-                    {this.state.addMode && (
-                        <View style={{ width: '35%', marginTop: scale(5), }}>
-                            {/* 輸入框 */}
-                            <View style={{
-                                borderColor: themeColor,
-                                borderWidth: scale(1), borderRadius: scale(10),
-                                marginHorizontal: scale(3),
-                            }}>
-                                {/* Add課搜索框 */}
-                                <TextInput
-                                    ref={this.textSearchRef}
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: black.main,
-                                        fontSize: scale(12),
-                                        padding: scale(5),
-                                    }}
-                                    onChangeText={(inputText) => {
-                                        this.setState({ searchText: inputText.toUpperCase(), });
-                                    }}
-                                    value={this.state.searchText}
-                                    selectTextOnFocus
-                                    placeholder="ECE, 電氣, AIM..."
-                                    placeholderTextColor={black.third}
-                                    returnKeyType={'search'}
-                                    selectionColor={themeColor}
-                                />
-                            </View>
-
-                            {/* 渲染搜索課程的結果 */}
-                            {this.state.searchText && filterCourseList.length > 0
-                                ? (filterCourseList.map(i => {
-                                    // 從courseTimeList篩選所有的課程的Section、時間、老師
-                                    let sectionObj = {};
-                                    if (filterCourseList.length == 1) {
-                                        let codeRes = courseTimeList.filter(itm => {
-                                            return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
-                                        });
-                                        codeRes.map(itm => {
-                                            let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
-                                            tempArr.push(itm);
-                                            sectionObj[itm['Section']] = tempArr;
-                                        })
-                                    }
-
-                                    return (<View>
-                                        {/* 刪除該Code課程按鈕 */}
-                                        {filterCourseList.length == 1 && sectionObj && (
-                                            <TouchableOpacity
-                                                style={{
-                                                    ...s.buttonContainer,
-                                                    backgroundColor: unread,
-                                                    padding: scale(3),
-                                                }}
-                                                onPress={() => {
-                                                    let { courseCodeList } = this.state;
-                                                    let tempArr = [];
-                                                    courseCodeList.map(itm => {
-                                                        if (itm['Course Code'] != i['Course Code']) {
-                                                            tempArr.push(itm);
-                                                        }
-                                                    })
-                                                    courseCodeList = tempArr;
-                                                    this.handleCourseList(courseCodeList);
-                                                }}
-                                            >
-                                                <Text style={{
-                                                    ...s.searchResultText,
-                                                    color: COLOR_DIY.trueWhite,
-                                                }} >{`刪除所有${i['Course Code']}`}</Text>
-                                            </TouchableOpacity>
-                                        )}
-
-                                        {filterCourseList.length == 1 && sectionObj && (
-                                            <Text style={{ ...s.searchResultText, }}>↓ 全部放入課表</Text>
-                                        )}
-
-                                        {/* 課程標題 */}
-                                        <TouchableOpacity
-                                            style={{
-                                                marginBottom: scale(10),
-                                                borderBottomWidth: scale(1),
-                                                borderColor: themeColor,
-                                            }}
-                                            onPress={() => {
-                                                // TODO: 震動
-                                                this.addAllSectionCourse(i['Course Code'], sectionObj);
-                                                // 切換searchText為點擊的Code
-                                                this.setState({ searchText: i['Course Code'] });
-                                            }}
-                                        >
-                                            <Text style={{
-                                                ...s.searchResultText,
-                                                fontSize: scale(15),
-                                                color: filterCourseList.length == 1 ? themeColor : black.third,
-                                                fontWeight: 'bold',
-                                            }}>{i['Course Code']}</Text>
-                                            <Text style={{ ...s.searchResultText, }}>{i['Course Title']}</Text>
-                                            <Text style={{ ...s.searchResultText, }}>{i['Course Title Chi']}</Text>
-                                        </TouchableOpacity>
-
-                                        {/* 只剩一節候選課程時，展示可選Section */}
-                                        {filterCourseList.length == 1 && sectionObj && (<>
-                                            <Text style={{ ...s.searchResultText, }}>↓ 選取單節</Text>
-                                            {Object.keys(sectionObj).map(key => {
-                                                return <TouchableOpacity
-                                                    style={{ marginBottom: scale(5), }}
-                                                    onPress={() => {
-                                                        // TODO: 震動
-                                                        this.addCourse(sectionObj[key][0]);
-                                                        this.verScroll.current.scrollTo({ y: 0 });
-                                                    }}
-                                                >
-                                                    {/* Section號碼 */}
-                                                    <Text style={{ ...s.searchResultText, color: themeColor, fontSize: scale(15), }}>{key}</Text>
-                                                    {/* 老師名 */}
-                                                    <Text style={{ ...s.searchResultText, }}>{sectionObj[key][0]['Teacher Information']}</Text>
-                                                    {/* 該Section上課時間 */}
-                                                    {sectionObj[key].map(itm => {
-                                                        return <View>
-                                                            <Text style={{ ...s.searchResultText, }}>{itm['Day'] + ' ' + itm['Time From'] + ' ~ ' + itm['Time To']}</Text>
-                                                            {/* <Text>{itm['Time From'] + '~' + itm['Time To']}</Text> */}
-                                                        </View>
-                                                    })}
-                                                </TouchableOpacity>
-                                            })}
-                                        </>)}
-                                    </View>)
-                                })
-                                ) : null}
-                        </View>
-                    )}
+                    {this.state.addMode ? this.renderCourseSearch() : null}
                 </ScrollView>
             </View >
         );

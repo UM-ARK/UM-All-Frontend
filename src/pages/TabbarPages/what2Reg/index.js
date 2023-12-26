@@ -153,7 +153,6 @@ async function setLocalOpitons(filterOptions) {
 handleSearchFilterCourse = (inputText) => {
     const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
 
-    inputText = inputText.toUpperCase();
     // 篩選所需課程
     let filterCourseList = offerCourseList.filter(itm => {
         return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
@@ -732,7 +731,7 @@ export default class index extends Component {
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
-                                inputText,
+                                inputText: inputText.toUpperCase(),
                                 inputOK: inputText.length > 0,
                                 scrollData: {},
                             });
