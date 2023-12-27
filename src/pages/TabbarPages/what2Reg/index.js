@@ -923,7 +923,7 @@ export default class index extends Component {
                 />
 
                 {isLoading ? (
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_DIY.bg_color, }}>
                         <Loading />
                     </View>
                 ) : (<>

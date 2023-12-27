@@ -34,8 +34,13 @@ export const COLOR_DIY = {
 
     // 我的頁顏色
     meScreenColor: {
-        bg_color: '#ededed',
-        card_color: 'white',
+        bg_color: isLight ? '#212121' : '#ededed',
+        card_color: isLight ? '#fff' : '#272729',
+    },
+
+    // 組織活動編輯
+    eventColor: {
+        imageCard: isLight ? '#f0f0f0' : 'gray',
     },
 
     // ARK Wiki配色

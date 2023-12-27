@@ -581,7 +581,7 @@ class ClubDetail extends Component {
                                     />
                                 </TouchableOpacity>
                                 <View style={{ alignItems: 'center' }}>
-                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.main }}>Update組織資料&發佈新資訊請點我！↑</Text>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: COLOR_DIY.unread }}>Update組織資料&發佈新資訊請點我！↑</Text>
                                 </View>
                             </>
                         ) : null}
@@ -749,7 +749,7 @@ class ClubDetail extends Component {
                     ) : null}
 
                     {isAdmin && eventData != undefined && eventData.length > 0 && (
-                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.main, alignSelf: 'center' }}>Update活動資料請進入具體活動頁內修改！↓</Text>
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: COLOR_DIY.unread, alignSelf: 'center' }}>Update活動資料請進入具體活動頁內修改！↓</Text>
                     )}
 
                     {/* 舉辦的活動 */}
@@ -814,8 +814,9 @@ class ClubDetail extends Component {
                     </TouchableOpacity>
 
                     <View
-                        style={{ height: scale(50), backgroundColor: bg_color }}
+                        style={{ height: scale(400), backgroundColor: bg_color }}
                     />
+                    <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center', }}>快催催這個組織多發活動｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡</Text>
                 </View>
             );
         };

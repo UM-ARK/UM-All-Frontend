@@ -16,6 +16,7 @@ class Loading extends Component {
                     borderWidth: scale(2),
                     borderColor: themeColor,
                     alignItems: 'center',
+                    backgroundColor: bg_color,
                 }}>
                 <Text
                     style={{

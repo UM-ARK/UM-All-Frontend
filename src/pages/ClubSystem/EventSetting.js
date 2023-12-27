@@ -629,12 +629,14 @@ class EventSetting extends Component {
                                         label={'普通活動'}
                                         color={themeColor}
                                         onPress={this.initState}
+                                        labelStyle={{ color: themeColor }}
                                     />
                                     <RadioButton
                                         value={'website'}
                                         label={'Website Link跳轉'}
                                         color={themeColor}
                                         onPress={this.initState}
+                                        labelStyle={{ color: themeColor }}
                                     />
                                 </RadioGroup>
                                 {/* type選擇的提示說明 */}
@@ -845,7 +847,7 @@ class EventSetting extends Component {
                         {type == 'activity' && (
                             <View style={{ marginTop: pxToDp(10) }}>
                                 <Text
-                                    style={{ ...uiStyle.defaultText,color: black.third, fontSize: 12 }}>
+                                    style={{ ...uiStyle.defaultText, color: black.third, fontSize: 12 }}>
                                     *
                                     將問卷等Link直接寫到活動詳情，方便同學直接跳轉！
                                 </Text>
@@ -1023,7 +1025,7 @@ const styles = StyleSheet.create({
     imgSelectorContainer: {
         width: pxToDp(160),
         height: pxToDp(100),
-        backgroundColor: '#f0f0f0',
+        backgroundColor: COLOR_DIY.eventColor.imageCard,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: pxToDp(5),
