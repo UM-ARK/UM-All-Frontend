@@ -234,8 +234,8 @@ class LoginChoose extends Component {
                                     this.context.navigate('ClubLogin');
                                 }}
                                 disabled={!this.state.ruleChoice}>
-                                <Text style={{ ...s.roleCardText }}>
-                                    社團 / 組織賬號
+                                <Text style={{ ...s.roleCardText, textAlign: 'center' }}>
+                                    {`社團 / 組織賬號\n點我登錄`}
                                 </Text>
                             </TouchableOpacity>
 
