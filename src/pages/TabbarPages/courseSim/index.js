@@ -355,6 +355,7 @@ export default class courseSim extends Component {
         const { importTimeTableText } = this.state;
         let parseRes = parseImportData(importTimeTableText);
         if (parseRes) {
+            this.verScroll.current.scrollTo({ y: 0 });
             this.handleCourseList(parseRes);
         }
         else {
@@ -438,6 +439,7 @@ export default class courseSim extends Component {
 
     // 渲染首次使用文字提示
     renderFirstUse = () => {
+        const { importTimeTableText } = this.state;
         return (
             <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
                 <Text style={{ ...s.firstUseText, }}>{`\n如何開始使用模擬課表？\n`}</Text>
@@ -448,12 +450,14 @@ export default class courseSim extends Component {
                 <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n(ISW課表是文字不是圖片!)\n到下方框框中粘貼，\n然後一鍵導入！`}</Text>
 
                 {/* 跳轉ISW按鈕 */}
-                <TouchableOpacity style={{ ...s.buttonContainer, }}
-                    onPress={() => { openLink(UM_ISW); }}
-                >
-                    <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
-                </TouchableOpacity>
-                {/* 粘貼課表數據 */}
+                {importTimeTableText && importTimeTableText.length > 0 ? null : (
+                    <TouchableOpacity style={{ ...s.buttonContainer, }}
+                        onPress={() => { openLink(UM_ISW); }}
+                    >
+                        <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
+                    </TouchableOpacity>
+                )}
+                {/* 課表數據輸入框 */}
                 <TextInput
                     ref={this.textSearchRef}
                     selectTextOnFocus
@@ -470,8 +474,7 @@ E11-0000
 E11-0000
 (Lab/Tutorial)	-	-	-
 9:30	-	-	-	-	-
-18:30	-	-	-	-	-
-                                `}
+18:30	-	-	-	-	-`}
                     placeholderTextColor={black.third}
                     value={this.state.importTimeTableText}
                     style={{
@@ -479,9 +482,12 @@ E11-0000
                         padding: scale(10),
                         borderRadius: scale(10),
                         width: '90%',
-                        color: black.main,
+                        color: themeColor,
                     }}
+                    blurOnSubmit={true}
+                    onSubmitEditing={() => Keyboard.dismiss()}
                 />
+                <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third, }}>↑記得先粘貼課表數據，再點擊導入哦</Text>
                 {/* 導入課表按鈕 */}
                 <TouchableOpacity
                     style={{
@@ -649,6 +655,8 @@ E11-0000
                         placeholderTextColor={black.third}
                         returnKeyType={'search'}
                         selectionColor={themeColor}
+                        blurOnSubmit={true}
+                        onSubmitEditing={() => Keyboard.dismiss()}
                     />
                 </View>
 
