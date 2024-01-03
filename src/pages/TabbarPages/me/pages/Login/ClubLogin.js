@@ -56,6 +56,8 @@ const NBTextInput = () => {
                 }
                 placeholder="Club Account"
                 onChangeText={account => (accountPassword.account = account)}
+                color={COLOR_DIY.themeColor}
+                fontSize={scale(15)}
             />
             <Input
                 variant="rounded"
@@ -82,6 +84,8 @@ const NBTextInput = () => {
                 }
                 placeholder="Password"
                 onChangeText={password => (accountPassword.password = password)}
+                color={COLOR_DIY.themeColor}
+                fontSize={scale(15)}
             />
         </Stack>
     );

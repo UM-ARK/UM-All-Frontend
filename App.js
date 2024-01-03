@@ -32,7 +32,8 @@ function SafeAreaDIY(props) {
                 backgroundColor: bg_color,
                 // insets.top為59時，為iPhone 14 Pro Max機型等的靈動島區域
                 paddingTop: insets.top == 59 ? 12 : 0,
-                paddingBottom: insets.top == 59 ? insets.bottom : 0,
+                // 更新safe-area包後，bottom的padding會導致Tabbar過高
+                // paddingBottom: insets.top == 59 ? insets.bottom : 0,
                 paddingLeft: insets.left,
                 paddingRight: insets.right,
             }}

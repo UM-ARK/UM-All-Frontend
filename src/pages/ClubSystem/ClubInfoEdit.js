@@ -7,6 +7,7 @@ import {
     ScrollView,
     TextInput,
     ActivityIndicator,
+    Keyboard,
 } from 'react-native';
 
 import { pxToDp } from '../../utils/stylesKits';
@@ -398,6 +399,8 @@ class ClubInfoEdit extends Component {
                         titleColor: themeColor,
                     });
                 }}
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
             />
         );
     };
@@ -610,7 +613,7 @@ const styles = StyleSheet.create({
     imgSelectorContainer: {
         width: pxToDp(160),
         height: pxToDp(100),
-        backgroundColor: '#f0f0f0',
+        backgroundColor: COLOR_DIY.eventColor.imageCard,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: pxToDp(5),

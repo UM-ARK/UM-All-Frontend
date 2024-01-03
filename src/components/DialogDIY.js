@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
-import { pxToDp } from '../utils/stylesKits';
 
 import { Dialog } from '@rneui/themed';
 
@@ -12,7 +11,9 @@ class DialogDIY extends Component {
         return (
             <Dialog
                 isVisible={this.props.showDialog}
-                onBackdropPress={this.props.handleCancel}>
+                onBackdropPress={this.props.handleCancel}
+                overlayStyle={{ backgroundColor: COLOR_DIY.white }}
+            >
                 <Dialog.Title
                     title="ARK ALL 提示"
                     titleStyle={{ color: COLOR_DIY.black.main }}

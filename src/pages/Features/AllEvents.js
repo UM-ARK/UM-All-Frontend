@@ -253,7 +253,7 @@ class AllEvents extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: bg_color, }}>
                 <Header title={'所有活動查看'} />
                 {/* TODO: 排序與篩選 選擇器 */}
                 {/* {this.renderDropDown()} */}
