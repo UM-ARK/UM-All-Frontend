@@ -10,6 +10,7 @@ import {
     FlatList,
     KeyboardAvoidingView,
     Keyboard,
+    Alert,
 } from "react-native";
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH } from "../../../utils/pathMap";
@@ -145,7 +146,7 @@ async function setLocalOpitons(filterOptions) {
         await AsyncStorage.setItem('ARK_Courses_filterOptions', strFilterOptions)
             .catch(e => console.log('AsyncStorage Error', e));
     } catch (e) {
-        alert(e);
+        Alert.alert(JSON.stringify(e));
     }
 }
 
@@ -227,7 +228,7 @@ export default class index extends Component {
                 setLocalOpitons(this.state.filterOptions);
             }
         } catch (e) {
-            alert('ARK Courses error, 請聯繫開發者！', e)
+            Alert.alert('ARK Courses error, 請聯繫開發者！', e)
         } finally {
             this.getClassifyCourse();
         }
@@ -241,6 +242,34 @@ export default class index extends Component {
 
     componentWillUnmount() {
         this.keyboardDidHideListener.remove();
+    }
+
+    // TODO: 在線更新課表數據
+    getCourseJSON = async (type) => {
+        typeObj = {
+            'plan': 'COURSE_PLAN',
+            'planTime': 'COURSE_PLAN_TIME',
+            'offer': 'OFFER_COURSE',
+        }
+        const URI = GET[typeObj[type]];
+        try {
+            let res = await axios.get(URI)
+            return res.data
+        } catch (error) {
+            Alert.alert(``,
+                '連接Github更新數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或發郵件催促一下作者\nQAQ...'
+                , null, { cancelable: true })
+        }
+    }
+
+    // TODO: 在線更新課表數據
+    updateCourseJSON = async () => {
+        try {
+            let PLAN_JSON = await this.getCourseJSON('plan');
+            console.log('PLAN_JSON', PLAN_JSON);
+        } catch (error) {
+            console.log('error', error);
+        }
     }
 
     // 鍵盤收起，使輸入框失焦
@@ -377,7 +406,7 @@ export default class index extends Component {
                                 this.setState({ filterOptions });
                                 setLocalOpitons(filterOptions);
                             } catch (error) {
-                                alert(error)
+                                Alert.alert(JSON.stringify(error))
                             }
                         }}
                     >
@@ -448,7 +477,7 @@ export default class index extends Component {
                                 } else if (itm == 'GE') {
                                     filterCourseList = offerCourseByGE[filterOptions.GE]
                                 }
-                            } catch (error) { alert(error) } finally {
+                            } catch (error) { Alert.alert(JSON.stringify(error)) } finally {
                                 filterOptions.option = itm;
                                 this.setState({ filterOptions, filterCourseList, scrollData: {} })
                                 setLocalOpitons(filterOptions);
@@ -671,7 +700,7 @@ export default class index extends Component {
             let res = await axios.get(URI)
             return res.data
         } catch (error) {
-            alert('服務器錯誤', error)
+            Alert.alert('服務器錯誤', JSON.stringify(error))
         }
     };
 
@@ -685,7 +714,7 @@ export default class index extends Component {
                 this.props.navigation.navigate('What2RegCourse', res);
             }
             else {
-                alert('課程不存在')
+                Alert.alert('課程不存在')
             }
             this.setState({ isLoading: false })
         }
@@ -935,19 +964,37 @@ export default class index extends Component {
                         stickyHeaderIndices={[1]}
                         showsVerticalScrollIndicator={false}
                     >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
-                            {/* ARK Logo */}
-                            <FastImage
-                                source={require('../../../static/img/logo.png')}
-                                style={{
-                                    height: iconSize, width: iconSize,
-                                    borderRadius: scale(5),
-                                }}
-                            />
-                            {/* 標題 */}
-                            <View style={{ marginLeft: scale(5) }}>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                        {/* 頁面標題欄 */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <View style={{ flexDirection: 'row' }}>
+                                {/* ARK Logo */}
+                                <FastImage
+                                    source={require('../../../static/img/logo.png')}
+                                    style={{
+                                        height: iconSize, width: iconSize,
+                                        borderRadius: scale(5),
+                                    }}
+                                />
+                                <View style={{ marginLeft: scale(5) }}>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                                </View>
                             </View>
+
+                            {/* TODO: 更新數據按鈕 */}
+                            {false && (
+                                <TouchableOpacity style={{
+                                    position: 'absolute',
+                                    right: scale(10),
+                                }}
+                                    onPress={this.updateCourseJSON}
+                                >
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: COLOR_DIY.unread,
+                                        fontWeight: 'bold',
+                                    }}>{`點我更新${'01-02'}課表`}</Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
 
                         <>
