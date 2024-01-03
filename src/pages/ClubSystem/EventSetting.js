@@ -9,6 +9,7 @@ import {
     TextInput,
     ActivityIndicator,
     Image,
+    Keyboard,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
@@ -362,6 +363,8 @@ class EventSetting extends Component {
                         titleColor: themeColor,
                     });
                 }}
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
             />
         );
     };

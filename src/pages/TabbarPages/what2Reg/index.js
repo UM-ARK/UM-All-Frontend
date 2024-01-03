@@ -744,6 +744,8 @@ export default class index extends Component {
                         onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
                         returnKeyType={'search'}
                         selectionColor={themeColor}
+                        blurOnSubmit={true}
+                        onSubmitEditing={() => Keyboard.dismiss()}
                     />
                     {/* 清空搜索框按鈕 */}
                     {inputText.length > 0 ? (

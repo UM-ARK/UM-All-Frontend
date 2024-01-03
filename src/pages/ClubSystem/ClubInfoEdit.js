@@ -7,6 +7,7 @@ import {
     ScrollView,
     TextInput,
     ActivityIndicator,
+    Keyboard,
 } from 'react-native';
 
 import { pxToDp } from '../../utils/stylesKits';
@@ -398,6 +399,8 @@ class ClubInfoEdit extends Component {
                         titleColor: themeColor,
                     });
                 }}
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
             />
         );
     };
