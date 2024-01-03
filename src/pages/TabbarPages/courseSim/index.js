@@ -484,6 +484,7 @@ E11-0000
                         width: '90%',
                         color: themeColor,
                     }}
+                    returnKeyType={'done'}
                     blurOnSubmit={true}
                     onSubmitEditing={() => Keyboard.dismiss()}
                 />
