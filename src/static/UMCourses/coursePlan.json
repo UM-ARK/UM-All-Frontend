@@ -7,7 +7,7 @@
             "Course Title": "Principles of Financial Accounting",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "CARLOS NORONHA",
+            "Teacher Information": "CHAI LAI PING",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "11:30",
@@ -93,7 +93,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-SECOND YEAR / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / ACM19 / ACM21\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-SECOND YEAR / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC20-FOURTH YEAR / ACM19 / ACM21\n",
             "Course Title Chi": "管理會計II"
         },
         {
@@ -564,7 +564,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC17 / BEC20-SECOND YEAR / BEC20-THIRD YEAR / BEC20-FOURTH YEAR / GBS20-FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC17 / BEC20-THIRD YEAR / BEC20-FOURTH YEAR / GBS20-FOURTH YEAR\n",
             "Course Title Chi": "中級宏觀經濟學"
         },
         {
@@ -754,7 +754,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-4004",
+            "Classroom": "E21-G016",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "文言文II"
         },
@@ -4069,7 +4069,7 @@
             "Course Title": "Advanced English Structure",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "SENIOR INSTRUCTOR",
+            "Teacher Information": "FONG ION WA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "17:30",
@@ -4181,6 +4181,17 @@
             "Time To": "12:45",
             "Classroom": "E21-2110",
             "Course Title Chi": "文學作品翻譯"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "GLEN TIMMERMANS",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
         },
         {
             "Offering Unit": "FAH",
@@ -4402,7 +4413,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC16 / FNC17 / FNC20-FNE20-THIRD YEAR / FNC20-FNE20-FOURTH YEAR / FNC20-THIRD YEAR / FNC20-FOURTH YEAR / FNM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC16 / FNC17 / FNC20-FNE20-FOURTH YEAR / FNC20-FOURTH YEAR / FNM19\n",
             "Course Title Chi": "奇異選擇權和結構性產品"
         },
         {
@@ -5351,9 +5362,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "(2023-2) GPAD2006",
             "Lecture / Lab": "Lecture",
-            "Day": "TUE",
+            "Day": "SAT",
             "Time From": "10:00",
-            "Time To": "11:15",
+            "Time To": "12:45",
             "Classroom": "E21-1017",
             "Course Title Chi": "公共部門組織結構與設計"
         },
@@ -5471,9 +5482,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "(2023-2) GPAD3024",
             "Lecture / Lab": "Lecture",
-            "Day": "MON",
+            "Day": "SAT",
             "Time From": "14:30",
-            "Time To": "15:45",
+            "Time To": "17:15",
             "Classroom": "E21-1027",
             "Course Title Chi": "當代中國的治理改革"
         },
@@ -5984,7 +5995,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "E12-1064 / E12-1061 / E12-1057",
+            "Classroom": "E12-1057 / E12-1064 / E12-1061",
             "\"Class For / Class Not For\" Information": "Class for :\n - FHS - BIF19 / BIF22 / BIO19 / BIO22\n",
             "Course Title Chi": "遺傳學,基因組學和生物資訊實驗室"
         },
@@ -6312,7 +6323,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E3-4042 / E6-3094",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBS22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBS20 / GBS22\n",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -6328,7 +6339,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-4012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC20\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17-FOURTH YEAR / FNC20\n",
             "Course Title Chi": "應用微積分"
         },
         {
@@ -6360,7 +6371,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "資訊系統與組織"
         },
         {
@@ -6392,7 +6402,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-1015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Course Title Chi": "資訊系統分析與設計"
         },
         {
@@ -6424,7 +6434,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / SECOND YEAR / THIRD YEAR\n",
             "Course Title Chi": "商業電腦網路"
         },
         {
@@ -6820,6 +6830,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "WONG MEI LEI",
             "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "10:00",
+            "Time To": "12:45",
+            "Classroom": "E32-G029",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "法律史"
         },
@@ -6832,6 +6846,10 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "KONG WA",
             "Lecture / Lab": "Lecture",
+            "Day": "WED",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "澳門基本法"
         },
@@ -6844,7 +6862,11 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "LI KE",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLL18\n",
+            "Day": "WED",
+            "Time From": "22:00",
+            "Time To": "22:50",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "澳門基本法（法律實務）"
         },
         {
@@ -6856,6 +6878,10 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "WANG CHAO",
             "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "20:30",
+            "Time To": "23:15",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "國際公法"
         },
@@ -6868,8 +6894,44 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "LI KE",
             "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "14:30",
+            "Time To": "15:20",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "國際公法（法律實務）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS1010",
+            "Course Title": "Economics II",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "JOSÉ EDUARDO ISAAC SOARES DUARTE",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "20:45",
+            "Classroom": "E32-G028",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "經濟學II"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS1012",
+            "Course Title": "Chinese Language II",
+            "Section": "201",
+            "Medium of Instruction": "Chinese supplemented with English",
+            "Teacher Information": "FONG KENG SENG",
+            "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "19:00",
+            "Time To": "20:45",
+            "Classroom": "E32-1025",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "漢語II"
         },
         {
             "Offering Unit": "FLL",
@@ -6880,7 +6942,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "KAN YUT CHING",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Day": "WED",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G007",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "公共經濟學"
         },
         {
@@ -6892,7 +6958,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "LEE KIN KEI",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Day": "TUE",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G029",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "稅收法"
         },
         {
@@ -6904,7 +6974,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "WU HIO",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G029",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "登記和公證法"
         },
         {
@@ -6916,7 +6990,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "LAM HAO SAN / WONG WAI KIT BERNARD",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Day": "FRI",
+            "Time From": "19:00",
+            "Time To": "20:15",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "法醫學"
         },
         {
@@ -6928,6 +7006,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "KUOK  WENG MUI / LOU SIO FONG",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "15:00",
+            "Time To": "17:15",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "替代性爭議解決簡介"
         },
@@ -6940,6 +7022,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LAI KUAN JU",
             "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "14:30",
+            "Time To": "17:15",
+            "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "澳門及香港基本法"
         },
@@ -6952,6 +7038,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "MA ZHE",
             "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "14:30",
+            "Time To": "17:15",
+            "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "法律,經濟與社會"
         },
@@ -6964,6 +7054,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "MURUGA PERUMAL RAMASWAMY",
             "Lecture / Lab": "Lecture",
+            "Day": "WED",
+            "Time From": "10:00",
+            "Time To": "12:45",
+            "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "國際法"
         },
@@ -6976,6 +7070,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LYU HANYUE",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "14:30",
+            "Time To": "17:15",
+            "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "刑法一"
         },
@@ -6988,6 +7086,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "WANG YILIN",
             "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "14:30",
+            "Time To": "17:15",
+            "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "民法一：總則"
         },
@@ -7000,6 +7102,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "NG KEI KEI",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "20:30",
+            "Time To": "23:15",
+            "Classroom": "E32-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "民法通論II"
         },
@@ -7010,8 +7116,12 @@
             "Course Title": "General Theory of Civil Law II (Legal Practice)",
             "Section": "001",
             "Medium of Instruction": "Cantonese",
-            "Teacher Information": "TONG IO CHENG",
+            "Teacher Information": "NG KEI KEI",
             "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "15:30",
+            "Time To": "17:15",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "民法通論II（法律實務）"
         },
@@ -7024,6 +7134,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "MAI MAN IENG",
             "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "09:30",
+            "Time To": "12:15",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "行政法二"
         },
@@ -7036,8 +7150,44 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "VONG KENG HEI",
             "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "20:30",
+            "Time To": "21:20",
+            "Classroom": "E32-G029",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "行政法二（法律實務）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS2009",
+            "Course Title": "Chinese Language IV",
+            "Section": "201",
+            "Medium of Instruction": "Chinese supplemented with English",
+            "Teacher Information": "LAO KENG CHONG",
+            "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "20:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G006",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "漢語四"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS2011",
+            "Course Title": "Legal Translation Chinese/Portuguese II",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese and Chinese",
+            "Teacher Information": "TAM CHI NENG",
+            "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "20:00",
+            "Time To": "21:45",
+            "Classroom": "E32-1020",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "法律翻譯中/葡文II"
         },
         {
             "Offering Unit": "FLL",
@@ -7048,7 +7198,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHU LAM LAM",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "MON",
+            "Time From": "14:00",
+            "Time To": "16:45",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
             "Course Title Chi": "義務法一"
         },
         {
@@ -7060,7 +7214,11 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "MA ZHE",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "FRI",
+            "Time From": "11:00",
+            "Time To": "12:45",
+            "Classroom": "E32-G029",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
             "Course Title Chi": "義務法一（法律實務）"
         },
         {
@@ -7072,6 +7230,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHAN IO CHAO",
             "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "20:30",
+            "Time To": "23:15",
+            "Classroom": "E32-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "義務法二"
         },
@@ -7084,6 +7246,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "IONG MAN TENG",
             "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "21:30",
+            "Time To": "23:15",
+            "Classroom": "E32-G029",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "債權法二（法律實務）"
         },
@@ -7096,7 +7262,11 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "WANG MORBEY WEI",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "TUE",
+            "Time From": "14:00",
+            "Time To": "16:45",
+            "Classroom": "E32-G005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
             "Course Title Chi": "商法一"
         },
         {
@@ -7108,7 +7278,11 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "WANG MORBEY WEI",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "TUE",
+            "Time From": "17:00",
+            "Time To": "17:50",
+            "Classroom": "E32-G005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
             "Course Title Chi": "商法一（法律實務）"
         },
         {
@@ -7120,6 +7294,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "FONG MAN CHONG",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "商法二"
         },
@@ -7132,6 +7310,10 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "MA ZHE",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "22:00",
+            "Time To": "22:50",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "商法II（法律實務）"
         },
@@ -7144,6 +7326,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "SAM CHAN IO",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "刑法二"
         },
@@ -7156,6 +7342,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "SAM CHAN IO",
             "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "19:30",
+            "Time To": "21:15",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "刑法II（法律實務）"
         },
@@ -7168,6 +7358,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHAN CHI WENG",
             "Lecture / Lab": "Lecture",
+            "Day": "WED",
+            "Time From": "20:00",
+            "Time To": "22:45",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "物權法"
         },
@@ -7180,6 +7374,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "LEE KIN KEI",
             "Lecture / Lab": "Lecture",
+            "Day": "WED",
+            "Time From": "19:00",
+            "Time To": "19:50",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "物權法（法律實務）"
         },
@@ -7192,7 +7390,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "HO WAI NENG",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "行政法三"
         },
         {
@@ -7204,7 +7406,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHIN CHIO KEONG",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Day": "MON",
+            "Time From": "22:00",
+            "Time To": "22:50",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "行政法三（法律實務）"
         },
         {
@@ -7216,7 +7422,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "IAU TENG PIO",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "SAT",
+            "Time From": "14:00",
+            "Time To": "16:45",
+            "Classroom": "E32-G005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "民事訴訟法第一"
         },
         {
@@ -7228,8 +7438,44 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "IAU TENG PIO",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "SAT",
+            "Time From": "17:00",
+            "Time To": "17:50",
+            "Classroom": "E32-G005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "民事訴訟法一（法律實務）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS3021",
+            "Course Title": "Chinese Language VI",
+            "Section": "201",
+            "Medium of Instruction": "Chinese supplemented with English",
+            "Teacher Information": "LAO KENG CHONG",
+            "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "18:00",
+            "Time To": "19:45",
+            "Classroom": "E32-1005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "漢語六"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS3023",
+            "Course Title": "Legal English II",
+            "Section": "201",
+            "Medium of Instruction": "English supplemented with Portuguese",
+            "Teacher Information": "HUGO EMANUEL DE MIRANDA RODRIGUES DUARTE FONSECA",
+            "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "18:00",
+            "Time To": "19:45",
+            "Classroom": "E32-G002",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "法律英語II"
         },
         {
             "Offering Unit": "FLL",
@@ -7240,7 +7486,11 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "JIANG YI WA",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Day": "WED",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G020",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "世襲家庭法與繼承法"
         },
         {
@@ -7252,7 +7502,11 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "JIANG YI WA",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Day": "WED",
+            "Time From": "22:00",
+            "Time To": "22:50",
+            "Classroom": "E32-G020",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "世襲家庭法與繼承法（法律實務）"
         },
         {
@@ -7264,7 +7518,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHOU KAM CHON",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "SAT",
+            "Time From": "10:00",
+            "Time To": "12:45",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "商法三"
         },
         {
@@ -7276,7 +7534,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHOU KAM CHON",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "SAT",
+            "Time From": "09:00",
+            "Time To": "09:50",
+            "Classroom": "E32-G013",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "商法三（法律實務）"
         },
         {
@@ -7288,6 +7550,10 @@
             "Medium of Instruction": "Mandarin",
             "Teacher Information": "TU GUANGJIAN",
             "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "國際私法"
         },
@@ -7300,6 +7566,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "WONG WAI KING",
             "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "19:00",
+            "Time To": "19:50",
+            "Classroom": "E32-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "國際私法（法律實務）"
         },
@@ -7312,6 +7582,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHEONG WENG TONG",
             "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "刑事訴訟法"
         },
@@ -7324,6 +7598,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "VONG IOK IP FRANCISCA",
             "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "12:00",
+            "Time To": "12:50",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "刑事訴訟法（法律實務）"
         },
@@ -7336,6 +7614,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "TONG HIO FONG",
             "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "19:00",
+            "Time To": "21:45",
+            "Classroom": "E32-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "民事訴訟法二"
         },
@@ -7348,6 +7630,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "VONG KENG HEI",
             "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "21:30",
+            "Time To": "23:15",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
             "Course Title Chi": "民事訴訟法二（法律實務）"
         },
@@ -7360,7 +7646,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "MARIO AUGUSTO SILVESTRE",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "THU",
+            "Time From": "14:00",
+            "Time To": "16:45",
+            "Classroom": "E32-G005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "民事訴訟法三"
         },
         {
@@ -7372,7 +7662,11 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "MARIO AUGUSTO SILVESTRE",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "THU",
+            "Time From": "17:00",
+            "Time To": "17:50",
+            "Classroom": "E32-G005",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "民事訴訟法三（法律實務）"
         },
         {
@@ -7384,8 +7678,72 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "TANG CHI KEONG",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18\n",
+            "Day": "THU",
+            "Time From": "10:00",
+            "Time To": "12:45",
+            "Classroom": "E32-G027",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
             "Course Title Chi": "研究與實習"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5001",
+            "Course Title": "General Theory of Law",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "CÉLIA FILIPA FERREIRA MATIAS",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "20:45",
+            "Classroom": "E32-G008",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "法學通論"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5002",
+            "Course Title": "Comparative Law",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "DA CRUZ CARDINAL FERNANDO PAULO",
+            "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "19:00",
+            "Time To": "20:45",
+            "Classroom": "E32-G008",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "比較法"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5003",
+            "Course Title": "Research Report",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "TERESA LANCRY DE GOUVEIA DE ALBUQUERQUE E SOUSA ROBALO",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5004",
+            "Course Title": "Research and Communication Skills",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "HUGO EMANUEL DE MIRANDA RODRIGUES DUARTE FONSECA",
+            "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "22:00",
+            "Time To": "22:50",
+            "Classroom": "E32-G008",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "研究和溝通技巧"
         },
         {
             "Offering Unit": "FST",
@@ -8367,7 +8725,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -8692,6 +9050,29 @@
         {
             "Offering Unit": "FSS",
             "Offering Department": "DSOC",
+            "Course Code": "SOCY4000",
+            "Course Title": "Research Project",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "LI YI",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究計畫"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DSOC",
+            "Course Code": "SOCY4001",
+            "Course Title": "Independent Study in Sociology",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "ZHANG HUIQUAN",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC19\n",
+            "Course Title Chi": "社會學獨立研究"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DSOC",
             "Course Code": "SOCY4002",
             "Course Title": "Selected Topics in Sociology",
             "Section": "001",
@@ -8762,7 +9143,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2023-12-21",
+    "updateTime": "2024-01-02",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
