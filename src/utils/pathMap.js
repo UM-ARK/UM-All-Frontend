@@ -21,6 +21,8 @@ export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';
 
 export const ARK_WIKI_ABOUT_ARK = ARK_WIKI + '/wiki/ARK_ALL';
 
+export const OFFICIAL_COURSE_SEARCH = 'https://isw.umac.mo/siwci/faces/courseDetailUG?courseCode=';
+
 export function addHost(itm) {
     if (itm.length > 0) {
         return BASE_HOST + itm;

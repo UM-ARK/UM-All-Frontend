@@ -1015,7 +1015,7 @@ export default class index extends Component {
                             {/* 篩選列表 */}
                             {this.renderFilterView()}
 
-                            <Text style={{
+                            {/* <Text style={{
                                 ...uiStyle.defaultText,
                                 alignSelf: 'center',
                                 // fontSize: scale(13),
@@ -1023,7 +1023,7 @@ export default class index extends Component {
                                 // fontWeight: 'bold',
                             }}>
                                 短按查Wiki，長按查Section !!!
-                            </Text>
+                            </Text> */}
 
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList && filterCourseList.length > 0 ? (

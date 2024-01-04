@@ -18,6 +18,7 @@ import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 import { scale } from "react-native-size-matters";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { NavigationContext } from '@react-navigation/native';
+import { MenuView } from '@react-native-menu/menu';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 const coursePlanList = coursePlanTime.Courses;
@@ -95,49 +96,93 @@ export default class LocalCourse extends Component {
                     schedulesObj[itm] = daySort(schedulesObj[itm])
                     const courseInfo = schedulesObj[itm][0];
                     return (
-                        <TouchableOpacity
-                            style={{
-                                margin: scale(5),
-                                backgroundColor: white,
-                                borderRadius: scale(10),
-                                paddingVertical: scale(5), paddingHorizontal: scale(8),
-                                alignItems: 'center',
-                            }}
-                            onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
-                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
-                                logToFirebase('checkCourse', {
-                                    courseCode: courseInfo['Course Code'],
-                                    profName: courseInfo['Teacher Information'],
-                                });
-                                this.context.navigate('Wiki', { url: URL });
-                            }}
-                        >
-                            <View style={{ alignItems: 'center', }}>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>{courseInfo.Section}</Text>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Medium of Instruction']}</Text>
-                            </View>
+                        <MenuView
+                            onPressAction={({ nativeEvent }) => {
+                                switch (nativeEvent.event) {
+                                    case 'wiki':
+                                        ReactNativeHapticFeedback.trigger('soft');
+                                        let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
+                                        logToFirebase('checkCourse', {
+                                            courseCode: courseInfo['Course Code'],
+                                            profName: courseInfo['Teacher Information'],
+                                        });
+                                        this.context.navigate('Wiki', { url: URL });
+                                        break;
 
-                            <View style={{ flexDirection: 'row', }}>
-                                {schedulesObj[itm].map(sameSection => {
-                                    return (
-                                        <View style={{
-                                            margin: scale(5),
-                                            alignItems: 'center',
-                                        }}>
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
-                                            {'Classroom' in sameSection && sameSection['Classroom'] ? (
-                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
-                                            ) : null}
-                                            {'Time From' in sameSection && sameSection['Time From'] ? (
-                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
-                                            ) : null}
-                                        </View>
-                                    )
-                                })}
-                            </View>
-                        </TouchableOpacity>
+                                    case 'what2reg':
+                                        ReactNativeHapticFeedback.trigger('soft');
+                                        const courseCode = courseInfo['Course Code'];
+                                        const profName = courseInfo['Teacher Information'];
+                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(profName);
+                                        logToFirebase('checkCourse', {
+                                            courseCode: courseCode,
+                                            profName: profName,
+                                        });
+                                        openLink(URI);
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }}
+                            actions={[
+                                {
+                                    id: 'wiki',
+                                    title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                                    titleColor: themeColor,
+                                },
+                                {
+                                    id: 'what2reg',
+                                    title: '查 選咩課',
+                                    titleColor: black.third,
+                                },
+                            ]}
+                            shouldOpenOnLongPress={false}
+                        >
+                            <TouchableOpacity
+                                style={{
+                                    margin: scale(5),
+                                    backgroundColor: white,
+                                    borderRadius: scale(10),
+                                    paddingVertical: scale(5), paddingHorizontal: scale(8),
+                                    alignItems: 'center',
+                                }}
+                            // onPress={() => {
+                            //     ReactNativeHapticFeedback.trigger('soft');
+                            //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
+                            //     logToFirebase('checkCourse', {
+                            //         courseCode: courseInfo['Course Code'],
+                            //         profName: courseInfo['Teacher Information'],
+                            //     });
+                            //     this.context.navigate('Wiki', { url: URL });
+                            // }}
+                            >
+                                <View style={{ alignItems: 'center', }}>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>{courseInfo.Section}</Text>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Medium of Instruction']}</Text>
+                                </View>
+
+                                <View style={{ flexDirection: 'row', }}>
+                                    {schedulesObj[itm].map(sameSection => {
+                                        return (
+                                            <View style={{
+                                                margin: scale(5),
+                                                alignItems: 'center',
+                                            }}>
+                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
+                                                {'Classroom' in sameSection && sameSection['Classroom'] ? (
+                                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                                ) : null}
+                                                {'Time From' in sameSection && sameSection['Time From'] ? (
+                                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
+                                                ) : null}
+                                            </View>
+                                        )
+                                    })}
+                                </View>
+                            </TouchableOpacity>
+                        </MenuView>
                     )
                 }}
                 ListFooterComponent={() => <View style={{ marginBottom: scale(50) }} />}
