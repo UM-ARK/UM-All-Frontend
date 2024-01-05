@@ -1369,6 +1369,22 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "CEE",
+            "Course Code": "CIVL3001",
+            "Course Title": "Construction Management and Practice",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "AO IEONG TAI MAN",
+            "Lecture / Lab": "Lecture",
+            "Day": "WED",
+            "Time From": "13:30",
+            "Time To": "15:15",
+            "Classroom": "E11-1015",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17",
+            "Course Title Chi": "施工管理與實務"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "CEE",
             "Course Code": "CIVL3003",
             "Course Title": "Environmental Engineering II",
             "Section": "001",
@@ -1413,6 +1429,18 @@
             "Classroom": "E11-1028",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE11 / CVE17\n",
             "Course Title Chi": "環境建模"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "CEE",
+            "Course Code": "CIVL4000",
+            "Course Title": "Graduation Project I",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "XU JIE",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
+            "Course Title Chi": "畢業設計一"
         },
         {
             "Offering Unit": "FST",
@@ -4975,7 +5003,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-1061",
             "Course Title Chi": "探索地球"
         },
         {
@@ -5502,6 +5530,18 @@
             "Time To": "12:45",
             "Classroom": "E22-2007",
             "Course Title Chi": "憲法"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DGPA",
+            "Course Code": "GPAD4001",
+            "Course Title": "Research Project",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "DAINA CHIBA",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - GPA19-PAD19\n",
+            "Course Title Chi": "研究計畫"
         },
         {
             "Offering Unit": "FSS",
@@ -8581,7 +8621,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1011",
+            "Classroom": "E21-2007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17 / PTS19\n",
             "Course Title Chi": "葡萄牙語世界文學研究概論II"
         },
@@ -8725,7 +8765,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -9143,7 +9183,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-01-02",
+    "updateTime": "2024-01-04",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
