@@ -558,6 +558,7 @@ E11-0000
                     returnKeyType={'done'}
                     blurOnSubmit={true}
                     onSubmitEditing={() => Keyboard.dismiss()}
+                    clearButtonMode='always'
                 />
                 <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third, }}>↑記得先粘貼課表數據，再點擊導入哦</Text>
                 {/* 導入課表按鈕 */}
@@ -729,6 +730,7 @@ E11-0000
                         selectionColor={themeColor}
                         blurOnSubmit={true}
                         onSubmitEditing={() => Keyboard.dismiss()}
+                        clearButtonMode='always'
                     />
                 </View>
 
