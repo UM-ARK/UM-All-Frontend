@@ -135,6 +135,7 @@ export default class CourseCard extends Component {
                                         break;
 
                                     case 'official':
+                                        ReactNativeHapticFeedback.trigger('soft');
                                         const URI = OFFICIAL_COURSE_SEARCH + courseCode;
                                         logToFirebase('checkCourse', {
                                             courseCode: 'Official ' + courseCode,
@@ -191,91 +192,25 @@ export default class CourseCard extends Component {
                                     margin: scale(5),
                                     padding: scale(10), paddingVertical: scale(5),
                                 }}
-                                onPress={() => {
-                                    if (false) {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                                        if (this.props.prof_info) {
-                                            URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
-                                            logToFirebase('checkCourse', {
-                                                courseCode: courseCode,
-                                                profName: this.props.prof_info.name,
-                                            });
-                                        }
-                                        else {
-                                            logToFirebase('checkCourse', {
-                                                courseCode: courseCode,
-                                                onLongPress: 0,
-                                            });
-                                        }
-                                        // 跳轉ARK Wiki
-                                        this.context.navigate('Wiki', { url: URL });
-                                    }
-                                    // 棄用方案，詢問打開Wiki還是選咩課
-                                    // Alert.alert(null,
-                                    //     `想打開哪個平台查課？\n來為澳大人建設Wiki！\n現在就到Wiki留下你的足跡~\nヽ(ﾟ∀ﾟ)ﾒ(ﾟ∀ﾟ)ﾉ `,
-                                    //     [
-                                    //         {
-                                    //             text: "Close",
-                                    //         },
-                                    //         {
-                                    //             text: "選咩課搜索",
-                                    //             onPress: () => {
-                                    //                 ReactNativeHapticFeedback.trigger('soft');
-                                    //                 let webview_param = {
-                                    //                     url: '',
-                                    //                     title: '',
-                                    //                     text_color: COLOR_DIY.white,
-                                    //                     bg_color_diy: COLOR_DIY.what2reg_color,
-                                    //                     isBarStyleBlack: false,
-                                    //                 };
-                                    //                 if (this.props.prof_info) {
-                                    //                     // 進入搜索特定教授的課程模式，進入評論詳情頁
-                                    //                     const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(this.props.prof_info.name)
-                                    //                     webview_param.url = URI;
-                                    //                     webview_param.title = courseCode;
-                                    //                     logToFirebase('checkCourse', {
-                                    //                         courseCode: courseCode,
-                                    //                         profName: this.props.prof_info.name,
-                                    //                     });
-                                    //                 }
-                                    //                 else {
-                                    //                     // 進入搜索課程代號模式
-                                    //                     const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`
-                                    //                     webview_param.url = URI;
-                                    //                     webview_param.title = courseCode;
-                                    //                     logToFirebase('checkCourse', {
-                                    //                         courseCode: courseCode,
-                                    //                         onLongPress: 0,
-                                    //                     });
-                                    //                 }
-                                    //                 // this.context.navigate('Webviewer', webview_param);
-                                    //                 openLink(webview_param.url);
-                                    //             },
-                                    //         },
-                                    //         {
-                                    //             text: "ARK Wiki搜索",
-                                    //             onPress: () => {
-                                    //                 ReactNativeHapticFeedback.trigger('soft');
-                                    //                 let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                                    //                 if (this.props.prof_info) {
-                                    //                     URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
-                                    //                     logToFirebase('checkCourse', {
-                                    //                         courseCode: courseCode,
-                                    //                         profName: this.props.prof_info.name,
-                                    //                     });
-                                    //                 }
-                                    //                 else {
-                                    //                     logToFirebase('checkCourse', {
-                                    //                         courseCode: courseCode,
-                                    //                         onLongPress: 0,
-                                    //                     });
-                                    //                 }
-                                    //                 this.context.navigate('Wiki', { url: URL });
-                                    //             },
-                                    //         },
-                                    //     ])
-                                }}
+                                // onPress={() => {
+                                //     ReactNativeHapticFeedback.trigger('soft');
+                                //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+                                //     if (this.props.prof_info) {
+                                //         URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
+                                //         logToFirebase('checkCourse', {
+                                //             courseCode: courseCode,
+                                //             profName: this.props.prof_info.name,
+                                //         });
+                                //     }
+                                //     else {
+                                //         logToFirebase('checkCourse', {
+                                //             courseCode: courseCode,
+                                //             onLongPress: 0,
+                                //         });
+                                //     }
+                                //     // 跳轉ARK Wiki
+                                //     this.context.navigate('Wiki', { url: URL });
+                                // }}
                                 onLongPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     logToFirebase('checkCourse', {
