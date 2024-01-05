@@ -24,8 +24,9 @@ import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
-import { UM_ISW, ARK_WIKI_SEARCH, } from "../../../utils/pathMap";
+import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
+import { MenuView } from '@react-native-menu/menu';
 
 const { themeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -258,93 +259,163 @@ export default class courseSim extends Component {
             <View>
                 {timeReminder}
 
-                <TouchableOpacity
-                    style={{
-                        margin: scale(5),
-                        backgroundColor: timeWarning ? unread : course['color'],
-                        borderRadius: scale(10),
-                        padding: scale(5),
-                        alignItems: 'center', justifyContent: 'center',
+                <MenuView
+                    onPressAction={({ nativeEvent }) => {
+                        switch (nativeEvent.event) {
+                            case 'wiki':
+                                ReactNativeHapticFeedback.trigger('soft');
+                                const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
+                                this.props.navigation.navigate('Wiki', { url: URL });
+                                break;
+
+                            case 'what2reg':
+                                ReactNativeHapticFeedback.trigger('soft');
+                                const courseCode = course['Course Code'];
+                                const profName = course['Teacher Information'];
+                                // 進入搜索特定教授的課程模式，進入評論詳情頁
+                                const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(profName);
+                                openLink(URI);
+                                break;
+
+                            case 'official':
+                                ReactNativeHapticFeedback.trigger('soft');
+                                openLink(OFFICIAL_COURSE_SEARCH + course['Course Code']);
+                                break;
+
+                            case 'section':
+                                ReactNativeHapticFeedback.trigger('soft');
+                                this.props.navigation.navigate('LocalCourse', course['Course Code']);
+                                break;
+
+                            case 'drop':
+                                ReactNativeHapticFeedback.trigger('soft');
+                                Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}-${course['Section']}嗎？`,
+                                    [
+                                        {
+                                            text: "Drop",
+                                            onPress: () => {
+                                                ReactNativeHapticFeedback.trigger('soft');
+                                                this.dropCourse(course);
+                                            },
+                                            style: 'destructive',
+                                        },
+                                        {
+                                            text: "取消",
+                                        },
+                                    ],
+                                    { cancelable: true, }
+                                );
+                                break;
+
+                            default:
+                                break;
+                        }
                     }}
-                    activeOpacity={0.8}
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        Alert.alert("", `想知道關於${course['Course Code']}的...\n(長按可以刪除課程...)`,
-                            [
-                                {
-                                    text: "可選Section/老師",
-                                    onPress: () => {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        this.props.navigation.navigate('LocalCourse', course['Course Code']);
-                                    },
-                                },
-                                {
-                                    text: "課程Wiki",
-                                    onPress: () => {
-                                        ReactNativeHapticFeedback.trigger('soft');
-                                        const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
-                                        this.props.navigation.navigate('Wiki', { url: URL });
-                                    },
-                                },
-                                {
-                                    text: "取消",
-                                },
-                            ],
-                            { cancelable: true, }
-                        );
-                    }}
-                    onLongPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}-${course['Section']}嗎？`,
-                            [
-                                {
-                                    text: "Drop",
-                                    onPress: () => {
-                                        this.dropCourse(course);
-                                    },
-                                    style: 'destructive',
-                                },
-                                {
-                                    text: "取消",
-                                },
-                            ],
-                            { cancelable: true, }
-                        );
-                    }}
-                    delayLongPress={300}
+                    actions={[
+                        {
+                            id: 'wiki',
+                            title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                            titleColor: themeColor,
+                        },
+                        {
+                            id: 'what2reg',
+                            title: '查 選咩課',
+                            titleColor: black.third,
+                        },
+                        {
+                            id: 'official',
+                            title: '查 官方',
+                            titleColor: black.third,
+                        },
+                        {
+                            id: 'section',
+                            title: '查 Section / 老師',
+                            titleColor: black.third,
+                        },
+                        {
+                            id: 'drop',
+                            title: `刪除 ${course['Course Code']}`,
+                            attributes: {
+                                destructive: true,
+                            },
+                            image: Platform.select({
+                                ios: 'trash',
+                                android: 'ic_menu_delete',
+                            }),
+                        },
+                    ]}
+                    shouldOpenOnLongPress={false}
                 >
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: white,
-                        fontSize: scale(20),
-                        textAlign: 'center',
-                        fontWeight: '700',
-                    }}>
-                        {course['Course Code'].substring(0, 4) + '\n'}<Text style={{ fontSize: scale(20), fontWeight: 'bold', }}>{course['Course Code'].substring(4, 8)}</Text>
-                    </Text>
-                    <Text style={{ ...uiStyle.defaultText, color: white, }}>{course['Section']}</Text>
-
-                    <Text style={{ ...uiStyle.defaultText, color: white, textAlign: 'center', }} numberOfLines={4}>{course['Course Title']}</Text>
-                    <Text style={{ ...uiStyle.defaultText, color: white, }}>{course['Classroom']}</Text>
-
-                    {/* 上課時間 */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }}>
-                        {/* 開始時間 */}
-                        <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.trueBlack, }}>
-                            {course['Time From']}
+                    <TouchableOpacity
+                        style={{
+                            margin: scale(5),
+                            backgroundColor: timeWarning ? unread : course['color'],
+                            borderRadius: scale(10),
+                            padding: scale(5),
+                            alignItems: 'center', justifyContent: 'center',
+                        }}
+                        activeOpacity={0.8}
+                        // onPress={() => {
+                        //     ReactNativeHapticFeedback.trigger('soft');
+                        //     Alert.alert("", `想知道關於${course['Course Code']}的...\n(長按可以刪除課程...)`,
+                        //         [
+                        //             {
+                        //                 text: "可選Section/老師",
+                        //                 onPress: () => {
+                        //                     ReactNativeHapticFeedback.trigger('soft');
+                        //                     this.props.navigation.navigate('LocalCourse', course['Course Code']);
+                        //                 },
+                        //             },
+                        //             {
+                        //                 text: "課程Wiki",
+                        //                 onPress: () => {
+                        //                     ReactNativeHapticFeedback.trigger('soft');
+                        //                     const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
+                        //                     this.props.navigation.navigate('Wiki', { url: URL });
+                        //                 },
+                        //             },
+                        //             {
+                        //                 text: "取消",
+                        //             },
+                        //         ],
+                        //         { cancelable: true, }
+                        //     );
+                        // }}
+                        delayLongPress={300}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: white,
+                            fontSize: scale(20),
+                            textAlign: 'center',
+                            fontWeight: '700',
+                        }}>
+                            {course['Course Code'].substring(0, 4) + '\n'}<Text style={{ fontSize: scale(20), fontWeight: 'bold', }}>{course['Course Code'].substring(4, 8)}</Text>
                         </Text>
-                        {/* 引導用戶操作圖標 */}
-                        <Ionicons
-                            name="ellipsis-horizontal"
-                            size={scale(20)}
-                            color={white}
-                        />
-                        {/* 結束時間 */}
-                        <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.trueBlack, }}>
-                            {course['Time To']}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
+                        <Text style={{ ...uiStyle.defaultText, color: white, }}>{course['Section']}</Text>
+
+                        <Text style={{ ...uiStyle.defaultText, color: white, textAlign: 'center', }} numberOfLines={4}>{course['Course Title']}</Text>
+                        <Text style={{ ...uiStyle.defaultText, color: white, }}>{course['Classroom']}</Text>
+
+                        {/* 上課時間 */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }}>
+                            {/* 開始時間 */}
+                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.trueBlack, fontWeight: '600', }}>
+                                {course['Time From']}
+                            </Text>
+                            {/* 引導用戶操作圖標 */}
+                            <Ionicons
+                                name="ellipsis-horizontal"
+                                size={scale(20)}
+                                color={white}
+                            />
+                            {/* 結束時間 */}
+                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.trueBlack, fontWeight: '600', }}>
+                                {course['Time To']}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </MenuView>
             </View>
         )
     }
