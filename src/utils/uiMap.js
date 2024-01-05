@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Appearance } from 'react-native';
 import { pxToDp } from './stylesKits';
 import { scale } from 'react-native-size-matters';
 
-const isLight = Appearance.getColorScheme() == 'light';
+export const isLight = Appearance.getColorScheme() == 'light';
 
 export const COLOR_DIY = {
     // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;

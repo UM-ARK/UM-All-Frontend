@@ -725,7 +725,7 @@ class Index extends Component {
                                 // 複製相關網站link
                                 onLongPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    if (go_where == 'Webview') {
+                                    if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
                                         Alert.alert('已複製網站Link到剪貼板！');
                                     }

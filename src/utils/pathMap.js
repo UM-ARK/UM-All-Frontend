@@ -21,6 +21,8 @@ export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';
 
 export const ARK_WIKI_ABOUT_ARK = ARK_WIKI + '/wiki/ARK_ALL';
 
+export const OFFICIAL_COURSE_SEARCH = 'https://isw.umac.mo/siwci/faces/courseDetailUG?courseCode=';
+
 export function addHost(itm) {
     if (itm.length > 0) {
         return BASE_HOST + itm;
@@ -166,8 +168,8 @@ export const UM_PASS = 'https://umpass.um.edu.mo';
 export const UM_COMMENTS = 'https://isw.umac.mo/qmweb/faces/app/addComments.jspx';
 // 澳大 - UM Portal
 export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
-// 澳大 - 學生公告
-export const UM_BULLETIN = 'https://www.um.edu.mo/zh-hant/um-students/e-bulletin/';
+// 澳大 - 學生電子公告
+export const UM_BULLETIN = 'https://e-bulletin.um.edu.mo/';
 
 // 學業發展分類
 // 澳大 - UM Moodle
