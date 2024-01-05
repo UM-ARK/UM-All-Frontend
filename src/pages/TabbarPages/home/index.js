@@ -32,7 +32,6 @@ import EventPage from '../news/EventPage.js';
 import ModalBottom from '../../../components/ModalBottom';
 import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
 import { versionStringCompare } from '../../../utils/versionKits';
-import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
@@ -76,6 +75,7 @@ const toastTextArr = [
     `點擊頂部校曆看看最近有什麼假期~ ヾ(ｏ･ω･)ﾉ`,
     `快試試底部幾個按鈕都有什麼功能~ ( • ̀ω•́ )✧`,
     `別只看校巴啦! 也來寫寫Wiki! ( • ̀ω•́ )✧`,
+    `Wiki在電腦上編輯更方便哦! ( • ̀ω•́ )✧`,
     `ARK ALL為愛發電ing... (*/ω＼*)`,
     `記住我們的官網 ${BASE_HOST} !!! (*/ω＼*)`,
     `記住Wiki的官網 ${ARK_WIKI} !!! (*/ω＼*)`,
@@ -90,6 +90,7 @@ const toastTextArr = [
     `澳大資訊一次看完!!! ヽ(^ω^)ﾉ  `,
     `快試試看校園巴士!!! (ﾟωﾟ)ﾉ☆ `,
     `快試試看ARK找課!!! (*￣3￣)╭ `,
+    `快試試看ARK課表模擬!!! (*￣3￣)╭ `,
     `快看看ARK Wiki有什麼新東西!!! (*￣3￣)╭ `,
     `一起來加入方舟計劃!!!\n一起來寫Wiki!!! (*￣3￣)╭ `,
     `前人種樹，後人乘涼\n多想從前就有Wiki... (ಥ_ಥ)`,
@@ -198,7 +199,6 @@ class HomeScreen extends Component {
     }
 
     componentDidMount() {
-        logToFirebase('openPage', { page: 'home' });
         this.onRefresh();
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
