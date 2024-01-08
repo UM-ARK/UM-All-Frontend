@@ -261,6 +261,7 @@ export default class courseSim extends Component {
 
                 <MenuView
                     onPressAction={({ nativeEvent }) => {
+                        ReactNativeHapticFeedback.trigger('soft');
                         switch (nativeEvent.event) {
                             case 'wiki':
                                 ReactNativeHapticFeedback.trigger('soft');

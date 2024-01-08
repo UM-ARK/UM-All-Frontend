@@ -98,6 +98,7 @@ export default class LocalCourse extends Component {
                     return (
                         <MenuView
                             onPressAction={({ nativeEvent }) => {
+                                ReactNativeHapticFeedback.trigger('soft');
                                 switch (nativeEvent.event) {
                                     case 'wiki':
                                         ReactNativeHapticFeedback.trigger('soft');
