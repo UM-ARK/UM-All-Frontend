@@ -13,7 +13,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-2013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / ACC21-FIRST YEAR / BIA19-FIRST YEAR / FNC20-FIRST YEAR / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "財務會計原理"
         },
         {
@@ -29,7 +28,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E22-3009",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-SECOND YEAR / BEC20-SECOND YEAR / BEC22-SECOND YEAR / FIC17 / FIC20-SECOND YEAR / FIC22-SECOND YEAR / GBM20-SECOND YEAR / GBM22-SECOND YEAR / GBS20-SECOND YEAR / GBS22-SECOND YEAR / HRM20-SECOND YEAR / HRM22-SECOND YEAR / IIR17 / IIR20-SECOND YEAR / MKG20-SECOND YEAR / MKG22-SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -45,7 +43,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-4012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / FIC20-THIRD YEAR / FIC20-FOURTH YEAR / ACM19\n",
             "Course Title Chi": "中級會計學Ⅰ"
         },
         {
@@ -61,7 +58,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-4015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / ACC21 / ACM21\n",
             "Course Title Chi": "商務法"
         },
         {
@@ -77,7 +73,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-3009",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21 / ACM21\n",
             "Course Title Chi": "中級會計"
         },
         {
@@ -93,7 +88,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-SECOND YEAR / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC20-FOURTH YEAR / ACM19 / ACM21\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-SECOND YEAR / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC20-THIRD YEAR / FIC20-FOURTH YEAR / ACM19 / ACM21\n",
             "Course Title Chi": "管理會計II"
         },
         {
@@ -173,7 +168,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-2011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / IIR17-GMM17 / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC20-FOURTH YEAR / IIR17-GMM17 / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
             "Course Title Chi": "酒店和博彩業的財務會計"
         },
         {
@@ -237,7 +232,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E11-1021",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "電磁學和物理光學"
         },
         {
@@ -253,7 +247,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E11-1026",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - INS19 / INS23\n - FST - APC19 / APC23\n",
             "Course Title Chi": "大學化學概論"
         },
         {
@@ -269,7 +262,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E11-G015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FHS\n",
             "Course Title Chi": "普通物理學"
         },
         {
@@ -285,7 +277,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E21-G035",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FHS\n",
             "Course Title Chi": "物理實驗室"
         },
         {
@@ -301,7 +292,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E11-1027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "高等數學II"
         },
         {
@@ -317,7 +307,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E11-1027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - INS19 / INS23\n - FST - APC19 / APC23\n",
             "Course Title Chi": "無機化學"
         },
         {
@@ -333,7 +322,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E11-1026",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "量子物理學"
         },
         {
@@ -500,7 +488,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-4012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH\n - FBA\n - FED\n - FSS\n - FST\n",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -516,7 +503,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E22-2017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH\n - FBA - FNC20 / GBS22 / IIR20 / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n - FED\n - FSS\n - FST\n",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -676,7 +662,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-1021",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "漢語語言學概論"
         },
         {
@@ -692,7 +677,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-1031",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "中國現代文學"
         },
         {
@@ -708,7 +692,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1031",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "中國古典詩詞"
         },
         {
@@ -724,7 +707,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-1017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "中國史學選讀"
         },
         {
@@ -755,7 +737,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-G016",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "文言文II"
         },
         {
@@ -771,7 +752,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-1021",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "中國古典文學：宋至清"
         },
         {
@@ -787,7 +767,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E3-G041",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "世界華文文學"
         },
         {
@@ -803,7 +782,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1031",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL17 / CLL19\n",
             "Course Title Chi": "漢語詞典專題"
         },
         {
@@ -1062,7 +1040,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E34-G011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST\n",
             "Course Title Chi": "人機互動"
         },
         {
@@ -1315,7 +1292,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E11-1015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE11 / CVE17\n",
             "Course Title Chi": "土木工程數學"
         },
         {
@@ -1379,7 +1355,7 @@
             "Time From": "13:30",
             "Time To": "15:15",
             "Classroom": "E11-1015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
             "Course Title Chi": "施工管理與實務"
         },
         {
@@ -1548,21 +1524,6 @@
             "Classroom": "E11-1028",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE11 / CVE17\n",
             "Course Title Chi": "交通規劃和公共交通系統"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CEE",
-            "Course Code": "CIVL4021",
-            "Course Title": "Special Topics in Civil Engineering - Building Information Modeling",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "AO IEONG TAI MAN / LAM CHI CHIU / LOK MAN HOI / YIN XIANFEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "10:00",
-            "Time To": "11:45",
-            "Classroom": "E11-2032",
-            "Course Title Chi": "土木工程專題-建築資訊模型"
         },
         {
             "Offering Unit": "FSS",
@@ -1842,7 +1803,7 @@
             "Course Title": "Public Relations Planning and Strategy",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "COMM3007-001",
+            "Teacher Information": "CHEN NI",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "14:30",
@@ -2462,7 +2423,6 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E6-1102C",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN15 / ECN17 / ECN19 / MEC19\n",
             "Course Title Chi": "基礎宏觀經濟學"
         },
         {
@@ -2478,7 +2438,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E6-1102C",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN15 / ECN17 / ECN19 / MEC19\n",
             "Course Title Chi": "數學二"
         },
         {
@@ -2494,7 +2453,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-G016",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN15 / ECN17 / ECN19 / MEC19\n",
             "Course Title Chi": "統計二"
         },
         {
@@ -2510,7 +2468,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E6-1102C",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN15 / ECN17 / ECN19 / MEC19\n",
             "Course Title Chi": "中級微觀經濟學II"
         },
         {
@@ -2526,7 +2483,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "N23-G016",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN15 / ECN17 / ECN19 / MEC19\n",
             "Course Title Chi": "中級宏觀經濟學II"
         },
         {
@@ -2637,7 +2593,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E3-3032",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n",
             "Course Title Chi": "教育哲學"
         },
         {
@@ -2693,7 +2648,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3032",
+            "Classroom": "E4-1051",
             "Course Title Chi": "運動,休閒與娛樂產業－簡介"
         },
         {
@@ -3105,7 +3060,6 @@
             "Time From": "13:00",
             "Time To": "15:45",
             "Classroom": "E3-3032",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - ENG11 / ENG17 / ENG19 / INS19 / INS23 / MAS19 / PPE15 / PPE17 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "特殊教育概論"
         },
         {
@@ -3265,20 +3219,6 @@
             "Time To": "11:15",
             "Classroom": "E33-1045",
             "Course Title Chi": "兒童語言文學"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "EDUC3031",
-            "Course Title": "Educational Evaluation",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "SIT POU SEONG",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E3-2043",
-            "Course Title Chi": "教育評價"
         },
         {
             "Offering Unit": "FED",
@@ -3460,20 +3400,6 @@
             "Teacher Information": "FAN CHUN WAI",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "監督教學和學校經驗"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "EDUC4006",
-            "Course Title": "Teaching of Organization of Writing in Secondary School",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "CHENG CHUN WAI GEORGE",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "18:00",
-            "Time To": "20:45",
-            "Classroom": "E3-3032",
-            "Course Title Chi": "中學寫作組織教學"
         },
         {
             "Offering Unit": "FED",
@@ -4249,7 +4175,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-3007",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FAH\n - FBA - FNC16 / FNC17 / FNC20 / FIRST YEAR\n - FED\n - FSS\n - FST\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FAH\n - FBA - FNC16 / FNC17 / FNC20\n - FED\n",
             "Course Title Chi": "財務管理"
         },
         {
@@ -4345,7 +4271,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-4015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC16 / FNC17 / FNC20 / FNM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC20-THIRD YEAR / BEC20-FOURTH YEAR / FNC16 / FNC17 / FNC20 / FNM19\n",
             "Course Title Chi": "投資組合管理"
         },
         {
@@ -4728,7 +4654,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-1051",
             "Course Title Chi": "性與藝術"
         },
         {
@@ -4759,7 +4685,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E3-4043",
+            "Classroom": "E21-G009",
             "Course Title Chi": "視覺與表演藝術 - 戲劇"
         },
         {
@@ -4823,7 +4749,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E4-3054",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "商業定量推理"
         },
         {
@@ -5159,7 +5084,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-4043",
+            "Classroom": "E6-1102C",
             "Course Title Chi": "營養與食品安全"
         },
         {
@@ -5388,7 +5313,7 @@
             "Course Title": "Public Sector Organizational Structure and Design",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "(2023-2) GPAD2006",
+            "Teacher Information": "MENG CAN",
             "Lecture / Lab": "Lecture",
             "Day": "SAT",
             "Time From": "10:00",
@@ -5508,7 +5433,7 @@
             "Course Title": "Governance Reform in Contemporary China",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "(2023-2) GPAD3024",
+            "Teacher Information": "DONG BINZIZI",
             "Lecture / Lab": "Lecture",
             "Day": "SAT",
             "Time From": "14:30",
@@ -5571,7 +5496,7 @@
             "Time From": "16:00",
             "Time To": "18:45",
             "Classroom": "E21-G013",
-            "Course Title Chi": "計劃評估和績效評估"
+            "Course Title Chi": "專案評估與績效評估"
         },
         {
             "Offering Unit": "FSS",
@@ -5852,7 +5777,6 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E12-G031",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FHS - BIF22 / BIO19 / BIO22 / PHA22\n",
             "Course Title Chi": "生物化學實驗室"
         },
         {
@@ -5883,7 +5807,6 @@
             "Time From": "15:00",
             "Time To": "15:50",
             "Classroom": "E12-G030",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FHS - BIO22 / PHA22\n",
             "Course Title Chi": "有機化學實驗室"
         },
         {
@@ -5944,7 +5867,6 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E12-G030 / E12-1064",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FHS - BIO19 / BIO22\n",
             "Course Title Chi": "生理學實驗室"
         },
         {
@@ -5990,7 +5912,6 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E12-G030",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FHS - PHA22\n",
             "Course Title Chi": "藥理實驗室"
         },
         {
@@ -6000,7 +5921,7 @@
             "Course Title": "Medicinal Chemistry",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TAM KIN YIP",
+            "Teacher Information": "SONG HE / TAM KIN YIP",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "17:30",
@@ -6123,7 +6044,6 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2018",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIM19\n",
             "Course Title Chi": "綜合度假村管理概論"
         },
         {
@@ -6139,7 +6059,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR17 / IIR20 / IIM19\n",
             "Course Title Chi": "博彩管理概論"
         },
         {
@@ -6155,7 +6074,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR17-GMM17 / IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20 / IIM19\n",
             "Course Title Chi": "賭博心理學"
         },
         {
@@ -6363,7 +6281,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E3-4042 / E6-3094",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBS20 / GBS22\n",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -6395,7 +6312,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E3-1043 / E6-3094",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / GBS22\n",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -6426,7 +6342,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E22-2011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "統計和數據分析"
         },
         {
@@ -6474,7 +6389,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / SECOND YEAR / THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / BIA19-FOURTH YEAR / SECOND YEAR / THIRD YEAR\n",
             "Course Title Chi": "商業電腦網路"
         },
         {
@@ -6490,7 +6405,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Course Title Chi": "業務資料探勘與視覺化"
         },
         {
@@ -6522,7 +6436,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E3-4032 / E6-3093",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-THIRD YEAR / BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FNC20-FNE20-FOURTH YEAR\n",
             "Course Title Chi": "高階電腦程式設計"
         },
         {
@@ -6554,7 +6468,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3001",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Course Title Chi": "高等微積分"
         },
         {
@@ -6634,7 +6548,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-G037",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "實用日語II"
         },
         {
@@ -6650,7 +6563,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-1011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19 / JSM19\n",
             "Course Title Chi": "日文文法II"
         },
         {
@@ -6698,7 +6610,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1041",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "實用日文IV"
         },
         {
@@ -6714,7 +6625,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-G038",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19 / JSM19\n",
             "Course Title Chi": "綜合日語II"
         },
         {
@@ -6730,7 +6640,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E21-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19 / JSM19\n",
             "Course Title Chi": "日文閱讀二"
         },
         {
@@ -6746,7 +6655,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-1039",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "日語作文II"
         },
         {
@@ -6874,7 +6782,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "法律史"
         },
         {
@@ -6890,7 +6798,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "澳門基本法"
         },
         {
@@ -6906,7 +6814,7 @@
             "Time From": "22:00",
             "Time To": "22:50",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "澳門基本法（法律實務）"
         },
         {
@@ -6922,7 +6830,7 @@
             "Time From": "20:30",
             "Time To": "23:15",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "國際公法"
         },
         {
@@ -6938,7 +6846,7 @@
             "Time From": "14:30",
             "Time To": "15:20",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "國際公法（法律實務）"
         },
         {
@@ -6985,8 +6893,8 @@
             "Day": "WED",
             "Time From": "19:00",
             "Time To": "21:45",
-            "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Classroom": "E32-G003",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "公共經濟學"
         },
         {
@@ -7002,7 +6910,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "稅收法"
         },
         {
@@ -7018,7 +6926,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "登記和公證法"
         },
         {
@@ -7034,7 +6942,7 @@
             "Time From": "19:00",
             "Time To": "20:15",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "法醫學"
         },
         {
@@ -7146,7 +7054,7 @@
             "Time From": "20:30",
             "Time To": "23:15",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "民法通論II"
         },
         {
@@ -7162,7 +7070,7 @@
             "Time From": "15:30",
             "Time To": "17:15",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "民法通論II（法律實務）"
         },
         {
@@ -7178,7 +7086,7 @@
             "Time From": "09:30",
             "Time To": "12:15",
             "Classroom": "E32-G004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "行政法二"
         },
         {
@@ -7194,7 +7102,7 @@
             "Time From": "20:30",
             "Time To": "21:20",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "行政法二（法律實務）"
         },
         {
@@ -7242,7 +7150,7 @@
             "Time From": "14:00",
             "Time To": "16:45",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "義務法一"
         },
         {
@@ -7258,7 +7166,7 @@
             "Time From": "11:00",
             "Time To": "12:45",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "義務法一（法律實務）"
         },
         {
@@ -7274,7 +7182,7 @@
             "Time From": "20:30",
             "Time To": "23:15",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "義務法二"
         },
         {
@@ -7290,7 +7198,7 @@
             "Time From": "21:30",
             "Time To": "23:15",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "債權法二（法律實務）"
         },
         {
@@ -7306,7 +7214,7 @@
             "Time From": "14:00",
             "Time To": "16:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "商法一"
         },
         {
@@ -7322,7 +7230,7 @@
             "Time From": "17:00",
             "Time To": "17:50",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "商法一（法律實務）"
         },
         {
@@ -7338,7 +7246,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "商法二"
         },
         {
@@ -7354,7 +7262,7 @@
             "Time From": "22:00",
             "Time To": "22:50",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "商法II（法律實務）"
         },
         {
@@ -7370,7 +7278,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "刑法二"
         },
         {
@@ -7386,7 +7294,7 @@
             "Time From": "19:30",
             "Time To": "21:15",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "刑法II（法律實務）"
         },
         {
@@ -7402,7 +7310,7 @@
             "Time From": "20:00",
             "Time To": "22:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "物權法"
         },
         {
@@ -7418,7 +7326,7 @@
             "Time From": "19:00",
             "Time To": "19:50",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "物權法（法律實務）"
         },
         {
@@ -7434,7 +7342,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "行政法三"
         },
         {
@@ -7450,7 +7358,7 @@
             "Time From": "22:00",
             "Time To": "22:50",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "行政法三（法律實務）"
         },
         {
@@ -7466,7 +7374,7 @@
             "Time From": "14:00",
             "Time To": "16:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "民事訴訟法第一"
         },
         {
@@ -7482,7 +7390,7 @@
             "Time From": "17:00",
             "Time To": "17:50",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "民事訴訟法一（法律實務）"
         },
         {
@@ -7530,7 +7438,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G020",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "世襲家庭法與繼承法"
         },
         {
@@ -7546,7 +7454,7 @@
             "Time From": "22:00",
             "Time To": "22:50",
             "Classroom": "E32-G020",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "世襲家庭法與繼承法（法律實務）"
         },
         {
@@ -7562,7 +7470,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "商法三"
         },
         {
@@ -7578,7 +7486,7 @@
             "Time From": "09:00",
             "Time To": "09:50",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "商法三（法律實務）"
         },
         {
@@ -7594,7 +7502,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "國際私法"
         },
         {
@@ -7610,7 +7518,7 @@
             "Time From": "19:00",
             "Time To": "19:50",
             "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "國際私法（法律實務）"
         },
         {
@@ -7626,7 +7534,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "刑事訴訟法"
         },
         {
@@ -7642,7 +7550,7 @@
             "Time From": "12:00",
             "Time To": "12:50",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "刑事訴訟法（法律實務）"
         },
         {
@@ -7658,7 +7566,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "民事訴訟法二"
         },
         {
@@ -7674,7 +7582,7 @@
             "Time From": "21:30",
             "Time To": "23:15",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE17 / BLE18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "民事訴訟法二（法律實務）"
         },
         {
@@ -7690,7 +7598,7 @@
             "Time From": "14:00",
             "Time To": "16:45",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "民事訴訟法三"
         },
         {
@@ -7706,7 +7614,7 @@
             "Time From": "17:00",
             "Time To": "17:50",
             "Classroom": "E32-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "民事訴訟法三（法律實務）"
         },
         {
@@ -7722,7 +7630,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
             "Course Title Chi": "研究與實習"
         },
         {
@@ -7813,7 +7721,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "N8-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST - MTH17 / MTH19 / MTH23 / AMM19\n",
             "Course Title Chi": "中級微積分"
         },
         {
@@ -7844,7 +7751,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E12-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE11 / CVE17 / EME17\n",
             "Course Title Chi": "工程數學II"
         },
         {
@@ -8062,7 +7968,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "商務通訊"
         },
         {
@@ -8078,7 +7983,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-1015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "組織行為學"
         },
         {
@@ -8480,7 +8384,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-1013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19 / PTM19\n",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -8496,7 +8399,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-3127",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19 / PTM19\n",
             "Course Title Chi": "書面理解與寫作技巧II"
         },
         {
@@ -8512,7 +8414,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E21-3126",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17 / PTS19 / PTM19\n",
             "Course Title Chi": "葡萄牙語言與文化II"
         },
         {
@@ -8558,7 +8459,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-1039",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19 / PTM19\n - FLL - BLL18\n",
             "Course Title Chi": "口語理解與表達能力IV"
         },
         {
@@ -8574,7 +8474,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-1045",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19 / PTM19\n - FLL - BLL17 / BLL18\n",
             "Course Title Chi": "書面理解與表達能力IV"
         },
         {
@@ -8993,7 +8892,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-G009",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC17 / SOC19 / SOC22 / SOM17 / SOM19 / SOM22\n",
             "Course Title Chi": "政治社會學"
         },
         {
@@ -9122,7 +9020,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-G015",
+            "Classroom": "E21-G013",
             "Course Title Chi": "社會學選題"
         },
         {
@@ -9183,7 +9081,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-01-04",
+    "updateTime": "2024-01-08",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
