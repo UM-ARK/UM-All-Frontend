@@ -49,6 +49,8 @@ class ChatDetail extends Component {
         openOption: false,
     };
 
+    imageScrollViewer = React.createRef(null);
+
     componentDidMount() {
         let globalData = this.props.RootStore;
         if (globalData.userInfo.isClub) {
@@ -190,7 +192,7 @@ class ChatDetail extends Component {
                         } else if (item.notice_type == 'IMAGE') {
                             // 打開圖片查看器
                             this.setState({ imageUrls: item.image_url });
-                            this.refs.imageScrollViewer.tiggerModal();
+                            this.imageScrollViewer.current.tiggerModal();
                         }
                     }}>
                     <Image
@@ -395,7 +397,7 @@ class ChatDetail extends Component {
 
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
-                    ref={'imageScrollViewer'}
+                    ref={this.imageScrollViewer}
                     imageUrls={imageUrls}
                 />
 
