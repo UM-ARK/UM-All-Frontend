@@ -2,12 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/syukugen/Desktop/UM-All-Frontend/ios/UMALL.xcodeproj">
+      location = "group:UMALL.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:UMALL.xcodeproj">
    </FileRef>
 </Workspace>
