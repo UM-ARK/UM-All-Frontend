@@ -81,7 +81,6 @@ export default class CourseCard extends Component {
                     return (
                         <MenuView
                             onPressAction={({ nativeEvent }) => {
-                                ReactNativeHapticFeedback.trigger('soft');
                                 switch (nativeEvent.event) {
                                     case 'wiki':
                                         ReactNativeHapticFeedback.trigger('soft');
@@ -212,6 +211,9 @@ export default class CourseCard extends Component {
                                 //     // 跳轉ARK Wiki
                                 //     this.context.navigate('Wiki', { url: URL });
                                 // }}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                }}
                                 onLongPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     logToFirebase('checkCourse', {

@@ -261,7 +261,6 @@ export default class courseSim extends Component {
 
                 <MenuView
                     onPressAction={({ nativeEvent }) => {
-                        ReactNativeHapticFeedback.trigger('soft');
                         switch (nativeEvent.event) {
                             case 'wiki':
                                 ReactNativeHapticFeedback.trigger('soft');
@@ -382,6 +381,9 @@ export default class courseSim extends Component {
                         //         { cancelable: true, }
                         //     );
                         // }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                        }}
                         delayLongPress={300}
                     >
                         <Text style={{
