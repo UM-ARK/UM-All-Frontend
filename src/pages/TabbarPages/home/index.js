@@ -27,6 +27,7 @@ import {
     APPSTORE_URL,
     MAIL,
     ARK_WIKI,
+    ARK_WIKI_RANDOM_TITLE,
 } from '../../../utils/pathMap';
 import EventPage from '../news/EventPage.js';
 import ModalBottom from '../../../components/ModalBottom';
@@ -287,9 +288,23 @@ class HomeScreen extends Component {
         }
     };
 
-    onRefresh = () => {
+    onRefresh = async () => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
         this.toast.show(toastTextArr[toastTextIdx], 3500);
+
+        // TODO: 會出現教授的名字，暫且擱置
+        // const URL = ARK_WIKI_RANDOM_TITLE;
+        // await axios.get(URL)
+        //     .then(res => {
+        //         let result = res.data;
+        //         if (result) {
+        //             let randomTitle = result.query.random[0].title;
+        //             console.log(randomTitle);
+        //         }
+        //     })
+        //     .catch(err => {
+        //         Alert.alert('', 'Wiki請求錯誤' + JSON.stringify(err))
+        //     })
     }
 
     // 獲取日曆數據

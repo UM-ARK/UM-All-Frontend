@@ -381,6 +381,9 @@ export default class courseSim extends Component {
                         //         { cancelable: true, }
                         //     );
                         // }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                        }}
                         delayLongPress={300}
                     >
                         <Text style={{

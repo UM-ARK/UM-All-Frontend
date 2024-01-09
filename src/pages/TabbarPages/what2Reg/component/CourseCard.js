@@ -211,6 +211,9 @@ export default class CourseCard extends Component {
                                 //     // 跳轉ARK Wiki
                                 //     this.context.navigate('Wiki', { url: URL });
                                 // }}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                }}
                                 onLongPress={() => {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     logToFirebase('checkCourse', {

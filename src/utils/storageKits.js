@@ -15,7 +15,7 @@ export async function handleLogin(userInfo) {
             .then(() => {
                 RNRestart.Restart();
             })
-            .catch(e => console.log(e));
+            .catch(e => console.log('handleLogin error', e));
     } catch (e) {
         alert(e);
     }
@@ -42,7 +42,7 @@ export async function updateUserInfo(userInfo) {
     try {
         const strUserInfo = JSON.stringify(userInfo);
         await AsyncStorage.setItem('userInfo', strUserInfo).catch(e =>
-            console.log(e),
+            console.log('updateUserInfo error', e),
         );
     } catch (e) {
         alert(e);
@@ -53,7 +53,7 @@ export async function updateUserInfo(userInfo) {
 export async function setAPPInfo(appInfo) {
     try {
         const strAppInfo = JSON.stringify(appInfo);
-        await AsyncStorage.setItem('appInfo', strAppInfo).catch(e => console.log(e));
+        await AsyncStorage.setItem('appInfo', strAppInfo).catch(e => console.log('setAPPInfo error', e));
     } catch (e) {
         alert(e);
     }

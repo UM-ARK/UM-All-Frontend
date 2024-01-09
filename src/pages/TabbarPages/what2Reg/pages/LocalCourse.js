@@ -147,15 +147,18 @@ export default class LocalCourse extends Component {
                                     paddingVertical: scale(5), paddingHorizontal: scale(8),
                                     alignItems: 'center',
                                 }}
-                            // onPress={() => {
-                            //     ReactNativeHapticFeedback.trigger('soft');
-                            //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
-                            //     logToFirebase('checkCourse', {
-                            //         courseCode: courseInfo['Course Code'],
-                            //         profName: courseInfo['Teacher Information'],
-                            //     });
-                            //     this.context.navigate('Wiki', { url: URL });
-                            // }}
+                                // onPress={() => {
+                                //     ReactNativeHapticFeedback.trigger('soft');
+                                //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
+                                //     logToFirebase('checkCourse', {
+                                //         courseCode: courseInfo['Course Code'],
+                                //         profName: courseInfo['Teacher Information'],
+                                //     });
+                                //     this.context.navigate('Wiki', { url: URL });
+                                // }}
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                }}
                             >
                                 <View style={{ alignItems: 'center', }}>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
