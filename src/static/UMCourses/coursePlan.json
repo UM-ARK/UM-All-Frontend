@@ -2393,9 +2393,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LAW MAN KAY",
             "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "17:00",
-            "Time To": "18:45",
+            "Day": "WED",
+            "Time From": "13:00",
+            "Time To": "14:45",
             "Classroom": "E11-1028",
             "Course Title Chi": "物聯網工作坊"
         },
@@ -3103,7 +3103,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "15:45",
-            "Classroom": "E31-G001",
+            "Classroom": "E3-3032",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - CHN17 / CHN19\n",
             "Course Title Chi": "學科教學法二（中文）"
         },
@@ -4444,7 +4444,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-4032",
+            "Classroom": "E3-3033",
             "Course Title Chi": "大中華與全球經濟"
         },
         {
@@ -5496,7 +5496,7 @@
             "Time From": "16:00",
             "Time To": "18:45",
             "Classroom": "E21-G013",
-            "Course Title Chi": "專案評估與績效評估"
+            "Course Title Chi": "計劃評估和績效評估"
         },
         {
             "Offering Unit": "FSS",
@@ -5881,7 +5881,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E12-G003",
+            "Classroom": "E12-G005",
             "Course Title Chi": "人體解剖學"
         },
         {
@@ -8338,7 +8338,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E21-1021",
+            "Classroom": "E22-G010",
             "Course Title Chi": "哲學與電影"
         },
         {
@@ -8664,7 +8664,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -9081,7 +9081,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-01-08",
+    "updateTime": "2024-01-10",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
