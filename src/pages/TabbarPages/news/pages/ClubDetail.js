@@ -65,6 +65,8 @@ const CLUB_IMAGE_WIDTH = scale(66);
 const CLUB_IMAGE_HEIGHT = scale(55);
 
 class ClubDetail extends Component {
+    imageScrollViewer = React.createRef(null);
+
     state = {
         clubData: undefined,
         eventData: undefined,
@@ -408,7 +410,7 @@ class ClubDetail extends Component {
                         } else {
                             this.setState({ imageUrls: bgImgUrl });
                         }
-                        this.refs.imageScrollViewer.handleOpenImage(0);
+                        this.imageScrollViewer.current.handleOpenImage(0);
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
@@ -494,7 +496,7 @@ class ClubDetail extends Component {
                     <TouchableWithoutFeedback
                         onPress={() => {
                             this.setState({ imageUrls: logo_url });
-                            this.refs.imageScrollViewer.tiggerModal();
+                            this.imageScrollViewer.current.tiggerModal();
                         }}>
                         <View style={styles.clubLogoContainer}>
                             <FastImage
@@ -620,7 +622,7 @@ class ClubDetail extends Component {
                                                             imageUrls:
                                                                 clubData.club_photos_list,
                                                         });
-                                                        this.refs.imageScrollViewer.handleOpenImage(
+                                                        this.imageScrollViewer.current.handleOpenImage(
                                                             index,
                                                         );
                                                     }}>
@@ -876,10 +878,10 @@ class ClubDetail extends Component {
 
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
-                    ref={'imageScrollViewer'}
+                    ref={this.imageScrollViewer}
                     imageUrls={imageUrls}
-                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
+                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 {/* 彈出層提示 */}
@@ -981,7 +983,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         width: scale(CLUB_LOGO_SIZE),
         height: scale(CLUB_LOGO_SIZE),
-        borderRadius: 50,
+        borderRadius: scale(50),
         overflow: 'hidden',
         ...COLOR_DIY.viewShadow,
         backgroundColor: white,

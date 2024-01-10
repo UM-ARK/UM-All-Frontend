@@ -29,6 +29,8 @@ const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = scale(320);
 
 class UMEventDetail extends Component {
+    imageScrollViewer = React.createRef(null);
+
     constructor(props) {
         super(props);
 
@@ -450,10 +452,10 @@ class UMEventDetail extends Component {
                 <Header title={'活動詳情'} />
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
-                    ref={'imageScrollViewer'}
+                    ref={this.imageScrollViewer}
                     imageUrls={imageUrls}
-                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
+                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 <ScrollView>
@@ -484,7 +486,7 @@ class UMEventDetail extends Component {
                         style={styles.imgContainer}
                         // 瀏覽大圖
                         onPress={() => {
-                            this.refs.imageScrollViewer.handleOpenImage(0);
+                            this.imageScrollViewer.current.handleOpenImage(0);
                         }}>
                         <FastImage
                             source={{

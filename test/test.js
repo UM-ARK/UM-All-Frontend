@@ -45,6 +45,8 @@ class TestScreen extends Component {
     // static contextType = NavigationContext;
     // this.context === this.props.navigation
 
+    imageScrollViewer = React.createRef(null);
+
     state = {
         isModalVisible: false,
         imagesIndex: 0,
@@ -105,10 +107,10 @@ class TestScreen extends Component {
 
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
-                    ref={'imageScrollViewer'}
+                    ref={this.imageScrollViewer}
                     imageUrls={images}
-                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
+                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 {/* 圖片展示 */}
@@ -120,7 +122,7 @@ class TestScreen extends Component {
                     {images.map(({ url }, index) => (
                         <TouchableOpacity
                             onPress={() =>
-                                this.refs.imageScrollViewer.handleOpenImage(
+                                this.imageScrollViewer.current.handleOpenImage(
                                     index,
                                 )
                             }>
@@ -134,7 +136,7 @@ class TestScreen extends Component {
                 <Button
                     title="打開圖片"
                     onPress={() => {
-                        this.refs.imageScrollViewer.tiggerModal();
+                        this.imageScrollViewer.current.tiggerModal();
                     }}></Button>
 
                 {/* 展示Modal */}

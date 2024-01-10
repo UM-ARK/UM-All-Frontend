@@ -70,6 +70,8 @@ let topNews = {};
 class NewsPage extends Component {
     static contextType = NavigationContext;
 
+    virtualizedList = React.createRef(null);
+
     constructor() {
         super();
         this.state = {
@@ -306,13 +308,11 @@ class NewsPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.refs.virtualizedList.scrollToOffset({
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.virtualizedList.current.scrollToOffset({
                             x: 0,
                             y: 0,
-                            duration: 500, // 回頂時間
                         });
-                        ReactNativeHapticFeedback.trigger('soft');
                     }}>
                     <View
                         style={{
@@ -370,7 +370,7 @@ class NewsPage extends Component {
                     // 渲染新聞列表
                     <VirtualizedList
                         data={this.state.newsList}
-                        ref={'virtualizedList'}
+                        ref={this.virtualizedList}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
                         initialNumToRender={4}
                         renderItem={({ item }) => <NewsCard data={item} />}

@@ -43,6 +43,8 @@ let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 class NewsDetail extends Component {
+    imageScrollViewer = React.createRef(null);
+
     constructor(props) {
         super(props);
 
@@ -271,7 +273,7 @@ class NewsDetail extends Component {
                                 }}
                                 // 打開圖片瀏覽大圖
                                 onPress={() => {
-                                    this.refs.imageScrollViewer.handleOpenImage(
+                                    this.imageScrollViewer.current.handleOpenImage(
                                         index,
                                     );
                                 }}>
@@ -323,7 +325,7 @@ class NewsDetail extends Component {
 
                     {/* 彈出層展示圖片查看器 */}
                     <ImageScrollViewer
-                        ref={'imageScrollViewer'}
+                        ref={this.imageScrollViewer}
                         imageUrls={imageUrls}
                     />
                     <View style={{ marginBottom: scale(50) }} />

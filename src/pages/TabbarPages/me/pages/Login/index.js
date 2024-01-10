@@ -139,7 +139,7 @@ class LoginChoose extends Component {
                 {this.state.showMoodle ? (
                     <WebView
                         source={{ uri: UM_Moodle }}
-                        ref={'webRef'}
+                        // ref={'webRef'}
                         startInLoadingState={true}
                         // 自動注入賬號密碼
                         injectedJavaScript={`

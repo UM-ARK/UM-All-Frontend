@@ -1,10 +1,10 @@
 {
   "name": "umall",
-  "version": "2.6.3",
+  "version": "2.6.4",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios": "react-native run-ios --simulator=\"iPhone 14 Pro\"",
+    "ios": "react-native run-ios --simulator=\"iPhone 14 Pro 17.2\"",
     "start": "react-native start --reset-cache",
     "test": "jest",
     "lint": "eslint ."
@@ -35,7 +35,7 @@
     "qs": "^6.11.2",
     "react": "17.0.2",
     "react-content-loader": "^6.2.1",
-    "react-native": "0.68.2",
+    "react-native": "0.68.7",
     "react-native-actionsheet": "^2.4.2",
     "react-native-animated-nav-tab-bar": "^3.1.10",
     "react-native-animated-splash-screen": "^2.0.5",

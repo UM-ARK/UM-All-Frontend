@@ -8626,9 +8626,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LAW MAN KAY",
             "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "17:00",
-            "Time To": "18:45",
+            "Day": "WED",
+            "Time From": "13:00",
+            "Time To": "14:45",
             "Classroom": "E11-1028",
             "Course Title Chi": "物聯網工作坊"
         },
@@ -8641,9 +8641,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LAW MAN KAY",
             "Lecture / Lab": "Lab",
-            "Day": "FRI",
-            "Time From": "17:00",
-            "Time To": "18:45",
+            "Day": "SAT",
+            "Time From": "13:00",
+            "Time To": "14:45",
             "Classroom": "E11-1028",
             "Course Title Chi": "物聯網工作坊"
         },
@@ -10080,7 +10080,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "15:45",
-            "Classroom": "E31-G001",
+            "Classroom": "E3-3032",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - CHN17 / CHN19\n",
             "Course Title Chi": "學科教學法二（中文）"
         },
@@ -15009,6 +15009,36 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "ELC",
+            "Course Code": "EELC1013",
+            "Course Title": "University English III",
+            "Section": "025",
+            "Medium of Instruction": "English",
+            "Teacher Information": "JOSHUA LEE",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "13:00",
+            "Time To": "14:15",
+            "Classroom": "E3-3033",
+            "Course Title Chi": "大學英語三"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "ELC",
+            "Course Code": "EELC1013",
+            "Course Title": "University English III",
+            "Section": "025",
+            "Medium of Instruction": "English",
+            "Teacher Information": "JOSHUA LEE",
+            "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "13:00",
+            "Time To": "14:15",
+            "Classroom": "E3-3033",
+            "Course Title Chi": "大學英語三"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "ELC",
             "Course Code": "EELC2008",
             "Course Title": "Academic English: Speaking",
             "Section": "001",
@@ -16660,36 +16690,6 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "DENG",
-            "Course Code": "ENGL1004",
-            "Course Title": "Introduction to French I",
-            "Section": "002",
-            "Medium of Instruction": "French and English",
-            "Teacher Information": "CHEUNG KEE HUNG",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E21-G037",
-            "Course Title Chi": "法語入門一"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "DENG",
-            "Course Code": "ENGL1004",
-            "Course Title": "Introduction to French I",
-            "Section": "002",
-            "Medium of Instruction": "French and English",
-            "Teacher Information": "CHEUNG KEE HUNG",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E21-G037",
-            "Course Title Chi": "法語入門一"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "DENG",
             "Course Code": "ENGL1005",
             "Course Title": "Introduction to French II",
             "Section": "001",
@@ -18299,7 +18299,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-4032",
+            "Classroom": "E3-3033",
             "Course Title Chi": "大中華與全球經濟"
         },
         {
@@ -18315,7 +18315,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-4032",
+            "Classroom": "E3-3033",
             "Course Title Chi": "大中華與全球經濟"
         },
         {
@@ -22300,7 +22300,7 @@
             "Time From": "16:00",
             "Time To": "18:45",
             "Classroom": "E21-G013",
-            "Course Title Chi": "專案評估與績效評估"
+            "Course Title Chi": "計劃評估和績效評估"
         },
         {
             "Offering Unit": "FSS",
@@ -23760,7 +23760,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E12-G003",
+            "Classroom": "E12-G005",
             "Course Title Chi": "人體解剖學"
         },
         {
@@ -23775,7 +23775,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E12-G003",
+            "Classroom": "E12-G005",
             "Course Title Chi": "人體解剖學"
         },
         {
@@ -30669,7 +30669,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-2002",
             "Course Title Chi": "組織行為學"
         },
         {
@@ -30684,7 +30684,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-2002",
             "Course Title Chi": "組織行為學"
         },
         {
@@ -31453,6 +31453,21 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "DPHIL",
+            "Course Code": "PHIL1000",
+            "Course Title": "Introduction to Western Philosophy",
+            "Section": "002",
+            "Medium of Instruction": "English",
+            "Teacher Information": "NEVIA DOLCINI",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "14:30",
+            "Time To": "17:15",
+            "Classroom": "E21-1027",
+            "Course Title Chi": "西方哲學概論"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DPHIL",
             "Course Code": "PHIL1002",
             "Course Title": "Critical Thinking",
             "Section": "001",
@@ -31507,7 +31522,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E21-1021",
+            "Classroom": "E22-G010",
             "Course Title Chi": "哲學與電影"
         },
         {
@@ -32572,7 +32587,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32587,7 +32602,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32602,7 +32617,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1040",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32617,7 +32632,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1040",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32632,7 +32647,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32647,7 +32662,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32662,7 +32677,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1040",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32677,7 +32692,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1040",
+            "Classroom": "E21-1052",
             "Course Title Chi": "口語理解與表達能力II"
         },
         {
@@ -32918,66 +32933,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1056",
-            "Course Title Chi": "書面理解與寫作技巧II"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "DPT",
-            "Course Code": "PORT1005",
-            "Course Title": "Written Comprehension and Production Skills II",
-            "Section": "004",
-            "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ZHANG XIAOFEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
-            "Classroom": "E21-1016",
-            "Course Title Chi": "書面理解與寫作技巧II"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "DPT",
-            "Course Code": "PORT1005",
-            "Course Title": "Written Comprehension and Production Skills II",
-            "Section": "004",
-            "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ZHANG XIAOFEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
-            "Classroom": "E21-1016",
-            "Course Title Chi": "書面理解與寫作技巧II"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "DPT",
-            "Course Code": "PORT1005",
-            "Course Title": "Written Comprehension and Production Skills II",
-            "Section": "004",
-            "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ZHANG XIAOFEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
-            "Classroom": "E21-1016",
-            "Course Title Chi": "書面理解與寫作技巧II"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "DPT",
-            "Course Code": "PORT1005",
-            "Course Title": "Written Comprehension and Production Skills II",
-            "Section": "004",
-            "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ZHANG XIAOFEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
-            "Classroom": "E21-1016",
             "Course Title Chi": "書面理解與寫作技巧II"
         },
         {
@@ -34864,7 +34819,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -34880,7 +34835,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",

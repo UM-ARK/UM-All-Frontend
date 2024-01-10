@@ -60,6 +60,8 @@ class EventDetail extends Component {
         toastColor: themeColor,
     };
 
+    imageScrollViewer = React.createRef(null);
+
     componentDidMount() {
         let globalData = this.props.RootStore;
         // 已登錄
@@ -398,7 +400,7 @@ class EventDetail extends Component {
                     style={{ flex: 1, position: 'relative' }}
                     onPress={() => {
                         this.setState({ imageUrls: coverImgUrl });
-                        this.refs.imageScrollViewer.handleOpenImage(0);
+                        this.imageScrollViewer.current.handleOpenImage(0);
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
@@ -672,7 +674,7 @@ class EventDetail extends Component {
                             activeOpacity={0.7}
                             onPress={() => {
                                 this.setState({ imageUrls: relateImgUrl });
-                                this.refs.imageScrollViewer.tiggerModal();
+                                this.imageScrollViewer.current.tiggerModal();
                             }}>
                             {/* 卡片標題 */}
                             <View
@@ -712,7 +714,7 @@ class EventDetail extends Component {
                                                 this.setState({
                                                     imageUrls: relateImgUrl,
                                                 });
-                                                this.refs.imageScrollViewer.handleOpenImage(
+                                                this.imageScrollViewer.current.handleOpenImage(
                                                     index,
                                                 );
                                             }}>
@@ -814,10 +816,10 @@ class EventDetail extends Component {
 
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
-                    ref={'imageScrollViewer'}
+                    ref={this.imageScrollViewer}
                     imageUrls={imageUrls}
-                // 父組件調用 this.refs.imageScrollViewer.tiggerModal(); 打開圖層
-                // 父組件調用 this.refs.imageScrollViewer.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
+                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
                 />
 
                 {/* Dialog提示登錄 */}

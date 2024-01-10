@@ -33,7 +33,7 @@ class ModalBottom extends Component {
                 isVisible={isModalBottomVisible}
                 statusBarTranslucent
                 deviceHeight={PAGE_HEIGHT}
-                backdropColor={'black'}
+                backdropColor={COLOR_DIY.black.main}
                 backdropOpacity={0.5}
                 // animationIn='zoomIn'    animationOut='zoomOut'
                 onBackButtonPress={this.tiggerModal}
@@ -47,7 +47,7 @@ class ModalBottom extends Component {
                     style={{
                         // height: '18%',
                         width: '100%',
-                        backgroundColor: COLOR_DIY.meScreenColor.bg_color,
+                        backgroundColor: COLOR_DIY.bg_color,
                         borderTopLeftRadius: scale(15),
                         borderTopRightRadius: scale(15),
                         overflow: 'hidden',

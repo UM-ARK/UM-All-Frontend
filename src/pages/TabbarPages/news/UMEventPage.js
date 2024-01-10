@@ -39,6 +39,8 @@ const getItemCount = data => {
 };
 
 class UMEventPage extends Component {
+    virtualizedList = React.createRef(null);
+
     constructor() {
         super();
         this.state = {
@@ -146,11 +148,9 @@ class UMEventPage extends Component {
                 <TouchableWithoutFeedback
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
-                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.refs.virtualizedList.scrollToOffset({
+                        this.virtualizedList.current.scrollToOffset({
                             x: 0,
                             y: 0,
-                            duration: 500, // 回頂時間
                         });
                     }}>
                     <View
@@ -180,7 +180,7 @@ class UMEventPage extends Component {
         return (
             <VirtualizedList
                 data={data}
-                ref={'virtualizedList'}
+                ref={this.virtualizedList}
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
                 renderItem={({ item }) => <NewsCard data={item} type={'event'} />}
