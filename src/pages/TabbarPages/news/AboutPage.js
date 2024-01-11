@@ -41,6 +41,7 @@ import RNRestart from 'react-native-restart';
 
 const { black, themeColor, secondThemeColor, white, wiki_bg_color } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
+const iconSize = scale(25);
 
 export default class AboutPage extends Component {
 
@@ -48,14 +49,33 @@ export default class AboutPage extends Component {
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center' }}>
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <View style={{ alignItems: 'center' }}>
+                    <View style={{
+                        alignSelf: 'center',
+                        alignItems: 'center', justifyContent: 'center',
+                        flexDirection: 'row',
+                        marginTop: scale(10),
+                    }}>
+                        {/* ARK Logo */}
+                        <FastImage
+                            source={require('../../../static/img/logo.png')}
+                            style={{
+                                height: iconSize, width: iconSize,
+                                borderRadius: scale(5),
+                            }}
+                        />
                         <Text style={{
                             fontSize: scale(18),
                             color: themeColor,
                             fontWeight: 'bold',
-                            marginTop: scale(10),
+                            marginLeft: scale(5),
                         }}>關於 ARK ALL</Text>
                     </View>
+
+                    {/* 版本說明 */}
+                    <HomeCard>
+                        {/* TODO: 應用版本號 */}
+                        {/* TODO: 課表數據版本號 */}
+                    </HomeCard>
 
                     {/* 提示資訊 */}
                     <HomeCard>
@@ -205,6 +225,13 @@ export default class AboutPage extends Component {
                             {`圖片更新不及時？網站響應出錯？\n‼️:您已登錄的界面可能會退出登錄\n‼️:您可能需要重新加載圖片，會消耗流量\n‼️:瀏覽器選項卡問題可以前往對應瀏覽器清除緩存~`}
                         </Text>
                         <TouchableOpacity
+                            style={{
+                                backgroundColor: themeColor,
+                                borderRadius: scale(10),
+                                padding: scale(5),
+                                marginTop: scale(5),
+                                width: scale(215),
+                            }}
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
@@ -223,6 +250,7 @@ export default class AboutPage extends Component {
                                                 RNRestart.Restart();
                                                 Alert.alert('已清除所有緩存');
                                             },
+                                            style: 'destructive',
                                         },
                                         {
                                             text: "No",
@@ -234,8 +262,8 @@ export default class AboutPage extends Component {
                                 );
 
                             }}>
-                            <Text style={{ ...s.highlightText }}>
-                                {`清除APP內的圖片和Web緩存`}
+                            <Text style={{ ...s.highlightText, color: white, }}>
+                                {`點我：清除APP內的圖片和Web緩存`}
                             </Text>
                         </TouchableOpacity>
                     </HomeCard>
