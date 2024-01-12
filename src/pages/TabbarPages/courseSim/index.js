@@ -194,12 +194,16 @@ export default class courseSim extends Component {
                 return a['Time From'].localeCompare(b['Time From'])
             });
 
+            // 例如今天星期五，FRI
+            // 用於高亮當天的Day文字
+            let todayText = moment().format('dddd').substring(0, 3).toUpperCase();
+
             return (
                 <View style={{ width: scale(135), marginBottom: dayCourseList.length < 4 ? ((4 - dayCourseList.length) * scale(140)) : null }}>
                     {/* 星期幾 */}
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: black.third,
+                        color: todayText == day ? themeColor : black.third,
                         fontSize: scale(25), fontWeight: 'bold',
                         alignSelf: 'center',
                     }}>{day}</Text>
