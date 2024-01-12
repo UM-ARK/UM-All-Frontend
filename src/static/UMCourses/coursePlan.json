@@ -2497,7 +2497,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E21-1029",
+            "Classroom": "E22-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN15 / ECN17 / ECN19 / MEC19\n",
             "Course Title Chi": "經濟學數學"
         },
@@ -9081,7 +9081,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-01-10",
+    "updateTime": "2024-01-12",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
