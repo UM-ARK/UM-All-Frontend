@@ -47,7 +47,7 @@ async function setLocalStorage(courseCodeList) {
 }
 
 function parseImportData(inputText) {
-    let matchRes = inputText.match(/[A-Za-z]{4}[0-9]{3,4}((\/[0-9]{3})*)?( )?(\([0-9]{3}\))?/g);
+    let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
 
     if (matchRes && matchRes.length > 0) {
         // 去重
@@ -56,9 +56,19 @@ function parseImportData(inputText) {
         // 構建數據格式 Array
         let courseCodeList = [];
         matchRes.map(text => {
+            // Section部份左右括號的index
             let lbIdx = text.indexOf("(");
             let rbIdx = text.indexOf(")");
-            let courseCode = text.substring(0, lbIdx);
+            // 對於特殊的 GESB1001/1002/1003，記錄 / 從左到右第一次出現的index，不存在 / 時返回 -1
+            let slashIdx = text.indexOf("/");
+
+            // 定位至CourseCode後一位的index
+            // 例：GESB1001/1002，courseCodeBound = 8
+            // 例：GEGA1000(001)，courseCodeBound = 8
+            let courseCodeBound = slashIdx == -1 ? lbIdx : slashIdx;
+
+            // 截取CourseCode的字符
+            let courseCode = text.substring(0, courseCodeBound);
             let section = text.substring(lbIdx + 1, rbIdx);
             let obj = {
                 'Course Code': courseCode,
