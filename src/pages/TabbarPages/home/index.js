@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, VERSION_EMOJI } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, VERSION_EMOJI, isLight } from '../../../utils/uiMap';
 import {
     UM_WHOLE,
     WHAT_2_REG,
@@ -354,10 +354,11 @@ class HomeScreen extends Component {
     renderCal = (item, index) => {
         const { selectDay } = this.state;
         const momentItm = moment(item.startDate).format("YYYYMMDD");
+        let isThisDateSelected = selectDay == index;    // 是否渲染到所選擇的日子
         return (
             <TouchableOpacity
                 style={{
-                    backgroundColor: selectDay == index ? themeColor : themeColorLight,
+                    backgroundColor: isThisDateSelected ? themeColor : themeColorLight,
                     borderRadius: scale(8),
                     paddingHorizontal: scale(5), paddingVertical: scale(3),
                     margin: scale(3),
@@ -372,9 +373,10 @@ class HomeScreen extends Component {
                     {/* 年份 */}
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: white,
+                        color: COLOR_DIY.trueWhite,
                         fontSize: scale(10),
-                        fontWeight: selectDay == index ? 'bold' : 'normal',
+                        fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                        opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                     }}>
                         {momentItm.substring(0, 4)}
                     </Text>
@@ -383,9 +385,10 @@ class HomeScreen extends Component {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: white,
+                            color: COLOR_DIY.trueWhite,
                             fontSize: scale(22),
-                            fontWeight: selectDay == index ? 'bold' : 'normal',
+                            fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                            opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
                         {momentItm.substring(4, 6)}
                     </Text>
@@ -394,9 +397,10 @@ class HomeScreen extends Component {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: white,
+                            color: COLOR_DIY.trueWhite,
                             fontSize: scale(22),
-                            fontWeight: selectDay == index ? 'bold' : 'normal',
+                            fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                            opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
                         {momentItm.substring(6, 8)}
                     </Text>
@@ -404,9 +408,10 @@ class HomeScreen extends Component {
                     {/* 星期幾 */}
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: white,
+                        color: COLOR_DIY.trueWhite,
                         fontSize: scale(10),
-                        fontWeight: selectDay == index ? 'bold' : 'normal',
+                        fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                        opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                     }}>
                         {this.getWeek(item.startDate)}
                     </Text>
