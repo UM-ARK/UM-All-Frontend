@@ -31,6 +31,9 @@ import {
     GITHUB_UPDATE_PLAN,
     ARK_WIKI_ABOUT_ARK,
 } from '../../../utils/pathMap';
+import packageInfo from '../../../../package.json';
+import coursePlanFile from "../../../static/UMCourses/coursePlan";
+import offerCourseFile from "../../../static/UMCourses/offerCourses";
 
 import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
@@ -73,8 +76,21 @@ export default class AboutPage extends Component {
 
                     {/* 版本說明 */}
                     <HomeCard>
-                        {/* TODO: 應用版本號 */}
-                        {/* TODO: 課表數據版本號 */}
+                        {/* 應用版本號 */}
+                        <Text style={{ ...s.bodyText, }}>
+                            {`當前應用版本：`}
+                            <Text style={{ ...s.highlightText }}>{packageInfo.version}</Text>
+                        </Text>
+
+                        {/* 課表數據版本號 */}
+                        <Text style={{ ...s.bodyText, }}>
+                            {`Add Drop課表數據更新日期：`}
+                            <Text style={{ ...s.highlightText }}>{coursePlanFile.updateTime}</Text>
+                        </Text>
+                        <Text style={{ ...s.bodyText, }}>
+                            {`預選課表數據更新日期：`}
+                            <Text style={{ ...s.highlightText }}>{offerCourseFile.updateTime}</Text>
+                        </Text>
                     </HomeCard>
 
                     {/* 提示資訊 */}
