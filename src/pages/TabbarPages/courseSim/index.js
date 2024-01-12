@@ -207,6 +207,7 @@ export default class courseSim extends Component {
                         fontSize: scale(25), fontWeight: 'bold',
                         alignSelf: 'center',
                     }}>{day}</Text>
+                    {/* 渲染單一課程卡片 */}
                     <View style={{ flexDirection: 'column', }}>
                         {dayCourseList.map((course, idx) => this.renderCourse(course, dayCourseList, idx))}
                     </View>
@@ -263,12 +264,21 @@ export default class courseSim extends Component {
         // 判斷是否下午
         let timeHH = moment(course['Time From'], "HH").format("HH");
         let timeReminderText = null;
-        if (timeHH > 12) {
-            timeReminderText = '🧋下午🧋';
-            if (timeHH >= 18) {
-                timeReminderText = '🌜晚上🌛';
+        // list只有一條數據，展示
+        // list前方數據不是相同 下午/晚上，才展示
+        timeReminderText = timeHH > 12 ? (timeHH >= 18 ? '🌜晚上🌛' : '🧋下午🧋') : null;
+
+        if (timeHH > 12 && dayCourseList.length > 1 && idx > 0) {
+            let preTimeHH = moment(dayCourseList[idx - 1]['Time From'], "HH").format("HH");
+            // 下一節課和該節課同為晚上，只展示該節課
+            if (preTimeHH >= 18 && timeHH >= 18) {
+                timeReminderText = null;
+            }
+            if (preTimeHH > 12 && preTimeHH < 18 && timeHH < 18) {
+                timeReminderText = null;
             }
         }
+
         afternoonReminder = timeReminderText ? <Text
             style={{
                 ...uiStyle.defaultText,
@@ -282,8 +292,10 @@ export default class courseSim extends Component {
 
         return (
             <View>
+                {/* 渲染下午/晚上提醒 */}
                 {afternoonReminder}
 
+                {/* 渲染時間間隔提醒 */}
                 {timeDiffReminder}
 
                 <MenuView
@@ -529,6 +541,7 @@ export default class courseSim extends Component {
                         searchText: null,
                     });
                     setLocalStorage([]);
+                    this.verScroll.current.scrollTo({ y: 0 });
                 },
                 style: 'destructive',
             },
@@ -800,6 +813,7 @@ E11-0000
                                         })
                                         courseCodeList = tempArr;
                                         this.handleCourseList(courseCodeList);
+                                        this.verScroll.current.scrollTo({ y: 0 });
                                     }}
                                 >
                                     <Text style={{
@@ -825,6 +839,7 @@ E11-0000
                                     this.addAllSectionCourse(i['Course Code'], sectionObj);
                                     // 切換searchText為點擊的Code
                                     this.setState({ searchText: i['Course Code'] });
+                                    this.verScroll.current.scrollTo({ y: 0 });
                                 }}
                             >
                                 <Text style={{
