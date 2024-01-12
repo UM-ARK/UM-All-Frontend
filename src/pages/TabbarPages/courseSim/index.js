@@ -213,7 +213,8 @@ export default class courseSim extends Component {
 
     // 渲染課表卡片
     renderCourse = (course, dayCourseList, idx) => {
-        let timeReminder = null;
+        let timeDiffReminder = null;
+        let afternoonReminder = null;
         let timeWarning = false;
         if (idx > 0) {
             let lastEnd = moment(dayCourseList[idx - 1]['Time To'], "HH:mm:ss");
@@ -227,7 +228,7 @@ export default class courseSim extends Component {
             }
 
             if (idx < dayCourseList.length) {
-                timeReminder = <Text
+                timeDiffReminder = <Text
                     style={{
                         ...uiStyle.defaultText,
                         alignSelf: 'center',
@@ -240,7 +241,7 @@ export default class courseSim extends Component {
                     <Text style={{ fontWeight: 'bold', color: timeWarning ? unread : themeColor, }}>
                         {hourDiff >= 1 ? `${hourDiff}` : `${minuteDiff}`}
                     </Text>
-                    {hourDiff >= 1 ? `小時` : `分鐘`}
+                    {hourDiff >= 1 ? `小時` : `分鐘`}後
                     {timeWarning ? <Text>{'\n🆘課程衝突🆘'}</Text> : null}
                 </Text>
             }
@@ -255,9 +256,31 @@ export default class courseSim extends Component {
             }
         }
 
+        // 判斷是否下午
+        let timeHH = moment(course['Time From'], "HH").format("HH");
+        let timeReminderText = null;
+        if (timeHH > 12) {
+            timeReminderText = '🧋下午🧋';
+            if (timeHH >= 18) {
+                timeReminderText = '🌜晚上🌛';
+            }
+        }
+        afternoonReminder = timeReminderText ? <Text
+            style={{
+                ...uiStyle.defaultText,
+                alignSelf: 'center', textAlign: 'center',
+                color: black.third,
+                fontWeight: 'bold',
+                fontSize: scale(20),
+            }}>
+            {timeReminderText}
+        </Text> : null;
+
         return (
             <View>
-                {timeReminder}
+                {afternoonReminder}
+
+                {timeDiffReminder}
 
                 <MenuView
                     onPressAction={({ nativeEvent }) => {
