@@ -31,7 +31,7 @@ import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { openLink } from '../../../utils/browser';
 
-const { themeColor, black, white, viewShadow } = COLOR_DIY;
+const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled} = COLOR_DIY;
 const iconSize = scale(25);
 
 // preEnroll
@@ -797,9 +797,9 @@ export default class index extends Component {
                 {/* ARK Wiki搜索 */}
                 <TouchableOpacity
                     style={{
-                        backgroundColor: inputOK ? themeColor : 'gray',
-                        borderRadius: scale(10),
-                        padding: scale(5), paddingHorizontal: scale(8),
+                        backgroundColor: inputOK ? themeColor : disabled,
+                        borderRadius: scale(6),
+                        padding: scale(7), paddingHorizontal: scale(8),
                         alignItems: 'center'
                     }}
                     disabled={isLoading || !inputOK}
@@ -809,7 +809,7 @@ export default class index extends Component {
                         this.props.navigation.navigate('Wiki', { url: URL });
                     }}
                 >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>搜索</Text>
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight:'bold' }}>搜索</Text>
                 </TouchableOpacity>
                 {/* 課程搜索按鈕 */}
                 {/* <TouchableOpacity

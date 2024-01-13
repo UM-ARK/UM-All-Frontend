@@ -7,9 +7,9 @@ export const isLight = Appearance.getColorScheme() == 'light';
 
 export const COLOR_DIY = {
     // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
-    themeColor: '#4796d6',
-    themeColorLight: '#7ca8cc',
-    themeColorUltraLight: '#c9e1f5',
+    themeColor: isLight ? '#4796d6' : '#4a9cde',
+    themeColorLight: isLight ? '#7ca8cc' : '#2d5f87',
+    themeColorUltraLight: isLight ? '#c9e1f5' : '#23323d',
     secondThemeColor: '#FF8627',
     // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
     black: {
@@ -21,9 +21,11 @@ export const COLOR_DIY = {
         third: isLight ? '#666666' : '#e1e1e3',
     },
     trueBlack: '#121212',
+
     // 當想用純白，或其他顏色背景，白色文字時用white的色值
     white: isLight ? '#fff' : '#272729',
     trueWhite: '#fff',
+
     // 全局背景白色(偏灰)
     bg_color: isLight ? '#F5F5F7' : '#121212',
 
@@ -31,6 +33,7 @@ export const COLOR_DIY = {
     success: '#27ae60',
     warning: '#f39c12',
     unread: '#f75353',
+    disabled: isLight ? '#cad5de' : '#3a3d40',
 
     // 我的頁顏色
     meScreenColor: {
