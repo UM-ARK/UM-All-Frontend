@@ -383,7 +383,7 @@ export default class courseSim extends Component {
                         },
                         {
                             id: 'drop',
-                            title: `刪除 ${course['Course Code']}`,
+                            title: `刪除 ${course['Course Code']}-${course['Section']}`,
                             attributes: {
                                 destructive: true,
                             },
