@@ -325,6 +325,8 @@ PODS:
     - React-Core
   - react-native-menu (0.9.1):
     - React
+  - react-native-notifications (5.1.0):
+    - React-Core
   - react-native-pager-view (6.2.3):
     - React-Core
   - react-native-restart (0.0.24):
@@ -495,6 +497,7 @@ DEPENDENCIES:
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
+  - react-native-notifications (from `../node_modules/react-native-notifications`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -595,6 +598,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-image-picker"
   react-native-menu:
     :path: "../node_modules/@react-native-menu/menu"
+  react-native-notifications:
+    :path: "../node_modules/react-native-notifications"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-restart:
@@ -697,6 +702,7 @@ SPEC CHECKSUMS:
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-image-picker: 60f4246eb5bb7187fc15638a8c1f13abd3820695
   react-native-menu: 9728f90160c36b9a75481fc76e05354b99d54c59
+  react-native-notifications: 4601a5a8db4ced6ae7cfc43b44d35fe437ac50c4
   react-native-pager-view: c29d484f19c49ff19525a94105e4ab2c4d4ae273
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89

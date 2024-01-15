@@ -20,6 +20,7 @@ import com.reactnativecommunity.cameraroll.CameraRollPackage; // 圖片保存需
 import com.reactnativerestart.RestartPackage;  // <--- Import
 import com.mkuczera.RNReactNativeHapticFeedbackPackage; // 震動包
 import com.reactnativecompressor.CompressorPackage;
+import com.wix.reactnativenotifications.RNNotificationsPackage; // notification包
 
 public class MainApplication extends Application implements ReactApplication {
 

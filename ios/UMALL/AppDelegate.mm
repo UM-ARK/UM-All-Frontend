@@ -1,6 +1,7 @@
 #import "AppDelegate.h"
 
 #import <Firebase.h>
+#import "RNNotifications.h"
 
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
@@ -31,6 +32,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  [RNNotifications startMonitorNotifications]; // react-native-notifications
   [FIRApp configure];
 
   RCTAppSetupPrepareApp(application);
@@ -60,6 +62,18 @@
   [self.window makeKeyAndVisible];
   return YES;
 }
+
+// react-native-notifications - begin
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+  [RNNotifications didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+}
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+  [RNNotifications didFailToRegisterForRemoteNotificationsWithError:error];
+}
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
+  [RNNotifications didReceiveBackgroundNotification:userInfo withCompletionHandler:completionHandler];
+}
+// react-native-notifications - end
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
