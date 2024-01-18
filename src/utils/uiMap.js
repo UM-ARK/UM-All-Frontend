@@ -70,17 +70,30 @@ export const COLOR_DIY = {
     barStyle: isLight ? 'dark-content' : 'light-content',
 };
 
-export const TIME_TABLE_COLOR = [
-    '#D6BEB8',
-    '#8FCACA',
-    '#BEC8D3',
-    '#B6CFB6',
-    '#97C1A9',
-    '#f5b6e0',
-    '#f7cd50',
-    '#6dbed6',
-    '#C6DBDA',
+export const TIME_TABLE_COLOR = isLight?
+    [
+        '#D6BEB8',
+        '#8FCACA',
+        '#BEC8D3',
+        '#B6CFB6',
+        '#d5bae3',
+        '#f5b6e0',
+        '#f7cd50',
+        '#6dbed6',
+        '#C6DBDA',
+    ] :
+    [
+        '#786a67',
+        '#486666',
+        '#4e5c6b',
+        '#4f5e4f',
+        '#584861',
+        '#6e5766',
+        '#5e5743',
+        '#30444a',
+        '#4c6160'
 ]
+
 
 export const VERSION_EMOJI = {
     ve_Left: '⛱️',
