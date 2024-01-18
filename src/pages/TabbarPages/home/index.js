@@ -637,7 +637,7 @@ class HomeScreen extends Component {
                                             style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: scale(12) }}
                                         >
                                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), fontWeight: 'bold' }}>
-                                                {'📅 Almanac 校曆' + '\n'}
+                                                {'📅 校曆 Upcoming:' + '\n'}
                                             </Text>
 
                                             {cal[selectDay].summary}
