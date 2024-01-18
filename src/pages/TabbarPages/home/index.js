@@ -42,7 +42,7 @@ import { inject } from 'mobx-react';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { ScaledSheet, scale } from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
