@@ -19,7 +19,7 @@ import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
 
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, isLight } from '../../../utils/uiMap';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
@@ -109,7 +109,7 @@ export default class ARKWiki extends Component {
     render() {
         const { canGoBack, canGoForward, currentURL, progress, isLoaded } = this.state;
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, }}>
                 <Header
                     // Wiki的默認配色
                     backgroundColor={white}
@@ -143,11 +143,7 @@ export default class ARKWiki extends Component {
                             position: 'absolute',
                             left: scale(10),
                         }}
-                        onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
-                            this.setState({ currentURL: ARK_WIKI })
-                            this.webviewRef.current.reload();
-                        }}
+                        onPress={this.returnWikiHome}
                     >
                         <MaterialCommunityIcons
                             name="home-outline"
@@ -313,6 +309,58 @@ export default class ARKWiki extends Component {
                     onLoadEnd={() => {
                         this.setState({ isLoaded: true })
                     }}
+                    injectedJavaScript={`
+                    window.applyPref = () => {
+                        const a = "skin-citizen-", b = "skin-citizen-theme",
+                            c = a => window.localStorage.getItem(a),
+                            d = c("skin-citizen-theme"),
+                            e = () => {
+                                const d = {
+                                    fontsize: "font-size",
+                                    pagewidth: "--width-layout",
+                                    lineheight: "--line-height"
+                                },
+                                e = () => ["auto", "dark", "light"].map(b => a + b),
+                                f = a => {
+                                    let b = document.getElementById("citizen-style");
+                                    null === b && (b = document.createElement("style"),
+                                        b.setAttribute("id", "citizen-style"),
+                                        document.head.appendChild(b)),
+                                        b.textContent = \`:root{\${a}}\`
+                                };
+
+                                try {
+                                    const g = c(b);
+                                    let h = "";
+                                    if (null !== g) {
+                                        const b = document.documentElement;
+                                        b.classList.remove(...e(a)),
+                                            b.classList.add(a + g)
+                                    }
+
+                                    for (const [b, e] of Object.entries(d)) {
+                                        const d = c(a + b);
+                                        null !== d && (h += \`\${e}:\${d};\`)
+                                    } h && f(h)
+                                }
+                                catch (a) { }
+                            };
+
+                        // d==='auto' 隨著用戶設置而修改
+                        // true 強行按照設備深淺色模式修改Wiki的深淺色模式
+                        if ( true ) {
+                            const a = ${isLight},
+                                c = a ? "light" : "dark",
+                                d = (a, b) => window.localStorage.setItem(a, b);
+                                d(b, c),
+                                e(),
+                                a.addListener(() => { e() }), d(b, "auto")
+                        }
+                        else e()
+                    },
+
+                    (() => { window.applyPref() })();
+                    `}
                 />
 
                 {/* Tost */}
