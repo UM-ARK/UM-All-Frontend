@@ -3,6 +3,7 @@ import { PermissionsAndroid, Platform, Alert } from 'react-native';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import RNFetchBlob from 'rn-fetch-blob';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import Toast from "react-native-simple-toast";
 
 async function hasAndroidPermission() {
     const getCheckPermissionPromise = () => {
@@ -93,7 +94,7 @@ export async function handleImageDownload(IMAGE_URL) {
         .then(res => {
             CameraRoll.save(res.data, { type: 'photo' })
                 .then(res => {
-                    Alert.alert('Saved successfully 😊 ~');
+                    Toast.show('保存成功 😊 ~')
                 })
                 .catch(err => console.error(err));
         })

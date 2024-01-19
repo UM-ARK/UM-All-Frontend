@@ -57,6 +57,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { inject } from 'mobx-react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+import Toast from "react-native-simple-toast";
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -728,7 +729,7 @@ class Index extends Component {
                                     ReactNativeHapticFeedback.trigger('soft');
                                     if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
-                                        Alert.alert('已複製網站Link到剪貼板！');
+                                        Toast.show('已複製網站Link到剪貼板！');
                                     }
                                 }}>
                                 {icon}
