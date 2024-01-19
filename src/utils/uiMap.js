@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text, Appearance } from 'react-native';
-import { pxToDp } from './stylesKits';
 import { scale } from 'react-native-size-matters';
 
 export const isLight = Appearance.getColorScheme() == 'light';
@@ -70,7 +69,7 @@ export const COLOR_DIY = {
     barStyle: isLight ? 'dark-content' : 'light-content',
 };
 
-export const TIME_TABLE_COLOR = isLight?
+export const TIME_TABLE_COLOR = isLight ?
     [
         '#D6BEB8',
         '#8FCACA',
@@ -92,7 +91,7 @@ export const TIME_TABLE_COLOR = isLight?
         '#5e5743',
         '#30444a',
         '#4c6160'
-]
+    ]
 
 
 export const VERSION_EMOJI = {
@@ -107,8 +106,8 @@ export const uiStyle = StyleSheet.create({
     },
     toastContainer: {
         backgroundColor: COLOR_DIY.themeColor,
-        padding: pxToDp(10),
-        borderRadius: pxToDp(10),
+        padding: scale(10),
+        borderRadius: scale(10),
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -116,16 +115,16 @@ export const uiStyle = StyleSheet.create({
 
 export const ToastText = props => {
     let backgroundColor = uiStyle.toastContainer.backgroundColor;
-    let textColor = COLOR_DIY.white;
     if (props.backgroundColor) {
         backgroundColor = props.backgroundColor;
     }
-    if (props.textColor) {
-        textColor = props.textColor;
-    }
     return (
         <View style={{ ...uiStyle.toastContainer, backgroundColor }}>
-            <Text style={{ color: textColor }}>{props.text}</Text>
+            <Text style={{
+                color: props.textColor ? props.textColor : COLOR_DIY.white,
+                ...uiStyle.defaultText,
+                ...props.textStyle,
+            }}>{props.text}</Text>
         </View>
     );
 };
