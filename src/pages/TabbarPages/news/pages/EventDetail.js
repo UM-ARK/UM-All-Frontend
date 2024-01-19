@@ -557,7 +557,7 @@ class EventDetail extends Component {
                                                 : clubData.logo_url,
                                         // cache: FastImage.cacheControl.web,
                                     }}
-                                    style={{ width: '100%', height: '100%' }}
+                                    style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                                     resizeMode={FastImage.resizeMode.contain}
                                 />
                             </View>
@@ -725,6 +725,7 @@ class EventDetail extends Component {
                                                     //     .cacheControl.web,
                                                 }}
                                                 style={{
+                                                    backgroundColor: COLOR_DIY.trueWhite,
                                                     width: scale(
                                                         CLUB_IMAGE_WIDTH,
                                                     ),
@@ -873,7 +874,7 @@ class EventDetail extends Component {
                                     uri: coverImgUrl.replace('http:', 'https:'),
                                     // cache: FastImage.cacheControl.web,
                                 }}
-                                style={{ width: '100%', height: '100%' }}
+                                style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                             />
                         )}
                         // 前景固定內容

@@ -446,6 +446,7 @@ class HomeScreen extends Component {
                 <FastImage
                     source={icon_name}
                     style={{
+                        backgroundColor: COLOR_DIY.trueWhite,
                         height: imageSize,
                         width: imageSize,
                         borderRadius: scale(10),

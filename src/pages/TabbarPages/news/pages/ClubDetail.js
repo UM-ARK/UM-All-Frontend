@@ -504,7 +504,7 @@ class ClubDetail extends Component {
                                     uri: logo_url,
                                     // cache: FastImage.cacheControl.web,
                                 }}
-                                style={{ width: '100%', height: '100%' }}
+                                style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                                 resizeMode={FastImage.resizeMode.contain}
                             />
                         </View>
@@ -634,6 +634,7 @@ class ClubDetail extends Component {
                                                             //     .web,
                                                         }}
                                                         style={{
+                                                            backgroundColor: COLOR_DIY.trueWhite,
                                                             width: '100%',
                                                             height: '100%',
                                                         }}
@@ -850,7 +851,7 @@ class ClubDetail extends Component {
                                     uri: bgImgUrl,
                                     // cache: FastImage.cacheControl.web,
                                 }}
-                                style={{ width: '100%', height: '100%' }}
+                                style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                             />
                         )}
                         // 前景固定內容

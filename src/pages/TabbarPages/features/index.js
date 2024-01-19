@@ -679,6 +679,7 @@ class Index extends Component {
                                         // cache: FastImage.cacheControl.web,
                                     }}
                                     style={{
+                                        backgroundColor: COLOR_DIY.trueWhite,
                                         height: scale(60),
                                         width: scale(60),
                                     }}

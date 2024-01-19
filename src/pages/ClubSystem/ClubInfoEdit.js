@@ -301,7 +301,7 @@ class ClubInfoEdit extends Component {
                             uri: imageUrlArr[index],
                             // cache: FastImage.cacheControl.web,
                         }}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                         onLoadStart={() => {
                             this.setState({ imgLoading: true });
                         }}
