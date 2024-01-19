@@ -13,13 +13,14 @@ import { Header } from '@rneui/themed';
 import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
-import { ARK_WIKI } from '../../../utils/pathMap';
+import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
 const { themeColor, black, white, wiki_bg_color, barStyle } = COLOR_DIY;
@@ -98,6 +99,13 @@ export default class ARKWiki extends Component {
         this.toast.show(`正全力返回主頁！`, 2000);
     }
 
+    goRandomPage = () => {
+        ReactNativeHapticFeedback.trigger('soft');
+        this.setState({ currentURL: ARK_WIKI_RANDOM_PAGE })
+        this.webviewRef.current.reload();
+        this.toast.show(`正為你打開隨機條目！`, 2000);
+    }
+
     render() {
         const { canGoBack, canGoForward, currentURL, progress, isLoaded } = this.state;
         return (
@@ -128,13 +136,33 @@ export default class ARKWiki extends Component {
                     backgroundColor: white,
                     paddingVertical: scale(5),
                 }}>
+                    {/* 主頁按鈕 */}
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            position: 'absolute',
+                            left: scale(10),
+                        }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            this.setState({ currentURL: ARK_WIKI })
+                            this.webviewRef.current.reload();
+                        }}
+                    >
+                        <MaterialCommunityIcons
+                            name="home-outline"
+                            size={scale(28)}
+                            color={themeColor}
+                        />
+                    </TouchableOpacity>
+
                     {/* 回退按鈕 */}
                     {canGoBack ? (
                         <TouchableOpacity
                             style={{
                                 alignSelf: 'center',
                                 position: 'absolute',
-                                left: scale(13),
+                                left: scale(45),
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goBack();
@@ -154,7 +182,7 @@ export default class ARKWiki extends Component {
                             style={{
                                 alignSelf: 'center',
                                 position: 'absolute',
-                                left: scale(45),
+                                left: scale(75),
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goForward();
@@ -172,7 +200,7 @@ export default class ARKWiki extends Component {
                     {/* ARK Logo */}
                     <TouchableOpacity
                         style={{ flexDirection: 'row', }}
-                        onPress={this.returnWikiHome}
+                        onPress={this.goRandomPage}
                     >
                         <FastImage
                             source={require('../../../static/img/logo.png')}
@@ -187,12 +215,32 @@ export default class ARKWiki extends Component {
                         </View>
                     </TouchableOpacity>
 
+                    {/* 搜索按鈕 */}
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            position: 'absolute',
+                            right: scale(65),
+                        }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            this.setState({ currentURL: ARK_WIKI_SEARCH })
+                            this.webviewRef.current.reload();
+                        }}
+                    >
+                        <Ionicons
+                            name="search"
+                            size={scale(25)}
+                            color={themeColor}
+                        />
+                    </TouchableOpacity>
+
                     {/* 刷新按鈕 */}
                     <TouchableOpacity
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
-                            right: scale(45),
+                            right: scale(35),
                         }}
                         onPress={() => {
                             this.webviewRef.current.reload();
@@ -211,7 +259,7 @@ export default class ARKWiki extends Component {
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
-                            right: scale(13),
+                            right: scale(10),
                         }}
                         onPress={() => {
                             ReactNativeHapticFeedback.trigger('soft');

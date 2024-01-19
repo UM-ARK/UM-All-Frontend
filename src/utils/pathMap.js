@@ -23,6 +23,8 @@ export const ARK_WIKI_ABOUT_ARK = ARK_WIKI + '/wiki/ARK_ALL';
 
 export const ARK_WIKI_PAGE = ARK_WIKI + '/wiki/';
 
+export const ARK_WIKI_RANDOM_PAGE = ARK_WIKI + '/wiki/Special:Random';
+
 export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0';
 
 export const OFFICIAL_COURSE_SEARCH = 'https://isw.umac.mo/siwci/faces/courseDetailUG?courseCode=';
