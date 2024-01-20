@@ -222,7 +222,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-3009",
+            "Classroom": "E22-1002",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -237,7 +237,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-3009",
+            "Classroom": "E22-1002",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -252,7 +252,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3009",
+            "Classroom": "E22-1002",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -267,7 +267,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3009",
+            "Classroom": "E22-1002",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -776,7 +776,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / ACM19 / ACM21\n",
             "Course Title Chi": "管理控制系統"
         },
@@ -792,7 +792,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / ACM19 / ACM21\n",
             "Course Title Chi": "管理控制系統"
         },
@@ -9130,7 +9130,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-1029",
             "Course Title Chi": "兒童文學欣賞與教學"
         },
         {
@@ -9144,7 +9144,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-1029",
             "Course Title Chi": "兒童文學欣賞與教學"
         },
         {
@@ -9272,7 +9272,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-3038",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - ENG11 / ENG17 / ENG19 / INS19 / INS23 / MAS19 / PPE15 / PPE17 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "課程與教學理論"
         },
@@ -9287,7 +9287,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-3038",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - ENG11 / ENG17 / ENG19 / INS19 / INS23 / MAS19 / PPE15 / PPE17 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "課程與教學理論"
         },
@@ -10080,7 +10080,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "15:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-3038",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - CHN17 / CHN19\n",
             "Course Title Chi": "學科教學法二（中文）"
         },
@@ -10292,7 +10292,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-3038",
             "Course Title Chi": "小學語文教學"
         },
         {
@@ -10306,7 +10306,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-3038",
             "Course Title Chi": "小學語文教學"
         },
         {
@@ -10348,7 +10348,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-3038",
             "Course Title Chi": "教室安排"
         },
         {
@@ -10362,7 +10362,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-3038",
             "Course Title Chi": "教室安排"
         },
         {
@@ -12858,7 +12858,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -12873,7 +12873,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -12888,7 +12888,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -12903,7 +12903,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -12978,7 +12978,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-G034",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -12993,7 +12993,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-G034",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13008,7 +13008,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-G034",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13023,7 +13023,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-G034",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13038,7 +13038,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13053,7 +13053,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13068,7 +13068,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13083,7 +13083,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13278,7 +13278,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13293,7 +13293,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13308,7 +13308,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13323,7 +13323,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-2005",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13398,7 +13398,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1020",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13413,7 +13413,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1020",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13428,7 +13428,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1020",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -13443,7 +13443,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1020",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -15288,7 +15288,7 @@
             "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-1042",
+            "Classroom": "E4-3062",
             "Course Title Chi": "學術英語：寫作"
         },
         {
@@ -15303,7 +15303,7 @@
             "Day": "THU",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-1042",
+            "Classroom": "E4-3062",
             "Course Title Chi": "學術英語：寫作"
         },
         {
@@ -16299,36 +16299,6 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "EME",
-            "Course Code": "EMEN3039",
-            "Course Title": "Mechanical Processing of Materials",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "VALENTINO ANOK MELO CRISTINO",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "09:00",
-            "Time To": "10:45",
-            "Classroom": "E11-1015",
-            "Course Title Chi": "材料機械加工"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "EME",
-            "Course Code": "EMEN3039",
-            "Course Title": "Mechanical Processing of Materials",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "VALENTINO ANOK MELO CRISTINO",
-            "Lecture / Lab": "Lab",
-            "Day": "THU",
-            "Time From": "09:00",
-            "Time To": "10:45",
-            "Classroom": "E11-1015",
-            "Course Title Chi": "材料機械加工"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "EME",
             "Course Code": "EMEN3042",
             "Course Title": "Sensors and Actuators",
             "Section": "001",
@@ -16894,7 +16864,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1043",
+            "Classroom": "E21-1046",
             "Course Title Chi": "語言與意義"
         },
         {
@@ -16909,7 +16879,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1043",
+            "Classroom": "E21-1046",
             "Course Title Chi": "語言與意義"
         },
         {
@@ -19106,7 +19076,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "E3-4042",
+            "Classroom": "N8-3008",
             "Course Title Chi": "視覺與表演藝術 - 戲劇"
         },
         {
@@ -22245,6 +22215,17 @@
         {
             "Offering Unit": "FSS",
             "Offering Department": "DGPA",
+            "Course Code": "GPAD4001",
+            "Course Title": "Research Project",
+            "Section": "002",
+            "Medium of Instruction": "English",
+            "Teacher Information": "HO CHIEW SIANG",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究計畫"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DGPA",
             "Course Code": "GPAD4002",
             "Course Title": "International Security",
             "Section": "001",
@@ -22624,6 +22605,17 @@
             "Section": "005",
             "Medium of Instruction": "English",
             "Teacher Information": "LIN SHAOYANG",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "高級歷史寫作II"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DHIST",
+            "Course Code": "HIST4002",
+            "Course Title": "Advanced History Writing II",
+            "Section": "006",
+            "Medium of Instruction": "English",
+            "Teacher Information": "WU DONGMING",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "高級歷史寫作II"
         },
@@ -24631,7 +24623,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4032 / E6-3094",
+            "Classroom": "E22-2014 / E6-3094",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -24646,7 +24638,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4032 / E6-3094",
+            "Classroom": "E22-2014 / E6-3094",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -24661,7 +24653,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-4032 / E6-3094",
+            "Classroom": "E22-2014 / E6-3094",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -24676,7 +24668,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-4032 / E6-3094",
+            "Classroom": "E22-2014 / E6-3094",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -24691,7 +24683,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E4-3052 / E6-3094",
+            "Classroom": "E22-1013 / E6-3094",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -24706,7 +24698,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E4-3052 / E6-3094",
+            "Classroom": "E22-1013 / E6-3094",
             "Course Title Chi": "組織的當代資訊系統"
         },
         {
@@ -24817,7 +24809,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E3-1043 / E6-3094",
+            "Classroom": "E22-4004 / E6-3094",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -24832,7 +24824,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E3-1043 / E6-3094",
+            "Classroom": "E22-4004 / E6-3094",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -24847,7 +24839,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-1043 / E6-3094",
+            "Classroom": "E22-4004 / E6-3094",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -24862,7 +24854,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-1043 / E6-3094",
+            "Classroom": "E22-4004 / E6-3094",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -25279,7 +25271,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-3002",
+            "Classroom": "E22-3009",
             "Course Title Chi": "業務資料探勘與視覺化"
         },
         {
@@ -25294,7 +25286,7 @@
             "Day": "FRI",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-3002",
+            "Classroom": "E22-3009",
             "Course Title Chi": "業務資料探勘與視覺化"
         },
         {
@@ -25595,7 +25587,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-3011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "網路安全和區塊鏈"
         },
@@ -25611,7 +25603,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-3011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "網路安全和區塊鏈"
         },
@@ -27360,22 +27352,6 @@
             "Classroom": "E32-1025",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
             "Course Title Chi": "漢語II"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1016",
-            "Course Title": "Public Economics",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "KAN YUT CHING",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "19:00",
-            "Time To": "21:45",
-            "Classroom": "E32-G003",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
-            "Course Title Chi": "公共經濟學"
         },
         {
             "Offering Unit": "FLL",
@@ -30459,7 +30435,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-2002",
             "Course Title Chi": "企業管理原理"
         },
         {
@@ -30474,7 +30450,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-2002",
             "Course Title Chi": "企業管理原理"
         },
         {
@@ -30549,7 +30525,7 @@
             "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-3015",
+            "Classroom": "E22-4020",
             "Course Title Chi": "商務通訊"
         },
         {
@@ -30564,7 +30540,7 @@
             "Day": "THU",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-3015",
+            "Classroom": "E22-4020",
             "Course Title Chi": "商務通訊"
         },
         {
@@ -30797,7 +30773,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-2018",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "研究方法"
         },
@@ -30813,7 +30789,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-2018",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "研究方法"
         },
@@ -30829,7 +30805,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E22-1015",
+            "Classroom": "E22-3015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "研究方法"
         },
@@ -30845,7 +30821,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E22-1015",
+            "Classroom": "E22-3015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "研究方法"
         },
@@ -31005,7 +30981,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-3010",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "全球策略管理"
         },
@@ -31021,7 +30997,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-3010",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "全球策略管理"
         },
@@ -31792,7 +31768,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1011",
+            "Classroom": "E21-1052",
             "Course Title Chi": "葡萄牙語 I - 葡萄牙語入門"
         },
         {
@@ -31807,7 +31783,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1011",
+            "Classroom": "E21-1052",
             "Course Title Chi": "葡萄牙語 I - 葡萄牙語入門"
         },
         {
@@ -33442,7 +33418,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-1055",
             "Course Title Chi": "口語理解與表達能力IV"
         },
         {
@@ -33457,7 +33433,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-1055",
             "Course Title Chi": "口語理解與表達能力IV"
         },
         {
@@ -33502,7 +33478,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1056",
+            "Classroom": "E21-1055",
             "Course Title Chi": "口語理解與表達能力IV"
         },
         {
@@ -33517,7 +33493,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1056",
+            "Classroom": "E21-1055",
             "Course Title Chi": "口語理解與表達能力IV"
         },
         {
@@ -34366,7 +34342,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1059",
+            "Classroom": "E21-G037",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17 / PTS19\n",
             "Course Title Chi": "畢業設計"
         },
@@ -34382,7 +34358,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1059",
+            "Classroom": "E21-G037",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17 / PTS19\n",
             "Course Title Chi": "畢業設計"
         },
@@ -34714,7 +34690,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -34730,7 +34706,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
