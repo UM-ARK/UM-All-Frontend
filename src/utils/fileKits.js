@@ -1,9 +1,11 @@
 // 文件操作相關
-import { PermissionsAndroid, Platform, Alert } from 'react-native';
+import { PermissionsAndroid, Platform, Alert, Linking, } from 'react-native';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import RNFetchBlob from 'rn-fetch-blob';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
+import Toast from "react-native-simple-toast";
 
+// TODO: BUG: RN版本未更新，無法使用最新Android Permission
 async function hasAndroidPermission() {
     const getCheckPermissionPromise = () => {
         if (Platform.Version >= 33) {
@@ -58,10 +60,17 @@ export async function getPermissionAndroid() {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
             return true;
         }
+        // 權限請求失敗
         Alert.alert(
-            'Save remote Image',
-            'Grant Me Permission to save Image',
-            [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+            '保存圖片失敗 / Save remote Image Failed',
+            '請前往應用設置-權限管理，手動賦予相機、圖片等權限！\nGrant Me Permission to save Image!\n如一直出現此錯誤，請在設置中清除全部資料 或 重裝APP再試！',
+            [{
+                text: 'GO NOW', onPress: () => {
+                    // 打開應用設置
+                    Linking.openSettings();
+                }
+            },
+            { text: 'NO', }],
             { cancelable: false },
         );
     } catch (err) {
@@ -78,7 +87,7 @@ export async function getPermissionAndroid() {
 export async function handleImageDownload(IMAGE_URL) {
     // 安卓平台需要請求儲存權限
     if (Platform.OS === 'android') {
-        const granted = await getPermissionAndroid() && await hasAndroidPermission();
+        const granted = await getPermissionAndroid();
         if (!granted) {
             return;
         }
@@ -93,7 +102,7 @@ export async function handleImageDownload(IMAGE_URL) {
         .then(res => {
             CameraRoll.save(res.data, { type: 'photo' })
                 .then(res => {
-                    Alert.alert('Saved successfully 😊 ~');
+                    Toast.show('保存成功 😊 ~')
                 })
                 .catch(err => console.error(err));
         })
@@ -107,7 +116,7 @@ export async function handleImageDownload(IMAGE_URL) {
 export async function handleImageSelect() {
     // 安卓平台需要請求儲存權限
     if (Platform.OS === 'android') {
-        const granted = await getPermissionAndroid() && await hasAndroidPermission();
+        const granted = await getPermissionAndroid();
         if (!granted) {
             return;
         }

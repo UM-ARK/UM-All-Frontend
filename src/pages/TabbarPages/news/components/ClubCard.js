@@ -65,6 +65,7 @@ class EventCard extends Component {
                     <FastImage
                         source={{ uri: logo_url }}
                         style={{
+                            backgroundColor: COLOR_DIY.trueWhite,
                             width: '100%',
                             height: '100%',
                             borderRadius: 50,

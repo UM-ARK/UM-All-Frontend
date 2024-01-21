@@ -31,7 +31,7 @@ import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { openLink } from '../../../utils/browser';
 
-const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled} = COLOR_DIY;
+const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
 
 // preEnroll
@@ -636,7 +636,7 @@ export default class index extends Component {
                 {this.renderADPESwitch()}
 
                 {/* 渲染CMRE GE選擇 */}
-                <View style={{ width: '100%', marginTop: scale(5), }}>
+                <View style={{ width: '100%', marginTop: scale(10), }}>
                     {this.renderCMGESwitch()}
                 </View>
 
@@ -648,7 +648,7 @@ export default class index extends Component {
                             {geClassMap[filterOptions.GE]}
                         </Text>
                         {/* 具體GE課程分類按鈕 */}
-                        <View style={{ flexDirection: 'row', }}>
+                        <View style={{ flexDirection: 'row', marginVertical: scale(5), }}>
                             {offerGEList.length > 0 && offerGEList.map(itm => {
                                 return (
                                     <TouchableOpacity style={{
@@ -677,9 +677,9 @@ export default class index extends Component {
                         </View>
                     </View>
                 ) : (
-                    <View style={{ marginTop: scale(5), width: '100%' }}>
+                    <View style={{ marginTop: scale(10), width: '100%' }}>
                         {offerFacultyDepaListObj ? this.renderFacultySwitch() : null}
-                        {offerDepaList.length > 0 ? <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        {offerDepaList.length > 0 ? <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: scale(10), }}>
                             {/* 展示學系中文名稱 */}
                             {filterOptions.depaName in depaMap ?
                                 <Text style={{ ...s.classItmTitleText, marginBottom: scale(-5) }}>
@@ -809,7 +809,7 @@ export default class index extends Component {
                         this.props.navigation.navigate('Wiki', { url: URL });
                     }}
                 >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight:'bold' }}>搜索</Text>
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>搜索</Text>
                 </TouchableOpacity>
                 {/* 課程搜索按鈕 */}
                 {/* <TouchableOpacity

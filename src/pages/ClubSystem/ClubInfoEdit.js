@@ -4,10 +4,10 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    ScrollView,
     TextInput,
     ActivityIndicator,
     Keyboard,
+    TouchableWithoutFeedback,
 } from 'react-native';
 
 import { pxToDp } from '../../utils/stylesKits';
@@ -301,7 +301,7 @@ class ClubInfoEdit extends Component {
                             uri: imageUrlArr[index],
                             // cache: FastImage.cacheControl.web,
                         }}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                         onLoadStart={() => {
                             this.setState({ imgLoading: true });
                         }}
@@ -399,8 +399,6 @@ class ClubInfoEdit extends Component {
                         titleColor: themeColor,
                     });
                 }}
-                blurOnSubmit={true}
-                onSubmitEditing={() => Keyboard.dismiss()}
             />
         );
     };
@@ -506,7 +504,7 @@ class ClubInfoEdit extends Component {
     render() {
         const { clubData, submitChoice, isLoading } = this.state;
         return (
-            <View style={{ flex: 1, backgroundColor: bg_color }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}><View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
@@ -558,7 +556,7 @@ class ClubInfoEdit extends Component {
                     handleConfirm={this.postNewInfo}
                     handleCancel={() => this.setState({ submitChoice: false })}
                 />
-            </View>
+            </View></TouchableWithoutFeedback>
         );
     }
 }

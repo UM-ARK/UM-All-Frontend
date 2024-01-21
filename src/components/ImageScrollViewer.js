@@ -82,7 +82,7 @@ class ImageScrollViewer extends Component {
                             source={{
                                 uri: props.source.uri,
                             }}
-                            style={props.style}
+                            style={{ backgroundColor: COLOR_DIY.trueWhite, ...props.style }}
                             onLoadStart={() => {
                                 this.setState({ isLoading: true });
                             }}

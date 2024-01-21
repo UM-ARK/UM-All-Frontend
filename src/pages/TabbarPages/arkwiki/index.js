@@ -13,13 +13,14 @@ import { Header } from '@rneui/themed';
 import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
 
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
-import { ARK_WIKI } from '../../../utils/pathMap';
+import { COLOR_DIY, uiStyle, isLight } from '../../../utils/uiMap';
+import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 
 const { themeColor, black, white, wiki_bg_color, barStyle } = COLOR_DIY;
@@ -98,10 +99,17 @@ export default class ARKWiki extends Component {
         this.toast.show(`正全力返回主頁！`, 2000);
     }
 
+    goRandomPage = () => {
+        ReactNativeHapticFeedback.trigger('soft');
+        this.setState({ currentURL: ARK_WIKI_RANDOM_PAGE })
+        this.webviewRef.current.reload();
+        this.toast.show(`正為你打開隨機條目！`, 2000);
+    }
+
     render() {
         const { canGoBack, canGoForward, currentURL, progress, isLoaded } = this.state;
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, }}>
                 <Header
                     // Wiki的默認配色
                     backgroundColor={white}
@@ -128,13 +136,29 @@ export default class ARKWiki extends Component {
                     backgroundColor: white,
                     paddingVertical: scale(5),
                 }}>
+                    {/* 主頁按鈕 */}
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            position: 'absolute',
+                            left: scale(10),
+                        }}
+                        onPress={this.returnWikiHome}
+                    >
+                        <MaterialCommunityIcons
+                            name="home-outline"
+                            size={scale(28)}
+                            color={themeColor}
+                        />
+                    </TouchableOpacity>
+
                     {/* 回退按鈕 */}
                     {canGoBack ? (
                         <TouchableOpacity
                             style={{
                                 alignSelf: 'center',
                                 position: 'absolute',
-                                left: scale(13),
+                                left: scale(45),
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goBack();
@@ -154,7 +178,7 @@ export default class ARKWiki extends Component {
                             style={{
                                 alignSelf: 'center',
                                 position: 'absolute',
-                                left: scale(45),
+                                left: scale(75),
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goForward();
@@ -172,7 +196,7 @@ export default class ARKWiki extends Component {
                     {/* ARK Logo */}
                     <TouchableOpacity
                         style={{ flexDirection: 'row', }}
-                        onPress={this.returnWikiHome}
+                        onPress={this.goRandomPage}
                     >
                         <FastImage
                             source={require('../../../static/img/logo.png')}
@@ -187,12 +211,32 @@ export default class ARKWiki extends Component {
                         </View>
                     </TouchableOpacity>
 
+                    {/* 搜索按鈕 */}
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            position: 'absolute',
+                            right: scale(65),
+                        }}
+                        onPress={() => {
+                            ReactNativeHapticFeedback.trigger('soft');
+                            this.setState({ currentURL: ARK_WIKI_SEARCH })
+                            this.webviewRef.current.reload();
+                        }}
+                    >
+                        <Ionicons
+                            name="search"
+                            size={scale(25)}
+                            color={themeColor}
+                        />
+                    </TouchableOpacity>
+
                     {/* 刷新按鈕 */}
                     <TouchableOpacity
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
-                            right: scale(45),
+                            right: scale(35),
                         }}
                         onPress={() => {
                             this.webviewRef.current.reload();
@@ -211,7 +255,7 @@ export default class ARKWiki extends Component {
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
-                            right: scale(13),
+                            right: scale(10),
                         }}
                         onPress={() => {
                             ReactNativeHapticFeedback.trigger('soft');
@@ -265,6 +309,58 @@ export default class ARKWiki extends Component {
                     onLoadEnd={() => {
                         this.setState({ isLoaded: true })
                     }}
+                    injectedJavaScript={`
+                    window.applyPref = () => {
+                        const a = "skin-citizen-", b = "skin-citizen-theme",
+                            c = a => window.localStorage.getItem(a),
+                            d = c("skin-citizen-theme"),
+                            e = () => {
+                                const d = {
+                                    fontsize: "font-size",
+                                    pagewidth: "--width-layout",
+                                    lineheight: "--line-height"
+                                },
+                                e = () => ["auto", "dark", "light"].map(b => a + b),
+                                f = a => {
+                                    let b = document.getElementById("citizen-style");
+                                    null === b && (b = document.createElement("style"),
+                                        b.setAttribute("id", "citizen-style"),
+                                        document.head.appendChild(b)),
+                                        b.textContent = \`:root{\${a}}\`
+                                };
+
+                                try {
+                                    const g = c(b);
+                                    let h = "";
+                                    if (null !== g) {
+                                        const b = document.documentElement;
+                                        b.classList.remove(...e(a)),
+                                            b.classList.add(a + g)
+                                    }
+
+                                    for (const [b, e] of Object.entries(d)) {
+                                        const d = c(a + b);
+                                        null !== d && (h += \`\${e}:\${d};\`)
+                                    } h && f(h)
+                                }
+                                catch (a) { }
+                            };
+
+                        // d==='auto' 隨著用戶設置而修改
+                        // true 強行按照設備深淺色模式修改Wiki的深淺色模式
+                        if ( true ) {
+                            const a = ${isLight},
+                                c = a ? "light" : "dark",
+                                d = (a, b) => window.localStorage.setItem(a, b);
+                                d(b, c),
+                                e(),
+                                a.addListener(() => { e() }), d(b, "auto")
+                        }
+                        else e()
+                    },
+
+                    (() => { window.applyPref() })();
+                    `}
                 />
 
                 {/* Tost */}

@@ -2,14 +2,12 @@ import React, { Component } from 'react';
 import {
     View,
     Text,
-    Button,
-    ScrollView,
     StyleSheet,
     TouchableOpacity,
     TextInput,
     ActivityIndicator,
-    Image,
     Keyboard,
+    TouchableWithoutFeedback,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
@@ -303,7 +301,7 @@ class EventSetting extends Component {
                             uri: imageUrlArr[index],
                             // cache: FastImage.cacheControl.web,
                         }}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                         onLoadStart={() => {
                             this.setState({ imgLoading: true });
                         }}
@@ -363,8 +361,6 @@ class EventSetting extends Component {
                         titleColor: themeColor,
                     });
                 }}
-                blurOnSubmit={true}
-                onSubmitEditing={() => Keyboard.dismiss()}
             />
         );
     };
@@ -609,7 +605,8 @@ class EventSetting extends Component {
         const canSubmit = this.checkInfoOK();
 
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+            // 使iOS可以點擊其他位置關閉鍵盤
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}><View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header title={'活動資訊編輯'} />
 
                 {!isLoading ? (
@@ -979,7 +976,7 @@ class EventSetting extends Component {
                     }
                     handleCancel={() => this.setState({ submitChoice: false })}
                 />
-            </View>
+            </View></TouchableWithoutFeedback>
         );
     }
 }

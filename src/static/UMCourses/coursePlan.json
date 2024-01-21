@@ -27,7 +27,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-3009",
+            "Classroom": "E22-1002",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -199,7 +199,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC17 / ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / ACM19 / ACM21\n",
             "Course Title Chi": "管理控制系統"
         },
@@ -2676,7 +2676,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-1029",
             "Course Title Chi": "兒童文學欣賞與教學"
         },
         {
@@ -3103,7 +3103,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "15:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E33-3038",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - CHN17 / CHN19\n",
             "Course Title Chi": "學科教學法二（中文）"
         },
@@ -3245,7 +3245,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-3038",
             "Course Title Chi": "小學語文教學"
         },
         {
@@ -3273,7 +3273,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-3038",
             "Course Title Chi": "教室安排"
         },
         {
@@ -3783,21 +3783,6 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "EME",
-            "Course Code": "EMEN3039",
-            "Course Title": "Mechanical Processing of Materials",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "VALENTINO ANOK MELO CRISTINO",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "09:00",
-            "Time To": "10:45",
-            "Classroom": "E11-1015",
-            "Course Title Chi": "材料機械加工"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "EME",
             "Course Code": "EMEN3042",
             "Course Title": "Sensors and Actuators",
             "Section": "001",
@@ -3968,7 +3953,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1043",
+            "Classroom": "E21-1046",
             "Course Title Chi": "語言與意義"
         },
         {
@@ -6311,7 +6296,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E3-1043 / E6-3094",
+            "Classroom": "E22-4004 / E6-3094",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -6404,7 +6389,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-3002",
+            "Classroom": "E22-3009",
             "Course Title Chi": "業務資料探勘與視覺化"
         },
         {
@@ -6483,7 +6468,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-3011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "網路安全和區塊鏈"
         },
@@ -6886,14 +6871,14 @@
             "Offering Department": "MLS",
             "Course Code": "LAWS1016",
             "Course Title": "Public Economics",
-            "Section": "001",
+            "Section": "101",
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "KAN YUT CHING",
             "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "19:00",
-            "Time To": "21:45",
-            "Classroom": "E32-G003",
+            "Day": "FRI",
+            "Time From": "10:00",
+            "Time To": "12:45",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "公共經濟學"
         },
@@ -8029,7 +8014,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-2018",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "研究方法"
         },
@@ -8093,7 +8078,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-3010",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "全球策略管理"
         },
@@ -8664,7 +8649,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理統計學II"
+            "Course Title Chi": "心理學統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -9081,7 +9066,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-01-12",
+    "updateTime": "2024-01-19",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"

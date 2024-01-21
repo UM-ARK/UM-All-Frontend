@@ -276,7 +276,7 @@ export default class courseSim extends Component {
         let timeReminderText = null;
         // list只有一條數據，展示
         // list前方數據不是相同 下午/晚上，才展示
-        timeReminderText = timeHH > 12 ? (timeHH >= 18 ? '🌜晚上🌛' : '🧋下午🧋') : null;
+        timeReminderText = timeHH > 12 ? (timeHH >= 18 ? '🌜晚上🌛' : '☕️下午☕️') : null;
 
         if (timeHH > 12 && dayCourseList.length > 1 && idx > 0) {
             let preTimeHH = moment(dayCourseList[idx - 1]['Time From'], "HH").format("HH");
@@ -435,34 +435,42 @@ export default class courseSim extends Component {
                         }}
                         delayLongPress={300}
                     >
+                        {/* 課號 */}
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: white,
+                            color: black.main,
+                            opacity: 0.7,
                             fontSize: scale(20),
                             textAlign: 'center',
                             fontWeight: '700',
                         }}>
                             {course['Course Code'].substring(0, 4) + '\n'}<Text style={{ fontSize: scale(20), fontWeight: 'bold', }}>{course['Course Code'].substring(4, 8)}</Text>
                         </Text>
-                        <Text style={{ ...uiStyle.defaultText, color: white, }}>{course['Section']}</Text>
 
-                        <Text style={{ ...uiStyle.defaultText, color: white, textAlign: 'center', }} numberOfLines={4}>{course['Course Title']}</Text>
-                        <Text style={{ ...uiStyle.defaultText, color: white, }}>{course['Classroom']}</Text>
+                        {/* Section */}
+                        <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.8, }}>{course['Section']}</Text>
+
+                        {/* 課程名稱 */}
+                        <Text style={{ ...uiStyle.defaultText, color: black.main, textAlign: 'center', opacity: 0.4 }} numberOfLines={4}>{course['Course Title']}</Text>
+
+                        {/* 教室 */}
+                        <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: 'bold', opacity: 0.5 }}>{course['Classroom']}</Text>
 
                         {/* 上課時間 */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }}>
                             {/* 開始時間 */}
-                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.trueBlack, fontWeight: '600', }}>
+                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.black.main, fontWeight: '600', opacity: 0.8 }}>
                                 {course['Time From']}
                             </Text>
                             {/* 引導用戶操作圖標 */}
                             <Ionicons
                                 name="ellipsis-horizontal"
                                 size={scale(20)}
-                                color={white}
+                                color={black.main}
+                                style={{ opacity: 0.4 }}
                             />
                             {/* 結束時間 */}
-                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.trueBlack, fontWeight: '600', }}>
+                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.black.main, fontWeight: '600', opacity: 0.8 }}>
                                 {course['Time To']}
                             </Text>
                         </View>

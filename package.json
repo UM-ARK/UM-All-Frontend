@@ -1,6 +1,6 @@
 {
   "name": "umall",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -65,6 +65,7 @@
     "react-native-restart": "^0.0.24",
     "react-native-safe-area-context": "^4.8.2",
     "react-native-screens": "^3.29.0",
+    "react-native-simple-toast": "^3.2.0",
     "react-native-size-matters": "^0.4.2",
     "react-native-super-grid": "^4.6.1",
     "react-native-svg": "^12.5.1",
