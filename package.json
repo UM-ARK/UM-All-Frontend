@@ -71,6 +71,7 @@
     "react-native-svg": "^12.5.1",
     "react-native-svg-uri": "^1.2.3",
     "react-native-tab-view": "^3.5.2",
+    "react-native-touchable-scale": "^2.2.0",
     "react-native-ui-lib": "^6.31.0",
     "react-native-vector-icons": "^9.1.0",
     "react-native-webview": "^11.26.1",
