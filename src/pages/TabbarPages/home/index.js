@@ -36,6 +36,7 @@ import { versionStringCompare } from '../../../utils/versionKits';
 import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
+import { screenWidth } from '../../../utils/stylesKits';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -49,7 +50,6 @@ import axios from 'axios';
 import { ScaledSheet, scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
-import { screenWidth } from '../../../utils/stylesKits';
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 
@@ -70,7 +70,7 @@ const iconTypes = {
     img: 'img',
 };
 
-const cal = UMCalendar;
+let cal = UMCalendar;
 const toastTextArr = [
     `ARK ALL全力加載中!!! (>ω･* )ﾉ`,
     `點擊頂部校曆看看最近有什麼假期~ ヾ(ｏ･ω･)ﾉ`,
@@ -295,6 +295,7 @@ class HomeScreen extends Component {
     onRefresh = async () => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
         this.toast.show(toastTextArr[toastTextIdx], 3500);
+        this.getCal();
 
         // TODO: 會出現教授的名字，暫且擱置
         // const URL = ARK_WIKI_RANDOM_TITLE;
@@ -358,69 +359,85 @@ class HomeScreen extends Component {
     renderCal = (item, index) => {
         const { selectDay } = this.state;
         const momentItm = moment(item.startDate).format("YYYYMMDD");
-        let isThisDateSelected = selectDay == index;    // 是否渲染到所選擇的日子
+        // 渲染所選日期
+        let isThisDateSelected = selectDay == index;
+        // 是否重要日子：開Sem、完Sem、考試
+        let isEssencial = item.summary.toUpperCase().indexOf('EXAM') != -1 ||
+            item.summary.toUpperCase().indexOf('SEMESTER') != -1 &&
+            item.summary.toUpperCase().indexOf('BREAK') == -1;
+        let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
         return (
-            <TouchableOpacity
-                style={{
-                    backgroundColor: isThisDateSelected ? themeColor : themeColorLight,
-                    borderRadius: scale(8),
-                    paddingHorizontal: scale(5), paddingVertical: scale(3),
-                    margin: scale(3),
-                }}
-                activeOpacity={0.8}
-                onPress={() => {
-                    ReactNativeHapticFeedback.trigger('soft');
-                    this.setState({ selectDay: index });
-                }}>
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-
-                    {/* 年份 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: COLOR_DIY.trueWhite,
-                        fontSize: scale(10),
-                        fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                        opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+            <View style={{ alignItems: "center" }}>
+                <TouchableOpacity
+                    style={{
+                        backgroundColor,
+                        borderRadius: scale(8),
+                        paddingHorizontal: scale(5), paddingVertical: scale(3),
+                        margin: scale(3),
+                    }}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('soft');
+                        this.setState({ selectDay: index });
                     }}>
-                        {momentItm.substring(0, 4)}
-                    </Text>
-
-                    {/* 月份 */}
-                    <Text
-                        style={{
+                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        {/* 年份 */}
+                        <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(22),
+                            fontSize: scale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
-                        {momentItm.substring(4, 6)}
-                    </Text>
+                            {momentItm.substring(0, 4)}
+                        </Text>
 
-                    {/* 日期 */}
-                    <Text
-                        style={{
+                        {/* 月份 */}
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: COLOR_DIY.trueWhite,
+                                fontSize: scale(22),
+                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                                opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+                            }}>
+                            {momentItm.substring(4, 6)}
+                        </Text>
+
+                        {/* 日期 */}
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: COLOR_DIY.trueWhite,
+                                fontSize: scale(22),
+                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                                opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+                            }}>
+                            {momentItm.substring(6, 8)}
+                        </Text>
+
+                        {/* 星期幾 */}
+                        <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(22),
+                            fontSize: scale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
-                        {momentItm.substring(6, 8)}
-                    </Text>
-
-                    {/* 星期幾 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: COLOR_DIY.trueWhite,
-                        fontSize: scale(10),
-                        fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                        opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
-                    }}>
-                        {this.getWeek(item.startDate)}
-                    </Text>
-                </View>
-            </TouchableOpacity>
+                            {this.getWeek(item.startDate)}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+                {isEssencial ? (
+                    <View style={{
+                        backgroundColor: COLOR_DIY.warning,
+                        borderRadius: scale(50),
+                        width: scale(10), height: scale(10),
+                        position: 'absolute',
+                        right: scale(0), top: scale(0),
+                    }} />
+                ) : null}
+            </View>
         );
     };
 
@@ -585,9 +602,9 @@ class HomeScreen extends Component {
                             <VirtualizedList
                                 data={cal}
                                 initialNumToRender={11}
-                                initialScrollIndex={selectDay <= cal.length ? selectDay : 0}
+                                initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                                 getItemLayout={(data, index) => {
-                                    const layoutSize = scale(42);
+                                    const layoutSize = scale(42.5);
                                     return {
                                         length: selectDay,
                                         offset: layoutSize * index - selectDay,
@@ -643,6 +660,13 @@ class HomeScreen extends Component {
                                         >
                                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), fontWeight: 'bold' }}>
                                                 {'📅 校曆 Upcoming:' + '\n'}
+                                            </Text>
+
+                                            {/* 如果時間差大於1天，展示活動的時間差 */}
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), fontWeight: 'bold' }}>
+                                                {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
+                                                    `${moment(cal[selectDay].startDate).format("YYYY-MM-DD")} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format("YYYY-MM-DD")}\n`
+                                                ) : null}
                                             </Text>
 
                                             {cal[selectDay].summary}
