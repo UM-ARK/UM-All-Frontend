@@ -192,7 +192,8 @@ class HomeScreen extends Component {
             app_version: {
                 lastest: '',
                 local: '',
-            }
+            },
+            version_info: null,
         };
 
         this.eventPage = React.createRef();
@@ -279,6 +280,9 @@ class HomeScreen extends Component {
                             text: "No",
                         },
                     ])
+                if ('version_info' in serverInfo) {
+                    this.setState({ version_info: serverInfo.version_info });
+                }
             }
         } catch (e) {
             // console.error(e);
@@ -696,6 +700,18 @@ class HomeScreen extends Component {
                                         }}>
                                         {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
                                     </Text>
+                                    {/* 版本更新說明 */}
+                                    {this.state.version_info ? (
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            color: black,
+                                            fontWeight: 'bold',
+                                            marginTop: scale(2),
+                                            alignSelf: 'center',
+                                        }}>
+                                            {'\n更新內容：\n' + this.state.version_info + '\n'}
+                                        </Text>
+                                    ) : null}
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
