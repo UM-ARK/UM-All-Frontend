@@ -963,7 +963,7 @@ const styles = StyleSheet.create({
         // 增加陰影
         marginBottom: scale(8),
         marginTop: scale(10),
-        ...COLOR_DIY.viewShadow,
+        // ...COLOR_DIY.viewShadow,
     },
     cardTitleContainer: {
         flexDirection: 'row',
