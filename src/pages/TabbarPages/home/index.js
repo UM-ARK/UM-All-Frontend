@@ -117,6 +117,8 @@ const toastTextArr = [
     `再刷新我就累了... ㄟ( ▔, ▔ )ㄏ `,
 ];
 
+const calItemWidth = scale(44.5);
+
 class HomeScreen extends Component {
     constructor(props) {
         super(props)
@@ -157,6 +159,7 @@ class HomeScreen extends Component {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.onRefresh();
                         this.getAppData();
+                        this.getCal();
                         // 刷新重新請求活動頁數據
                         this.eventPage.current.onRefresh();
                     },
@@ -296,7 +299,6 @@ class HomeScreen extends Component {
     onRefresh = async () => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
         this.toast.show(toastTextArr[toastTextIdx], 3500);
-        this.getCal();
 
         // TODO: 會出現教授的名字，暫且擱置
         // const URL = ARK_WIKI_RANDOM_TITLE;
@@ -368,19 +370,19 @@ class HomeScreen extends Component {
             item.summary.toUpperCase().indexOf('BREAK') == -1;
         let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
         return (
-            <View style={{ alignItems: "center" }}>
-                <TouchableScale
-                    style={{
-                        backgroundColor,
-                        borderRadius: scale(8),
-                        paddingHorizontal: scale(5), paddingVertical: scale(3),
-                        margin: scale(3),
-                    }}
-                    activeOpacity={0.8}
-                    onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
-                        this.setState({ selectDay: index });
-                    }}>
+            <TouchableScale
+                style={{ width: calItemWidth, }}
+                onPress={() => {
+                    ReactNativeHapticFeedback.trigger('soft');
+                    this.setState({ selectDay: index });
+                }}
+            >
+                <View style={{
+                    backgroundColor,
+                    borderRadius: scale(8),
+                    paddingHorizontal: scale(5), paddingVertical: scale(3),
+                    margin: scale(3),
+                }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
                         <Text style={{
@@ -428,7 +430,7 @@ class HomeScreen extends Component {
                             {this.getWeek(item.startDate)}
                         </Text>
                     </View>
-                </TouchableScale>
+                </View>
                 {isEssencial ? (
                     <View style={{
                         backgroundColor: COLOR_DIY.warning,
@@ -438,7 +440,7 @@ class HomeScreen extends Component {
                         right: scale(0), top: scale(0),
                     }} />
                 ) : null}
-            </View>
+            </TouchableScale>
         );
     };
 
@@ -588,6 +590,7 @@ class HomeScreen extends Component {
                                 this.setState({ isLoading: true });
                                 this.onRefresh();
                                 this.getAppData();
+                                this.getCal();
                                 // 刷新重新請求活動頁數據
                                 this.eventPage.current.onRefresh();
                             }}
@@ -604,12 +607,13 @@ class HomeScreen extends Component {
                             <VirtualizedList
                                 data={cal}
                                 initialNumToRender={11}
+                                windowSize={3}
                                 initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                                 getItemLayout={(data, index) => {
-                                    const layoutSize = scale(42.5);
+                                    const layoutSize = calItemWidth;
                                     return {
-                                        length: selectDay,
-                                        offset: layoutSize * index - selectDay,
+                                        length: layoutSize,
+                                        offset: layoutSize * index,
                                         index,
                                     };
                                 }}
