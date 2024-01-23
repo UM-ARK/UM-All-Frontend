@@ -30,6 +30,7 @@ import {
     GITHUB_DONATE,
     GITHUB_UPDATE_PLAN,
     ARK_WIKI_ABOUT_ARK,
+    GITHUB_ACTIVITY,
 } from '../../../utils/pathMap';
 import packageInfo from '../../../../package.json';
 import coursePlanFile from "../../../static/UMCourses/coursePlan";
@@ -96,16 +97,13 @@ export default class AboutPage extends Component {
                     {/* 提示資訊 */}
                     <HomeCard>
                         <Text style={{ ...s.bodyText, }}>
-                            {`ARK ALL源自FST同學為愛發電，並非官方應用程式！`}
+                            {`ARK ALL源自澳大同學為愛發電，並非官方應用程式！`}
                         </Text>
                         <Text style={{ ...s.bodyText, }}>
                             {`ARK ALL並非澳大官方應用‼️`}
                         </Text>
                         <Text style={{ ...s.bodyText, }}>
                             {`ARK ALL is not an official APP of UM‼️`}
-                        </Text>
-                        <Text style={{ ...s.bodyText, }}>
-                            {`感謝您的認可和使用 ♪(･ω･)ﾉ`}
                         </Text>
                         <View style={{ alignItems: 'center', flexDirection: 'row', }}>
                             <Text style={{ ...s.bodyText, }}>
@@ -124,23 +122,12 @@ export default class AboutPage extends Component {
                             </Text>
                         </View>
                         <Text style={{ ...s.bodyText, }}>
-                            {`歡迎澳大同學齊來建造ARK！`}
+                            {`感謝您的認可和使用 ♪(･ω･)ﾉ`}
                         </Text>
-                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
+
+                        <View style={{ alignItems: 'center', flexDirection: 'row', marginTop: scale(5), }}>
                             <Text style={{ ...s.bodyText, }}>
-                                {`立即通過Email聯繫我們：`}
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
-                                    Linking.openURL('mailto:' + MAIL);
-                                }}>
-                                <Text style={{ ...s.highlightText, }}>{MAIL}</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
-                            <Text style={{ ...s.bodyText, }}>
-                                {`訪問我們的官網：`}
+                                {`官網：`}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
@@ -151,51 +138,60 @@ export default class AboutPage extends Component {
                                 <Text style={{ ...s.highlightText, }}>{BASE_HOST}</Text>
                             </TouchableOpacity>
                         </View>
+                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
+                            <Text style={{ ...s.bodyText, }}>
+                                {`Email: `}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    ReactNativeHapticFeedback.trigger('soft');
+                                    Linking.openURL('mailto:' + MAIL);
+                                }}>
+                                <Text style={{ ...s.highlightText, }}>{MAIL}</Text>
+                            </TouchableOpacity>
+                        </View>
 
+                        <TouchableOpacity
+                            onPress={() => {
+                                ReactNativeHapticFeedback.trigger('soft');
+                                openLink(GITHUB_DONATE);
+                            }}
+                            style={{ marginTop: scale(5), }}
+                        >
+                            <Text
+                                style={{ ...s.highlightText, }}>💰Donate/捐贈/贊助/支持我們</Text>
+                        </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
                                 openLink(GITHUB_UPDATE_PLAN);
                             }}
+                            style={{ marginTop: scale(5), }}
                         >
                             <Text style={{ ...s.highlightText, }}>更新計劃、問題區</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                openLink(GITHUB_DONATE);
+                                openLink(GITHUB_ACTIVITY);
                             }}
+                            style={{ marginTop: scale(5), }}
                         >
-                            <Text
-                                style={{ ...s.highlightText, }}>Donate/捐贈/贊助/支持我們！</Text>
+                            <Text style={{ ...s.highlightText, }}>開發動態</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
                     {/* 其他提示 */}
                     <HomeCard>
-                        <Text style={{ ...s.bodyText, }}>
-                            您可能想先了解：
-                        </Text>
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                // let webview_param = {
-                                //     url: ARK_WIKI_ABOUT_ARK,
-                                //     title: 'ARK Wiki',
-                                //     text_color: black.main,
-                                //     bg_color_diy: wiki_bg_color,
-                                //     isBarStyleBlack: true,
-                                // };
-                                // this.props.navigation.navigate('Webviewer', webview_param);
                                 openLink(ARK_WIKI_ABOUT_ARK);
                             }}>
-                            <Text style={{ ...s.highlightText, }}>{`這個APP是?`}</Text>
+                            <Text style={{ ...s.highlightText, }}>{`關於ARK ALL`}</Text>
                         </TouchableOpacity>
 
-                        <Text style={{ ...s.bodyText, }}>
-                            您可能還有很多疑問...
-                        </Text>
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
@@ -217,14 +213,6 @@ export default class AboutPage extends Component {
                             activeOpacity={0.8}
                             onPress={() => {
                                 ReactNativeHapticFeedback.trigger('soft');
-                                // let webview_param = {
-                                //     url: USER_AGREE,
-                                //     title: 'ARK ALL 隱私政策 & 用戶協議',
-                                // };
-                                // this.props.navigation.navigate(
-                                //     'Webviewer',
-                                //     webview_param,
-                                // );
                                 openLink(USER_AGREE);
                             }}>
                             <Text style={{ ...s.highlightText }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
