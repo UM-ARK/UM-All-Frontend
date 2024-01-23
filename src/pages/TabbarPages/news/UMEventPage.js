@@ -146,7 +146,7 @@ class UMEventPage extends Component {
                 // 設定初始吸附位置
                 initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableScale
+                <TouchableWithoutFeedback
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.virtualizedList.current.scrollToOffset({
@@ -163,6 +163,7 @@ class UMEventPage extends Component {
                             justifyContent: 'center',
                             alignItems: 'center',
                             ...viewShadow,
+                            margin: scale(5),
                         }}>
                         <Ionicons
                             name={'chevron-up'}
@@ -170,7 +171,7 @@ class UMEventPage extends Component {
                             color={COLOR_DIY.themeColor}
                         />
                     </View>
-                </TouchableScale>
+                </TouchableWithoutFeedback>
             </Interactable.View>
         );
     };
