@@ -58,7 +58,7 @@ import { inject } from 'mobx-react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
-
+import TouchableScale from "react-native-touchable-scale";
 // 定義可使用icon，注意大小寫
 const iconTypes = {
     ionicons: 'ionicons',
@@ -690,7 +690,7 @@ class Index extends Component {
 
                         let { go_where, webview_param, needLogin } = item;
                         return (
-                            <TouchableOpacity
+                            <TouchableScale
                                 style={{
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -741,7 +741,7 @@ class Index extends Component {
                                     }}>
                                     {item.fn_name}
                                 </Text>
-                            </TouchableOpacity>
+                            </TouchableScale>
                         );
                     }}
                     showsVerticalScrollIndicator={false}

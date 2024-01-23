@@ -11,6 +11,7 @@ import {
     StyleSheet,
     TextInput,
     Linking,
+    Alert,
 } from 'react-native';
 
 // 本地工具
@@ -23,10 +24,12 @@ import {
     USUAL_Q,
 } from '../../../../../utils/pathMap';
 import Webviewer from '../../../../../components/Webviewer';
-import { UM_Moodle } from '../../../../../utils/pathMap';
+import { UM_Moodle, APPSTORE_URL, BASE_HOST, } from '../../../../../utils/pathMap';
 import { openLink } from '../../../../../utils/browser';
+import { versionStringCompare } from '../../../../../utils/versionKits';
 import DialogDIY from '../../../../../components/DialogDIY';
 import ClubLogin from './ClubLogin';
+import packageInfo from '../../../../../../package.json';
 
 import { Header, CheckBox } from '@rneui/themed';
 import { NavigationContext } from '@react-navigation/native';
@@ -229,9 +232,40 @@ class LoginChoose extends Component {
                                     ...s.roleCardContainer,
                                 }}
                                 activeOpacity={0.7}
-                                onPress={() => {
+                                onPress={async () => {
                                     ReactNativeHapticFeedback.trigger('soft');
-                                    this.context.navigate('ClubLogin');
+                                    // 判斷版本號，強制組織賬號使用最新版APP
+                                    const strAppInfo = await AsyncStorage.getItem('appInfo');
+                                    const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
+                                    const serverVersion = appInfo.app_version ? appInfo.app_version : null;
+                                    if (serverVersion) {
+                                        // 判斷APP版本是否滯後，提示下載新版本
+                                        const shouldUpdate = versionStringCompare(packageInfo.version, serverVersion) == -1;
+                                        if (shouldUpdate) {
+                                            Alert.alert(`ARK ${serverVersion} 現可更新！！`,
+                                                `請先更新再使用組織賬號功能，不然可能觸發意外的BUG！\n現在前往更新嗎？`,
+                                                [
+                                                    {
+                                                        text: "Yes",
+                                                        onPress: () => {
+                                                            ReactNativeHapticFeedback.trigger('soft');
+                                                            const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                                            Linking.openURL(url);
+                                                        },
+                                                    },
+                                                    {
+                                                        text: "No",
+                                                    },
+                                                ])
+                                        }
+                                        else {
+                                            // 版本通過，允許登錄
+                                            this.context.navigate('ClubLogin');
+                                        }
+                                    }
+                                    else {
+                                        Alert.alert(`APP錯誤`, `沒有獲取到服務器版本信息，\n請檢查網絡再試，\n也可能是程序錯誤，\n嘗試聯繫開發者！`);
+                                    }
                                 }}
                                 disabled={!this.state.ruleChoice}>
                                 <Text style={{ ...s.roleCardText, textAlign: 'center' }}>
@@ -343,16 +377,18 @@ class LoginChoose extends Component {
                         <TouchableOpacity
                             onPress={() => openLink(USUAL_Q)}
                             style={{
-                                // marginTop: scale(20),
                                 alignSelf: 'center',
+                                backgroundColor: COLOR_DIY.themeColorLight,
+                                padding: scale(5),
+                                borderRadius: scale(5),
                             }}>
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
-                                    color: themeColor,
+                                    color: white,
                                     fontSize: scale(12),
                                 }}>
-                                還沒有賬號? 進駐ARK ALL!
+                                還沒有賬號? 點我查看如何進駐ARK ALL！
                             </Text>
                         </TouchableOpacity>
                     </View>

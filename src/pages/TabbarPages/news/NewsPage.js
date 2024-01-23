@@ -25,6 +25,7 @@ import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
 import axios from 'axios';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -322,7 +323,8 @@ class NewsPage extends Component {
                             borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
-                            ...viewShadow
+                            ...viewShadow,
+                            margin: scale(5),
                         }}>
                         <Ionicons
                             name={'chevron-up'}
@@ -345,7 +347,7 @@ class NewsPage extends Component {
                     backgroundColor: COLOR_DIY.bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
-                {this.renderGoTopButton()}
+                {this.state.isLoading ? null : this.renderGoTopButton()}
 
                 {/* 新聞列表 */}
                 {/* 判斷是否加載中 */}

@@ -1,6 +1,6 @@
 {
   "name": "umall",
-  "version": "2.6.6",
+  "version": "2.7.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@babel/plugin-proposal-decorators": "^7.23.6",
+    "@babel/plugin-proposal-decorators": "^7.23.7",
     "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-camera-roll/camera-roll": "5.6.0",
     "@react-native-clipboard/clipboard": "^1.13.2",
@@ -29,8 +29,8 @@
     "fbjs": "^3.0.5",
     "mobx": "^6.12.0",
     "mobx-react": "^7.6.0",
-    "moment": "^2.30.0",
-    "moment-timezone": "^0.5.43",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.5.44",
     "native-base": "^3.4.28",
     "qs": "^6.11.2",
     "react": "17.0.2",
@@ -43,7 +43,7 @@
     "react-native-easy-toast": "^2.3.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-fs": "^2.20.0",
-    "react-native-gesture-handler": "^2.14.0",
+    "react-native-gesture-handler": "^2.14.1",
     "react-native-haptic-feedback": "^1.14.0",
     "react-native-html-parser": "^0.1.0",
     "react-native-htmlview": "^0.16.0",
@@ -71,6 +71,7 @@
     "react-native-svg": "^12.5.1",
     "react-native-svg-uri": "^1.2.3",
     "react-native-tab-view": "^3.5.2",
+    "react-native-touchable-scale": "^2.2.0",
     "react-native-ui-lib": "^6.31.0",
     "react-native-vector-icons": "^9.1.0",
     "react-native-webview": "^11.26.1",
@@ -79,8 +80,8 @@
     "xmldom": "^0.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.6",
-    "@babel/runtime": "^7.23.6",
+    "@babel/core": "^7.23.7",
+    "@babel/runtime": "^7.23.8",
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.6.3",
     "eslint": "^7.32.0",

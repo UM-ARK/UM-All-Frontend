@@ -19,6 +19,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import TouchableScale from "react-native-touchable-scale";
+import { MenuView } from '@react-native-menu/menu';
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -26,7 +28,6 @@ import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
-import { MenuView } from '@react-native-menu/menu';
 
 const { themeColor, themeColorUltraLight, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -395,7 +396,7 @@ export default class courseSim extends Component {
                     ]}
                     shouldOpenOnLongPress={false}
                 >
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             margin: scale(5),
                             backgroundColor: timeWarning ? unread : course['color'],
@@ -474,7 +475,7 @@ export default class courseSim extends Component {
                                 {course['Time To']}
                             </Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 </MenuView>
             </View>
         )

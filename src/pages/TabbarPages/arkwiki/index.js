@@ -18,6 +18,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-easy-toast';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
+import TouchableScale from "react-native-touchable-scale";
 
 import { COLOR_DIY, uiStyle, isLight } from '../../../utils/uiMap';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
@@ -137,7 +138,7 @@ export default class ARKWiki extends Component {
                     paddingVertical: scale(5),
                 }}>
                     {/* 主頁按鈕 */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
@@ -150,11 +151,11 @@ export default class ARKWiki extends Component {
                             size={scale(28)}
                             color={themeColor}
                         />
-                    </TouchableOpacity>
+                    </TouchableScale>
 
                     {/* 回退按鈕 */}
                     {canGoBack ? (
-                        <TouchableOpacity
+                        <TouchableScale
                             style={{
                                 alignSelf: 'center',
                                 position: 'absolute',
@@ -170,11 +171,11 @@ export default class ARKWiki extends Component {
                                 size={scale(25)}
                                 color={themeColor}
                             />
-                        </TouchableOpacity>
+                        </TouchableScale>
                     ) : null}
                     {/* 前進按鈕 */}
                     {canGoForward ? (
-                        <TouchableOpacity
+                        <TouchableScale
                             style={{
                                 alignSelf: 'center',
                                 position: 'absolute',
@@ -190,11 +191,11 @@ export default class ARKWiki extends Component {
                                 size={scale(25)}
                                 color={themeColor}
                             />
-                        </TouchableOpacity>
+                        </TouchableScale>
                     ) : null}
 
                     {/* ARK Logo */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{ flexDirection: 'row', }}
                         onPress={this.goRandomPage}
                     >
@@ -209,10 +210,10 @@ export default class ARKWiki extends Component {
                         <View style={{ marginLeft: scale(5) }}>
                             <Text style={s.titleText}>ARK Wiki</Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableScale>
 
                     {/* 搜索按鈕 */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
@@ -229,10 +230,10 @@ export default class ARKWiki extends Component {
                             size={scale(25)}
                             color={themeColor}
                         />
-                    </TouchableOpacity>
+                    </TouchableScale>
 
                     {/* 刷新按鈕 */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
@@ -248,10 +249,10 @@ export default class ARKWiki extends Component {
                             size={scale(28)}
                             color={themeColor}
                         />
-                    </TouchableOpacity>
+                    </TouchableScale>
 
                     {/* 分享按鈕 */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             alignSelf: 'center',
                             position: 'absolute',
@@ -268,7 +269,7 @@ export default class ARKWiki extends Component {
                             size={scale(23)}
                             color={themeColor}
                         />
-                    </TouchableOpacity>
+                    </TouchableScale>
                 </View>
 
                 {!isLoaded ? (

@@ -23,6 +23,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -162,6 +163,7 @@ class UMEventPage extends Component {
                             justifyContent: 'center',
                             alignItems: 'center',
                             ...viewShadow,
+                            margin: scale(5),
                         }}>
                         <Ionicons
                             name={'chevron-up'}
@@ -238,7 +240,7 @@ class UMEventPage extends Component {
                     backgroundColor: COLOR_DIY.bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
-                {this.renderGoTopButton()}
+                {isLoading ? null : this.renderGoTopButton()}
 
                 {isLoading ? (
                     <View
