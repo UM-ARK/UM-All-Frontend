@@ -21,6 +21,7 @@ import coursePlan from '../../../static/UMCourses/coursePlan';
 import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
+import { openLink } from '../../../utils/browser';
 
 import axios from "axios";
 import { scale } from "react-native-size-matters";
@@ -29,7 +30,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { openLink } from '../../../utils/browser';
+import TouchableScale from "react-native-touchable-scale";
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
@@ -391,7 +392,7 @@ export default class index extends Component {
                 numColumns={modeList.length}
                 contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             ...s.classItm,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
@@ -416,7 +417,7 @@ export default class index extends Component {
                             fontWeight: filterOptions.mode === itm ? '900' : 'normal',
                             fontSize: scale(12),
                         }}>{modeENStr[itm]}</Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 )}
                 // 展示CM GE中文名稱
                 ListHeaderComponent={() =>
@@ -451,7 +452,7 @@ export default class index extends Component {
                 numColumns={CMGEList.length}
                 contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             ...s.classItm,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
@@ -490,7 +491,7 @@ export default class index extends Component {
                             fontWeight: filterOptions.option === itm ? '900' : 'normal',
                             fontSize: scale(12),
                         }}>{itm}</Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 )}
                 // 展示CM GE中文名稱
                 ListHeaderComponent={() =>
@@ -525,7 +526,7 @@ export default class index extends Component {
                 }
                 contentContainerStyle={{ alignItems: 'center' }}
                 renderItem={({ item: itm }) => (
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             ...s.classItm,
                             backgroundColor: itm === filterOptions.facultyName ? themeColor : null,
@@ -553,7 +554,7 @@ export default class index extends Component {
                             fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                             fontSize: scale(12)
                         }}>{itm}</Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 )}
                 // 展示學院中文名稱
                 ListHeaderComponent={() =>
@@ -583,7 +584,7 @@ export default class index extends Component {
             style={{ marginTop: scale(5) }}
             contentContainerStyle={{ alignItems: 'center' }}
             renderItem={({ item: itm }) => (
-                <TouchableOpacity style={{
+                <TouchableScale style={{
                     ...s.classItm,
                     paddingHorizontal: scale(5), paddingVertical: scale(2),
                     backgroundColor: filterOptions.depaName === itm ? themeColor : null,
@@ -605,7 +606,7 @@ export default class index extends Component {
                         fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
                         fontSize: scale(12)
                     }}>{itm}</Text>
-                </TouchableOpacity>
+                </TouchableScale>
             )}
         />
     }
@@ -651,7 +652,7 @@ export default class index extends Component {
                         <View style={{ flexDirection: 'row', marginVertical: scale(5), }}>
                             {offerGEList.length > 0 && offerGEList.map(itm => {
                                 return (
-                                    <TouchableOpacity style={{
+                                    <TouchableScale style={{
                                         ...s.classItm,
                                         paddingHorizontal: scale(5), paddingVertical: scale(3),
                                         borderColor: filterOptions.GE === itm ? themeColor : black.third,
@@ -671,7 +672,7 @@ export default class index extends Component {
                                             fontWeight: filterOptions.GE === itm ? '900' : 'normal',
                                             fontSize: scale(12)
                                         }}>{itm}</Text>
-                                    </TouchableOpacity>
+                                    </TouchableScale>
                                 )
                             })}
                         </View>
@@ -890,7 +891,7 @@ export default class index extends Component {
                 ...viewShadow,
             }}>
                 {firstLetterList.map(itm => {
-                    return <TouchableOpacity
+                    return <TouchableScale
                         style={{ padding: scale(3), }}
                         onPress={() => {
                             // 滑動到對應的首字母課程
@@ -901,7 +902,7 @@ export default class index extends Component {
                         }}
                     >
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(15), color: themeColor }}>{itm}</Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 })}
             </View>
         ) : null

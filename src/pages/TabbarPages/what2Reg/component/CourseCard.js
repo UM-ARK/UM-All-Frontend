@@ -11,6 +11,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { NavigationContext } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MenuView } from '@react-native-menu/menu';
+import TouchableScale from "react-native-touchable-scale";
 
 const { themeColor, black, secondThemeColor } = COLOR_DIY;
 
@@ -185,7 +186,7 @@ export default class CourseCard extends Component {
                                 'handleSetLetterData' in this.props && this.props.handleSetLetterData({ [courseCode[0]]: layout.y })
                             }}
                         >
-                            <TouchableOpacity
+                            <TouchableScale
                                 style={{
                                     backgroundColor: COLOR_DIY.white,
                                     borderRadius: scale(10),
@@ -278,7 +279,7 @@ export default class CourseCard extends Component {
                                         color: black.third,
                                     }}>{credit} Credit</Text>
                                 ) : null}
-                            </TouchableOpacity>
+                            </TouchableScale>
                         </MenuView>
                     )
                 }}
