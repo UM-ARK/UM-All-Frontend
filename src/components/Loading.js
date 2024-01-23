@@ -41,6 +41,17 @@ class Loading extends Component {
                 <ActivityIndicator size="large" color={themeColor} style={{
                     marginTop: scale(10),
                 }} />
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        fontSize: scale(15),
+                        fontWeight: '600',
+                        color: themeColor,
+                        marginTop: scale(3),
+                        textAlign: 'center',
+                    }}>
+                    {`確保網絡正常\n可以刷新或重啟APP再試`}
+                </Text>
             </View>
         );
     }
