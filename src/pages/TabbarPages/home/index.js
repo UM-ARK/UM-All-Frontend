@@ -371,7 +371,7 @@ class HomeScreen extends Component {
         let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
         return (
             <TouchableScale
-                style={{ width: calItemWidth, }}
+                style={{ width: calItemWidth, margin: scale(3), }}
                 onPress={() => {
                     ReactNativeHapticFeedback.trigger('soft');
                     this.setState({ selectDay: index });
@@ -381,7 +381,6 @@ class HomeScreen extends Component {
                     backgroundColor,
                     borderRadius: scale(8),
                     paddingHorizontal: scale(5), paddingVertical: scale(3),
-                    margin: scale(3),
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
