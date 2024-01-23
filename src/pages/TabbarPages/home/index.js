@@ -50,6 +50,7 @@ import axios from 'axios';
 import { ScaledSheet, scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
+import TouchableScale from "react-native-touchable-scale";
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 
@@ -368,7 +369,7 @@ class HomeScreen extends Component {
         let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
         return (
             <View style={{ alignItems: "center" }}>
-                <TouchableOpacity
+                <TouchableScale
                     style={{
                         backgroundColor,
                         borderRadius: scale(8),
@@ -427,7 +428,7 @@ class HomeScreen extends Component {
                             {this.getWeek(item.startDate)}
                         </Text>
                     </View>
-                </TouchableOpacity>
+                </TouchableScale>
                 {isEssencial ? (
                     <View style={{
                         backgroundColor: COLOR_DIY.warning,
