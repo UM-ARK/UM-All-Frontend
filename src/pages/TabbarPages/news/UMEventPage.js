@@ -23,6 +23,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -145,7 +146,7 @@ class UMEventPage extends Component {
                 // 設定初始吸附位置
                 initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
+                <TouchableScale
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.virtualizedList.current.scrollToOffset({
@@ -169,7 +170,7 @@ class UMEventPage extends Component {
                             color={COLOR_DIY.themeColor}
                         />
                     </View>
-                </TouchableWithoutFeedback>
+                </TouchableScale>
             </Interactable.View>
         );
     };
@@ -238,7 +239,7 @@ class UMEventPage extends Component {
                     backgroundColor: COLOR_DIY.bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
-                {this.renderGoTopButton()}
+                {isLoading ? null : this.renderGoTopButton()}
 
                 {isLoading ? (
                     <View

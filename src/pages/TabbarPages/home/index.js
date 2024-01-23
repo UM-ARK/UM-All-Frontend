@@ -533,7 +533,7 @@ class HomeScreen extends Component {
                 // 設定初始吸附位置
                 initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
+                <TouchableScale
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
@@ -559,7 +559,7 @@ class HomeScreen extends Component {
                             color={COLOR_DIY.themeColor}
                         />
                     </View>
-                </TouchableWithoutFeedback>
+                </TouchableScale>
             </Interactable.View>
         );
     };

@@ -25,6 +25,7 @@ import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
 import axios from 'axios';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -306,7 +307,7 @@ class NewsPage extends Component {
                 // 設定初始吸附位置
                 initialPosition={{ x: scale(140), y: scale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
+                <TouchableScale
                     onPress={() => {
                         ReactNativeHapticFeedback.trigger('soft');
                         this.virtualizedList.current.scrollToOffset({
@@ -330,7 +331,7 @@ class NewsPage extends Component {
                             color={COLOR_DIY.themeColor}
                         />
                     </View>
-                </TouchableWithoutFeedback>
+                </TouchableScale>
             </Interactable.View>
         );
     };
@@ -345,7 +346,7 @@ class NewsPage extends Component {
                     backgroundColor: COLOR_DIY.bg_color,
                 }}>
                 {/* 懸浮可拖動按鈕 */}
-                {this.renderGoTopButton()}
+                {this.state.isLoading ? null : this.renderGoTopButton()}
 
                 {/* 新聞列表 */}
                 {/* 判斷是否加載中 */}
