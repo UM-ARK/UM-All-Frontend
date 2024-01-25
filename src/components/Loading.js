@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, } from 'react-native';
 
+import LoadingDotsDIY from './LoadingDots';
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import { scale } from 'react-native-size-matters';
 const { black, white, themeColor, bg_color } = COLOR_DIY;
@@ -26,21 +27,11 @@ class Loading extends Component {
                         color: themeColor,
                         marginTop: scale(2),
                     }}>
-                    ARK ALL在瘋狂加載中
+                    ARK ALL瘋狂加載中
                 </Text>
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(15),
-                        fontWeight: '600',
-                        color: themeColor,
-                        marginTop: scale(3),
-                    }}>
-                    耐心等待一下
-                </Text>
-                <ActivityIndicator size="large" color={themeColor} style={{
-                    marginTop: scale(10),
-                }} />
+                <View style={{ marginVertical: scale(10), }}>
+                    <LoadingDotsDIY />
+                </View>
                 <Text
                     style={{
                         ...uiStyle.defaultText,
