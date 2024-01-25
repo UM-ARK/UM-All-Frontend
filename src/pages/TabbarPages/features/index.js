@@ -4,7 +4,6 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Alert,
     Linking,
 } from 'react-native';
 
@@ -691,10 +690,7 @@ class Index extends Component {
                         let { go_where, webview_param, needLogin } = item;
                         return (
                             <TouchableOpacity
-                                style={{
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
+                                style={{ justifyContent: 'center', alignItems: 'center', }}
                                 activeOpacity={0.7}
                                 // 跳轉具體頁面
                                 onPress={() => {
@@ -730,10 +726,11 @@ class Index extends Component {
                                     if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
                                         Toast.show('已複製Link到剪貼板！');
-                                    } else{
+                                    } else {
                                         Toast.show('這個功能沒有Link可以複製哦！');
                                     }
-                                }}>
+                                }}
+                            >
                                 {icon}
                                 <Text
                                     style={{
@@ -795,7 +792,7 @@ class Index extends Component {
                     })}
 
                     <View style={{ marginHorizontal: scale(20), marginVertical: scale(10) }}>
-                        <Text
+                        {/* <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 alignSelf: 'center',
@@ -810,7 +807,7 @@ class Index extends Component {
                                 color: COLOR_DIY.black.third,
                             }}>
                             長按圖標可複製對應的link ~
-                        </Text>
+                        </Text> */}
                     </View>
                 </ScrollView>
 
