@@ -24,6 +24,7 @@ import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import LoadingDots from "react-native-loading-dots";
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -354,6 +355,20 @@ class BusScreen extends Component {
                             {this.renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
                             {this.renderBusStopText(79, 395, 'E32', '法學院', 6)}
                             {this.renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
+
+                            <View style={{
+                                position: 'absolute',
+                                top: scale(5),
+                                left: scale(130),
+                                width: scale(35),
+                            }}>
+                                <LoadingDots
+                                    size={scale(10)}
+                                    bounceHeight={scale(5)}
+                                    dots={3}
+                                    colors={[COLOR_DIY.themeColor, COLOR_DIY.themeColorLight, COLOR_DIY.themeColorUltraLight]}
+                                />
+                            </View>
                         </ImageBackground>
                     </ScrollView>
                 </ScrollView>
