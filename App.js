@@ -28,7 +28,10 @@ const toastConfig = {
     arkToast: (props) => (
         <BaseToast
             {...props}
-            style={{ borderLeftColor: COLOR_DIY.themeColor, backgroundColor: COLOR_DIY.white, }}
+            style={{
+                borderLeftColor: COLOR_DIY.themeColor, backgroundColor: COLOR_DIY.white,
+                width: '80%', height: scale(60),
+            }}
             contentContainerStyle={{ paddingHorizontal: scale(15) }}
             text1Style={{
                 ...uiStyle.defaultText,
@@ -45,7 +48,10 @@ const toastConfig = {
     error: (props) => (
         <ErrorToast
             {...props}
-            style={{ backgroundColor: COLOR_DIY.white, }}
+            style={{
+                backgroundColor: COLOR_DIY.white,
+                width: '80%', height: scale(60),
+            }}
             text1Style={{
                 ...uiStyle.defaultText,
                 color: COLOR_DIY.black.main,
@@ -61,7 +67,10 @@ const toastConfig = {
     warning: (props) => (
         <BaseToast
             {...props}
-            style={{ borderLeftColor: COLOR_DIY.warning, backgroundColor: COLOR_DIY.white, }}
+            style={{
+                borderLeftColor: COLOR_DIY.warning, backgroundColor: COLOR_DIY.white,
+                width: '80%', height: scale(60),
+            }}
             contentContainerStyle={{ paddingHorizontal: scale(15) }}
             text1Style={{
                 ...uiStyle.defaultText,
