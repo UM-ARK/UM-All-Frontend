@@ -16,7 +16,7 @@ import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
 
 import axios from 'axios';
-import Toast from 'react-native-easy-toast';
+import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
@@ -158,7 +158,7 @@ class EventPage extends Component {
         const { noMoreData } = this.state;
         dataPage++;
         if (!noMoreData) {
-            this.toast.show('數據加載中，請稍等~', 2000);
+            Toast.show('數據加載中...')
             this.getData();
         }
         ReactNativeHapticFeedback.trigger('soft');
@@ -271,18 +271,6 @@ class EventPage extends Component {
                         </View>
                     </ScrollView> : null
                 )}
-
-                {/* Tost */}
-                <Toast
-                    ref={toast => (this.toast = toast)}
-                    position="top"
-                    positionValue={'10%'}
-                    textStyle={{ color: white }}
-                    style={{
-                        backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: scale(10),
-                    }}
-                />
             </View>
         );
     }
