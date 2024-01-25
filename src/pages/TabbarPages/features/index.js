@@ -44,17 +44,15 @@ import {
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
+import { trigger } from "../../../utils/trigger";
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { inject } from 'mobx-react';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 
@@ -694,7 +692,7 @@ class Index extends Component {
                                 activeOpacity={0.7}
                                 // 跳轉具體頁面
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     logToFirebase('funcUse', { funcName: item.fn_name });
                                     if (!needLogin || this.state.isLogin) {
                                         // Webview頁面，需附帶跳轉參數
@@ -722,7 +720,7 @@ class Index extends Component {
                                 }}
                                 // 複製相關網站link
                                 onLongPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
                                         Toast.show('已複製Link到剪貼板！');

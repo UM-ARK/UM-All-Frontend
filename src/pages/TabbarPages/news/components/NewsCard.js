@@ -8,13 +8,13 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle } from '../../../../utils/uiMap';
+import { trigger } from '../../../../utils/trigger';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow } = COLOR_DIY;
@@ -90,7 +90,7 @@ class NewsCard extends Component {
                 style={styles.newsCardContainer}
                 activeOpacity={0.8}
                 onPress={() => {
-                    ReactNativeHapticFeedback.trigger('soft');
+                    trigger();
                     // 跳轉對應新聞的詳情頁
                     this.context.navigate(
                         type == 'news' ? 'NewsDetail' : 'UMEventDetail',

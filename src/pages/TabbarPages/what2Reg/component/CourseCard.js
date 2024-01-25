@@ -5,9 +5,9 @@ import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { WHAT_2_REG, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../utils/pathMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
+import { trigger } from '../../../../utils/trigger';
 
 import { scale } from "react-native-size-matters";
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { NavigationContext } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MenuView } from '@react-native-menu/menu';
@@ -84,7 +84,7 @@ export default class CourseCard extends Component {
                             onPressAction={({ nativeEvent }) => {
                                 switch (nativeEvent.event) {
                                     case 'wiki':
-                                        ReactNativeHapticFeedback.trigger('soft');
+                                        trigger();
                                         let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
                                         if (this.props.prof_info) {
                                             URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
@@ -104,7 +104,7 @@ export default class CourseCard extends Component {
                                         break;
 
                                     case 'what2reg':
-                                        ReactNativeHapticFeedback.trigger('soft');
+                                        trigger();
                                         let webview_param = {
                                             url: '',
                                             title: '',
@@ -136,7 +136,7 @@ export default class CourseCard extends Component {
                                         break;
 
                                     case 'official':
-                                        ReactNativeHapticFeedback.trigger('soft');
+                                        trigger();
                                         const URI = OFFICIAL_COURSE_SEARCH + courseCode;
                                         logToFirebase('checkCourse', {
                                             courseCode: 'Official ' + courseCode,
@@ -145,7 +145,7 @@ export default class CourseCard extends Component {
                                         break;
 
                                     case 'section':
-                                        ReactNativeHapticFeedback.trigger('soft');
+                                        trigger();
                                         logToFirebase('checkCourse', {
                                             courseCode: courseCode,
                                         });
@@ -194,7 +194,7 @@ export default class CourseCard extends Component {
                                     padding: scale(10), paddingVertical: scale(5),
                                 }}
                                 // onPress={() => {
-                                //     ReactNativeHapticFeedback.trigger('soft');
+                                //     trigger();
                                 //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
                                 //     if (this.props.prof_info) {
                                 //         URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
@@ -213,10 +213,10 @@ export default class CourseCard extends Component {
                                 //     this.context.navigate('Wiki', { url: URL });
                                 // }}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                 }}
                                 onLongPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     logToFirebase('checkCourse', {
                                         courseCode: courseCode,
                                         onLongPress: 1,

@@ -11,6 +11,7 @@ import {
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
+import { trigger } from '../../../../utils/trigger';
 
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -18,7 +19,6 @@ import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import { inject } from 'mobx-react';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 const IMAGE_SIZE = scale(160);
@@ -67,7 +67,7 @@ class EventCard extends Component {
 
     handleJumpToDetail = () => {
         const { type, link, title, isAdmin } = this.state;
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         // let webview_param = {
         //     // import pathMap的鏈接進行跳轉
         //     url: link,

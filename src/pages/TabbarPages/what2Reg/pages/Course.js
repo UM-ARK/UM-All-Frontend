@@ -10,13 +10,13 @@ import {
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { openLink } from '../../../../utils/browser';
+import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../../utils/pathMap";
 
 import axios from 'axios';
 import { scale } from "react-native-size-matters";
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
@@ -58,7 +58,7 @@ export default class Course extends Component {
     }
 
     jumpToProf = (data) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(data.New_code) + '/' + encodeURIComponent(data.prof_name)
         openLink(URI);
     }

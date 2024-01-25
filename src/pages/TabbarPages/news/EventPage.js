@@ -12,13 +12,13 @@ import {
 
 import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 import EventCard from './components/EventCard';
 
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
@@ -161,7 +161,7 @@ class EventPage extends Component {
             Toast.show('數據加載中...')
             this.getData();
         }
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
     };
 
     onRefresh = () => {

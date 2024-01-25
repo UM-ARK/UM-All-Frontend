@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, Platform, Text, Dimensions } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
+import { trigger } from '../../../utils/trigger';
 import HomePage from '../home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
@@ -11,7 +12,6 @@ import AboutPage from './AboutPage';
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale } from 'react-native-size-matters';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
@@ -84,7 +84,7 @@ class NewsScreen extends Component {
                             title: '主頁',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -94,7 +94,7 @@ class NewsScreen extends Component {
                             title: '組織',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -104,7 +104,7 @@ class NewsScreen extends Component {
                             title: '活動',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -114,7 +114,7 @@ class NewsScreen extends Component {
                             title: '新聞',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -124,7 +124,7 @@ class NewsScreen extends Component {
                             title: '關於',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 </Tab.Navigator>

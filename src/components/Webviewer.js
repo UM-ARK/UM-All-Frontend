@@ -6,13 +6,13 @@ import { Text, View, TouchableOpacity, Linking, StyleSheet, Appearance, } from '
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import IntegratedWebView from './IntegratedWebView';
 import { ARK_WIKI } from '../utils/pathMap';
+import { trigger } from '../utils/trigger';
 import ModalBottom from '../components/ModalBottom';
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 const isLight = Appearance.getColorScheme() == 'light';
@@ -63,6 +63,7 @@ class WebViewer extends Component {
 
     // 切換Webview刷新標識
     triggerRefresh = () => {
+        trigger();
         this.setState({ needRefresh: !this.state.needRefresh });
         this.setState({ isShowModal: false });
     };
@@ -74,6 +75,7 @@ class WebViewer extends Component {
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
+        trigger();
         this.setState({ isShowModal: !this.state.isShowModal });
     };
 
@@ -94,7 +96,7 @@ class WebViewer extends Component {
                     leftComponent={
                         <TouchableOpacity
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 this.props.navigation.goBack();
                             }}>
                             <Ionicons
@@ -152,7 +154,10 @@ class WebViewer extends Component {
                                     }}>
                                     <TouchableOpacity
                                         style={{ ...s.iconContainer }}
-                                        onPress={() => Linking.openURL(url)}>
+                                        onPress={() => {
+                                            trigger();
+                                            Linking.openURL(url)
+                                        }}>
                                         <Ionicons
                                             name="navigate-outline"
                                             size={scale(30)}

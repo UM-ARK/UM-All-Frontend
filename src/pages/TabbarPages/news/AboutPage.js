@@ -32,12 +32,12 @@ import {
     ARK_WIKI_ABOUT_ARK,
     GITHUB_ACTIVITY,
 } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 import packageInfo from '../../../../package.json';
 import coursePlanFile from "../../../static/UMCourses/coursePlan";
 import offerCourseFile from "../../../static/UMCourses/offerCourses";
 
 import { scale } from 'react-native-size-matters';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -111,7 +111,7 @@ export default class AboutPage extends Component {
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     openLink(GITHUB_PAGE);
                                 }}
                             >
@@ -131,7 +131,7 @@ export default class AboutPage extends Component {
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     openLink(BASE_HOST);
                                 }}
                             >
@@ -144,7 +144,7 @@ export default class AboutPage extends Component {
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     Linking.openURL('mailto:' + MAIL);
                                 }}>
                                 <Text style={{ ...s.highlightText, }}>{MAIL}</Text>
@@ -153,7 +153,7 @@ export default class AboutPage extends Component {
 
                         <TouchableOpacity
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 openLink(GITHUB_DONATE);
                             }}
                             style={{ marginTop: scale(5), }}
@@ -163,7 +163,7 @@ export default class AboutPage extends Component {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 openLink(GITHUB_UPDATE_PLAN);
                             }}
                             style={{ marginTop: scale(5), }}
@@ -172,7 +172,7 @@ export default class AboutPage extends Component {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 openLink(GITHUB_ACTIVITY);
                             }}
                             style={{ marginTop: scale(5), }}
@@ -186,7 +186,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 openLink(ARK_WIKI_ABOUT_ARK);
                             }}>
                             <Text style={{ ...s.highlightText, }}>{`關於ARK ALL`}</Text>
@@ -195,7 +195,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 // let webview_param = {
                                 //     url: USUAL_Q,
                                 //     title: 'ARK ALL常見問題',
@@ -212,7 +212,7 @@ export default class AboutPage extends Component {
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 openLink(USER_AGREE);
                             }}>
                             <Text style={{ ...s.highlightText }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
@@ -238,7 +238,7 @@ export default class AboutPage extends Component {
                             }}
                             activeOpacity={0.8}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 Alert.alert(
                                     "關鍵操作!!",
                                     `將清除所有緩存並重啟，您確定繼續嗎？`,
@@ -246,7 +246,7 @@ export default class AboutPage extends Component {
                                         {
                                             text: "Yes",
                                             onPress: async () => {
-                                                ReactNativeHapticFeedback.trigger('soft');
+                                                trigger();
                                                 await FastImage.clearDiskCache();
                                                 await FastImage.clearMemoryCache();
                                                 await CookieManager.clearAll();
@@ -259,7 +259,7 @@ export default class AboutPage extends Component {
                                         {
                                             text: "No",
                                             onPress: () => {
-                                                ReactNativeHapticFeedback.trigger('soft');
+                                                trigger();
                                             }
                                         },
                                     ]

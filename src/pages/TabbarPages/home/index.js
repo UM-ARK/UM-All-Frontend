@@ -32,6 +32,7 @@ import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
 import { screenWidth } from '../../../utils/stylesKits';
+import { trigger } from '../../../utils/trigger';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -39,7 +40,6 @@ import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import { inject } from 'mobx-react';
 import Toast from 'react-native-toast-message';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { ScaledSheet, scale } from 'react-native-size-matters';
@@ -152,7 +152,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.ionicons,
                     function_name: '校園巴士',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.props.navigation.navigate('Bus');
                     },
                 },
@@ -161,7 +161,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.materialCommunityIcons,
                     function_name: '支持我們',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         let webview_param = {
                             url: GITHUB_DONATE,
                             title: '支持我們',
@@ -177,7 +177,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.img,
                     function_name: '澳大方舟',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.onRefresh();
                         this.getAppData();
                         this.getCal();
@@ -190,7 +190,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.materialCommunityIcons,
                     function_name: '方舟百科',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.props.navigation.navigate('Wiki');
                     },
                 },
@@ -199,7 +199,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.ionicons,
                     function_name: '組織登入',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.props.navigation.navigate('MeScreen');
                     },
                 },
@@ -302,7 +302,7 @@ class HomeScreen extends Component {
                         {
                             text: "Yes",
                             onPress: () => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                                 Linking.openURL(url);
                             },
@@ -407,7 +407,7 @@ class HomeScreen extends Component {
             <TouchableScale
                 style={{ width: calItemWidth, margin: scale(3), }}
                 onPress={() => {
-                    ReactNativeHapticFeedback.trigger('soft');
+                    trigger();
                     this.setState({ selectDay: index });
                 }}
             >
@@ -570,7 +570,7 @@ class HomeScreen extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.scrollView.current.scrollTo({
                             x: 0,
@@ -815,7 +815,7 @@ class HomeScreen extends Component {
                                         }}
                                         activeOpacity={0.8}
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger('soft');
+                                            trigger();
                                             const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                                             Linking.openURL(url);
                                         }}>
@@ -880,9 +880,7 @@ class HomeScreen extends Component {
                                             alignSelf: 'center',
                                         }}
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger(
-                                                'soft',
-                                            );
+                                            trigger();
                                             this.setState({ isShowModal: false });
                                             this.props.navigation.jumpTo(
                                                 'MeTabbar',

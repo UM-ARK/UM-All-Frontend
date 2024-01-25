@@ -16,13 +16,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
 import TouchableScale from "react-native-touchable-scale";
 
 import { COLOR_DIY, uiStyle, isLight } from '../../../utils/uiMap';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
+import { trigger } from "../../../utils/trigger";
 
 const { themeColor, black, white, wiki_bg_color, barStyle } = COLOR_DIY;
 const iconSize = scale(25);
@@ -94,7 +94,7 @@ export default class ARKWiki extends Component {
 
     // 返回ARK Wiki的主頁
     returnWikiHome = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         this.setState({ currentURL: ARK_WIKI })
         this.webviewRef.current.reload();
         Toast.show({
@@ -105,7 +105,7 @@ export default class ARKWiki extends Component {
     }
 
     goRandomPage = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         this.setState({ currentURL: ARK_WIKI_RANDOM_PAGE })
         this.webviewRef.current.reload();
         Toast.show({
@@ -171,7 +171,7 @@ export default class ARKWiki extends Component {
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goBack();
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                             }}
                         >
                             <MaterialCommunityIcons
@@ -191,7 +191,7 @@ export default class ARKWiki extends Component {
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goForward();
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                             }}
                         >
                             <MaterialCommunityIcons
@@ -228,7 +228,7 @@ export default class ARKWiki extends Component {
                             right: scale(65),
                         }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             this.setState({ currentURL: ARK_WIKI_SEARCH })
                             this.webviewRef.current.reload();
                         }}
@@ -249,7 +249,7 @@ export default class ARKWiki extends Component {
                         }}
                         onPress={() => {
                             this.webviewRef.current.reload();
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                         }}
                     >
                         <MaterialCommunityIcons
@@ -267,7 +267,7 @@ export default class ARKWiki extends Component {
                             right: scale(10),
                         }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             Clipboard.setString(currentURL);
                             Toast.show({
                                 type: 'arkToast',

@@ -8,13 +8,13 @@ import {
 } from 'react-native'
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
+import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
 import CourseCard from "../component/CourseCard";
 
 import { scale } from "react-native-size-matters";
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import axios from 'axios';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;

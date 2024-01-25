@@ -17,12 +17,12 @@ import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
 import LoadingDotsDIY from '../../components/LoadingDots';
+import { trigger } from '../../utils/trigger';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import { DOMParser } from "react-native-html-parser";
 import { scale } from 'react-native-size-matters';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 
@@ -215,6 +215,7 @@ class BusScreen extends Component {
 
     // 控制彈出層打開 or 關閉
     toggleModal = index => {
+        trigger();
         this.setState({
             isModalVisible: !this.state.isModalVisible,
             clickStopIndex: index,
@@ -294,7 +295,7 @@ class BusScreen extends Component {
                                     top: scale(350),
                                 }}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     // Linking.openURL(UM_MAP);
                                     // const webview_param = {
                                     //     url: UM_MAP,

@@ -16,6 +16,7 @@ import NewsCard from './components/NewsCard';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 
 import FastImage from 'react-native-fast-image';
@@ -23,7 +24,6 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 // const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -178,7 +178,7 @@ class NewsPage extends Component {
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     this.context.navigate('NewsDetail', {
                                         data: topNews,
                                     });
@@ -288,7 +288,7 @@ class NewsPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.virtualizedList.current.scrollToOffset({
                             x: 0,
                             y: 0,

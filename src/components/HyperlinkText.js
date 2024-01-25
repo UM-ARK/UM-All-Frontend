@@ -2,12 +2,11 @@ import React from 'react';
 import { Text, Linking } from 'react-native';
 
 import { COLOR_DIY, ToastText } from '../utils/uiMap';
+import { trigger } from '../utils/trigger';
 import { openLink } from '../utils/browser';
 
-// import { useToast } from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Toast from "react-native-toast-message";
 
 const HyperlinkText = ({
@@ -28,7 +27,7 @@ const HyperlinkText = ({
     };
 
     const handleHyperLink = (url, text) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         if (beforeJump) {
             beforeJump();
         }
@@ -48,7 +47,7 @@ const HyperlinkText = ({
     };
 
     const copyToClipboard = (url, text) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         Clipboard.setString(text);
         Toast.show({
             type: 'arkToast',

@@ -8,6 +8,7 @@ import {
 } from 'react-native'
 
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
+import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from "../../../../utils/pathMap";
@@ -16,7 +17,6 @@ import { logToFirebase } from "../../../../utils/firebaseAnalytics";
 import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
 
@@ -100,7 +100,7 @@ export default class LocalCourse extends Component {
                             onPressAction={({ nativeEvent }) => {
                                 switch (nativeEvent.event) {
                                     case 'wiki':
-                                        ReactNativeHapticFeedback.trigger('soft');
+                                        trigger();
                                         let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
                                         logToFirebase('checkCourse', {
                                             courseCode: courseInfo['Course Code'],
@@ -110,7 +110,7 @@ export default class LocalCourse extends Component {
                                         break;
 
                                     case 'what2reg':
-                                        ReactNativeHapticFeedback.trigger('soft');
+                                        trigger();
                                         const courseCode = courseInfo['Course Code'];
                                         const profName = courseInfo['Teacher Information'];
                                         const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(profName);
@@ -148,7 +148,7 @@ export default class LocalCourse extends Component {
                                     alignItems: 'center',
                                 }}
                                 // onPress={() => {
-                                //     ReactNativeHapticFeedback.trigger('soft');
+                                //     trigger();
                                 //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
                                 //     logToFirebase('checkCourse', {
                                 //         courseCode: courseInfo['Course Code'],
@@ -157,7 +157,7 @@ export default class LocalCourse extends Component {
                                 //     this.context.navigate('Wiki', { url: URL });
                                 // }}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                 }}
                             >
                                 <View style={{ alignItems: 'center', }}>

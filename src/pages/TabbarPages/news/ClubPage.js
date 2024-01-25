@@ -13,12 +13,12 @@ import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
+import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
 
 import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import { FlatList } from 'react-native';
 
@@ -220,7 +220,7 @@ class ClubPage extends Component {
                                 return (
                                     <TouchableOpacity
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger('soft');
+                                            trigger();
                                             this.scrollViewRef.current.scrollTo({ y: 0 });
                                         }}
                                         style={{
@@ -243,7 +243,7 @@ class ClubPage extends Component {
                                 return (
                                     <TouchableOpacity
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger('soft');
+                                            trigger();
                                             // 點擊自動滑動到對應分類的社團
                                             const tag = itm.item;
                                             this.scrollViewRef.current.scrollTo({
