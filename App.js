@@ -173,19 +173,19 @@ class App extends Component {
                 backgroundColor={bg_color}>
                 <SafeAreaProvider>
                     {/* 修復iOS safe area問題 */}
-                    <SafeAreaDIY>
-                        {/* 全局變量 */}
-                        <Provider RootStore={RootStore}>
-                            {/* NativeBase庫需要Provider */}
-                            <NativeBaseProvider>
-                                <Nav
-                                    lock={this.state.versionLock}
-                                    setLock={this.setLock}
-                                />
-                                <Toast config={toastConfig} />
-                            </NativeBaseProvider>
-                        </Provider>
-                    </SafeAreaDIY>
+                    {/* <SafeAreaDIY> */}
+                    {/* 全局變量 */}
+                    <Provider RootStore={RootStore}>
+                        {/* NativeBase庫需要Provider */}
+                        <NativeBaseProvider>
+                            <Nav
+                                lock={this.state.versionLock}
+                                setLock={this.setLock}
+                            />
+                            <Toast config={toastConfig} />
+                        </NativeBaseProvider>
+                    </Provider>
+                    {/* </SafeAreaDIY> */}
                 </SafeAreaProvider>
             </AnimatedSplash>
         );

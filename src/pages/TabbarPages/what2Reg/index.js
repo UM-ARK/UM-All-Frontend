@@ -946,7 +946,7 @@ export default class index extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(35),
+                            default: scale(48),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
