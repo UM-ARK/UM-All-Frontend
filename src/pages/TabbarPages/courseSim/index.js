@@ -28,6 +28,7 @@ import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
+import Toast from 'react-native-simple-toast';
 
 const { themeColor, themeColorUltraLight, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -543,6 +544,7 @@ export default class courseSim extends Component {
             }
         })
         this.handleCourseList(newList);
+        Toast.show(`已刪除${course['Course Code'] + '-' + course['Section']}`)
     }
 
     clearCourse = () => {
