@@ -18,6 +18,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import * as Progress from 'react-native-progress';
 import TouchableScale from "react-native-touchable-scale";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { COLOR_DIY, uiStyle, isLight } from '../../../utils/uiMap';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
@@ -118,7 +119,7 @@ export default class ARKWiki extends Component {
     render() {
         const { canGoBack, canGoForward, currentURL, progress, isLoaded } = this.state;
         return (
-            <View style={{ flex: 1, }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1 }}>
                 <Header
                     // Wiki的默認配色
                     backgroundColor={white}
@@ -130,7 +131,7 @@ export default class ARKWiki extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(48),
+                            default: insets.top >= 59 ? scale(48) : scale(5),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -376,7 +377,7 @@ export default class ARKWiki extends Component {
                     (() => { window.applyPref() })();
                     `}
                 />
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

@@ -21,6 +21,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import TouchableScale from "react-native-touchable-scale";
 import { MenuView } from '@react-native-menu/menu';
 import Toast from 'react-native-simple-toast';
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -914,7 +915,7 @@ E11-0000
     render() {
         const { allCourseAllTime, } = this.state;
         return (
-            <View style={{ flex: 1, backgroundColor: bg_color, }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1, backgroundColor: bg_color, }}>
                 <Header
                     backgroundColor={bg_color}
                     statusBarProps={{
@@ -925,7 +926,7 @@ E11-0000
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(48),
+                            default: insets.top >= 59 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -1011,7 +1012,7 @@ E11-0000
                     {/* 渲染選課的篩選列表 */}
                     {this.state.addMode ? this.renderCourseSearch() : null}
                 </ScrollView>
-            </View >
+            </View>}</SafeAreaInsetsContext.Consumer  >
         );
     }
 }

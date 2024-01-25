@@ -12,6 +12,7 @@ import AboutPage from './AboutPage';
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale } from 'react-native-size-matters';
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
@@ -22,7 +23,7 @@ const numOfTabs = 5;
 class NewsScreen extends Component {
     render() {
         return (
-            <View style={{ backgroundColor: COLOR_DIY.bg_color, flex: 1 }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ backgroundColor: COLOR_DIY.bg_color, flex: 1 }}>
                 <Header
                     backgroundColor={bg_color}
                     // centerComponent={{
@@ -40,7 +41,7 @@ class NewsScreen extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(48),
+                            default: insets.top >= 59 ? scale(48) : scale(5),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -128,7 +129,7 @@ class NewsScreen extends Component {
                         })}
                     />
                 </Tab.Navigator>
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

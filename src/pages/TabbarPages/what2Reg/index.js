@@ -31,6 +31,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TouchableScale from "react-native-touchable-scale";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
@@ -930,11 +931,10 @@ export default class index extends Component {
             inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
 
         return (
-            <View style={{
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{
                 flex: 1,
                 backgroundColor: COLOR_DIY.bg_color,
-                alignItems: 'center',
-                justifyContent: 'center'
+                alignItems: 'center', justifyContent: 'center'
             }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
@@ -946,7 +946,7 @@ export default class index extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(48),
+                            default: insets.top >= 59 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -1088,7 +1088,7 @@ export default class index extends Component {
                             this.renderFirstLetterNav(filterCourseList) : null
                     )}
                 </>)}
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

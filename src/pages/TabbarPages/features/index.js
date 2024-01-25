@@ -56,6 +56,7 @@ import { inject } from 'mobx-react';
 import { scale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -753,7 +754,7 @@ class Index extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     statusBarProps={{
@@ -764,7 +765,7 @@ class Index extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(48),
+                            default: insets.top >= 59 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -822,7 +823,7 @@ class Index extends Component {
                     }}
                     handleCancel={() => this.setState({ showDialog: false })}
                 />
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }
