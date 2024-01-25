@@ -25,6 +25,7 @@ import { DOMParser } from "react-native-html-parser";
 import { scale } from 'react-native-size-matters';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import TouchableScale from "react-native-touchable-scale";
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -192,7 +193,7 @@ class BusScreen extends Component {
         }
 
         return (
-            <TouchableOpacity
+            <TouchableScale
                 onPress={this.toggleModal.bind(this, index)}
                 style={{
                     position: 'absolute',
@@ -209,7 +210,7 @@ class BusScreen extends Component {
                     {buildingCode}
                     <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
                 </Text>
-            </TouchableOpacity>
+            </TouchableScale>
         );
     };
 
@@ -335,7 +336,11 @@ class BusScreen extends Component {
                             {/* 巴士圖標 */}
                             {busPositionArr.length > 0
                                 ? busPositionArr.map(item => (
-                                    <View style={busStyleArr[item.index]}>
+                                    <TouchableScale style={busStyleArr[item.index]} activeScale={0.6}
+                                        onPress={()=>{
+                                            trigger();
+                                            this.fetchBusInfo();
+                                        }}>
                                         <Image
                                             source={busIcon}
                                             style={{
@@ -343,7 +348,7 @@ class BusScreen extends Component {
                                                 height: scale(30),
                                             }}
                                         />
-                                    </View>
+                                    </TouchableScale>
                                 ))
                                 : null}
 
