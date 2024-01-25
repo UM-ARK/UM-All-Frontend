@@ -648,9 +648,9 @@ class HomeScreen extends Component {
                             <VirtualizedList
                                 data={cal}
                                 ref={this.calScrollRef}
-                                initialNumToRender={11}
+                                initialNumToRender={selectDay <= 11 ? 11 : selectDay}
                                 windowSize={4}
-                                // initialScrollIndex={selectDay < cal.length ? selectDay : 0}
+                                initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                                 getItemLayout={(data, index) => {
                                     const layoutSize = calItemWidth;
                                     return {
