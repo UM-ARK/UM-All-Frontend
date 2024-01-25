@@ -15,15 +15,10 @@ import {
 // 本地工具
 import { COLOR_DIY, uiStyle, VERSION_EMOJI, isLight } from '../../../utils/uiMap';
 import {
-    UM_WHOLE,
-    WHAT_2_REG,
-    NEW_SCZN,
-    UM_MAP,
     GITHUB_DONATE,
     BASE_HOST,
     BASE_URI,
     GET,
-    addHost,
     APPSTORE_URL,
     MAIL,
     ARK_WIKI,
@@ -37,14 +32,14 @@ import packageInfo from '../../../../package.json';
 import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
 import HomeCard from './components/HomeCard';
 import { screenWidth } from '../../../utils/stylesKits';
+import { trigger } from '../../../utils/trigger';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import { inject } from 'mobx-react';
-import Toast from 'react-native-easy-toast';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { ScaledSheet, scale } from 'react-native-size-matters';
@@ -72,54 +67,81 @@ const iconTypes = {
 };
 
 let cal = UMCalendar;
+
 const toastTextArr = [
-    `ARK ALL全力加載中!!! (>ω･* )ﾉ`,
-    `點擊頂部校曆看看最近有什麼假期~ ヾ(ｏ･ω･)ﾉ`,
-    `快試試底部幾個按鈕都有什麼功能~ ( • ̀ω•́ )✧`,
-    `別只看校巴啦! 也來寫寫Wiki! ( • ̀ω•́ )✧`,
-    `Wiki在電腦上編輯更方便哦! ( • ̀ω•́ )✧`,
-    `ARK ALL為愛發電ing... (*/ω＼*)`,
-    `記住我們的官網 ${BASE_HOST} !!! (*/ω＼*)`,
-    `記住Wiki的官網 ${ARK_WIKI} !!! (*/ω＼*)`,
-    `ARK 就是 方舟 ヾ(❀^ω^)ﾉﾞ`,
-    `ARK Wiki - 澳大人的維基百科!!! ヾ(❀^ω^)ﾉﾞ`,
-    `快喊上你心愛的社團進駐ARK!!! ヾ(❀^ω^)ﾉﾞ`,
-    `在關於頁找到我們的郵箱!!! (~o￣3￣)~ `,
-    `到底什麼才是ARK??? ∠( °ω°)／ `,
-    `今天也要加油!!! UMer!!! ＼\٩('ω')و/／`,
-    `快把ARK介紹給學弟學妹學長學姐 ✧⁺⸜(●˙▾˙●)⸝⁺✧ `,
-    `今天你更新ARK了嗎? (｡◝ᴗ◜｡)`,
-    `澳大資訊一次看完!!! ヽ(^ω^)ﾉ  `,
-    `快試試看校園巴士!!! (ﾟωﾟ)ﾉ☆ `,
-    `快試試看ARK找課!!! (*￣3￣)╭ `,
-    `快試試看ARK課表模擬!!! (*￣3￣)╭ `,
-    `快看看ARK Wiki有什麼新東西!!! (*￣3￣)╭ `,
-    `一起來加入方舟計劃!!!\n一起來寫Wiki!!! (*￣3￣)╭ `,
-    `前人種樹，後人乘涼\n多想從前就有Wiki... (ಥ_ಥ)`,
-    `Wiki是百科、知識庫、攻略站、博客...\n是UM All In One! ヾ(❀^ω^)ﾉﾞ`,
-    `讓我們在Wiki打造澳大最強知識庫!!! ヾ(❀^ω^)ﾉﾞ`,
-    `不要讓學習的辛苦白費，共享到Wiki吧!!! ヾ(❀^ω^)ﾉﾞ`,
-    `UM All In One 就在ARK ALL ヾ(❀^ω^)ﾉﾞ`,
-    `又是選不上課的一天... (ಥ_ಥ) `,
-    `今天會下雨嗎 (￣.￣)`,
-    `今天不能熬夜 (￣.￣)`,
-    `今天又掉了多少根頭髮 (￣.￣)`,
-    `週末還有多少天 (￣.￣)`,
-    `我覺得和你挺有緣的，來App Store給個好評吧~\n٩(๑>◡<๑)۶ `,
-    `快去進駐組織頁看看有無你愛的社團!!! (oﾟ▽ﾟ)o  `,
-    `你在這裡刷新多少次了??? (▼へ▼メ)`,
-    `開發者這麼努力，不向朋友推薦一下ARK嗎...\n(T ^ T) `,
-    `朝著UMer人手一個ARK的目標努力著... ￣▽￣`,
-    `想來開發/學習? 歡迎聯繫我們!!! (*￣3￣)╭ `,
-    `我們的郵箱是 ${MAIL} !!! (*￣3￣)╭ `,
-    `這麼良心的APP還不推薦給朋友們嗎 (*￣3￣)╭ `,
-    `開發者的錢包快被掏空... ㄟ( ▔, ▔ )ㄏ `,
-    `再刷新我就累了... ㄟ( ▔, ▔ )ㄏ `,
+    `ARK ALL全力加載中!!!`,
+    `點擊頂部校曆看看最近有什麼假期~`,
+    `快試試底部幾個按鈕都有什麼功能~`,
+    `別只看校巴啦! 也來寫寫Wiki!`,
+    `Wiki在電腦上編輯更方便哦!`,
+    `ARK ALL為愛發電ing...`,
+    `記住我們的官網 ${BASE_HOST} !!!`,
+    `記住Wiki的官網 ${ARK_WIKI} !!!`,
+    `ARK 就是 方舟 !!!`,
+    `ARK Wiki - 澳大人的維基百科!!!`,
+    `快喊上你心愛的社團進駐ARK!!!`,
+    `在關於頁找到我們的郵箱!!!`,
+    `到底什麼才是ARK???`,
+    `今天也要加油!!! UMer!!! `,
+    `快把ARK介紹給學弟學妹學長學姐`,
+    `今天你更新ARK了嗎?`,
+    `澳大資訊一次看完!!!`,
+    `快試試看校園巴士!!!`,
+    `快試試看ARK找課!!!`,
+    `快試試看ARK課表模擬!!!`,
+    `快看看ARK Wiki有什麼新東西!!!`,
+    `一起來加入方舟計劃!!!一起來寫Wiki!!!`,
+    `前人種樹 後人乘涼 多想從前就有Wiki...`,
+    `Wiki是百科、知識庫、攻略站、博客 是UM All In One!`,
+    `讓我們在Wiki打造澳大最強知識庫!!!`,
+    `不要讓學習的辛苦白費 共享到Wiki吧!!!`,
+    `UM All In One 就在ARK ALL`,
+    `又是選不上課的一天...`,
+    `今天會下雨嗎`,
+    `今天不能熬夜`,
+    `今天又掉了多少根頭髮`,
+    `週末還有多少天`,
+    `我覺得和你挺有緣的 來App Store給個好評吧~`,
+    `快去進駐組織頁看看有無你愛的社團!!!`,
+    `你在這裡刷新多少次了???`,
+    `開發者這麼努力 不向朋友推薦一下ARK嗎...`,
+    `朝著UMer人手一個ARK的目標努力著... `,
+    `想來開發/學習? 歡迎聯繫我們!!!`,
+    `我們的郵箱是 ${MAIL} !!!`,
+    `這麼良心的APP還不推薦給朋友們嗎`,
+    `開發者的錢包快被掏空...`,
+    `再刷新我就累了...`,
+];
+const toastKaomojiArr = [
+    '(>ω･* )ﾉ',
+    'ヾ(ｏ･ω･)ﾉ',
+    '( • ̀ω•́ )✧',
+    '(*/ω＼*)',
+    'ヾ(❀^ω^)ﾉﾞ',
+    '(~o￣3￣)~',
+    '∠( °ω°)／',
+    `＼\٩('ω')و/／`,
+    '✧⁺⸜(●˙▾˙●)⸝⁺✧',
+    '(｡◝ᴗ◜｡)',
+    'ヽ(^ω^)ﾉ',
+    '(ﾟωﾟ)ﾉ☆',
+    '(*￣3￣)╭',
+    '(ಥ_ಥ)',
+    '(￣.￣)',
+    '٩(๑>◡<๑)۶',
+    '(T ^ T)',
+    'ㄟ( ▔, ▔ )ㄏ',
+    '(▼へ▼メ)',
+    '￣▽￣',
+    '(oﾟ▽ﾟ)o',
 ];
 
 const calItemWidth = scale(44.5);
 
 class HomeScreen extends Component {
+    toastTimer = null;
+    calScrollRef = React.createRef();
+
     constructor(props) {
         super(props)
 
@@ -131,7 +153,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.ionicons,
                     function_name: '校園巴士',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.props.navigation.navigate('Bus');
                     },
                 },
@@ -140,7 +162,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.materialCommunityIcons,
                     function_name: '支持我們',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         let webview_param = {
                             url: GITHUB_DONATE,
                             title: '支持我們',
@@ -156,7 +178,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.img,
                     function_name: '澳大方舟',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.onRefresh();
                         this.getAppData();
                         this.getCal();
@@ -169,7 +191,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.materialCommunityIcons,
                     function_name: '方舟百科',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.props.navigation.navigate('Wiki');
                     },
                 },
@@ -178,7 +200,7 @@ class HomeScreen extends Component {
                     icon_type: iconTypes.ionicons,
                     function_name: '組織登入',
                     func: () => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.props.navigation.navigate('MeScreen');
                     },
                 },
@@ -205,7 +227,6 @@ class HomeScreen extends Component {
     }
 
     componentDidMount() {
-        this.onRefresh();
         let globalData = this.props.RootStore;
         // 已登錄學生賬號
         if (globalData.userInfo && globalData.userInfo.stdData) {
@@ -215,6 +236,14 @@ class HomeScreen extends Component {
             this.getAppData(false);
         }
         this.getCal();
+
+        this.toastTimer = setTimeout(() => {
+            this.onRefresh();
+        }, 1000);
+    }
+
+    componentWillUnmount() {
+        this.toastTimer && clearTimeout(this.toastTimer);
     }
 
     getAppData = async isLogin => {
@@ -229,7 +258,6 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
-                // this.toast.show(`網絡請求錯誤 TAT ...`, 2000);
                 this.getAppData();
             });
     };
@@ -275,7 +303,7 @@ class HomeScreen extends Component {
                         {
                             text: "Yes",
                             onPress: () => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                                 Linking.openURL(url);
                             },
@@ -296,9 +324,16 @@ class HomeScreen extends Component {
         }
     };
 
-    onRefresh = async () => {
+    onRefresh = () => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
-        this.toast.show(toastTextArr[toastTextIdx], 3500);
+        const toastKaoIdx = Math.round(Math.random() * (toastKaomojiArr.length - 1));
+        Toast.show({
+            type: 'arkToast',
+            text1: toastKaomojiArr[toastKaoIdx],
+            text2: toastTextArr[toastTextIdx],
+            topOffset: scale(100),
+            onPress: () => Toast.hide(),
+        })
 
         // TODO: 會出現教授的名字，暫且擱置
         // const URL = ARK_WIKI_RANDOM_TITLE;
@@ -323,17 +358,24 @@ class HomeScreen extends Component {
         // ***務必注意key、value的大小寫！！**
         const nowTimeStamp = moment(new Date());
         const CAL_LENGTH = cal.length;
+        let { selectDay } = this.state;
         // 同日或未來的重要時間設為選中日
         if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
-            this.setState({ selectDay: CAL_LENGTH - 1 });
+            selectDay = CAL_LENGTH - 1;
+            this.setState({ selectDay });
         }
         else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
             for (let i = 0; i < CAL_LENGTH; i++) {
                 if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
-                    this.setState({ selectDay: i });
+                    selectDay = i;
+                    this.setState({ selectDay });
                     break;
                 }
             }
+        }
+        // 自動滾動到校曆的selectDay
+        if (this.calScrollRef) {
+            this.calScrollRef.current.scrollToOffset({ offset: selectDay * calItemWidth });
         }
     };
 
@@ -373,7 +415,7 @@ class HomeScreen extends Component {
             <TouchableScale
                 style={{ width: calItemWidth, margin: scale(3), }}
                 onPress={() => {
-                    ReactNativeHapticFeedback.trigger('soft');
+                    trigger();
                     this.setState({ selectDay: index });
                 }}
             >
@@ -480,7 +522,7 @@ class HomeScreen extends Component {
         }
 
         return (
-            <TouchableScale
+            <TouchableOpacity
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -499,7 +541,7 @@ class HomeScreen extends Component {
                         {function_name}
                     </Text>
                 )}
-            </TouchableScale>
+            </TouchableOpacity>
         );
     };
 
@@ -536,7 +578,7 @@ class HomeScreen extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         // 回頂，需先創建ref，可以在this.refs直接找到方法引用
                         this.scrollView.current.scrollTo({
                             x: 0,
@@ -605,8 +647,9 @@ class HomeScreen extends Component {
                         <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8), justifyContent: 'center', }}>
                             <VirtualizedList
                                 data={cal}
-                                initialNumToRender={11}
-                                windowSize={3}
+                                ref={this.calScrollRef}
+                                initialNumToRender={selectDay <= 11 ? 11 : selectDay}
+                                windowSize={4}
                                 initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                                 getItemLayout={(data, index) => {
                                     const layoutSize = calItemWidth;
@@ -781,7 +824,7 @@ class HomeScreen extends Component {
                                         }}
                                         activeOpacity={0.8}
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger('soft');
+                                            trigger();
                                             const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                                             Linking.openURL(url);
                                         }}>
@@ -846,9 +889,7 @@ class HomeScreen extends Component {
                                             alignSelf: 'center',
                                         }}
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger(
-                                                'soft',
-                                            );
+                                            trigger();
                                             this.setState({ isShowModal: false });
                                             this.props.navigation.jumpTo(
                                                 'MeTabbar',
@@ -871,7 +912,7 @@ class HomeScreen extends Component {
                 }
 
                 {/* Tost */}
-                <Toast
+                {/* <Toast
                     ref={toast => (this.toast = toast)}
                     position="top"
                     positionValue={'7%'}
@@ -883,7 +924,7 @@ class HomeScreen extends Component {
                         borderColor: COLOR_DIY.themeColor,
                         ...viewShadow,
                     }}
-                />
+                /> */}
             </View >
         );
     }

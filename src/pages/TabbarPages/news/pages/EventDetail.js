@@ -14,6 +14,7 @@ import {
 
 import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
+import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
 import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import DialogDIY from '../../../../components/DialogDIY';
@@ -33,7 +34,6 @@ import { inject } from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import Toast, { DURATION } from 'react-native-easy-toast';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -167,7 +167,7 @@ class EventDetail extends Component {
                 this.postDelFollow(eventID);
             }
         }
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
     };
 
     async postAddFollow(eventID) {
@@ -414,7 +414,7 @@ class EventDetail extends Component {
                         <TouchableOpacity
                             activeOpacity={0.7}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 this.props.navigation.goBack()
                             }}>
                             <Ionicons

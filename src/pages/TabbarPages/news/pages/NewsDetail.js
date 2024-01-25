@@ -24,6 +24,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -149,8 +150,8 @@ class NewsDetail extends Component {
                     //只渲染存在的语言的按钮
                     if (item.available == 1) {
                         return (
-                            <TouchableOpacity
-                                activeOpacity={0.8}
+                            <TouchableScale
+                                // activeOpacity={0.8}
                                 style={{
                                     ...styles.languageModeButtonContainer,
                                     backgroundColor:
@@ -170,7 +171,7 @@ class NewsDetail extends Component {
                                 }}>
                                     {item.name}
                                 </Text>
-                            </TouchableOpacity>
+                            </TouchableScale>
                         );
                     }
                 })}
@@ -261,7 +262,7 @@ class NewsDetail extends Component {
                         // 每個項目的間距
                         spacing={scale(15)}
                         renderItem={({ item, index }) => (
-                            <TouchableOpacity
+                            <TouchableScale
                                 activeOpacity={0.7}
                                 style={{
                                     width: COMPONENT_WIDTH,
@@ -305,7 +306,7 @@ class NewsDetail extends Component {
                                         />
                                     </View>
                                 ) : null}
-                            </TouchableOpacity>
+                            </TouchableScale>
                         )}
                         itemContainerStyle={{
                             alignItems: 'center',

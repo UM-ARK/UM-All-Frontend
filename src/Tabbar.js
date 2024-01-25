@@ -10,8 +10,8 @@ import ARKWiki from './pages/TabbarPages/arkwiki';
 import CourseSim from './pages/TabbarPages/courseSim';
 
 import { COLOR_DIY } from './utils/uiMap';
+import { trigger } from './utils/trigger';
 import { scale } from 'react-native-size-matters';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -73,7 +73,7 @@ class Tabbar extends Component {
                             title: '資訊',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 )}
@@ -97,7 +97,7 @@ class Tabbar extends Component {
                             title: 'Wiki',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 )}
@@ -121,7 +121,7 @@ class Tabbar extends Component {
                             title: '搵課',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 )}
@@ -145,7 +145,7 @@ class Tabbar extends Component {
                             title: '課表',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 )}
@@ -169,7 +169,7 @@ class Tabbar extends Component {
                             title: '服務',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 )}
@@ -220,7 +220,7 @@ class Tabbar extends Component {
                             title: isClub ? '組織' : '我的',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                         initialParams={{ setLock: this.props.route.params.setLock }}
                     />

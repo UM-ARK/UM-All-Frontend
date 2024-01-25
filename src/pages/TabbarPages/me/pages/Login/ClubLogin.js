@@ -18,6 +18,7 @@ import { ToastDIY } from '../../../../../components/ToastDIY';
 import { handleLogin } from '../../../../../utils/storageKits';
 import ModalBottom from '../../../../../components/ModalBottom';
 import { BASE_URI, GET, USUAL_Q } from '../../../../../utils/pathMap';
+import { trigger} from '../../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
 import { Input, Box, Center, Stack, Icon } from 'native-base';
@@ -26,7 +27,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useToast } from 'native-base';
 import axios from 'axios';
 import qs from 'qs';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 // 存入臨時變量，準備提交後端驗證
@@ -77,7 +77,7 @@ const NBTextInput = () => {
                         mr="2"
                         color="muted.400"
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             setShow(!show);
                         }}
                     />
@@ -97,7 +97,7 @@ function RenderLoginButton(props) {
     const { unread, white, black, success } = COLOR_DIY;
 
     handleLoginPress = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         // 賬戶輸入未完成
         if (accountPassword.account == '' || accountPassword.password == '') {
             toast.show({

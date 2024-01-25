@@ -10,6 +10,7 @@ import {
 
 import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
 import { COLOR_DIY } from '../../../../utils/uiMap';
+import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 
@@ -17,7 +18,6 @@ import axios from "axios";
 import { scale } from 'react-native-size-matters';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { AirbnbRating } from '@rneui/themed';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
@@ -71,7 +71,7 @@ export default class Comment extends Component {
     }
 
     jumpToSearchProf = async (name) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         this.props.navigation.navigate('What2RegRelateCourses', { inputText: name, type: 'prof' });
     }
 
@@ -281,7 +281,7 @@ export default class Comment extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.scrollViewRef.current.scrollTo({
                             x: 0,
                             y: 0,
@@ -396,7 +396,7 @@ export default class Comment extends Component {
                                     prof_name: res.prof_info.name,
                                 }
                                 this.props.navigation.navigate('What2RegNewComment', data)
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                             }}
                         >
                             <Text style={{ color: white }}>新增評論</Text>

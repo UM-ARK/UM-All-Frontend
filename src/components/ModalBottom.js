@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
 
 import Modal from 'react-native-modal';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import { scale } from 'react-native-size-matters';
@@ -33,7 +32,7 @@ class ModalBottom extends Component {
                 isVisible={isModalBottomVisible}
                 statusBarTranslucent
                 deviceHeight={PAGE_HEIGHT}
-                backdropColor={COLOR_DIY.black.main}
+                backdropColor={COLOR_DIY.trueBlack}
                 backdropOpacity={0.5}
                 // animationIn='zoomIn'    animationOut='zoomOut'
                 onBackButtonPress={this.tiggerModal}

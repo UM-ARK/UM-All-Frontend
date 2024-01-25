@@ -17,10 +17,11 @@ import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import TouchableScale from "react-native-touchable-scale";
 import { MenuView } from '@react-native-menu/menu';
+import Toast from 'react-native-simple-toast';
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -28,6 +29,7 @@ import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
+import { trigger } from "../../../utils/trigger";
 
 const { themeColor, themeColorUltraLight, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -313,13 +315,13 @@ export default class courseSim extends Component {
                     onPressAction={({ nativeEvent }) => {
                         switch (nativeEvent.event) {
                             case 'wiki':
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
                                 this.props.navigation.navigate('Wiki', { url: URL });
                                 break;
 
                             case 'what2reg':
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 const courseCode = course['Course Code'];
                                 const profName = course['Teacher Information'];
                                 // 進入搜索特定教授的課程模式，進入評論詳情頁
@@ -328,23 +330,23 @@ export default class courseSim extends Component {
                                 break;
 
                             case 'official':
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 openLink(OFFICIAL_COURSE_SEARCH + course['Course Code']);
                                 break;
 
                             case 'section':
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 this.props.navigation.navigate('LocalCourse', course['Course Code']);
                                 break;
 
                             case 'drop':
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}-${course['Section']}嗎？`,
                                     [
                                         {
                                             text: "Drop",
                                             onPress: () => {
-                                                ReactNativeHapticFeedback.trigger('soft');
+                                                trigger();
                                                 this.dropCourse(course);
                                             },
                                             style: 'destructive',
@@ -406,20 +408,20 @@ export default class courseSim extends Component {
                         }}
                         activeOpacity={0.8}
                         // onPress={() => {
-                        //     ReactNativeHapticFeedback.trigger('soft');
+                        //     trigger();
                         //     Alert.alert("", `想知道關於${course['Course Code']}的...\n(長按可以刪除課程...)`,
                         //         [
                         //             {
                         //                 text: "可選Section/老師",
                         //                 onPress: () => {
-                        //                     ReactNativeHapticFeedback.trigger('soft');
+                        //                     trigger();
                         //                     this.props.navigation.navigate('LocalCourse', course['Course Code']);
                         //                 },
                         //             },
                         //             {
                         //                 text: "課程Wiki",
                         //                 onPress: () => {
-                        //                     ReactNativeHapticFeedback.trigger('soft');
+                        //                     trigger();
                         //                     const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
                         //                     this.props.navigation.navigate('Wiki', { url: URL });
                         //                 },
@@ -432,7 +434,7 @@ export default class courseSim extends Component {
                         //     );
                         // }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger('rigid');
                         }}
                         delayLongPress={300}
                     >
@@ -483,7 +485,7 @@ export default class courseSim extends Component {
 
     // 導入ISW課表數據
     importCourseData = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         const { importTimeTableText } = this.state;
         let parseRes = parseImportData(importTimeTableText);
         if (parseRes) {
@@ -496,7 +498,7 @@ export default class courseSim extends Component {
     }
 
     addCourse = (course) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         let { courseCodeList } = this.state;
         let tempArr = [];
         courseCodeList.map(i => {
@@ -534,7 +536,7 @@ export default class courseSim extends Component {
 
     // 刪除所選課程
     dropCourse = (course) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         const { courseCodeList } = this.state;
         let newList = [];
         courseCodeList.map(i => {
@@ -543,15 +545,16 @@ export default class courseSim extends Component {
             }
         })
         this.handleCourseList(newList);
+        Toast.show(`已刪除${course['Course Code'] + '-' + course['Section']}`)
     }
 
     clearCourse = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         Alert.alert(``, `確定要清空當前的模擬課表嗎？`, [
             {
                 text: '確定清空',
                 onPress: () => {
-                    ReactNativeHapticFeedback.trigger('soft');
+                    trigger();
                     this.setState({
                         allCourseAllTime: [],
                         courseCodeList: [],
@@ -585,7 +588,10 @@ export default class courseSim extends Component {
                 {/* 跳轉ISW按鈕 */}
                 {importTimeTableText && importTimeTableText.length > 0 ? null : (
                     <TouchableOpacity style={{ ...s.buttonContainer, }}
-                        onPress={() => { openLink(UM_ISW); }}
+                        onPress={() => {
+                            trigger();
+                            openLink(UM_ISW);
+                        }}
                     >
                         <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
                     </TouchableOpacity>
@@ -825,7 +831,7 @@ E11-0000
                                     padding: scale(3),
                                 }}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     let { courseCodeList } = this.state;
                                     let tempArr = [];
                                     courseCodeList.map(itm => {
@@ -858,7 +864,7 @@ E11-0000
                                 borderColor: themeColor,
                             }}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 this.addAllSectionCourse(i['Course Code'], sectionObj);
                                 // 切換searchText為點擊的Code
                                 this.setState({ searchText: i['Course Code'] });
@@ -909,7 +915,7 @@ E11-0000
     render() {
         const { allCourseAllTime, } = this.state;
         return (
-            <View style={{ flex: 1, backgroundColor: bg_color, }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1, backgroundColor: bg_color, }}>
                 <Header
                     backgroundColor={bg_color}
                     statusBarProps={{
@@ -920,7 +926,7 @@ E11-0000
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(35),
+                            default: insets.top >= 35 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -969,7 +975,7 @@ E11-0000
                         padding: scale(5),
                     }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             // 切換加課模式
                             this.setState({ addMode: !this.state.addMode });
                             this.verScroll.current.scrollTo({ y: 0 });
@@ -1006,7 +1012,7 @@ E11-0000
                     {/* 渲染選課的篩選列表 */}
                     {this.state.addMode ? this.renderCourseSearch() : null}
                 </ScrollView>
-            </View >
+            </View>}</SafeAreaInsetsContext.Consumer  >
         );
     }
 }

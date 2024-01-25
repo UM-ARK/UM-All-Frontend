@@ -15,6 +15,7 @@ import {
 
 import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH } from "../../../utils/pathMap";
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { trigger } from '../../../utils/trigger';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
 import coursePlan from '../../../static/UMCourses/coursePlan';
@@ -27,10 +28,10 @@ import axios from "axios";
 import { scale } from "react-native-size-matters";
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TouchableScale from "react-native-touchable-scale";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
@@ -399,7 +400,7 @@ export default class index extends Component {
                             backgroundColor: filterOptions.mode === itm ? themeColor : null,
                         }}
                         onPress={async () => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             try {
                                 filterOptions.mode = itm;
                                 COURSE_MODE = itm;
@@ -459,7 +460,7 @@ export default class index extends Component {
                             backgroundColor: filterOptions.option === itm ? themeColor : null,
                         }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             let filterCourseList = [];
                             try {
                                 if (itm == 'CMRE') {
@@ -533,7 +534,7 @@ export default class index extends Component {
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
                         }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             const facultyName = itm;
                             let filterCourseList = [];
                             if (offerFacultyDepaListObj[facultyName].length > 0) {
@@ -590,7 +591,7 @@ export default class index extends Component {
                     backgroundColor: filterOptions.depaName === itm ? themeColor : null,
                 }}
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         const depaName = itm;
                         let filterCourseList = [];
                         filterCourseList = offerCourseByDepa[depaName]
@@ -659,7 +660,7 @@ export default class index extends Component {
                                         backgroundColor: filterOptions.GE === itm ? themeColor : null,
                                     }}
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger('soft');
+                                            trigger();
                                             filterOptions.GE = itm;
                                             let filterCourseList = offerCourseByGE[itm];
                                             this.setState({ filterOptions, filterCourseList, scrollData: {} })
@@ -706,7 +707,7 @@ export default class index extends Component {
     };
 
     jumpToCoursePage = async (courseCode) => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         this.setState({ isLoading: true })
         if (courseCode.length > 0) {
             let res = await this.getCourseData(courseCode)
@@ -771,7 +772,7 @@ export default class index extends Component {
                         placeholder="試試ECE or Electrical or 電氣（區分簡繁）"
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
-                        onFocus={() => ReactNativeHapticFeedback.trigger('soft')}
+                        onFocus={() => trigger()}
                         returnKeyType={'search'}
                         selectionColor={themeColor}
                         blurOnSubmit={true}
@@ -781,7 +782,7 @@ export default class index extends Component {
                     {inputText.length > 0 ? (
                         <TouchableOpacity
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 this.setState({ inputText: '', inputOK: false, scrollData: {}, })
                                 this.textInputRef.current.focus();
                             }}
@@ -805,7 +806,7 @@ export default class index extends Component {
                     }}
                     disabled={isLoading || !inputOK}
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         let URL = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
                         this.props.navigation.navigate('Wiki', { url: URL });
                     }}
@@ -822,7 +823,7 @@ export default class index extends Component {
                     }}
                     disabled={isLoading || !inputOK}
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.jumpToWebRelateCoursePage({ inputText, type: 'course' })
                     }}
                 >
@@ -839,7 +840,7 @@ export default class index extends Component {
                     }}
                     disabled={isLoading || !inputOK}
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.jumpToWebRelateCoursePage({ inputText, type: 'prof' })
                     }}
                 >
@@ -895,7 +896,7 @@ export default class index extends Component {
                         style={{ padding: scale(3), }}
                         onPress={() => {
                             // 滑動到對應的首字母課程
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             this.scrollViewRef.current.scrollTo({
                                 y: scrollData[itm],
                             });
@@ -930,11 +931,10 @@ export default class index extends Component {
             inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
 
         return (
-            <View style={{
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{
                 flex: 1,
                 backgroundColor: COLOR_DIY.bg_color,
-                alignItems: 'center',
-                justifyContent: 'center'
+                alignItems: 'center', justifyContent: 'center'
             }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
@@ -946,7 +946,7 @@ export default class index extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(35),
+                            default: insets.top >= 35 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -1088,7 +1088,7 @@ export default class index extends Component {
                             this.renderFirstLetterNav(filterCourseList) : null
                     )}
                 </>)}
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

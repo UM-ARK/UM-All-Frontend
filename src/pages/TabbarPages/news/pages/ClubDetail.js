@@ -37,6 +37,7 @@ import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
 import { updateUserInfo } from '../../../../utils/storageKits';
 import { versionStringCompare } from '../../../../utils/versionKits';
+import { trigger } from '../../../../utils/trigger';
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -51,7 +52,6 @@ import { useToast } from 'native-base';
 import { inject } from 'mobx-react';
 import axios from 'axios';
 import Toast, { DURATION } from 'react-native-easy-toast';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -316,7 +316,7 @@ class ClubDetail extends Component {
                 this.postDelFollow(club_num);
             }
         }
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
     };
 
     renderFollowButton = () => {
@@ -418,7 +418,7 @@ class ClubDetail extends Component {
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={() => {
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                                 this.props.navigation.goBack()
                             }}
                             style={{
@@ -776,9 +776,7 @@ class ClubDetail extends Component {
                                         style={styles.checkMoreButton}
                                         activeOpacity={0.8}
                                         onPress={() => {
-                                            ReactNativeHapticFeedback.trigger(
-                                                'soft',
-                                            );
+                                            trigger();
                                             this.props.navigation.navigate(
                                                 'AllEvents',
                                                 { clubData },

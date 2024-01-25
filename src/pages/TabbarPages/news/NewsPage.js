@@ -16,19 +16,18 @@ import NewsCard from './components/NewsCard';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
+import Loading from '../../../components/Loading';
 
 import FastImage from 'react-native-fast-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
-import ContentLoader, { Rect, Circle, Path } from 'react-content-loader/native';
 import axios from 'axios';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
-import TouchableScale from "react-native-touchable-scale";
 
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
+// const { width: PAGE_WIDTH } = Dimensions.get('window');
+// const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
@@ -44,26 +43,6 @@ const getItem = (data, index) => {
 const getItemCount = data => {
     return data.length;
 };
-
-// 渲染幾個骨架屏
-const renderLoader = new Array(parseInt(PAGE_HEIGHT / 200));
-renderLoader.fill(0);
-// loading時的骨架屏
-const NewsLoader = props => (
-    <ContentLoader
-        viewBox="0 0 400 200"
-        width={PAGE_WIDTH}
-        height={200}
-        // title="Loading news..."
-        {...props}>
-        <Rect x="42.84" y="9.93" rx="5" ry="5" width="143.55" height="86.59" />
-        <Rect x="192.84" y="9.67" rx="0" ry="0" width="148.72" height="12.12" />
-        <Rect x="192.84" y="25.67" rx="0" ry="0" width="89" height="9" />
-        <Rect x="42.84" y="107" rx="5" ry="5" width="143.55" height="86.59" />
-        <Rect x="192.84" y="107" rx="0" ry="0" width="148.72" height="12.12" />
-        <Rect x="192.84" y="123" rx="0" ry="0" width="89" height="9" />
-    </ContentLoader>
-);
 
 // 頭條新聞數據Obj，不要刪掉，作為全局變量給另一個func調用
 let topNews = {};
@@ -199,7 +178,7 @@ class NewsPage extends Component {
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     this.context.navigate('NewsDetail', {
                                         data: topNews,
                                     });
@@ -309,7 +288,7 @@ class NewsPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.virtualizedList.current.scrollToOffset({
                             x: 0,
                             y: 0,
@@ -354,7 +333,11 @@ class NewsPage extends Component {
                 {this.state.isLoading ? (
                     // 渲染Loading時的骨架屏
                     <ScrollView
-                        contentContainerStyle={{ backgroundColor: bg_color }}
+                        contentContainerStyle={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            backgroundColor: bg_color,
+                        }}
                         refreshControl={
                             <RefreshControl
                                 colors={[themeColor]}
@@ -366,7 +349,7 @@ class NewsPage extends Component {
                                 }}
                             />
                         }>
-                        {renderLoader.map(() => NewsLoader())}
+                        <Loading />
                     </ScrollView>
                 ) : (
                     // 渲染新聞列表
@@ -375,6 +358,7 @@ class NewsPage extends Component {
                         ref={this.virtualizedList}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
                         initialNumToRender={4}
+                        windowSize={3}
                         renderItem={({ item }) => <NewsCard data={item} />}
                         contentContainerStyle={{ width: '100%' }}
                         keyExtractor={itm => itm._id}

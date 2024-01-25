@@ -27,6 +27,7 @@ import Webviewer from '../../../../../components/Webviewer';
 import { UM_Moodle, APPSTORE_URL, BASE_HOST, } from '../../../../../utils/pathMap';
 import { openLink } from '../../../../../utils/browser';
 import { versionStringCompare } from '../../../../../utils/versionKits';
+import { trigger } from '../../../../../utils/trigger';
 import DialogDIY from '../../../../../components/DialogDIY';
 import ClubLogin from './ClubLogin';
 import packageInfo from '../../../../../../package.json';
@@ -38,7 +39,6 @@ import WebView from 'react-native-webview';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 const { bg_color, black, themeColor, white } = COLOR_DIY;
@@ -233,7 +233,7 @@ class LoginChoose extends Component {
                                 }}
                                 activeOpacity={0.7}
                                 onPress={async () => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     // 判斷版本號，強制組織賬號使用最新版APP
                                     const strAppInfo = await AsyncStorage.getItem('appInfo');
                                     const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
@@ -248,7 +248,7 @@ class LoginChoose extends Component {
                                                     {
                                                         text: "Yes",
                                                         onPress: () => {
-                                                            ReactNativeHapticFeedback.trigger('soft');
+                                                            trigger();
                                                             const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                                                             Linking.openURL(url);
                                                         },
@@ -282,9 +282,7 @@ class LoginChoose extends Component {
                                     }}
                                     activeOpacity={0.7}
                                     onPress={() => {
-                                        ReactNativeHapticFeedback.trigger(
-                                            'soft',
-                                        );
+                                        trigger();
                                         this.setState({ showDialog: true });
                                     }}
                                     disabled={!this.state.ruleChoice}>
@@ -320,9 +318,7 @@ class LoginChoose extends Component {
                                     size={scale(20)}
                                     checked={this.state.ruleChoice}
                                     onPress={() => {
-                                        ReactNativeHapticFeedback.trigger(
-                                            'soft',
-                                        );
+                                        trigger();
                                         this.setState({
                                             ruleChoice: !this.state.ruleChoice,
                                         });
@@ -331,9 +327,7 @@ class LoginChoose extends Component {
                                 <TouchableOpacity
                                     activeOpacity={0.9}
                                     onPress={() => {
-                                        ReactNativeHapticFeedback.trigger(
-                                            'soft',
-                                        );
+                                        trigger();
                                         this.setState({
                                             ruleChoice: !this.state.ruleChoice,
                                         });

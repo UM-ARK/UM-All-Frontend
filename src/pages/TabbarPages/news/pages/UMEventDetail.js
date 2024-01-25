@@ -20,6 +20,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import moment, { lang } from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
@@ -237,7 +238,7 @@ class UMEventDetail extends Component {
                     //只渲染存在的语言的按钮
                     if (item.available == 1) {
                         return (
-                            <TouchableOpacity
+                            <TouchableScale
                                 activeOpacity={0.8}
                                 style={{
                                     ...styles.languageModeButtonContainer,
@@ -260,7 +261,7 @@ class UMEventDetail extends Component {
                                     }}>
                                     {item.name}
                                 </Text>
-                            </TouchableOpacity>
+                            </TouchableScale>
                         );
                     }
                 })}
@@ -481,7 +482,7 @@ class UMEventDetail extends Component {
                         </Text>
                     </View>
                     {/* 海報 */}
-                    <TouchableOpacity
+                    <TouchableScale
                         activeOpacity={0.8}
                         style={styles.imgContainer}
                         // 瀏覽大圖
@@ -516,7 +517,7 @@ class UMEventDetail extends Component {
                                 />
                             </View>
                         ) : null}
-                    </TouchableOpacity>
+                    </TouchableScale>
 
                     {/* 詳情資訊 */}
                     <View style={styles.infoCardContainer}>

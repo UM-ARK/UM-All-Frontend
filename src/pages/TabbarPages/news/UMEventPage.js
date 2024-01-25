@@ -13,6 +13,7 @@ import {
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 
 import NewsCard from './components/NewsCard';
 import Loading from '../../../components/Loading';
@@ -21,7 +22,6 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
@@ -148,7 +148,7 @@ class UMEventPage extends Component {
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
-                        ReactNativeHapticFeedback.trigger('soft');
+                        trigger();
                         this.virtualizedList.current.scrollToOffset({
                             x: 0,
                             y: 0,
@@ -185,6 +185,7 @@ class UMEventPage extends Component {
                 ref={this.virtualizedList}
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
+                windowSize={3}
                 renderItem={({ item }) => <NewsCard data={item} type={'event'} />}
                 contentContainerStyle={{ width: '100%' }}
                 keyExtractor={itm => itm._id}

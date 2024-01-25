@@ -15,14 +15,15 @@ import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
-import Toast from 'react-native-easy-toast';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Toast from 'react-native-toast-message';
 import * as Progress from 'react-native-progress';
 import TouchableScale from "react-native-touchable-scale";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { COLOR_DIY, uiStyle, isLight } from '../../../utils/uiMap';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
+import { trigger } from "../../../utils/trigger";
 
 const { themeColor, black, white, wiki_bg_color, barStyle } = COLOR_DIY;
 const iconSize = scale(25);
@@ -94,23 +95,31 @@ export default class ARKWiki extends Component {
 
     // 返回ARK Wiki的主頁
     returnWikiHome = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         this.setState({ currentURL: ARK_WIKI })
         this.webviewRef.current.reload();
-        this.toast.show(`正全力返回主頁！`, 2000);
+        Toast.show({
+            type: 'arkToast',
+            text1: '正全力返回主頁！',
+            topOffset: scale(80),
+        })
     }
 
     goRandomPage = () => {
-        ReactNativeHapticFeedback.trigger('soft');
+        trigger();
         this.setState({ currentURL: ARK_WIKI_RANDOM_PAGE })
         this.webviewRef.current.reload();
-        this.toast.show(`正為你打開隨機條目！`, 2000);
+        Toast.show({
+            type: 'arkToast',
+            text1: '正為你打開隨機條目！',
+            topOffset: scale(80),
+        })
     }
 
     render() {
         const { canGoBack, canGoForward, currentURL, progress, isLoaded } = this.state;
         return (
-            <View style={{ flex: 1, }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1 }}>
                 <Header
                     // Wiki的默認配色
                     backgroundColor={white}
@@ -122,7 +131,7 @@ export default class ARKWiki extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(35),
+                            default: insets.top >= 35 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -163,7 +172,7 @@ export default class ARKWiki extends Component {
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goBack();
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                             }}
                         >
                             <MaterialCommunityIcons
@@ -183,7 +192,7 @@ export default class ARKWiki extends Component {
                             }}
                             onPress={() => {
                                 this.webviewRef.current.goForward();
-                                ReactNativeHapticFeedback.trigger('soft');
+                                trigger();
                             }}
                         >
                             <MaterialCommunityIcons
@@ -220,7 +229,7 @@ export default class ARKWiki extends Component {
                             right: scale(65),
                         }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             this.setState({ currentURL: ARK_WIKI_SEARCH })
                             this.webviewRef.current.reload();
                         }}
@@ -241,7 +250,7 @@ export default class ARKWiki extends Component {
                         }}
                         onPress={() => {
                             this.webviewRef.current.reload();
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                         }}
                     >
                         <MaterialCommunityIcons
@@ -259,9 +268,14 @@ export default class ARKWiki extends Component {
                             right: scale(10),
                         }}
                         onPress={() => {
-                            ReactNativeHapticFeedback.trigger('soft');
+                            trigger();
                             Clipboard.setString(currentURL);
-                            this.toast.show(`已複製當前頁面鏈接到粘貼板！\n快去和小夥伴分享吧~`, 2000);
+                            Toast.show({
+                                type: 'arkToast',
+                                text1: '已複製當前頁面鏈接到粘貼板！',
+                                text2: '快去和小夥伴分享吧~',
+                                topOffset: scale(80),
+                            })
                         }}
                     >
                         <MaterialCommunityIcons
@@ -363,19 +377,7 @@ export default class ARKWiki extends Component {
                     (() => { window.applyPref() })();
                     `}
                 />
-
-                {/* Tost */}
-                <Toast
-                    ref={toast => (this.toast = toast)}
-                    position="top"
-                    positionValue={'10%'}
-                    textStyle={{ color: white }}
-                    style={{
-                        backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: scale(10),
-                    }}
-                />
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

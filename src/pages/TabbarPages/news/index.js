@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, Platform, Text, Dimensions } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
+import { trigger } from '../../../utils/trigger';
 import HomePage from '../home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
@@ -11,7 +12,7 @@ import AboutPage from './AboutPage';
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale } from 'react-native-size-matters';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
@@ -22,7 +23,7 @@ const numOfTabs = 5;
 class NewsScreen extends Component {
     render() {
         return (
-            <View style={{ backgroundColor: COLOR_DIY.bg_color, flex: 1 }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ backgroundColor: COLOR_DIY.bg_color, flex: 1 }}>
                 <Header
                     backgroundColor={bg_color}
                     // centerComponent={{
@@ -40,7 +41,7 @@ class NewsScreen extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(35),
+                            default: insets.top >= 35 ? scale(48) : scale(5),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -84,7 +85,7 @@ class NewsScreen extends Component {
                             title: '主頁',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -94,7 +95,7 @@ class NewsScreen extends Component {
                             title: '組織',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -104,7 +105,7 @@ class NewsScreen extends Component {
                             title: '活動',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -114,7 +115,7 @@ class NewsScreen extends Component {
                             title: '新聞',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                     <Tab.Screen
@@ -124,11 +125,11 @@ class NewsScreen extends Component {
                             title: '關於',
                         }}
                         listeners={() => ({
-                            tabPress: () => ReactNativeHapticFeedback.trigger('soft')
+                            tabPress: () => trigger()
                         })}
                     />
                 </Tab.Navigator>
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

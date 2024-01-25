@@ -7,9 +7,7 @@ import {
     Image,
     ImageBackground,
     ScrollView,
-    Dimensions,
     RefreshControl,
-    Linking,
 } from 'react-native';
 
 // 引入本地工具
@@ -18,18 +16,21 @@ import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
+import LoadingDotsDIY from '../../components/LoadingDots';
+import { trigger } from '../../utils/trigger';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
-var DomParser = require('react-native-html-parser').DOMParser;
-import { scale, verticalScale } from 'react-native-size-matters';
-import Toast, { DURATION } from 'react-native-easy-toast';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { DOMParser } from "react-native-html-parser";
+import { scale } from 'react-native-size-matters';
+import axios from 'axios';
+import Toast from 'react-native-toast-message';
+import TouchableScale from "react-native-touchable-scale";
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
-const { width: PAGE_WIDTH } = Dimensions.get('window'); // screen 包括navi bar
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
+// const { width: PAGE_WIDTH } = Dimensions.get('window'); // screen 包括navi bar
+// const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 let busIcon = require('../../static/img/Bus/bus.png');
 let busRouteImg = require('../../static/img/Bus/bus_route.png');
@@ -48,11 +49,11 @@ let stopImgArr = [
 function getBusData(busInfoHtml) {
     // 使用第三方插件react-native-html-parser，以使用DomParser（為了懶寫代碼，複用Vue寫的解析邏輯）
     // https://bestofreactjs.com/repo/g6ling-react-native-html-parser-react-native-utilities
-    let doc = new DomParser().parseFromString(busInfoHtml, 'text/html');
+    let doc = new DOMParser().parseFromString(busInfoHtml, 'text/html');
 
     // 主要的巴士資訊都存放在span內
-    var mainInfo = doc.getElementsByTagName('span');
-    var busInfoArr = new Array();
+    let mainInfo = doc.getElementsByTagName('span');
+    let busInfoArr = new Array();
 
     // 到站時車牌屬於span（13個span）。未到站時車牌屬於div（12個span）
     // 無車服務時只有0~2的下標為busInfo（11個span）。有車服務時，0~3的下標都是busInfo（至少12個span）
@@ -70,11 +71,11 @@ function getBusData(busInfoHtml) {
     // console.log("busInfoArr為:",    busInfoArr);
 
     // 車輛和站點都在class=main的div標籤內
-    var arriveInfoBuffer = doc.getElementsByClassName('left', false);
+    let arriveInfoBuffer = doc.getElementsByClassName('left', false);
     // console.log("巴士到達資訊HTML節點形式:",arriveInfoBuffer);
 
     // 將節點文字數據存入Array，用於以車牌判斷巴士到達位置
-    var arriveInfoArr = [];
+    let arriveInfoArr = [];
     // 解析巴士到站數據
     for (let i = 0; i < arriveInfoBuffer.length; i++) {
         let item = arriveInfoBuffer[i].textContent;
@@ -100,17 +101,16 @@ function getBusData(busInfoHtml) {
     }
     // console.log("Bus車牌、位置總數據：",busPositionArr);
 
-    // console.log('\n\n\n');
     return {
         busInfoArr,
         busPositionArr,
     };
 }
 
-let timer = null;
-
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
+    timer = null;
+
     state = {
         busPositionArr: [],
         // Example: busPositionArr: [{index: 0}],
@@ -125,32 +125,26 @@ class BusScreen extends Component {
         toastColor: themeColor,
     };
 
-    constructor() {
-        super();
+    async componentDidMount() {
+        logToFirebase('openPage', { page: 'bus' });
         // 打開Bus頁時直接請求巴士報站的數據
         this.fetchBusInfo();
-    }
 
-    componentDidMount() {
-        logToFirebase('openPage', { page: 'bus' });
-        timer = setInterval(() => {
+        // 定時自動刷新巴士數據
+        this.timer = setInterval(() => {
             // this.onRefresh();
             this.fetchBusInfo();
         }, 7000);
     }
 
     componentWillUnmount() {
-        clearInterval(timer);
+        clearInterval(this.timer);
     }
 
     // 爬蟲campus Bus
-    fetchBusInfo = () => {
-        // 訪問campusloop網站
-        fetch(UM_BUS_LOOP, {
-            method: 'GET',
-        })
-            .then(res => res.text())
-            .then(text => getBusData(text))
+    fetchBusInfo = async () => {
+        await axios.get(UM_BUS_LOOP)
+            .then(res => getBusData(res.data))
             .then(result => {
                 // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
                 result.busInfoArr.shift(); // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
@@ -163,18 +157,26 @@ class BusScreen extends Component {
                 });
                 if (this.state.busPositionArr.length == 0) {
                     this.setState({ toastColor: COLOR_DIY.warning });
-                    this.toast.show(`當前沒有巴士~\n[]~(￣▽￣)~*`, 3000);
+                    Toast.show({
+                        type: 'warning',
+                        text1: '當前沒有巴士~',
+                        text2: '[]~(￣▽￣)~* 👋'
+                    });
                 } else {
                     this.setState({ toastColor: themeColor });
-                    this.toast.show(
-                        `Data is Loading~\n[]~(￣▽￣)~*`,
-                        1500,
-                    );
+                    Toast.show({
+                        type: 'arkToast',
+                        text1: 'Data is Loading~',
+                        text2: '幫你刷新了一下~ []~(￣▽￣)~* 👋'
+                    });
                 }
             })
             .catch(error => {
                 this.setState({ toastColor: COLOR_DIY.warning });
-                this.toast.show(`網絡錯誤`, 2000);
+                Toast.show({
+                    type: 'error',
+                    text1: '網絡錯誤！',
+                });
             });
     };
 
@@ -191,7 +193,7 @@ class BusScreen extends Component {
         }
 
         return (
-            <TouchableOpacity
+            <TouchableScale
                 onPress={this.toggleModal.bind(this, index)}
                 style={{
                     position: 'absolute',
@@ -208,12 +210,13 @@ class BusScreen extends Component {
                     {buildingCode}
                     <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
                 </Text>
-            </TouchableOpacity>
+            </TouchableScale>
         );
     };
 
     // 控制彈出層打開 or 關閉
     toggleModal = index => {
+        trigger();
         this.setState({
             isModalVisible: !this.state.isModalVisible,
             clickStopIndex: index,
@@ -293,7 +296,7 @@ class BusScreen extends Component {
                                     top: scale(350),
                                 }}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     // Linking.openURL(UM_MAP);
                                     // const webview_param = {
                                     //     url: UM_MAP,
@@ -333,7 +336,11 @@ class BusScreen extends Component {
                             {/* 巴士圖標 */}
                             {busPositionArr.length > 0
                                 ? busPositionArr.map(item => (
-                                    <View style={busStyleArr[item.index]}>
+                                    <TouchableScale style={busStyleArr[item.index]} activeScale={0.6}
+                                        onPress={()=>{
+                                            trigger();
+                                            this.fetchBusInfo();
+                                        }}>
                                         <Image
                                             source={busIcon}
                                             style={{
@@ -341,7 +348,7 @@ class BusScreen extends Component {
                                                 height: scale(30),
                                             }}
                                         />
-                                    </View>
+                                    </TouchableScale>
                                 ))
                                 : null}
 
@@ -354,6 +361,15 @@ class BusScreen extends Component {
                             {this.renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
                             {this.renderBusStopText(79, 395, 'E32', '法學院', 6)}
                             {this.renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
+
+                            <View style={{
+                                position: 'absolute',
+                                top: scale(5),
+                                left: scale(130),
+                                width: scale(35),
+                            }}>
+                                <LoadingDotsDIY />
+                            </View>
                         </ImageBackground>
                     </ScrollView>
                 </ScrollView>
@@ -400,18 +416,6 @@ class BusScreen extends Component {
                         />
                     </View>
                 </Modal>
-
-                {/* Tost */}
-                <Toast
-                    ref={toast => (this.toast = toast)}
-                    position="top"
-                    positionValue={'10%'}
-                    textStyle={{ color: white }}
-                    style={{
-                        backgroundColor: toastColor,
-                        borderRadius: scale(10),
-                    }}
-                />
             </View>
         );
     }

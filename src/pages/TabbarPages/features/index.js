@@ -4,7 +4,6 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Alert,
     Linking,
 } from 'react-native';
 
@@ -45,20 +44,20 @@ import {
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
+import { trigger } from "../../../utils/trigger";
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { inject } from 'mobx-react';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+
 // 定義可使用icon，注意大小寫
 const iconTypes = {
     ionicons: 'ionicons',
@@ -691,47 +690,49 @@ class Index extends Component {
                         let { go_where, webview_param, needLogin } = item;
                         return (
                             <TouchableScale
-                                style={{
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
+                                style={{ justifyContent: 'center', alignItems: 'center', }}
                                 activeOpacity={0.7}
                                 // 跳轉具體頁面
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     logToFirebase('funcUse', { funcName: item.fn_name });
                                     if (!needLogin || this.state.isLogin) {
-                                        // Webview頁面，需附帶跳轉參數
-                                        if (go_where == 'Webview') {
-                                            // this.props.navigation.navigate(
-                                            //     'Webviewer',
-                                            //     webview_param,
-                                            // );
-                                            openLink(webview_param.url);
-                                        } else if (go_where == 'Linking') {
-                                            // 使用默認瀏覽器打開
-                                            // Linking.openURL(webview_param.url);
-                                            // 使用應用內瀏覽器選項卡打開
-                                            openLink(webview_param.url);
-                                        }
-                                        // 跳轉對應本地頁面
-                                        else {
-                                            this.props.navigation.navigate(
-                                                go_where,
-                                            );
-                                        }
+                                        setTimeout(() => {
+                                            // Webview頁面，需附帶跳轉參數
+                                            if (go_where == 'Webview') {
+                                                // this.props.navigation.navigate(
+                                                //     'Webviewer',
+                                                //     webview_param,
+                                                // );
+                                                openLink(webview_param.url);
+                                            } else if (go_where == 'Linking') {
+                                                // 使用默認瀏覽器打開
+                                                // Linking.openURL(webview_param.url);
+                                                // 使用應用內瀏覽器選項卡打開
+                                                openLink(webview_param.url);
+                                            }
+                                            // 跳轉對應本地頁面
+                                            else {
+                                                this.props.navigation.navigate(
+                                                    go_where,
+                                                );
+                                            }
+                                        }, 50);
                                     } else {
                                         this.setState({ showDialog: true });
                                     }
                                 }}
                                 // 複製相關網站link
                                 onLongPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
-                                        Toast.show('已複製網站Link到剪貼板！');
+                                        Toast.show('已複製Link到剪貼板！');
+                                    } else {
+                                        Toast.show('這個功能沒有Link可以複製哦！');
                                     }
-                                }}>
+                                }}
+                            >
                                 {icon}
                                 <Text
                                     style={{
@@ -753,7 +754,7 @@ class Index extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+            <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header
                     backgroundColor={COLOR_DIY.bg_color}
                     statusBarProps={{
@@ -764,7 +765,7 @@ class Index extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: scale(35),
+                            default: insets.top >= 35 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -793,7 +794,7 @@ class Index extends Component {
                     })}
 
                     <View style={{ marginHorizontal: scale(20), marginVertical: scale(10) }}>
-                        <Text
+                        {/* <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 alignSelf: 'center',
@@ -808,7 +809,7 @@ class Index extends Component {
                                 color: COLOR_DIY.black.third,
                             }}>
                             長按圖標可複製對應的link ~
-                        </Text>
+                        </Text> */}
                     </View>
                 </ScrollView>
 
@@ -822,7 +823,7 @@ class Index extends Component {
                     }}
                     handleCancel={() => this.setState({ showDialog: false })}
                 />
-            </View>
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }

@@ -4,10 +4,10 @@ import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import { handleImageDownload } from '../utils/fileKits';
+import { trigger } from '../utils/trigger';
 
 import Modal from 'react-native-modal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { scale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -30,7 +30,7 @@ class ModalSave extends Component {
                 isVisible={isModalBottomVisible}
                 statusBarTranslucent
                 deviceHeight={PAGE_HEIGHT}
-                backdropColor={COLOR_DIY.black.main}
+                backdropColor={COLOR_DIY.trueBlack}
                 backdropOpacity={0.5}
                 onBackButtonPress={this.tiggerModal}
                 onBackdropPress={this.tiggerModal}
@@ -64,7 +64,7 @@ class ModalSave extends Component {
                                     alignItems: 'center',
                                 }}
                                 onPress={() => {
-                                    ReactNativeHapticFeedback.trigger('soft');
+                                    trigger();
                                     handleImageDownload(
                                         this.props.imageUrl.url,
                                     );
