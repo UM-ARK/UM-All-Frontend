@@ -16,6 +16,7 @@ import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
+import LoadingDotsDIY from '../../components/LoadingDots';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
@@ -24,7 +25,6 @@ import { scale } from 'react-native-size-matters';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
-import LoadingDots from "react-native-loading-dots";
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -362,12 +362,7 @@ class BusScreen extends Component {
                                 left: scale(130),
                                 width: scale(35),
                             }}>
-                                <LoadingDots
-                                    size={scale(10)}
-                                    bounceHeight={scale(5)}
-                                    dots={3}
-                                    colors={[COLOR_DIY.themeColor, COLOR_DIY.themeColorLight, COLOR_DIY.themeColorUltraLight]}
-                                />
+                                <LoadingDotsDIY />
                             </View>
                         </ImageBackground>
                     </ScrollView>
