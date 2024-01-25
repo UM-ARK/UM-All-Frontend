@@ -765,7 +765,7 @@ class Index extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: insets.top >= 59 ? scale(48) : scale(10),
+                            default: insets.top >= 35 ? scale(48) : scale(10),
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
