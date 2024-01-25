@@ -334,7 +334,7 @@ PODS:
   - react-native-simple-toast (3.2.0):
     - React-Core
     - Toast (~> 4)
-  - react-native-webview (11.26.1):
+  - react-native-webview (13.6.4):
     - React-Core
   - React-perflogger (0.68.7)
   - React-RCTActionSheet (0.68.7):
@@ -428,7 +428,7 @@ PODS:
     - React-Core
   - RNInAppBrowser (3.7.0):
     - React-Core
-  - RNReactNativeHapticFeedback (1.14.0):
+  - RNReactNativeHapticFeedback (2.2.0):
     - React-Core
   - RNReanimated (2.17.0):
     - DoubleConversion
@@ -709,7 +709,7 @@ SPEC CHECKSUMS:
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-simple-toast: 2079d417c52fc3ca295edba094d5632f7720e68d
-  react-native-webview: 9f111dfbcfc826084d6c507f569e5e03342ee1c1
+  react-native-webview: 4499e4e44aaf38c79f07da3c421a3b5c9055cb4f
   React-perflogger: 44436b315d757100a53dfb1ab6b77c58cb646d7d
   React-RCTActionSheet: 1888a229684762c40cc96c7ff4716f809655dc09
   React-RCTAnimation: f05da175751867521d14b02ab4d3994a7b96f131
@@ -733,7 +733,7 @@ SPEC CHECKSUMS:
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: e98441928705d9d1184b599d7c1c6df2dd4f7724
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
-  RNReactNativeHapticFeedback: 1e3efeca9628ff9876ee7cdd9edec1b336913f8c
+  RNReactNativeHapticFeedback: ec56a5f81c3941206fd85625fa669ffc7b4545f9
   RNReanimated: 1f117be601c59177816351a965bc57320b766c15
   RNScreens: fa9b582d85ae5d62c91c66003b5278458fed7aaa
   RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
