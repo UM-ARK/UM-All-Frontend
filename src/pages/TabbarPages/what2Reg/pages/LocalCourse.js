@@ -157,7 +157,7 @@ export default class LocalCourse extends Component {
                                 //     this.context.navigate('Wiki', { url: URL });
                                 // }}
                                 onPress={() => {
-                                    trigger();
+                                    trigger('rigid');
                                 }}
                             >
                                 <View style={{ alignItems: 'center', }}>

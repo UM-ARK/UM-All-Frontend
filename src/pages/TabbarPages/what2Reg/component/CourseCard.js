@@ -213,10 +213,10 @@ export default class CourseCard extends Component {
                                 //     this.context.navigate('Wiki', { url: URL });
                                 // }}
                                 onPress={() => {
-                                    trigger();
+                                    trigger('rigid');
                                 }}
                                 onLongPress={() => {
-                                    trigger();
+                                    trigger('rigid');
                                     logToFirebase('checkCourse', {
                                         courseCode: courseCode,
                                         onLongPress: 1,

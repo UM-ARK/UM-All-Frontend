@@ -433,7 +433,7 @@ export default class courseSim extends Component {
                         //     );
                         // }}
                         onPress={() => {
-                            trigger();
+                            trigger('rigid');
                         }}
                         delayLongPress={300}
                     >
