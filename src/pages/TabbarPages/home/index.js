@@ -140,6 +140,7 @@ const calItemWidth = scale(44.5);
 
 class HomeScreen extends Component {
     toastTimer = null;
+    calScrollRef = React.createRef();
 
     constructor(props) {
         super(props)
@@ -357,17 +358,24 @@ class HomeScreen extends Component {
         // ***務必注意key、value的大小寫！！**
         const nowTimeStamp = moment(new Date());
         const CAL_LENGTH = cal.length;
+        let { selectDay } = this.state;
         // 同日或未來的重要時間設為選中日
         if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
-            this.setState({ selectDay: CAL_LENGTH - 1 });
+            selectDay = CAL_LENGTH - 1;
+            this.setState({ selectDay });
         }
         else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
             for (let i = 0; i < CAL_LENGTH; i++) {
                 if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
-                    this.setState({ selectDay: i });
+                    selectDay = i;
+                    this.setState({ selectDay });
                     break;
                 }
             }
+        }
+        // 自動滾動到校曆的selectDay
+        if (this.calScrollRef) {
+            this.calScrollRef.current.scrollToOffset({ offset: selectDay * calItemWidth });
         }
     };
 
@@ -639,9 +647,10 @@ class HomeScreen extends Component {
                         <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8), justifyContent: 'center', }}>
                             <VirtualizedList
                                 data={cal}
+                                ref={this.calScrollRef}
                                 initialNumToRender={11}
-                                windowSize={3}
-                                initialScrollIndex={selectDay < cal.length ? selectDay : 0}
+                                windowSize={4}
+                                // initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                                 getItemLayout={(data, index) => {
                                     const layoutSize = calItemWidth;
                                     return {
