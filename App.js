@@ -4,7 +4,7 @@ import { View, Image, Dimensions, Alert, Linking } from 'react-native';
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
-import { COLOR_DIY } from './src/utils/uiMap';
+import { COLOR_DIY, uiStyle, } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
 import { Provider } from 'mobx-react';
 
@@ -13,6 +13,7 @@ import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
+import Toast, { BaseToast, ErrorToast, } from 'react-native-toast-message';
 
 // Initialize Clarity.
 // import { initialize } from 'react-native-clarity';
@@ -21,6 +22,60 @@ import { scale } from 'react-native-size-matters';
 const { bg_color } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
+
+// 自定義Toast外觀
+const toastConfig = {
+    arkToast: (props) => (
+        <BaseToast
+            {...props}
+            style={{ borderLeftColor: COLOR_DIY.themeColor, backgroundColor: COLOR_DIY.white, }}
+            contentContainerStyle={{ paddingHorizontal: scale(15) }}
+            text1Style={{
+                ...uiStyle.defaultText,
+                color: COLOR_DIY.black.main,
+                fontSize: scale(15),
+            }}
+            text2Style={{
+                ...uiStyle.defaultText,
+                color: COLOR_DIY.black.third,
+                fontSize: scale(10),
+            }}
+        />
+    ),
+    error: (props) => (
+        <ErrorToast
+            {...props}
+            style={{ backgroundColor: COLOR_DIY.white, }}
+            text1Style={{
+                ...uiStyle.defaultText,
+                color: COLOR_DIY.black.main,
+                fontSize: scale(15),
+            }}
+            text2Style={{
+                ...uiStyle.defaultText,
+                color: COLOR_DIY.black.main,
+                fontSize: scale(10),
+            }}
+        />
+    ),
+    warning: (props) => (
+        <BaseToast
+            {...props}
+            style={{ borderLeftColor: COLOR_DIY.warning, backgroundColor: COLOR_DIY.white, }}
+            contentContainerStyle={{ paddingHorizontal: scale(15) }}
+            text1Style={{
+                ...uiStyle.defaultText,
+                color: COLOR_DIY.black.main,
+                fontSize: scale(15),
+            }}
+            text2Style={{
+                ...uiStyle.defaultText,
+                color: COLOR_DIY.black.third,
+                fontSize: scale(10),
+            }}
+        />
+    ),
+};
 
 // 修復iOS靈動島的頂部底部問題
 function SafeAreaDIY(props) {
@@ -127,6 +182,7 @@ class App extends Component {
                                     lock={this.state.versionLock}
                                     setLock={this.setLock}
                                 />
+                                <Toast config={toastConfig} />
                             </NativeBaseProvider>
                         </Provider>
                     </SafeAreaDIY>
