@@ -139,6 +139,8 @@ const toastKaomojiArr = [
 const calItemWidth = scale(44.5);
 
 class HomeScreen extends Component {
+    toastTimer = null;
+
     constructor(props) {
         super(props)
 
@@ -233,7 +235,14 @@ class HomeScreen extends Component {
             this.getAppData(false);
         }
         this.getCal();
-        this.onRefresh();
+
+        this.toastTimer = setTimeout(() => {
+            this.onRefresh();
+        }, 1000);
+    }
+
+    componentWillUnmount() {
+        this.toastTimer && clearTimeout(this.toastTimer);
     }
 
     getAppData = async isLogin => {
