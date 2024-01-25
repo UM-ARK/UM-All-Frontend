@@ -15,7 +15,7 @@ import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
-import Toast from 'react-native-easy-toast';
+import Toast from 'react-native-toast-message';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Progress from 'react-native-progress';
 import TouchableScale from "react-native-touchable-scale";
@@ -97,14 +97,22 @@ export default class ARKWiki extends Component {
         ReactNativeHapticFeedback.trigger('soft');
         this.setState({ currentURL: ARK_WIKI })
         this.webviewRef.current.reload();
-        this.toast.show(`正全力返回主頁！`, 2000);
+        Toast.show({
+            type: 'arkToast',
+            text1: '正全力返回主頁！',
+            topOffset: scale(80),
+        })
     }
 
     goRandomPage = () => {
         ReactNativeHapticFeedback.trigger('soft');
         this.setState({ currentURL: ARK_WIKI_RANDOM_PAGE })
         this.webviewRef.current.reload();
-        this.toast.show(`正為你打開隨機條目！`, 2000);
+        Toast.show({
+            type: 'arkToast',
+            text1: '正為你打開隨機條目！',
+            topOffset: scale(80),
+        })
     }
 
     render() {
@@ -261,7 +269,12 @@ export default class ARKWiki extends Component {
                         onPress={() => {
                             ReactNativeHapticFeedback.trigger('soft');
                             Clipboard.setString(currentURL);
-                            this.toast.show(`已複製當前頁面鏈接到粘貼板！\n快去和小夥伴分享吧~`, 2000);
+                            Toast.show({
+                                type: 'arkToast',
+                                text1: '已複製當前頁面鏈接到粘貼板！',
+                                text2: '快去和小夥伴分享吧~',
+                                topOffset: scale(80),
+                            })
                         }}
                     >
                         <MaterialCommunityIcons
@@ -362,18 +375,6 @@ export default class ARKWiki extends Component {
 
                     (() => { window.applyPref() })();
                     `}
-                />
-
-                {/* Tost */}
-                <Toast
-                    ref={toast => (this.toast = toast)}
-                    position="top"
-                    positionValue={'10%'}
-                    textStyle={{ color: white }}
-                    style={{
-                        backgroundColor: COLOR_DIY.themeColor,
-                        borderRadius: scale(10),
-                    }}
                 />
             </View>
         );

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Text, Linking } from 'react-native';
 
-import { useToast } from 'native-base';
+import { COLOR_DIY, ToastText } from '../utils/uiMap';
+import { openLink } from '../utils/browser';
+
+// import { useToast } from 'native-base';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { COLOR_DIY, ToastText } from '../utils/uiMap';
-import { openLink } from '../utils/browser';
+import Toast from "react-native-toast-message";
 
 const HyperlinkText = ({
     children,
@@ -16,13 +18,6 @@ const HyperlinkText = ({
     navigation,
     beforeJump,
 }) => {
-    const toast = useToast();
-
-    const options = {
-        enableVibrateFallback: true,
-        ignoreAndroidSystemSettings: false,
-    };
-
     // 定義默認參數
     let webview_param = {
         url: '',
@@ -53,18 +48,11 @@ const HyperlinkText = ({
     };
 
     const copyToClipboard = (url, text) => {
+        ReactNativeHapticFeedback.trigger('soft');
         Clipboard.setString(text);
-        showClipedMessage();
-    };
-
-    const showClipedMessage = () => {
-        toast.show({
-            title: 'Text Copied',
-            placement: 'top',
-            duration: 1000,
-            render: () => (
-                <ToastText backgroundColor={'#748DA6'} text={'已複製到剪貼板!'} />
-            ),
+        Toast.show({
+            type: 'arkToast',
+            text1: '已複製Link到粘貼板！'
         });
     };
 
@@ -74,7 +62,8 @@ const HyperlinkText = ({
                 linkStyle={linkStyle}
                 linkDefault={false}
                 onPress={(url, text) => handleHyperLink(url, text)}
-                onLongPress={(url, text) => copyToClipboard(url, text)}>
+                onLongPress={(url, text) => copyToClipboard(url, text)}
+            >
                 {/* <Text style={style}>{children}</Text> */}
                 {children}
             </Hyperlink>
