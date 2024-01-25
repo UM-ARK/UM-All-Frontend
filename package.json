@@ -70,6 +70,7 @@
     "react-native-super-grid": "^5.0.0",
     "react-native-svg": "^12.5.1",
     "react-native-tab-view": "^3.5.2",
+    "react-native-toast-message": "^2.2.0",
     "react-native-touchable-scale": "^2.2.0",
     "react-native-ui-lib": "^6.31.0",
     "react-native-vector-icons": "^10.0.3",
