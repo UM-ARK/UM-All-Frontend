@@ -55,6 +55,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { inject } from 'mobx-react';
 import { scale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
+import TouchableScale from "react-native-touchable-scale";
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -687,7 +688,7 @@ class Index extends Component {
 
                         let { go_where, webview_param, needLogin } = item;
                         return (
-                            <TouchableOpacity
+                            <TouchableScale
                                 style={{ justifyContent: 'center', alignItems: 'center', }}
                                 activeOpacity={0.7}
                                 // 跳轉具體頁面
@@ -695,25 +696,27 @@ class Index extends Component {
                                     trigger();
                                     logToFirebase('funcUse', { funcName: item.fn_name });
                                     if (!needLogin || this.state.isLogin) {
-                                        // Webview頁面，需附帶跳轉參數
-                                        if (go_where == 'Webview') {
-                                            // this.props.navigation.navigate(
-                                            //     'Webviewer',
-                                            //     webview_param,
-                                            // );
-                                            openLink(webview_param.url);
-                                        } else if (go_where == 'Linking') {
-                                            // 使用默認瀏覽器打開
-                                            // Linking.openURL(webview_param.url);
-                                            // 使用應用內瀏覽器選項卡打開
-                                            openLink(webview_param.url);
-                                        }
-                                        // 跳轉對應本地頁面
-                                        else {
-                                            this.props.navigation.navigate(
-                                                go_where,
-                                            );
-                                        }
+                                        setTimeout(() => {
+                                            // Webview頁面，需附帶跳轉參數
+                                            if (go_where == 'Webview') {
+                                                // this.props.navigation.navigate(
+                                                //     'Webviewer',
+                                                //     webview_param,
+                                                // );
+                                                openLink(webview_param.url);
+                                            } else if (go_where == 'Linking') {
+                                                // 使用默認瀏覽器打開
+                                                // Linking.openURL(webview_param.url);
+                                                // 使用應用內瀏覽器選項卡打開
+                                                openLink(webview_param.url);
+                                            }
+                                            // 跳轉對應本地頁面
+                                            else {
+                                                this.props.navigation.navigate(
+                                                    go_where,
+                                                );
+                                            }
+                                        }, 50);
                                     } else {
                                         this.setState({ showDialog: true });
                                     }
@@ -738,7 +741,7 @@ class Index extends Component {
                                     }}>
                                     {item.fn_name}
                                 </Text>
-                            </TouchableOpacity>
+                            </TouchableScale>
                         );
                     }}
                     showsVerticalScrollIndicator={false}

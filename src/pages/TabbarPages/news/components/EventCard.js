@@ -20,6 +20,7 @@ import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import { inject } from 'mobx-react';
 import Ionicons from "react-native-vector-icons/Ionicons";
+import TouchableScale from "react-native-touchable-scale";
 
 const IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
@@ -79,22 +80,25 @@ class EventCard extends Component {
         //     // 狀態欄字體是否黑色，默認true
         //     // isBarStyleBlack: false,
         // };
-        if (type == 'WEBSITE') {
-            if (isAdmin) {
-                // 跳轉活動info編輯頁，並傳遞刷新函數
-                this.context.navigate('EventSetting', {
-                    mode: 'edit',
-                    eventData: { _id: this.state.eventData._id },
-                });
+        // 延時看到回彈動畫後跳轉
+        setTimeout(() => {
+            if (type == 'WEBSITE') {
+                if (isAdmin) {
+                    // 跳轉活動info編輯頁，並傳遞刷新函數
+                    this.context.navigate('EventSetting', {
+                        mode: 'edit',
+                        eventData: { _id: this.state.eventData._id },
+                    });
+                } else {
+                    // this.context.navigate('Webviewer', webview_param);
+                    openLink(link);
+                }
             } else {
-                // this.context.navigate('Webviewer', webview_param);
-                openLink(link);
+                this.context.navigate('EventDetail', {
+                    data: this.state.eventData,
+                });
             }
-        } else {
-            this.context.navigate('EventDetail', {
-                data: this.state.eventData,
-            });
-        }
+        }, 50);
         logToFirebase('clickEvent', {
             title: title,
             clubName: this.state.clubName,
@@ -125,7 +129,7 @@ class EventCard extends Component {
                 : false;
 
         return (
-            <TouchableOpacity
+            <TouchableScale
                 style={{
                     backgroundColor: white,
                     borderRadius: BORDER_RADIUS,
@@ -298,7 +302,7 @@ class EventCard extends Component {
                         </View>
                     </View>
                 ) : null}
-            </TouchableOpacity>
+            </TouchableScale>
         );
     }
 }

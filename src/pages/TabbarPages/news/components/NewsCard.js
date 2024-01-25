@@ -15,6 +15,7 @@ import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow } = COLOR_DIY;
@@ -86,16 +87,18 @@ class NewsCard extends Component {
         }
 
         return (
-            <TouchableOpacity
+            <TouchableScale
                 style={styles.newsCardContainer}
                 activeOpacity={0.8}
                 onPress={() => {
                     trigger();
                     // 跳轉對應新聞的詳情頁
-                    this.context.navigate(
-                        type == 'news' ? 'NewsDetail' : 'UMEventDetail',
-                        { data: newsData },
-                    );
+                    setTimeout(() => {
+                        this.context.navigate(
+                            type == 'news' ? 'NewsDetail' : 'UMEventDetail',
+                            { data: newsData },
+                        );
+                    }, 50);
                 }}
                 // 沒有相片數據時，禁用點擊，跳轉頁面會引起閃退
                 disabled={haveImage == false}
@@ -210,7 +213,7 @@ class NewsCard extends Component {
                         </View>
                     ) : null}
                 </View>
-            </TouchableOpacity>
+            </TouchableScale>
         );
     }
 }

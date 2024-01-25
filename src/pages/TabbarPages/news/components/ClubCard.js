@@ -17,6 +17,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import { scale } from 'react-native-size-matters';
+import TouchableScale from "react-native-touchable-scale";
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow, themeColor } = COLOR_DIY;
@@ -35,15 +36,17 @@ class EventCard extends Component {
     // 處理點擊跳轉邏輯
     handleJumpToDetail = () => {
         trigger();
-        this.context.navigate('ClubDetail', {
-            data: this.state.data,
-        });
+        setTimeout(() => {
+            this.context.navigate('ClubDetail', {
+                data: this.state.data,
+            });
+        }, 50);
     };
 
     render() {
         const { logo_url, name, tag } = this.state.data;
         return (
-            <TouchableOpacity
+            <TouchableScale
                 style={{
                     backgroundColor: white,
                     borderRadius: scale(10),
@@ -122,7 +125,7 @@ class EventCard extends Component {
                     }}>
                     #{clubTagMap(tag)}
                 </Text> */}
-            </TouchableOpacity>
+            </TouchableScale>
         );
     }
 }
