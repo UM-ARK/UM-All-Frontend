@@ -480,7 +480,7 @@ class HomeScreen extends Component {
         }
 
         return (
-            <TouchableScale
+            <TouchableOpacity
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -499,7 +499,7 @@ class HomeScreen extends Component {
                         {function_name}
                     </Text>
                 )}
-            </TouchableScale>
+            </TouchableOpacity>
         );
     };
 
