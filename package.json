@@ -31,7 +31,6 @@
     "mobx-react": "^9.1.0",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.44",
-    "native-base": "^3.4.28",
     "qs": "^6.11.2",
     "react": "17.0.2",
     "react-content-loader": "^6.2.1",

@@ -48,10 +48,9 @@ import {
     TriggeringView,
 } from 'react-native-image-header-scroll-view';
 import FastImage from 'react-native-fast-image';
-import { useToast } from 'native-base';
 import { inject } from 'mobx-react';
 import axios from 'axios';
-import Toast, { DURATION } from 'react-native-easy-toast';
+import Toast from 'react-native-easy-toast';
 import { scale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

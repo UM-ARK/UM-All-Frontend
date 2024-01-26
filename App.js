@@ -8,7 +8,6 @@ import { COLOR_DIY, uiStyle, } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
 import { Provider } from 'mobx-react';
 
-import { NativeBaseProvider } from 'native-base';
 import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -49,6 +48,7 @@ const toastConfig = {
         <ErrorToast
             {...props}
             style={{
+                borderLeftColor: COLOR_DIY.unread,
                 backgroundColor: COLOR_DIY.white,
                 width: '80%', height: scale(60),
             }}
@@ -162,14 +162,11 @@ class App extends Component {
                 <SafeAreaProvider>
                     {/* 全局變量 */}
                     <Provider RootStore={RootStore}>
-                        {/* NativeBase庫需要Provider */}
-                        <NativeBaseProvider>
-                            <Nav
-                                lock={this.state.versionLock}
-                                setLock={this.setLock}
-                            />
-                            <Toast config={toastConfig} />
-                        </NativeBaseProvider>
+                        <Nav
+                            lock={this.state.versionLock}
+                            setLock={this.setLock}
+                        />
+                        <Toast config={toastConfig} />
                     </Provider>
                 </SafeAreaProvider>
             </AnimatedSplash>
