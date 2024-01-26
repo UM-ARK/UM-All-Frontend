@@ -205,7 +205,7 @@ class ClubPage extends Component {
                         position: 'absolute',
                         zIndex: 2,
                         right: scale(10),
-                        top: scale(410),
+                        bottom: scale(20),
                         opacity: 0.9,
                         backgroundColor: white,
                         borderRadius: scale(10),
