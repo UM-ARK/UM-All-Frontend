@@ -1,7 +1,8 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
-import React, {Component} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import React, { Component } from 'react';
+import { Platform, Text } from "react-native";
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
@@ -37,8 +38,6 @@ import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 
 import courseSimIndex from './pages/TabbarPages/courseSim';
 
-import ARKWiki from './pages/TabbarPages/arkwiki';
-
 import Webviewer from './components/Webviewer';
 import AllEvents from './pages/Features/AllEvents';
 import UMWhole from './pages/Features/UMWhole';
@@ -48,13 +47,12 @@ import LostAndFound from './pages/Features/LostAndFound';
 import CarPark from './pages/Features/CarPark';
 
 import TestScreen from '../test/test';
-import {Text} from "react-native";
 
 // 創建一個頁面導航棧
 const Stack = createStackNavigator();
 // 頭部標題配置：http://www.himeizi.cn/reactnavigation/api/navigators/createStackNavigator.html#options
 
-Text.defaultProps={
+Text.defaultProps = {
     allowFontScaling: false
 };
 
@@ -65,12 +63,17 @@ class Nav extends Component {
                 {/* initialRouteName可以指定初始頁面的組件，headerShown可以控制頂部標題顯示 */}
                 <Stack.Navigator
                     initialRouteName="Tabbar"
-                    screenOptions={{headerShown: false}}>
+                    screenOptions={{
+                        headerShown: false,
+                        gestureDirection: 'horizontal', gestureEnabled: true,
+                        animationEnabled: true,
+                        freezeOnBlur: true,
+                    }}>
                     <Stack.Screen
                         name="Tabbar"
                         component={Tabbar}
-                        options={{headerShown: false}}
-                        initialParams={{setLock: this.props.setLock}}
+                        options={{ headerShown: false }}
+                        initialParams={{ setLock: this.props.setLock }}
                     />
 
                     {/* 資訊頁 */}
