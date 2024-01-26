@@ -6,17 +6,18 @@ import {
     TouchableOpacity,
     ScrollView,
     Linking,
+    Alert,
 } from 'react-native';
 
 import { pxToDp } from '../../utils/stylesKits';
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
 import { handleLogout } from '../../utils/storageKits';
 import { MAIL } from '../../utils/pathMap';
-import DialogDIY from '../../components/DialogDIY';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale } from 'react-native-size-matters';
+import { trigger } from '../../utils/trigger';
 
 const { black, themeColor, white } = COLOR_DIY;
 
@@ -39,7 +40,7 @@ class ClubSetting extends Component {
     }
 
     render() {
-        const { logoutChoice, fromEvent, eventID, deleteChoice } = this.state;
+        const { fromEvent, eventID, } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header title={fromEvent ? '活動設置' : '組織賬號設置'} />
@@ -249,7 +250,21 @@ class ClubSetting extends Component {
                                 style={{ ...styles.optionContainer }}
                                 activeOpacity={0.8}
                                 onPress={() => {
-                                    this.setState({ deleteChoice: true })
+                                    Alert.alert(`即將跳轉email界面`, `您需要向管理員提出刪除該組織賬號。\n該組織賬號所有內容，包括發佈的活動，都將被刪除。`,
+                                        [
+                                            {
+                                                text: "確定",
+                                                onPress: () => {
+                                                    trigger();
+                                                    Linking.openURL('mailto:' + MAIL);
+                                                },
+                                                style: 'destructive',
+                                            },
+                                            {
+                                                text: "取消",
+                                            },
+                                        ]
+                                    );
                                 }}>
                                 {/* 選項標題 */}
                                 <Text style={{ ...styles.optionTitle, color: black.third }}>
@@ -268,9 +283,21 @@ class ClubSetting extends Component {
                             {/* 登出賬號 */}
                             <TouchableOpacity
                                 activeOpacity={0.8}
-                                onPress={() =>
-                                    this.setState({ logoutChoice: true })
-                                }
+                                onPress={() => {
+                                    Alert.alert(`組織賬號提示`, `確定登出賬號嗎？`, [
+                                        {
+                                            text: "確定",
+                                            onPress: () => {
+                                                trigger();
+                                                handleLogout();
+                                            },
+                                            style: 'destructive',
+                                        },
+                                        {
+                                            text: "取消",
+                                        },
+                                    ]);
+                                }}
                                 style={{
                                     ...styles.logoutButton,
                                     marginTop: scale(300), marginBottom: scale(20)
@@ -282,25 +309,6 @@ class ClubSetting extends Component {
                         </View>
                     )}
                 </ScrollView>
-
-                {/* 登出前提示 */}
-                <DialogDIY
-                    showDialog={logoutChoice}
-                    text={'確定要登出賬號嗎？'}
-                    handleConfirm={handleLogout}
-                    handleCancel={() => this.setState({ logoutChoice: false })}
-                />
-
-                {/* 登出前提示 */}
-                <DialogDIY
-                    showDialog={deleteChoice}
-                    text={`即將跳轉email界面，您可以向服務器管理員提出刪除該組織賬號。\n該組織賬號所有內容，包括發佈的活動，都將被刪除。`}
-                    handleConfirm={() => {
-                        this.setState({ deleteChoice: false });
-                        Linking.openURL('mailto:' + MAIL);
-                    }}
-                    handleCancel={() => this.setState({ deleteChoice: false })}
-                />
             </View>
         );
     }
