@@ -524,6 +524,7 @@ class EventDetail extends Component {
                     {/* 舉辦方頭像 */}
                     <TouchableWithoutFeedback
                         onPress={() => {
+                            trigger();
                             if (!isClub) {
                                 this.props.navigation.navigate('ClubDetail', {
                                     data: clubData,

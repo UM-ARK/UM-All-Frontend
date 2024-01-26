@@ -495,6 +495,7 @@ class ClubDetail extends Component {
                     {/* 社團LOGO */}
                     <TouchableWithoutFeedback
                         onPress={() => {
+                            trigger();
                             this.setState({ imageUrls: logo_url });
                             this.imageScrollViewer.current.tiggerModal();
                         }}>

@@ -21,6 +21,7 @@ import FastImage from 'react-native-fast-image';
 import moment, { lang } from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
+import { trigger } from '../../../../utils/trigger';
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
@@ -248,9 +249,10 @@ class UMEventDetail extends Component {
                                             : bg_color,
                                     marginHorizontal: scale(120),
                                 }}
-                                onPress={() =>
-                                    this.setState({ chooseMode: index })
-                                }>
+                                onPress={() => {
+                                    trigger();
+                                    this.setState({ chooseMode: index });
+                                }}>
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
@@ -487,6 +489,7 @@ class UMEventDetail extends Component {
                         style={styles.imgContainer}
                         // 瀏覽大圖
                         onPress={() => {
+                            trigger();
                             this.imageScrollViewer.current.handleOpenImage(0);
                         }}>
                         <FastImage
