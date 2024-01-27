@@ -8,10 +8,9 @@ import { COLOR_DIY, uiStyle, } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
 import { Provider } from 'mobx-react';
 
-import { NativeBaseProvider } from 'native-base';
 import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast, } from 'react-native-toast-message';
 
@@ -49,6 +48,7 @@ const toastConfig = {
         <ErrorToast
             {...props}
             style={{
+                borderLeftColor: COLOR_DIY.unread,
                 backgroundColor: COLOR_DIY.white,
                 width: '80%', height: scale(60),
             }}
@@ -85,27 +85,6 @@ const toastConfig = {
         />
     ),
 };
-
-// 修復iOS靈動島的頂部底部問題
-function SafeAreaDIY(props) {
-    const insets = useSafeAreaInsets();
-    return (
-        <View
-            style={{
-                flex: 1,
-                backgroundColor: bg_color,
-                // insets.top為59時，為iPhone 14 Pro Max機型等的靈動島區域
-                paddingTop: insets.top == 59 ? 12 : 0,
-                // 更新safe-area包後，bottom的padding會導致Tabbar過高
-                // paddingBottom: insets.top == 59 ? insets.bottom : 0,
-                paddingLeft: insets.left,
-                paddingRight: insets.right,
-            }}
-        >
-            {props.children}
-        </View>
-    );
-}
 
 class App extends Component {
     state = {
@@ -181,20 +160,14 @@ class App extends Component {
                 }
                 backgroundColor={bg_color}>
                 <SafeAreaProvider>
-                    {/* 修復iOS safe area問題 */}
-                    {/* <SafeAreaDIY> */}
                     {/* 全局變量 */}
                     <Provider RootStore={RootStore}>
-                        {/* NativeBase庫需要Provider */}
-                        <NativeBaseProvider>
-                            <Nav
-                                lock={this.state.versionLock}
-                                setLock={this.setLock}
-                            />
-                            <Toast config={toastConfig} />
-                        </NativeBaseProvider>
+                        <Nav
+                            lock={this.state.versionLock}
+                            setLock={this.setLock}
+                        />
+                        <Toast config={toastConfig} />
                     </Provider>
-                    {/* </SafeAreaDIY> */}
                 </SafeAreaProvider>
             </AnimatedSplash>
         );

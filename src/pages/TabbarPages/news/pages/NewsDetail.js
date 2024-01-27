@@ -25,6 +25,7 @@ import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
+import { trigger } from '../../../../utils/trigger';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -159,9 +160,10 @@ class NewsDetail extends Component {
                                             ? themeColor
                                             : bg_color,
                                 }}
-                                onPress={() =>
-                                    this.setState({ chooseMode: index })
-                                }>
+                                onPress={() => {
+                                    trigger();
+                                    this.setState({ chooseMode: index });
+                                }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
                                     color:
@@ -274,6 +276,7 @@ class NewsDetail extends Component {
                                 }}
                                 // 打開圖片瀏覽大圖
                                 onPress={() => {
+                                    trigger();
                                     this.imageScrollViewer.current.handleOpenImage(
                                         index,
                                     );

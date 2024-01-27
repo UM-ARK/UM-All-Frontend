@@ -74,14 +74,26 @@ class EventDetail extends Component {
             }
         }
 
-        // 獲取上級路由傳遞的參數，展示活動詳情
-        const eventData = this.props.route.params.data;
-        this.getClubData(eventData.created_by);
-        this.getEventData(eventData._id);
+        this.getAllThings();
+    }
+
+    // 點入活動 - 點入社團 - 點入另一活動時觸發
+    componentDidUpdate(prevProps) {
+        const params = this.props.route.params;
+        if (prevProps.route.params != params) {
+            this.getAllThings();
+        }
     }
 
     componentWillUnmount() {
         FastImage.clearMemoryCache();
+    }
+
+    getAllThings = () => {
+        // 獲取上級路由傳遞的參數，展示活動詳情
+        const eventData = this.props.route.params.data;
+        this.getClubData(eventData.created_by);
+        this.getEventData(eventData._id);
     }
 
     // 按社團id獲取社團資訊，頭像
@@ -512,6 +524,7 @@ class EventDetail extends Component {
                     {/* 舉辦方頭像 */}
                     <TouchableWithoutFeedback
                         onPress={() => {
+                            trigger();
                             if (!isClub) {
                                 this.props.navigation.navigate('ClubDetail', {
                                     data: clubData,

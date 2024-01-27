@@ -1,6 +1,6 @@
 {
   "name": "umall",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -10,14 +10,14 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@babel/plugin-proposal-decorators": "^7.23.7",
+    "@babel/plugin-proposal-decorators": "^7.23.9",
     "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-camera-roll/camera-roll": "5.6.0",
     "@react-native-clipboard/clipboard": "^1.13.2",
     "@react-native-community/datetimepicker": "^6.7.5",
     "@react-native-cookies/cookies": "^6.2.1",
-    "@react-native-firebase/analytics": "^18.7.3",
-    "@react-native-firebase/app": "^18.7.3",
+    "@react-native-firebase/analytics": "^18.8.0",
+    "@react-native-firebase/app": "^18.8.0",
     "@react-native-menu/menu": "^0.9.1",
     "@react-native/gradle-plugin": "^0.73.4",
     "@react-navigation/material-top-tabs": "^6.6.5",
@@ -25,13 +25,12 @@
     "@react-navigation/stack": "^6.3.20",
     "@rneui/base": "^4.0.0-rc.5",
     "@rneui/themed": "^4.0.0-rc.5",
-    "axios": "^1.6.6",
+    "axios": "^1.6.7",
     "fbjs": "^3.0.5",
     "mobx": "^6.12.0",
     "mobx-react": "^9.1.0",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.44",
-    "native-base": "^3.4.28",
     "qs": "^6.11.2",
     "react": "17.0.2",
     "react-content-loader": "^6.2.1",
@@ -80,8 +79,8 @@
     "styled-components": "^5.3.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.7",
-    "@babel/runtime": "^7.23.8",
+    "@babel/core": "^7.23.9",
+    "@babel/runtime": "^7.23.9",
     "@react-native-community/eslint-config": "^3.2.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.56.0",

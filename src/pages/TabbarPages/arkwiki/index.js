@@ -72,7 +72,7 @@ export default class ARKWiki extends Component {
         if (prevProps.route.params != params) {
             if (params && params.url) {
                 this.setState({ currentURL: params.url })
-                this.webviewRef.current.reload();
+                // this.webviewRef.current.reload();
             }
         }
     }
@@ -97,7 +97,7 @@ export default class ARKWiki extends Component {
     returnWikiHome = () => {
         trigger();
         this.setState({ currentURL: ARK_WIKI })
-        this.webviewRef.current.reload();
+        // this.webviewRef.current.reload();
         Toast.show({
             type: 'arkToast',
             text1: '正全力返回主頁！',
@@ -108,7 +108,7 @@ export default class ARKWiki extends Component {
     goRandomPage = () => {
         trigger();
         this.setState({ currentURL: ARK_WIKI_RANDOM_PAGE })
-        this.webviewRef.current.reload();
+        // this.webviewRef.current.reload();
         Toast.show({
             type: 'arkToast',
             text1: '正為你打開隨機條目！',
@@ -131,7 +131,7 @@ export default class ARKWiki extends Component {
                         // 修復頂部空白過多問題
                         height: Platform.select({
                             android: scale(38),
-                            default: insets.top >= 35 ? scale(48) : scale(10),
+                            default: insets.top,
                         }),
                         paddingTop: 0,
                         // 修復深色模式頂部小白條問題
@@ -231,7 +231,7 @@ export default class ARKWiki extends Component {
                         onPress={() => {
                             trigger();
                             this.setState({ currentURL: ARK_WIKI_SEARCH })
-                            this.webviewRef.current.reload();
+                            // this.webviewRef.current.reload();
                         }}
                     >
                         <Ionicons
