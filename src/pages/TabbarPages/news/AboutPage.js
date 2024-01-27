@@ -10,6 +10,9 @@ import {
     StyleSheet,
 } from 'react-native';
 
+import { t } from 'i18next';
+
+import { setLanguage } from '../../../i18n/i18n';
 import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { openLink } from '../../../utils/browser';
 import HomeCard from '../home/components/HomeCard';
@@ -43,7 +46,7 @@ import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
 
-const { black, themeColor, secondThemeColor, white, wiki_bg_color } = COLOR_DIY;
+const { black, themeColor, white, } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
 const iconSize = scale(25);
 
@@ -72,26 +75,50 @@ export default class AboutPage extends Component {
                             color: themeColor,
                             fontWeight: 'bold',
                             marginLeft: scale(5),
-                        }}>關於 ARK ALL</Text>
+                        }}>{
+                                t("ABOUT")
+                            } ARK ALL</Text>
                     </View>
 
                     {/* 版本說明 */}
                     <HomeCard>
                         {/* 應用版本號 */}
                         <Text style={{ ...s.bodyText, }}>
-                            {`當前應用版本：`}
+                            {t("APP Version", { ns: 'about' })}
                             <Text style={{ ...s.highlightText }}>{packageInfo.version}</Text>
                         </Text>
 
                         {/* 課表數據版本號 */}
                         <Text style={{ ...s.bodyText, }}>
-                            {`Add Drop課表數據更新日期：`}
+                            {t('Add Drop Data Version', { ns: 'about' })}
                             <Text style={{ ...s.highlightText }}>{coursePlanFile.updateTime}</Text>
                         </Text>
                         <Text style={{ ...s.bodyText, }}>
-                            {`預選課表數據更新日期：`}
+                            {t('PreEnroll Data Version', { ns: 'about' })}
                             <Text style={{ ...s.highlightText }}>{offerCourseFile.updateTime}</Text>
                         </Text>
+
+                        <View style={{ flexDirection: 'row', }}>
+                            <Text style={{ ...s.bodyText, }}>
+                                {t('Language Setting', { ns: 'about' })}
+                            </Text>
+                            <TouchableOpacity
+                                style={{ marginLeft: scale(10), }}
+                                onPress={() => {
+                                    setLanguage('tc');
+                                }}
+                            >
+                                <Text style={{ ...s.highlightText }}>中</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{ marginLeft: scale(10), }}
+                                onPress={() => {
+                                    setLanguage('en');
+                                }}
+                            >
+                                <Text style={{ ...s.highlightText }}>EN</Text>
+                            </TouchableOpacity>
+                        </View>
                     </HomeCard>
 
                     {/* 提示資訊 */}
