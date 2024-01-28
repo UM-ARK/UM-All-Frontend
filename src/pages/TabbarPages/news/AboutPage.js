@@ -10,24 +10,14 @@ import {
     StyleSheet,
 } from 'react-native';
 
-import { t } from 'i18next';
-
 import { setLanguage } from '../../../i18n/i18n';
 import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { openLink } from '../../../utils/browser';
 import HomeCard from '../home/components/HomeCard';
 import {
-    UM_WHOLE,
-    WHAT_2_REG,
-    NEW_SCZN,
     USUAL_Q,
     USER_AGREE,
     BASE_HOST,
-    ARK_LETTER_IMG,
-    UMALL_LOGO,
-    BASE_URI,
-    GET,
-    addHost,
     MAIL,
     GITHUB_PAGE,
     GITHUB_DONATE,
@@ -45,6 +35,7 @@ import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
+import { t } from 'i18next';
 
 const { black, themeColor, white, } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
@@ -124,17 +115,11 @@ export default class AboutPage extends Component {
                     {/* 提示資訊 */}
                     <HomeCard>
                         <Text style={{ ...s.bodyText, }}>
-                            {`ARK ALL源自澳大同學為愛發電，並非官方應用程式！`}
-                        </Text>
-                        <Text style={{ ...s.bodyText, }}>
-                            {`ARK ALL並非澳大官方應用‼️`}
-                        </Text>
-                        <Text style={{ ...s.bodyText, }}>
-                            {`ARK ALL is not an official APP of UM‼️`}
+                            {t("ARK Describe 1", { ns: 'about' })}
                         </Text>
                         <View style={{ alignItems: 'center', flexDirection: 'row', }}>
                             <Text style={{ ...s.bodyText, }}>
-                                {`本軟件在 `}
+                                {t("ARK Describe 4_1", { ns: 'about' })}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
@@ -145,16 +130,16 @@ export default class AboutPage extends Component {
                                 <Text style={{ ...s.highlightText }}>{`Github`}</Text>
                             </TouchableOpacity>
                             <Text style={{ ...s.bodyText }}>
-                                {` 開源，歡迎給個Star!!✨✨`}
+                                {t("ARK Describe 4_2", { ns: 'about' })}
                             </Text>
                         </View>
                         <Text style={{ ...s.bodyText, }}>
-                            {`感謝您的認可和使用 ♪(･ω･)ﾉ`}
+                            {t("ARK Describe 5", { ns: 'about' })}
                         </Text>
 
                         <View style={{ alignItems: 'center', flexDirection: 'row', marginTop: scale(5), }}>
                             <Text style={{ ...s.bodyText, }}>
-                                {`官網：`}
+                                {t("Official Website", { ns: 'about' })}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
@@ -186,7 +171,7 @@ export default class AboutPage extends Component {
                             style={{ marginTop: scale(5), }}
                         >
                             <Text
-                                style={{ ...s.highlightText, }}>💰Donate/捐贈/贊助/支持我們</Text>
+                                style={{ ...s.highlightText, }}>{t("Donate", { ns: 'about' })}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
@@ -195,7 +180,7 @@ export default class AboutPage extends Component {
                             }}
                             style={{ marginTop: scale(5), }}
                         >
-                            <Text style={{ ...s.highlightText, }}>更新計劃、問題區</Text>
+                            <Text style={{ ...s.highlightText, }}>{t("Issues", { ns: 'about' })}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
@@ -204,7 +189,7 @@ export default class AboutPage extends Component {
                             }}
                             style={{ marginTop: scale(5), }}
                         >
-                            <Text style={{ ...s.highlightText, }}>開發動態</Text>
+                            <Text style={{ ...s.highlightText, }}>{t("Activity", { ns: 'about' })}</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
