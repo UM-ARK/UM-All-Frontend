@@ -26,9 +26,8 @@ async function initLanguage() {
                 // 讀取本地緩存中的語言設置，默認 英文 en
                 // TODO: 首次打開時設定語言
                 lng: lng ? lng : 'tc',
-                interpolation: {
-                    escapeValue: false
-                }
+                interpolation: { escapeValue: false },
+                defaultNS: 'common',
             });
         })
     } catch (error) {
