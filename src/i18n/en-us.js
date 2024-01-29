@@ -3,8 +3,8 @@ export default {
     common: {
         "ABOUT": "About",
         "TOPTAB_MAIN": "Main",
-        "TOPTAB_ORG": "Org",
-        "TOPTAB_ACTIVITY": "Event",
+        "TOPTAB_CLUB": "Club",
+        "TOPTAB_EVENT": "Event",
         "TOPTAB_NEWS": "News",
         "TOPTAB_ABOUT": "About",
 

@@ -3,8 +3,8 @@ export default {
     common: {
         "ABOUT": "關於",
         "TOPTAB_MAIN": "主頁",
-        "TOPTAB_ORG": "組織",
-        "TOPTAB_ACTIVITY": "活動",
+        "TOPTAB_CLUB": "組織",
+        "TOPTAB_EVENT": "活動",
         "TOPTAB_NEWS": "新聞",
         "TOPTAB_ABOUT": "關於",
     },
