@@ -14,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import { scale } from 'react-native-size-matters';
 import { screenWidth } from "../../../../utils/stylesKits";
+import { t } from "i18next";
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow } = COLOR_DIY;
@@ -30,7 +31,7 @@ class HomeCard extends Component {
         imageUrls: '',
         // 发布用户
         userName: 'ARK ALL',
-        userType: '開發者',
+        userType: t('開發者'),
         userImage: {
             profilePhoto: require('../../../../static/img/logo.png'),
         },

@@ -27,5 +27,8 @@ export default {
         "Donate": "💰Donate/捐贈/贊助/支持我們",
         "Issues": "更新計劃、問題區",
         "Activity": "開發動態",
+
+        "Common Issues": "常見問題",
+        "Privacy Policy & User Agreement": "隱私政策 & 用戶協議",
     }
 }

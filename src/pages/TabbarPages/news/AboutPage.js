@@ -96,7 +96,15 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 style={{ marginLeft: scale(10), }}
                                 onPress={() => {
-                                    setLanguage('tc');
+                                    Alert.alert('確定切換到繁體中文版嗎？', '將重啟APP。', [
+                                        {
+                                            text: 'Yes',
+                                            onPress: () => setLanguage('tc')
+                                        },
+                                        {
+                                            text: 'No',
+                                        }
+                                    ])
                                 }}
                             >
                                 <Text style={{ ...s.highlightText }}>中</Text>
@@ -104,7 +112,15 @@ export default class AboutPage extends Component {
                             <TouchableOpacity
                                 style={{ marginLeft: scale(10), }}
                                 onPress={() => {
-                                    setLanguage('en');
+                                    Alert.alert('Are you sure to switch to the English version?', 'The APP will be restarted.', [
+                                        {
+                                            text: 'Yes',
+                                            onPress: () => setLanguage('en')
+                                        },
+                                        {
+                                            text: 'No',
+                                        }
+                                    ])
                                 }}
                             >
                                 <Text style={{ ...s.highlightText }}>EN</Text>
@@ -201,7 +217,7 @@ export default class AboutPage extends Component {
                                 trigger();
                                 openLink(ARK_WIKI_ABOUT_ARK);
                             }}>
-                            <Text style={{ ...s.highlightText, }}>{`關於ARK ALL`}</Text>
+                            <Text style={{ ...s.highlightText, }}>{`${t('ABOUT')} ARK ALL`}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -218,7 +234,7 @@ export default class AboutPage extends Component {
                                 // );
                                 openLink(USUAL_Q);
                             }}>
-                            <Text style={{ ...s.highlightText, }}>{`ARK ALL常見問題`}</Text>
+                            <Text style={{ ...s.highlightText, }}>{`${t("Common Issues", { ns: 'about' })}`}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -227,7 +243,7 @@ export default class AboutPage extends Component {
                                 trigger();
                                 openLink(USER_AGREE);
                             }}>
-                            <Text style={{ ...s.highlightText }}>{`ARK ALL 隱私政策 & 用戶協議`}</Text>
+                            <Text style={{ ...s.highlightText }}>{`${t("Privacy Policy & User Agreement", { ns: 'about' })}`}</Text>
                         </TouchableOpacity>
                     </HomeCard>
 
@@ -238,7 +254,7 @@ export default class AboutPage extends Component {
                             fontSize: scale(12),
                             color: black.third
                         }}>
-                            {`圖片更新不及時？網站響應出錯？\n‼️:您已登錄的界面可能會退出登錄\n‼️:您可能需要重新加載圖片，會消耗流量\n‼️:瀏覽器選項卡問題可以前往對應瀏覽器清除緩存~`}
+                            {`${t('圖片更新不及時？網站響應出錯？', { ns: 'about' })}`}
                         </Text>
                         <TouchableOpacity
                             style={{
@@ -252,8 +268,8 @@ export default class AboutPage extends Component {
                             onPress={() => {
                                 trigger();
                                 Alert.alert(
-                                    "關鍵操作!!",
-                                    `將清除所有緩存並重啟，您確定繼續嗎？`,
+                                    t('重要提示', { ns: 'about' }),
+                                    `${t('您可能需要重新加載圖片，會消耗流量！', { ns: 'about' })}\n${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
                                     [
                                         {
                                             text: "Yes",
@@ -279,7 +295,7 @@ export default class AboutPage extends Component {
 
                             }}>
                             <Text style={{ ...s.highlightText, color: white, }}>
-                                {`點我：清除APP內的圖片和Web緩存`}
+                                {`${t('點我：清除APP內的圖片和Web緩存', { ns: 'about' })}`}
                             </Text>
                         </TouchableOpacity>
                     </HomeCard>
