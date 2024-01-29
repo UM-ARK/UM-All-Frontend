@@ -6,11 +6,11 @@ export default {
         "否": "NO",
         "開發者": "Developer",
 
-        "資訊":"Info",
-        "搵課":"Courses",
-        "課表":"Timetable",
-        "服務":"Services",
-        "組織":"Club",
+        "資訊": "Info",
+        "搵課": "Courses",
+        "課表": "Timetable",
+        "服務": "Services",
+        "組織": "Club",
 
         "TOPTAB_MAIN": "Main",
         "TOPTAB_CLUB": "Club",
@@ -25,13 +25,13 @@ export default {
         "方舟百科": "Wiki",
         "組織登入": "Sign In",
 
-        "周一":"MON",
-        "周二":"TUE",
-        "周三":"WED",
-        "周四":"THU",
-        "周五":"FRI",
-        "周六":"SAT",
-        "周日":"SUN",
+        "周一": "MON",
+        "周二": "TUE",
+        "周三": "WED",
+        "周四": "THU",
+        "周五": "FRI",
+        "周六": "SAT",
+        "周日": "SUN",
     },
     // 關於頁
     about: {
@@ -61,5 +61,49 @@ export default {
         "重要提示": "Important Hints",
         "您可能需要重新加載圖片，會消耗流量！": "You may need to reload the image, which will consume traffic!",
         "將清除所有緩存並重啟，您確定繼續嗎？": "All caches will be cleared and restarted. Are you sure you want to continue?",
+    },
+    features: {
+        "服務一覽": "All Services",
+
+        "校園服務": "Campus Services",
+        "校園巴士": "Bus",
+        "校曆": "Calendar",
+        "校園地圖": "Map",
+        "課室地圖": "Classroom",
+        "車位": "Park",
+        "資源借用": "Booking",
+        "公共電腦": "Computer",
+        "儲物箱": "Box",
+        "維修預約": "Repair",
+        "體育預訂": "Sports",
+        "圖書館": "Library",
+        "UM提意見": "Comments",
+        "電子公告": "Bulletin",
+        "更多服務": "More",
+
+
+        "課業 & 發展": "Coursework & Development",
+        "課表模擬": "Timetable",
+        "選咩課": "What2Reg",
+        "預選課": "PreEnroll",
+        "預選表格": "PreEnroll Excel",
+        "重要日期": "Important Dates",
+        "全人發展": "Whole Person",
+        "交流": "Exchange",
+        "獎學金": "Scholarship",
+        "證明文件": "Certificate",
+
+
+        "生活服務": "Domestic Services",
+        "失物認領": "Lost",
+        "泊車月票": "Park",
+        "職位空缺": "Vacancies",
+        "書院餐單": "Menu",
+
+
+        "新生推薦": "Recommended for Freshmen",
+        "生存指南": "Survival",
+        "內地生": "Mainland",
+        "圖文包": "Package",
     },
 }

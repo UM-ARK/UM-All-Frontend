@@ -57,6 +57,7 @@ import { scale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { t } from "i18next";
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -73,19 +74,19 @@ class Index extends Component {
     state = {
         functionArr: [
             {
-                title: '校園服務',
+                title: t('校園服務', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bus-stop',
-                        fn_name: '校園巴士',
+                        fn_name: t('校園巴士', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Bus', // a function
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'calendar-today',
-                        fn_name: '校曆',
+                        fn_name: t('校曆', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -103,7 +104,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map',
-                        fn_name: '校園地圖',
+                        fn_name: t('校園地圖', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -121,7 +122,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map-marker-multiple',
-                        fn_name: '課室地圖',
+                        fn_name: t('課室地圖', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -139,14 +140,14 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'car-brake-parking',
-                        fn_name: '車位',
+                        fn_name: t('車位', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'CarPark', // a function
                     },
                     {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'logo-dropbox',
-                        fn_name: '資源借用',
+                        fn_name: t('資源借用', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -164,7 +165,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'console-network',
-                        fn_name: '公共電腦',
+                        fn_name: t('公共電腦', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -182,7 +183,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'door-closed-lock',
-                        fn_name: '儲物箱',
+                        fn_name: t('儲物箱', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -200,7 +201,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'hammer-wrench',
-                        fn_name: '維修預約',
+                        fn_name: t('維修預約', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -218,7 +219,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'basketball',
-                        fn_name: '體育預訂',
+                        fn_name: t('體育預訂', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -236,7 +237,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'library',
-                        fn_name: '圖書館',
+                        fn_name: t('圖書館', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -254,7 +255,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'passport',
-                        fn_name: 'UM Pass',
+                        fn_name: t('UM Pass', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -272,7 +273,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'account-question',
-                        fn_name: 'UM提意見',
+                        fn_name: t('UM提意見', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -290,7 +291,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bullhorn',
-                        fn_name: '電子公告',
+                        fn_name: t('電子公告', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -304,7 +305,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'view-grid-plus',
-                        fn_name: '更多服務',
+                        fn_name: t('更多服務', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -322,7 +323,7 @@ class Index extends Component {
                 ],
             },
             {
-                title: '課業 & 發展',
+                title: t('課業 & 發展', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -352,7 +353,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'table-clock',
-                        fn_name: '課表模擬',
+                        fn_name: t('課表模擬', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'CourseSimTab',
                         // webview_param: {
@@ -363,7 +364,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'database-search',
-                        fn_name: '選咩課',
+                        fn_name: t('選咩課', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -392,7 +393,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'eye-plus',
-                        fn_name: '預選課',
+                        fn_name: t('預選課', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -403,7 +404,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'file-table',
-                        fn_name: '預選表格',
+                        fn_name: t('預選表格', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -425,7 +426,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'timeline-alert',
-                        fn_name: '重要日期',
+                        fn_name: t('重要日期', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -436,7 +437,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'cow',
-                        fn_name: '全人發展',
+                        fn_name: t('全人發展', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -447,7 +448,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dolphin',
-                        fn_name: '交流',
+                        fn_name: t('交流', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -458,7 +459,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'dice-multiple',
-                        fn_name: '獎學金',
+                        fn_name: t('獎學金', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -476,7 +477,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'badge-account',
-                        fn_name: '證明文件',
+                        fn_name: t('證明文件', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -487,12 +488,12 @@ class Index extends Component {
                 ],
             },
             {
-                title: '生活服務',
+                title: t('生活服務', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'text-box-check',
-                        fn_name: '失物認領',
+                        fn_name: t('失物認領', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'LostAndFound',
                         // go_where: 'Webview',
@@ -511,7 +512,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'car-multiple',
-                        fn_name: '泊車月票',
+                        fn_name: t('泊車月票', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -529,7 +530,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'human-dolly',
-                        fn_name: '職位空缺',
+                        fn_name: t('職位空缺', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
@@ -547,7 +548,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'food',
-                        fn_name: '書院餐單',
+                        fn_name: t('書院餐單', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -558,12 +559,12 @@ class Index extends Component {
                 ],
             },
             {
-                title: '新生推薦',
+                title: t('新生推薦', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'ghost',
-                        fn_name: '生存指南',
+                        fn_name: t('生存指南', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -576,7 +577,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'bag-suitcase',
-                        fn_name: '內地生',
+                        fn_name: t('內地生', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -589,7 +590,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'account-heart',
-                        fn_name: '圖文包',
+                        fn_name: t('圖文包', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -739,6 +740,7 @@ class Index extends Component {
                                         ...uiStyle.defaultText,
                                         fontSize: scale(10),
                                         color: COLOR_DIY.black.second,
+                                        textAlign: 'center',
                                     }}>
                                     {item.fn_name}
                                 </Text>
@@ -785,7 +787,7 @@ class Index extends Component {
                         />
                         {/* 標題 */}
                         <View style={{ marginLeft: scale(5), }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>服務一覽</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
                     </View>
 
