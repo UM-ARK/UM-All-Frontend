@@ -6,6 +6,7 @@ import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import { COLOR_DIY, uiStyle, } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
+import { setLanguage, setLocalStorage } from './src/i18n/i18n';
 import { Provider } from 'mobx-react';
 
 import AnimatedSplash from 'react-native-animated-splash-screen';
@@ -91,6 +92,8 @@ class App extends Component {
         isLoaded: false,
         isLogin: false,
         versionLock: false,
+
+        languageOK: false,
     };
 
     async componentDidMount() {
@@ -113,6 +116,7 @@ class App extends Component {
                 // console.log('無用戶token');
                 this.setState({ isLogin: false });
             }
+            this.checkLanguage();
         } catch (e) {
             console.error('App error', e);
         }
@@ -142,6 +146,26 @@ class App extends Component {
         this.setState({ versionLock: true });
     };
 
+    // 啟動檢查語言設置
+    checkLanguage = async () => {
+        await AsyncStorage.getItem('language').then(res => {
+            const lng = JSON.parse(res);
+            if (!lng) {
+                Alert.alert('語言設定 / Language Setting', '挑選您的首選語言\nPick your preferred languaeg(English version not fully translated)\n您稍後可以在關於頁再修改！\nYou can modify it later on the About page!', [
+                    {
+                        text: '繁體中文', onPress: () => {
+                            setLocalStorage('tc');
+                            this.setState({ languageOK: true });
+                        }
+                    },
+                    { text: 'English', onPress: () => setLanguage('en') },
+                ]);
+            } else {
+                this.setState({ languageOK: true })
+            }
+        })
+    }
+
     render() {
         return (
             // 開屏動畫
@@ -161,13 +185,12 @@ class App extends Component {
                 backgroundColor={bg_color}>
                 <SafeAreaProvider>
                     {/* 全局變量 */}
-                    <Provider RootStore={RootStore}>
-                        <Nav
-                            lock={this.state.versionLock}
-                            setLock={this.setLock}
-                        />
-                        <Toast config={toastConfig} />
-                    </Provider>
+                    {this.state.languageOK ? (
+                        <Provider RootStore={RootStore}>
+                            <Nav lock={this.state.versionLock} setLock={this.setLock} />
+                            <Toast config={toastConfig} />
+                        </Provider>
+                    ) : null}
                 </SafeAreaProvider>
             </AnimatedSplash>
         );

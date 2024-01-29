@@ -24,14 +24,12 @@ async function initLanguage() {
             i18n.use(initReactI18next).init({
                 resources,
                 // 讀取本地緩存中的語言設置，默認 英文 en
-                // TODO: 首次打開時設定語言
                 lng: lng ? lng : 'tc',
                 interpolation: { escapeValue: false },
                 defaultNS: 'common',
             });
         })
     } catch (error) {
-        console.log('error', error);
         Alert.alert('', 'i18n error, Please contact developer');
         // 如果出錯，直接使用 en 作為默認語言
         i18n.use(initReactI18next).init({
@@ -63,7 +61,7 @@ export async function setLanguage(lng) {
 }
 
 // 設置本地緩存
-async function setLocalStorage(lng) {
+export async function setLocalStorage(lng) {
     try {
         const strCourseCodeList = JSON.stringify(lng);
         await AsyncStorage.setItem('language', strCourseCodeList)
