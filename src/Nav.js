@@ -51,7 +51,7 @@ import TestScreen from '../test/test';
 
 // 創建一個頁面導航棧
 const Stack = Platform.select({
-    android: createStackNavigator,
+    android: createStackNavigator(),
     default: createNativeStackNavigator()
 });
 // 頭部標題配置：http://www.himeizi.cn/reactnavigation/api/navigators/createStackNavigator.html#options
