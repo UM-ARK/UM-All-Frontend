@@ -4,6 +4,8 @@ import { View, Text, } from 'react-native';
 import LoadingDotsDIY from './LoadingDots';
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
 import { scale } from 'react-native-size-matters';
+import { t } from "i18next";
+
 const { black, white, themeColor, bg_color } = COLOR_DIY;
 
 class Loading extends Component {
@@ -27,7 +29,7 @@ class Loading extends Component {
                         color: themeColor,
                         marginTop: scale(2),
                     }}>
-                    ARK ALL瘋狂加載中
+                    {t('ARK ALL瘋狂加載中')}
                 </Text>
                 <View style={{ marginVertical: scale(10), }}>
                     <LoadingDotsDIY />
@@ -41,7 +43,7 @@ class Loading extends Component {
                         marginTop: scale(3),
                         textAlign: 'center',
                     }}>
-                    {`確保網絡正常\n可以刷新或重啟APP再試`}
+                    {`${t('確保網絡正常')}\n${t('可以刷新或重啟APP再試')}`}
                 </Text>
             </View>
         );

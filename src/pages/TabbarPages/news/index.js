@@ -13,6 +13,7 @@ import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale } from 'react-native-size-matters';
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { t } from "i18next";
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
@@ -82,7 +83,7 @@ class NewsScreen extends Component {
                         name="HomePage"
                         component={HomePage}
                         options={{
-                            title: '主頁',
+                            title: t('TOPTAB_MAIN'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -92,7 +93,7 @@ class NewsScreen extends Component {
                         name="ClubPage"
                         component={ClubPage}
                         options={{
-                            title: '組織',
+                            title: t('TOPTAB_CLUB'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -102,7 +103,7 @@ class NewsScreen extends Component {
                         name="UMEventPage"
                         component={UMEventPage}
                         options={{
-                            title: '活動',
+                            title: t('TOPTAB_EVENT'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -112,7 +113,7 @@ class NewsScreen extends Component {
                         name="NewsPage"
                         component={NewsPage}
                         options={{
-                            title: '新聞',
+                            title: t('TOPTAB_NEWS'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -122,7 +123,7 @@ class NewsScreen extends Component {
                         name="AboutPage"
                         component={AboutPage}
                         options={{
-                            title: '關於',
+                            title: t('TOPTAB_ABOUT'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
