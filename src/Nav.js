@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Platform, Text } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
@@ -49,7 +50,10 @@ import CarPark from './pages/Features/CarPark';
 import TestScreen from '../test/test';
 
 // 創建一個頁面導航棧
-const Stack = createStackNavigator();
+const Stack = Platform.select({
+    android: createStackNavigator,
+    default: createNativeStackNavigator()
+});
 // 頭部標題配置：http://www.himeizi.cn/reactnavigation/api/navigators/createStackNavigator.html#options
 
 Text.defaultProps = {

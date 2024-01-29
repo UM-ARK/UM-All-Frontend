@@ -22,6 +22,7 @@
     "@react-native/gradle-plugin": "^0.73.4",
     "@react-navigation/material-top-tabs": "^6.6.5",
     "@react-navigation/native": "^6.1.9",
+    "@react-navigation/native-stack": "^6.9.17",
     "@react-navigation/stack": "^6.3.20",
     "@rneui/base": "^4.0.0-rc.5",
     "@rneui/themed": "^4.0.0-rc.5",
