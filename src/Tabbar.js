@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
+import { t } from "i18next";
 
 // 創建Tabbar的路由棧
 const Tabs = AnimatedTabBarNavigator();
@@ -70,7 +71,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: '資訊',
+                            title: t('資訊'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -94,7 +95,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: 'Wiki',
+                            title: t('Wiki'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -118,7 +119,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: '搵課',
+                            title: t('搵課'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -142,7 +143,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: '課表',
+                            title: t('課表'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -166,7 +167,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: '服務',
+                            title: t('服務'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
@@ -217,7 +218,7 @@ class Tabbar extends Component {
                                         focused={focused}
                                     />
                                 ),
-                            title: isClub ? '組織' : '我的',
+                            title: isClub ? t('組織') : '我的',
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()

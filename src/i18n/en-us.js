@@ -2,15 +2,21 @@
 export default {
     common: {
         "ABOUT": "About",
+        "是": "YES",
+        "否": "NO",
+        "開發者": "Developer",
+
+        "資訊":"Info",
+        "搵課":"Courses",
+        "課表":"Timetable",
+        "服務":"Services",
+        "組織":"Club",
+
         "TOPTAB_MAIN": "Main",
         "TOPTAB_CLUB": "Club",
         "TOPTAB_EVENT": "Event",
         "TOPTAB_NEWS": "News",
         "TOPTAB_ABOUT": "About",
-
-        "是": "YES",
-        "否": "NO",
-        "開發者": "Developer",
     },
     home: {
         "校園巴士": "Bus",
