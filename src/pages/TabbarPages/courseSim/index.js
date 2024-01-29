@@ -22,6 +22,7 @@ import TouchableScale from "react-native-touchable-scale";
 import { MenuView } from '@react-native-menu/menu';
 import Toast from 'react-native-simple-toast';
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { t } from "i18next";
 
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
@@ -578,12 +579,12 @@ export default class courseSim extends Component {
         const { importTimeTableText } = this.state;
         return (
             <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5), }}>
-                <Text style={{ ...s.firstUseText, }}>{`\n如何開始使用模擬課表？\n`}</Text>
+                <Text style={{ ...s.firstUseText, }}>{`\n${t("如何開始使用模擬課表？", { ns: 'timetable' })}\n`}</Text>
 
                 {/* Add課按鈕提示 */}
-                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項1：</Text>{`望向右上角自己動手“Add”！\n`}</Text>
+                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>{`${t("選項", { ns: 'timetable' })} 1：`}</Text>{`${t("右上角按鈕手動“Add”！", { ns: 'timetable' })}\n`}</Text>
 
-                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>選項2：</Text>{`全選、複製ISW真正課表，\n(ISW課表是文字不是圖片!)\n到下方框框中粘貼，\n然後一鍵導入！`}</Text>
+                <Text style={{ ...s.firstUseText, }}><Text style={{ color: themeColor }}>{`${t("選項", { ns: 'timetable' })} 2：`}</Text>{`${t("全選、複製Timetable，", { ns: 'timetable' })}\n${t("粘貼到下方輸入框，", { ns: 'timetable' })}\n${t("一鍵導入！", { ns: 'timetable' })}`}</Text>
 
                 {/* 跳轉ISW按鈕 */}
                 {importTimeTableText && importTimeTableText.length > 0 ? null : (
@@ -593,7 +594,7 @@ export default class courseSim extends Component {
                             openLink(UM_ISW);
                         }}
                     >
-                        <Text style={{ ...s.firstUseText, color: white, }}>2.1 進入ISW複製</Text>
+                        <Text style={{ ...s.firstUseText, color: white, }}>{`2.1 ${t("進入ISW複製", { ns: 'timetable' })}`}</Text>
                     </TouchableOpacity>
                 )}
                 {/* 課表數據輸入框 */}
@@ -628,7 +629,7 @@ E11-0000
                     onSubmitEditing={() => Keyboard.dismiss()}
                     clearButtonMode='always'
                 />
-                <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third, }}>↑記得先粘貼課表數據，再點擊導入哦</Text>
+                <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third, }}>{`${t('↑記得先粘貼課表數據，再點擊導入哦', { ns: 'timetable' })}`}</Text>
                 {/* 導入課表按鈕 */}
                 <TouchableOpacity
                     style={{
@@ -638,7 +639,7 @@ E11-0000
                     onPress={this.importCourseData}
                     disabled={!this.state.importTimeTableText}
                 >
-                    <Text style={{ ...s.firstUseText, color: white, }}>2.2 一鍵導入到模擬課表</Text>
+                    <Text style={{ ...s.firstUseText, color: white, }}>{`2.2 ${t('一鍵導入到模擬課表', { ns: 'timetable' })}`}</Text>
                 </TouchableOpacity>
 
                 <Text style={{ ...s.firstUseText, fontSize: scale(12), marginTop: scale(25) }}>
@@ -758,11 +759,12 @@ E11-0000
     renderCourseSearch = () => {
         const filterCourseList = handleSearchFilterCourse(this.state.searchText);
         // 是否有搜索結果
-        let haveSearchResult = this.state.searchText && filterCourseList.length > 0;
+        const haveSearchResult = this.state.searchText && filterCourseList.length > 0;
         return (
             <View style={{
                 width: '34%',
-                height: haveSearchResult ? '100%' : scale(50),
+                height: haveSearchResult ? '100%' : scale(45),
+                padding: scale(5),
                 marginRight: scale(5),
                 marginTop: scale(5), marginBottom: scale(10),
                 borderWidth: scale(1), borderColor: themeColor, borderRadius: scale(10),
@@ -779,7 +781,6 @@ E11-0000
                 <View style={{
                     borderColor: themeColor,
                     borderWidth: scale(1), borderRadius: scale(5),
-                    margin: scale(5),
                 }}>
                     {/* Add課搜索框 */}
                     <TextInput
@@ -947,7 +948,7 @@ E11-0000
                         }}
                             onPress={this.clearCourse}
                         >
-                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold' }}>清空</Text>
+                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold' }}>{t('清空', { ns: 'timetable' })}</Text>
                         </TouchableOpacity>
                     )}
 
@@ -962,7 +963,7 @@ E11-0000
                         />
                         {/* 標題 */}
                         <View style={{ marginLeft: scale(5) }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>課表模擬</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('課表模擬', { ns: 'timetable' })}</Text>
                         </View>
                     </View>
 
@@ -985,7 +986,7 @@ E11-0000
                             ...uiStyle.defaultText,
                             color: this.state.addMode ? themeColor : white,
                             fontWeight: 'bold'
-                        }}>{this.state.addMode ? '關閉' : '添加'}</Text>
+                        }}>{this.state.addMode ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}</Text>
                     </TouchableOpacity>
                 </View>
 

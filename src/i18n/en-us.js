@@ -62,6 +62,29 @@ export default {
         "您可能需要重新加載圖片，會消耗流量！": "You may need to reload the image, which will consume traffic!",
         "將清除所有緩存並重啟，您確定繼續嗎？": "All caches will be cleared and restarted. Are you sure you want to continue?",
     },
+    wiki: {
+
+    },
+    courses: {
+
+    },
+    timetable: {
+        "課表模擬": "Timetable Simulation",
+        "關閉": "Close",
+        "搵課/加課": "Add",
+        "清空": "Clear",
+
+        "如何開始使用模擬課表？": "How to start using the timetable simulation?",
+        "選項": "Choice",
+        "右上角按鈕手動“Add”！": "Manual add button in the upper right corner!",
+        "全選、複製Timetable，": "Select all, copy Timetable,",
+        "粘貼到下方輸入框，": "Paste it into the input box below,",
+        "一鍵導入！": "One-click import!",
+
+        "進入ISW複製": "Enter ISW Copy",
+        "↑記得先粘貼課表數據，再點擊導入哦": "↑Remember to paste the class schedule data first and then click Import",
+        "一鍵導入到模擬課表": "Import to simulated timetable",
+    },
     features: {
         "服務一覽": "All Services",
 
