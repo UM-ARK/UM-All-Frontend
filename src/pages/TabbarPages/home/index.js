@@ -46,6 +46,7 @@ import { scale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
+import { t } from "i18next";
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 
@@ -151,7 +152,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: 'bus',
                     icon_type: iconTypes.ionicons,
-                    function_name: '校園巴士',
+                    function_name: t('校園巴士', { ns: 'home' }),
                     func: () => {
                         trigger();
                         this.props.navigation.navigate('Bus');
@@ -160,7 +161,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: 'coffee',
                     icon_type: iconTypes.materialCommunityIcons,
-                    function_name: '支持我們',
+                    function_name: t('支持我們', { ns: 'home' }),
                     func: () => {
                         trigger();
                         let webview_param = {
@@ -176,7 +177,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: require('../../../static/img/logo.png'),
                     icon_type: iconTypes.img,
-                    function_name: '澳大方舟',
+                    function_name: t('澳大方舟', { ns: 'home' }),
                     func: () => {
                         trigger();
                         this.onRefresh();
@@ -189,7 +190,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: 'file-document-edit',
                     icon_type: iconTypes.materialCommunityIcons,
-                    function_name: '方舟百科',
+                    function_name: t('方舟百科', { ns: 'home' }),
                     func: () => {
                         trigger();
                         this.props.navigation.navigate('Wiki');
@@ -198,7 +199,7 @@ class HomeScreen extends Component {
                 {
                     icon_name: 'people',
                     icon_type: iconTypes.ionicons,
-                    function_name: '組織登入',
+                    function_name: t('組織登入', { ns: 'home' }),
                     func: () => {
                         trigger();
                         this.props.navigation.navigate('MeScreen');
@@ -384,19 +385,19 @@ class HomeScreen extends Component {
         let week = moment(date).day();
         switch (week) {
             case 1:
-                return '周一';
+                return t('周一', { ns: 'home' });
             case 2:
-                return '周二';
+                return t('周二', { ns: 'home' });
             case 3:
-                return '周三';
+                return t('周三', { ns: 'home' });
             case 4:
-                return '周四';
+                return t('周四', { ns: 'home' });
             case 5:
-                return '周五';
+                return t('周五', { ns: 'home' });
             case 6:
-                return '周六';
+                return t('周六', { ns: 'home' });
             case 0:
-                return '周日';
+                return t('周日', { ns: 'home' });
         }
     }
 

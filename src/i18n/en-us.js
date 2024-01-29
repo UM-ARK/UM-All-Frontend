@@ -12,6 +12,21 @@ export default {
         "否": "NO",
         "開發者": "Developer",
     },
+    home: {
+        "校園巴士": "Bus",
+        "支持我們": "Donate",
+        "澳大方舟": "ARK",
+        "方舟百科": "Wiki",
+        "組織登入": "Sign In",
+
+        "周一":"MON",
+        "周二":"TUE",
+        "周三":"WED",
+        "周四":"THU",
+        "周五":"FRI",
+        "周六":"SAT",
+        "周日":"SUN",
+    },
     // 關於頁
     about: {
         "APP Version": "APP Version: ",
