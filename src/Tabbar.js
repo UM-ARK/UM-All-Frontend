@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/news';
-import MessageScreen from './pages/TabbarPages/message';
-import MeScreen from './pages/TabbarPages/me';
+// import MessageScreen from './pages/TabbarPages/message';
+// import MeScreen from './pages/TabbarPages/me';
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import ARKWiki from './pages/TabbarPages/arkwiki';
@@ -175,7 +175,7 @@ class Tabbar extends Component {
                     />
                 )}
 
-                {false && isLogin && !isClub ? (
+                {/* {false && isLogin && !isClub ? (
                     <Tabs.Screen
                         name="MessageTabbar"
                         component={MessageScreen}
@@ -191,12 +191,12 @@ class Tabbar extends Component {
                             title: '關注',
                         }}
                     />
-                ) : null}
+                ) : null} */}
 
                 {isClub ? (
                     <Tabs.Screen
                         name="MeTabbar"
-                        component={isClub ? ClubDetail : MeScreen}
+                        component={ClubDetail}
                         options={{
                             tabBarIcon: ({ focused, color, size }) =>
                                 isClub ? (

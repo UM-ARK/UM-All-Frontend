@@ -11,23 +11,24 @@ import Tabbar from './Tabbar';
 import ClubSetting from './pages/ClubSystem/CLubSetting';
 import ClubInfoEdit from './pages/ClubSystem/ClubInfoEdit';
 import EventSetting from './pages/ClubSystem/EventSetting';
-import MessageSetting from './pages/ClubSystem/MessageSetting';
-import FollowersPage from './pages/ClubSystem/FollowersPage';
-import LoginSetting from './pages/TabbarPages/me/pages/Login/LoginSetting';
+// import MessageSetting from './pages/ClubSystem/MessageSetting';
+// import FollowersPage from './pages/ClubSystem/FollowersPage';
+// import LoginSetting from './pages/TabbarPages/me/pages/Login/LoginSetting';
 
-import ClubLogin from './pages/TabbarPages/me/pages/Login/ClubLogin';
-import MeScreen from './pages/TabbarPages/me';
-import MyFollow from './pages/TabbarPages/me/pages/MyFollow';
-import AppSetting from './pages/TabbarPages/me/pages/AppSetting';
-import FollowClub from './pages/TabbarPages/me/pages/Follow/FollowClub';
-import FollowEvent from './pages/TabbarPages/me/pages/Follow/FollowEvent';
+import ClubLogin from './pages/ClubSystem/login/ClubLogin';
+import LoginIndex from './pages/ClubSystem/login/index';
+// import MeScreen from './pages/TabbarPages/me';
+// import MyFollow from './pages/TabbarPages/me/pages/MyFollow';
+// import AppSetting from './pages/TabbarPages/me/pages/AppSetting';
+// import FollowClub from './pages/TabbarPages/me/pages/Follow/FollowClub';
+// import FollowEvent from './pages/TabbarPages/me/pages/Follow/FollowEvent';
 
 import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
 import EventDetail from './pages/TabbarPages/news/pages/EventDetail';
 import NewsDetail from './pages/TabbarPages/news/pages/NewsDetail';
 import UMEventDetail from './pages/TabbarPages/news/pages/UMEventDetail';
 
-import ChatDetail from './pages/TabbarPages/message/ChatDetail';
+// import ChatDetail from './pages/TabbarPages/message/ChatDetail';
 
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import What2RegCourse from './pages/TabbarPages/what2Reg/pages/Course';
@@ -47,7 +48,7 @@ import Bus from './pages/Features/Bus';
 import LostAndFound from './pages/Features/LostAndFound';
 import CarPark from './pages/Features/CarPark';
 
-import TestScreen from '../test/test';
+// import TestScreen from './test/test';
 
 // 創建一個頁面導航棧
 const Stack = Platform.select({
@@ -92,20 +93,21 @@ class Nav extends Component {
 
                     {/* 信息頁 */}
                     {/* 信息詳情 */}
-                    <Stack.Screen name="ChatDetail" component={ChatDetail} />
+                    {/* <Stack.Screen name="ChatDetail" component={ChatDetail} /> */}
 
                     {/* 我的頁 */}
+                    <Stack.Screen name="LoginIndex" component={LoginIndex} />
                     <Stack.Screen name="ClubLogin" component={ClubLogin} />
-                    <Stack.Screen name="MyFollow" component={MyFollow} />
-                    <Stack.Screen name="MeScreen" component={MeScreen} />
-                    <Stack.Screen name="FollowClub" component={FollowClub} />
-                    <Stack.Screen name="FollowEvent" component={FollowEvent} />
+                    {/* <Stack.Screen name="MyFollow" component={MyFollow} /> */}
+                    {/* <Stack.Screen name="MeScreen" component={MeScreen} /> */}
+                    {/* <Stack.Screen name="FollowClub" component={FollowClub} /> */}
+                    {/* <Stack.Screen name="FollowEvent" component={FollowEvent} /> */}
                     {/* 設置頁 */}
-                    <Stack.Screen name="AppSetting" component={AppSetting} />
-                    <Stack.Screen
+                    {/* <Stack.Screen name="AppSetting" component={AppSetting} /> */}
+                    {/* <Stack.Screen
                         name="LoginSetting"
                         component={LoginSetting}
-                    />
+                    /> */}
 
                     {/* 服務頁 */}
                     {/* 自定義Webview */}
@@ -133,14 +135,14 @@ class Nav extends Component {
                         name="EventSetting"
                         component={EventSetting}
                     />
-                    <Stack.Screen
+                    {/* <Stack.Screen
                         name="MessageSetting"
                         component={MessageSetting}
-                    />
-                    <Stack.Screen
+                    /> */}
+                    {/* <Stack.Screen
                         name="FollowersPage"
                         component={FollowersPage}
-                    />
+                    /> */}
 
                     {/* ARK選課 */}
                     <Stack.Screen name="What2RegHome" component={What2RegTabIndex} />
@@ -155,7 +157,7 @@ class Nav extends Component {
                     <Stack.Screen name="courseSimIndex" component={courseSimIndex} />
 
                     {/* 測試頁 */}
-                    <Stack.Screen name="TestScreen" component={TestScreen} />
+                    {/* <Stack.Screen name="TestScreen" component={TestScreen} /> */}
                 </Stack.Navigator>
             </NavigationContainer>
         ) : null;

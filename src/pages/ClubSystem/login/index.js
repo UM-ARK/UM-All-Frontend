@@ -3,43 +3,37 @@ import React, { Component } from 'react';
 import {
     Text,
     View,
-    Image,
     TouchableOpacity,
     ScrollView,
-    StatusBar,
-    AppRegistry,
     StyleSheet,
-    TextInput,
     Linking,
     Alert,
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, } from '../../../../../utils/uiMap';
-import { handleLogin } from '../../../../../utils/storageKits';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { handleLogin } from '../../../utils/storageKits';
 import {
     BASE_URI,
     POST,
     USER_AGREE,
     USUAL_Q,
-} from '../../../../../utils/pathMap';
-import Webviewer from '../../../../../components/Webviewer';
-import { UM_Moodle, APPSTORE_URL, BASE_HOST, } from '../../../../../utils/pathMap';
-import { openLink } from '../../../../../utils/browser';
-import { versionStringCompare } from '../../../../../utils/versionKits';
-import { trigger } from '../../../../../utils/trigger';
-import DialogDIY from '../../../../../components/DialogDIY';
-import ClubLogin from './ClubLogin';
-import packageInfo from '../../../../../../package.json';
+} from '../../../utils/pathMap';
+import { UM_Moodle, APPSTORE_URL, BASE_HOST, } from '../../../utils/pathMap';
+import { openLink } from '../../../utils/browser';
+import { versionStringCompare } from '../../../utils/versionKits';
+import { trigger } from '../../../utils/trigger';
+import DialogDIY from '../../../components/DialogDIY';
+import packageInfo from '../../../../package.json';
 
-import { Header, CheckBox } from '@rneui/themed';
+import { CheckBox } from '@rneui/themed';
 import { NavigationContext } from '@react-navigation/native';
 import CookieManager from '@react-native-cookies/cookies';
 import WebView from 'react-native-webview';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { scale } from 'react-native-size-matters';
+import Header from '../../../components/Header';
 
 const { bg_color, black, themeColor, white } = COLOR_DIY;
 
@@ -107,37 +101,7 @@ class LoginChoose extends Component {
         const { disabledButton } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
-                {/* <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    statusBarProps={{
-                        backgroundColor: 'transparent',
-                        barStyle: 'dark-content',
-                        translucent: true,
-                    }}
-                    centerComponent={{
-                        text: this.state.title,
-                        style: {
-                            color: COLOR_DIY.black.main,
-                            fontSize: scale(15),
-                        },
-                    }}
-                    leftComponent={
-                        this.state.showMoodle && (
-                            <TouchableOpacity
-                                onPress={() => {
-                                    this.refs.webRef.reload();
-                                    this.setState({showMoodle: false});
-                                }}
-                                disabled={disabledButton}>
-                                <Ionicons
-                                    name="chevron-back-outline"
-                                    size={scale(25)}
-                                    color={COLOR_DIY.black.main}
-                                />
-                            </TouchableOpacity>
-                        )
-                    }
-                /> */}
+                <Header title={'賬號登錄'} />
 
                 {this.state.showMoodle ? (
                     <WebView
@@ -351,14 +315,6 @@ class LoginChoose extends Component {
                                         }}
                                         activeOpacity={0.9}
                                         onPress={() => {
-                                            // let webview_param = {
-                                            //     url: USER_AGREE,
-                                            //     title: '用戶協議',
-                                            // };
-                                            // this.context.navigate(
-                                            //     'Webviewer',
-                                            //     webview_param,
-                                            // );
                                             openLink(USER_AGREE);
                                         }}>
                                         《隱私政策與用戶協議》

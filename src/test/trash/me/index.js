@@ -14,7 +14,7 @@ import { USUAL_Q } from '../../../utils/pathMap';
 import Header from '../../../components/Header';
 
 // 本Tabbar相關頁面
-import Login from './pages/Login';
+import Login from '../../../pages/ClubSystem/login';
 import AppSetting from './pages/AppSetting';
 import MyFollow from './pages/MyFollow';
 

@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import {View, Text, FlatList, RefreshControl} from 'react-native';
 
-import Header from '../../components/Header';
-import {COLOR_DIY} from '../../utils/uiMap';
-import {pxToDp} from '../../utils/stylesKits';
-import {BASE_URI, GET} from '../../utils/pathMap';
+import Header from '../../../components/Header';
+import {COLOR_DIY} from '../../../utils/uiMap';
+import {pxToDp} from '../../../utils/stylesKits';
+import {BASE_URI, GET} from '../../../utils/pathMap';
 
 import axios from 'axios';
 

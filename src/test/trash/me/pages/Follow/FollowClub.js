@@ -12,7 +12,7 @@ import {BASE_URI, BASE_HOST, GET, POST} from '../../../../../utils/pathMap';
 import {COLOR_DIY} from '../../../../../utils/uiMap';
 import {pxToDp} from '../../../../../utils/stylesKits';
 import Header from '../../../../../components/Header';
-import ClubCard from '../../../news/components/ClubCard';
+import ClubCard from '../../../../../pages/TabbarPages/news/components/ClubCard';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {FlatGrid} from 'react-native-super-grid';

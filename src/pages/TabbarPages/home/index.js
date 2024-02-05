@@ -202,7 +202,7 @@ class HomeScreen extends Component {
                     function_name: t('組織登入', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        this.props.navigation.navigate('MeScreen');
+                        this.props.navigation.navigate('LoginIndex');
                     },
                 },
             ],

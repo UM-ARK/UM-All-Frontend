@@ -8,11 +8,11 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, } from '../../../../../utils/uiMap';
-import Header from '../../../../../components/Header';
-import { handleLogin } from '../../../../../utils/storageKits';
-import { BASE_URI, GET } from '../../../../../utils/pathMap';
-import { trigger } from '../../../../../utils/trigger';
+import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import Header from '../../../components/Header';
+import { handleLogin } from '../../../utils/storageKits';
+import { BASE_URI, GET } from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 
 import { Input } from '@rneui/themed';
 import axios from 'axios';

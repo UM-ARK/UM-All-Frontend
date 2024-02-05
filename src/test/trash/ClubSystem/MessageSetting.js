@@ -8,12 +8,12 @@ import {
     TextInput,
 } from 'react-native';
 
-import {COLOR_DIY} from '../../utils/uiMap';
-import Header from '../../components/Header';
-import DialogDIY from '../../components/DialogDIY';
-import {pxToDp} from '../../utils/stylesKits';
-import {BASE_URI, POST} from '../../utils/pathMap';
-import {handleImageSelect} from '../../utils/fileKits';
+import {COLOR_DIY} from '../../../utils/uiMap';
+import Header from '../../../components/Header';
+import DialogDIY from '../../../components/DialogDIY';
+import {pxToDp} from '../../../utils/stylesKits';
+import {BASE_URI, POST} from '../../../utils/pathMap';
+import {handleImageSelect} from '../../../utils/fileKits';
 
 import {
     RadioGroup,
