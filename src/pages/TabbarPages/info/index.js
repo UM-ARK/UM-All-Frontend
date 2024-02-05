@@ -3,7 +3,7 @@ import { View, Platform, Text, Dimensions } from 'react-native';
 
 import { COLOR_DIY } from '../../../utils/uiMap';
 import { trigger } from '../../../utils/trigger';
-import HomePage from '../home/index';
+import HomePage from './home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';

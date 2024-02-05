@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 
 import FeaturesScreen from './pages/TabbarPages/features';
-import NewsScreen from './pages/TabbarPages/news';
+import NewsScreen from './pages/TabbarPages/info';
 // import MessageScreen from './pages/TabbarPages/message';
 // import MeScreen from './pages/TabbarPages/me';
-import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
+import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import ARKWiki from './pages/TabbarPages/arkwiki';
 import CourseSim from './pages/TabbarPages/courseSim';

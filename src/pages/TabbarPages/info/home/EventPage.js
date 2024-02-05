@@ -10,11 +10,11 @@ import {
     Linking,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
-import { BASE_URI, BASE_HOST, GET } from '../../../utils/pathMap';
-import { trigger } from '../../../utils/trigger';
-import Loading from '../../../components/Loading';
-import EventCard from './components/EventCard';
+import { COLOR_DIY, uiStyle } from '../../../../utils/uiMap';
+import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';
+import { trigger } from '../../../../utils/trigger';
+import Loading from '../../../../components/Loading';
+import EventCard from '../components/EventCard';
 
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';

@@ -8,11 +8,11 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import Header from '../../components/Header';
-import EventCard from '../TabbarPages/news/components/EventCard';
-import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
-import { BASE_URI, BASE_HOST, GET } from '../../utils/pathMap';
-import Toast, { DURATION } from 'react-native-easy-toast';
+import Header from '../../../../components/Header';
+import EventCard from '../components/EventCard';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
+import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';
+import Toast from 'react-native-easy-toast';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import Ionicons from 'react-native-vector-icons/Ionicons';

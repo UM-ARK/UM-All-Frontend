@@ -23,10 +23,10 @@ import LoginIndex from './pages/ClubSystem/login/index';
 // import FollowClub from './pages/TabbarPages/me/pages/Follow/FollowClub';
 // import FollowEvent from './pages/TabbarPages/me/pages/Follow/FollowEvent';
 
-import ClubDetail from './pages/TabbarPages/news/pages/ClubDetail';
-import EventDetail from './pages/TabbarPages/news/pages/EventDetail';
-import NewsDetail from './pages/TabbarPages/news/pages/NewsDetail';
-import UMEventDetail from './pages/TabbarPages/news/pages/UMEventDetail';
+import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
+import EventDetail from './pages/TabbarPages/info/club/EventDetail';
+import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
+import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
 
 // import ChatDetail from './pages/TabbarPages/message/ChatDetail';
 
@@ -41,7 +41,7 @@ import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 import courseSimIndex from './pages/TabbarPages/courseSim';
 
 import Webviewer from './components/Webviewer';
-import AllEvents from './pages/Features/AllEvents';
+import AllEvents from './pages/TabbarPages/info/club/AllEvents';
 import UMWhole from './pages/Features/UMWhole';
 import What2Reg from './pages/Features/What2Reg';
 import Bus from './pages/Features/Bus';

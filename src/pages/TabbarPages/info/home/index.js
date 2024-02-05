@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, VERSION_EMOJI, isLight } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, VERSION_EMOJI, isLight } from '../../../../utils/uiMap.js';
 import {
     GITHUB_DONATE,
     BASE_HOST,
@@ -23,16 +23,16 @@ import {
     MAIL,
     ARK_WIKI,
     ARK_WIKI_RANDOM_TITLE,
-} from '../../../utils/pathMap';
-import EventPage from '../news/EventPage.js';
-import ModalBottom from '../../../components/ModalBottom';
-import { setAPPInfo, handleLogout } from '../../../utils/storageKits';
-import { versionStringCompare } from '../../../utils/versionKits';
-import packageInfo from '../../../../package.json';
-import { UMCalendar } from '../../../static/UMCalendar/UMCalendar';
-import HomeCard from './components/HomeCard';
-import { screenWidth } from '../../../utils/stylesKits';
-import { trigger } from '../../../utils/trigger';
+} from '../../../../utils/pathMap.js';
+import EventPage from './EventPage.js';
+import ModalBottom from '../../../../components/ModalBottom.js';
+import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
+import { versionStringCompare } from '../../../../utils/versionKits.js';
+import packageInfo from '../../../../../package.json';
+import { UMCalendar } from '../../../../static/UMCalendar/UMCalendar.js';
+import HomeCard from './components/HomeCard.js';
+import { screenWidth } from '../../../../utils/stylesKits.js';
+import { trigger } from '../../../../utils/trigger.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -175,7 +175,7 @@ class HomeScreen extends Component {
                     },
                 },
                 {
-                    icon_name: require('../../../static/img/logo.png'),
+                    icon_name: require('../../../../static/img/logo.png'),
                     icon_type: iconTypes.img,
                     function_name: t('澳大方舟', { ns: 'home' }),
                     func: () => {

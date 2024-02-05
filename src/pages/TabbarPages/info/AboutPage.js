@@ -13,7 +13,7 @@ import {
 import { setLanguage } from '../../../i18n/i18n';
 import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { openLink } from '../../../utils/browser';
-import HomeCard from '../home/components/HomeCard';
+import HomeCard from './home/components/HomeCard';
 import {
     USUAL_Q,
     USER_AGREE,

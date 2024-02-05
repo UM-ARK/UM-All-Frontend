@@ -8,12 +8,12 @@ import {
     Image,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../../../utils/uiMap';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import { scale } from 'react-native-size-matters';
-import { screenWidth } from "../../../../utils/stylesKits";
+import { screenWidth } from "../../../../../utils/stylesKits";
 import { t } from "i18next";
 
 // 解構全局ui設計顏色
@@ -33,7 +33,7 @@ class HomeCard extends Component {
         userName: 'ARK ALL',
         userType: t('開發者'),
         userImage: {
-            profilePhoto: require('../../../../static/img/logo.png'),
+            profilePhoto: require('../../../../../static/img/logo.png'),
         },
         //是否關注
         ifFollowed: false,
