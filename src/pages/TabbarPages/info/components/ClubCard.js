@@ -16,12 +16,12 @@ import { trigger } from '../../../../utils/trigger';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow, themeColor } = COLOR_DIY;
-const IMG_SIZE = scale(45);
+const IMG_SIZE = verticalScale(45);
 
 class EventCard extends Component {
     // NavigationContext組件可以在非基頁面拿到路由信息
@@ -53,51 +53,42 @@ class EventCard extends Component {
                     justifyContent: 'space-around',
                     alignItems: 'center',
                     paddingVertical: scale(8),
+                    margin: scale(3),
                 }}
                 activeOpacity={0.8}
                 onPress={this.handleJumpToDetail}>
                 {/* 社團 / 組織 Logo */}
-                <View
+                <FastImage
+                    source={{ uri: logo_url }}
                     style={{
+                        backgroundColor: COLOR_DIY.trueWhite,
                         width: IMG_SIZE,
                         height: IMG_SIZE,
-                        borderRadius: 50,
-                        backgroundColor: COLOR_DIY.white,
-                        // ...viewShadow,
+                        borderRadius: scale(50),
+                    }}
+                    resizeMode={FastImage.resizeMode.contain}
+                    onLoadStart={() => {
+                        this.setState({ imgLoading: true });
+                    }}
+                    onLoad={() => {
+                        this.setState({ imgLoading: false });
                     }}>
-                    <FastImage
-                        source={{ uri: logo_url }}
-                        style={{
-                            backgroundColor: COLOR_DIY.trueWhite,
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: 50,
-                            overflow: 'hidden',
-                        }}
-                        resizeMode={FastImage.resizeMode.contain}
-                        onLoadStart={() => {
-                            this.setState({ imgLoading: true });
-                        }}
-                        onLoad={() => {
-                            this.setState({ imgLoading: false });
-                        }}>
-                        {this.state.imgLoading ? (
-                            <View
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    position: 'absolute',
-                                }}>
-                                <ActivityIndicator
-                                    size={'large'}
-                                    color={COLOR_DIY.themeColor}
-                                />
-                            </View>
-                        ) : null}
-                    </FastImage>
-                </View>
+                    {this.state.imgLoading ? (
+                        <View
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'absolute',
+                            }}>
+                            <ActivityIndicator
+                                size={'large'}
+                                color={COLOR_DIY.themeColor}
+                            />
+                        </View>
+                    ) : null}
+                </FastImage>
 
                 {/* 組織名 */}
                 <View
@@ -109,7 +100,7 @@ class EventCard extends Component {
                         width: '80%'
                     }}>
                     <Text
-                        style={{ ...uiStyle.defaultText, color: black.main, fontSize: scale(10) }}
+                        style={{ ...uiStyle.defaultText, color: black.main, fontSize: verticalScale(10) }}
                         numberOfLines={1}>
                         {name}
                     </Text>

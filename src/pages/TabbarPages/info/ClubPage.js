@@ -19,7 +19,7 @@ import ClubCard from './components/ClubCard';
 
 import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { FlatList } from 'react-native';
 
 const { themeColor, black, white } = COLOR_DIY;
@@ -108,7 +108,7 @@ class ClubPage extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: black.main,
-                            fontSize: scale(15)
+                            fontSize: verticalScale(15)
                         }}>
                             {clubTagMap(tag)}
                         </Text>
@@ -231,7 +231,7 @@ class ClubPage extends Component {
                                         <Text style={{
                                             ...uiStyle.defaultText,
                                             color: black.third,
-                                            fontSize: scale(11),
+                                            fontSize: verticalScale(11),
                                             fontWeight: 'bold'
                                         }}>
                                             ARK
@@ -258,7 +258,7 @@ class ClubPage extends Component {
                                         <Text style={{
                                             ...uiStyle.defaultText,
                                             color: black.third,
-                                            fontSize: scale(11),
+                                            fontSize: verticalScale(11),
                                             fontWeight: 'bold'
                                         }}>
                                             {clubTagMap(itm.item)}
