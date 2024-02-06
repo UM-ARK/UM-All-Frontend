@@ -34,7 +34,7 @@ import { inject } from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import Toast, { DURATION } from 'react-native-easy-toast';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -494,7 +494,7 @@ class EventDetail extends Component {
                         style={{
                             bottom: 0,
                             width: '100%',
-                            height: scale(100),
+                            height: verticalScale(100),
                             backgroundColor: bg_color,
                             position: 'absolute',
                             borderTopLeftRadius: scale(15),
@@ -739,12 +739,8 @@ class EventDetail extends Component {
                                                 }}
                                                 style={{
                                                     backgroundColor: COLOR_DIY.trueWhite,
-                                                    width: scale(
-                                                        CLUB_IMAGE_WIDTH,
-                                                    ),
-                                                    height: scale(
-                                                        CLUB_IMAGE_HEIGHT,
-                                                    ),
+                                                    width: CLUB_IMAGE_WIDTH,
+                                                    height: CLUB_IMAGE_HEIGHT,
                                                     borderRadius: scale(5),
                                                     ...COLOR_DIY.viewShadow,
                                                 }}
@@ -877,9 +873,9 @@ class EventDetail extends Component {
                         // 向上滾動的淡出效果
                         fadeOutForeground
                         // 收起時的高度
-                        minHeight={scale(220)}
+                        minHeight={verticalScale(220)}
                         // 打開時的高度
-                        maxHeight={scale(445)}
+                        maxHeight={verticalScale(445)}
                         // 背景內容 - 圖片 - 建議使用橫圖
                         renderHeader={() => (
                             <FastImage
@@ -901,7 +897,7 @@ class EventDetail extends Component {
                         {renderMainContent()}
                         <View
                             style={{
-                                height: scale(200),
+                                height: verticalScale(200),
                                 backgroundColor: bg_color,
                             }}
                         />
@@ -940,8 +936,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     clubLogoContainer: {
-        width: scale(CLUB_LOGO_SIZE),
-        height: scale(CLUB_LOGO_SIZE),
+        width: CLUB_LOGO_SIZE,
+        height: CLUB_LOGO_SIZE,
         borderRadius: 50,
         overflow: 'hidden',
         marginVertical: scale(5),

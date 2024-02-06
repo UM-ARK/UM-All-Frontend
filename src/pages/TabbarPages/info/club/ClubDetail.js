@@ -51,7 +51,7 @@ import FastImage from 'react-native-fast-image';
 import { inject } from 'mobx-react';
 import axios from 'axios';
 import Toast from 'react-native-easy-toast';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 解構uiMap的數據
@@ -61,7 +61,7 @@ const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
 const CLUB_LOGO_SIZE = scale(80);
 const CLUB_IMAGE_WIDTH = scale(66);
-const CLUB_IMAGE_HEIGHT = scale(55);
+const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 class ClubDetail extends Component {
     imageScrollViewer = React.createRef(null);
@@ -815,7 +815,7 @@ class ClubDetail extends Component {
                     </TouchableOpacity>
 
                     <View
-                        style={{ height: scale(400), backgroundColor: bg_color }}
+                        style={{ height: verticalScale(200), backgroundColor: bg_color }}
                     />
                     <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center', }}>快催催這個組織多發活動｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡</Text>
                 </View>
@@ -839,9 +839,9 @@ class ClubDetail extends Component {
                         // 向上滾動的淡出效果
                         fadeOutForeground
                         // 收起時的高度
-                        minHeight={scale(140)}
+                        minHeight={verticalScale(140)}
                         // 打開時的高度
-                        maxHeight={scale(230)}
+                        maxHeight={verticalScale(230)}
                         // 背景內容
                         renderHeader={() => (
                             <FastImage
@@ -980,8 +980,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: scale(5),
         alignSelf: 'center',
-        width: scale(CLUB_LOGO_SIZE),
-        height: scale(CLUB_LOGO_SIZE),
+        width: CLUB_LOGO_SIZE,
+        height: CLUB_LOGO_SIZE,
         borderRadius: scale(50),
         overflow: 'hidden',
         ...COLOR_DIY.viewShadow,
@@ -990,7 +990,7 @@ const styles = StyleSheet.create({
     clubLogoWhiteSpace: {
         bottom: 0,
         width: '100%',
-        height: scale(20),
+        height: verticalScale(20),
         backgroundColor: bg_color,
         position: 'absolute',
         borderTopLeftRadius: scale(15),
