@@ -38,7 +38,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
-const CLUB_LOGO_SIZE = 80;
+const CLUB_LOGO_SIZE = verticalScale(60);
 const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
 const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
@@ -58,6 +58,7 @@ class EventDetail extends Component {
         showDialog: false,
         reportChoice: false,
         toastColor: themeColor,
+        showUpInfo: false,
     };
 
     imageScrollViewer = React.createRef(null);
@@ -297,26 +298,25 @@ class EventDetail extends Component {
 
         // 活動基本信息
         renderEventBasicInfo = () => {
+            const { clubData } = this.state;
             return (
                 <View
                     style={{
                         backgroundColor: white,
-                        margin: scale(10),
-                        marginHorizontal: scale(40),
-                        paddingVertical: scale(20),
-                        paddingHorizontal: scale(15),
+                        marginVertical: verticalScale(5),
+                        marginHorizontal: scale(15),
                         borderRadius: scale(10),
-                        overflow: 'hidden',
-                        ...COLOR_DIY.viewShadow,
+                        paddingVertical: verticalScale(10),
+                        paddingHorizontal: scale(15),
                     }}>
-                    {/* 活動名 */}
-                    <View style={{ marginBottom: scale(15) }}>
+                    {/* 活動大標題 */}
+                    <View style={{ marginBottom: verticalScale(5) }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 color: black.main,
                                 fontWeight: 'bold',
-                                fontSize: scale(15),
+                                fontSize: verticalScale(15),
                             }}>
                             {title}
                         </Text>
@@ -328,7 +328,7 @@ class EventDetail extends Component {
                             <View style={{ ...styles.infoShowContainer }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
-                                    fontSize: scale(11),
+                                    fontSize: verticalScale(11),
                                     color: COLOR_DIY.themeColor,
                                 }}>
                                     @
@@ -347,12 +347,12 @@ class EventDetail extends Component {
                     </View>
 
                     {/* 活動時間 */}
-                    <View style={{ marginTop: scale(5) }}>
+                    <View style={{ marginTop: verticalScale(5) }}>
                         <View style={{ flexDirection: 'row' }}>
                             <View style={{ ...styles.infoShowContainer }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
-                                    fontSize: scale(11),
+                                    fontSize: verticalScale(11),
                                     color: COLOR_DIY.themeColor,
                                 }}>
                                     from
@@ -376,7 +376,7 @@ class EventDetail extends Component {
                             <View style={{ ...styles.infoShowContainer }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
-                                    fontSize: scale(11),
+                                    fontSize: verticalScale(11),
                                     color: COLOR_DIY.themeColor,
                                 }}>
                                     to
@@ -394,13 +394,57 @@ class EventDetail extends Component {
                         </View>
                     </View>
 
-                    {/* Follow按鈕 帶Toast */}
-                    {eventData != undefined &&
-                        eventData.can_follow &&
-                        !isClub &&
-                        false
-                        ? this.renderFollowButton()
-                        : null}
+                    {/* 舉辦方頭像 */}
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            trigger();
+                            if (!isClub) {
+                                this.props.navigation.navigate('ClubDetail', {
+                                    data: clubData,
+                                });
+                            }
+                        }}>
+                        <View style={{
+                            alignSelf: 'center',
+                            flexDirection: 'row',
+                        }}>
+                            {/* 社團名 */}
+                            <View style={{
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <View style={{ ...styles.infoShowContainer }}>
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: verticalScale(11),
+                                        color: COLOR_DIY.themeColor,
+                                    }}>
+                                        Created By
+                                    </Text>
+                                </View>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    alignSelf: 'center',
+                                    marginTop: scale(5),
+                                    color: black.third,
+                                }}>
+                                    {clubData == undefined ? '' : clubData.name}
+                                </Text>
+                            </View>
+                            {/* 社團Logo */}
+                            <FastImage
+                                source={{
+                                    uri:
+                                        clubData == undefined
+                                            ? ''
+                                            : clubData.logo_url,
+                                    // cache: FastImage.cacheControl.web,
+                                }}
+                                style={{ ...styles.clubLogoContainer, backgroundColor: COLOR_DIY.trueWhite, }}
+                                resizeMode={FastImage.resizeMode.contain}
+                            />
+                        </View>
+                    </TouchableWithoutFeedback>
                 </View>
             );
         };
@@ -419,7 +463,7 @@ class EventDetail extends Component {
                     <View
                         style={{
                             position: 'absolute',
-                            top: scale(65),
+                            top: verticalScale(65),
                             left: scale(15),
                             zIndex: 999
                         }}>
@@ -431,87 +475,11 @@ class EventDetail extends Component {
                             }}>
                             <Ionicons
                                 name="chevron-back-circle"
-                                size={scale(35)}
+                                size={verticalScale(35)}
                                 color={white}
                             />
                         </TouchableOpacity>
                     </View>
-                    {/* 設置按鈕 */}
-                    {
-                        false && isClub ? (
-                            <View
-                                style={{
-                                    position: 'absolute',
-                                    top: scale(65),
-                                    right: scale(15),
-                                }}>
-                                <TouchableOpacity
-                                    activeOpacity={0.7}
-                                    onPress={() => {
-                                        this.props.navigation.navigate(
-                                            'ClubSetting',
-                                            {
-                                                eventID: eventData._id,
-                                                refresh:
-                                                    this.onRefresh.bind(this),
-                                            },
-                                        );
-                                    }}>
-                                    <Ionicons
-                                        name="settings-outline"
-                                        size={scale(25)}
-                                        color={white}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        ) : null
-                        // <View
-                        //     style={{
-                        //         position: 'absolute',
-                        //         top: scale(65),
-                        //         right: scale(15),
-                        //     }}>
-                        //     <TouchableOpacity
-                        //         activeOpacity={0.7}
-                        //         onPress={() => {
-                        //             this.props.navigation.navigate(
-                        //                 'ChatDetail',
-                        //                 {get: 'event', id: eventData._id},
-                        //             );
-                        //         }}>
-                        //         <Feather
-                        //             name="message-circle"
-                        //             size={scale(25)}
-                        //             color={white}
-                        //         />
-                        //     </TouchableOpacity>
-                        // </View>
-                    }
-
-                    {/* 白邊，凸顯立體感 */}
-                    <TouchableOpacity
-                        activeOpacity={1}
-                        style={{
-                            bottom: 0,
-                            width: '100%',
-                            height: verticalScale(100),
-                            backgroundColor: bg_color,
-                            position: 'absolute',
-                            borderTopLeftRadius: scale(15),
-                            borderTopRightRadius: scale(15),
-                        }}
-                    />
-                    {/* 活動基本信息 */}
-                    <TouchableWithoutFeedback>
-                        <View
-                            style={{
-                                bottom: scale(5),
-                                position: 'absolute',
-                                width: '100%',
-                            }}>
-                            {renderEventBasicInfo()}
-                        </View>
-                    </TouchableWithoutFeedback>
                 </TouchableOpacity>
             );
         };
@@ -520,62 +488,8 @@ class EventDetail extends Component {
         renderMainContent = () => {
             const { relateImgUrl, clubData, eventData } = this.state;
             return (
-                <View style={{ backgroundColor: bg_color, flex: 1 }}>
-                    {/* 舉辦方頭像 */}
-                    <TouchableWithoutFeedback
-                        onPress={() => {
-                            trigger();
-                            if (!isClub) {
-                                this.props.navigation.navigate('ClubDetail', {
-                                    data: clubData,
-                                });
-                            }
-                        }}>
-                        <View
-                            style={{
-                                alignSelf: 'center',
-                                flexDirection: 'row',
-                            }}>
-                            {/* 社團名 */}
-                            <View
-                                style={{
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}>
-                                <View style={{ ...styles.infoShowContainer }}>
-                                    <Text style={{
-                                        ...uiStyle.defaultText,
-                                        fontSize: scale(11),
-                                        color: COLOR_DIY.themeColor,
-                                    }}>
-                                        Created By
-                                    </Text>
-                                </View>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    alignSelf: 'center',
-                                    marginTop: scale(5),
-                                    color: black.third,
-                                }}>
-                                    {clubData == undefined ? '' : clubData.name}
-                                </Text>
-                            </View>
-                            {/* 社團Logo */}
-                            <View style={styles.clubLogoContainer}>
-                                <FastImage
-                                    source={{
-                                        uri:
-                                            clubData == undefined
-                                                ? ''
-                                                : clubData.logo_url,
-                                        // cache: FastImage.cacheControl.web,
-                                    }}
-                                    style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
-                                    resizeMode={FastImage.resizeMode.contain}
-                                />
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
+                <View style={{ backgroundColor: bg_color, flex: 1, marginTop: verticalScale(5), }}>
+                    {renderEventBasicInfo()}
 
                     {/* 設置按鈕 */}
                     {isClub ? (
@@ -606,7 +520,7 @@ class EventDetail extends Component {
                                     backgroundColor: themeColor, borderRadius: scale(15), padding: scale(10), width: 'auto',
                                     margin: scale(70), marginVertical: scale(5)
                                 }}>
-                                <Text style={{ ...uiStyle.defaultText, color: white, fontSize: scale(20) }}>活動設置 </Text>
+                                <Text style={{ ...uiStyle.defaultText, color: white, fontSize: verticalScale(20) }}>活動設置 </Text>
                                 <Ionicons
                                     name="settings-outline"
                                     size={scale(25)}
@@ -614,7 +528,7 @@ class EventDetail extends Component {
                                 />
                             </TouchableOpacity>
                             <View>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.main, alignSelf: 'center' }}>Update活動資訊請點我！↑</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: black.main, alignSelf: 'center' }}>Update活動資訊請點我！↑</Text>
                             </View>
                         </>
                     ) : null}
@@ -627,10 +541,7 @@ class EventDetail extends Component {
                                     backgroundColor: COLOR_DIY.white,
                                     borderRadius: scale(10),
                                     marginHorizontal: scale(15),
-                                    // 增加陰影
-                                    marginBottom: scale(8),
-                                    marginTop: scale(10),
-                                    // ...COLOR_DIY.viewShadow,
+                                    marginTop: verticalScale(5),
                                 }}>
                                 {/* 卡片標題 */}
                                 <View
@@ -644,7 +555,7 @@ class EventDetail extends Component {
                                     activeOpacity={0.6}>
                                     <Text style={{
                                         ...uiStyle.defaultText,
-                                        fontSize: scale(12),
+                                        fontSize: verticalScale(12),
                                         color: themeColor,
                                         fontWeight: 'bold',
                                     }}>
@@ -701,7 +612,7 @@ class EventDetail extends Component {
                                 activeOpacity={0.6}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
-                                    fontSize: scale(12),
+                                    fontSize: verticalScale(12),
                                     color: themeColor,
                                     fontWeight: 'bold',
                                 }}>
@@ -770,7 +681,7 @@ class EventDetail extends Component {
                             size={scale(20)}
                             color={black.third}
                         />
-                        <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(13) }}>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: verticalScale(13) }}>
                             向管理員舉報該活動
                         </Text>
                     </TouchableOpacity>
@@ -801,7 +712,7 @@ class EventDetail extends Component {
                             <Text style={{
                                 ...uiStyle.defaultText,
                                 color: black.third,
-                                fontSize: scale(13),
+                                fontSize: verticalScale(13),
                             }}>
                                 詳情
                             </Text>
@@ -813,7 +724,7 @@ class EventDetail extends Component {
                                     <Text style={{
                                         ...uiStyle.defaultText,
                                         color: black.main,
-                                        fontSize: scale(16),
+                                        fontSize: verticalScale(16),
                                     }}
                                         selectable>
                                         {introduction}
@@ -873,9 +784,9 @@ class EventDetail extends Component {
                         // 向上滾動的淡出效果
                         fadeOutForeground
                         // 收起時的高度
-                        minHeight={verticalScale(220)}
+                        minHeight={verticalScale(150)}
                         // 打開時的高度
-                        maxHeight={verticalScale(445)}
+                        maxHeight={verticalScale(350)}
                         // 背景內容 - 圖片 - 建議使用橫圖
                         renderHeader={() => (
                             <FastImage
@@ -891,16 +802,12 @@ class EventDetail extends Component {
                         showsVerticalScrollIndicator={false}
                         refreshControl={this.renderRefreshCompo()}
                         alwaysBounceHorizontal={false}
+                        scrollViewBackgroundColor={bg_color}
                     // bounces={false}
                     >
                         {/* 主要頁面內容 */}
                         {renderMainContent()}
-                        <View
-                            style={{
-                                height: verticalScale(200),
-                                backgroundColor: bg_color,
-                            }}
-                        />
+                        <View style={{ height: verticalScale(50), }} />
                     </ImageHeaderScrollView>
                 ) : (
                     // Loading屏幕
@@ -938,9 +845,9 @@ const styles = StyleSheet.create({
     clubLogoContainer: {
         width: CLUB_LOGO_SIZE,
         height: CLUB_LOGO_SIZE,
-        borderRadius: 50,
+        borderRadius: scale(50),
         overflow: 'hidden',
-        marginVertical: scale(5),
+        marginTop: verticalScale(5),
         marginHorizontal: scale(20),
         backgroundColor: white,
         ...COLOR_DIY.viewShadow,
