@@ -22,7 +22,7 @@ import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -132,19 +132,19 @@ class UMEventPage extends Component {
                 ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
-                    { x: -scale(140), y: -scale(220) },
-                    { x: scale(140), y: -scale(220) },
-                    { x: -scale(140), y: -scale(120) },
-                    { x: scale(140), y: -scale(120) },
-                    { x: -scale(140), y: scale(0) },
-                    { x: scale(140), y: scale(0) },
-                    { x: -scale(140), y: scale(120) },
-                    { x: scale(140), y: scale(120) },
-                    { x: -scale(140), y: scale(220) },
-                    { x: scale(140), y: scale(220) },
+                    { x: -scale(140), y: -verticalScale(220) },
+                    { x: scale(140), y: -verticalScale(220) },
+                    { x: -scale(140), y: -verticalScale(120) },
+                    { x: scale(140), y: -verticalScale(120) },
+                    { x: -scale(140), y: verticalScale(0) },
+                    { x: scale(140), y: verticalScale(0) },
+                    { x: -scale(140), y: verticalScale(120) },
+                    { x: scale(140), y: verticalScale(120) },
+                    { x: -scale(140), y: verticalScale(220) },
+                    { x: scale(140), y: verticalScale(220) },
                 ]}
                 // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: scale(220) }}>
+                initialPosition={{ x: scale(140), y: verticalScale(220) }}>
                 {/* 懸浮吸附按鈕，回頂箭頭 */}
                 <TouchableWithoutFeedback
                     onPress={() => {
