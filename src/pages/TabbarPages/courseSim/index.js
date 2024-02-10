@@ -11,7 +11,7 @@ import {
     FlatList,
 } from 'react-native';
 
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -762,7 +762,6 @@ E11-0000
         const haveSearchResult = this.state.searchText && filterCourseList.length > 0;
         return (
             <View style={{
-                width: '34%',
                 height: haveSearchResult ? '100%' : scale(45),
                 padding: scale(5),
                 marginRight: scale(5),
@@ -1011,7 +1010,29 @@ E11-0000
                     </View>
 
                     {/* 渲染選課的篩選列表 */}
-                    {this.state.addMode ? this.renderCourseSearch() : null}
+                    {this.state.addMode ?
+                        <View style={{ width: '34%', }}>
+                            {/* 搜索框引導文字 */}
+                            {!this.state.searchText ?
+                                <View style={{
+                                    flexDirection: 'row',
+                                    marginTop: verticalScale(5),
+                                    alignItems: 'center',
+                                }}>
+                                    <Ionicons
+                                        name="search"
+                                        size={verticalScale(12)}
+                                        color={themeColor}
+                                    />
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: themeColor,
+                                    }}>Search↓</Text>
+                                </View>
+                                : null}
+                            {this.renderCourseSearch()}
+                        </View>
+                        : null}
                 </ScrollView>
             </View>}</SafeAreaInsetsContext.Consumer  >
         );
