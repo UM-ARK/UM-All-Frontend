@@ -16,7 +16,7 @@ import { MAIL } from '../../utils/pathMap';
 import Header from '../../components/Header';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { trigger } from '../../utils/trigger';
 
 const { black, themeColor, white } = COLOR_DIY;
@@ -75,7 +75,7 @@ class ClubSetting extends Component {
                                 <Ionicons
                                     name="chevron-forward-outline"
                                     color={black.third}
-                                    size={pxToDp(20)}
+                                    size={scale(20)}
                                 />
                             </TouchableOpacity>
 
@@ -101,7 +101,7 @@ class ClubSetting extends Component {
                                     <Ionicons
                                         name="chevron-forward-outline"
                                         color={black.third}
-                                        size={pxToDp(20)}
+                                        size={scale(20)}
                                     />
                                 </TouchableOpacity>
                             )}
@@ -127,7 +127,7 @@ class ClubSetting extends Component {
                                     <Ionicons
                                         name="chevron-forward-outline"
                                         color={black.third}
-                                        size={pxToDp(20)}
+                                        size={scale(20)}
                                     />
                                 </TouchableOpacity>
                             )}
@@ -135,6 +135,42 @@ class ClubSetting extends Component {
                     ) : (
                         // 社團設置
                         <View>
+                            {/* 新增活動 選項 */}
+                            <TouchableOpacity
+                                style={{ ...styles.optionContainer }}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    // 跳轉活動info編輯頁，並傳遞刷新函數
+                                    this.props.navigation.navigate(
+                                        'EventSetting',
+                                        {
+                                            mode: 'create',
+                                            refresh:
+                                                this.props.route.params.refresh,
+                                        },
+                                    );
+                                }}>
+                                {/* 選項標題 */}
+                                <View style={{ flexDirection: 'row', }}>
+                                    <Ionicons
+                                        name="add-circle-outline"
+                                        color={black.main}
+                                        size={scale(20)}
+                                    />
+                                    <Text style={{ ...styles.optionTitle }}>
+                                        {'新增活動'}
+                                    </Text>
+                                </View>
+
+                                {/* 右側flex佈局 */}
+                                {/* 引導點擊的 > 箭頭 */}
+                                <Ionicons
+                                    name="chevron-forward-outline"
+                                    color={black.third}
+                                    size={scale(20)}
+                                />
+                            </TouchableOpacity>
+
                             {/* 社團/組織面板設置 選項 */}
                             <TouchableOpacity
                                 style={{ ...styles.optionContainer }}
@@ -150,16 +186,23 @@ class ClubSetting extends Component {
                                     );
                                 }}>
                                 {/* 選項標題 */}
-                                <Text style={{ ...styles.optionTitle }}>
-                                    {'社團/組織面板設置'}
-                                </Text>
+                                <View style={{ flexDirection: 'row', }}>
+                                    <Ionicons
+                                        name="settings-outline"
+                                        color={black.main}
+                                        size={scale(20)}
+                                    />
+                                    <Text style={{ ...styles.optionTitle }}>
+                                        {'組織主頁資料編輯'}
+                                    </Text>
+                                </View>
 
                                 {/* 右側flex佈局 */}
                                 {/* 引導點擊的 > 箭頭 */}
                                 <Ionicons
                                     name="chevron-forward-outline"
                                     color={black.third}
-                                    size={pxToDp(20)}
+                                    size={scale(20)}
                                 />
                             </TouchableOpacity>
 
@@ -185,7 +228,7 @@ class ClubSetting extends Component {
                                     <Ionicons
                                         name="chevron-forward-outline"
                                         color={black.third}
-                                        size={pxToDp(20)}
+                                        size={scale(20)}
                                     />
                                 </TouchableOpacity>
                             )}
@@ -211,39 +254,10 @@ class ClubSetting extends Component {
                                     <Ionicons
                                         name="chevron-forward-outline"
                                         color={black.third}
-                                        size={pxToDp(20)}
+                                        size={scale(20)}
                                     />
                                 </TouchableOpacity>
                             )}
-
-                            {/* 新增活動 選項 */}
-                            <TouchableOpacity
-                                style={{ ...styles.optionContainer }}
-                                activeOpacity={0.8}
-                                onPress={() => {
-                                    // 跳轉活動info編輯頁，並傳遞刷新函數
-                                    this.props.navigation.navigate(
-                                        'EventSetting',
-                                        {
-                                            mode: 'create',
-                                            refresh:
-                                                this.props.route.params.refresh,
-                                        },
-                                    );
-                                }}>
-                                {/* 選項標題 */}
-                                <Text style={{ ...styles.optionTitle }}>
-                                    {'新增活動'}
-                                </Text>
-
-                                {/* 右側flex佈局 */}
-                                {/* 引導點擊的 > 箭頭 */}
-                                <Ionicons
-                                    name="chevron-forward-outline"
-                                    color={black.third}
-                                    size={pxToDp(20)}
-                                />
-                            </TouchableOpacity>
 
                             {/* 刪除組織賬號 */}
                             <TouchableOpacity
@@ -267,18 +281,32 @@ class ClubSetting extends Component {
                                     );
                                 }}>
                                 {/* 選項標題 */}
-                                <Text style={{ ...styles.optionTitle, color: black.third }}>
-                                    {'刪除組織賬號'}
-                                </Text>
+                                <View style={{ flexDirection: 'row', }}>
+                                    <Ionicons
+                                        name="trash-outline"
+                                        color={black.third}
+                                        size={scale(20)}
+                                    />
+                                    <Text style={{ ...styles.optionTitle, color: black.third }}>
+                                        {'註銷組織賬號'}
+                                    </Text>
+                                </View>
 
                                 {/* 右側flex佈局 */}
                                 {/* 引導點擊的 > 箭頭 */}
                                 <Ionicons
                                     name="close-sharp"
                                     color={black.third}
-                                    size={pxToDp(20)}
+                                    size={scale(20)}
                                 />
                             </TouchableOpacity>
+
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: verticalScale(12), fontWeight: 'bold',
+                                color: COLOR_DIY.secondThemeColor,
+                                alignSelf: 'center', textAlign: 'center', marginTop: scale(10)
+                            }}>修改活動資料可進入具體活動頁面內操作！</Text>
 
                             {/* 登出賬號 */}
                             <TouchableOpacity
@@ -319,35 +347,35 @@ const styles = StyleSheet.create({
         backgroundColor: COLOR_DIY.unread,
         alignItems: 'center',
         alignSelf: 'center',
-        marginTop: pxToDp(20),
-        paddingHorizontal: pxToDp(20),
-        paddingVertical: pxToDp(10),
-        borderRadius: pxToDp(10),
+        marginTop: scale(20),
+        paddingHorizontal: scale(20),
+        paddingVertical: scale(10),
+        borderRadius: scale(10),
         ...COLOR_DIY.viewShadow,
     },
     submitButtonText: {
         ...uiStyle.defaultText,
         color: white,
-        fontSize: pxToDp(18),
+        fontSize: scale(18),
         fontWeight: '500',
     },
     optionContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: pxToDp(45),
-        padding: pxToDp(10),
+        height: scale(45),
+        padding: scale(10),
         backgroundColor: COLOR_DIY.meScreenColor.card_color,
-        marginBottom: pxToDp(1),
-        borderRadius: pxToDp(15),
-        marginHorizontal: pxToDp(10),
-        marginVertical: pxToDp(6),
+        marginBottom: scale(1),
+        borderRadius: scale(15),
+        marginHorizontal: scale(10),
+        marginVertical: scale(6),
     },
     optionTitle: {
         ...uiStyle.defaultText,
-        fontSize: pxToDp(16),
+        fontSize: scale(16),
         color: COLOR_DIY.black.main,
-        marginLeft: pxToDp(10),
+        marginLeft: scale(10),
     },
 });
 export default ClubSetting;

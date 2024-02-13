@@ -516,19 +516,20 @@ class EventDetail extends Component {
                                     );
                                 }}
                                 style={{
-                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                                    backgroundColor: themeColor, borderRadius: scale(15), padding: scale(10), width: 'auto',
+                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: 'center',
+                                    backgroundColor: COLOR_DIY.secondThemeColor, borderRadius: scale(15),
+                                    paddingHorizontal: scale(10), paddingVertical: scale(5),
                                     margin: scale(70), marginVertical: scale(5)
                                 }}>
-                                <Text style={{ ...uiStyle.defaultText, color: white, fontSize: verticalScale(20) }}>活動設置 </Text>
                                 <Ionicons
                                     name="settings-outline"
                                     size={scale(25)}
                                     color={white}
                                 />
+                                <Text style={{ ...uiStyle.defaultText, color: white, fontSize: verticalScale(20), fontWeight: 'bold', }}> 編輯活動</Text>
                             </TouchableOpacity>
                             <View>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: black.main, alignSelf: 'center' }}>Update活動資訊請點我！↑</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: COLOR_DIY.secondThemeColor, fontWeight: 'bold', alignSelf: 'center' }}>Update活動資訊請點我！↑</Text>
                             </View>
                         </>
                     ) : null}

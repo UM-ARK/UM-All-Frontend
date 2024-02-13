@@ -627,37 +627,54 @@ class EventSetting extends Component {
                                     <RadioButton
                                         value={'activity'}
                                         label={'普通活動'}
-                                        color={themeColor}
+                                        color={type == 'activity' ? themeColor : black.second}
                                         onPress={this.initState}
-                                        labelStyle={{ color: themeColor }}
+                                        labelStyle={{ color: type == 'activity' ? themeColor : black.second }}
                                     />
                                     <RadioButton
                                         value={'website'}
-                                        label={'Website Link跳轉'}
-                                        color={themeColor}
+                                        label={'Link跳轉/轉載貼文'}
+                                        color={type == 'website' ? themeColor : black.second}
                                         onPress={this.initState}
-                                        labelStyle={{ color: themeColor }}
+                                        labelStyle={{ color: type == 'website' ? themeColor : black.second }}
                                     />
                                 </RadioGroup>
                                 {/* type選擇的提示說明 */}
                                 <View style={{ marginTop: pxToDp(5) }}>
-                                    {type == 'activity' ? (
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            alignSelf: 'flex-start',
+                                        }}>
+                                        {`* 發佈模式說明：`}
+                                    </Text>
+                                    {type == 'activity' ? (<>
                                         <Text
                                             style={{
                                                 ...uiStyle.defaultText,
                                                 color: black.third,
                                                 alignSelf: 'flex-start',
                                             }}>
-                                            * 點擊活動卡片會進入ARK的詳情頁，可以在活動詳情處填入問卷、報名link，讓同學一鍵直達
+                                            {`* 點擊活動卡片會進入活動詳情頁，在活動詳情處填入問卷/報名Link，讓同學一鍵直達！`}
                                         </Text>
+                                        <Text
+                                            style={{
+                                                ...uiStyle.defaultText,
+                                                color: COLOR_DIY.secondThemeColor,
+                                                alignSelf: 'flex-start',
+                                            }}>
+                                            {`* 如希望轉載貼文，可在上方選擇“Link跳轉”模式發佈`}
+                                        </Text>
+                                    </>
                                     ) : (
                                         <Text
                                             style={{
                                                 ...uiStyle.defaultText,
                                                 color: black.third,
-                                                alignSelf: 'flex-end',
+                                                alignSelf: 'flex-start',
                                             }}>
-                                            * 點擊活動卡片會跳轉到您填寫的網址，適合公眾號推文、IG Post
+                                            {`* 點擊活動卡片會跳轉到您填寫的網址，適合公眾號推文、IG Post`}
                                         </Text>
                                     )}
                                 </View>
@@ -691,7 +708,7 @@ class EventSetting extends Component {
                         {type == 'website' ? (
                             // Website Link輸入框
                             <TextField
-                                placeholder={'Website Link *'}
+                                placeholder={'一鍵跳轉的網址Link *'}
                                 floatingPlaceholder
                                 floatOnFocus
                                 floatingPlaceholderColor={
@@ -700,7 +717,7 @@ class EventSetting extends Component {
                                 floatingPlaceholderStyle={
                                     floatingPlaceholderStyle
                                 }
-                                hint={'e.g. https://ark.boxz.dev/'}
+                                hint={'e.g. https://wiki.umall.one'}
                                 dynamicFieldStyle={(context) => {
                                     return {
                                         borderBottomWidth: pxToDp(1),

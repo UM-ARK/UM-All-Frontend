@@ -53,6 +53,7 @@ import axios from 'axios';
 import Toast from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MenuView } from '@react-native-menu/menu';
 
 // 解構uiMap的數據
 const { bg_color, white, black, themeColor, viewShadow } = COLOR_DIY;
@@ -523,19 +524,19 @@ class ClubDetail extends Component {
                                     }
                                     style={{
                                         flexDirection: 'row', alignItems: 'center',
-                                        backgroundColor: themeColor, borderRadius: scale(15), padding: scale(10),
+                                        backgroundColor: COLOR_DIY.secondThemeColor, borderRadius: scale(15), paddingHorizontal: scale(10), paddingVertical: scale(5),
                                         marginVertical: scale(10)
                                     }}>
-                                    <Text style={{ ...uiStyle.defaultText, color: white, fontSize: verticalScale(20) }}>賬號設置&新增活動 </Text>
                                     <Ionicons
                                         name="settings-outline"
                                         size={scale(25)}
                                         color={white}
                                     />
+                                    <Text style={{ ...uiStyle.defaultText, color: white, fontSize: verticalScale(20), fontWeight: 'bold', }}> 新增活動 & 資料編輯</Text>
                                 </TouchableOpacity>
-                                <View style={{ alignItems: 'center' }}>
+                                {/* <View style={{ alignItems: 'center' }}>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: COLOR_DIY.unread }}>Update組織資料&發佈新資訊請點我！↑</Text>
-                                </View>
+                                </View> */}
                             </>
                         ) : null}
                     </View>
@@ -704,7 +705,11 @@ class ClubDetail extends Component {
                     ) : null}
 
                     {isAdmin && eventData != undefined && eventData.length > 0 && (
-                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: COLOR_DIY.unread, alignSelf: 'center' }}>Update活動資料請進入具體活動頁內修改！↓</Text>
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            fontWeight: 'bold', fontSize: verticalScale(12),
+                            color: COLOR_DIY.secondThemeColor, alignSelf: 'center'
+                        }}>Update活動資料請進入具體活動頁內修改！↓</Text>
                     )}
 
                     {/* 舉辦的活動 */}
@@ -810,7 +815,7 @@ class ClubDetail extends Component {
                         refreshControl={this.renderRefreshCompo()}
                         alwaysBounceHorizontal={false}
                         scrollViewBackgroundColor={bg_color}
-                        // bounces={false}
+                    // bounces={false}
                     >
                         {/* 渲染主要頁面內容 */}
                         {renderMainContent()}
