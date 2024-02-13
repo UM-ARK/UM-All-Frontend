@@ -765,7 +765,7 @@ class HomeScreen extends Component {
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
-                                            color: black,
+                                            color: black.second,
                                             fontWeight: 'bold',
                                             marginTop: scale(2),
                                             alignSelf: 'center',
@@ -777,7 +777,7 @@ class HomeScreen extends Component {
                                     {this.state.version_info ? (
                                         <Text style={{
                                             ...uiStyle.defaultText,
-                                            color: black,
+                                            color: black.second,
                                             fontWeight: 'bold',
                                             marginTop: scale(2),
                                             alignSelf: 'center',
