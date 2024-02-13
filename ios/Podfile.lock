@@ -329,12 +329,12 @@ PODS:
     - React-Core
   - react-native-restart (0.0.24):
     - React-Core
-  - react-native-safe-area-context (4.8.2):
+  - react-native-safe-area-context (4.9.0):
     - React-Core
   - react-native-simple-toast (3.2.0):
     - React-Core
     - Toast (~> 4)
-  - react-native-webview (13.6.4):
+  - react-native-webview (13.8.1):
     - React-Core
   - React-perflogger (0.68.7)
   - React-RCTActionSheet (0.68.7):
@@ -707,9 +707,9 @@ SPEC CHECKSUMS:
   react-native-menu: 9728f90160c36b9a75481fc76e05354b99d54c59
   react-native-pager-view: c29d484f19c49ff19525a94105e4ab2c4d4ae273
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
-  react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
+  react-native-safe-area-context: b97eb6f9e3b7f437806c2ce5983f479f8eb5de4b
   react-native-simple-toast: 2079d417c52fc3ca295edba094d5632f7720e68d
-  react-native-webview: 4499e4e44aaf38c79f07da3c421a3b5c9055cb4f
+  react-native-webview: bef49fb935d75e1ca83aed3ac74eecf5b78764ac
   React-perflogger: 44436b315d757100a53dfb1ab6b77c58cb646d7d
   React-RCTActionSheet: 1888a229684762c40cc96c7ff4716f809655dc09
   React-RCTAnimation: f05da175751867521d14b02ab4d3994a7b96f131
@@ -744,4 +744,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: dffe2d434591b177ef39b2bee1110bfecfd0502a
 
-COCOAPODS: 1.15.0
+COCOAPODS: 1.15.2
