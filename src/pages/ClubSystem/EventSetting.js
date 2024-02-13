@@ -6,8 +6,6 @@ import {
     TouchableOpacity,
     TextInput,
     ActivityIndicator,
-    Keyboard,
-    TouchableWithoutFeedback,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
@@ -34,7 +32,7 @@ import FastImage from 'react-native-fast-image';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ImgComp from 'react-native-compressor';
 
-import { pxToDp } from '../../utils/stylesKits';
+import { scale } from 'react-native-size-matters';
 
 const { black, themeColor, white, bg_color, viewShadow } = COLOR_DIY;
 
@@ -42,7 +40,7 @@ const floatingPlaceholderColor = {
     focus: themeColor,
     default: black.main,
 };
-const floatingPlaceholderStyle = { fontSize: pxToDp(15) };
+const floatingPlaceholderStyle = { fontSize: scale(15) };
 
 let cover_image_file = {};
 let add_relate_image = [];
@@ -288,7 +286,7 @@ class EventSetting extends Component {
                         }>
                         <Ionicons
                             name="close-circle"
-                            size={pxToDp(25)}
+                            size={scale(25)}
                             color={COLOR_DIY.unread}
                         />
                     </TouchableOpacity>
@@ -327,7 +325,7 @@ class EventSetting extends Component {
                 ) : (
                     <Ionicons
                         name="camera-outline"
-                        size={pxToDp(25)}
+                        size={scale(25)}
                         color={COLOR_DIY.black.main}
                     />
                 )}
@@ -377,7 +375,7 @@ class EventSetting extends Component {
                 </Text>
                 <Ionicons
                     name={this.state.expanded1 ? 'chevron-up' : 'chevron-down'}
-                    size={pxToDp(20)}
+                    size={scale(20)}
                     color={black.third}
                 />
             </View>
@@ -394,6 +392,13 @@ class EventSetting extends Component {
                         expanded1: !this.state.expanded1,
                     });
                 }}>
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: black.third, fontSize: scale(12), marginVertical: scale(5),
+                }}>
+                    *
+                    將問卷等Link直接寫到活動詳情，方便同學直接跳轉！
+                </Text>
                 {this.renderTextArea()}
             </ExpandableSection>
         );
@@ -605,13 +610,12 @@ class EventSetting extends Component {
         const canSubmit = this.checkInfoOK();
 
         return (
-            // 使iOS可以點擊其他位置關閉鍵盤
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}><View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header title={'活動資訊編輯'} />
 
                 {!isLoading ? (
                     <KeyboardAwareScrollView
-                        contentContainerStyle={{ marginHorizontal: pxToDp(10) }}>
+                        contentContainerStyle={{ marginHorizontal: scale(10) }}>
                         {/* 活動類型選擇 */}
                         {!(mode == 'edit') && (
                             <View>
@@ -640,7 +644,7 @@ class EventSetting extends Component {
                                     />
                                 </RadioGroup>
                                 {/* type選擇的提示說明 */}
-                                <View style={{ marginTop: pxToDp(5) }}>
+                                <View style={{ marginTop: scale(5) }}>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
@@ -691,8 +695,8 @@ class EventSetting extends Component {
                             hint={'e.g. Python爬蟲工作坊'}
                             dynamicFieldStyle={(context) => {
                                 return {
-                                    borderBottomWidth: pxToDp(1),
-                                    paddingBottom: pxToDp(4),
+                                    borderBottomWidth: scale(1),
+                                    paddingBottom: scale(4),
                                     borderColor: context.isFocused
                                         ? themeColor
                                         : black.third,
@@ -720,8 +724,8 @@ class EventSetting extends Component {
                                 hint={'e.g. https://wiki.umall.one'}
                                 dynamicFieldStyle={(context) => {
                                     return {
-                                        borderBottomWidth: pxToDp(1),
-                                        paddingBottom: pxToDp(4),
+                                        borderBottomWidth: scale(1),
+                                        paddingBottom: scale(4),
                                         borderColor: context.isFocused
                                             ? themeColor
                                             : black.third,
@@ -762,7 +766,7 @@ class EventSetting extends Component {
                         )}
 
                         {/* 活動時間 */}
-                        <View style={{ marginTop: pxToDp(10) }}>
+                        <View style={{ marginTop: scale(10) }}>
                             <DateTimePickerModal
                                 isVisible={
                                     isStartDatePickerVisible ||
@@ -798,7 +802,7 @@ class EventSetting extends Component {
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    marginTop: pxToDp(10),
+                                    marginTop: scale(10),
                                 }}
                                 activeOpacity={0.8}
                                 onPress={() => {
@@ -811,7 +815,7 @@ class EventSetting extends Component {
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
-                                            fontSize: pxToDp(15),
+                                            fontSize: scale(15),
                                             color: black.third,
                                         }}>
                                         {moment(String(startDate)).format(
@@ -821,7 +825,7 @@ class EventSetting extends Component {
                                 </Text>
                                 <Ionicons
                                     name={'chevron-back-outline'}
-                                    size={pxToDp(20)}
+                                    size={scale(20)}
                                     color={black.third}
                                 />
                             </TouchableOpacity>
@@ -831,7 +835,7 @@ class EventSetting extends Component {
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    marginTop: pxToDp(10),
+                                    marginTop: scale(10),
                                 }}
                                 activeOpacity={0.8}
                                 onPress={() =>
@@ -844,7 +848,7 @@ class EventSetting extends Component {
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
-                                            fontSize: pxToDp(15),
+                                            fontSize: scale(15),
                                             color: black.third,
                                         }}>
                                         {moment(String(finishDate)).format(
@@ -854,7 +858,7 @@ class EventSetting extends Component {
                                 </Text>
                                 <Ionicons
                                     name={'chevron-back-outline'}
-                                    size={pxToDp(20)}
+                                    size={scale(20)}
                                     color={black.third}
                                 />
                             </TouchableOpacity>
@@ -862,18 +866,13 @@ class EventSetting extends Component {
 
                         {/* 活動詳情說明 */}
                         {type == 'activity' && (
-                            <View style={{ marginTop: pxToDp(10) }}>
-                                <Text
-                                    style={{ ...uiStyle.defaultText, color: black.third, fontSize: 12 }}>
-                                    *
-                                    將問卷等Link直接寫到活動詳情，方便同學直接跳轉！
-                                </Text>
+                            <View style={{ marginTop: scale(20), }}>
                                 {this.renderExpandSection1()}
                             </View>
                         )}
 
                         {/* 封面圖片 */}
-                        <View style={{ marginTop: pxToDp(20) }}>
+                        <View style={{ marginTop: scale(20) }}>
                             <Text style={styles.inputTitle}>
                                 設定封面圖片 *
                             </Text>
@@ -882,14 +881,14 @@ class EventSetting extends Component {
 
                         {/* 其他圖片 */}
                         {type == 'activity' && (
-                            <View style={{ marginTop: pxToDp(20) }}>
+                            <View style={{ marginTop: scale(20) }}>
                                 <Text style={styles.inputTitle}>
                                     設定其他圖片(選填)
                                 </Text>
                                 <FlatGrid
                                     maxItemsPerRow={2}
-                                    itemDimension={pxToDp(50)}
-                                    spacing={pxToDp(10)}
+                                    itemDimension={scale(50)}
+                                    spacing={scale(10)}
                                     data={this.state.relateImgUrl}
                                     renderItem={({ _, index }) =>
                                         this.renderImageSelectorItem(
@@ -909,7 +908,7 @@ class EventSetting extends Component {
                                 style={{
                                     flexDirection: 'row',
                                     alignItems: 'center',
-                                    marginTop: pxToDp(10),
+                                    marginTop: scale(10),
                                 }}>
                                 <Text style={styles.inputTitle}>
                                     允許Follow
@@ -919,7 +918,7 @@ class EventSetting extends Component {
                                     onValueChange={(allowFollow) =>
                                         this.setState({ allowFollow })
                                     }
-                                    style={{ marginLeft: pxToDp(5) }}
+                                    style={{ marginLeft: scale(5) }}
                                     onColor={themeColor}
                                 />
                             </View>
@@ -943,7 +942,7 @@ class EventSetting extends Component {
                             style={{
                                 ...styles.submitButton,
                                 backgroundColor: canSubmit ? themeColor : black.third,
-                                marginVertical: pxToDp(30),
+                                marginVertical: scale(30),
                             }}>
                             <Text style={{ ...styles.submitButtonText }}>
                                 {this.state.mode == 'create'
@@ -965,7 +964,7 @@ class EventSetting extends Component {
                                 style={{
                                     ...styles.submitButton,
                                     backgroundColor: COLOR_DIY.unread,
-                                    marginBottom: pxToDp(50),
+                                    marginBottom: scale(50),
                                 }}>
                                 <Text style={{ ...styles.submitButtonText }}>
                                     刪除
@@ -993,7 +992,7 @@ class EventSetting extends Component {
                     }
                     handleCancel={() => this.setState({ submitChoice: false })}
                 />
-            </View></TouchableWithoutFeedback>
+            </View>
         );
     }
 }
@@ -1002,33 +1001,33 @@ const styles = StyleSheet.create({
     inputTitle: {
         ...uiStyle.defaultText,
         color: themeColor,
-        fontSize: pxToDp(16),
+        fontSize: scale(16),
     },
     inputArea: {
         ...uiStyle.defaultText,
         textAlignVertical: 'top',
-        borderWidth: pxToDp(1),
-        paddingVertical: pxToDp(10),
-        paddingHorizontal: pxToDp(15),
-        borderRadius: pxToDp(10),
+        borderWidth: scale(1),
+        paddingVertical: scale(10),
+        paddingHorizontal: scale(15),
+        borderRadius: scale(10),
         ...COLOR_DIY.viewShadow,
         backgroundColor: bg_color,
-        fontSize: pxToDp(15),
+        fontSize: scale(15),
     },
     submitButton: {
         backgroundColor: themeColor,
         alignItems: 'center',
         alignSelf: 'center',
-        marginVertical: pxToDp(5),
-        paddingHorizontal: pxToDp(20),
-        paddingVertical: pxToDp(10),
-        borderRadius: pxToDp(10),
+        marginVertical: scale(5),
+        paddingHorizontal: scale(20),
+        paddingVertical: scale(10),
+        borderRadius: scale(10),
         ...COLOR_DIY.viewShadow,
     },
     submitButtonText: {
         ...uiStyle.defaultText,
         color: white,
-        fontSize: pxToDp(18),
+        fontSize: scale(18),
         fontWeight: '500',
     },
 
@@ -1040,12 +1039,12 @@ const styles = StyleSheet.create({
         zIndex: 9,
     },
     imgSelectorContainer: {
-        width: pxToDp(160),
-        height: pxToDp(100),
+        width: scale(150),
+        height: scale(100),
         backgroundColor: COLOR_DIY.eventColor.imageCard,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: pxToDp(5),
+        borderRadius: scale(5),
         overflow: 'hidden',
     },
 });

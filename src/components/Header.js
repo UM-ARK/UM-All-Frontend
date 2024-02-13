@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import {
     TouchableOpacity,
     Appearance,
+    TouchableWithoutFeedback,
+    Keyboard,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
@@ -21,7 +23,7 @@ class HeaderDIY extends Component {
 
     render() {
         return (
-            <Header
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}><Header
                 backgroundColor={COLOR_DIY.bg_color}
                 leftComponent={
                     <TouchableOpacity onPress={() => {
@@ -56,7 +58,7 @@ class HeaderDIY extends Component {
                     // 修復深色模式頂部小白條問題
                     borderBottomWidth: 0,
                 }}
-            />
+            /></TouchableWithoutFeedback>
         );
     }
 }

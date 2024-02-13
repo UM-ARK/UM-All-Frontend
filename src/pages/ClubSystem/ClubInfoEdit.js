@@ -504,7 +504,7 @@ class ClubInfoEdit extends Component {
     render() {
         const { clubData, submitChoice, isLoading } = this.state;
         return (
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}><View style={{ flex: 1, backgroundColor: bg_color }}>
+            <View style={{ flex: 1, backgroundColor: bg_color }}>
                 <Header title={'社團主頁信息編輯'} />
 
                 {!isLoading ? (
@@ -556,7 +556,7 @@ class ClubInfoEdit extends Component {
                     handleConfirm={this.postNewInfo}
                     handleCancel={() => this.setState({ submitChoice: false })}
                 />
-            </View></TouchableWithoutFeedback>
+            </View>
         );
     }
 }
