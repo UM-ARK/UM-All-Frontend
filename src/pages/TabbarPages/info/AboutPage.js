@@ -94,12 +94,16 @@ export default class AboutPage extends Component {
                                 {t('Language Setting', { ns: 'about' })}
                             </Text>
                             <TouchableOpacity
-                                style={{ marginLeft: scale(10), }}
+                                style={{ ...s.buttonContainer, }}
                                 onPress={() => {
+                                    trigger();
                                     Alert.alert('確定切換到繁體中文版嗎？', '將重啟APP。', [
                                         {
                                             text: 'Yes',
-                                            onPress: () => setLanguage('tc')
+                                            onPress: () => {
+                                                trigger();
+                                                setLanguage('tc');
+                                            }
                                         },
                                         {
                                             text: 'No',
@@ -107,15 +111,19 @@ export default class AboutPage extends Component {
                                     ])
                                 }}
                             >
-                                <Text style={{ ...s.highlightText }}>中</Text>
+                                <Text style={{ ...s.highlightText, color: white, }}>中</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={{ marginLeft: scale(10), }}
+                                style={{ ...s.buttonContainer, }}
                                 onPress={() => {
+                                    trigger();
                                     Alert.alert('Are you sure to switch to the English version?', 'The APP will be restarted.', [
                                         {
                                             text: 'Yes',
-                                            onPress: () => setLanguage('en')
+                                            onPress: () => {
+                                                trigger();
+                                                setLanguage('en');
+                                            }
                                         },
                                         {
                                             text: 'No',
@@ -123,7 +131,7 @@ export default class AboutPage extends Component {
                                     ])
                                 }}
                             >
-                                <Text style={{ ...s.highlightText }}>EN</Text>
+                                <Text style={{ ...s.highlightText, color: white, }}>EN</Text>
                             </TouchableOpacity>
                         </View>
                     </HomeCard>
@@ -357,5 +365,12 @@ const s = StyleSheet.create({
         fontSize: scale(12),
         color: black.third,
         marginTop: scale(3),
+    },
+    buttonContainer: {
+        marginLeft: scale(10),
+        backgroundColor: themeColor,
+        paddingHorizontal: scale(5),
+        paddingVertical: scale(3),
+        borderRadius: scale(10),
     },
 })
