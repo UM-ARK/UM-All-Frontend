@@ -30,7 +30,7 @@ import packageInfo from '../../../../package.json';
 import coursePlanFile from "../../../static/UMCourses/coursePlan";
 import offerCourseFile from "../../../static/UMCourses/offerCourses";
 
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,7 +39,7 @@ import { t } from 'i18next';
 
 const { black, themeColor, white, } = COLOR_DIY;
 const IMG_WIDTH = scale(160);
-const iconSize = scale(25);
+const iconSize = verticalScale(25);
 
 export default class AboutPage extends Component {
 
@@ -51,7 +51,7 @@ export default class AboutPage extends Component {
                         alignSelf: 'center',
                         alignItems: 'center', justifyContent: 'center',
                         flexDirection: 'row',
-                        marginTop: scale(10),
+                        marginTop: verticalScale(10),
                     }}>
                         {/* ARK Logo */}
                         <FastImage
@@ -62,10 +62,10 @@ export default class AboutPage extends Component {
                             }}
                         />
                         <Text style={{
-                            fontSize: scale(18),
+                            fontSize: verticalScale(18),
                             color: themeColor,
                             fontWeight: 'bold',
-                            marginLeft: scale(5),
+                            marginLeft: verticalScale(5),
                         }}>{
                                 t("ABOUT")
                             } ARK ALL</Text>
@@ -356,21 +356,21 @@ export default class AboutPage extends Component {
 
 const s = StyleSheet.create({
     highlightText: {
-        fontSize: scale(12),
+        fontSize: verticalScale(12),
         color: themeColor,
         fontWeight: '600',
     },
     bodyText: {
         ...uiStyle.defaultText,
-        fontSize: scale(12),
+        fontSize: verticalScale(12),
         color: black.third,
-        marginTop: scale(3),
+        marginTop: verticalScale(3),
     },
     buttonContainer: {
         marginLeft: scale(10),
         backgroundColor: themeColor,
         paddingHorizontal: scale(5),
-        paddingVertical: scale(3),
+        paddingVertical: verticalScale(3),
         borderRadius: scale(10),
     },
 })

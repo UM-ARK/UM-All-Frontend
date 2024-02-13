@@ -12,7 +12,7 @@ import { COLOR_DIY, uiStyle } from '../../../../../utils/uiMap';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { screenWidth } from "../../../../../utils/stylesKits";
 import { t } from "i18next";
 
@@ -61,8 +61,8 @@ class HomeCard extends Component {
                         {/* 這裡點擊跳轉組織頁面,但還沒做 */}
                         <Image
                             style={{
-                                width: scale(35),
-                                height: scale(35),
+                                width: verticalScale(35),
+                                height: verticalScale(35),
                                 borderRadius: scale(45),
                             }}
                             source={userImage.profilePhoto}
@@ -79,7 +79,7 @@ class HomeCard extends Component {
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
-                                    fontSize: scale(15),
+                                    fontSize: verticalScale(15),
                                     color: COLOR_DIY.black.second,
                                 }}>
                                 {userName}
@@ -88,7 +88,7 @@ class HomeCard extends Component {
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
-                                    fontSize: scale(12),
+                                    fontSize: verticalScale(12),
                                     color: 'grey',
                                 }}>
                                 {userType}
@@ -189,30 +189,30 @@ class HomeCard extends Component {
 const styles = StyleSheet.create({
     homeCard: {
         backgroundColor: white,
-        marginTop: scale(10),
+        marginTop: verticalScale(10),
         borderRadius: 10,
         width: screenWidth * 0.95,
     },
     userInformation: {
         flexDirection: 'row',
-        marginTop: scale(10),
+        marginTop: verticalScale(10),
         marginHorizontal: scale(15),
         alignItems: 'center',
     },
     Container: {
         backgroundColor: white,
-        marginBottom: scale(7),
+        marginBottom: verticalScale(7),
         marginHorizontal: scale(10),
         borderRadius: scale(10),
     },
     ContentContainer: {
         justifyContent: 'space-between',
         paddingHorizontal: scale(8),
-        paddingVertical: scale(8),
+        paddingVertical: verticalScale(8),
     },
     newsCardImg: {
-        width: scale(125),
-        height: scale(100),
+        width: verticalScale(125),
+        height: verticalScale(100),
     },
 });
 

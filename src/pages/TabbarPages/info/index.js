@@ -11,14 +11,14 @@ import AboutPage from './AboutPage';
 
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
 
 const { bg_color, white, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
 
-const tabWidth = scale(25);
+const tabWidth = verticalScale(25);
 const numOfTabs = 5;
 
 class NewsScreen extends Component {
@@ -53,7 +53,7 @@ class NewsScreen extends Component {
                 <Tab.Navigator
                     screenOptions={{
                         tabBarLabelStyle: {
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: 'bold',
                         },
                         tabBarStyle: {

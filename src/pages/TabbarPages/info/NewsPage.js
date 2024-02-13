@@ -167,7 +167,7 @@ class NewsPage extends Component {
         } = this.state.topNews;
 
         return (
-            <View style={{ marginTop: scale(5) }}>
+            <View style={{ marginTop: verticalScale(5) }}>
                 <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center' }}>
                     Data From: data.um.edu.mo
                 </Text>
@@ -219,17 +219,17 @@ class NewsPage extends Component {
                                                     ...uiStyle.defaultText,
                                                     color: COLOR_DIY.trueWhite,
                                                     fontWeight: 'bold',
-                                                    fontSize: scale(18),
+                                                    fontSize: verticalScale(18),
                                                 }}
                                                 numberOfLines={3}>
                                                 {title_en}
                                             </Text>
                                             <Text
-                                                style={{
+                                                style={{    
                                                     ...uiStyle.defaultText,
                                                     color: COLOR_DIY.trueWhite,
                                                     fontWeight: 'bold',
-                                                    fontSize: scale(13),
+                                                    fontSize: verticalScale(13),
                                                 }}>
                                                 {title_cn}
                                             </Text>
@@ -398,8 +398,8 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
         overflow: 'hidden',
         marginHorizontal: scale(10),
-        marginVertical: scale(5),
-        height: scale(200),
+        marginVertical: verticalScale(5),
+        height: verticalScale(200),
         backgroundColor: white,
         ...viewShadow,
     },
@@ -407,19 +407,19 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: scale(15),
+        padding: verticalScale(15),
         justifyContent: 'flex-end',
     },
     topNewsPosition: {
         position: 'absolute',
-        top: scale(10),
+        top: verticalScale(10),
         left: scale(15),
     },
     topNewsText: {
         ...uiStyle.defaultText,
         color: COLOR_DIY.trueWhite,
         fontWeight: 'bold',
-        fontSize: scale(20),
+        fontSize: verticalScale(20),
     },
 });
 

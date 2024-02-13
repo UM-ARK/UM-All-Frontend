@@ -14,7 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
 // 解構全局ui設計顏色
@@ -114,7 +114,7 @@ class NewsCard extends Component {
                                     ...uiStyle.defaultText,
                                     fontWeight: 'bold',
                                     color: black.main,
-                                    fontSize: scale(14),
+                                    fontSize: verticalScale(13),
                                 }}
                                 numberOfLines={3}>
                                 {title_en}
@@ -127,8 +127,8 @@ class NewsCard extends Component {
                                     ...uiStyle.defaultText,
                                     fontSize:
                                         title_en.length > 0
-                                            ? scale(13)
-                                            : scale(14),
+                                            ? verticalScale(12)
+                                            : verticalScale(14),
                                     color:
                                         title_en.length > 0
                                             ? black.second
@@ -145,8 +145,8 @@ class NewsCard extends Component {
                                     ...uiStyle.defaultText,
                                     fontSize:
                                         title_en.length > 0
-                                            ? scale(13)
-                                            : scale(14),
+                                            ? verticalScale(12)
+                                            : verticalScale(14),
                                     color:
                                         title_en.length > 0
                                             ? black.second
@@ -160,7 +160,7 @@ class NewsCard extends Component {
                         {/* 活動類型展示日期 */}
                         <Text style={{
                             ...uiStyle.defaultText,
-                            fontSize: scale(12),
+                            fontSize: verticalScale(12),
                             fontWeight: 'bold',
                             position: 'absolute',
                             bottom: 0,
@@ -221,7 +221,7 @@ class NewsCard extends Component {
 const styles = StyleSheet.create({
     newsCardContainer: {
         backgroundColor: white,
-        marginVertical: scale(5),
+        marginVertical: verticalScale(5),
         marginHorizontal: scale(10),
         borderRadius: scale(10),
         // ...viewShadow,
@@ -229,12 +229,12 @@ const styles = StyleSheet.create({
     newsCardContentContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: scale(10),
-        paddingVertical: scale(8),
+        padding: verticalScale(10),
+        paddingVertical: verticalScale(8),
     },
     newsCardImg: {
-        width: scale(80),
-        height: scale(112),
+        width: verticalScale(80),
+        height: verticalScale(112),
     },
 });
 

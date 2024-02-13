@@ -17,7 +17,7 @@ import { trigger } from '../../../../utils/trigger';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { inject } from 'mobx-react';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import TouchableScale from "react-native-touchable-scale";
@@ -218,7 +218,7 @@ class EventCard extends Component {
                             >
                                 <Ionicons
                                     name={'link'}
-                                    size={20}
+                                    size={verticalScale(20)}
                                     color={white}
                                 />
                             </View>
@@ -292,7 +292,7 @@ class EventCard extends Component {
                                             style={{
                                                 ...uiStyle.defaultText,
                                                 color: black.third,
-                                                fontSize: scale(9),
+                                                fontSize: verticalScale(9),
                                             }}>
                                             {clubName}
                                         </Text>
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     },
     stateNoticeText: {
         ...uiStyle.defaultText,
-        fontSize: scale(7),
+        fontSize: verticalScale(7),
     },
     title: {
         container: {
@@ -340,13 +340,13 @@ const styles = StyleSheet.create({
             ...uiStyle.defaultText,
             color: black.main,
             fontWeight: '500',
-            fontSize: scale(11),
+            fontSize: verticalScale(11),
         },
         disabledText: {
             ...uiStyle.defaultText,
             color: black.third,
             fontWeight: '500',
-            fontSize: scale(11),
+            fontSize: verticalScale(11),
         }
 
     },

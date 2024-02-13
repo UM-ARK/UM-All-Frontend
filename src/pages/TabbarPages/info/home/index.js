@@ -414,7 +414,7 @@ class HomeScreen extends Component {
         let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
         return (
             <TouchableScale
-                style={{ width: calItemWidth, margin: scale(3), }}
+                style={{ width: calItemWidth, margin: verticalScale(3), }}
                 onPress={() => {
                     trigger();
                     this.setState({ selectDay: index });
@@ -423,14 +423,14 @@ class HomeScreen extends Component {
                 <View style={{
                     backgroundColor,
                     borderRadius: scale(8),
-                    paddingHorizontal: scale(5), paddingVertical: scale(3),
+                    paddingHorizontal: scale(5), paddingVertical: verticalScale(3),
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -442,7 +442,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: scale(22),
+                                fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -454,7 +454,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: scale(22),
+                                fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -465,7 +465,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -477,7 +477,7 @@ class HomeScreen extends Component {
                     <View style={{
                         backgroundColor: COLOR_DIY.warning,
                         borderRadius: scale(50),
-                        width: scale(10), height: scale(10),
+                        width: verticalScale(10), height: verticalScale(10),
                         position: 'absolute',
                         right: scale(0), top: scale(0),
                     }} />
@@ -489,8 +489,8 @@ class HomeScreen extends Component {
     // 渲染快捷功能卡片的圖標
     GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
-        let imageSize = scale(29);
-        let iconSize = scale(30);
+        let imageSize = verticalScale(27);
+        let iconSize = verticalScale(30);
         if (icon_type == 'ionicons') {
             icon = (
                 <Ionicons
@@ -515,8 +515,8 @@ class HomeScreen extends Component {
                         backgroundColor: COLOR_DIY.trueWhite,
                         height: imageSize,
                         width: imageSize,
-                        borderRadius: scale(10),
-                        marginBottom: scale(1),
+                        borderRadius: verticalScale(10),
+                        marginBottom: verticalScale(1),
                     }}
                 />
             );
@@ -535,7 +535,7 @@ class HomeScreen extends Component {
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: 'bold',
                             color: COLOR_DIY.themeColor,
                         }}>
@@ -684,13 +684,13 @@ class HomeScreen extends Component {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     flexDirection: 'row',
-                                    marginTop: scale(5),
+                                    marginTop: verticalScale(5),
                                 }}>
                                     {/* 左Emoji */}
                                     <Text selectable style={{
                                         ...uiStyle.defaultText,
                                         textAlign: 'center',
-                                        fontSize: scale(12),
+                                        fontSize: verticalScale(12),
                                     }}
                                     >
                                         {VERSION_EMOJI.ve_Left + '\n\n'}
@@ -700,19 +700,19 @@ class HomeScreen extends Component {
                                     <View style={{
                                         backgroundColor: themeColorUltraLight,
                                         borderRadius: scale(5),
-                                        paddingVertical: scale(2), paddingHorizontal: scale(5),
+                                        paddingVertical: verticalScale(2), paddingHorizontal: scale(5),
                                         width: screenWidth * 0.8,
                                     }}>
                                         <Text
                                             selectable
-                                            style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: scale(12) }}
+                                            style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: verticalScale(12) }}
                                         >
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), fontWeight: 'bold' }}>
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
                                                 {'📅 校曆 Upcoming:' + '\n'}
                                             </Text>
 
                                             {/* 如果時間差大於1天，展示活動的時間差 */}
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), fontWeight: 'bold' }}>
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
                                                 {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
                                                     `${moment(cal[selectDay].startDate).format("YYYY-MM-DD")} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format("YYYY-MM-DD")}\n`
                                                 ) : null}
@@ -730,7 +730,7 @@ class HomeScreen extends Component {
                                     <Text selectable style={{
                                         ...uiStyle.defaultText,
                                         textAlign: 'center',
-                                        fontSize: scale(12)
+                                        fontSize: verticalScale(12)
                                     }}>
                                         {'\n\n' + VERSION_EMOJI.ve_Right}
                                     </Text>
