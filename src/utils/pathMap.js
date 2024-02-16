@@ -150,8 +150,8 @@ export const UM_API_TOKEN = '';
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站
-export const UM_BUS_LOOP =
-    'https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo';
+export const UM_BUS_LOOP_ZH = 'https://campusloop.cmdo.um.edu.mo/zh_TW/busstopinfo';
+export const UM_BUS_LOOP_EN = 'https://campusloop.cmdo.um.edu.mo/en_US/busstopinfo';
 // 澳大 - 校曆
 export const UM_CALENDAR =
     'https://reg.um.edu.mo/university-almanac/?lang=zh-hant';

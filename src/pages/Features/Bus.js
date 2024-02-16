@@ -12,7 +12,7 @@ import {
 
 // 引入本地工具
 import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
-import { UM_BUS_LOOP, UM_MAP } from '../../utils/pathMap';
+import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP, } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
@@ -22,10 +22,12 @@ import { trigger } from '../../utils/trigger';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import { DOMParser } from "react-native-html-parser";
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import TouchableScale from "react-native-touchable-scale";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { t } from 'i18next';
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -107,6 +109,8 @@ function getBusData(busInfoHtml) {
     };
 }
 
+let BUS_URL = UM_BUS_LOOP_ZH;
+
 // 巴士報站頁 - 畫面佈局與渲染
 class BusScreen extends Component {
     timer = null;
@@ -126,6 +130,16 @@ class BusScreen extends Component {
     };
 
     async componentDidMount() {
+        BUS_URL = await AsyncStorage.getItem('language').then(res => {
+            const lng = JSON.parse(res);
+            // 當為中文設置
+            if (lng != 'tc') {
+                return UM_BUS_LOOP_EN;
+            } else {
+                return UM_BUS_LOOP_ZH;
+            }
+        })
+
         logToFirebase('openPage', { page: 'bus' });
         // 打開Bus頁時直接請求巴士報站的數據
         this.fetchBusInfo();
@@ -143,7 +157,7 @@ class BusScreen extends Component {
 
     // 爬蟲campus Bus
     fetchBusInfo = async () => {
-        await axios.get(UM_BUS_LOOP)
+        await axios.get(BUS_URL)
             .then(res => getBusData(res.data))
             .then(result => {
                 // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
@@ -196,17 +210,12 @@ class BusScreen extends Component {
             <TouchableScale
                 onPress={this.toggleModal.bind(this, index)}
                 style={{
-                    position: 'absolute',
-                    left: scale(left),
-                    top: scale(top),
-                    paddingHorizontal: scale(5),
-                    paddingVertical: scale(2),
-                    alignItems: 'center',
-                    borderColor,
-                    borderRadius: scale(20),
-                    borderWidth: scale(2),
+                    position: 'absolute', left: scale(left), top: scale(top),
+                    paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
+                    alignItems: 'center', justifyContent: 'center',
+                    borderColor, borderRadius: scale(20), borderWidth: scale(2),
                 }}>
-                <Text style={{ ...uiStyle.defaultText, color: borderColor, fontSize: scale(11), fontWeight: 'bold' }}>
+                <Text style={{ ...uiStyle.defaultText, color: borderColor, fontSize: verticalScale(11), fontWeight: 'bold' }}>
                     {buildingCode}
                     <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
                 </Text>
@@ -253,7 +262,7 @@ class BusScreen extends Component {
 
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
-                <Header title={'校園巴士'} />
+                <Header title={t('校園巴士', { ns: 'features' })} />
 
                 <ScrollView
                     bounces={false}
@@ -309,7 +318,7 @@ class BusScreen extends Component {
                                     openLink(UM_MAP);
                                 }}
                             >
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>校園地圖</Text>
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>
                             </TouchableOpacity>
                             {/* Bus運行信息的渲染 */}
                             <View
@@ -337,7 +346,7 @@ class BusScreen extends Component {
                             {busPositionArr.length > 0
                                 ? busPositionArr.map(item => (
                                     <TouchableScale style={busStyleArr[item.index]} activeScale={0.6}
-                                        onPress={()=>{
+                                        onPress={() => {
                                             trigger();
                                             this.fetchBusInfo();
                                         }}>
