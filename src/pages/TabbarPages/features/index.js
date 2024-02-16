@@ -53,7 +53,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { inject } from 'mobx-react';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
@@ -624,7 +624,7 @@ class Index extends Component {
                     backgroundColor: COLOR_DIY.white,
                     borderRadius: scale(10),
                     marginHorizontal: scale(10),
-                    marginTop: scale(10),
+                    marginTop: verticalScale(10),
                     // 增加陰影
                     // ...COLOR_DIY.viewShadow,
                 }}>
@@ -635,12 +635,12 @@ class Index extends Component {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         paddingHorizontal: scale(12),
-                        paddingTop: scale(12),
+                        paddingTop: verticalScale(12),
                     }}>
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            fontSize: scale(12),
+                            fontSize: verticalScale(12),
                             color: COLOR_DIY.black.main,
                             fontWeight: 'bold',
                         }}>
@@ -660,7 +660,7 @@ class Index extends Component {
                             icon = (
                                 <Ionicons
                                     name={item.icon_name}
-                                    size={scale(30)}
+                                    size={verticalScale(30)}
                                     color={COLOR_DIY.themeColor}
                                 />
                             );
@@ -668,7 +668,7 @@ class Index extends Component {
                             icon = (
                                 <MaterialCommunityIcons
                                     name={item.icon_name}
-                                    size={scale(30)}
+                                    size={verticalScale(30)}
                                     color={COLOR_DIY.themeColor}
                                 />
                             );
@@ -738,7 +738,7 @@ class Index extends Component {
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
-                                        fontSize: scale(10),
+                                        fontSize: verticalScale(10),
                                         color: COLOR_DIY.black.second,
                                         textAlign: 'center',
                                     }}>

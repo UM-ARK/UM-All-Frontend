@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, Dimensions, Alert, Linking } from 'react-native';
+import { View, Image, Dimensions, Alert, Linking, Appearance, } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -14,6 +14,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast, } from 'react-native-toast-message';
+import RNRestart from 'react-native-restart';
+import { t } from 'i18next';
 
 // Initialize Clarity.
 // import { initialize } from 'react-native-clarity';
@@ -22,6 +24,8 @@ import Toast, { BaseToast, ErrorToast, } from 'react-native-toast-message';
 const { bg_color } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
+
+let isLight = null;
 
 // 自定義Toast外觀
 const toastConfig = {
@@ -120,6 +124,26 @@ class App extends Component {
         } catch (e) {
             console.error('App error', e);
         }
+
+        isLight = Appearance.getColorScheme() == 'light';
+    }
+
+    // 監聽系統深淺色模式，提示切換
+    componentDidUpdate() {
+        this.listener = Appearance.addChangeListener((theme) => {
+            let scheme = theme.colorScheme;
+            if (scheme == 'light' != isLight) {
+                isLight = scheme == 'light';
+                Alert.alert(`ARK ALL`, `${t('現在重啟APP切換到')} ${scheme == 'light' ? t('淺色模式') : t('深色模式')} ?`, [
+                    {
+                        text: 'Yes', onPress: () => {
+                            RNRestart.Restart();
+                        }
+                    },
+                    { text: 'No', },
+                ])
+            }
+        });
     }
 
     setLock = app_version => {

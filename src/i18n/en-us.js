@@ -18,9 +18,13 @@ export default {
         "TOPTAB_NEWS": "News",
         "TOPTAB_ABOUT": "About",
 
-        "ARK ALL瘋狂加載中":"ARK ALL is loading like crazy",
-        "確保網絡正常":"Make sure network is good",
-        "可以刷新或重啟APP再試":"Refresh or restart the APP and try again",
+        "ARK ALL瘋狂加載中": "ARK ALL is loading like crazy",
+        "確保網絡正常": "Make sure network is good",
+        "可以刷新或重啟APP再試": "Refresh or restart the APP and try again",
+
+        "現在重啟APP切換到": "Restart the app now to switch to",
+        "深色模式": "Dark Mode",
+        "淺色模式": "Light Mode",
     },
     home: {
         "校園巴士": "Bus",

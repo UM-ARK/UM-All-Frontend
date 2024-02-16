@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text, Appearance } from 'react-native';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 
 export const isLight = Appearance.getColorScheme() == 'light';
 
@@ -102,7 +102,7 @@ export const VERSION_EMOJI = {
 export const uiStyle = StyleSheet.create({
     defaultText: {
         fontWeight: 'normal',
-        fontSize: scale(12),
+        fontSize: verticalScale(12),
     },
     toastContainer: {
         backgroundColor: COLOR_DIY.themeColor,
