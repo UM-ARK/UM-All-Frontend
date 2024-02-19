@@ -211,11 +211,11 @@ class BusScreen extends Component {
                 onPress={this.toggleModal.bind(this, index)}
                 style={{
                     position: 'absolute', left: scale(left), top: scale(top),
-                    paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
+                    paddingHorizontal: scale(5), paddingVertical: scale(2),
                     alignItems: 'center', justifyContent: 'center',
                     borderColor, borderRadius: scale(20), borderWidth: scale(2),
                 }}>
-                <Text style={{ ...uiStyle.defaultText, color: borderColor, fontSize: verticalScale(11), fontWeight: 'bold' }}>
+                <Text style={{ ...uiStyle.defaultText, color: borderColor, fontSize: scale(11), fontWeight: 'bold' }}>
                     {buildingCode}
                     <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
                 </Text>
@@ -362,10 +362,10 @@ class BusScreen extends Component {
                                 : null}
 
                             {/* 巴士站點文字 */}
-                            {this.renderBusStopText(108, 455, 'PGH', '研究生宿舍(起)', 0)}
-                            {this.renderBusStopText(150, 302, 'E4', '劉少榮樓', 1)}
-                            {this.renderBusStopText(150, 82, 'N2', '大學會堂', 2)}
-                            {this.renderBusStopText(51, 88, 'N6', '行政樓', 3)}
+                            {this.renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}
+                            {this.renderBusStopText(145, 302, 'E4', '劉少榮樓', 1)}
+                            {this.renderBusStopText(145, 82, 'N2', '大學會堂', 2)}
+                            {this.renderBusStopText(45, 90, 'N6', '行政樓', 3)}
                             {this.renderBusStopText(79, 160, 'E11', '科技學院', 4)}
                             {this.renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
                             {this.renderBusStopText(79, 395, 'E32', '法學院', 6)}
