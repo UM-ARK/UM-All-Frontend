@@ -430,7 +430,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: verticalScale(10),
+                            fontSize: scale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -442,7 +442,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: verticalScale(22),
+                                fontSize: scale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -454,7 +454,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: verticalScale(22),
+                                fontSize: scale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -465,7 +465,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: verticalScale(10),
+                            fontSize: scale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
