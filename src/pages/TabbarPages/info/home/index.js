@@ -477,7 +477,7 @@ class HomeScreen extends Component {
                     <View style={{
                         backgroundColor: COLOR_DIY.warning,
                         borderRadius: scale(50),
-                        width: verticalScale(10), height: verticalScale(10),
+                        width: verticalScale(8), height: verticalScale(8),
                         position: 'absolute',
                         right: scale(0), top: scale(0),
                     }} />
