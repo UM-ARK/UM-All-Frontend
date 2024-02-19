@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { View, Image, Dimensions, Alert, Linking, Appearance, } from 'react-native';
+import { View, Image, Dimensions, Alert, Linking, Appearance, AppState, } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
-import { COLOR_DIY, uiStyle, } from './src/utils/uiMap';
+import { COLOR_DIY, isLight, uiStyle, } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
 import { setLanguage, setLocalStorage } from './src/i18n/i18n';
 import { Provider } from 'mobx-react';
@@ -24,8 +24,6 @@ import { t } from 'i18next';
 const { bg_color } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
-
-let isLight = null;
 
 // 自定義Toast外觀
 const toastConfig = {
@@ -98,6 +96,8 @@ class App extends Component {
         versionLock: false,
 
         languageOK: false,
+
+        scheme: Appearance.getColorScheme(),
     };
 
     async componentDidMount() {
@@ -125,25 +125,19 @@ class App extends Component {
             console.error('App error', e);
         }
 
-        isLight = Appearance.getColorScheme() == 'light';
-    }
-
-    // 監聽系統深淺色模式，提示切換
-    componentDidUpdate() {
         this.listener = Appearance.addChangeListener((theme) => {
             let scheme = theme.colorScheme;
-            if (scheme == 'light' != isLight) {
-                isLight = scheme == 'light';
-                Alert.alert(`ARK ALL`, `${t('現在重啟APP切換到')} ${scheme == 'light' ? t('淺色模式') : t('深色模式')} ?`, [
-                    {
-                        text: 'Yes', onPress: () => {
-                            RNRestart.Restart();
-                        }
-                    },
-                    { text: 'No', },
-                ])
-            }
+            this.setState({ scheme });
+            this.schemeChange();
         });
+        this.screenListener = AppState.addEventListener('change', nextAppState => {
+            this.schemeChange();
+        })
+    }
+
+    componentWillUnmount() {
+        this.listener.remove();
+        this.screenListener.remove();
     }
 
     setLock = app_version => {
@@ -188,6 +182,19 @@ class App extends Component {
                 this.setState({ languageOK: true })
             }
         })
+    }
+
+    schemeChange = () => {
+        if (AppState.currentState == 'active' && (isLight != (this.state.scheme == 'light'))) {
+            Alert.alert(`ARK ALL`, `${t('現在重啟APP切換到')} ${this.state.scheme == 'light' ? t('淺色模式') : t('深色模式')} ?`, [
+                {
+                    text: 'Yes', onPress: () => {
+                        RNRestart.Restart();
+                    }
+                },
+                { text: 'No', },
+            ])
+        }
     }
 
     render() {
