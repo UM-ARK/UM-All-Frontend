@@ -4,6 +4,16 @@
 * 如果ARK ALL有幫助到您，可以請我們[喝杯咖啡](https://github.com/UM-ARK/Donate)！
 * 如果您也想參與到ARK ALL的開發中，立即聯繫我們 `umacark@gmail.com`！
 
+<details>
+  <summary>APP熒幕截圖</summary>
+  <img src="/README/img/Home.png" height="500rem" alt="Home" />
+  <img src="/README/img/Club.png" height="500rem" alt="Club" />
+  <img src="/README/img/Courses.png" height="500rem" alt="Courses" />
+  <img src="/README/img/Timetable.png" height="500rem" alt="Timetable" />
+  <img src="/README/img/Features.png" height="500rem" alt="Features" />
+  <img src="/README/img/Bus.png" height="500rem" alt="Bus" />
+</details>
+
 - [**🎉ARK ALL是一個免費的開源APP🎉**](#ark-all是一個免費的開源app)
 - [🎉 首次運行該項目](#-首次運行該項目)
   - [🤖 Android 環境 Setup](#-android-環境-setup)
