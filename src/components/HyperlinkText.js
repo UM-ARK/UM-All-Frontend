@@ -8,6 +8,7 @@ import { openLink } from '../utils/browser';
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from "react-native-toast-message";
+import { scale } from 'react-native-size-matters';
 
 const HyperlinkText = ({
     children,
@@ -51,7 +52,9 @@ const HyperlinkText = ({
         Clipboard.setString(text);
         Toast.show({
             type: 'arkToast',
-            text1: '已複製Link到粘貼板！'
+            text1: '已複製Link到粘貼板！',
+            topOffset: scale(100),
+            onPress: () => Toast.hide(),
         });
     };
 

@@ -101,7 +101,8 @@ export default class ARKWiki extends Component {
         Toast.show({
             type: 'arkToast',
             text1: '正全力返回主頁！',
-            topOffset: scale(80),
+            topOffset: scale(100),
+            onPress: () => Toast.hide(),
         })
     }
 
@@ -112,7 +113,8 @@ export default class ARKWiki extends Component {
         Toast.show({
             type: 'arkToast',
             text1: '正為你打開隨機條目！',
-            topOffset: scale(80),
+            topOffset: scale(100),
+            onPress: () => Toast.hide(),
         })
     }
 
@@ -274,7 +276,8 @@ export default class ARKWiki extends Component {
                                 type: 'arkToast',
                                 text1: '已複製當前頁面鏈接到粘貼板！',
                                 text2: '快去和小夥伴分享吧~',
-                                topOffset: scale(80),
+                                topOffset: scale(100),
+                                onPress: () => Toast.hide(),
                             })
                         }}
                     >
