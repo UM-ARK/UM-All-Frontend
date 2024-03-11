@@ -174,14 +174,18 @@ class BusScreen extends Component {
                     Toast.show({
                         type: 'warning',
                         text1: '當前沒有巴士~',
-                        text2: '[]~(￣▽￣)~* 👋'
+                        text2: '[]~(￣▽￣)~* 👋',
+                        topOffset: scale(100),
+                        onPress: () => Toast.hide(),
                     });
                 } else {
                     this.setState({ toastColor: themeColor });
                     Toast.show({
                         type: 'arkToast',
                         text1: 'Data is Loading~',
-                        text2: '幫你刷新了一下~ []~(￣▽￣)~* 👋'
+                        text2: '幫你刷新了一下~ []~(￣▽￣)~* 👋',
+                        topOffset: scale(100),
+                        onPress: () => Toast.hide(),
                     });
                 }
             })
@@ -190,6 +194,8 @@ class BusScreen extends Component {
                 Toast.show({
                     type: 'error',
                     text1: '網絡錯誤！',
+                    topOffset: scale(100),
+                    onPress: () => Toast.hide(),
                 });
             });
     };

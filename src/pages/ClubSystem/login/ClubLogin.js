@@ -35,7 +35,9 @@ class ClubLogin extends Component {
         if (accountPassword.account == '' || accountPassword.password == '') {
             Toast.show({
                 type: 'warning',
-                text1: '賬號密碼輸入未完成！'
+                text1: '賬號密碼輸入未完成！',
+                topOffset: scale(100),
+                onPress: () => Toast.hide(),
             });
         } else {
             this.clubSignIn();
@@ -59,7 +61,9 @@ class ClubLogin extends Component {
             if (json.message == 'success') {
                 Toast.show({
                     type: 'arkToast',
-                    text1: 'Welcome Back ~'
+                    text1: 'Welcome Back ~',
+                    topOffset: scale(100),
+                    onPress: () => Toast.hide(),
                 });
                 handleLogin({ isClub: true, clubData: json.content, });
             }
@@ -68,14 +72,18 @@ class ClubLogin extends Component {
                 Toast.show({
                     type: 'error',
                     text1: '賬號或密碼錯誤！',
-                    text2: '登錄失敗！'
+                    text2: '登錄失敗！',
+                    topOffset: scale(100),
+                    onPress: () => Toast.hide(),
                 });
             }
         }).catch(err => {
             alert('Warning', err);
             Toast.show({
                 type: 'warning',
-                text1: '網絡錯誤！'
+                text1: '網絡錯誤！',
+                topOffset: scale(100),
+                onPress: () => Toast.hide(),
             });
         });
     }
