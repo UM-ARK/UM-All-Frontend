@@ -721,7 +721,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E1-B1002",
+            "Classroom": "E22-3009",
             "Course Title Chi": "通俗文學與文化"
         },
         {
@@ -3923,7 +3923,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1011",
+            "Classroom": "E21-1037",
             "Course Title Chi": "語言與社會"
         },
         {
@@ -4013,7 +4013,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-G038",
             "Course Title Chi": "高級英語結構"
         },
         {
@@ -5861,7 +5861,7 @@
             "Course Title": "Human Anatomy",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "MAO XIAOWEN / SU HUANXING",
+            "Teacher Information": "MAO XIAOWEN / SU HUANXING / GYEONG HUN BAEG",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "08:30",
@@ -6865,22 +6865,6 @@
             "Classroom": "E32-1025",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
             "Course Title Chi": "漢語II"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1016",
-            "Course Title": "Public Economics",
-            "Section": "101",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "KAN YUT CHING",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "10:00",
-            "Time To": "12:45",
-            "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
-            "Course Title Chi": "公共經濟學"
         },
         {
             "Offering Unit": "FLL",
@@ -8649,7 +8633,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -9066,7 +9050,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-01-19",
+    "updateTime": "2024-03-06",
     "academicYear": "23/24",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"

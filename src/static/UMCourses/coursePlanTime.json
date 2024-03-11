@@ -2509,7 +2509,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E1-B1002",
+            "Classroom": "E22-3009",
             "Course Title Chi": "通俗文學與文化"
         },
         {
@@ -2524,7 +2524,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E1-B1002",
+            "Classroom": "E22-3009",
             "Course Title Chi": "通俗文學與文化"
         },
         {
@@ -9508,7 +9508,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-1030",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN17 / CHN19 / ENG11 / ENG17 / ENG19 / PPE15 / PPE17 / PPE19 / PYE17 / PYE19 / PYE22\n",
             "Course Title Chi": "教育心理學"
         },
@@ -9523,7 +9523,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-1030",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN17 / CHN19 / ENG11 / ENG17 / ENG19 / PPE15 / PPE17 / PPE19 / PYE17 / PYE19 / PYE22\n",
             "Course Title Chi": "教育心理學"
         },
@@ -16789,7 +16789,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1011",
+            "Classroom": "E21-1037",
             "Course Title Chi": "語言與社會"
         },
         {
@@ -16804,7 +16804,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1011",
+            "Classroom": "E21-1037",
             "Course Title Chi": "語言與社會"
         },
         {
@@ -17029,7 +17029,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-G038",
             "Course Title Chi": "高級英語結構"
         },
         {
@@ -17044,7 +17044,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-G038",
             "Course Title Chi": "高級英語結構"
         },
         {
@@ -23717,7 +23717,7 @@
             "Course Title": "Human Anatomy",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "MAO XIAOWEN / SU HUANXING",
+            "Teacher Information": "MAO XIAOWEN / SU HUANXING / GYEONG HUN BAEG",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "08:30",
@@ -23732,7 +23732,7 @@
             "Course Title": "Human Anatomy",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "MAO XIAOWEN / SU HUANXING",
+            "Teacher Information": "MAO XIAOWEN / SU HUANXING / GYEONG HUN BAEG",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
             "Time From": "08:30",
@@ -25491,7 +25491,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-2015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },
@@ -25507,7 +25507,7 @@
             "Day": "FRI",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-2015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },
@@ -25523,7 +25523,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-2015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },
@@ -25539,7 +25539,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-2015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },
@@ -25890,7 +25890,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-2008",
             "Course Title Chi": "實用日語II"
         },
         {
@@ -25920,7 +25920,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-2008",
             "Course Title Chi": "實用日語II"
         },
         {
@@ -25950,7 +25950,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-2008",
             "Course Title Chi": "實用日語II"
         },
         {
@@ -25980,7 +25980,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1013",
+            "Classroom": "E21-2008",
             "Course Title Chi": "實用日語II"
         },
         {
@@ -27352,22 +27352,6 @@
             "Classroom": "E32-1025",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
             "Course Title Chi": "漢語II"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1016",
-            "Course Title": "Public Economics",
-            "Section": "101",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "KAN YUT CHING",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "10:00",
-            "Time To": "12:45",
-            "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
-            "Course Title Chi": "公共經濟學"
         },
         {
             "Offering Unit": "FLL",
@@ -31823,7 +31807,7 @@
             "Course Title": "Portuguese Language I - Introductory Portuguese",
             "Section": "013",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "SARA GONÇALVES DOS SANTOS",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "11:30",
@@ -31838,7 +31822,7 @@
             "Course Title": "Portuguese Language I - Introductory Portuguese",
             "Section": "013",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "SARA GONÇALVES DOS SANTOS",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
             "Time From": "11:30",
@@ -33713,7 +33697,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "004",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "LUÍS TIAGO ALVES PIRES / PAULA CRISTINA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "10:00",
@@ -33728,7 +33712,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "004",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "LUÍS TIAGO ALVES PIRES / PAULA CRISTINA",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "16:00",
@@ -33743,7 +33727,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "004",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "LUÍS TIAGO ALVES PIRES / PAULA CRISTINA",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "10:00",
@@ -33758,7 +33742,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "004",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "LUÍS TIAGO ALVES PIRES / PAULA CRISTINA",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
             "Time From": "16:00",
@@ -33773,7 +33757,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "005",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "VÍTOR MIGUEL DUARTE SILVA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "11:30",
@@ -33788,7 +33772,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "005",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "VÍTOR MIGUEL DUARTE SILVA",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "14:30",
@@ -33803,7 +33787,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "005",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "VÍTOR MIGUEL DUARTE SILVA",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "11:30",
@@ -33818,7 +33802,7 @@
             "Course Title": "Written Comprehension and Production Skills IV",
             "Section": "005",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "ANA MARIA SIMÃO SALDANHA",
+            "Teacher Information": "VÍTOR MIGUEL DUARTE SILVA",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
             "Time From": "14:30",
@@ -34690,7 +34674,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -34706,7 +34690,7 @@
             "Time To": "15:45",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
