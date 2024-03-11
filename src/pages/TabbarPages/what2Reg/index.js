@@ -13,7 +13,7 @@ import {
     Alert,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH } from "../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { trigger } from '../../../utils/trigger';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -32,6 +32,7 @@ import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { MenuView } from '@react-native-menu/menu';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
@@ -796,23 +797,56 @@ export default class index extends Component {
                         </TouchableOpacity>
                     ) : null}
                 </View>
-                {/* ARK Wiki搜索 */}
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: inputOK ? themeColor : disabled,
-                        borderRadius: scale(6),
-                        padding: scale(7), paddingHorizontal: scale(8),
-                        alignItems: 'center'
+                {/* 搜索 */}
+                <MenuView
+                    onPressAction={({ nativeEvent }) => {
+                        switch (nativeEvent.event) {
+                            case 'wiki':
+                                trigger();
+                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
+                                this.props.navigation.navigate('Wiki', { url: URL });
+                                break;
+
+                            case 'official':
+                                trigger();
+                                let courseCode = encodeURIComponent(inputText);
+                                const URI = OFFICIAL_COURSE_SEARCH + courseCode;
+                                logToFirebase('checkCourse', {
+                                    courseCode: 'Official ' + courseCode,
+                                });
+                                openLink(URI);
+                                break;
+
+                            default:
+                                break;
+                        }
                     }}
-                    disabled={isLoading || !inputOK}
-                    onPress={() => {
-                        trigger();
-                        let URL = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
-                        this.props.navigation.navigate('Wiki', { url: URL });
-                    }}
+                    actions={[
+                        {
+                            id: 'wiki',
+                            title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                            titleColor: themeColor,
+                        },
+                        {
+                            id: 'official',
+                            title: '查 官方',
+                            titleColor: black.third,
+                        },
+                    ]}
+                    shouldOpenOnLongPress={false}
                 >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>搜索</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: inputOK ? themeColor : disabled,
+                            borderRadius: scale(6),
+                            padding: scale(7), paddingHorizontal: scale(8),
+                            alignItems: 'center'
+                        }}
+                        disabled={isLoading || !inputOK}
+                    >
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>搜索</Text>
+                    </TouchableOpacity>
+                </MenuView>
                 {/* 課程搜索按鈕 */}
                 {/* <TouchableOpacity
                     style={{
