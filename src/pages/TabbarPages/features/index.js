@@ -31,6 +31,7 @@ import {
     UM_LIBRARY,
     UM_COURSE_SIMU,
     UM_ISW,
+    UM_ISW_NEW,
     NEW_INFOG,
     UM_DOCUMENTS,
     NEW_SCZN,
@@ -387,6 +388,17 @@ class Index extends Component {
                         go_where: 'Linking',
                         webview_param: {
                             url: UM_ISW,
+                            title: 'UM ISW',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'ab-testing',
+                        fn_name: 'New ISW',
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_ISW_NEW,
                             title: 'UM ISW',
                         },
                     },

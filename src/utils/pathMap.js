@@ -186,6 +186,7 @@ export const UM_BULLETIN = 'https://e-bulletin.um.edu.mo/';
 export const UM_Moodle = 'https://ummoodle.um.edu.mo/my/';
 // 澳大 - UM ISW
 export const UM_ISW = 'https://isw.um.edu.mo/siweb/faces/login.jspx';
+export const UM_ISW_NEW = 'https://isw.um.edu.mo/siapp';
 // 澳大 - UM 預選課
 export const UM_PRE_ENROLMENT =
     'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
