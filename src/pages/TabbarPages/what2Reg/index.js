@@ -800,25 +800,27 @@ export default class index extends Component {
                 {/* 搜索 */}
                 <MenuView
                     onPressAction={({ nativeEvent }) => {
-                        switch (nativeEvent.event) {
-                            case 'wiki':
-                                trigger();
-                                let URL = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
-                                this.props.navigation.navigate('Wiki', { url: URL });
-                                break;
+                        if (!isLoading && inputOK) {
+                            switch (nativeEvent.event) {
+                                case 'wiki':
+                                    trigger();
+                                    let URL = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
+                                    this.props.navigation.navigate('Wiki', { url: URL });
+                                    break;
 
-                            case 'official':
-                                trigger();
-                                let courseCode = encodeURIComponent(inputText);
-                                const URI = OFFICIAL_COURSE_SEARCH + courseCode;
-                                logToFirebase('checkCourse', {
-                                    courseCode: 'Official ' + courseCode,
-                                });
-                                openLink(URI);
-                                break;
+                                case 'official':
+                                    trigger();
+                                    let courseCode = encodeURIComponent(inputText);
+                                    const URI = OFFICIAL_COURSE_SEARCH + courseCode;
+                                    logToFirebase('checkCourse', {
+                                        courseCode: 'Official ' + courseCode,
+                                    });
+                                    openLink(URI);
+                                    break;
 
-                            default:
-                                break;
+                                default:
+                                    break;
+                            }
                         }
                     }}
                     actions={[
@@ -843,6 +845,7 @@ export default class index extends Component {
                             alignItems: 'center'
                         }}
                         disabled={isLoading || !inputOK}
+                        onPress={() => trigger()}
                     >
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>搜索</Text>
                     </TouchableOpacity>
