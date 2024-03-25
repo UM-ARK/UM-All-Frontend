@@ -535,7 +535,7 @@ class EventDetail extends Component {
                     ) : null}
 
                     {/* 詳情介紹 */}
-                    {eventData != undefined &&
+                    {eventData != undefined && eventData.introduction &&
                         eventData.introduction.length > 0 && (
                             <View
                                 style={{

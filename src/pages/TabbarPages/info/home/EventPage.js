@@ -80,6 +80,7 @@ class EventPage extends Component {
             })
         } catch (error) {
             if (error.code == 'ERR_NETWORK') {
+                Toast.show('網絡錯誤！請檢查網絡再試');
                 // 網絡錯誤，自動重載
                 this.onRefresh();
             } else {
