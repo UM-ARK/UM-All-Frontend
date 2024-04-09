@@ -844,7 +844,7 @@ class HomeScreen extends Component {
                     }
 
                     {/* 活動頁 */}
-                    <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
+                    <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
                     <EventPage ref={this.eventPage} />
 
                 </ScrollView >
