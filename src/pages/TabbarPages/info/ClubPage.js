@@ -28,29 +28,25 @@ const COMPONENT_WIDTH = scale(90);
 let originClubDataList = [];
 
 clubFilter = (clubDataList, tag) => {
-    // this.setState({ isLoading: true });
-    // const {clubDataList} = this.state;
-
     let filter = [tag];
     let result = clubDataList.filter(a => {
         return filter.some(f => f === a.tag);
     });
-    // this.setState({ clubDataList: result, isLoading: false });
     return result
 };
 
 class ClubPage extends Component {
-    constructor() {
-        super();
-        this.scrollViewRef = React.createRef();
+    scrollViewRef = React.createRef(null);
 
-        this.state = {
-            clubDataList: undefined,
-            isLoading: true,
-            scrollPosition: 0,
-            clubClassLayout: {},
-            isOtherViewVisible: true,
-        };
+    state = {
+        clubDataList: undefined,
+        isLoading: true,
+        scrollPosition: 0,
+        clubClassLayout: {},
+        isOtherViewVisible: true,
+    }
+
+    componentDidMount() {
         // 獲取所有社團信息
         this.getData();
     }
@@ -64,7 +60,7 @@ class ClubPage extends Component {
             await axios.get(URL).then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    clubDataList = json.content;
+                    let clubDataList = json.content;
                     clubDataList.map(itm => {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
@@ -79,9 +75,9 @@ class ClubPage extends Component {
                 }
             })
         } catch (error) {
-            if (error.code == 'ERR_NETWORK') {
-                // 網絡錯誤，自動重載
-                this.getData();
+            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
+                // 網絡錯誤
+                this.setState({ isLoading: false, clubDataList: undefined, });
             } else {
                 Alert.alert('未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
             }
@@ -124,6 +120,7 @@ class ClubPage extends Component {
                     this.setState({ clubClassLayout })
                 }}
                 showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
             />
         );
     };
@@ -200,7 +197,7 @@ class ClubPage extends Component {
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center', justifyContent: 'center' }}>
                 {/* 側邊分類導航 */}
-                {clubDataList != undefined && 'ARK' in clubDataList && isOtherViewVisible ? (
+                {clubDataList != undefined && 'ARK' in clubDataList && isOtherViewVisible && !isLoading ? (
                     <View style={{
                         position: 'absolute',
                         zIndex: 2,
@@ -266,7 +263,7 @@ class ClubPage extends Component {
                                     </TouchableOpacity>
                                 )
                             }}
-                            keyExtractor={item => item.id}
+                            keyExtractor={item => item}
                             showsHorizontalScrollIndicator={false}
                             showsVerticalScrollIndicator={false}
                             scrollEnabled={false}
@@ -275,25 +272,25 @@ class ClubPage extends Component {
                 ) : null}
 
                 {/* 組織展示 */}
-                {clubDataList != undefined && !isLoading ? (
-                    'ARK' in clubDataList ?
-                        <ScrollView
-                            showsVerticalScrollIndicator={false}
-                            refreshControl={
-                                <RefreshControl
-                                    colors={[themeColor]}
-                                    tintColor={themeColor}
-                                    refreshing={this.state.isLoading}
-                                    onRefresh={() => {
-                                        this.getData();
-                                        this.handleScrollStart();
-                                    }}
-                                />
-                            }
-                            ref={this.scrollViewRef}
-                            onScrollBeginDrag={this.handleScrollStart}
-                            onMomentumScrollEnd={this.handleScrollEnd}
-                        >
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={this.state.isLoading}
+                            onRefresh={() => {
+                                this.getData();
+                                this.handleScrollStart();
+                            }}
+                        />
+                    }
+                    ref={this.scrollViewRef}
+                    onScrollBeginDrag={this.handleScrollStart}
+                    onMomentumScrollEnd={this.handleScrollEnd}
+                >
+                    {isLoading ? <Loading /> : (
+                        clubDataList != undefined && 'ARK' in clubDataList ? <>
                             <View>
                                 {this.renderClub(clubDataList.ARK, 'ARK')}
                                 {clubTagList.map((tag) => {
@@ -303,10 +300,9 @@ class ClubPage extends Component {
                                 })}
                             </View>
                             {this.renderBottomInfo()}
-                        </ScrollView> : null
-                ) : (
-                    <Loading />
-                )}
+                        </> : <Loading />
+                    )}
+                </ScrollView>
             </View>
         );
     }

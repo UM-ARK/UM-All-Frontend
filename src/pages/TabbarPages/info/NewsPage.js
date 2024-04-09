@@ -141,10 +141,8 @@ class NewsPage extends Component {
                 });
             })
         } catch (error) {
-            if (error.code == 'ERR_NETWORK') {
+            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 this.setState({ isLoading: true });
-                // 網絡錯誤，自動重載
-                this.getData();
             } else {
                 alert('未知錯誤，請聯繫開發者！')
             }
@@ -225,7 +223,7 @@ class NewsPage extends Component {
                                                 {title_en}
                                             </Text>
                                             <Text
-                                                style={{    
+                                                style={{
                                                     ...uiStyle.defaultText,
                                                     color: COLOR_DIY.trueWhite,
                                                     fontWeight: 'bold',

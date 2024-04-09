@@ -45,6 +45,8 @@
 	<string>Need to upload image</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Need to upload image</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Need to play sound effects</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome5_Regular.ttf</string>

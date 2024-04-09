@@ -1,10 +1,10 @@
 {
   "name": "umall",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios": "react-native run-ios --simulator=\"iPhone 14 Pro 17.2\"",
+    "ios": "react-native run-ios --simulator=\"iPhone 14 Pro\"",
     "iosBig": "react-native run-ios --simulator=\"iPad Pro (12.9-inch) (6th generation)\"",
     "start": "react-native start --reset-cache",
     "test": "jest",

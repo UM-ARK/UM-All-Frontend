@@ -2,9 +2,6 @@ import React, { Component, useState } from 'react';
 import {
     Text,
     View,
-    StyleSheet,
-    Dimensions,
-    FlatList,
     ScrollView,
     TouchableWithoutFeedback,
     RefreshControl,
@@ -23,10 +20,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import TouchableScale from "react-native-touchable-scale";
-
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('window');
 
 const { black, white, themeColor } = COLOR_DIY;
 
@@ -42,13 +35,13 @@ const getItemCount = data => {
 class UMEventPage extends Component {
     virtualizedList = React.createRef(null);
 
-    constructor() {
-        super();
-        this.state = {
-            data: undefined,
-            isLoading: true,
-            isLogin: false,
-        };
+    state = {
+        data: undefined,
+        isLoading: true,
+        isLogin: false,
+    };
+
+    componentDidMount() {
         this.getData();
     }
 
@@ -56,15 +49,10 @@ class UMEventPage extends Component {
     async getData() {
         try {
             axios.get(UM_API_EVENT, {
-                // 請求頭配置
                 headers: {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
-                // params: {
-                // date_from: macauTime,
-                // TODO: 篩選是否有smart_point
-                // },
             }).then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
@@ -110,13 +98,13 @@ class UMEventPage extends Component {
                 this.setState({ data: resultList, isLoading: false });
             })
         } catch (error) {
-            if (error.code == 'ERR_NETWORK') {
-                this.setState({ isLoading: true });
-                // 網絡錯誤，自動重載
-                this.getData();
+            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
+                this.setState({ data: undefined, isLoading: false });
             } else {
                 alert('未知錯誤，請聯繫開發者！')
             }
+        } finally {
+            this.setState({ isLoading: false });
         }
     }
 
@@ -149,7 +137,7 @@ class UMEventPage extends Component {
                 <TouchableWithoutFeedback
                     onPress={() => {
                         trigger();
-                        this.virtualizedList.current.scrollToOffset({
+                        this.virtualizedList.current.scrollTo && this.virtualizedList.current.scrollTo({
                             x: 0,
                             y: 0,
                         });
@@ -182,7 +170,6 @@ class UMEventPage extends Component {
         return (
             <VirtualizedList
                 data={data}
-                ref={this.virtualizedList}
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
                 windowSize={3}
@@ -211,18 +198,18 @@ class UMEventPage extends Component {
                 ListFooterComponent={() => (
                     <View style={{ marginBottom: scale(50) }}></View>
                 )}
-                refreshControl={
-                    <RefreshControl
-                        colors={[themeColor]}
-                        tintColor={themeColor}
-                        refreshing={isLoading}
-                        onRefresh={() => {
-                            // 展示Loading標識
-                            this.setState({ isLoading: true });
-                            this.getData();
-                        }}
-                    />
-                }
+                // refreshControl={
+                //     <RefreshControl
+                //         colors={[themeColor]}
+                //         tintColor={themeColor}
+                //         refreshing={isLoading}
+                //         onRefresh={() => {
+                //             // 展示Loading標識
+                //             this.setState({ isLoading: true });
+                //             this.getData();
+                //         }}
+                //     />
+                // }
                 directionalLockEnabled
                 alwaysBounceHorizontal={false}
             />
@@ -233,26 +220,32 @@ class UMEventPage extends Component {
         const { isLoading } = this.state;
 
         return (
-            <View
-                style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: COLOR_DIY.bg_color,
-                }}>
+            <View style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: COLOR_DIY.bg_color,
+            }}>
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}
-
-                {isLoading ? (
-                    <View
-                        style={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        <Loading />
-                    </View>
-                ) : (this.renderPage())}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    ref={this.virtualizedList}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={this.state.isLoading}
+                            onRefresh={() => {
+                                // 展示Loading標識
+                                this.setState({ isLoading: true });
+                                this.getData();
+                            }}
+                        />
+                    }
+                >
+                    {isLoading ? (<Loading />) : (this.state.data != undefined ? this.renderPage() : <Loading />)}
+                </ScrollView>
             </View>
         );
     }
