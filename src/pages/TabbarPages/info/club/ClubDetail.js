@@ -39,7 +39,7 @@ import { updateUserInfo } from '../../../../utils/storageKits';
 import { versionStringCompare } from '../../../../utils/versionKits';
 import { trigger } from '../../../../utils/trigger';
 
-import { Header } from '@rneui/themed';
+import Header from '../../../../components/Header';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -781,11 +781,15 @@ class ClubDetail extends Component {
 
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
-                <StatusBar
-                    barStyle="light-content"
-                    backgroundColor={'transparent'}
-                    translucent={true}
-                />
+                {isLoading ? (
+                    <Header title={'組織詳情'} />
+                ) : (
+                    <StatusBar
+                        barStyle="light-content"
+                        backgroundColor={'transparent'}
+                        translucent={true}
+                    />
+                )}
 
                 {/* 渲染主要內容 */}
                 {!isLoading && clubData ? (
