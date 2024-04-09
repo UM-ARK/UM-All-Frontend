@@ -15,3 +15,7 @@ npm i --legacy-peer-deps
 
 # 在android\app\build\outputs\apk\release目錄下
 # adb install app-release.apk
+
+# 使用本地服務器需要在WiFi處設置代理
+# 代理主機名：10.0.2.2
+# 代理端口：10809
