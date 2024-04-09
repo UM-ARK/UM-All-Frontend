@@ -28,29 +28,25 @@ const COMPONENT_WIDTH = scale(90);
 let originClubDataList = [];
 
 clubFilter = (clubDataList, tag) => {
-    // this.setState({ isLoading: true });
-    // const {clubDataList} = this.state;
-
     let filter = [tag];
     let result = clubDataList.filter(a => {
         return filter.some(f => f === a.tag);
     });
-    // this.setState({ clubDataList: result, isLoading: false });
     return result
 };
 
 class ClubPage extends Component {
-    constructor() {
-        super();
-        this.scrollViewRef = React.createRef();
+    scrollViewRef = React.createRef(null);
 
-        this.state = {
-            clubDataList: undefined,
-            isLoading: true,
-            scrollPosition: 0,
-            clubClassLayout: {},
-            isOtherViewVisible: true,
-        };
+    state = {
+        clubDataList: undefined,
+        isLoading: true,
+        scrollPosition: 0,
+        clubClassLayout: {},
+        isOtherViewVisible: true,
+    }
+
+    componentDidMount() {
         // 獲取所有社團信息
         this.getData();
     }
@@ -64,7 +60,7 @@ class ClubPage extends Component {
             await axios.get(URL).then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    clubDataList = json.content;
+                    let clubDataList = json.content;
                     clubDataList.map(itm => {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
@@ -124,6 +120,7 @@ class ClubPage extends Component {
                     this.setState({ clubClassLayout })
                 }}
                 showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
             />
         );
     };
@@ -266,7 +263,7 @@ class ClubPage extends Component {
                                     </TouchableOpacity>
                                 )
                             }}
-                            keyExtractor={item => item.id}
+                            keyExtractor={item => item}
                             showsHorizontalScrollIndicator={false}
                             showsVerticalScrollIndicator={false}
                             scrollEnabled={false}
