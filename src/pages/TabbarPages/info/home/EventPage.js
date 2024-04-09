@@ -27,15 +27,14 @@ const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
 let dataPage = 1;
 let eventDataList = [];
 class EventPage extends Component {
-    constructor() {
-        super();
-        this.state = {
-            leftDataList: [],
-            rightDataList: [],
-            isLoading: true,
-            noMoreData: false,
-        };
+    state = {
+        leftDataList: [],
+        rightDataList: [],
+        isLoading: true,
+        noMoreData: false,
+    };
 
+    componentDidMount() {
         this.getData();
     }
 
@@ -79,10 +78,9 @@ class EventPage extends Component {
                 }
             })
         } catch (error) {
-            if (error.code == 'ERR_NETWORK') {
+            if (error.code == 'ERR_NETWORK' || error.code == "ECONNABORTED") {
                 Toast.show('網絡錯誤！請檢查網絡再試');
-                // 網絡錯誤，自動重載
-                this.onRefresh();
+                this.setState({ leftDataList: [], rightDataList: [], });
             } else {
                 alert('未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
             }

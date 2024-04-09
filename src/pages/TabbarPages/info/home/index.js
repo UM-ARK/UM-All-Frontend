@@ -141,7 +141,9 @@ const calItemWidth = scale(44.5);
 
 class HomeScreen extends Component {
     toastTimer = null;
-    calScrollRef = React.createRef();
+    calScrollRef = React.createRef(null);
+    eventPage = React.createRef(null);
+    scrollView = React.createRef(null);
 
     constructor(props) {
         super(props)
@@ -221,10 +223,9 @@ class HomeScreen extends Component {
                 local: '',
             },
             version_info: null,
-        };
 
-        this.eventPage = React.createRef();
-        this.scrollView = React.createRef();
+            networkError: false,
+        };
     }
 
     componentDidMount() {
@@ -259,8 +260,12 @@ class HomeScreen extends Component {
                 }
             })
             .catch(err => {
-                this.getAppData();
-            });
+                if (err.code == 'ERR_NETWORK' || err.code == 'ECONNABORTED') {
+                    this.setState({ networkError: true });
+                }
+            }).finally(() => {
+                this.setState({ isLoading: false });
+            })
     };
 
     checkInfo = async (serverInfo, isLogin) => {
@@ -321,10 +326,11 @@ class HomeScreen extends Component {
             // console.error(e);
         }
         finally {
-            this.setState({ isLoading: false });
+            this.setState({ isLoading: false, networkError: false });
         }
     };
 
+    // 刷新主頁時展示隨機Toast
     onRefresh = () => {
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
         const toastKaoIdx = Math.round(Math.random() * (toastKaomojiArr.length - 1));
@@ -844,7 +850,11 @@ class HomeScreen extends Component {
                     }
 
                     {/* 活動頁 */}
-                    <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
+                    {this.state.networkError ? (
+                        <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
+                    ) : (<>
+                        <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
+                    </>)}
                     <EventPage ref={this.eventPage} />
 
                 </ScrollView >
