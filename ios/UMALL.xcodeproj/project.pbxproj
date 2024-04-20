@@ -47,6 +47,8 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8C0010F152BBC7D1B6B594A0 /* libPods-UMALL-UMALLTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 184169190567923CD6A1F059 /* libPods-UMALL-UMALLTests.a */; };
 		F88BA27F2ADEDFE8006EE818 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F88BA27E2ADEDFE8006EE818 /* GoogleService-Info.plist */; };
+		F8F8A7182BD351ED001A3B95 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8F8A7172BD351ED001A3B95 /* PrivacyInfo.xcprivacy */; };
+		F8F8A7192BD351ED001A3B95 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8F8A7172BD351ED001A3B95 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +113,7 @@
 		B7236444EB17C5095E41F842 /* Pods-UMALL.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL.release.xcconfig"; path = "Target Support Files/Pods-UMALL/Pods-UMALL.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F88BA27E2ADEDFE8006EE818 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		F8F8A7172BD351ED001A3B95 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -234,6 +237,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				F8F8A7172BD351ED001A3B95 /* PrivacyInfo.xcprivacy */,
 				F88BA27E2ADEDFE8006EE818 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* UMALL */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -361,6 +365,7 @@
 				60729383286644C7007FBD2F /* FontAwesome5_Regular.ttf in Resources */,
 				60729385286644C7007FBD2F /* Zocial.ttf in Resources */,
 				6072937C286644C7007FBD2F /* Entypo.ttf in Resources */,
+				F8F8A7192BD351ED001A3B95 /* PrivacyInfo.xcprivacy in Resources */,
 				60729388286644C7007FBD2F /* MaterialIcons.ttf in Resources */,
 				6072937F286644C7007FBD2F /* AntDesign.ttf in Resources */,
 				60729382286644C7007FBD2F /* FontAwesome5_Solid.ttf in Resources */,
@@ -394,6 +399,7 @@
 				6072936728664212007FBD2F /* MaterialIcons.ttf in Resources */,
 				6072936128664212007FBD2F /* FontAwesome5_Solid.ttf in Resources */,
 				6072935D28664212007FBD2F /* MaterialCommunityIcons.ttf in Resources */,
+				F8F8A7182BD351ED001A3B95 /* PrivacyInfo.xcprivacy in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -617,18 +623,18 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 2.8.5.1;
+				CURRENT_PROJECT_VERSION = 2.8.6;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = UMALL/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = 2.8.5;
+				INFOPLIST_KEY_CFBundleDisplayName = 2.8.6;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.8.5;
+				MARKETING_VERSION = 2.8.6;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -655,17 +661,17 @@
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
-				CURRENT_PROJECT_VERSION = 2.8.5.1;
+				CURRENT_PROJECT_VERSION = 2.8.6;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				INFOPLIST_FILE = UMALL/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = 2.8.5;
+				INFOPLIST_KEY_CFBundleDisplayName = 2.8.6;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.8.5;
+				MARKETING_VERSION = 2.8.6;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
