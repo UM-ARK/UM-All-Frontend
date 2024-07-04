@@ -204,7 +204,11 @@ class HomeScreen extends Component {
                     function_name: t('組織登入', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        this.props.navigation.navigate('LoginIndex');
+                        if (this.state.showUpdateInfo) {
+                            Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
+                        } else {
+                            this.props.navigation.navigate('ClubLogin');
+                        }
                     },
                 },
             ],
