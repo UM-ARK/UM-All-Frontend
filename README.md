@@ -33,7 +33,7 @@
 
 ## 🎉 首次運行該項目
 
-在此查看[已知 BUG](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
+在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
 
 ### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
@@ -162,7 +162,7 @@ yarn ios --simulator="iPhone 15"
 
 ### 🐛 故障排除
 
-在此查看[Android 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android)與[iOS 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#ios)
+在此查看[Android 解決方案](./README/debugging_doc.md#android)與[iOS 解決方案](./README/debugging_doc.md#ios)
 
 
 ---
