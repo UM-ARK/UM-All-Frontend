@@ -40,9 +40,6 @@ const iconSize = scale(25);
 // preEnroll
 let COURSE_MODE = 'ad';
 
-const coursePlanList = coursePlanTime.Courses;
-// const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
-
 // ***** 需到getClassifyCourse函數處運行 *****
 // Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
 // offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
@@ -153,42 +150,6 @@ async function setLocalOpitons(filterOptions) {
     }
 }
 
-// 返回搜索候選所需的課程列表
-handleSearchFilterCourse = (inputText) => {
-    const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
-
-    // 篩選所需課程
-    let filterCourseList = offerCourseList.filter(itm => {
-        return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-            || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-            || itm['Course Title Chi'].indexOf(inputText) != -1
-    });
-
-    // 篩選課表時間Excel的數據
-    if (coursePlanList.length > 0) {
-        let coursePlanSearchList = coursePlanList.filter(itm => {
-            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-                || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-                || itm['Teacher Information'].toUpperCase().indexOf(inputText) != -1
-                || (itm['Day'] && itm['Day'].toUpperCase().indexOf(inputText) != -1)
-                || (itm['Offering Department'] && itm['Offering Department'].toUpperCase().indexOf(inputText) != -1)
-                || itm['Offering Unit'].toUpperCase().indexOf(inputText) != -1
-                || itm['Course Title Chi'].indexOf(inputText) != -1
-        });
-
-        // 搜索合併
-        filterCourseList = filterCourseList.concat(coursePlanSearchList)
-        // 搜索去重
-        filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
-    }
-
-    // 搜索結果排序
-    filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
-    filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
-
-    return filterCourseList
-}
-
 export default class index extends Component {
     constructor() {
         super();
@@ -212,6 +173,9 @@ export default class index extends Component {
             offerGEList: [],
             filterCourseList: [],
             scrollData: {},
+
+            s_offerCourses: offerCourses,
+            coursePlanList: coursePlanTime.Courses,
         };
 
         this.textInputRef = React.createRef();
@@ -222,6 +186,18 @@ export default class index extends Component {
         logToFirebase('openPage', { page: 'chooseCourses' });
 
         try {
+            // 優先使用本地緩存的offerCourses數據展示，後台對比雲端數據版本，提示更新
+            const strOfferCourses = await AsyncStorage.getItem('Offer_Courses');
+            const storageOfferCourses = strOfferCourses ? JSON.parse(strOfferCourses) : undefined;
+            if (storageOfferCourses) {
+                this.setState({ s_offerCourses: storageOfferCourses });
+            } else {
+                console.log('首次存入緩存a');
+                const strOfferCourses = JSON.stringify(offerCourses);
+                await AsyncStorage.setItem('Offer_Courses', strOfferCourses)
+                    .catch(e => console.log('AsyncStorage Error', e));
+            }
+
             const strFilterOptions = await AsyncStorage.getItem('ARK_Courses_filterOptions');
             const filterOptions = strFilterOptions ? JSON.parse(strFilterOptions) : undefined;
             if (filterOptions) {
@@ -283,7 +259,8 @@ export default class index extends Component {
 
     // 對開課數據進行分類
     getClassifyCourse = () => {
-        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : offerCourses.Courses;
+        const { s_offerCourses } = this.state;
+        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : s_offerCourses.Courses;
         let { filterOptions } = this.state;
 
         // 開設課程的學院名列表
@@ -957,6 +934,43 @@ export default class index extends Component {
         }
     }
 
+    // 返回搜索候選所需的課程列表
+    handleSearchFilterCourse = (inputText) => {
+        const { coursePlanList, s_offerCourses, } = this.state;
+        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : s_offerCourses.Courses;
+
+        // 篩選所需課程
+        let filterCourseList = offerCourseList.filter(itm => {
+            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title Chi'].indexOf(inputText) != -1
+        });
+
+        // 篩選課表時間Excel的數據
+        if (coursePlanList.length > 0) {
+            let coursePlanSearchList = coursePlanList.filter(itm => {
+                return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+                    || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+                    || itm['Teacher Information'].toUpperCase().indexOf(inputText) != -1
+                    || (itm['Day'] && itm['Day'].toUpperCase().indexOf(inputText) != -1)
+                    || (itm['Offering Department'] && itm['Offering Department'].toUpperCase().indexOf(inputText) != -1)
+                    || itm['Offering Unit'].toUpperCase().indexOf(inputText) != -1
+                    || itm['Course Title Chi'].indexOf(inputText) != -1
+            });
+
+            // 搜索合併
+            filterCourseList = filterCourseList.concat(coursePlanSearchList)
+            // 搜索去重
+            filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+        }
+
+        // 搜索結果排序
+        filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
+        filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+
+        return filterCourseList
+    }
+
     render() {
         const {
             isLoading,
@@ -1079,7 +1093,7 @@ export default class index extends Component {
                                 {`${COURSE_MODE == 'ad' ? '開設' : '預選'}課程:`}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                                數據更新日期: {COURSE_MODE == 'ad' ? coursePlan.updateTime : offerCourses.updateTime}
+                                數據更新日期: {COURSE_MODE == 'ad' ? coursePlan.updateTime : this.state.s_offerCourses.updateTime}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
