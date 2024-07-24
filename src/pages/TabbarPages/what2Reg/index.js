@@ -23,10 +23,10 @@ import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 import { openLink } from '../../../utils/browser';
-import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
+import { getLocalStorage, setLocalStorage, logAllStorage } from '../../../utils/storageKits';
 
 import axios from "axios";
-import { scale } from "react-native-size-matters";
+import { scale, verticalScale } from "react-native-size-matters";
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
@@ -34,32 +34,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
+import moment from 'moment';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
 
+// TODO: BUG：用PreEnroll模式搜索時，會將屬於AddDrop課搜索出來並打上PreEnroll標籤
 // preEnroll
 let COURSE_MODE = 'ad';
-
-// ***** 需到getClassifyCourse函數處運行 *****
-// Excel開課數據按首字母排序，複製一份排序後的數據到offerCourses.json，節省安卓端性能
-// offerCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
-// offerCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
-
-// 複製替換原課程列表為排序後列表
-// const courseListStr = JSON.stringify(offerCourseList);
-// console.log(courseListStr);
-
-// 預選課程加入Pre 鍵值
-// offerCourseList.map((itm,idx)=>{
-//     itm['Pre'] = 'true';
-// })
-// console.log(JSON.stringify(offerCourseList));
-
-// 加入課表時間Excel數據，去重
-// offerCourseList = offerCourseList.concat(xxxList);
-// offerCourseList = offerCourseList.filter((item, index) => offerCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
-// console.log(JSON.stringify(offerCourseList));
 
 // 學院名中文參考
 const unitMap = {
@@ -176,7 +158,8 @@ export default class index extends Component {
             scrollData: {},
 
             s_offerCourses: offerCourses,
-            coursePlanList: coursePlanTime.Courses,
+            s_coursePlan: coursePlan,
+            s_coursePlanTime: coursePlanTime,
         };
 
         this.textInputRef = React.createRef();
@@ -185,23 +168,36 @@ export default class index extends Component {
 
     async componentDidMount() {
         logToFirebase('openPage', { page: 'chooseCourses' });
+        // logAllStorage();
+        // await AsyncStorage.removeItem('course_file_check_date');
 
         try {
-            // 優先使用本地緩存的offerCourses數據展示，後台對比雲端數據版本，提示更新
-            const storageOfferCourses = await getLocalStorage('Offer_Courses');
+            // 3.0開始，優先使用本地緩存的offerCourses數據展示，後台對比雲端數據版本，提示更新
+            const storageOfferCourses = await getLocalStorage('offer_courses');
             if (storageOfferCourses) {
                 this.setState({ s_offerCourses: storageOfferCourses });
             } else {
-                // const strOfferCourses = JSON.stringify(offerCourses);
-                // await AsyncStorage.setItem('Offer_Courses', strOfferCourses).catch(e => console.log('AsyncStorage Error', e));
-                const saveResult = await setLocalStorage('Offer_Courses', offerCourses);
-                if (saveResult === 'ok') {
-                    console.log('課程數據首次存入緩存');
-                } else {
-                    Alert.alert('Error', JSON.stringify(saveResult));
-                }
+                const saveResult = await setLocalStorage('offer_courses', offerCourses);
+                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
             }
 
+            const storageCoursePlan = await getLocalStorage('course_plan');
+            if (storageCoursePlan) {
+                this.setState({ s_coursePlan: storageCoursePlan });
+            } else {
+                const saveResult = await setLocalStorage('course_plan', coursePlan);
+                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            }
+
+            const storageCoursePlanList = await getLocalStorage('course_plan_time');
+            if (storageCoursePlanList) {
+                this.setState({ s_coursePlanList: storageCoursePlanList });
+            } else {
+                const saveResult = await setLocalStorage('course_plan_time', coursePlanTime);
+                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            }
+
+            // 讀取課程類別選擇器的本地緩存
             const strFilterOptions = await AsyncStorage.getItem('ARK_Courses_filterOptions');
             const filterOptions = strFilterOptions ? JSON.parse(strFilterOptions) : undefined;
             if (filterOptions) {
@@ -211,47 +207,65 @@ export default class index extends Component {
                 setLocalOpitons(this.state.filterOptions);
             }
         } catch (e) {
+            // console.log('err', e);
             Alert.alert('ARK Courses error, 請聯繫開發者！', e)
         } finally {
+            // TODO: 需不需要每天自動更新課表數據？
+            // const storageFileCheckDate = await getLocalStorage('course_file_check_date');
+            // if (moment(storageFileCheckDate).isBefore(moment().format("YYYY-MM-DD")) || storageFileCheckDate == undefined) {
+            // await this.updateLocalCourseData('coursePlanTime');
+            // }
             this.getClassifyCourse();
         }
-
-        // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
-        this.keyboardDidHideListener = Keyboard.addListener(
-            'keyboardDidHide',
-            this._keyboardDidHide,
-        );
     };
+
+    // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
+    keyboardDidHideListener = Keyboard.addListener(
+        'keyboardDidHide',
+        this._keyboardDidHide,
+    );
 
     componentWillUnmount() {
         this.keyboardDidHideListener.remove();
     }
 
-    // TODO: 在線更新課表數據
-    getCourseJSON = async (type) => {
-        typeObj = {
-            'plan': 'COURSE_PLAN',
-            'planTime': 'COURSE_PLAN_TIME',
-            'offer': 'OFFER_COURSE',
-        }
-        const URI = GET[typeObj[type]];
+    // 更新Add Drop課表的數據
+    updateLocalCourseData = async (type) => {
+        const storageMap = {
+            'coursePlan': 'course_plan',
+            'coursePlanTime': 'course_plan_time',
+            'offerCourses': 'offer_courses',
+        };
+        const fileNameMap = {
+            'coursePlan': 'coursePlan',
+            'coursePlanTime': 'coursePlanTime',
+            'offerCourses': 'offerCourses',
+        };
+        const stateMap = {
+            'coursePlan': 's_coursePlan',
+            'coursePlanTime': 's_coursePlanTime',
+            'offerCourses': 's_offerCourses',
+        };
+
         try {
-            let res = await axios.get(URI)
-            return res.data
+            const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/jsonUpdateTest/src/static/UMCourses/${fileNameMap[type]}.json`)
+            if (res.status == 200) {
+                const { data } = res;
+                // console.log('Github data', data);
+                this.setState({ [stateMap[type]]: data });
+                const saveResult = await setLocalStorage(storageMap[type], data);
+                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            }
         } catch (error) {
             Alert.alert(``,
-                '連接Github更新數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或發郵件催促一下作者\nQAQ...'
+                '自動連線至Github更新課程數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或與作者反饋\nQAQ...'
                 , null, { cancelable: true })
-        }
-    }
-
-    // TODO: 在線更新課表數據
-    updateCourseJSON = async () => {
-        try {
-            let PLAN_JSON = await this.getCourseJSON('plan');
-            console.log('PLAN_JSON', PLAN_JSON);
-        } catch (error) {
-            console.log('error', error);
+        } finally {
+            // TODO: 每日任務的最後寫入更新日期到緩存
+            // const strToday = moment().format("YYYY-MM-DD");
+            // const saveResult = await setLocalStorage('course_file_check_date', strToday);
+            // if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            this.getClassifyCourse();
         }
     }
 
@@ -263,8 +277,8 @@ export default class index extends Component {
 
     // 對開課數據進行分類
     getClassifyCourse = () => {
-        const { s_offerCourses } = this.state;
-        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : s_offerCourses.Courses;
+        const { s_offerCourses, s_coursePlan } = this.state;
+        const offerCourseList = COURSE_MODE == 'ad' ? s_coursePlan.Courses : s_offerCourses.Courses;
         let { filterOptions } = this.state;
 
         // 開設課程的學院名列表
@@ -940,8 +954,9 @@ export default class index extends Component {
 
     // 返回搜索候選所需的課程列表
     handleSearchFilterCourse = (inputText) => {
-        const { coursePlanList, s_offerCourses, } = this.state;
-        const offerCourseList = COURSE_MODE == 'ad' ? coursePlan.Courses : s_offerCourses.Courses;
+        const { s_offerCourses, s_coursePlan, s_coursePlanTime } = this.state;
+        const offerCourseList = COURSE_MODE == 'ad' ? s_coursePlan.Courses : s_offerCourses.Courses;
+        const coursePlanList = s_coursePlanTime.Courses;
 
         // 篩選所需課程
         let filterCourseList = offerCourseList.filter(itm => {
@@ -1022,6 +1037,54 @@ export default class index extends Component {
                     >
                         {/* 頁面標題欄 */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            {/* TODO: 提示按鈕，包括更新數據 */}
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    right: scale(10),
+                                    flexDirection: 'row', alignItems: 'center',
+                                    backgroundColor: themeColor,
+                                    borderRadius: scale(5),
+                                    padding: scale(5),
+                                }}
+                                onPress={() => {
+                                    trigger();
+                                    Alert.alert('ARK搵課提示',
+                                        `APP內Add Drop課表數據更新日期：${this.state.s_coursePlan.updateTime}\n\nAPP內選課表數據更新日期：${this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n可附件最新的課表Excel，Email提醒作者更新！`,
+                                        [
+                                            {
+                                                text: "更新Pre Enroll數據",
+                                                onPress: () => {
+                                                    this.updateLocalCourseData('offerCourses');
+                                                },
+                                            },
+                                            {
+                                                text: "更新Add Drop數據",
+                                                onPress: async () => {
+                                                    try {
+                                                        await this.updateLocalCourseData('coursePlan')
+                                                    } catch (error) {
+                                                        alert(JSON.stringify(error));
+                                                    } finally {
+                                                        await this.updateLocalCourseData('coursePlanTime')
+                                                    }
+                                                },
+                                            },
+                                            {
+                                                text: "GOT IT",
+                                            },
+                                        ]
+                                    );
+                                }}
+                            >
+                                <Ionicons
+                                    name={'build'}
+                                    size={verticalScale(15)}
+                                    color={white}
+                                />
+                                <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>更新</Text>
+                            </TouchableOpacity>
+
                             <View style={{ flexDirection: 'row' }}>
                                 {/* ARK Logo */}
                                 <FastImage
@@ -1037,20 +1100,25 @@ export default class index extends Component {
                             </View>
 
                             {/* TODO: 更新數據按鈕 */}
-                            {false && (
-                                <TouchableOpacity style={{
-                                    position: 'absolute',
-                                    right: scale(10),
-                                }}
-                                    onPress={this.updateCourseJSON}
+                            {false && <>
+                                <TouchableOpacity
+                                    onPress={() => this.updateLocalCourseData('coursePlan')}
                                 >
-                                    <Text style={{
-                                        ...uiStyle.defaultText,
-                                        color: COLOR_DIY.unread,
-                                        fontWeight: 'bold',
-                                    }}>{`點我更新${'01-02'}課表`}</Text>
+                                    <Text>更新課表</Text>
                                 </TouchableOpacity>
-                            )}
+
+                                <TouchableOpacity
+                                    onPress={() => this.updateLocalCourseData('coursePlanTime')}
+                                >
+                                    <Text>更新課表時間</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={() => this.updateLocalCourseData('offerCourses')}
+                                >
+                                    <Text>更新預選課</Text>
+                                </TouchableOpacity>
+                            </>}
                         </View>
 
                         <>
@@ -1097,7 +1165,7 @@ export default class index extends Component {
                                 {`${COURSE_MODE == 'ad' ? '開設' : '預選'}課程:`}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                                數據更新日期: {COURSE_MODE == 'ad' ? coursePlan.updateTime : this.state.s_offerCourses.updateTime}
+                                數據更新日期: {COURSE_MODE == 'ad' ? this.state.s_coursePlan.updateTime : this.state.s_offerCourses.updateTime}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                                 記得更新APP以獲得最新數據~
