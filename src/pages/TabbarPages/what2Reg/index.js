@@ -23,6 +23,7 @@ import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
 import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 import { openLink } from '../../../utils/browser';
+import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
 
 import axios from "axios";
 import { scale } from "react-native-size-matters";
@@ -187,15 +188,18 @@ export default class index extends Component {
 
         try {
             // 優先使用本地緩存的offerCourses數據展示，後台對比雲端數據版本，提示更新
-            const strOfferCourses = await AsyncStorage.getItem('Offer_Courses');
-            const storageOfferCourses = strOfferCourses ? JSON.parse(strOfferCourses) : undefined;
+            const storageOfferCourses = await getLocalStorage('Offer_Courses');
             if (storageOfferCourses) {
                 this.setState({ s_offerCourses: storageOfferCourses });
             } else {
-                console.log('首次存入緩存a');
-                const strOfferCourses = JSON.stringify(offerCourses);
-                await AsyncStorage.setItem('Offer_Courses', strOfferCourses)
-                    .catch(e => console.log('AsyncStorage Error', e));
+                // const strOfferCourses = JSON.stringify(offerCourses);
+                // await AsyncStorage.setItem('Offer_Courses', strOfferCourses).catch(e => console.log('AsyncStorage Error', e));
+                const saveResult = await setLocalStorage('Offer_Courses', offerCourses);
+                if (saveResult === 'ok') {
+                    console.log('課程數據首次存入緩存');
+                } else {
+                    Alert.alert('Error', JSON.stringify(saveResult));
+                }
             }
 
             const strFilterOptions = await AsyncStorage.getItem('ARK_Courses_filterOptions');
