@@ -85,3 +85,15 @@ export async function setLocalStorage(itemName, data) {
         return 'ok';
     }
 }
+
+// log出當前所有的緩存資料
+export function logAllStorage() {
+    AsyncStorage.getAllKeys((err, keys) => {
+        AsyncStorage.multiGet(keys, (error, stores) => {
+            stores.map((result, i, store) => {
+                console.log({ [store[i][0]]: JSON.parse(store[i][1]) });
+                return true;
+            });
+        });
+    });
+}
