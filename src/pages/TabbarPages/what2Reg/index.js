@@ -37,7 +37,7 @@ import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
 
-const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
+const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
 const iconSize = scale(25);
 
 // TODO: BUG：用PreEnroll模式搜索時，會將屬於AddDrop課搜索出來並打上PreEnroll標籤
@@ -395,7 +395,7 @@ export default class index extends Component {
                         style={{
                             ...s.classItm,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
-                            backgroundColor: filterOptions.mode === itm ? themeColor : null,
+                            backgroundColor: filterOptions.mode === itm ? (filterOptions.mode === 'ad' ? themeColor : secondThemeColor) : null,
                         }}
                         onPress={async () => {
                             trigger();
@@ -999,8 +999,8 @@ export default class index extends Component {
             inputText,
         } = this.state;
         const searchFilterCourse = hasChinese(inputText) ?
-            (inputText.length > 0 ? handleSearchFilterCourse(inputText) : null) :
-            inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
+            (inputText.length > 0 ? this.handleSearchFilterCourse(inputText) : null) :
+            inputText.length > 2 ? this.handleSearchFilterCourse(inputText) : null;
 
         return (
             <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{
@@ -1133,9 +1133,7 @@ export default class index extends Component {
                                 <View style={{ alignSelf: 'center' }}>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                                 </View>
-                                <CourseCard data={searchFilterCourse} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
-                                    handleSetLetterData={this.handleSetLetterData}
-                                />
+                                <CourseCard data={searchFilterCourse} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
                             </>
                         ) : (<>
                             {/* 篩選列表 */}
@@ -1154,9 +1152,7 @@ export default class index extends Component {
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList && filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
-                                    <CourseCard data={filterCourseList} mode={'json'} preEnroll={COURSE_MODE == 'preEnroll'}
-                                        handleSetLetterData={this.handleSetLetterData}
-                                    />
+                                    <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
                                 </View>
                             ) : null}
                         </>)}
@@ -1170,7 +1166,7 @@ export default class index extends Component {
                                 數據更新日期: {COURSE_MODE == 'ad' ? this.state.s_coursePlan.updateTime : this.state.s_offerCourses.updateTime}
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
-                                記得更新APP以獲得最新數據~
+                                記得更新APP或右上角手動更新以獲得最新數據~
                             </Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }} selectable>
                                 遇到BUG可聯繫umacark@gmail.com

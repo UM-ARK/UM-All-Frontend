@@ -65,7 +65,7 @@ export default class CourseCard extends Component {
     }
 
     render() {
-        const { data, mode, preEnroll } = this.props;
+        const { data, mode } = this.props;
 
         return (
             <FlatList
@@ -235,7 +235,7 @@ export default class CourseCard extends Component {
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     {this.renderCourseCode(courseCode)}
                                     {/* Pre Enroll標記 */}
-                                    {preEnroll ? (
+                                    {/* {preEnroll ? (
                                         <Text style={{
                                             ...uiStyle.defaultText,
                                             fontSize: scale(10),
@@ -243,7 +243,7 @@ export default class CourseCard extends Component {
                                             marginLeft: scale(5),
                                             color: secondThemeColor,
                                         }}>PreEnroll</Text>
-                                    ) : null}
+                                    ) : null} */}
                                 </View>
                                 <Text style={{
                                     ...uiStyle.defaultText,
