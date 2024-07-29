@@ -31,7 +31,7 @@ export const ARK_WIKI_RANDOM_PAGE = ARK_WIKI + '/wiki/Special:Random';
 
 export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0';
 
-export const OFFICIAL_COURSE_SEARCH = 'https://isw.umac.mo/siwci/faces/courseDetailUG?courseCode=';
+export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
 
 export function addHost(itm) {
     if (itm.length > 0) {
