@@ -35,6 +35,7 @@ import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
+import Toast from 'react-native-simple-toast';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled } = COLOR_DIY;
 const iconSize = scale(25);
@@ -248,7 +249,7 @@ export default class index extends Component {
         };
 
         try {
-            const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/jsonUpdateTest/src/static/UMCourses/${fileNameMap[type]}.json`)
+            const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/master/src/static/UMCourses/${fileNameMap[type]}.json`)
             if (res.status == 200) {
                 const { data } = res;
                 // console.log('Github data', data);
@@ -261,6 +262,7 @@ export default class index extends Component {
                 '自動連線至Github更新課程數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或與作者反饋\nQAQ...'
                 , null, { cancelable: true })
         } finally {
+            Toast.show(`已拉取更新！`);
             // TODO: 每日任務的最後寫入更新日期到緩存
             // const strToday = moment().format("YYYY-MM-DD");
             // const saveResult = await setLocalStorage('course_file_check_date', strToday);
