@@ -24,6 +24,7 @@ import Toast from 'react-native-simple-toast';
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
 
+import { getLocalStorage } from '../../../utils/storageKits';
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
@@ -34,9 +35,6 @@ import { trigger } from "../../../utils/trigger";
 
 const { themeColor, themeColorUltraLight, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
-const courseTimeList = coursePlanTimeFile.Courses;
-const coursePlanList = coursePlanFile.Courses;
-
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 // 設置本地緩存
@@ -88,21 +86,6 @@ function parseImportData(inputText) {
     }
 }
 
-// 返回搜索候選所需的課程列表
-handleSearchFilterCourse = (inputText) => {
-    let filterCourseList = [];
-
-    filterCourseList = coursePlanList.filter(itm => {
-        return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-            || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-            || itm['Course Title Chi'].indexOf(inputText) != -1
-            || itm['Teacher Information'].indexOf(inputText) != -1
-            || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1)
-    });
-
-    return filterCourseList
-}
-
 // TODO: 查看某時間段可選的CourseCode、Section
 export default class courseSim extends Component {
     constructor() {
@@ -127,10 +110,23 @@ export default class courseSim extends Component {
         // timeFilterTo: '22:00',
         // showTimePickerFrom: false,
         // showTimePickerTo: false,
+
+        s_coursePlanFile: coursePlanFile,
+        s_coursePlanTimeFile: coursePlanTimeFile,
     }
 
     async componentDidMount() {
         logToFirebase('openPage', { page: 'courseSim' });
+
+        const storageCoursePlan = await getLocalStorage('course_plan');
+        if (storageCoursePlan) {
+            this.setState({ s_coursePlanFile: storageCoursePlan });
+        }
+
+        const storageCoursePlanList = await getLocalStorage('course_plan_time');
+        if (storageCoursePlanList) {
+            this.setState({ s_coursePlanTimeFile: storageCoursePlanList });
+        }
 
         const strCourseCodeList = await AsyncStorage.getItem('ARK_Timetable_Storage');
         const courseCodeList = strCourseCodeList ? JSON.parse(strCourseCodeList) : null;
@@ -161,6 +157,8 @@ export default class courseSim extends Component {
 
     // 處理課表數據，分析出用於render的數據
     handleCourseList = (courseCodeList) => {
+        const { s_coursePlanTimeFile } = this.state;
+        const courseTimeList = s_coursePlanTimeFile.Courses;
         let courseScheduleByCode = {};
         courseCodeList.map(i => {
             let tempArr = [];
@@ -757,9 +755,12 @@ E11-0000
     }
 
     renderCourseSearch = () => {
-        const filterCourseList = handleSearchFilterCourse(this.state.searchText);
+        const filterCourseList = this.handleSearchFilterCourse(this.state.searchText);
         // 是否有搜索結果
         const haveSearchResult = this.state.searchText && filterCourseList.length > 0;
+
+        const { s_coursePlanTimeFile } = this.state;
+        const courseTimeList = s_coursePlanTimeFile.Courses;
         return (
             <View style={{
                 height: haveSearchResult ? '100%' : scale(45),
@@ -910,6 +911,24 @@ E11-0000
                 }) : null}
             </View>
         )
+    }
+
+    // 返回搜索候選所需的課程列表
+    handleSearchFilterCourse = (inputText) => {
+        const { s_coursePlanFile } = this.state;
+        const coursePlanList = s_coursePlanFile.Courses;
+
+        let filterCourseList = [];
+
+        filterCourseList = coursePlanList.filter(itm => {
+            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
+                || itm['Course Title Chi'].indexOf(inputText) != -1
+                || itm['Teacher Information'].indexOf(inputText) != -1
+                || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1)
+        });
+
+        return filterCourseList
     }
 
     render() {
