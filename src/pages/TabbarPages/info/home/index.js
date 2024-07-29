@@ -752,20 +752,22 @@ class HomeScreen extends Component {
                     }
 
                     {/* 快捷功能圖標 */}
-                    <FlatGrid
-                        style={{
-                            alignSelf: 'center',
-                            backgroundColor: white, borderRadius: scale(10),
-                            marginTop: scale(5),
-                        }}
-                        maxItemsPerRow={6}
-                        itemDimension={scale(50)}
-                        spacing={scale(5)}
-                        data={this.state.functionArray}
-                        renderItem={({ item }) => this.GetFunctionIcon(item)}
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={false}
-                    />
+                    {false &&
+                        <FlatGrid
+                            style={{
+                                alignSelf: 'center',
+                                backgroundColor: white, borderRadius: scale(10),
+                                marginTop: scale(5),
+                            }}
+                            maxItemsPerRow={6}
+                            itemDimension={scale(50)}
+                            spacing={scale(5)}
+                            data={this.state.functionArray}
+                            renderItem={({ item }) => this.GetFunctionIcon(item)}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    }
 
                     {/* 更新提示 */}
                     {

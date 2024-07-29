@@ -67,7 +67,7 @@ const iconTypes = {
     img: 'img',
 };
 
-const { themeColor } = COLOR_DIY;
+const { themeColor, white } = COLOR_DIY;
 
 const iconSize = scale(25);
 
@@ -801,6 +801,27 @@ class Index extends Component {
                         <View style={{ marginLeft: scale(5), }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
+
+                        {/* 組織登入按鈕 */}
+                        <TouchableOpacity style={{
+                            position: 'absolute',
+                            right: scale(10),
+                            backgroundColor: themeColor,
+                            borderRadius: scale(5),
+                            padding: scale(5),
+                        }}
+                            onPress={() => {
+                                trigger();
+                                // TODO: 跳轉組織登入
+                                this.props.navigation.navigate('ClubLogin');
+                            }}
+                        >
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                color: this.state.addMode ? themeColor : white,
+                                fontWeight: 'bold'
+                            }}>組織登入</Text>
+                        </TouchableOpacity>
                     </View>
 
                     {this.state.functionArr.map(fn_card => {
