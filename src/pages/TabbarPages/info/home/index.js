@@ -628,7 +628,6 @@ class HomeScreen extends Component {
 
         // 接近底部時，獲取更多數據
         if (isCloseToBottom && !isLoadMore) {
-            // console.log('已到底');
             const thisFunc = this.eventPage.current;
             if (!thisFunc.state.noMoreData) {
                 isLoadMore = true;
@@ -674,6 +673,7 @@ class HomeScreen extends Component {
                     ref={this.scrollView}
                     showsVerticalScrollIndicator={true}
                     onScroll={this.handleScroll}
+                    scrollEventThrottle={400}
                 >
                     <View style={{
                         alignSelf: 'center',
