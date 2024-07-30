@@ -49,6 +49,7 @@ import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
+const iconSize = verticalScale(25);
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -674,10 +675,31 @@ class HomeScreen extends Component {
                     showsVerticalScrollIndicator={true}
                     onScroll={this.handleScroll}
                 >
+                    <View style={{
+                        alignSelf: 'center',
+                        alignItems: 'center', justifyContent: 'center',
+                        flexDirection: 'row',
+                        marginTop: verticalScale(10),
+                    }}>
+                        {/* ARK Logo */}
+                        <FastImage
+                            source={require('../../../../static/img/logo.png')}
+                            style={{
+                                height: iconSize, width: iconSize,
+                                borderRadius: scale(5),
+                            }}
+                        />
+                        <Text style={{
+                            fontSize: verticalScale(18),
+                            color: themeColor,
+                            fontWeight: 'bold',
+                            marginLeft: verticalScale(5),
+                        }}>ARK ALL 澳大方舟</Text>
+                    </View>
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
-                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8), justifyContent: 'center', }}>
+                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center', }}>
                             <VirtualizedList
                                 data={cal}
                                 ref={this.calScrollRef}
@@ -880,9 +902,11 @@ class HomeScreen extends Component {
                     {/* 活動頁 */}
                     {this.state.networkError ? (
                         <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
-                    ) : (<>
-                        <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
-                    </>)}
+                    ) : null
+                    // (<>
+                    //     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
+                    // </>)
+                    }
                     <EventPage ref={this.eventPage} />
 
                 </ScrollView >
