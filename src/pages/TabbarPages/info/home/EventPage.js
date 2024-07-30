@@ -250,25 +250,11 @@ class EventPage extends Component {
                 {this.state.isLoading ? (
                     <Loading />
                 ) : (leftDataList.length > 0 || rightDataList.length > 0 ?
-                    <ScrollView
-                        ref={'scrollView'}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={isLoading}
-                                onRefresh={this.onRefresh}
-                            />
-                        }
-                        directionalLockEnabled
-                        alwaysBounceHorizontal={false}>
-                        <View>
-                            {/* 瀑布流渲染主要內容 */}
-                            {this.renderPage()}
-
-                            {this.renderLoadMoreView()}
-                        </View>
-                    </ScrollView> : null
+                    <View>
+                        {/* 瀑布流渲染主要內容 */}
+                        {this.renderPage()}
+                        {this.renderLoadMoreView()}
+                    </View> : null
                 )}
             </View>
         );

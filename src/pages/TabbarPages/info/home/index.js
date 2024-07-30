@@ -139,6 +139,8 @@ const toastKaomojiArr = [
 
 const calItemWidth = scale(44.5);
 
+let isLoadMore = false;
+
 class HomeScreen extends Component {
     toastTimer = null;
     calScrollRef = React.createRef(null);
@@ -619,6 +621,25 @@ class HomeScreen extends Component {
         );
     };
 
+    handleScroll = (event) => {
+        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
+
+        // 接近底部時，獲取更多數據
+        if (isCloseToBottom && !isLoadMore) {
+            // console.log('已到底');
+            const thisFunc = this.eventPage.current;
+            if (!thisFunc.state.noMoreData) {
+                isLoadMore = true;
+                thisFunc.loadMoreData();
+                // 延時鎖，避免到底觸發過多次
+                setTimeout(() => {
+                    isLoadMore = false;
+                }, 1000);
+            }
+        }
+    };
+
     render() {
         const { selectDay, isLoading } = this.state;
         return (
@@ -650,7 +671,8 @@ class HomeScreen extends Component {
                     }
                     alwaysBounceHorizontal={false}
                     ref={this.scrollView}
-                    showsVerticalScrollIndicator={false}
+                    showsVerticalScrollIndicator={true}
+                    onScroll={this.handleScroll}
                 >
 
                     {/* 校曆列表 */}
