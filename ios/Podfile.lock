@@ -326,7 +326,7 @@ PODS:
     - glog
   - react-native-cameraroll (5.6.0):
     - React-Core
-  - react-native-compressor (1.8.23):
+  - react-native-compressor (1.8.25):
     - React-Core
   - react-native-cookies (6.2.1):
     - React-Core
@@ -334,16 +334,16 @@ PODS:
     - React-Core
   - react-native-menu (0.9.1):
     - React
-  - react-native-pager-view (6.2.3):
+  - react-native-pager-view (6.3.3):
     - React-Core
   - react-native-restart (0.0.24):
     - React-Core
-  - react-native-safe-area-context (4.9.0):
+  - react-native-safe-area-context (4.10.7):
     - React-Core
-  - react-native-simple-toast (3.3.0):
+  - react-native-simple-toast (3.3.1):
     - React-Core
     - Toast (~> 4)
-  - react-native-webview (13.8.1):
+  - react-native-webview (13.10.4):
     - React-Core
   - React-perflogger (0.68.7)
   - React-RCTActionSheet (0.68.7):
@@ -414,9 +414,9 @@ PODS:
     - React
   - rn-fetch-blob (0.12.0):
     - React-Core
-  - RNCAsyncStorage (1.21.0):
+  - RNCAsyncStorage (1.23.1):
     - React-Core
-  - RNCClipboard (1.13.2):
+  - RNCClipboard (1.14.1):
     - React-Core
   - RNDateTimePicker (6.7.5):
     - React-Core
@@ -433,7 +433,7 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.14.1):
+  - RNGestureHandler (2.17.1):
     - React-Core
   - RNInAppBrowser (3.7.0):
     - React-Core
@@ -468,7 +468,7 @@ PODS:
     - React-RCTText
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.29.0):
+  - RNScreens (3.32.0):
     - React-Core
     - React-RCTImage
   - RNSVG (12.5.1):
@@ -715,15 +715,15 @@ SPEC CHECKSUMS:
   React-jsinspector: cab4d37ebde480f84c79ac89568abbf76b916c3e
   React-logger: b75b80500ea80457b2cf169427d66de986cdcb29
   react-native-cameraroll: 755bcc628148a90a7c9cf3f817a252be3a601bc5
-  react-native-compressor: 83d346f200b8618e890eb17a9cd486b1cd10dedc
+  react-native-compressor: c8a35e0e7b80b041804a7bed0cc97d647e487294
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-image-picker: 60f4246eb5bb7187fc15638a8c1f13abd3820695
   react-native-menu: 9728f90160c36b9a75481fc76e05354b99d54c59
-  react-native-pager-view: c29d484f19c49ff19525a94105e4ab2c4d4ae273
+  react-native-pager-view: 73a454fe1b01c275a6a11a99cccd659f6899bfdd
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
-  react-native-safe-area-context: b97eb6f9e3b7f437806c2ce5983f479f8eb5de4b
-  react-native-simple-toast: 6148335d096ab63dc852535ec64c82527315d575
-  react-native-webview: bef49fb935d75e1ca83aed3ac74eecf5b78764ac
+  react-native-safe-area-context: 422017db8bcabbada9ad607d010996c56713234c
+  react-native-simple-toast: 1f1cc551d419bc0ab05dcb0136554006c274789d
+  react-native-webview: 625925488f70034d18162509da93c320a8a56325
   React-perflogger: 44436b315d757100a53dfb1ab6b77c58cb646d7d
   React-RCTActionSheet: 1888a229684762c40cc96c7ff4716f809655dc09
   React-RCTAnimation: f05da175751867521d14b02ab4d3994a7b96f131
@@ -738,19 +738,19 @@ SPEC CHECKSUMS:
   ReactCommon: 29bb6fad3242e30e9d049bc9d592736fa3da9e50
   ReactNativeUiLib: 8d3804947431a465a69f09c5e785c988314612a9
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
-  RNCAsyncStorage: 618d03a5f52fbccb3d7010076bc54712844c18ef
-  RNCClipboard: 60fed4b71560d7bfe40e9d35dea9762b024da86d
+  RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
+  RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
   RNDateTimePicker: 65e1d202799460b286ff5e741d8baf54695e8abd
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFBAnalytics: ec290267aac57446c10b491293373ac86357f575
   RNFBApp: 9b25191f7a5e72c185b7e43fffb0d906869c4659
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: e98441928705d9d1184b599d7c1c6df2dd4f7724
+  RNGestureHandler: 30704285c8ef803f7705f92dd9428261ed756e24
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNPermissions: b8968413f8aba5d451e59f269277583d36eb2b6d
   RNReactNativeHapticFeedback: ec56a5f81c3941206fd85625fa669ffc7b4545f9
   RNReanimated: 1f117be601c59177816351a965bc57320b766c15
-  RNScreens: fa9b582d85ae5d62c91c66003b5278458fed7aaa
+  RNScreens: afdbd43bcd6c81559917054da18ad101b4395000
   RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
