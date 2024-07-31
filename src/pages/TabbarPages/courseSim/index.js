@@ -118,15 +118,7 @@ export default class courseSim extends Component {
     async componentDidMount() {
         logToFirebase('openPage', { page: 'courseSim' });
 
-        const storageCoursePlan = await getLocalStorage('course_plan');
-        if (storageCoursePlan) {
-            this.setState({ s_coursePlanFile: storageCoursePlan });
-        }
-
-        const storageCoursePlanList = await getLocalStorage('course_plan_time');
-        if (storageCoursePlanList) {
-            this.setState({ s_coursePlanTimeFile: storageCoursePlanList });
-        }
+        await this.readLocalCourseData();
 
         const strCourseCodeList = await AsyncStorage.getItem('ARK_Timetable_Storage');
         const courseCodeList = strCourseCodeList ? JSON.parse(strCourseCodeList) : null;
@@ -143,6 +135,27 @@ export default class courseSim extends Component {
 
     componentWillUnmount() {
         this.keyboardDidHideListener.remove();
+    }
+
+    // 讀取本地緩存的課表數據
+    readLocalCourseData = async () => {
+        const storageCoursePlan = await getLocalStorage('course_plan');
+        if (storageCoursePlan) {
+            this.setState({ s_coursePlanFile: storageCoursePlan });
+        }
+
+        const storageCoursePlanList = await getLocalStorage('course_plan_time');
+        if (storageCoursePlanList) {
+            this.setState({ s_coursePlanTimeFile: storageCoursePlanList });
+        }
+    }
+
+    // 讀取另一頁面的傳參，新增課程
+    readParams = () => {
+        if ('add' in this.props.route.params) {
+            const { add } = this.props.route.params;
+            this.addCourse(add);
+        }
     }
 
     // 鍵盤收起，使輸入框失焦

@@ -36,6 +36,7 @@ import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
+import RNRestart from 'react-native-restart';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
 const iconSize = scale(25);
@@ -252,17 +253,26 @@ export default class index extends Component {
             const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/master/src/static/UMCourses/${fileNameMap[type]}.json`)
             if (res.status == 200) {
                 const { data } = res;
-                // console.log('Github data', data);
                 this.setState({ [stateMap[type]]: data });
                 const saveResult = await setLocalStorage(storageMap[type], data);
                 if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+                Toast.show(`已拉取更新！`);
+                if (type === 'coursePlanTime') {
+                    Alert.alert(`ARK搵課提示`, `現在重啟APP以適配最新課表數據嗎？`, [
+                        {
+                            text: 'Yes', onPress: () => {
+                                RNRestart.Restart();
+                            }
+                        },
+                        { text: 'No', },
+                    ]);
+                }
             }
         } catch (error) {
             Alert.alert(``,
                 '自動連線至Github更新課程數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或與作者反饋\nQAQ...'
                 , null, { cancelable: true })
         } finally {
-            Toast.show(`已拉取更新！`);
             // TODO: 每日任務的最後寫入更新日期到緩存
             // const strToday = moment().format("YYYY-MM-DD");
             // const saveResult = await setLocalStorage('course_file_check_date', strToday);
@@ -1052,23 +1062,23 @@ export default class index extends Component {
                                 onPress={() => {
                                     trigger();
                                     Alert.alert('ARK搵課提示',
-                                        `APP內Add Drop課表數據更新日期：${this.state.s_coursePlan.updateTime}\n\nAPP內選課表數據更新日期：${this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n可附件最新的課表Excel，Email提醒作者更新！`,
+                                        `APP內Add Drop課數據更新日期：${this.state.s_coursePlan.updateTime}\n\nAPP內Pre Enroll數據更新日期：${this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
                                         [
                                             {
                                                 text: "更新Pre Enroll數據",
-                                                onPress: () => {
-                                                    this.updateLocalCourseData('offerCourses');
+                                                onPress: async () => {
+                                                    await this.updateLocalCourseData('offerCourses');
                                                 },
                                             },
                                             {
                                                 text: "更新Add Drop數據",
                                                 onPress: async () => {
                                                     try {
-                                                        await this.updateLocalCourseData('coursePlan')
+                                                        await this.updateLocalCourseData('coursePlan');
                                                     } catch (error) {
                                                         alert(JSON.stringify(error));
                                                     } finally {
-                                                        await this.updateLocalCourseData('coursePlanTime')
+                                                        await this.updateLocalCourseData('coursePlanTime');
                                                     }
                                                 },
                                             },
