@@ -229,7 +229,7 @@ class UMEventPage extends Component {
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}
                 <ScrollView
-                    showsVerticalScrollIndicator={false}
+                    showsVerticalScrollIndicator={true}
                     ref={this.virtualizedList}
                     refreshControl={
                         <RefreshControl

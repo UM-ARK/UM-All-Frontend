@@ -11,14 +11,16 @@ import {
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import Header from '../../../components/Header';
 import { handleLogin } from '../../../utils/storageKits';
-import { BASE_URI, GET } from '../../../utils/pathMap';
+import { BASE_URI, GET, USER_AGREE, USUAL_Q, } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
+import { openLink } from '../../../utils/browser';
 
 import { Input } from '@rneui/themed';
 import axios from 'axios';
 import qs from 'qs';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-toast-message";
+import { CheckBox } from '@rneui/themed';
 
 const { white, black, themeColor, } = COLOR_DIY;
 
@@ -29,6 +31,10 @@ let accountPassword = {
 };
 
 class ClubLogin extends Component {
+    state = {
+        ruleChoice: false,
+    };
+
     handleLoginPress = () => {
         trigger();
         // 賬戶輸入未完成
@@ -40,7 +46,16 @@ class ClubLogin extends Component {
                 onPress: () => Toast.hide(),
             });
         } else {
-            this.clubSignIn();
+            if (!this.state.ruleChoice) {
+                Toast.show({
+                    type: 'warning',
+                    text1: '請先閱讀和同意相關協議！',
+                    topOffset: scale(100),
+                    onPress: () => Toast.hide(),
+                });
+            } else {
+                this.clubSignIn();
+            }
         }
     };
 
@@ -111,13 +126,88 @@ class ClubLogin extends Component {
                         style={{ color: themeColor, }}
                     />
 
+                    {/* 登錄提示 */}
+                    <View style={{ alignSelf: 'center', }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                            {/* 選中圖標 */}
+                            <CheckBox
+                                containerStyle={{
+                                    backgroundColor: 'transparent',
+                                    padding: 0,
+                                }}
+                                checkedIcon="dot-circle-o"
+                                uncheckedIcon="circle-o"
+                                size={scale(20)}
+                                checked={this.state.ruleChoice}
+                                onPress={() => {
+                                    trigger();
+                                    this.setState({
+                                        ruleChoice: !this.state.ruleChoice,
+                                    });
+                                }}
+                            />
+                            <TouchableOpacity
+                                activeOpacity={0.9}
+                                onPress={() => {
+                                    trigger();
+                                    this.setState({
+                                        ruleChoice: !this.state.ruleChoice,
+                                    });
+                                }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: COLOR_DIY.black.third,
+                                        fontSize: scale(13),
+                                    }}>
+                                    我已閱讀且同意遵守
+                                </Text>
+                            </TouchableOpacity>
+                            {/* 查看用戶協議 */}
+                            <TouchableOpacity>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: COLOR_DIY.themeColor,
+                                        fontSize: scale(13),
+                                    }}
+                                    activeOpacity={0.9}
+                                    onPress={() => {
+                                        openLink(USER_AGREE);
+                                    }}>
+                                    《隱私政策與用戶協議》
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* 註冊、進駐提示 */}
+                    <TouchableOpacity
+                        onPress={() => openLink(USUAL_Q)}
+                        style={{
+                            alignSelf: 'center',
+                            backgroundColor: COLOR_DIY.themeColorLight,
+                            padding: scale(5),
+                            borderRadius: scale(5),
+                            marginTop: verticalScale(10),
+                        }}>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: white,
+                                fontSize: scale(12),
+                            }}>
+                            註冊/進駐ARK ALL
+                        </Text>
+                    </TouchableOpacity>
+
                     {/* 登錄按鈕 */}
                     <TouchableOpacity
                         style={{
                             justifyContent: 'center', alignItems: 'center',
-                            marginTop: scale(5),
+                            marginTop: verticalScale(15),
                             padding: scale(10), paddingHorizontal: scale(20),
-                            backgroundColor: COLOR_DIY.themeColor,
+                            backgroundColor: this.state.ruleChoice ? COLOR_DIY.themeColor : COLOR_DIY.themeColorLight,
                             borderRadius: scale(10),
                             alignSelf: 'center',
                         }}

@@ -49,6 +49,7 @@ import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
+const iconSize = verticalScale(25);
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -139,6 +140,8 @@ const toastKaomojiArr = [
 
 const calItemWidth = scale(44.5);
 
+let isLoadMore = false;
+
 class HomeScreen extends Component {
     toastTimer = null;
     calScrollRef = React.createRef(null);
@@ -204,7 +207,11 @@ class HomeScreen extends Component {
                     function_name: t('組織登入', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        this.props.navigation.navigate('LoginIndex');
+                        if (this.state.showUpdateInfo) {
+                            Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
+                        } else {
+                            this.props.navigation.navigate('ClubLogin');
+                        }
                     },
                 },
             ],
@@ -615,6 +622,24 @@ class HomeScreen extends Component {
         );
     };
 
+    handleScroll = (event) => {
+        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+        const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
+
+        // 接近底部時，獲取更多數據
+        if (isCloseToBottom && !isLoadMore) {
+            const thisFunc = this.eventPage.current;
+            if (!thisFunc.state.noMoreData) {
+                isLoadMore = true;
+                thisFunc.loadMoreData();
+                // 延時鎖，避免到底觸發過多次
+                setTimeout(() => {
+                    isLoadMore = false;
+                }, 1000);
+            }
+        }
+    };
+
     render() {
         const { selectDay, isLoading } = this.state;
         return (
@@ -646,12 +671,35 @@ class HomeScreen extends Component {
                     }
                     alwaysBounceHorizontal={false}
                     ref={this.scrollView}
-                    showsVerticalScrollIndicator={false}
+                    showsVerticalScrollIndicator={true}
+                    onScroll={this.handleScroll}
+                    scrollEventThrottle={400}
                 >
+                    <View style={{
+                        alignSelf: 'center',
+                        alignItems: 'center', justifyContent: 'center',
+                        flexDirection: 'row',
+                        marginTop: verticalScale(10),
+                    }}>
+                        {/* ARK Logo */}
+                        <FastImage
+                            source={require('../../../../static/img/logo.png')}
+                            style={{
+                                height: iconSize, width: iconSize,
+                                borderRadius: scale(5),
+                            }}
+                        />
+                        <Text style={{
+                            fontSize: verticalScale(18),
+                            color: themeColor,
+                            fontWeight: 'bold',
+                            marginLeft: verticalScale(5),
+                        }}>ARK ALL 澳大方舟</Text>
+                    </View>
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
-                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: scale(8), justifyContent: 'center', }}>
+                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center', }}>
                             <VirtualizedList
                                 data={cal}
                                 ref={this.calScrollRef}
@@ -748,20 +796,22 @@ class HomeScreen extends Component {
                     }
 
                     {/* 快捷功能圖標 */}
-                    <FlatGrid
-                        style={{
-                            alignSelf: 'center',
-                            backgroundColor: white, borderRadius: scale(10),
-                            marginTop: scale(5),
-                        }}
-                        maxItemsPerRow={6}
-                        itemDimension={scale(50)}
-                        spacing={scale(5)}
-                        data={this.state.functionArray}
-                        renderItem={({ item }) => this.GetFunctionIcon(item)}
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={false}
-                    />
+                    {false &&
+                        <FlatGrid
+                            style={{
+                                alignSelf: 'center',
+                                backgroundColor: white, borderRadius: scale(10),
+                                marginTop: scale(5),
+                            }}
+                            maxItemsPerRow={6}
+                            itemDimension={scale(50)}
+                            spacing={scale(5)}
+                            data={this.state.functionArray}
+                            renderItem={({ item }) => this.GetFunctionIcon(item)}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    }
 
                     {/* 更新提示 */}
                     {
@@ -852,9 +902,11 @@ class HomeScreen extends Component {
                     {/* 活動頁 */}
                     {this.state.networkError ? (
                         <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
-                    ) : (<>
-                        <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
-                    </>)}
+                    ) : null
+                    // (<>
+                    //     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
+                    // </>)
+                    }
                     <EventPage ref={this.eventPage} />
 
                 </ScrollView >

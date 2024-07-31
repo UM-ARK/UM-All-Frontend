@@ -41,6 +41,7 @@ import {
     UM_IMPORTANT_DATE,
     UM_BULLETIN,
     UM_RC_MENU,
+    UM_LOST_FOUND,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -67,7 +68,7 @@ const iconTypes = {
     img: 'img',
 };
 
-const { themeColor } = COLOR_DIY;
+const { themeColor, white } = COLOR_DIY;
 
 const iconSize = scale(25);
 
@@ -507,7 +508,19 @@ class Index extends Component {
                         icon_name: 'text-box-check',
                         fn_name: t('失物認領', { ns: 'features' }),
                         needLogin: false,
-                        go_where: 'LostAndFound',
+                        go_where: 'Linking',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_LOST_FOUND,
+                            title: '失物認領',
+                            // 標題顏色，默認為black.main
+                            text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            bg_color_diy: '#005f96',
+                            // 狀態欄字體是否黑色，默認true
+                            isBarStyleBlack: false,
+                        },
+                        // go_where: 'LostAndFound',
                         // go_where: 'Webview',
                         // webview_param: {
                         //     // import pathMap的鏈接進行跳轉
@@ -801,6 +814,27 @@ class Index extends Component {
                         <View style={{ marginLeft: scale(5), }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
+
+                        {/* 組織登入按鈕 */}
+                        <TouchableOpacity style={{
+                            position: 'absolute',
+                            right: scale(10),
+                            backgroundColor: themeColor,
+                            borderRadius: scale(5),
+                            padding: scale(5),
+                        }}
+                            onPress={() => {
+                                trigger();
+                                // TODO: 跳轉組織登入
+                                this.props.navigation.navigate('ClubLogin');
+                            }}
+                        >
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                color: this.state.addMode ? themeColor : white,
+                                fontWeight: 'bold'
+                            }}>組織登入</Text>
+                        </TouchableOpacity>
                     </View>
 
                     {this.state.functionArr.map(fn_card => {

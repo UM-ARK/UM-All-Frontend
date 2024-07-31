@@ -1,3 +1,5 @@
+import UMAPITOKEN from "../../umAPIToken.json";
+
 // 網站地址映射
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
@@ -31,7 +33,7 @@ export const ARK_WIKI_RANDOM_PAGE = ARK_WIKI + '/wiki/Special:Random';
 
 export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0';
 
-export const OFFICIAL_COURSE_SEARCH = 'https://isw.umac.mo/siwci/faces/courseDetailUG?courseCode=';
+export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
 
 export function addHost(itm) {
     if (itm.length > 0) {
@@ -146,7 +148,7 @@ export const UM_API_EVENT =
 export const UM_API_NEWS =
     'https://api.data.um.edu.mo/service/media/news/v1.0.0/all';
 // 澳大 - API token
-export const UM_API_TOKEN = '';
+export const UM_API_TOKEN = UMAPITOKEN.token;
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站
@@ -210,7 +212,7 @@ export const UM_PRE_ENROLMENT_EXCEL = 'https://reg.um.edu.mo/current-students/en
 export const UM_IMPORTANT_DATE = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/important-dates/?lang=zh-hant';
 
 // 澳大 - 失物認領
-export const UM_LOST_FOUND = 'https://um2.umac.mo/apps/com/umlostfound.nsf';
+export const UM_LOST_FOUND = 'https://lostandfound.cmdo.um.edu.mo';
 // 澳大 - 泊車月票
 export const UM_PARK_APPLY = 'https://isw.um.edu.mo/parkmpapp/application';
 // 澳大 - 職位空缺系統

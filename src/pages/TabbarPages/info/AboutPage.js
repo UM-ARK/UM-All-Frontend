@@ -26,6 +26,7 @@ import {
     GITHUB_ACTIVITY,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
+import { getLocalStorage } from '../../../utils/storageKits';
 import packageInfo from '../../../../package.json';
 import coursePlanFile from "../../../static/UMCourses/coursePlan";
 import offerCourseFile from "../../../static/UMCourses/offerCourses";
@@ -42,6 +43,22 @@ const IMG_WIDTH = scale(160);
 const iconSize = verticalScale(25);
 
 export default class AboutPage extends Component {
+    state = {
+        s_offerCourses: offerCourseFile,
+        s_coursePlan: coursePlanFile,
+    }
+
+    async componentDidMount() {
+        const storageOfferCourses = await getLocalStorage('offer_courses');
+        if (storageOfferCourses) {
+            this.setState({ s_offerCourses: storageOfferCourses });
+        }
+
+        const storageCoursePlan = await getLocalStorage('course_plan');
+        if (storageCoursePlan) {
+            this.setState({ s_coursePlan: storageCoursePlan });
+        }
+    }
 
     render() {
         return (
@@ -82,11 +99,11 @@ export default class AboutPage extends Component {
                         {/* 課表數據版本號 */}
                         <Text style={{ ...s.bodyText, }}>
                             {t('Add Drop Data Version', { ns: 'about' })}
-                            <Text style={{ ...s.highlightText }}>{coursePlanFile.updateTime}</Text>
+                            <Text style={{ ...s.highlightText }}>{this.state.s_coursePlan.updateTime}</Text>
                         </Text>
                         <Text style={{ ...s.bodyText, }}>
                             {t('PreEnroll Data Version', { ns: 'about' })}
-                            <Text style={{ ...s.highlightText }}>{offerCourseFile.updateTime}</Text>
+                            <Text style={{ ...s.highlightText }}>{this.state.s_offerCourses.updateTime}</Text>
                         </Text>
 
                         <View style={{ flexDirection: 'row', }}>

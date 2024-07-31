@@ -5,6 +5,7 @@ import {
     ScrollView,
     TouchableOpacity,
     FlatList,
+    Alert,
 } from 'react-native'
 
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
@@ -14,6 +15,7 @@ import Loading from '../../../../components/Loading';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from "../../../../utils/pathMap";
 import { openLink } from "../../../../utils/browser";
 import { logToFirebase } from "../../../../utils/firebaseAnalytics";
+import { getLocalStorage } from "../../../../utils/storageKits";
 import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
@@ -21,7 +23,6 @@ import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
-const coursePlanList = coursePlanTime.Courses;
 
 const daySorter = {
     'MON': 1,
@@ -47,10 +48,25 @@ export default class LocalCourse extends Component {
     state = {
         courseCode: this.props.route.params,
         isLoading: true,
+        s_coursePlanTime: coursePlanTime,
     }
 
-    componentDidMount() {
-        const { courseCode } = this.state;
+    async componentDidMount() {
+        try {
+            const storageCoursePlanList = await getLocalStorage('course_plan_time');
+            if (storageCoursePlanList) {
+                this.setState({ s_coursePlanTime: storageCoursePlanList });
+            }
+        } catch (error) {
+            Alert.alert(JSON.stringify(error))
+        } finally {
+            this.searchCourse();
+        }
+    }
+
+    searchCourse = () => {
+        const { courseCode, s_coursePlanTime } = this.state;
+        const coursePlanList = s_coursePlanTime.Courses;
 
         let relateCourseList = coursePlanList.filter(itm => {
             return itm['Course Code'].toUpperCase().indexOf(courseCode) != -1
@@ -121,6 +137,20 @@ export default class LocalCourse extends Component {
                                         openLink(URI);
                                         break;
 
+                                    case 'add':
+                                        trigger();
+                                        Alert.alert(`ARK搵課提示`, `確定添加此課程到模擬課表嗎？`, [
+                                            {
+                                                text: 'Yes', onPress: () => {
+                                                    trigger();
+                                                    this.props.navigation.navigate('CourseSimTab', {
+                                                        add: courseInfo
+                                                    });
+                                                }
+                                            },
+                                            { text: 'No', },
+                                        ]);
+
                                     default:
                                         break;
                                 }
@@ -134,6 +164,11 @@ export default class LocalCourse extends Component {
                                 {
                                     id: 'what2reg',
                                     title: '查 選咩課',
+                                    titleColor: black.third,
+                                },
+                                {
+                                    id: 'add',
+                                    title: '添加至模擬課表',
                                     titleColor: black.third,
                                 },
                             ]}

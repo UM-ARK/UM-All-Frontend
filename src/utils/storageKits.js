@@ -58,3 +58,42 @@ export async function setAPPInfo(appInfo) {
         alert(e);
     }
 }
+
+// 獲取本地緩存
+export async function getLocalStorage(itemName) {
+    let localItem = null;
+    try {
+        const strLocalItem = await AsyncStorage.getItem(itemName);
+        localItem = strLocalItem ? JSON.parse(strLocalItem) : undefined;
+    } catch (error) {
+        localItem = error;
+    } finally {
+        return localItem;
+    }
+}
+
+// 存入本地緩存
+export async function setLocalStorage(itemName, data) {
+    try {
+        const strData = JSON.stringify(data);
+        await AsyncStorage.setItem(itemName, strData);
+    } catch (error) {
+        console.log('AsyncStorage Error', error)
+        return error;
+    } finally {
+        console.log(itemName, '已存入緩存');
+        return 'ok';
+    }
+}
+
+// log出當前所有的緩存資料
+export function logAllStorage() {
+    AsyncStorage.getAllKeys((err, keys) => {
+        AsyncStorage.multiGet(keys, (error, stores) => {
+            stores.map((result, i, store) => {
+                console.log({ [store[i][0]]: JSON.parse(store[i][1]) });
+                return true;
+            });
+        });
+    });
+}

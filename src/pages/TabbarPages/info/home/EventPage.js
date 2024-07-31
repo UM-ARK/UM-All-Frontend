@@ -23,26 +23,23 @@ import { scale } from 'react-native-size-matters';
 
 const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
 
-// 返回數據的頁數
-let dataPage = 1;
 let eventDataList = [];
 class EventPage extends Component {
     state = {
+        // 返回數據的頁數
+        dataPage: 1,
         leftDataList: [],
         rightDataList: [],
         isLoading: true,
         noMoreData: false,
     };
 
-    componentDidMount() {
-        this.getData();
-    }
-
-    componentWillUnmount() {
-        dataPage = 1;
+    async componentDidMount() {
+        await this.getData();
     }
 
     getData = async () => {
+        const { dataPage } = this.state;
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 10;
         let noMoreData = true;
@@ -154,8 +151,8 @@ class EventPage extends Component {
     };
 
     loadMoreData = () => {
-        const { noMoreData } = this.state;
-        dataPage++;
+        const { noMoreData, dataPage } = this.state;
+        this.setState({ dataPage: dataPage + 1 });
         if (!noMoreData) {
             Toast.show('數據加載中...')
             this.getData();
@@ -163,12 +160,19 @@ class EventPage extends Component {
         trigger();
     };
 
-    onRefresh = () => {
-        if (dataPage > 1) {
-            dataPage = 1;
+    onRefresh = async () => {
+        try {
+            this.setState({
+                dataPage: 1,
+                leftDataList: [],
+                rightDataList: [],
+                isLoading: true,
+            });
+        } catch (error) {
+            alert(JSON.stringify(error));
+        } finally {
+            await this.getData();
         }
-        this.setState({ isLoading: true });
-        this.getData();
     };
 
     renderLoadMoreView = () => {
@@ -250,25 +254,11 @@ class EventPage extends Component {
                 {this.state.isLoading ? (
                     <Loading />
                 ) : (leftDataList.length > 0 || rightDataList.length > 0 ?
-                    <ScrollView
-                        ref={'scrollView'}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={isLoading}
-                                onRefresh={this.onRefresh}
-                            />
-                        }
-                        directionalLockEnabled
-                        alwaysBounceHorizontal={false}>
-                        <View>
-                            {/* 瀑布流渲染主要內容 */}
-                            {this.renderPage()}
-
-                            {this.renderLoadMoreView()}
-                        </View>
-                    </ScrollView> : null
+                    <View>
+                        {/* 瀑布流渲染主要內容 */}
+                        {this.renderPage()}
+                        {this.renderLoadMoreView()}
+                    </View> : null
                 )}
             </View>
         );

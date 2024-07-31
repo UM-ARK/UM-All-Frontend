@@ -33,7 +33,7 @@
 
 ## 🎉 首次運行該項目
 
-在此查看[已知 BUG](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
+在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
 
 ### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
@@ -162,7 +162,7 @@ yarn ios --simulator="iPhone 15"
 
 ### 🐛 故障排除
 
-在此查看[Android 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#android)與[iOS 解決方案](https://github.com/UM-ARK/UM-All-Frontend/blob/master/debugging_doc.md#ios)
+在此查看[Android 解決方案](./README/debugging_doc.md#android)與[iOS 解決方案](./README/debugging_doc.md#ios)
 
 
 ---
@@ -171,7 +171,7 @@ yarn ios --simulator="iPhone 15"
 
 ## ⛵ 維護須知
 
-1. 澳大日曆更新。從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 獲取 ics 文件；使用任何工具將 ics 轉為 json，例如 `https://ical-to-json.herokuapp.com/`。**務必注意最終 json 中的 key 必須為小寫**。覆蓋 `src/static/UMCalendar/UMCalendar.json` 中的內容即可。
+1. 澳大日曆更新。從 `https://reg.um.edu.mo/university-almanac/?lang=zh-hant` 獲取 ics 文件；使用任何工具將 ics 轉為 json（course-data-parse倉庫內也有icsToJSON工具），例如 `https://ical-to-json.herokuapp.com/`。**務必注意最終 json 中的 key 必須為小寫**。覆蓋 `src/static/UMCalendar/UMCalendar.json` 中的內容即可。
    * 按照程序注釋增加校曆的繁體中文翻譯內容。
 2. 澳大課程更新。使用預選課Excel，使用Excel to JSON工具獲得JSON數據，放入`src/static/UMCourses/offer courses.json`。
    * 按照程序注釋增加開設課程的繁體中文翻譯內容。
