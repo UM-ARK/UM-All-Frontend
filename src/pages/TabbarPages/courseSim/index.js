@@ -127,14 +127,31 @@ export default class courseSim extends Component {
             this.handleCourseList(courseCodeList);
         }
 
+        if (this.props.route.params) {
+            this.readParams();
+        }
+
         this.keyboardDidHideListener = Keyboard.addListener(
             'keyboardDidHide',
             this._keyboardDidHide,
         );
+
+        // 頁面聚焦時觸發
+        this.focusListener = this.props.navigation.addListener('focus', () => {
+            this.handleFocus();
+        });
     }
 
     componentWillUnmount() {
         this.keyboardDidHideListener.remove();
+    }
+
+    // 頁面聚焦時觸發
+    handleFocus = () => {
+        // this.readLocalCourseData();
+        if (this.props.route.params) {
+            this.readParams();
+        }
     }
 
     // 讀取本地緩存的課表數據

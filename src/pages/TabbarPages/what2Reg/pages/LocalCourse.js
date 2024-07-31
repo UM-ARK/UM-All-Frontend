@@ -137,6 +137,20 @@ export default class LocalCourse extends Component {
                                         openLink(URI);
                                         break;
 
+                                    case 'add':
+                                        trigger();
+                                        Alert.alert(`ARK搵課提示`, `確定添加此課程到模擬課表嗎？`, [
+                                            {
+                                                text: 'Yes', onPress: () => {
+                                                    trigger();
+                                                    this.props.navigation.navigate('CourseSimTab', {
+                                                        add: courseInfo
+                                                    });
+                                                }
+                                            },
+                                            { text: 'No', },
+                                        ]);
+
                                     default:
                                         break;
                                 }
@@ -150,6 +164,11 @@ export default class LocalCourse extends Component {
                                 {
                                     id: 'what2reg',
                                     title: '查 選咩課',
+                                    titleColor: black.third,
+                                },
+                                {
+                                    id: 'add',
+                                    title: '添加至模擬課表',
                                     titleColor: black.third,
                                 },
                             ]}
