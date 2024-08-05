@@ -72,6 +72,7 @@ const depaMap = {
     'DPHIL': '哲學及宗教學系',
     'DPT': '葡文系',
     'DJP': '日文系',
+    'DAD': '藝術設計系',
     'ELC': '英語中心',
 
     // FBA
