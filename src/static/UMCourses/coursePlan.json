@@ -2884,7 +2884,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2018",
-            "Course Title Chi": "以學科為基礎的教學方法（中學數學）II"
+            "Course Title Chi": "基於學科的教學方法（中學數學）II"
         },
         {
             "Offering Unit": "FED",
@@ -4991,7 +4991,7 @@
             "Course Title": "Advanced History Writing I",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "WANG DI",
+            "Teacher Information": "KWAN CHING-YIN NATHAN",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "高級歷史寫作Ⅰ"
         },
@@ -5533,7 +5533,7 @@
             "Time To": "11:15",
             "Classroom": "E22-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR17-GMM17-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
-            "Course Title Chi": "遊戲管理實習"
+            "Course Title Chi": "博彩管理實習"
         },
         {
             "Offering Unit": "FBA",
@@ -7493,7 +7493,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "佛教哲學"
         },
         {
@@ -8129,7 +8129,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-4015",
-            "Course Title Chi": "遊戲社會學"
+            "Course Title Chi": "博彩社會學"
         },
         {
             "Offering Unit": "FSS",
@@ -8327,7 +8327,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-05",
+    "updateTime": "2024-08-07",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
