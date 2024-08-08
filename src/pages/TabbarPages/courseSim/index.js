@@ -33,7 +33,7 @@ import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "..
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
 
-const { themeColor, themeColorUltraLight, black, white, bg_color, unread, } = COLOR_DIY;
+const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
@@ -464,6 +464,7 @@ export default class courseSim extends Component {
                         // }}
                         onPress={() => {
                             trigger('rigid');
+                            this.setState({ addMode: false });
                         }}
                         delayLongPress={300}
                     >
@@ -1019,7 +1020,7 @@ E11-0000
                     <TouchableOpacity style={{
                         position: 'absolute',
                         right: scale(10),
-                        backgroundColor: this.state.addMode ? themeColorUltraLight : themeColor,
+                        backgroundColor: this.state.addMode ? secondThemeColor : themeColor,
                         borderRadius: scale(5),
                         padding: scale(5),
                     }}
@@ -1032,7 +1033,7 @@ E11-0000
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: this.state.addMode ? themeColor : white,
+                            color: white,
                             fontWeight: 'bold'
                         }}>{this.state.addMode ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}</Text>
                     </TouchableOpacity>
@@ -1041,7 +1042,7 @@ E11-0000
                 <ScrollView
                     ref={this.verScroll}
                     contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
-                    // showsVerticalScrollIndicator={false}
+                // showsVerticalScrollIndicator={false}
                 >
                     {/* 課表 / 首次使用提示 */}
                     <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
