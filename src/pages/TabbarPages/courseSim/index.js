@@ -634,7 +634,7 @@ export default class courseSim extends Component {
                     onChangeText={text => {
                         this.setState({ importTimeTableText: text });
                     }}
-                    placeholder={`Example：
+                    placeholder={`Click here and enter your timetable:\nExample：
 TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
 9:00	09:00-10:45 ECEN0000(001)
 E11-0000
