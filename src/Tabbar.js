@@ -52,6 +52,8 @@ class Tabbar extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
                     tabBarBackground: COLOR_DIY.bg_color,
+                    whenInactiveShow: 'both',
+                    tabButtonLayout: 'vertical',
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
 
