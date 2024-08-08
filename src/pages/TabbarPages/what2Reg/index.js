@@ -13,7 +13,7 @@ import {
     Alert,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH, } from "../../../utils/pathMap";
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
 import { trigger } from '../../../utils/trigger';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -817,6 +817,12 @@ export default class index extends Component {
                                     this.props.navigation.navigate('Wiki', { url: URL });
                                     break;
 
+                                case 'what2reg':
+                                    trigger();
+                                    // 進入選咩課搜索模式
+                                    openLink(`${WHAT_2_REG_SEARCH}${encodeURIComponent(inputText)}`);
+                                    break;
+
                                 case 'official':
                                     trigger();
                                     let courseCode = encodeURIComponent(inputText);
@@ -837,6 +843,11 @@ export default class index extends Component {
                             id: 'wiki',
                             title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
                             titleColor: themeColor,
+                        },
+                        {
+                            id: 'what2reg',
+                            title: '查 選咩課',
+                            titleColor: black.third,
                         },
                         {
                             id: 'official',

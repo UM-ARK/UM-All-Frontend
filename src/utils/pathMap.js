@@ -112,6 +112,7 @@ export const USUAL_Q = 'https://umall.one/qa.html';
 // Webview 服務
 // 選咩課
 export const WHAT_2_REG = 'https://www.umeh.top';
+export const WHAT_2_REG_SEARCH = 'https://www.umeh.top/search/course/';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
 
