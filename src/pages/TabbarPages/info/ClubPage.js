@@ -273,7 +273,7 @@ class ClubPage extends Component {
 
                 {/* 組織展示 */}
                 <ScrollView
-                    showsVerticalScrollIndicator={false}
+                    // showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}

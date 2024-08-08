@@ -8245,7 +8245,7 @@
             "Notes for Course Enrolment": "Course for students admitted in AY2021/2022 and onwards; Class for (RC=MLC)",
             "Teacher Information": "VÉNUS TERESA VIANA",
             "Lecture / Lab": "Lecture",
-            "Course Title Chi": "住宿學院社區團隊計畫"
+            "Course Title Chi": "住宿學院社區團隊專案"
         },
         {
             "Offering Unit": "FST",
@@ -10580,7 +10580,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2018",
-            "Course Title Chi": "以學科為基礎的教學方法（中學數學）II"
+            "Course Title Chi": "基於學科的教學方法（中學數學）II"
         },
         {
             "Offering Unit": "FED",
@@ -25138,7 +25138,7 @@
             "Course Title": "Advanced History Writing I",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "WANG DI",
+            "Teacher Information": "KWAN CHING-YIN NATHAN",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "高級歷史寫作Ⅰ"
         },
@@ -25204,7 +25204,7 @@
             "Course Title": "Advanced History Writing I",
             "Section": "007",
             "Medium of Instruction": "English",
-            "Teacher Information": "WU DONGMING",
+            "Teacher Information": "GUILLERMO FRANCISCO RICHARD RUIZ STOVEL",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "高級歷史寫作Ⅰ"
         },
@@ -25238,6 +25238,39 @@
             "Section": "003",
             "Medium of Instruction": "English",
             "Teacher Information": "SHEYLA SCHUVARTZ ZANDONAI",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究計畫"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DHIST",
+            "Course Code": "HIST4003",
+            "Course Title": "Research Project",
+            "Section": "004",
+            "Medium of Instruction": "English",
+            "Teacher Information": "KWAN CHING-YIN NATHAN",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究計畫"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DHIST",
+            "Course Code": "HIST4003",
+            "Course Title": "Research Project",
+            "Section": "005",
+            "Medium of Instruction": "English",
+            "Teacher Information": "WU DONGMING",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究計畫"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DHIST",
+            "Course Code": "HIST4003",
+            "Course Title": "Research Project",
+            "Section": "006",
+            "Medium of Instruction": "English",
+            "Teacher Information": "JOSHUA PARR EHRLICH",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "研究計畫"
         },
@@ -26359,7 +26392,7 @@
             "Time To": "11:15",
             "Classroom": "E22-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR17-GMM17-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
-            "Course Title Chi": "遊戲管理實習"
+            "Course Title Chi": "博彩管理實習"
         },
         {
             "Offering Unit": "FBA",
@@ -26375,7 +26408,7 @@
             "Time To": "11:15",
             "Classroom": "E22-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR17-GMM17-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
-            "Course Title Chi": "遊戲管理實習"
+            "Course Title Chi": "博彩管理實習"
         },
         {
             "Offering Unit": "FBA",
@@ -32423,7 +32456,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "佛教哲學"
         },
         {
@@ -32438,7 +32471,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "佛教哲學"
         },
         {
@@ -35226,6 +35259,38 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "DPT",
+            "Course Code": "PORT3002",
+            "Course Title": "Practical Writing for Professional Purposes I",
+            "Section": "002",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "JÚLIO REIS JATOBÁ",
+            "Lecture / Lab": "Lecture",
+            "Day": "TUE",
+            "Time From": "16:00",
+            "Time To": "17:15",
+            "Classroom": "E21-1045",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "Course Title Chi": "專業實用寫作 I"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DPT",
+            "Course Code": "PORT3002",
+            "Course Title": "Practical Writing for Professional Purposes I",
+            "Section": "002",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "JÚLIO REIS JATOBÁ",
+            "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "16:00",
+            "Time To": "17:15",
+            "Classroom": "E21-1045",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "Course Title Chi": "專業實用寫作 I"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DPT",
             "Course Code": "PORT3004",
             "Course Title": "Translation I (Portuguese to Chinese)",
             "Section": "001",
@@ -36556,7 +36621,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-4015",
-            "Course Title Chi": "遊戲社會學"
+            "Course Title Chi": "博彩社會學"
         },
         {
             "Offering Unit": "FSS",
@@ -36571,7 +36636,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-4015",
-            "Course Title Chi": "遊戲社會學"
+            "Course Title Chi": "博彩社會學"
         },
         {
             "Offering Unit": "FSS",

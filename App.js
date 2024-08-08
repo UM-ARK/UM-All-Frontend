@@ -7,6 +7,8 @@ import RootStore from './src/mobx';
 import { COLOR_DIY, isLight, uiStyle, } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
 import { setLanguage, setLocalStorage } from './src/i18n/i18n';
+import { checkLocalCourseVersion, } from './src/utils/checkCoursesKits';
+
 import { Provider } from 'mobx-react';
 
 import AnimatedSplash from 'react-native-animated-splash-screen';
@@ -121,6 +123,8 @@ class App extends Component {
                 this.setState({ isLogin: false });
             }
             this.checkLanguage();
+            // 檢查APP靜態文件的課程更新時間和緩存數據新舊，取最新
+            checkLocalCourseVersion();
         } catch (e) {
             console.error('App error', e);
         }

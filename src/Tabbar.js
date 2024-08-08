@@ -52,6 +52,8 @@ class Tabbar extends Component {
                     activeTabBackgrounds: COLOR_DIY.themeColor,
                     activeColors: COLOR_DIY.white,
                     tabBarBackground: COLOR_DIY.bg_color,
+                    whenInactiveShow: 'both',
+                    tabButtonLayout: 'vertical',
                 }}
                 initialRouteName={isClub ? 'MeTabbar' : 'NewsTabbar'}>
 
@@ -95,7 +97,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: t('Wiki'),
+                            title: t('百科'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()

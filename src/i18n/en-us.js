@@ -8,6 +8,7 @@ export default {
 
         "資訊": "Info",
         "搵課": "Courses",
+        "百科": "Wiki",
         "課表": "Timetable",
         "服務": "Services",
         "組織": "Club",

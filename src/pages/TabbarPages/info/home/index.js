@@ -23,6 +23,7 @@ import {
     MAIL,
     ARK_WIKI,
     ARK_WIKI_RANDOM_TITLE,
+    UM_Moodle,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -33,6 +34,7 @@ import { UMCalendar } from '../../../../static/UMCalendar/UMCalendar.js';
 import HomeCard from './components/HomeCard.js';
 import { screenWidth } from '../../../../utils/stylesKits.js';
 import { trigger } from '../../../../utils/trigger.js';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -47,6 +49,7 @@ import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
+import { openLink } from '../../../../utils/browser.js';
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 const iconSize = verticalScale(25);
@@ -164,19 +167,13 @@ class HomeScreen extends Component {
                     },
                 },
                 {
-                    icon_name: 'coffee',
+                    icon_name: 'alpha-m-circle-outline',
                     icon_type: iconTypes.materialCommunityIcons,
-                    function_name: t('支持我們', { ns: 'home' }),
+                    function_name: t('Moodle', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        let webview_param = {
-                            url: GITHUB_DONATE,
-                            title: '支持我們',
-                            text_color: white,
-                            bg_color_diy: themeColor,
-                            isBarStyleBlack: false,
-                        };
-                        this.props.navigation.navigate('Webviewer', webview_param);
+                        logToFirebase('openPage', { page: 'moodle' });
+                        openLink(UM_Moodle);
                     },
                 },
                 {
@@ -193,12 +190,19 @@ class HomeScreen extends Component {
                     },
                 },
                 {
-                    icon_name: 'file-document-edit',
+                    icon_name: 'coffee',
                     icon_type: iconTypes.materialCommunityIcons,
-                    function_name: t('方舟百科', { ns: 'home' }),
+                    function_name: t('支持我們', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        this.props.navigation.navigate('Wiki');
+                        let webview_param = {
+                            url: GITHUB_DONATE,
+                            title: '支持我們',
+                            text_color: white,
+                            bg_color_diy: themeColor,
+                            isBarStyleBlack: false,
+                        };
+                        this.props.navigation.navigate('Webviewer', webview_param);
                     },
                 },
                 {
@@ -675,27 +679,29 @@ class HomeScreen extends Component {
                     onScroll={this.handleScroll}
                     scrollEventThrottle={400}
                 >
-                    <View style={{
-                        alignSelf: 'center',
-                        alignItems: 'center', justifyContent: 'center',
-                        flexDirection: 'row',
-                        marginTop: verticalScale(10),
-                    }}>
-                        {/* ARK Logo */}
-                        <FastImage
-                            source={require('../../../../static/img/logo.png')}
-                            style={{
-                                height: iconSize, width: iconSize,
-                                borderRadius: scale(5),
-                            }}
-                        />
-                        <Text style={{
-                            fontSize: verticalScale(18),
-                            color: themeColor,
-                            fontWeight: 'bold',
-                            marginLeft: verticalScale(5),
-                        }}>ARK ALL 澳大方舟</Text>
-                    </View>
+                    {false && (
+                        <View style={{
+                            alignSelf: 'center',
+                            alignItems: 'center', justifyContent: 'center',
+                            flexDirection: 'row',
+                            marginTop: verticalScale(10),
+                        }}>
+                            {/* ARK Logo */}
+                            <FastImage
+                                source={require('../../../../static/img/logo.png')}
+                                style={{
+                                    height: iconSize, width: iconSize,
+                                    borderRadius: scale(5),
+                                }}
+                            />
+                            <Text style={{
+                                fontSize: verticalScale(18),
+                                color: themeColor,
+                                fontWeight: 'bold',
+                                marginLeft: verticalScale(5),
+                            }}>ARK ALL 澳大方舟</Text>
+                        </View>
+                    )}
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
@@ -796,22 +802,20 @@ class HomeScreen extends Component {
                     }
 
                     {/* 快捷功能圖標 */}
-                    {false &&
-                        <FlatGrid
-                            style={{
-                                alignSelf: 'center',
-                                backgroundColor: white, borderRadius: scale(10),
-                                marginTop: scale(5),
-                            }}
-                            maxItemsPerRow={6}
-                            itemDimension={scale(50)}
-                            spacing={scale(5)}
-                            data={this.state.functionArray}
-                            renderItem={({ item }) => this.GetFunctionIcon(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    }
+                    <FlatGrid
+                        style={{
+                            alignSelf: 'center',
+                            backgroundColor: white, borderRadius: scale(10),
+                            marginTop: scale(5),
+                        }}
+                        maxItemsPerRow={6}
+                        itemDimension={scale(50)}
+                        spacing={scale(5)}
+                        data={this.state.functionArray}
+                        renderItem={({ item }) => this.GetFunctionIcon(item)}
+                        showsVerticalScrollIndicator={false}
+                        scrollEnabled={false}
+                    />
 
                     {/* 更新提示 */}
                     {
@@ -903,9 +907,9 @@ class HomeScreen extends Component {
                     {this.state.networkError ? (
                         <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
                     ) : null
-                    // (<>
-                    //     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
-                    // </>)
+                        // (<>
+                        //     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
+                        // </>)
                     }
                     <EventPage ref={this.eventPage} />
 
