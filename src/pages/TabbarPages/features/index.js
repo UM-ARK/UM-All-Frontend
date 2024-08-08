@@ -800,7 +800,7 @@ class Index extends Component {
                     }}
                 />
 
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView showsVerticalScrollIndicator={true}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                         {/* ARK Logo */}
                         <FastImage

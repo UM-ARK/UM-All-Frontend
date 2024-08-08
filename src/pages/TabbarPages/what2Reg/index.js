@@ -1058,7 +1058,7 @@ export default class index extends Component {
                         ref={this.scrollViewRef}
                         style={{ width: '100%' }}
                         stickyHeaderIndices={[1]}
-                        showsVerticalScrollIndicator={false}
+                        // showsVerticalScrollIndicator={false}
                     >
                         {/* 頁面標題欄 */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>

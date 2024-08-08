@@ -1041,7 +1041,7 @@ E11-0000
                 <ScrollView
                     ref={this.verScroll}
                     contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
-                    showsVerticalScrollIndicator={false}
+                    // showsVerticalScrollIndicator={false}
                 >
                     {/* 課表 / 首次使用提示 */}
                     <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
