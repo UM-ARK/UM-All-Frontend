@@ -97,7 +97,7 @@ class Tabbar extends Component {
                                     focused={focused}
                                 />
                             ),
-                            title: t('Wiki'),
+                            title: t('百科'),
                         }}
                         listeners={() => ({
                             tabPress: () => trigger()
