@@ -2169,7 +2169,7 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2185,7 +2185,7 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2201,7 +2201,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2217,7 +2217,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2233,7 +2233,7 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2249,7 +2249,7 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2265,7 +2265,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -2281,7 +2281,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -3817,7 +3817,7 @@
             "Day": "TUE",
             "Time From": "11:00",
             "Time To": "12:45",
-            "Classroom": "E21-G016",
+            "Classroom": "E4-G053",
             "Course Title Chi": "工程地質"
         },
         {
@@ -3832,7 +3832,7 @@
             "Day": "FRI",
             "Time From": "11:00",
             "Time To": "12:45",
-            "Classroom": "E21-G016",
+            "Classroom": "E4-G053",
             "Course Title Chi": "工程地質"
         },
         {
@@ -5482,7 +5482,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E21-1013",
-            "Course Title Chi": "寫劇本"
+            "Course Title Chi": "劇本創作"
         },
         {
             "Offering Unit": "FSS",
@@ -9103,7 +9103,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-1011",
+            "Classroom": "E6-1113A",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "教育概論"
         },
@@ -9118,7 +9118,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-1011",
+            "Classroom": "E6-1113A",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "教育概論"
         },
@@ -9133,7 +9133,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-1013",
+            "Classroom": "E22-4005",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - ENG19 / INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "教育概論"
         },
@@ -9148,7 +9148,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-1013",
+            "Classroom": "E22-4005",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - ENG19 / INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "教育概論"
         },
@@ -9283,7 +9283,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-1015",
+            "Classroom": "E33-G021",
             "Course Title Chi": "中國文學史及其教學Ⅰ"
         },
         {
@@ -9297,7 +9297,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-1015",
+            "Classroom": "E33-G021",
             "Course Title Chi": "中國文學史及其教學Ⅰ"
         },
         {
@@ -9439,7 +9439,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-1011",
+            "Classroom": "E6-1113A",
             "Course Title Chi": "應用英語研究導論"
         },
         {
@@ -9453,7 +9453,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-1011",
+            "Classroom": "E6-1113A",
             "Course Title Chi": "應用英語研究導論"
         },
         {
@@ -16250,66 +16250,6 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "ELC",
-            "Course Code": "EELC1012",
-            "Course Title": "University English II",
-            "Section": "038",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E4-3055",
-            "Course Title Chi": "大學英語二"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1012",
-            "Course Title": "University English II",
-            "Section": "038",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E4-3055",
-            "Course Title Chi": "大學英語二"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1012",
-            "Course Title": "University English II",
-            "Section": "038",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E4-3055",
-            "Course Title Chi": "大學英語二"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1012",
-            "Course Title": "University English II",
-            "Section": "038",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E4-3055",
-            "Course Title Chi": "大學英語二"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
             "Course Code": "EELC1013",
             "Course Title": "University English III",
             "Section": "001",
@@ -16365,36 +16305,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E3-3044",
-            "Course Title Chi": "大學英語三"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1013",
-            "Course Title": "University English III",
-            "Section": "003",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E3-3041",
-            "Course Title Chi": "大學英語三"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1013",
-            "Course Title": "University English III",
-            "Section": "003",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E3-3041",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -16919,36 +16829,6 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-2032",
-            "Course Title Chi": "大學英語三"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1013",
-            "Course Title": "University English III",
-            "Section": "021",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E3-2032",
-            "Course Title Chi": "大學英語三"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "EELC1013",
-            "Course Title": "University English III",
-            "Section": "022",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TEACHER",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "14:30",
-            "Time To": "15:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -16957,7 +16837,7 @@
             "Offering Department": "ELC",
             "Course Code": "EELC1013",
             "Course Title": "University English III",
-            "Section": "022",
+            "Section": "021",
             "Medium of Instruction": "English",
             "Teacher Information": "TEACHER",
             "Lecture / Lab": "Lecture",
@@ -17055,7 +16935,7 @@
             "Time From": "16:00",
             "Time To": "17:45",
             "Classroom": "E11-1028",
-            "Course Title Chi": "材料強度"
+            "Course Title Chi": "材料的強度"
         },
         {
             "Offering Unit": "FST",
@@ -17070,7 +16950,7 @@
             "Time From": "16:00",
             "Time To": "17:45",
             "Classroom": "E11-1028",
-            "Course Title Chi": "材料強度"
+            "Course Title Chi": "材料的強度"
         },
         {
             "Offering Unit": "FST",
@@ -17379,7 +17259,7 @@
             "Course Title": "Fire Protection Engineering",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TAM LAP MOU",
+            "Teacher Information": "TAM LAP MOU / LAO SENG KIN",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "11:00",
@@ -17394,7 +17274,7 @@
             "Course Title": "Fire Protection Engineering",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TAM LAP MOU",
+            "Teacher Information": "TAM LAP MOU / LAO SENG KIN",
             "Lecture / Lab": "Lab",
             "Day": "THU",
             "Time From": "11:00",
@@ -17545,7 +17425,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1033",
             "Course Title Chi": "文學研究概論I"
         },
         {
@@ -17560,7 +17440,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1033",
             "Course Title Chi": "文學研究概論I"
         },
         {
@@ -18252,6 +18132,50 @@
             "Time To": "11:15",
             "Classroom": "E21-G049",
             "Course Title Chi": "會議口譯"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "TSAI CHENG-YU",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "002",
+            "Medium of Instruction": "English",
+            "Teacher Information": "NICHOLAS MICHAEL PARKER-GROOM",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "003",
+            "Medium of Instruction": "English",
+            "Teacher Information": "GLEN TIMMERMANS",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "004",
+            "Medium of Instruction": "English",
+            "Teacher Information": "CHIU MAN YIN",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
         },
         {
             "Offering Unit": "FAH",
@@ -19624,26 +19548,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "YANG HAI",
             "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E6-1113A",
-            "Course Title Chi": "理解國際政治"
-        },
-        {
-            "Offering Unit": "FSS",
-            "Offering Department": "DGPA",
-            "Course Code": "GEGA3001",
-            "Course Title": "Understanding International Politics",
-            "Section": "002",
-            "Course Type": "GE Area 9",
-            "Medium of Instruction": "English",
-            "Teacher Information": "YANG HAI",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E6-1113A",
+            "Day": "SAT",
+            "Time From": "10:00",
+            "Time To": "12:45",
+            "Classroom": "E4-G053",
             "Course Title Chi": "理解國際政治"
         },
         {
@@ -22983,7 +22891,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E6-1113A",
-            "Course Title Chi": "遊戲和賭博的發展"
+            "Course Title Chi": "博彩和賭博的發展"
         },
         {
             "Offering Unit": "FBA",
@@ -22999,7 +22907,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E6-1113A",
-            "Course Title Chi": "遊戲和賭博的發展"
+            "Course Title Chi": "博彩和賭博的發展"
         },
         {
             "Offering Unit": "FBA",
@@ -23015,7 +22923,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E6-1113A",
-            "Course Title Chi": "遊戲和賭博的發展"
+            "Course Title Chi": "博彩和賭博的發展"
         },
         {
             "Offering Unit": "FBA",
@@ -23031,7 +22939,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E6-1113A",
-            "Course Title Chi": "遊戲和賭博的發展"
+            "Course Title Chi": "博彩和賭博的發展"
         },
         {
             "Offering Unit": "FST",
@@ -25004,7 +24912,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1027",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "歷史理論與實踐"
         },
@@ -25020,7 +24928,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1027",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "歷史理論與實踐"
         },
@@ -25297,9 +25205,9 @@
             "Teacher Information": "GUO TIEYUAN / JEREMY CENTENO DE CHAVEZ / LOI CHI HO",
             "Lecture / Lab": "Lecture",
             "Day": "WED",
-            "Time From": "14:00",
-            "Time To": "16:45",
-            "Classroom": "E12-G021",
+            "Time From": "18:30",
+            "Time To": "21:15",
+            "Classroom": "E11-1009",
             "Course Title Chi": "發展領導力"
         },
         {
@@ -28168,7 +28076,7 @@
             "Time To": "17:15",
             "Classroom": "E21-1045",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n - FAH - JSM19\n",
-            "Course Title Chi": "綜合日文Ⅰ"
+            "Course Title Chi": "綜合日文I"
         },
         {
             "Offering Unit": "FAH",
@@ -28184,7 +28092,7 @@
             "Time To": "18:45",
             "Classroom": "E21-1045",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n - FAH - JSM19\n",
-            "Course Title Chi": "綜合日文Ⅰ"
+            "Course Title Chi": "綜合日文I"
         },
         {
             "Offering Unit": "FAH",
@@ -28200,7 +28108,7 @@
             "Time To": "18:45",
             "Classroom": "E21-1045",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n - FAH - JSM19\n",
-            "Course Title Chi": "綜合日文Ⅰ"
+            "Course Title Chi": "綜合日文I"
         },
         {
             "Offering Unit": "FAH",
@@ -29771,7 +29679,7 @@
             "Teacher Information": "LEONG CHENG HANG",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL\n",
-            "Course Title Chi": "家規"
+            "Course Title Chi": "家庭法"
         },
         {
             "Offering Unit": "FLL",
@@ -29783,7 +29691,7 @@
             "Teacher Information": "LEONG CHENG HANG",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL\n",
-            "Course Title Chi": "家規"
+            "Course Title Chi": "家庭法"
         },
         {
             "Offering Unit": "FLL",
@@ -29795,7 +29703,7 @@
             "Teacher Information": "MANUEL MARCELINO ESCOVAR TRIGO",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLL18 / WA17\n",
-            "Course Title Chi": "家規"
+            "Course Title Chi": "家庭法"
         },
         {
             "Offering Unit": "FLL",
@@ -29807,7 +29715,7 @@
             "Teacher Information": "LEONG CHENG HANG",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL\n",
-            "Course Title Chi": "家規"
+            "Course Title Chi": "家庭法"
         },
         {
             "Offering Unit": "FLL",
@@ -31700,7 +31608,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3011",
-            "Course Title Chi": "國際化管理"
+            "Course Title Chi": "國際管理"
         },
         {
             "Offering Unit": "FBA",
@@ -31715,7 +31623,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3011",
-            "Course Title Chi": "國際化管理"
+            "Course Title Chi": "國際管理"
         },
         {
             "Offering Unit": "FBA",
@@ -31730,7 +31638,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-2014",
-            "Course Title Chi": "國際化管理"
+            "Course Title Chi": "國際管理"
         },
         {
             "Offering Unit": "FBA",
@@ -31745,7 +31653,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-2014",
-            "Course Title Chi": "國際化管理"
+            "Course Title Chi": "國際管理"
         },
         {
             "Offering Unit": "FBA",
@@ -32322,7 +32230,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2010",
-            "Course Title Chi": "整合式行銷傳播"
+            "Course Title Chi": "整合行銷傳播"
         },
         {
             "Offering Unit": "FBA",
@@ -32337,7 +32245,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-3011",
-            "Course Title Chi": "市場策略"
+            "Course Title Chi": "行銷策略"
         },
         {
             "Offering Unit": "FBA",
@@ -36454,7 +36362,7 @@
             "Time To": "11:15",
             "Classroom": "E22-4020",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC17 / SOC19 / SOC22\n - FSS - SOM17 / SOM19 / SOM22\n",
-            "Course Title Chi": "社會學概論"
+            "Course Title Chi": "社會學導論"
         },
         {
             "Offering Unit": "FSS",
@@ -36469,7 +36377,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E21-1021",
-            "Course Title Chi": "社會學概論"
+            "Course Title Chi": "社會學導論"
         },
         {
             "Offering Unit": "FSS",
@@ -37629,38 +37537,6 @@
             "Day": "THU",
             "Time From": "12:00",
             "Time To": "12:50",
-            "Classroom": "E4-G060",
-            "Course Title Chi": "大學英語I（教程）"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "TELC1011",
-            "Course Title": "University English I (Tutorial)",
-            "Section": "042",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "Class for students placed in English placement level of E1b",
-            "Teacher Information": "TUTORIAL",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "12:30",
-            "Time To": "13:20",
-            "Classroom": "E4-G067",
-            "Course Title Chi": "大學英語I（教程）"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "TELC1011",
-            "Course Title": "University English I (Tutorial)",
-            "Section": "043",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "Class for students placed in English placement level of E1b",
-            "Teacher Information": "TUTORIAL",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "13:00",
-            "Time To": "13:50",
             "Classroom": "E4-G060",
             "Course Title Chi": "大學英語I（教程）"
         },
@@ -38912,36 +38788,6 @@
             "Time From": "15:30",
             "Time To": "16:20",
             "Classroom": "E3-4033",
-            "Course Title Chi": "大學英文II（教程）"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "TELC1012",
-            "Course Title": "University English II (Tutorial)",
-            "Section": "079",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TUTORIAL",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "16:00",
-            "Time To": "16:50",
-            "Classroom": "E3-2032",
-            "Course Title Chi": "大學英文II（教程）"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "TELC1012",
-            "Course Title": "University English II (Tutorial)",
-            "Section": "080",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TUTORIAL",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "16:00",
-            "Time To": "16:50",
-            "Classroom": "E3-3042",
             "Course Title Chi": "大學英文II（教程）"
         }
     ]

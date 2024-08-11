@@ -589,7 +589,7 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-G035",
-            "Course Title Chi": "大學文"
+            "Course Title Chi": "大學語文"
         },
         {
             "Offering Unit": "FAH",
@@ -1228,7 +1228,7 @@
             "Day": "TUE",
             "Time From": "11:00",
             "Time To": "12:45",
-            "Classroom": "E21-G016",
+            "Classroom": "E4-G053",
             "Course Title Chi": "工程地質"
         },
         {
@@ -1634,7 +1634,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E21-1013",
-            "Course Title Chi": "寫劇本"
+            "Course Title Chi": "劇本創作"
         },
         {
             "Offering Unit": "FSS",
@@ -2238,7 +2238,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-1011",
+            "Classroom": "E6-1113A",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "教育概論"
         },
@@ -2268,7 +2268,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-1015",
+            "Classroom": "E33-G021",
             "Course Title Chi": "中國文學史及其教學Ⅰ"
         },
         {
@@ -2353,7 +2353,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-1011",
+            "Classroom": "E6-1113A",
             "Course Title Chi": "應用英語研究導論"
         },
         {
@@ -3098,7 +3098,7 @@
             "Time From": "16:00",
             "Time To": "17:45",
             "Classroom": "E11-1028",
-            "Course Title Chi": "材料強度"
+            "Course Title Chi": "材料的強度"
         },
         {
             "Offering Unit": "FST",
@@ -3257,7 +3257,7 @@
             "Course Title": "Fire Protection Engineering",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TAM LAP MOU",
+            "Teacher Information": "TAM LAP MOU / LAO SENG KIN",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "11:00",
@@ -3560,6 +3560,17 @@
             "Time To": "11:15",
             "Classroom": "E21-G049",
             "Course Title Chi": "會議口譯"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "TSAI CHENG-YU",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
         },
         {
             "Offering Unit": "FAH",
@@ -4262,7 +4273,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E6-1113A",
-            "Course Title Chi": "遊戲和賭博的發展"
+            "Course Title Chi": "博彩和賭博的發展"
         },
         {
             "Offering Unit": "FST",
@@ -4919,7 +4930,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1027",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "歷史理論與實踐"
         },
@@ -6613,7 +6624,7 @@
             "Teacher Information": "LEONG CHENG HANG",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL\n",
-            "Course Title Chi": "家規"
+            "Course Title Chi": "家庭法"
         },
         {
             "Offering Unit": "FLL",
@@ -7175,7 +7186,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3011",
-            "Course Title Chi": "國際化管理"
+            "Course Title Chi": "國際管理"
         },
         {
             "Offering Unit": "FBA",
@@ -7389,7 +7400,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2010",
-            "Course Title Chi": "整合式行銷傳播"
+            "Course Title Chi": "整合行銷傳播"
         },
         {
             "Offering Unit": "FBA",
@@ -7404,7 +7415,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-3011",
-            "Course Title Chi": "市場策略"
+            "Course Title Chi": "行銷策略"
         },
         {
             "Offering Unit": "FBA",
@@ -8038,7 +8049,7 @@
             "Time To": "11:15",
             "Classroom": "E22-4020",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC17 / SOC19 / SOC22\n - FSS - SOM17 / SOM19 / SOM22\n",
-            "Course Title Chi": "社會學概論"
+            "Course Title Chi": "社會學導論"
         },
         {
             "Offering Unit": "FSS",
@@ -8327,7 +8338,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-07",
+    "updateTime": "2024-08-09",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
