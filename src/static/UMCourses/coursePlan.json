@@ -2047,7 +2047,7 @@
             "Course Title": "Graduation Project I",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "WONG MAN CHUNG",
+            "Teacher Information": "CARLOS JORGE FERREIRA SILVESTRE",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "畢業設計一"
         },
@@ -2884,7 +2884,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2018",
-            "Course Title Chi": "基於學科的教學方法（中學數學）II"
+            "Course Title Chi": "以學科為基礎的教學方法（中學數學）II"
         },
         {
             "Offering Unit": "FED",
@@ -3035,8 +3035,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -3050,8 +3050,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -3065,8 +3065,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -3289,10 +3289,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "JIANG YING",
             "Lecture / Lab": "Lab",
-            "Day": "FRI",
-            "Time From": "14:00",
-            "Time To": "15:45",
-            "Classroom": "E11-1012",
+            "Day": "THU",
+            "Time From": "18:00",
+            "Time To": "19:45",
+            "Classroom": "E4-3052",
             "Course Title Chi": "工程設計材料的選擇"
         },
         {
@@ -4289,7 +4289,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E4-G068",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - APC19 / APC23 / MTH19 / MTH23\n - FST - AMM19 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - APC19 / APC23 / MTH19 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -5591,7 +5591,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22 / GBS22 / MKG22-THIRD YEAR\n - FBA - BAM22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC22 / GBM22 / GBS22 / MKG22-THIRD YEAR\n - FBA - BAM22\n",
             "Course Title Chi": "商業智慧與資訊導論"
         },
         {
@@ -5622,7 +5622,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-3002",
+            "Classroom": "E12-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20\n - FBA - FNM19\n",
             "Course Title Chi": "線性代數"
         },
@@ -5639,7 +5639,6 @@
             "Time From": "19:00",
             "Time To": "20:15",
             "Classroom": "E3-4043 / E6-3094",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19\n",
             "Course Title Chi": "業務分析程式設計"
         },
         {
@@ -7763,13 +7762,13 @@
             "Section": "001",
             "Medium of Instruction": "Portuguese",
             "Teacher Information": "LUÍS TIAGO ALVES PIRES",
-            "Lecture / Lab": "Lab",
-            "Day": "FRI",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-1040 / E21-1011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FAH - PTM19\n",
-            "Course Title Chi": "口語理解與表達能力I"
+            "Course Title Chi": "口語理解與表達能力Ⅰ"
         },
         {
             "Offering Unit": "FAH",
@@ -7780,7 +7779,7 @@
             "Medium of Instruction": "Portuguese",
             "Teacher Information": "RUI MANUEL ESTEVES DA SILVA",
             "Lecture / Lab": "Lecture",
-            "Day": "FRI",
+            "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-1020",
@@ -7826,11 +7825,11 @@
             "Section": "001",
             "Medium of Instruction": "Portuguese",
             "Teacher Information": "MARIO RUI LIMA DE OLIVEIRA PINHARANDA NUNES",
-            "Lecture / Lab": "Lab",
-            "Day": "FRI",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1013 / E21-1038",
+            "Classroom": "E21-1037/ E21-1038",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FLL - BLL18\n - FAH - PTM19\n",
             "Course Title Chi": "口語理解與表達技巧三"
         },
@@ -7843,7 +7842,7 @@
             "Medium of Instruction": "Portuguese",
             "Teacher Information": "LU CHUNHUI",
             "Lecture / Lab": "Lecture",
-            "Day": "FRI",
+            "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-1018",
@@ -7879,7 +7878,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-1019",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17\n - FAH - PTS19\n",
             "Course Title Chi": "翻譯一（葡萄牙語到中文）"
         },
         {
@@ -7895,7 +7894,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17\n - FAH - PTS19\n",
             "Course Title Chi": "語言學導論"
         },
         {
@@ -7911,7 +7910,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-1019",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17\n - FAH - PTS19\n",
             "Course Title Chi": "葡語世界文學研究導論Ⅰ"
         },
         {
@@ -7926,8 +7925,8 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-G011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "Classroom": "E21-1019",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17\n - FAH - PTS19\n",
             "Course Title Chi": "葡語國家近現代史Ⅰ"
         },
         {
@@ -7975,7 +7974,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-1020",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS17\n - FAH - PTS19\n",
             "Course Title Chi": "葡萄牙語作為外語教學 I"
         },
         {
@@ -8526,7 +8525,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-13",
+    "updateTime": "2024-08-16",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
