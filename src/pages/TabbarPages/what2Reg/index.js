@@ -508,7 +508,7 @@ export default class index extends Component {
                 // 展示CM GE中文名稱
                 ListHeaderComponent={() =>
                     <Text style={{ ...s.classItmTitleText }}>
-                        {filterOptions.option == 'GE' ? '通識課' : '必修課 與 選修課'}
+                        {filterOptions.option == 'GE' ? t('通識課', { ns: 'catalog' }) : t('必修課 與 選修課', { ns: 'catalog' })}
                     </Text>
                 }
             />
