@@ -103,7 +103,7 @@ export default {
         "校園地圖": "Map",
         "課室地圖": "Classroom",
         "車位": "Park",
-        "資源借用": "Booking",
+        "資源預約": "Booking",
         "公共電腦": "Computer",
         "儲物箱": "Box",
         "維修預約": "Repair",

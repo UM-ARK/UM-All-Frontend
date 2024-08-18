@@ -149,13 +149,13 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'logo-dropbox',
-                        fn_name: t('資源借用', { ns: 'features' }),
+                        fn_name: t('資源預約', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_RBS,
-                            title: 'UM 資源借用',
+                            title: 'UM 資源預約',
                             // 標題顏色，默認為black.main
                             // text_color: '#989898',
                             // 標題背景顏色，默認為bg_color
