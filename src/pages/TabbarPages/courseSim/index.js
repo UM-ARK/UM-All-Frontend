@@ -885,7 +885,7 @@ E11-0000
                         )}
 
                         {filterCourseList.length == 1 && sectionObj && (
-                            <Text style={{ ...s.searchResultText, }}>↓ 全部放入課表</Text>
+                            <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 全部放入課表</Text>
                         )}
 
                         {/* 課程標題 */}
@@ -915,11 +915,11 @@ E11-0000
 
                         {/* 只剩一節候選課程時，展示可選Section */}
                         {filterCourseList.length == 1 && sectionObj && (<>
-                            <Text style={{ ...s.searchResultText, }}>↓ 選取單節</Text>
+                            <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
                             {Object.keys(sectionObj).map(key => {
                                 const courseInfo = sectionObj[key][0];
                                 return <TouchableOpacity
-                                    style={{ marginBottom: scale(5), }}
+                                    style={{ marginBottom: verticalScale(5), backgroundColor: themeColorUltraLight, borderRadius: scale(5), }}
                                     onPress={() => {
                                         this.addCourse(courseInfo);
                                         this.verScroll.current.scrollTo({ y: 0 });
@@ -928,8 +928,8 @@ E11-0000
                                     {/* CPED1001、CPED1002特有不同Section不同課 */}
                                     {(courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002') && (
                                         <>
-                                            <Text style={{ ...s.searchResultText, color: themeColor, }}>{courseInfo['Course Title']}</Text>
-                                            <Text style={{ ...s.searchResultText, color: themeColor, }}>{courseInfo['Course Title Chi']}</Text>
+                                            <Text style={{ ...s.searchResultText, }}>{courseInfo['Course Title']}</Text>
+                                            <Text style={{ ...s.searchResultText, }}>{courseInfo['Course Title Chi']}</Text>
                                         </>
                                     )}
                                     {/* Section號碼 */}
