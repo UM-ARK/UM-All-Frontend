@@ -250,7 +250,12 @@ export default class LocalCourse extends Component {
                                     {courseInfo['Offering Unit']}
                                     {courseInfo['Offering Department'] ? <Text>{' - ' + courseInfo['Offering Department']}</Text> : null}
                                 </Text>
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Course Type']}</Text>
+                                {"\"Class For / Class Not For\" Information" in courseInfo && (
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, textAlign: 'center', }}>{courseInfo["\"Class For / Class Not For\" Information"]}</Text>
+                                )}
+                                {'Course Type' in courseInfo && (
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Course Type']}</Text>
+                                )}
                             </View>
                         ) : null}
 
