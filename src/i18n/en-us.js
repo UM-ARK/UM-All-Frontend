@@ -109,8 +109,11 @@ export default {
         "維修預約": "Repair",
         "體育預訂": "Sports",
         "圖書館": "Library",
-        "UM提意見": "Comments",
+        "Lib房間": "Lib Rooms",
+        "UM提意見": "Feedback",
         "電子公告": "Bulletin",
+        "打印": "Print",
+        "打印餘額": "Balance",
         "更多服務": "More",
 
 
@@ -124,6 +127,7 @@ export default {
         "交流": "Exchange",
         "獎學金": "Scholarship",
         "證明文件": "Certificate",
+        "資源搜索": "Resource Finder",
 
 
         "生活服務": "Domestic Services",

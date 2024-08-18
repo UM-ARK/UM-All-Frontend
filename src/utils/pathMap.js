@@ -178,11 +178,19 @@ export const UM_LIBRARY = 'https://library.um.edu.mo';
 // 澳大 - UM Pass
 export const UM_PASS = 'https://umpass.um.edu.mo';
 // 澳大 - 好意見計劃
-export const UM_COMMENTS = 'https://isw.umac.mo/qmweb/faces/app/addComments.jspx';
+export const UM_COMMENTS = 'https://isw.um.edu.mo/qmweb/faces/app/addComments.jspx';
 // 澳大 - UM Portal
-export const UM_PORTAL = 'https://myum.um.edu.mo/portal';
+export const UM_PORTAL = 'https://myum.um.edu.mo';
 // 澳大 - 學生電子公告
 export const UM_BULLETIN = 'https://e-bulletin.um.edu.mo/';
+// 澳大 - 找書
+export const UM_FIND_BOOKS = 'https://umlibrary.primo.exlibrisgroup.com/discovery/login?vid=853UOM_INST:umlibrary&lang=zh-tw';
+// 澳大 - 圖書館預約
+export const UM_LIB_BOOK = 'https://lib-booking.library.um.edu.mo/';
+// 澳大 - 學生打印
+export const UM_PRINT = 'https://followyouprint.icto.um.edu.mo/websubmit/';
+// 澳大 - 打印餘額
+export const UM_PRINT_BALANCE = 'https://followyouprint.icto.um.edu.mo/adminportal';
 
 // 學業發展分類
 // 澳大 - UM Moodle

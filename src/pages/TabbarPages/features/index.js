@@ -42,6 +42,10 @@ import {
     UM_BULLETIN,
     UM_RC_MENU,
     UM_LOST_FOUND,
+    UM_FIND_BOOKS,
+    UM_LIB_BOOK,
+    UM_PRINT,
+    UM_PRINT_BALANCE
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -256,6 +260,17 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'clipboard-clock',
+                        fn_name: t('Lib房間', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_LIB_BOOK,
+                            title: 'Lib房間',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'passport',
                         fn_name: t('UM Pass', { ns: 'features' }),
                         needLogin: false,
@@ -302,6 +317,28 @@ class Index extends Component {
                             text_color: COLOR_DIY.white,
                             bg_color_diy: '#002c55',
                             isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'cloud-print',
+                        fn_name: t('打印', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_PRINT,
+                            title: '打印',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'printer-search',
+                        fn_name: t('打印餘額', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_PRINT_BALANCE,
+                            title: '打印',
                         },
                     },
                     {
@@ -496,6 +533,17 @@ class Index extends Component {
                         webview_param: {
                             url: UM_DOCUMENTS,
                             title: 'UM 證明文件',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'book-search',
+                        fn_name: t('資源搜索', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_FIND_BOOKS,
+                            title: '資源搜索',
                         },
                     },
                 ],
