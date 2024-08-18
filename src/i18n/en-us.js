@@ -26,6 +26,9 @@ export default {
         "現在重啟APP切換到": "Restart the app now to switch to",
         "深色模式": "Dark Mode",
         "淺色模式": "Light Mode",
+
+        "更新": "Update",
+        "搜索": "Search",
     },
     home: {
         "校園巴士": "Bus",
@@ -74,8 +77,9 @@ export default {
     wiki: {
 
     },
-    courses: {
-
+    catalog: {
+        "ARK搵課": "ARK Catalog",
+        "試試ECE or Electrical or 電氣（區分簡繁）": "Try ECE or Electrical or 電氣",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
