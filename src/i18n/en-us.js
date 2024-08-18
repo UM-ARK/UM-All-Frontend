@@ -7,10 +7,10 @@ export default {
         "開發者": "Developer",
 
         "資訊": "Info",
-        "搵課": "Courses",
+        "搵課": "Catalog",
         "百科": "Wiki",
-        "課表": "Timetable",
-        "服務": "Services",
+        "課表": "Table",
+        "服務": "Service",
         "組織": "Club",
 
         "TOPTAB_MAIN": "Main",
