@@ -111,6 +111,8 @@ export default class LocalCourse extends Component {
                 renderItem={({ item: itm }) => {
                     schedulesObj[itm] = daySort(schedulesObj[itm])
                     const courseInfo = schedulesObj[itm][0];
+                    let isPE = courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002';
+
                     return (
                         <MenuView
                             onPressAction={({ nativeEvent }) => {
@@ -182,20 +184,15 @@ export default class LocalCourse extends Component {
                                     paddingVertical: scale(5), paddingHorizontal: scale(8),
                                     alignItems: 'center',
                                 }}
-                                // onPress={() => {
-                                //     trigger();
-                                //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseInfo['Teacher Information']);
-                                //     logToFirebase('checkCourse', {
-                                //         courseCode: courseInfo['Course Code'],
-                                //         profName: courseInfo['Teacher Information'],
-                                //     });
-                                //     this.context.navigate('Wiki', { url: URL });
-                                // }}
-                                onPress={() => {
-                                    trigger('rigid');
-                                }}
+                                onPress={() => { trigger('rigid'); }}
                             >
                                 <View style={{ alignItems: 'center', }}>
+                                    {isPE && (
+                                        <>
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title']}</Text>
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title Chi']}</Text>
+                                        </>
+                                    )}
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>{courseInfo.Section}</Text>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Medium of Instruction']}</Text>

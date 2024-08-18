@@ -917,17 +917,25 @@ E11-0000
                         {filterCourseList.length == 1 && sectionObj && (<>
                             <Text style={{ ...s.searchResultText, }}>↓ 選取單節</Text>
                             {Object.keys(sectionObj).map(key => {
+                                const courseInfo = sectionObj[key][0];
                                 return <TouchableOpacity
                                     style={{ marginBottom: scale(5), }}
                                     onPress={() => {
-                                        this.addCourse(sectionObj[key][0]);
+                                        this.addCourse(courseInfo);
                                         this.verScroll.current.scrollTo({ y: 0 });
                                     }}
                                 >
+                                    {/* CPED1001、CPED1002特有不同Section不同課 */}
+                                    {(courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002') && (
+                                        <>
+                                            <Text style={{ ...s.searchResultText, color: themeColor, }}>{courseInfo['Course Title']}</Text>
+                                            <Text style={{ ...s.searchResultText, color: themeColor, }}>{courseInfo['Course Title Chi']}</Text>
+                                        </>
+                                    )}
                                     {/* Section號碼 */}
                                     <Text style={{ ...s.searchResultText, color: themeColor, fontSize: scale(15), fontWeight: 'bold' }}>{key}</Text>
                                     {/* 老師名 */}
-                                    <Text style={{ ...s.searchResultText, color: themeColor }}>{sectionObj[key][0]['Teacher Information']}</Text>
+                                    <Text style={{ ...s.searchResultText, color: themeColor }}>{courseInfo['Teacher Information']}</Text>
                                     {/* 該Section上課時間 */}
                                     {sectionObj[key].map(itm => {
                                         return <View>
