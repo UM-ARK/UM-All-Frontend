@@ -21,6 +21,7 @@ import qs from 'qs';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-toast-message";
 import { CheckBox } from '@rneui/themed';
+import { t } from 'i18next';
 
 const { white, black, themeColor, } = COLOR_DIY;
 
@@ -109,6 +110,14 @@ class ClubLogin extends Component {
                 <Header title={'社團 | 組織 | 登錄'} />
 
                 <ScrollView>
+                    {/* 登錄提示 */}
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: COLOR_DIY.black.third,
+                        fontSize: scale(13),
+                        alignSelf: 'center',
+                    }}>{t("社團/組織賬號登錄入口，請勿使用UMPASS", { ns: 'club' })}</Text>
+
                     {/* 賬號 */}
                     <Input
                         placeholder='賬號 | Account'

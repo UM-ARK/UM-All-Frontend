@@ -35,7 +35,7 @@ export default {
         "支持我們": "Donate",
         "澳大方舟": "ARK",
         "方舟百科": "Wiki",
-        "組織登入": "Sign In",
+        "組織登入": "Club In",
 
         "周一": "MON",
         "周二": "TUE",
@@ -149,4 +149,7 @@ export default {
         "內地生": "Mainland",
         "圖文包": "Package",
     },
+    club: {
+        "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
+    }
 }
