@@ -816,25 +816,27 @@ class Index extends Component {
                         </View>
 
                         {/* 組織登入按鈕 */}
-                        <TouchableOpacity style={{
-                            position: 'absolute',
-                            right: scale(10),
-                            backgroundColor: themeColor,
-                            borderRadius: scale(5),
-                            padding: scale(5),
-                        }}
-                            onPress={() => {
-                                trigger();
-                                // TODO: 跳轉組織登入
-                                this.props.navigation.navigate('ClubLogin');
+                        {false && (
+                            <TouchableOpacity style={{
+                                position: 'absolute',
+                                right: scale(10),
+                                backgroundColor: themeColor,
+                                borderRadius: scale(5),
+                                padding: scale(5),
                             }}
-                        >
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                color: this.state.addMode ? themeColor : white,
-                                fontWeight: 'bold'
-                            }}>組織登入</Text>
-                        </TouchableOpacity>
+                                onPress={() => {
+                                    trigger();
+                                    // TODO: 跳轉組織登入
+                                    this.props.navigation.navigate('ClubLogin');
+                                }}
+                            >
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: this.state.addMode ? themeColor : white,
+                                    fontWeight: 'bold'
+                                }}>組織登入</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
 
                     {this.state.functionArr.map(fn_card => {
