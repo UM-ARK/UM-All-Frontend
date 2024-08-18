@@ -37,6 +37,7 @@ import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import Toast from 'react-native-simple-toast';
 import RNRestart from 'react-native-restart';
+import { t } from "i18next";
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
 const iconSize = scale(25);
@@ -507,7 +508,7 @@ export default class index extends Component {
                 // 展示CM GE中文名稱
                 ListHeaderComponent={() =>
                     <Text style={{ ...s.classItmTitleText }}>
-                        {filterOptions.option == 'GE' ? '通識課' : '必修課 與 選修課'}
+                        {filterOptions.option == 'GE' ? t('通識課', { ns: 'catalog' }) : t('必修課 與 選修課', { ns: 'catalog' })}
                     </Text>
                 }
             />
@@ -740,7 +741,7 @@ export default class index extends Component {
                 style={{
                     alignItems: 'center', flexDirection: 'row',
                     width: '100%',
-                    marginTop: scale(5), marginHorizontal: scale(5),
+                    marginTop: scale(5), paddingHorizontal: scale(10),
                     backgroundColor: 'transparent',
                 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -751,9 +752,9 @@ export default class index extends Component {
                         backgroundColor: white,
                         borderWidth: scale(2), borderColor: themeColor, borderRadius: scale(10),
                         flexDirection: 'row', alignItems: 'center',
-                        marginHorizontal: scale(5),
+                        marginRight: scale(5),
                         paddingHorizontal: scale(5), paddingVertical: scale(3),
-                        width: '81%',
+                        flex: 1,
                     }}>
                     {/* 搜索圖標，引導用戶 */}
                     <Ionicons
@@ -764,11 +765,9 @@ export default class index extends Component {
                     <TextInput
                         style={{
                             ...uiStyle.defaultText,
-                            paddingVertical: scale(3),
+                            paddingVertical: verticalScale(3),
                             color: black.main,
                             fontSize: scale(12),
-                            // width: scale(180),
-                            width: '88%',
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
@@ -779,7 +778,7 @@ export default class index extends Component {
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder="試試ECE or Electrical or 電氣（區分簡繁）"
+                        placeholder={t("試試ECE or Electrical or 電氣（區分簡繁）", { ns: 'catalog' })}
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => trigger()}
@@ -793,10 +792,11 @@ export default class index extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 trigger();
-                                this.setState({ inputText: '', inputOK: false, scrollData: {}, })
+                                this.textInputRef.current.clear();
                                 this.textInputRef.current.focus();
+                                this.setState({ inputText: '', inputOK: false, scrollData: {}, })
                             }}
-                            style={{ padding: scale(3) }}
+                            style={{ padding: scale(3), marginLeft: 'auto' }}
                         >
                             <Ionicons
                                 name={'close-circle'}
@@ -867,7 +867,7 @@ export default class index extends Component {
                         disabled={isLoading || !inputOK}
                         onPress={() => trigger()}
                     >
-                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>搜索</Text>
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
                     </TouchableOpacity>
                 </MenuView>
                 {/* 課程搜索按鈕 */}
@@ -1058,10 +1058,10 @@ export default class index extends Component {
                         ref={this.scrollViewRef}
                         style={{ width: '100%' }}
                         stickyHeaderIndices={[1]}
-                        // showsVerticalScrollIndicator={false}
+                    // showsVerticalScrollIndicator={false}
                     >
                         {/* 頁面標題欄 */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                             {/* TODO: 提示按鈕，包括更新數據 */}
                             <TouchableOpacity
                                 style={{
@@ -1075,16 +1075,16 @@ export default class index extends Component {
                                 onPress={() => {
                                     trigger();
                                     Alert.alert('ARK搵課提示',
-                                        `APP內Add Drop課數據更新日期：${this.state.s_coursePlan.updateTime}\n\nAPP內Pre Enroll數據更新日期：${this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
+                                        `${t('Add Drop Data Version', { ns: 'about' }) + this.state.s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
                                         [
                                             {
-                                                text: "更新Pre Enroll數據",
+                                                text: t("更新Pre Enroll數據",{ns:'catalog'}),
                                                 onPress: async () => {
                                                     await this.updateLocalCourseData('offerCourses');
                                                 },
                                             },
                                             {
-                                                text: "更新Add Drop數據",
+                                                text: t("更新Add Drop數據",{ns:'catalog'}),
                                                 onPress: async () => {
                                                     try {
                                                         await this.updateLocalCourseData('coursePlan');
@@ -1107,7 +1107,7 @@ export default class index extends Component {
                                     size={verticalScale(15)}
                                     color={white}
                                 />
-                                <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>更新</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('更新')}</Text>
                             </TouchableOpacity>
 
                             <View style={{ flexDirection: 'row' }}>
@@ -1120,7 +1120,7 @@ export default class index extends Component {
                                     }}
                                 />
                                 <View style={{ marginLeft: scale(5) }}>
-                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>ARK搵課</Text>
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('ARK搵課', { ns: 'catalog' })}</Text>
                                 </View>
                             </View>
 

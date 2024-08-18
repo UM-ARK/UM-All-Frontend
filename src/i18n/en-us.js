@@ -7,10 +7,10 @@ export default {
         "開發者": "Developer",
 
         "資訊": "Info",
-        "搵課": "Courses",
+        "搵課": "Catalog",
         "百科": "Wiki",
-        "課表": "Timetable",
-        "服務": "Services",
+        "課表": "Table",
+        "服務": "Service",
         "組織": "Club",
 
         "TOPTAB_MAIN": "Main",
@@ -26,13 +26,16 @@ export default {
         "現在重啟APP切換到": "Restart the app now to switch to",
         "深色模式": "Dark Mode",
         "淺色模式": "Light Mode",
+
+        "更新": "Update",
+        "搜索": "Search",
     },
     home: {
         "校園巴士": "Bus",
         "支持我們": "Donate",
         "澳大方舟": "ARK",
         "方舟百科": "Wiki",
-        "組織登入": "Sign In",
+        "組織登入": "Club In",
 
         "周一": "MON",
         "周二": "TUE",
@@ -74,8 +77,15 @@ export default {
     wiki: {
 
     },
-    courses: {
+    catalog: {
+        "ARK搵課": "ARK Catalog",
+        "試試ECE or Electrical or 電氣（區分簡繁）": "Try ECE or Electrical or 電氣",
 
+        "必修課 與 選修課": "Compulsory and Required Elective ",
+        "通識課": "General Education",
+
+        "更新Add Drop數據": "Update Add Drop data",
+        "更新Pre Enroll數據": "Update Pre Enroll data",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
@@ -90,7 +100,7 @@ export default {
         "粘貼到下方輸入框，": "Paste it into the input box below,",
         "一鍵導入！": "One-click import!",
 
-        "進入ISW複製": "Enter ISW Copy",
+        "進入ISW複製": "Enter ISW to Copy",
         "↑記得先粘貼課表數據，再點擊導入哦": "↑Remember to paste the class schedule data first and then click Import",
         "一鍵導入到模擬課表": "Import to simulated timetable",
     },
@@ -103,14 +113,17 @@ export default {
         "校園地圖": "Map",
         "課室地圖": "Classroom",
         "車位": "Park",
-        "資源借用": "Booking",
+        "資源預約": "Booking",
         "公共電腦": "Computer",
         "儲物箱": "Box",
         "維修預約": "Repair",
         "體育預訂": "Sports",
         "圖書館": "Library",
-        "UM提意見": "Comments",
+        "Lib房間": "Lib Rooms",
+        "UM提意見": "Feedback",
         "電子公告": "Bulletin",
+        "打印": "Print",
+        "打印餘額": "Balance",
         "更多服務": "More",
 
 
@@ -124,6 +137,7 @@ export default {
         "交流": "Exchange",
         "獎學金": "Scholarship",
         "證明文件": "Certificate",
+        "資源搜索": "Resource Finder",
 
 
         "生活服務": "Domestic Services",
@@ -138,4 +152,7 @@ export default {
         "內地生": "Mainland",
         "圖文包": "Package",
     },
+    club: {
+        "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
+    }
 }

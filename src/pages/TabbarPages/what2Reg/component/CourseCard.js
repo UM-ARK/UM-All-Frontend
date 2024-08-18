@@ -193,25 +193,6 @@ export default class CourseCard extends Component {
                                     margin: scale(5),
                                     padding: scale(10), paddingVertical: scale(5),
                                 }}
-                                // onPress={() => {
-                                //     trigger();
-                                //     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                                //     if (this.props.prof_info) {
-                                //         URL = ARK_WIKI_SEARCH + encodeURIComponent(this.props.prof_info.name);
-                                //         logToFirebase('checkCourse', {
-                                //             courseCode: courseCode,
-                                //             profName: this.props.prof_info.name,
-                                //         });
-                                //     }
-                                //     else {
-                                //         logToFirebase('checkCourse', {
-                                //             courseCode: courseCode,
-                                //             onLongPress: 0,
-                                //         });
-                                //     }
-                                //     // 跳轉ARK Wiki
-                                //     this.context.navigate('Wiki', { url: URL });
-                                // }}
                                 onPress={() => {
                                     trigger('rigid');
                                 }}
