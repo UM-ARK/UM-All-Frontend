@@ -1075,16 +1075,16 @@ export default class index extends Component {
                                 onPress={() => {
                                     trigger();
                                     Alert.alert('ARK搵課提示',
-                                        `APP內Add Drop課數據更新日期：${this.state.s_coursePlan.updateTime}\n\nAPP內Pre Enroll數據更新日期：${this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
+                                        `${t('Add Drop Data Version', { ns: 'about' }) + this.state.s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
                                         [
                                             {
-                                                text: "更新Pre Enroll數據",
+                                                text: t("更新Pre Enroll數據",{ns:'catalog'}),
                                                 onPress: async () => {
                                                     await this.updateLocalCourseData('offerCourses');
                                                 },
                                             },
                                             {
-                                                text: "更新Add Drop數據",
+                                                text: t("更新Add Drop數據",{ns:'catalog'}),
                                                 onPress: async () => {
                                                     try {
                                                         await this.updateLocalCourseData('coursePlan');
