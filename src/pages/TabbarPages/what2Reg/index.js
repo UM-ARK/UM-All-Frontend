@@ -1061,7 +1061,7 @@ export default class index extends Component {
                     // showsVerticalScrollIndicator={false}
                     >
                         {/* 頁面標題欄 */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                             {/* TODO: 提示按鈕，包括更新數據 */}
                             <TouchableOpacity
                                 style={{
