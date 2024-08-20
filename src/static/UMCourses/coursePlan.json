@@ -3035,8 +3035,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -3050,8 +3050,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -3065,8 +3065,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -8525,7 +8525,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-16",
+    "updateTime": "2024-08-20",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
