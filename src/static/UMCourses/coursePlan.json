@@ -3370,7 +3370,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-3127",
+            "Classroom": "E21-1033",
             "Course Title Chi": "英文文法概論"
         },
         {
@@ -7364,7 +7364,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3001",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-SECOND YEAR /GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -8478,7 +8478,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-21",
+    "updateTime": "2024-08-22",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

@@ -11707,6 +11707,56 @@
         },
         {
             "Offering Unit": "FED",
+            "Course Code": "EDUC4003",
+            "Course Title": "Supervised Teaching and School Experience",
+            "Section": "035",
+            "Medium of Instruction": "Cantonese and Mandarin",
+            "Teacher Information": "TBC_2024-1",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "監督教學和學校經驗"
+        },
+        {
+            "Offering Unit": "FED",
+            "Course Code": "EDUC4003",
+            "Course Title": "Supervised Teaching and School Experience",
+            "Section": "036",
+            "Medium of Instruction": "Cantonese and Mandarin",
+            "Teacher Information": "TBC_2024-1",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "監督教學和學校經驗"
+        },
+        {
+            "Offering Unit": "FED",
+            "Course Code": "EDUC4003",
+            "Course Title": "Supervised Teaching and School Experience",
+            "Section": "037",
+            "Medium of Instruction": "Cantonese and Mandarin",
+            "Teacher Information": "TBC_2024-1",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "監督教學和學校經驗"
+        },
+        {
+            "Offering Unit": "FED",
+            "Course Code": "EDUC4003",
+            "Course Title": "Supervised Teaching and School Experience",
+            "Section": "038",
+            "Medium of Instruction": "Cantonese and Mandarin",
+            "Teacher Information": "TBC_2024-1",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "監督教學和學校經驗"
+        },
+        {
+            "Offering Unit": "FED",
+            "Course Code": "EDUC4003",
+            "Course Title": "Supervised Teaching and School Experience",
+            "Section": "039",
+            "Medium of Instruction": "Cantonese and Mandarin",
+            "Teacher Information": "TBC_2024-1",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "監督教學和學校經驗"
+        },
+        {
+            "Offering Unit": "FED",
             "Course Code": "EDUC4004",
             "Course Title": "Supervised Teaching and School Experience",
             "Section": "001",
@@ -12060,6 +12110,16 @@
             "Course Code": "EDUC4004",
             "Course Title": "Supervised Teaching and School Experience",
             "Section": "036",
+            "Medium of Instruction": "Cantonese and Mandarin",
+            "Teacher Information": "TBC_2024-1",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "監督教學和學校經驗"
+        },
+        {
+            "Offering Unit": "FED",
+            "Course Code": "EDUC4004",
+            "Course Title": "Supervised Teaching and School Experience",
+            "Section": "037",
             "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "TBC_2024-1",
             "Lecture / Lab": "Lecture",
@@ -17465,7 +17525,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-1056",
-            "Course Title Chi": "法語入門I"
+            "Course Title Chi": "法語入門一"
         },
         {
             "Offering Unit": "FAH",
@@ -17599,7 +17659,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-3127",
+            "Classroom": "E21-1033",
             "Course Title Chi": "英文文法概論"
         },
         {
@@ -17614,7 +17674,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-3127",
+            "Classroom": "E21-1033",
             "Course Title Chi": "英文文法概論"
         },
         {
@@ -17629,7 +17689,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1056",
+            "Classroom": "E21-1033",
             "Course Title Chi": "英文文法概論"
         },
         {
@@ -17644,7 +17704,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1056",
+            "Classroom": "E21-1033",
             "Course Title Chi": "英文文法概論"
         },
         {
@@ -22944,7 +23004,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E4-1063",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CVE17\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CVE17 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -22961,7 +23021,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E4-1063",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CVE17\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CVE17 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -22978,7 +23038,7 @@
             "Time From": "10:00",
             "Time To": "10:50",
             "Classroom": "E6-1102C",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CVE17\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CVE17 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -22995,7 +23055,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E4-G062",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CPS19\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CPS19 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -23012,7 +23072,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E4-G062",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CPS19\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CPS19 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -23029,7 +23089,7 @@
             "Time From": "10:00",
             "Time To": "10:50",
             "Classroom": "E6-1113B",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CPS19\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - CPS19 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -23046,7 +23106,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E12-G004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - ECE19 / ECE21\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - ECE19 / ECE21 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -23063,7 +23123,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E12-G004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - ECE19 / ECE21\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - ECE19 / ECE21 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -23080,7 +23140,7 @@
             "Time From": "11:30",
             "Time To": "12:20",
             "Classroom": "E4-1063",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - ECE19 / ECE21\n - FST - AMM19 / AMM23 / CIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FHS - BIF19\n - FST - ECE19 / ECE21 / MTH23\n - FST - AMM19 / AMM23 / CIM19\n",
             "Course Title Chi": "科學技術的定量推理"
         },
         {
@@ -28076,7 +28136,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1044",
-            "Course Title Chi": "日語作文I"
+            "Course Title Chi": "日文作文Ⅰ"
         },
         {
             "Offering Unit": "FAH",
@@ -32333,7 +32393,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3001",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-SECOND YEAR /GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32349,7 +32409,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / GBM22-SECOND YEAR / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32365,7 +32425,7 @@
             "Time From": "16:00",
             "Time To": "18:45",
             "Classroom": "E22-2014",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-SECOND YEAR / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32381,7 +32441,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20 / GBM22-SECOND YEAR / GBM22-THIRD YEAR / GBS20 / MKG22-SECOND YEAR / MKG22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32736,7 +32796,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2010",
+            "Classroom": "E22-1002",
             "Course Title Chi": "行銷原理"
         },
         {
@@ -32751,7 +32811,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2010",
+            "Classroom": "E22-1002",
             "Course Title Chi": "行銷原理"
         },
         {
