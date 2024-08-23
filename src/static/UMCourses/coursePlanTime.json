@@ -5288,7 +5288,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-G010",
+            "Classroom": "E21-G011",
             "Course Title Chi": "中國新聞寫作"
         },
         {
@@ -5303,7 +5303,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-G010",
+            "Classroom": "E21-G011",
             "Course Title Chi": "中國新聞寫作"
         },
         {
@@ -9526,7 +9526,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-1051",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - PPE19\n",
             "Course Title Chi": "音樂修養I"
         },
         {
@@ -9541,6 +9541,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E33-1051",
+            "\"Class For / Class Not For\" Information": "Class not for :\n- FED - PYE19 / PYE22\n",
             "Course Title Chi": "音樂修養I"
         },
         {
@@ -9555,6 +9556,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E33-1051",
+            "\"Class For / Class Not For\" Information": "Class not for :\n- FED - PYE19 / PYE22\n",
             "Course Title Chi": "音樂修養I"
         },
         {
@@ -9654,7 +9656,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-G032",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - PPE19\n",
             "Course Title Chi": "視覺藝術一：探索與發現"
         },
         {
@@ -16928,7 +16930,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:45",
-            "Classroom": "E11-1009",
+            "Classroom": "E12-G003",
             "Course Title Chi": "熱力學"
         },
         {
@@ -16943,7 +16945,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:45",
-            "Classroom": "E11-1009",
+            "Classroom": "E12-G003",
             "Course Title Chi": "熱力學"
         },
         {
@@ -23463,7 +23465,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4043",
+            "Classroom": "E4-1052",
             "Course Title Chi": "探索地球"
         },
         {
@@ -23479,7 +23481,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4043",
+            "Classroom": "E4-1052",
             "Course Title Chi": "探索地球"
         },
         {
@@ -23495,7 +23497,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4043",
+            "Classroom": "E6-1113B",
             "Course Title Chi": "個人成長"
         },
         {
@@ -23511,39 +23513,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4043",
-            "Course Title Chi": "個人成長"
-        },
-        {
-            "Offering Unit": "FSS",
-            "Offering Department": "DPSY",
-            "Course Code": "GESB1009",
-            "Course Title": "Personal Growth",
-            "Section": "002",
-            "Course Type": "GE Area 7",
-            "Medium of Instruction": "English",
-            "Teacher Information": "CHANG SIO NGA",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "11:30",
-            "Time To": "12:45",
-            "Classroom": "E4-3054",
-            "Course Title Chi": "個人成長"
-        },
-        {
-            "Offering Unit": "FSS",
-            "Offering Department": "DPSY",
-            "Course Code": "GESB1009",
-            "Course Title": "Personal Growth",
-            "Section": "002",
-            "Course Type": "GE Area 7",
-            "Medium of Instruction": "English",
-            "Teacher Information": "CHANG SIO NGA",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "11:30",
-            "Time To": "12:45",
-            "Classroom": "E4-3054",
+            "Classroom": "E6-1113B",
             "Course Title Chi": "個人成長"
         },
         {
@@ -27155,7 +27125,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FIC17 / FIC20 / FIC22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / FIC17 / FIC20 / FIC22\n",
             "Course Title Chi": "商業預測模型"
         },
         {
@@ -27171,7 +27141,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FIC17 / FIC20 / FIC22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / FIC17 / FIC20 / FIC22\n",
             "Course Title Chi": "商業預測模型"
         },
         {
@@ -27187,7 +27157,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FIC17 / FIC20 / FIC22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / FIC17 / FIC20 / FIC22\n",
             "Course Title Chi": "商業預測模型"
         },
         {
@@ -27203,7 +27173,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FIC17 / FIC20 / FIC22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / FIC17 / FIC20 / FIC22\n",
             "Course Title Chi": "商業預測模型"
         },
         {

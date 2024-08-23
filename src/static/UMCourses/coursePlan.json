@@ -2352,7 +2352,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-1051",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - PPE19\n",
             "Course Title Chi": "音樂修養I"
         },
         {
@@ -2395,7 +2395,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-G032",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - PPE19\n",
             "Course Title Chi": "視覺藝術一：探索與發現"
         },
         {
@@ -3089,7 +3089,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:45",
-            "Classroom": "E11-1009",
+            "Classroom": "E12-G003",
             "Course Title Chi": "熱力學"
         },
         {
@@ -4362,7 +4362,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4043",
+            "Classroom": "E4-1052",
             "Course Title Chi": "探索地球"
         },
         {
@@ -4378,7 +4378,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4043",
+            "Classroom": "E6-1113B",
             "Course Title Chi": "個人成長"
         },
         {
@@ -5689,7 +5689,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-3002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FIC17 / FIC20 / FIC22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / FIC17 / FIC20 / FIC22\n",
             "Course Title Chi": "商業預測模型"
         },
         {
@@ -8478,7 +8478,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-22",
+    "updateTime": "2024-08-23",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
