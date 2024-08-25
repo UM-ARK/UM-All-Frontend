@@ -86,6 +86,20 @@ function parseImportData(inputText) {
     }
 }
 
+// 判斷Object Array內是否有某個Key的Value重複
+function hasSpecificDuplicate(array, key, value) {
+    let count = 0;
+
+    for (const obj of array) {
+        if (obj[key] === value) { count++; }
+
+        // 如果找到多於1次，直接返回true
+        if (count > 1) { return true; }
+    }
+
+    return false;
+}
+
 // TODO: 查看某時間段可選的CourseCode、Section
 export default class courseSim extends Component {
     constructor() {
@@ -332,6 +346,8 @@ export default class courseSim extends Component {
             {timeReminderText}
         </Text> : null;
 
+        let hasDuplicate = hasSpecificDuplicate(this.state.courseCodeList, 'Course Code', course['Course Code']);
+
         return (
             <View>
                 {/* 渲染下午/晚上提醒 */}
@@ -366,6 +382,35 @@ export default class courseSim extends Component {
                             case 'section':
                                 trigger();
                                 this.props.navigation.navigate('LocalCourse', course['Course Code']);
+                                break;
+
+                            case 'del':
+                                trigger();
+                                Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}的所有Section嗎？`,
+                                    [
+                                        {
+                                            text: "Yes",
+                                            onPress: () => {
+                                                trigger();
+                                                let { courseCodeList } = this.state;
+                                                let tempArr = [];
+                                                courseCodeList.map(i => {
+                                                    if (course['Course Code'] != i['Course Code']) {
+                                                        tempArr.push(i);
+                                                    }
+                                                })
+                                                courseCodeList = tempArr;
+                                                this.handleCourseList(courseCodeList);
+                                                this.verScroll.current.scrollTo({ y: 0 });
+                                            },
+                                            style: 'destructive',
+                                        },
+                                        {
+                                            text: "No",
+                                        },
+                                    ],
+                                    { cancelable: true, }
+                                );
                                 break;
 
                             case 'drop':
@@ -413,6 +458,18 @@ export default class courseSim extends Component {
                             title: '查 Section / 老師',
                             titleColor: black.third,
                         },
+                        // 多於一個Section的課，展示刪除該Code的所有Section
+                        ...(hasDuplicate ? [{
+                            id: 'del',
+                            title: `刪除所有 ${course['Course Code']}`,
+                            attributes: {
+                                destructive: true,
+                            },
+                            image: Platform.select({
+                                ios: 'trash',
+                                android: 'ic_menu_delete',
+                            }),
+                        }] : []),
                         {
                             id: 'drop',
                             title: `刪除 ${course['Course Code']}-${course['Section']}`,

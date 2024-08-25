@@ -23,11 +23,11 @@ import { scale } from 'react-native-size-matters';
 
 const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
 
-let eventDataList = [];
 class EventPage extends Component {
     state = {
         // 返回數據的頁數
         dataPage: 1,
+        eventDataList: [],
         leftDataList: [],
         rightDataList: [],
         isLoading: true,
@@ -35,11 +35,11 @@ class EventPage extends Component {
     };
 
     async componentDidMount() {
-        await this.getData();
+        await this.getData(false);
     }
 
-    getData = async () => {
-        const { dataPage } = this.state;
+    getData = async (loadMore) => {
+        const { dataPage, eventDataList } = this.state;
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 10;
         let noMoreData = true;
@@ -60,12 +60,12 @@ class EventPage extends Component {
                     }
 
                     if (dataPage == 1) {
-                        this.separateData(this.getNotFinishEvent(newDataArr));
-                        eventDataList = newDataArr;
+                        this.separateData(this.getNotFinishEvent(newDataArr, loadMore));
                     } else if (eventDataList.length > 0) {
-                        newDataArr = eventDataList.concat(newDataArr);
-                        this.separateData(this.getNotFinishEvent(newDataArr));
-                        eventDataList = newDataArr;
+                        let tempArr = eventDataList.concat(newDataArr);
+                        this.separateData(this.getNotFinishEvent(tempArr, loadMore));
+                        // this.separateData(newDataArr);
+                        // this.setState({ eventDataList: tempArr });
                     }
                 } else if (json.code == '2') {
                     alert('已無更多數據');
@@ -108,11 +108,14 @@ class EventPage extends Component {
         this.setState({
             leftDataList,
             rightDataList,
+            eventDataList: eventList,
         });
     };
 
     // 篩選尚未結束的活動，並隨機亂序，最後與原數組合併去重
-    getNotFinishEvent = eventList => {
+    getNotFinishEvent = (eventList, loadMore) => {
+        // if (!loadMore) { return eventList; }
+
         let notFinishEvent = [];
         let closeFinishEvent = [];
         // 當前時刻時間戳
@@ -130,49 +133,42 @@ class EventPage extends Component {
             }
         });
 
-        // 如果未結束活動超過1個，再進行隨機排序
-        if (notFinishEvent.length > 1) {
-            notFinishEvent.sort(() => {
-                return Math.random() - 0.5
-            })
-        }
-        // 如果將結束活動超過1個，再進行隨機排序
-        if (closeFinishEvent.length > 1) {
-            closeFinishEvent.sort(() => {
-                return Math.random() - 0.5
-            })
-        }
-        return Array.from(
-            new Set(
+        // 如果未結束 or 將結束活動超過1個，再進行隨機排序
+        if (!loadMore && (notFinishEvent.length > 1 || closeFinishEvent.length > 1)) {
+            notFinishEvent.sort(() => { return Math.random() - 0.5 });
+
+            let newList = Array.from(new Set(
                 closeFinishEvent.concat(
                     notFinishEvent.concat(eventList)
                 )
-            ))
+            ));
+            this.setState({ eventDataList: newList })
+            return newList;
+        } else {
+            this.setState({ eventDataList: eventList })
+            return eventList;
+        }
     };
 
     loadMoreData = () => {
-        const { noMoreData, dataPage } = this.state;
-        this.setState({ dataPage: dataPage + 1 });
-        if (!noMoreData) {
-            Toast.show('數據加載中...')
-            this.getData();
-        }
         trigger();
+        const { noMoreData, dataPage } = this.state;
+        this.setState({ dataPage: dataPage + 1 }, () => {
+            if (!noMoreData) {
+                Toast.show('數據加載中...')
+                this.getData(true);
+            }
+        });
     };
 
-    onRefresh = async () => {
-        try {
-            this.setState({
-                dataPage: 1,
-                leftDataList: [],
-                rightDataList: [],
-                isLoading: true,
-            });
-        } catch (error) {
-            alert(JSON.stringify(error));
-        } finally {
-            await this.getData();
-        }
+    onRefresh = () => {
+        this.setState({
+            dataPage: 1,
+            leftDataList: [], rightDataList: [],
+            isLoading: true,
+        }, () => {
+            this.getData(false);
+        });
     };
 
     renderLoadMoreView = () => {
