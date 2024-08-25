@@ -24,10 +24,11 @@ import Modal from 'react-native-modal';
 import { DOMParser } from "react-native-html-parser";
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
-import Toast from 'react-native-toast-message';
+// import Toast from 'react-native-toast-message';
 import TouchableScale from "react-native-touchable-scale";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
+import Toast from 'react-native-simple-toast';
 
 const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
     COLOR_DIY;
@@ -170,33 +171,36 @@ class BusScreen extends Component {
                     isLoading: false,
                 });
                 if (this.state.busPositionArr.length == 0) {
-                    this.setState({ toastColor: COLOR_DIY.warning });
-                    Toast.show({
-                        type: 'warning',
-                        text1: '當前沒有巴士~',
-                        text2: '[]~(￣▽￣)~* 👋',
-                        topOffset: scale(100),
-                        onPress: () => Toast.hide(),
-                    });
+                    // this.setState({ toastColor: COLOR_DIY.warning });
+                    // Toast.show({
+                    //     type: 'warning',
+                    //     text1: '當前沒有巴士~',
+                    //     text2: '[]~(￣▽￣)~* 👋',
+                    //     topOffset: scale(100),
+                    //     onPress: () => Toast.hide(),
+                    // });
+                    Toast.show('當前沒有巴士~ []~(￣▽￣)~*👋');
                 } else {
-                    this.setState({ toastColor: themeColor });
-                    Toast.show({
-                        type: 'arkToast',
-                        text1: 'Data is Loading~',
-                        text2: '幫你刷新了一下~ []~(￣▽￣)~* 👋',
-                        topOffset: scale(100),
-                        onPress: () => Toast.hide(),
-                    });
+                    // this.setState({ toastColor: themeColor });
+                    // Toast.show({
+                    //     type: 'arkToast',
+                    //     text1: 'Data is Loading~',
+                    //     text2: '幫你刷新了一下~ []~(￣▽￣)~* 👋',
+                    //     topOffset: scale(100),
+                    //     onPress: () => Toast.hide(),
+                    // });
+                    Toast.show('已自動刷新！點擊巴士圖標可手動刷新 []~(￣▽￣)~*👋');
                 }
             })
             .catch(error => {
-                this.setState({ toastColor: COLOR_DIY.warning });
-                Toast.show({
-                    type: 'error',
-                    text1: '網絡錯誤！',
-                    topOffset: scale(100),
-                    onPress: () => Toast.hide(),
-                });
+                // this.setState({ toastColor: COLOR_DIY.warning });
+                // Toast.show({
+                //     type: 'error',
+                //     text1: '網絡錯誤！',
+                //     topOffset: scale(100),
+                //     onPress: () => Toast.hide(),
+                // });
+                Toast.show('網絡錯誤！🆘');
             });
     };
 
