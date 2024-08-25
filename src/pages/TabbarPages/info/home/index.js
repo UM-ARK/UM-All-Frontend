@@ -143,8 +143,6 @@ const toastKaomojiArr = [
 
 const calItemWidth = scale(44.5);
 
-let isLoadMore = false;
-
 class HomeScreen extends Component {
     toastTimer = null;
     calScrollRef = React.createRef(null);
@@ -236,6 +234,8 @@ class HomeScreen extends Component {
             version_info: null,
 
             networkError: false,
+
+            isLoadMore: false,
         };
     }
 
@@ -629,17 +629,19 @@ class HomeScreen extends Component {
     handleScroll = (event) => {
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
+        const { isLoadMore, isLoading } = this.state;
 
         // 接近底部時，獲取更多數據
-        if (isCloseToBottom && !isLoadMore) {
+        if (isCloseToBottom && !isLoadMore && !isLoading) {
             const thisFunc = this.eventPage.current;
             if (!thisFunc.state.noMoreData) {
-                isLoadMore = true;
-                thisFunc.loadMoreData();
-                // 延時鎖，避免到底觸發過多次
-                setTimeout(() => {
-                    isLoadMore = false;
-                }, 1000);
+                this.setState({ isLoadMore: true }, () => {
+                    thisFunc.loadMoreData();
+                    // 延時鎖，避免到底觸發過多次
+                    setTimeout(() => {
+                        this.setState({ isLoadMore: false });
+                    }, 1000);
+                });
             }
         }
     };
@@ -663,13 +665,13 @@ class HomeScreen extends Component {
                             colors={[themeColor]}
                             tintColor={themeColor}
                             refreshing={this.state.isLoading}
-                            onRefresh={() => {
+                            onRefresh={async () => {
                                 this.setState({ isLoading: true });
                                 this.onRefresh();
                                 this.getAppData();
                                 this.getCal();
                                 // 刷新重新請求活動頁數據
-                                this.eventPage.current.onRefresh();
+                                await this.eventPage.current.onRefresh();
                             }}
                         />
                     }
