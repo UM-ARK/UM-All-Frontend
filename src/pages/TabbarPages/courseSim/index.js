@@ -100,6 +100,12 @@ function hasSpecificDuplicate(array, key, value) {
     return false;
 }
 
+// 將 HH:mm 時間轉為Date對象，用於排序
+function toDateTime(time) {
+    var [hours, minutes] = time.split(':');
+    return new Date(0, 0, 0, hours, minutes); // 使用一个固定的日期
+};
+
 // TODO: 查看某時間段可選的CourseCode、Section
 export default class courseSim extends Component {
     constructor() {
@@ -247,7 +253,7 @@ export default class courseSim extends Component {
         if (dayCourseList.length > 0) {
             // 按上課時間Time From排序
             dayCourseList = dayCourseList.sort((a, b) => {
-                return a['Time From'].localeCompare(b['Time From'])
+                return toDateTime(a['Time From']) - toDateTime(b['Time From'])
             });
 
             // 例如今天星期五，FRI
