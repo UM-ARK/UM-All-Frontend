@@ -1,6 +1,12 @@
 # 忽略部分警告安裝npm
 npm i --legacy-peer-deps
 
+# 檢查漏洞
+# npm audit
+
+# 檢查xxx包的依賴關係
+# npm ls xxx
+
 # 開啟Metro
 # yarn start
 
