@@ -10,6 +10,7 @@ import {
     Platform,
     Linking,
     Alert,
+    AppState,
 } from 'react-native';
 
 // 本地工具
@@ -253,11 +254,31 @@ class HomeScreen extends Component {
         this.toastTimer = setTimeout(() => {
             this.onRefresh();
         }, 1000);
+
+        // 捕捉應用狀態監聽器
+        this.appStateListener = AppState.addEventListener('change', this.handleAppStateChange);
     }
 
     componentWillUnmount() {
         this.toastTimer && clearTimeout(this.toastTimer);
+        // 移除監聽器
+        if (this.appStateListener) {
+            this.appStateListener.remove();
+        }
     }
+
+    handleAppStateChange = (nextAppState) => {
+        if (AppState.currentState == 'active') {
+            // 確認後台返回到 HomePage 主頁，進行刷新
+            if (this.props.navigation?.isFocused()) {
+                this.setState({ isLoading: true });
+                this.getAppData(false);
+                this.getCal();
+                this.onRefresh();
+                this.eventPage.current.onRefresh();
+            }
+        }
+    };
 
     getAppData = async isLogin => {
         let URL = BASE_URI + GET.APP_INFO;

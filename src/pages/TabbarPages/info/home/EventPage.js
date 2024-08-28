@@ -162,6 +162,7 @@ class EventPage extends Component {
     };
 
     onRefresh = () => {
+        trigger();
         this.setState({
             dataPage: 1,
             leftDataList: [], rightDataList: [],
