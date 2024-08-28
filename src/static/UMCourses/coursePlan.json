@@ -2425,7 +2425,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-1013",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / ENG19 / INS19 / INS23 / MAS19 / PPE19-SECOND YEAR / PPE19-THIRD YEAR / PPE19-FOURTH YEAR / PYE19 / PYE22\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / INS19 / INS23 / MAS19 / PPE19-SECOND YEAR / PPE19-THIRD YEAR / PPE19-FOURTH YEAR / PYE19 / PYE22\n",
             "Course Title Chi": "教育心理學"
         },
         {
@@ -3012,8 +3012,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -3027,8 +3027,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -3042,8 +3042,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -4641,7 +4641,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-2033",
+            "Classroom": "E22-4012",
             "Course Title Chi": "探尋中醫"
         },
         {
@@ -4831,6 +4831,17 @@
             "Teacher Information": "DAINA CHIBA",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "國際關係畢業設計"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DGPA",
+            "Course Code": "GPAD4009",
+            "Course Title": "Research Project on Public Administration",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "QI HANG",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "公共行政研究計畫"
         },
         {
             "Offering Unit": "FSS",
@@ -7591,7 +7602,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-3011",
+            "Classroom": "E22-2002",
             "Course Title Chi": "定價策略"
         },
         {
@@ -7608,21 +7619,6 @@
             "Time To": "18:45",
             "Classroom": "E22-2015",
             "Course Title Chi": "數位行銷"
-        },
-        {
-            "Offering Unit": "FBA",
-            "Offering Department": "MMI",
-            "Course Code": "MKTG4017",
-            "Course Title": "Special Topics in Marketing",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "LI WEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E22-3011",
-            "Course Title Chi": "行銷專題"
         },
         {
             "Offering Unit": "FAH",
@@ -8478,7 +8474,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-26",
+    "updateTime": "2024-08-28",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
