@@ -455,7 +455,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4005",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -470,7 +470,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-4011",
+            "Classroom": "E22-2007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -517,7 +517,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2017",
+            "Classroom": "E22-4015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC17 / BEC20 / BEC22\n",
             "Course Title Chi": "中級宏觀經濟學"
         },
@@ -3012,8 +3012,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -3027,8 +3027,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -3042,8 +3042,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -6083,54 +6083,6 @@
         },
         {
             "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1020",
-            "Course Title": "Registry and Notary Law",
-            "Section": "101",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "WU HIO",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "18:00",
-            "Time To": "20:45",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "登記和公證法"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1023",
-            "Course Title": "Juridical Practice",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "LOU IENG HA / SOU SIO KEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "19:00",
-            "Time To": "20:15",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "司法實踐"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1026",
-            "Course Title": "Portuguese Legal Language",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese supplemented with Portuguese",
-            "Teacher Information": "VONG SOK HEI ROSITA",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "19:00",
-            "Time To": "21:45",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "葡萄牙法律語言"
-        },
-        {
-            "Offering Unit": "FLL",
             "Offering Department": "GLS",
             "Course Code": "LAWS1055",
             "Course Title": "Chinese Legal History",
@@ -8474,7 +8426,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-28",
+    "updateTime": "2024-08-29",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

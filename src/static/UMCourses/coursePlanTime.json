@@ -1501,7 +1501,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4005",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -1516,7 +1516,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4005",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -1531,7 +1531,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4005",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -1546,7 +1546,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4005",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -1561,7 +1561,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4004",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -1576,7 +1576,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-4004",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -1801,7 +1801,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-4011",
+            "Classroom": "E22-2007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -1816,7 +1816,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-4011",
+            "Classroom": "E22-2007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -1831,7 +1831,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-G015",
+            "Classroom": "E22-4004",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -1846,7 +1846,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-G015",
+            "Classroom": "E22-4004",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -2049,7 +2049,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2017",
+            "Classroom": "E22-4015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC17 / BEC20 / BEC22\n",
             "Course Title Chi": "中級宏觀經濟學"
         },
@@ -2065,7 +2065,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2017",
+            "Classroom": "E22-4015",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC17 / BEC20 / BEC22\n",
             "Course Title Chi": "中級宏觀經濟學"
         },
@@ -6139,7 +6139,7 @@
             "Day": "TUE",
             "Time From": "19:00",
             "Time To": "20:15",
-            "Classroom": "W31-G051",
+            "Classroom": "W31-G033",
             "Course Title Chi": "住宿學院體驗式學習"
         },
         {
@@ -12596,8 +12596,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12612,8 +12612,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12628,8 +12628,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12644,8 +12644,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12660,8 +12660,8 @@
             "Teacher Information": "LI TAO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3054",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12676,8 +12676,8 @@
             "Teacher Information": "LI TAO",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3054",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12692,8 +12692,8 @@
             "Teacher Information": "LI TAO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3054",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12708,8 +12708,8 @@
             "Teacher Information": "LI TAO",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3054",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12724,8 +12724,8 @@
             "Teacher Information": "JEAN-PAUL LAFAYETTE DUQUETTE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3052",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12740,8 +12740,8 @@
             "Teacher Information": "JEAN-PAUL LAFAYETTE DUQUETTE",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3052",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12756,8 +12756,8 @@
             "Teacher Information": "JEAN-PAUL LAFAYETTE DUQUETTE",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3052",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12772,8 +12772,8 @@
             "Teacher Information": "JEAN-PAUL LAFAYETTE DUQUETTE",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3052",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12788,8 +12788,8 @@
             "Teacher Information": "ALEGRE ROMULO AUJERO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3045",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12804,8 +12804,8 @@
             "Teacher Information": "ALEGRE ROMULO AUJERO",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3045",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12820,8 +12820,8 @@
             "Teacher Information": "ALEGRE ROMULO AUJERO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3045",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12836,8 +12836,8 @@
             "Teacher Information": "ALEGRE ROMULO AUJERO",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3045",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12852,8 +12852,8 @@
             "Teacher Information": "CHAN KA LON",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12868,8 +12868,8 @@
             "Teacher Information": "CHAN KA LON",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12884,8 +12884,8 @@
             "Teacher Information": "CHAN KA LON",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12900,8 +12900,8 @@
             "Teacher Information": "CHAN KA LON",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12916,8 +12916,8 @@
             "Teacher Information": "CHAN I LEI",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12932,8 +12932,8 @@
             "Teacher Information": "CHAN I LEI",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12948,8 +12948,8 @@
             "Teacher Information": "CHAN I LEI",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -12964,8 +12964,8 @@
             "Teacher Information": "CHAN I LEI",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3032",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -14003,8 +14003,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -14018,8 +14018,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -14033,8 +14033,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -14048,8 +14048,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -14063,8 +14063,8 @@
             "Teacher Information": "KERRIN FELIX BURNELL",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3041",
             "Course Title Chi": "大學英語二"
         },
@@ -14078,8 +14078,8 @@
             "Teacher Information": "KERRIN FELIX BURNELL",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3041",
             "Course Title Chi": "大學英語二"
         },
@@ -14093,8 +14093,8 @@
             "Teacher Information": "KERRIN FELIX BURNELL",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3041",
             "Course Title Chi": "大學英語二"
         },
@@ -14108,8 +14108,8 @@
             "Teacher Information": "KERRIN FELIX BURNELL",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3041",
             "Course Title Chi": "大學英語二"
         },
@@ -14123,8 +14123,8 @@
             "Teacher Information": "WONG HWAI PING MARK",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4034",
             "Course Title Chi": "大學英語二"
         },
@@ -14138,8 +14138,8 @@
             "Teacher Information": "WONG HWAI PING MARK",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4034",
             "Course Title Chi": "大學英語二"
         },
@@ -14153,8 +14153,8 @@
             "Teacher Information": "WONG HWAI PING MARK",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4034",
             "Course Title Chi": "大學英語二"
         },
@@ -14168,8 +14168,8 @@
             "Teacher Information": "WONG HWAI PING MARK",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4034",
             "Course Title Chi": "大學英語二"
         },
@@ -14183,8 +14183,8 @@
             "Teacher Information": "TANG FUN HEI",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2032",
             "Course Title Chi": "大學英語二"
         },
@@ -14198,8 +14198,8 @@
             "Teacher Information": "TANG FUN HEI",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2032",
             "Course Title Chi": "大學英語二"
         },
@@ -14213,8 +14213,8 @@
             "Teacher Information": "TANG FUN HEI",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2032",
             "Course Title Chi": "大學英語二"
         },
@@ -14228,8 +14228,8 @@
             "Teacher Information": "TANG FUN HEI",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-2032",
             "Course Title Chi": "大學英語二"
         },
@@ -14243,8 +14243,8 @@
             "Teacher Information": "SUMIKO ITO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4033",
             "Course Title Chi": "大學英語二"
         },
@@ -14258,8 +14258,8 @@
             "Teacher Information": "SUMIKO ITO",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4033",
             "Course Title Chi": "大學英語二"
         },
@@ -14273,8 +14273,8 @@
             "Teacher Information": "SUMIKO ITO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4033",
             "Course Title Chi": "大學英語二"
         },
@@ -14288,8 +14288,8 @@
             "Teacher Information": "SUMIKO ITO",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-4033",
             "Course Title Chi": "大學英語二"
         },
@@ -14303,8 +14303,8 @@
             "Teacher Information": "VIVIAN FELICIO CHAPLIN",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-1042",
             "Course Title Chi": "大學英語二"
         },
@@ -14318,8 +14318,8 @@
             "Teacher Information": "VIVIAN FELICIO CHAPLIN",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-1042",
             "Course Title Chi": "大學英語二"
         },
@@ -14333,8 +14333,8 @@
             "Teacher Information": "VIVIAN FELICIO CHAPLIN",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-1042",
             "Course Title Chi": "大學英語二"
         },
@@ -14348,8 +14348,8 @@
             "Teacher Information": "VIVIAN FELICIO CHAPLIN",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-1042",
             "Course Title Chi": "大學英語二"
         },
@@ -15218,8 +15218,8 @@
             "Teacher Information": "LE PHUONG ANH",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3044",
             "Course Title Chi": "大學英語二"
         },
@@ -15248,8 +15248,8 @@
             "Teacher Information": "LE PHUONG ANH",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3044",
             "Course Title Chi": "大學英語二"
         },
@@ -16223,8 +16223,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -16238,8 +16238,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -16253,8 +16253,8 @@
             "Teacher Information": "MANUEL ANTONIO NORONHA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3044",
             "Course Title Chi": "大學英語三"
         },
@@ -16268,8 +16268,8 @@
             "Teacher Information": "MANUEL ANTONIO NORONHA",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E3-3044",
             "Course Title Chi": "大學英語三"
         },
@@ -16553,8 +16553,8 @@
             "Teacher Information": "TOU CHI WAI",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3055",
             "Course Title Chi": "大學英語三"
         },
@@ -16568,8 +16568,8 @@
             "Teacher Information": "TOU CHI WAI",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3055",
             "Course Title Chi": "大學英語三"
         },
@@ -16583,8 +16583,8 @@
             "Teacher Information": "LUQUE LAU JAIME",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -16598,8 +16598,8 @@
             "Teacher Information": "LUQUE LAU JAIME",
             "Lecture / Lab": "Lecture",
             "Day": "FRI",
-            "Time From": "08:30",
-            "Time To": "09:45",
+            "Time From": "8:30",
+            "Time To": "9:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -28770,86 +28770,6 @@
         },
         {
             "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1020",
-            "Course Title": "Registry and Notary Law",
-            "Section": "101",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "WU HIO",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "18:00",
-            "Time To": "20:45",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "登記和公證法"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1023",
-            "Course Title": "Juridical Practice",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "LOU IENG HA / SOU SIO KEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "19:00",
-            "Time To": "20:15",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "司法實踐"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1023",
-            "Course Title": "Juridical Practice",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese",
-            "Teacher Information": "LOU IENG HA / SOU SIO KEI",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "20:30",
-            "Time To": "21:45",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "司法實踐"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1026",
-            "Course Title": "Portuguese Legal Language",
-            "Section": "001",
-            "Medium of Instruction": "Cantonese supplemented with Portuguese",
-            "Teacher Information": "VONG SOK HEI ROSITA",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "19:00",
-            "Time To": "21:45",
-            "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "葡萄牙法律語言"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "LAWS1026",
-            "Course Title": "Portuguese Legal Language",
-            "Section": "101",
-            "Medium of Instruction": "Cantonese supplemented with Portuguese",
-            "Teacher Information": "TANG CHI KEONG",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "10:00",
-            "Time To": "12:45",
-            "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD17 / BLD18 / BLE17 / BLE18 / BLL18\n",
-            "Course Title Chi": "葡萄牙法律語言"
-        },
-        {
-            "Offering Unit": "FLL",
             "Offering Department": "GLS",
             "Course Code": "LAWS1055",
             "Course Title": "Chinese Legal History",
@@ -35173,7 +35093,7 @@
             "Day": "MON",
             "Time From": "19:00",
             "Time To": "20:15",
-            "Classroom": "E21-1018 / E21-1038",
+            "Classroom": "E21-1018 / E21-1042",
             "Course Title Chi": "口語理解與表達技巧三"
         },
         {
@@ -35188,7 +35108,7 @@
             "Day": "THU",
             "Time From": "19:00",
             "Time To": "20:15",
-            "Classroom": "E21-1018 / E21-1038",
+            "Classroom": "E21-1018 / E21-1042",
             "Course Title Chi": "口語理解與表達技巧三"
         },
         {
@@ -35203,7 +35123,7 @@
             "Day": "TUE",
             "Time From": "19:00",
             "Time To": "20:15",
-            "Classroom": "E21-1018 / E21-1038",
+            "Classroom": "E21-1018 / E21-1042",
             "Course Title Chi": "口語理解與表達技巧三"
         },
         {
@@ -35218,7 +35138,7 @@
             "Day": "FRI",
             "Time From": "19:00",
             "Time To": "20:15",
-            "Classroom": "E21-1018 / E21-1038",
+            "Classroom": "E21-1018 / E21-1042",
             "Course Title Chi": "口語理解與表達技巧三"
         },
         {
