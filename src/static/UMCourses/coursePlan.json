@@ -3295,7 +3295,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1033",
             "Course Title Chi": "文學研究概論I"
         },
         {
@@ -3460,7 +3460,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "兒童文學"
         },
         {
@@ -8426,7 +8426,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-08-29",
+    "updateTime": "2024-08-30",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

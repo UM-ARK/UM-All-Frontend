@@ -12267,16 +12267,6 @@
         },
         {
             "Offering Unit": "FED",
-            "Course Code": "EDUC4022",
-            "Course Title": "Supervised Teaching and School Experience",
-            "Section": "012",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TBC_2024-1",
-            "Lecture / Lab": "Lecture",
-            "Course Title Chi": "監督教學和學校經驗"
-        },
-        {
-            "Offering Unit": "FED",
             "Course Code": "EDUC4023",
             "Course Title": "Supervised Teaching and School Experience",
             "Section": "001",
@@ -14965,7 +14955,7 @@
             "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-1042",
+            "Classroom": "E3-2041",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -14980,7 +14970,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-1042",
+            "Classroom": "E3-2041",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -14995,7 +14985,7 @@
             "Day": "THU",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-1042",
+            "Classroom": "E3-2041",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -15010,7 +15000,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-1042",
+            "Classroom": "E3-2041",
             "Course Title Chi": "大學英語二"
         },
         {
@@ -16405,7 +16395,7 @@
             "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E4-3053",
+            "Classroom": "E3-3046",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -16420,7 +16410,7 @@
             "Day": "THU",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E4-3053",
+            "Classroom": "E3-3046",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -16435,7 +16425,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E4-3053",
+            "Classroom": "E3-3046",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -16450,7 +16440,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E4-3053",
+            "Classroom": "E3-3046",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -16735,7 +16725,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-3041",
+            "Classroom": "E3-3046",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -16750,7 +16740,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E3-3041",
+            "Classroom": "E3-3046",
             "Course Title Chi": "大學英語三"
         },
         {
@@ -17331,7 +17321,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1033",
             "Course Title Chi": "文學研究概論I"
         },
         {
@@ -17346,7 +17336,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1041",
+            "Classroom": "E21-1033",
             "Course Title Chi": "文學研究概論I"
         },
         {
@@ -17916,7 +17906,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "兒童文學"
         },
         {
@@ -17931,7 +17921,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "兒童文學"
         },
         {
@@ -17946,7 +17936,7 @@
             "Day": "FRI",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "兒童文學"
         },
         {
@@ -17961,7 +17951,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1031",
+            "Classroom": "E22-3015",
             "Course Title Chi": "兒童文學"
         },
         {
