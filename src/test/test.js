@@ -1,201 +1,80 @@
-import React, { Component } from 'react';
-import {
-    Dimensions,
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    StatusBar,
-    Button,
-    Image,
-    ScrollView,
-} from 'react-native';
+import React, { createRef } from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 
-import { COLOR_DIY, uiStyle } from '../src/utils/uiMap';
-import { pxToDp } from '../src/utils/stylesKits';
+class CustomBottomSheet extends React.Component {
+    constructor(props) {
+        super(props);
+        this.bottomSheetRef = createRef();
+        this.snapPoints = ['25%', '50%', '75%']; // 设置不同的snap点
+    }
 
-// 文檔：https://github.com/dohooo/react-native-reanimated-carousel/
-import Carousel from 'react-native-reanimated-carousel';
-import { Header } from '@rneui/themed';
-import { NavigationContext } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-import Modal from 'react-native-modal';
-import ImageViewer from 'react-native-image-zoom-viewer';
-
-const { width: PAGE_WIDTH } = Dimensions.get('window');
-const { height: PAGE_HEIGHT } = Dimensions.get('screen');
-
-const images = [
-    {
-        url: 'https://info.umsu.org.mo/storage/activity_covers/images/13a5158b6a890818615af9bcff8bc81b.png',
-    },
-    {
-        url: 'https://info.umsu.org.mo/storage/activity_covers/images/c8049bf0ebd8ea081e75f1c1573631f2.png',
-    },
-    {
-        url: 'https://www.cpsumsu.org/_announcement/CPSUMSU_Web_Crawler_Workshop2022/poster.jpg',
-    },
-];
-
-import ImageScrollViewer from '../src/components/ImageScrollViewer';
-import ModalBottom from '../src/components/ModalBottom';
-
-class TestScreen extends Component {
-    // static contextType = NavigationContext;
-    // this.context === this.props.navigation
-
-    imageScrollViewer = React.createRef(null);
-
-    state = {
-        isModalVisible: false,
-        imagesIndex: 0,
-        isModalBottomVisible: true,
-        isShow: false,
+    openBottomSheet = () => {
+        this.bottomSheetRef.current?.snapToIndex(1); // 打开到50%位置
     };
 
-    // 打開和關閉顯示照片的彈出層
-    tiggerModal = () => {
-        this.setState({
-            isModalVisible: !this.state.isModalVisible,
-        });
-    };
-    // 打開圖片數組內的某張圖片
-    handleOpenImage = index => {
-        this.setState({
-            imagesIndex: index,
-            isModalVisible: true,
-        });
+    closeBottomSheet = () => {
+        this.bottomSheetRef.current?.close(); // 关闭弹窗
     };
 
-    tiggerModalBottom = () => {
-        this.setState({ isShow: !this.state.isShow });
-    };
+    handleSheetChange = ((index) => {
+        console.log("handleSheetChange", index);
+    });
 
     render() {
-        const { isModalVisible, isModalBottomVisible, imagesIndex } = this.state;
 
-        console.log(this.state.isShow);
+        const data = Array(50)
+            .fill(0)
+            .map((_, index) => `index-${index}`);
+
+        const renderItem = (item) => (
+            <View key={item} style={styles.itemContainer}>
+                <Text>{item}</Text>
+            </View>
+        );
 
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
-                <Header
-                    backgroundColor={COLOR_DIY.bg_color}
-                    leftComponent={
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Ionicons
-                                name="chevron-back-outline"
-                                size={pxToDp(25)}
-                                color={COLOR_DIY.black.main}
-                            />
-                        </TouchableOpacity>
-                    }
-                    centerComponent={{
-                        text: '測試頁',
-                        style: {
-                            ...uiStyle.defaultText,
-                            color: COLOR_DIY.black.main,
-                            fontSize: pxToDp(22),
-                        },
-                    }}
-                    statusBarProps={{
-                        backgroundColor: COLOR_DIY.bg_color,
-                        barStyle: 'dark-content',
-                    }}
-                />
+            <View style={styles.container}>
+                <Button title="Open Bottom Sheet" onPress={this.openBottomSheet} />
+                {/* <BottomSheet
+                    ref={this.bottomSheetRef}
+                    index={-1} // 初始状态关闭
+                    snapPoints={this.snapPoints}
+                >
+                    <View style={styles.contentContainer}>
+                        <Text>这里是 Bottom Sheet 内容</Text>
+                        <Button title="Close Bottom Sheet" onPress={this.closeBottomSheet} />
+                    </View>
+                </BottomSheet> */}
 
-                {/* 彈出層展示圖片查看器 */}
-                <ImageScrollViewer
-                    ref={this.imageScrollViewer}
-                    imageUrls={images}
-                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
-                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
-                />
-
-                {/* 圖片展示 */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}>
-                    {images.map(({ url }, index) => (
-                        <TouchableOpacity
-                            onPress={() =>
-                                this.imageScrollViewer.current.handleOpenImage(
-                                    index,
-                                )
-                            }>
-                            <Image
-                                source={{ uri: url }}
-                                style={{ width: 100, height: 100 }}></Image>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-
-                <Button
-                    title="打開圖片"
-                    onPress={() => {
-                        this.imageScrollViewer.current.tiggerModal();
-                    }}></Button>
-
-                {/* 展示Modal */}
-                {this.state.isShow && (
-                    <ModalBottom cancel={this.tiggerModalBottom}>
-                        <View
-                            style={{
-                                padding: pxToDp(20),
-                                height: PAGE_HEIGHT * 0.7,
-                            }}>
-                            <ScrollView>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                                <Text>Test</Text>
-                            </ScrollView>
-                        </View>
-                    </ModalBottom>
-                )}
-
-                <Button
-                    title="打開ModalBottom"
-                    onPress={() => this.tiggerModalBottom()}></Button>
+                <BottomSheet
+                    ref={this.bottomSheetRef}
+                    index={1}
+                    snapPoints={this.snapPoints}
+                    onChange={this.handleSheetChange}
+                >
+                    <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
+                        {data.map(renderItem)}
+                    </BottomSheetScrollView>
+                </BottomSheet>
             </View>
         );
     }
 }
 
-export default TestScreen;
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingTop: 200,
+    },
+    contentContainer: {
+        backgroundColor: "white",
+    },
+    itemContainer: {
+        padding: 6,
+        margin: 6,
+        backgroundColor: "#eee",
+    },
+});
+
+export default CustomBottomSheet;
