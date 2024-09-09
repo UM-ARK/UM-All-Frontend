@@ -2983,8 +2983,8 @@
             "Teacher Information": "RICARDO FRANCO RIBEIRO",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E3-2041",
             "Course Title Chi": "大學英語Ⅰ"
         },
@@ -2998,8 +2998,8 @@
             "Teacher Information": "SEAN WILLIAM GRANT",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E3-3042",
             "Course Title Chi": "大學英語二"
         },
@@ -3013,8 +3013,8 @@
             "Teacher Information": "ALICE SHU-JU LEE",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
-            "Time From": "8:30",
-            "Time To": "9:45",
+            "Time From": "08:30",
+            "Time To": "09:45",
             "Classroom": "E4-3053",
             "Course Title Chi": "大學英語三"
         },
@@ -5954,7 +5954,7 @@
             "Time To": "18:45",
             "Classroom": "E21-1031",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP17 / JAP19\n",
-            "Course Title Chi": "日本社會文化Ⅰ"
+            "Course Title Chi": "日本社會與文化Ⅰ"
         },
         {
             "Offering Unit": "FLL",
@@ -6867,17 +6867,6 @@
             "Classroom": "E32-G028",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
             "Course Title Chi": "中國法通論"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "MAT",
-            "Course Code": "MATH0001",
-            "Course Title": "Pre-Calculus",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "WAN LUNG YAM",
-            "Lecture / Lab": "Lecture",
-            "Course Title Chi": "初級微積分"
         },
         {
             "Offering Unit": "FST",
@@ -8397,7 +8386,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-09-03",
+    "updateTime": "2024-09-09",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
