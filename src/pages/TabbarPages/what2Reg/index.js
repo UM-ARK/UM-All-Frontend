@@ -225,14 +225,14 @@ export default class index extends Component {
     };
 
     // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
-    keyboardDidHideListener = Keyboard.addListener(
-        'keyboardDidHide',
-        this._keyboardDidHide,
-    );
+    // keyboardDidHideListener = Keyboard.addListener(
+    //     'keyboardDidHide',
+    //     this._keyboardDidHide,
+    // );
 
-    componentWillUnmount() {
-        this.keyboardDidHideListener.remove();
-    }
+    // componentWillUnmount() {
+    //     this.keyboardDidHideListener.remove();
+    // }
 
     // 更新Add Drop課表的數據
     updateLocalCourseData = async (type) => {
@@ -285,10 +285,10 @@ export default class index extends Component {
     }
 
     // 鍵盤收起，使輸入框失焦
-    _keyboardDidHide = () => {
-        // 使输入框失去焦点
-        this.textInputRef.current.blur();
-    };
+    // _keyboardDidHide = () => {
+    //     // 使输入框失去焦点
+    //     this.textInputRef.current.blur();
+    // };
 
     // 對開課數據進行分類
     getClassifyCourse = () => {
@@ -792,9 +792,9 @@ export default class index extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 trigger();
-                                this.textInputRef.current.clear();
-                                this.textInputRef.current.focus();
-                                this.setState({ inputText: '', inputOK: false, scrollData: {}, })
+                                this.setState({ inputText: '', inputOK: false, scrollData: {}, }, () => {
+                                    this.textInputRef.current.focus();
+                                })
                             }}
                             style={{ padding: scale(3), marginLeft: 'auto' }}
                         >

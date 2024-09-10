@@ -151,10 +151,10 @@ export default class courseSim extends Component {
             this.readParams();
         }
 
-        this.keyboardDidHideListener = Keyboard.addListener(
-            'keyboardDidHide',
-            this._keyboardDidHide,
-        );
+        // this.keyboardDidHideListener = Keyboard.addListener(
+        //     'keyboardDidHide',
+        //     this._keyboardDidHide,
+        // );
 
         // 頁面聚焦時觸發
         this.focusListener = this.props.navigation.addListener('focus', () => {
@@ -162,9 +162,9 @@ export default class courseSim extends Component {
         });
     }
 
-    componentWillUnmount() {
-        this.keyboardDidHideListener.remove();
-    }
+    // componentWillUnmount() {
+    //     this.keyboardDidHideListener.remove();
+    // }
 
     // 頁面聚焦時觸發
     handleFocus = () => {
@@ -196,14 +196,14 @@ export default class courseSim extends Component {
     }
 
     // 鍵盤收起，使輸入框失焦
-    _keyboardDidHide = async () => {
-        // 使输入框失去焦点
-        try {
-            this.textSearchRef.current.blur();
-        } catch (error) {
-            console.log('error', error);
-        }
-    };
+    // _keyboardDidHide = async () => {
+    //     // 使输入框失去焦点
+    //     try {
+    //         this.textSearchRef.current.blur();
+    //     } catch (error) {
+    //         console.log('error', error);
+    //     }
+    // };
 
     // 處理課表數據，分析出用於render的數據
     handleCourseList = (courseCodeList) => {
