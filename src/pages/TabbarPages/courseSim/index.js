@@ -886,7 +886,7 @@ E11-0000
                             padding: scale(5),
                         }}
                         onChangeText={(inputText) => {
-                            this.setState({ searchText: inputText.toUpperCase(), });
+                            this.setState({ searchText: inputText, });
                         }}
                         value={this.state.searchText}
                         selectTextOnFocus
@@ -1019,6 +1019,7 @@ E11-0000
     handleSearchFilterCourse = (inputText) => {
         const { s_coursePlanFile } = this.state;
         const coursePlanList = s_coursePlanFile.Courses;
+        inputText = inputText.toUpperCase();
 
         let filterCourseList = [];
 

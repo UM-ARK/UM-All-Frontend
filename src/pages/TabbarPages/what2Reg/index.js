@@ -771,7 +771,7 @@ export default class index extends Component {
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
-                                inputText: inputText.toUpperCase(),
+                                inputText,
                                 inputOK: inputText.length > 0,
                                 scrollData: {},
                             });
@@ -979,6 +979,7 @@ export default class index extends Component {
 
     // 返回搜索候選所需的課程列表
     handleSearchFilterCourse = (inputText) => {
+        inputText = inputText.toUpperCase();
         const { s_offerCourses, s_coursePlan, s_coursePlanTime } = this.state;
         const offerCourseList = COURSE_MODE == 'ad' ? s_coursePlan.Courses : s_offerCourses.Courses;
         const coursePlanList = s_coursePlanTime.Courses;
