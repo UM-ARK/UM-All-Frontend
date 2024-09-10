@@ -1114,6 +1114,7 @@ E11-0000
                 <ScrollView
                     ref={this.verScroll}
                     contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
+                    keyboardDismissMode='on-drag'
                 // showsVerticalScrollIndicator={false}
                 >
                     {/* 課表 / 首次使用提示 */}
