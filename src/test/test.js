@@ -1,12 +1,17 @@
 import React, { createRef } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import Carousel from 'react-native-snap-carousel';
+import { scale } from 'react-native-size-matters';
 
 class CustomBottomSheet extends React.Component {
     constructor(props) {
         super(props);
         this.bottomSheetRef = createRef();
         this.snapPoints = ['25%', '50%', '75%']; // 设置不同的snap点
+        this.state = {
+            entries: [1, 2, 3, 4, 5]
+        }
     }
 
     openBottomSheet = () => {
@@ -20,6 +25,17 @@ class CustomBottomSheet extends React.Component {
     handleSheetChange = ((index) => {
         console.log("handleSheetChange", index);
     });
+
+    _renderItem = ({ item, index }) => {
+        return (
+            <View style={{
+                backgroundColor: 'red',
+                padding: scale(10),
+            }}>
+                <Text style={styles.title}>{item}</Text>
+            </View>
+        );
+    }
 
     render() {
 
@@ -54,6 +70,13 @@ class CustomBottomSheet extends React.Component {
                     onChange={this.handleSheetChange}
                 >
                     <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
+                        <Carousel
+                            ref={(c) => { this._carousel = c; }}
+                            data={this.state.entries}
+                            renderItem={this._renderItem}
+                            sliderWidth={300}
+                            itemWidth={200}
+                        />
                         {data.map(renderItem)}
                     </BottomSheetScrollView>
                 </BottomSheet>
