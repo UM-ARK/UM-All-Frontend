@@ -20,10 +20,10 @@ export async function openLink(URL) {
                 preferredControlTintColor: white,
                 readerMode: false,
                 animated: true,
-                modalPresentationStyle: 'fullScreen',
+                modalPresentationStyle: 'automatic',
                 modalTransitionStyle: 'coverVertical',
                 modalEnabled: true,
-                enableBarCollapsing: false,
+                enableBarCollapsing: true,
                 // Android Properties
                 showTitle: true,
                 toolbarColor: themeColor,
