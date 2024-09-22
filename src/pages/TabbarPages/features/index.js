@@ -4,10 +4,6 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Linking,
-    KeyboardAvoidingView,
-    TextInput,
-    Keyboard,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
@@ -80,8 +76,6 @@ const { themeColor, white, black, } = COLOR_DIY;
 const iconSize = scale(25);
 
 class Index extends Component {
-    textInputRef = React.createRef(null);
-
     state = {
         functionArr: [
             {
@@ -683,7 +677,6 @@ class Index extends Component {
         ],
         isLogin: false,
         showDialog: false,
-        inputText: '',
     };
 
     componentDidMount() {
@@ -833,107 +826,6 @@ class Index extends Component {
         );
     }
 
-    // 搜索框
-    renderSearch = () => {
-        const { inputText, } = this.state;
-
-        const goToBrowser = (inputText) => {
-            trigger();
-            logToFirebase('funcUse', {
-                funcName: 'searchBar_features',
-                searchBarDetail: inputText,
-            });
-            let url = `https://www.google.com/search?q=${encodeURIComponent('site:umall.one OR site:um.edu.mo ') + encodeURIComponent(inputText)}`;
-            openLink(url);
-        }
-
-        return (
-            <KeyboardAvoidingView
-                style={{
-                    alignItems: 'center', flexDirection: 'row',
-                    width: '100%',
-                    marginTop: scale(5), paddingHorizontal: scale(10),
-                    backgroundColor: 'transparent',
-                }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
-                {/* 搜索框 */}
-                <View style={{
-                    backgroundColor: white,
-                    borderWidth: scale(2), borderColor: themeColor, borderRadius: scale(10),
-                    flexDirection: 'row', alignItems: 'center',
-                    marginRight: scale(5),
-                    paddingHorizontal: scale(5), paddingVertical: scale(3),
-                    flex: 1,
-                }}>
-                    {/* 搜索圖標，引導用戶 */}
-                    <Ionicons
-                        name={'search'}
-                        size={scale(15)}
-                        color={black.third}
-                    />
-                    <TextInput
-                        style={{
-                            ...uiStyle.defaultText,
-                            paddingVertical: verticalScale(3),
-                            color: black.main,
-                            fontSize: scale(12),
-                        }}
-                        onChangeText={(inputText) => {
-                            this.setState({ inputText });
-                        }}
-                        value={inputText}
-                        selectTextOnFocus
-                        placeholder={t("關於澳大的一切...", { ns: 'features' })}
-                        placeholderTextColor={black.third}
-                        ref={this.textInputRef}
-                        onFocus={() => trigger()}
-                        returnKeyType={'search'}
-                        selectionColor={themeColor}
-                        blurOnSubmit={true}
-                        onSubmitEditing={() => {
-                            Keyboard.dismiss();
-                            goToBrowser(inputText);
-                        }}
-                    />
-                    {/* 清空搜索框按鈕 */}
-                    {inputText.length > 0 ? (
-                        <TouchableOpacity
-                            onPress={() => {
-                                trigger();
-                                this.setState({ inputText: '' }, () => {
-                                    this.textInputRef.current.focus();
-                                })
-                            }}
-                            style={{ padding: scale(3), marginLeft: 'auto' }}
-                        >
-                            <Ionicons
-                                name={'close-circle'}
-                                size={scale(15)}
-                                color={inputText.length > 0 ? themeColor : black.third}
-                            />
-                        </TouchableOpacity>
-                    ) : null}
-                </View>
-                {/* 搜索按鈕 */}
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: inputText == '' ? COLOR_DIY.disabled : themeColor,
-                        borderRadius: scale(6),
-                        padding: scale(7), paddingHorizontal: scale(8),
-                        alignItems: 'center'
-                    }}
-                    disabled={inputText == ''}
-                    onPress={() => {
-                        goToBrowser(inputText);
-                    }}
-                >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
-                </TouchableOpacity>
-            </KeyboardAvoidingView>
-        )
-    }
-
     render() {
         return (
             <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
@@ -955,7 +847,7 @@ class Index extends Component {
                     }}
                 />
 
-                <ScrollView showsVerticalScrollIndicator={true} stickyHeaderIndices={[1]} >
+                <ScrollView showsVerticalScrollIndicator={true} >
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                         {/* ARK Logo */}
                         <FastImage
@@ -1011,10 +903,6 @@ class Index extends Component {
                             </TouchableOpacity>
                         )}
                     </View>
-
-                    <>
-                        {this.renderSearch()}
-                    </>
 
                     {this.state.functionArr.map(fn_card => {
                         return this.GetFunctionCard(fn_card.title, fn_card.fn);
