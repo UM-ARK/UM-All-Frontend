@@ -452,7 +452,7 @@ class UMEventDetail extends Component {
 
         return (
             <View style={{ backgroundColor: bg_color, flex: 1 }}>
-                <Header title={'活動詳情'} />
+                <Header title={'活動詳情'} iOSDIY={true} />
                 {/* 彈出層展示圖片查看器 */}
                 <ImageScrollViewer
                     ref={this.imageScrollViewer}

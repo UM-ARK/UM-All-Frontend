@@ -230,7 +230,7 @@ export default class LocalCourse extends Component {
 
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
-                <Header title={courseCode} />
+                <Header title={courseCode} iOSDIY={true} />
 
                 {isLoading ? (
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>

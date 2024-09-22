@@ -272,7 +272,7 @@ class BusScreen extends Component {
 
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
-                <Header title={t('校園巴士', { ns: 'features' })} />
+                <Header title={t('校園巴士', { ns: 'features' })} iOSDIY={true} />
 
                 <ScrollView
                     bounces={false}

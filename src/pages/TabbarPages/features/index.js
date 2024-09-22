@@ -4,7 +4,6 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Linking,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
@@ -72,7 +71,7 @@ const iconTypes = {
     img: 'img',
 };
 
-const { themeColor, white } = COLOR_DIY;
+const { themeColor, white, black, } = COLOR_DIY;
 
 const iconSize = scale(25);
 
@@ -128,13 +127,13 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'map-marker-multiple',
-                        fn_name: t('課室地圖', { ns: 'features' }),
+                        fn_name: t('課室佔用', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_CLASSROOM_MAP,
-                            title: 'UM 課室地圖 & 使用情況',
+                            title: 'UM 課室佔用 & 使用情況',
                             // 標題顏色，默認為black.main
                             text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
@@ -153,13 +152,13 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.ionicons,
                         icon_name: 'logo-dropbox',
-                        fn_name: t('資源預約', { ns: 'features' }),
+                        fn_name: t('場地預約', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
                             url: UM_RBS,
-                            title: 'UM 資源預約',
+                            title: 'UM 場地預約',
                             // 標題顏色，默認為black.main
                             // text_color: '#989898',
                             // 標題背景顏色，默認為bg_color
@@ -848,8 +847,8 @@ class Index extends Component {
                     }}
                 />
 
-                <ScrollView showsVerticalScrollIndicator={true}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                <ScrollView showsVerticalScrollIndicator={true} >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                         {/* ARK Logo */}
                         <FastImage
                             source={require('../../../static/img/logo.png')}
@@ -863,6 +862,24 @@ class Index extends Component {
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
 
+                        {/* 跳轉設置/關於頁按鈕 */}
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute', right: scale(10),
+                                flexDirection: 'row', alignItems: 'center',
+                                backgroundColor: themeColor,
+                                borderRadius: scale(5),
+                                padding: scale(5),
+                            }}
+                            onPress={() => {
+                                trigger();
+                                this.props.navigation.navigate('AboutPage');
+                            }}
+                        >
+                            <Ionicons name={'build'} size={verticalScale(15)} color={white} />
+                            <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('設置')}</Text>
+                        </TouchableOpacity>
+
                         {/* 組織登入按鈕 */}
                         {false && (
                             <TouchableOpacity style={{
@@ -874,7 +891,7 @@ class Index extends Component {
                             }}
                                 onPress={() => {
                                     trigger();
-                                    // TODO: 跳轉組織登入
+                                    // 跳轉組織登入
                                     this.props.navigation.navigate('ClubLogin');
                                 }}
                             >

@@ -151,10 +151,10 @@ export default class courseSim extends Component {
             this.readParams();
         }
 
-        this.keyboardDidHideListener = Keyboard.addListener(
-            'keyboardDidHide',
-            this._keyboardDidHide,
-        );
+        // this.keyboardDidHideListener = Keyboard.addListener(
+        //     'keyboardDidHide',
+        //     this._keyboardDidHide,
+        // );
 
         // 頁面聚焦時觸發
         this.focusListener = this.props.navigation.addListener('focus', () => {
@@ -162,9 +162,9 @@ export default class courseSim extends Component {
         });
     }
 
-    componentWillUnmount() {
-        this.keyboardDidHideListener.remove();
-    }
+    // componentWillUnmount() {
+    //     this.keyboardDidHideListener.remove();
+    // }
 
     // 頁面聚焦時觸發
     handleFocus = () => {
@@ -196,14 +196,14 @@ export default class courseSim extends Component {
     }
 
     // 鍵盤收起，使輸入框失焦
-    _keyboardDidHide = async () => {
-        // 使输入框失去焦点
-        try {
-            this.textSearchRef.current.blur();
-        } catch (error) {
-            console.log('error', error);
-        }
-    };
+    // _keyboardDidHide = async () => {
+    //     // 使输入框失去焦点
+    //     try {
+    //         this.textSearchRef.current.blur();
+    //     } catch (error) {
+    //         console.log('error', error);
+    //     }
+    // };
 
     // 處理課表數據，分析出用於render的數據
     handleCourseList = (courseCodeList) => {
@@ -886,7 +886,7 @@ E11-0000
                             padding: scale(5),
                         }}
                         onChangeText={(inputText) => {
-                            this.setState({ searchText: inputText.toUpperCase(), });
+                            this.setState({ searchText: inputText, });
                         }}
                         value={this.state.searchText}
                         selectTextOnFocus
@@ -1019,6 +1019,7 @@ E11-0000
     handleSearchFilterCourse = (inputText) => {
         const { s_coursePlanFile } = this.state;
         const coursePlanList = s_coursePlanFile.Courses;
+        inputText = inputText.toUpperCase();
 
         let filterCourseList = [];
 
@@ -1056,7 +1057,7 @@ E11-0000
                 />
 
                 {/* 頁面標題 */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                     {/* 清空所有課表功能按鈕 */}
                     {allCourseAllTime && allCourseAllTime.length > 0 && (
                         <TouchableOpacity style={{
@@ -1113,6 +1114,7 @@ E11-0000
                 <ScrollView
                     ref={this.verScroll}
                     contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
+                    keyboardDismissMode='on-drag'
                 // showsVerticalScrollIndicator={false}
                 >
                     {/* 課表 / 首次使用提示 */}

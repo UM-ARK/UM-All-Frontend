@@ -10,6 +10,7 @@ import {
     ScrollView,
     RefreshControl,
     Linking,
+    Platform,
 } from 'react-native';
 
 import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
@@ -506,6 +507,8 @@ class EventDetail extends Component {
                                     //     },
                                     // );
 
+                                    // 關閉iOS Modal視圖
+                                    Platform.OS === 'ios' && this.props.navigation.pop(2);
                                     // 跳轉活動info編輯頁，並傳遞刷新函數
                                     this.props.navigation.navigate(
                                         'EventSetting', {

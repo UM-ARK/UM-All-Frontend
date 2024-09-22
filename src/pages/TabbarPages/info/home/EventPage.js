@@ -151,6 +151,9 @@ class EventPage extends Component {
     };
 
     loadMoreData = () => {
+        if (this.state.isLoading) {
+            return;
+        }
         trigger();
         const { noMoreData, dataPage } = this.state;
         this.setState({ dataPage: dataPage + 1 }, () => {
@@ -162,6 +165,7 @@ class EventPage extends Component {
     };
 
     onRefresh = () => {
+        trigger();
         this.setState({
             dataPage: 1,
             leftDataList: [], rightDataList: [],

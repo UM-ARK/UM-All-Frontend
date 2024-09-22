@@ -10,6 +10,10 @@ import {
     Platform,
     Linking,
     Alert,
+    AppState,
+    KeyboardAvoidingView,
+    TextInput,
+    Keyboard,
 } from 'react-native';
 
 // 本地工具
@@ -148,6 +152,7 @@ class HomeScreen extends Component {
     calScrollRef = React.createRef(null);
     eventPage = React.createRef(null);
     scrollView = React.createRef(null);
+    textInputRef = React.createRef(null);
 
     constructor(props) {
         super(props)
@@ -236,6 +241,8 @@ class HomeScreen extends Component {
             networkError: false,
 
             isLoadMore: false,
+
+            inputText: '',
         };
     }
 
@@ -253,11 +260,31 @@ class HomeScreen extends Component {
         this.toastTimer = setTimeout(() => {
             this.onRefresh();
         }, 1000);
+
+        // 捕捉應用狀態監聽器
+        this.appStateListener = AppState.addEventListener('change', this.handleAppStateChange);
     }
 
     componentWillUnmount() {
         this.toastTimer && clearTimeout(this.toastTimer);
+        // 移除監聽器
+        if (this.appStateListener) {
+            this.appStateListener.remove();
+        }
     }
+
+    handleAppStateChange = (nextAppState) => {
+        if (AppState.currentState == 'active') {
+            // 確認後台返回到 HomePage 主頁，進行刷新
+            if (this.props.navigation?.isFocused()) {
+                this.setState({ isLoading: true });
+                this.getAppData(false);
+                this.getCal();
+                this.onRefresh();
+                this.eventPage.current.onRefresh();
+            }
+        }
+    };
 
     getAppData = async isLogin => {
         let URL = BASE_URI + GET.APP_INFO;
@@ -646,6 +673,110 @@ class HomeScreen extends Component {
         }
     };
 
+    // 搜索框
+    renderSearch = () => {
+        const { inputText, } = this.state;
+
+        const goToBrowser = (inputText) => {
+            trigger();
+            logToFirebase('funcUse', {
+                funcName: 'searchBar_features',
+                searchBarDetail: inputText,
+            });
+            let url = `https://www.google.com/search?q=${encodeURIComponent('site:umall.one OR site:um.edu.mo ') + encodeURIComponent(inputText)}`;
+            openLink(url);
+        }
+
+        return (
+            <KeyboardAvoidingView
+                style={{
+                    alignItems: 'center', flexDirection: 'row',
+                    width: '100%',
+                    marginTop: scale(5), paddingHorizontal: scale(10),
+                    backgroundColor: 'transparent',
+                }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                {/* 搜索框 */}
+                <View style={{
+                    backgroundColor: white,
+                    borderRadius: scale(10),
+                    flexDirection: 'row', alignItems: 'center',
+                    marginRight: scale(5),
+                    paddingHorizontal: scale(5), paddingVertical: scale(3),
+                    flex: 1,
+                }}>
+                    {/* 搜索圖標，引導用戶 */}
+                    <Ionicons
+                        name={'search'}
+                        size={scale(15)}
+                        color={black.third}
+                    />
+                    <TextInput
+                        style={{
+                            ...uiStyle.defaultText,
+                            paddingVertical: verticalScale(3),
+                            color: black.main,
+                            fontSize: scale(12),
+                            width: '100%',
+                        }}
+                        onChangeText={(inputText) => {
+                            this.setState({ inputText });
+                        }}
+                        value={inputText}
+                        selectTextOnFocus
+                        placeholder={t("關於澳大的一切...", { ns: 'features' })}
+                        placeholderTextColor={black.third}
+                        ref={this.textInputRef}
+                        onFocus={() => trigger()}
+                        returnKeyType={'search'}
+                        selectionColor={themeColor}
+                        blurOnSubmit={true}
+                        onSubmitEditing={() => {
+                            Keyboard.dismiss();
+                            if (inputText.length > 0) {
+                                goToBrowser(inputText);
+                            }
+                        }}
+                    />
+                    {/* 清空搜索框按鈕 */}
+                    {inputText.length > 0 ? (
+                        <TouchableOpacity
+                            onPress={() => {
+                                trigger();
+                                this.setState({ inputText: '' }, () => {
+                                    this.textInputRef.current.focus();
+                                })
+                            }}
+                            style={{ padding: scale(3), marginLeft: 'auto' }}
+                        >
+                            <Ionicons
+                                name={'close-circle'}
+                                size={scale(15)}
+                                color={inputText.length > 0 ? themeColor : black.third}
+                            />
+                        </TouchableOpacity>
+                    ) : null}
+                </View>
+                {/* 搜索按鈕 */}
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: inputText == '' ? COLOR_DIY.disabled : themeColor,
+                        borderRadius: scale(6),
+                        padding: scale(7), paddingHorizontal: scale(8),
+                        alignItems: 'center'
+                    }}
+                    disabled={inputText == ''}
+                    onPress={() => {
+                        goToBrowser(inputText);
+                    }}
+                >
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
+                </TouchableOpacity>
+            </KeyboardAvoidingView>
+        )
+    }
+
     render() {
         const { selectDay, isLoading } = this.state;
         return (
@@ -680,6 +811,9 @@ class HomeScreen extends Component {
                     showsVerticalScrollIndicator={true}
                     onScroll={this.handleScroll}
                     scrollEventThrottle={400}
+                    // stickyHeaderIndices={[0]}
+                    // stickyHeaderHiddenOnScroll
+                    keyboardDismissMode={'on-drag'}
                 >
                     {false && (
                         <View style={{
@@ -704,6 +838,10 @@ class HomeScreen extends Component {
                             }}>ARK ALL 澳大方舟</Text>
                         </View>
                     )}
+
+                    <>
+                        {this.renderSearch()}
+                    </>
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
@@ -804,20 +942,24 @@ class HomeScreen extends Component {
                     }
 
                     {/* 快捷功能圖標 */}
-                    <FlatGrid
-                        style={{
-                            alignSelf: 'center',
-                            backgroundColor: white, borderRadius: scale(10),
-                            marginTop: scale(5),
-                        }}
-                        maxItemsPerRow={6}
-                        itemDimension={scale(50)}
-                        spacing={scale(5)}
-                        data={this.state.functionArray}
-                        renderItem={({ item }) => this.GetFunctionIcon(item)}
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={false}
-                    />
+                    <View style={{ width: '100%', paddingHorizontal: scale(10) }}>
+                        <FlatGrid
+                            style={{
+                                alignSelf: 'center',
+                                backgroundColor: white, borderRadius: scale(10),
+                                width: '100%',
+                                // marginHorizontal: scale(10),
+                                marginTop: scale(5),
+                            }}
+                            maxItemsPerRow={6}
+                            itemDimension={scale(50)}
+                            spacing={scale(5)}
+                            data={this.state.functionArray}
+                            renderItem={({ item }) => this.GetFunctionIcon(item)}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
+                        />
+                    </View>
 
                     {/* 更新提示 */}
                     {

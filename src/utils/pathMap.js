@@ -160,7 +160,7 @@ export const UM_CALENDAR =
     'https://reg.um.edu.mo/university-almanac/?lang=zh-hant';
 // 澳大 - 校園地圖
 export const UM_MAP = 'https://maps.um.edu.mo';
-// 澳大 - 課室地圖
+// 澳大 - 課室佔用
 export const UM_CLASSROOM_MAP = 'https://isw.um.edu.mo/umclassroom';
 // 澳大 - 資源借用 Resource Booking System，例如E6房間
 export const UM_RBS = 'https://isw.um.edu.mo/umresource/schedule.php';

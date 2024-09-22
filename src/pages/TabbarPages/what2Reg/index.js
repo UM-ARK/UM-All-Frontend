@@ -66,15 +66,17 @@ const unitMap = {
 // 部門/學系名中文參考
 const depaMap = {
     // FAH
-    'CJS': '日本研究中心',
+    'CCHC': '中國歷史文化中心',
+    'DAD': '藝術設計系',
     'DCH': '中國語言文學系',
     'DENG': '英文系',
     'DHIST': '歷史系',
-    'DPHIL': '哲學及宗教學系',
-    'DPT': '葡文系',
     'DJP': '日文系',
-    'DAD': '藝術設計系',
+    'CJS': '日本研究中心',
+    'DPT': '葡文系',
     'ELC': '英語中心',
+    'DPHIL': '哲學及宗教學系',
+    'PHIL': '哲學及宗教學系',
 
     // FBA
     'AIM': '會計及資訊管理學系',
@@ -92,6 +94,7 @@ const depaMap = {
     'MLS': '澳門法學系',
 
     // FSS
+    'CAD': '藝術與設計中心',
     'DCOM': '傳播系',
     'DECO': '經濟學系',
     'DGPA': '政府與行政學系',
@@ -106,6 +109,7 @@ const depaMap = {
     'ECE': '電機及電腦工程系',
     'EME': '機電工程系',
     'MAT': '數學系',
+    'OST': '海洋科學與技術系',
 }
 
 // GE課中文參考
@@ -225,17 +229,17 @@ export default class index extends Component {
     };
 
     // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
-    keyboardDidHideListener = Keyboard.addListener(
-        'keyboardDidHide',
-        this._keyboardDidHide,
-    );
+    // keyboardDidHideListener = Keyboard.addListener(
+    //     'keyboardDidHide',
+    //     this._keyboardDidHide,
+    // );
 
-    componentWillUnmount() {
-        this.keyboardDidHideListener.remove();
-    }
+    // componentWillUnmount() {
+    //     this.keyboardDidHideListener.remove();
+    // }
 
     // 更新Add Drop課表的數據
-    updateLocalCourseData = async (type) => {
+    updateLocalCourseData = async (type, callback) => {
         const storageMap = {
             'coursePlan': 'course_plan',
             'coursePlanTime': 'course_plan_time',
@@ -252,23 +256,53 @@ export default class index extends Component {
             'offerCourses': 's_offerCourses',
         };
 
+        // 儲存對應資料到localStorage中
+        const coverStorage = async (type, data) => {
+            try {
+                this.setState({ [stateMap[type]]: data });
+                const saveResult = await setLocalStorage(storageMap[type], data);
+                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            } catch (error) {
+                Alert.alert(``,
+                    '儲存課表數據失敗'
+                    , null, { cancelable: true })
+            }
+        }
+
         try {
             const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/master/src/static/UMCourses/${fileNameMap[type]}.json`)
             if (res.status == 200) {
                 const { data } = res;
-                this.setState({ [stateMap[type]]: data });
-                const saveResult = await setLocalStorage(storageMap[type], data);
-                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-                Toast.show(`已拉取更新！`);
-                if (type === 'coursePlanTime') {
-                    Alert.alert(`ARK搵課提示`, `現在重啟APP以適配最新課表數據嗎？`, [
-                        {
-                            text: 'Yes', onPress: () => {
-                                RNRestart.Restart();
-                            }
-                        },
-                        { text: 'No', },
-                    ]);
+
+                // type為coursePlan、offerCourses時檢查updateTime
+                if (type == 'coursePlan' || type == 'offerCourses') {
+                    // 如果原儲存updateTime 與 請求數據的updateTime 不一致，拉取coursePlanTime後提示重啟更新
+                    if (this.state[stateMap[type]].updateTime != data.updateTime) {
+                        type === 'coursePlan' && await this.updateLocalCourseData('coursePlanTime', () => {
+                            Alert.alert(`ARK搵課提示`, `現在重啟APP以適配最新課表數據嗎？`, [
+                                {
+                                    text: 'Yes', onPress: () => {
+                                        RNRestart.Restart();
+                                    }
+                                },
+                                { text: 'No', },
+                            ]);
+                        });
+                    } else {
+                        Toast.show('已是最新課表數據！');
+                    }
+                }
+
+                // 存入緩存
+                await coverStorage(type, data);
+
+                // 最後一個拉取的數據完成，觸發提示
+                if (type === 'coursePlanTime' || type == 'offerCourses') {
+                    Toast.show(`已拉取更新！`);
+                }
+
+                if (callback && typeof callback === "function") {
+                    callback();
                 }
             }
         } catch (error) {
@@ -285,10 +319,10 @@ export default class index extends Component {
     }
 
     // 鍵盤收起，使輸入框失焦
-    _keyboardDidHide = () => {
-        // 使输入框失去焦点
-        this.textInputRef.current.blur();
-    };
+    // _keyboardDidHide = () => {
+    //     // 使输入框失去焦点
+    //     this.textInputRef.current.blur();
+    // };
 
     // 對開課數據進行分類
     getClassifyCourse = () => {
@@ -768,10 +802,11 @@ export default class index extends Component {
                             paddingVertical: verticalScale(3),
                             color: black.main,
                             fontSize: scale(12),
+                            width: '100%',
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
-                                inputText: inputText.toUpperCase(),
+                                inputText,
                                 inputOK: inputText.length > 0,
                                 scrollData: {},
                             });
@@ -792,9 +827,9 @@ export default class index extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 trigger();
-                                this.textInputRef.current.clear();
-                                this.textInputRef.current.focus();
-                                this.setState({ inputText: '', inputOK: false, scrollData: {}, })
+                                this.setState({ inputText: '', inputOK: false, scrollData: {}, }, () => {
+                                    this.textInputRef.current.focus();
+                                })
                             }}
                             style={{ padding: scale(3), marginLeft: 'auto' }}
                         >
@@ -979,6 +1014,7 @@ export default class index extends Component {
 
     // 返回搜索候選所需的課程列表
     handleSearchFilterCourse = (inputText) => {
+        inputText = inputText.toUpperCase();
         const { s_offerCourses, s_coursePlan, s_coursePlanTime } = this.state;
         const offerCourseList = COURSE_MODE == 'ad' ? s_coursePlan.Courses : s_offerCourses.Courses;
         const coursePlanList = s_coursePlanTime.Courses;
@@ -1058,11 +1094,11 @@ export default class index extends Component {
                         ref={this.scrollViewRef}
                         style={{ width: '100%' }}
                         stickyHeaderIndices={[1]}
-                    // showsVerticalScrollIndicator={false}
+                        keyboardDismissMode='on-drag'
                     >
                         {/* 頁面標題欄 */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
-                            {/* TODO: 提示按鈕，包括更新數據 */}
+                            {/* 更新數據按鈕 */}
                             <TouchableOpacity
                                 style={{
                                     position: 'absolute',
@@ -1078,20 +1114,18 @@ export default class index extends Component {
                                         `${t('Add Drop Data Version', { ns: 'about' }) + this.state.s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
                                         [
                                             {
-                                                text: t("更新Pre Enroll數據",{ns:'catalog'}),
+                                                text: t("更新Pre Enroll數據", { ns: 'catalog' }),
                                                 onPress: async () => {
                                                     await this.updateLocalCourseData('offerCourses');
                                                 },
                                             },
                                             {
-                                                text: t("更新Add Drop數據",{ns:'catalog'}),
+                                                text: t("更新Add Drop/Timetable數據", { ns: 'catalog' }),
                                                 onPress: async () => {
                                                     try {
                                                         await this.updateLocalCourseData('coursePlan');
                                                     } catch (error) {
                                                         alert(JSON.stringify(error));
-                                                    } finally {
-                                                        await this.updateLocalCourseData('coursePlanTime');
                                                     }
                                                 },
                                             },
@@ -1102,11 +1136,7 @@ export default class index extends Component {
                                     );
                                 }}
                             >
-                                <Ionicons
-                                    name={'build'}
-                                    size={verticalScale(15)}
-                                    color={white}
-                                />
+                                <Ionicons name={'build'} size={verticalScale(15)} color={white} />
                                 <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('更新')}</Text>
                             </TouchableOpacity>
 
@@ -1123,27 +1153,6 @@ export default class index extends Component {
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('ARK搵課', { ns: 'catalog' })}</Text>
                                 </View>
                             </View>
-
-                            {/* TODO: 更新數據按鈕 */}
-                            {false && <>
-                                <TouchableOpacity
-                                    onPress={() => this.updateLocalCourseData('coursePlan')}
-                                >
-                                    <Text>更新課表</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={() => this.updateLocalCourseData('coursePlanTime')}
-                                >
-                                    <Text>更新課表時間</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={() => this.updateLocalCourseData('offerCourses')}
-                                >
-                                    <Text>更新預選課</Text>
-                                </TouchableOpacity>
-                            </>}
                         </View>
 
                         <>

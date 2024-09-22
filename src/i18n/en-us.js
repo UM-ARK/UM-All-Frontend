@@ -29,6 +29,7 @@ export default {
 
         "更新": "Update",
         "搜索": "Search",
+        "設置": "Setting",
     },
     home: {
         "校園巴士": "Bus",
@@ -84,7 +85,7 @@ export default {
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",
 
-        "更新Add Drop數據": "Update Add Drop data",
+        "更新Add Drop/Timetable數據": "Update Add Drop data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
     },
     timetable: {
@@ -111,9 +112,9 @@ export default {
         "校園巴士": "Bus",
         "校曆": "Calendar",
         "校園地圖": "Map",
-        "課室地圖": "Classroom",
+        "課室佔用": "Classroom",
         "車位": "Park",
-        "資源預約": "Booking",
+        "場地預約": "Booking",
         "公共電腦": "Computer",
         "儲物箱": "Box",
         "維修預約": "Repair",
@@ -151,6 +152,9 @@ export default {
         "生存指南": "Survival",
         "內地生": "Mainland",
         "圖文包": "Package",
+
+
+        "關於澳大的一切...": "Anything about UM...",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",

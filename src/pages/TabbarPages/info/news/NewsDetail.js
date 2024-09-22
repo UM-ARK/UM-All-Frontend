@@ -239,7 +239,7 @@ class NewsDetail extends Component {
 
         return (
             <View style={{ backgroundColor: bg_color, flex: 1 }}>
-                <Header title={'新聞詳情'} />
+                <Header title={'新聞詳情'} iOSDIY={true} />
 
                 <ScrollView>
                     {/* 文本模式選擇 3語切換 */}
