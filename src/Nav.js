@@ -90,8 +90,6 @@ class Nav extends Component {
                         }}
                     >
                         {/* 服務頁 */}
-                        {/* 自定義Webview */}
-                        <Stack.Screen name="Webviewer" component={Webviewer} />
                         {/* 澳大論壇 */}
                         {/* <Stack.Screen name="UMWhole" component={UMWhole} /> */}
                         {/* 澳大選咩課 */}
@@ -101,6 +99,13 @@ class Nav extends Component {
                         {/* 失物招領 */}
                         {/* <Stack.Screen name="LostAndFound" component={LostAndFound} /> */}
                         <Stack.Screen name="CarPark" component={CarPark} />
+
+                        {/* 資訊頁 */}
+                        <Stack.Screen name="ClubDetail" component={ClubDetail} />
+                        <Stack.Screen name="EventDetail" component={EventDetail} />
+                        <Stack.Screen name="NewsDetail" component={NewsDetail} />
+                        <Stack.Screen name="UMEventDetail" component={UMEventDetail} />
+                        <Stack.Screen name="AllEvents" component={AllEvents} />
 
                         {/* ARK選課 */}
                         {/* <Stack.Screen name="What2RegHome" component={What2RegTabIndex} />
@@ -118,12 +123,8 @@ class Nav extends Component {
 
                     {/* 普通左右壓動畫組 */}
                     <Stack.Group>
-                        {/* 資訊頁 */}
-                        <Stack.Screen name="ClubDetail" component={ClubDetail} />
-                        <Stack.Screen name="EventDetail" component={EventDetail} />
-                        <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                        <Stack.Screen name="UMEventDetail" component={UMEventDetail} />
-                        <Stack.Screen name="AllEvents" component={AllEvents} />
+                        {/* 自定義Webview */}
+                        <Stack.Screen name="Webviewer" component={Webviewer} />
 
                         {/* 信息頁 */}
                         {/* 信息詳情 */}

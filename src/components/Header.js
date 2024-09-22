@@ -5,6 +5,7 @@ import {
     Appearance,
     TouchableWithoutFeedback,
     Keyboard,
+    Platform,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
@@ -55,6 +56,8 @@ class HeaderDIY extends Component {
                     barStyle: COLOR_DIY.barStyle,
                 }}
                 containerStyle={{
+                    ...(Platform.OS === 'ios' && { paddingTop: 0 }),
+                    // paddingTop: 0,
                     // 修復深色模式頂部小白條問題
                     borderBottomWidth: 0,
                 }}
