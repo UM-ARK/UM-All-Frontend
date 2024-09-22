@@ -836,6 +836,17 @@ class Index extends Component {
     // 搜索框
     renderSearch = () => {
         const { inputText, } = this.state;
+
+        const goToBrowser = (inputText) => {
+            trigger();
+            logToFirebase('funcUse', {
+                funcName: 'searchBar_features',
+                searchBarDetail: inputText,
+            });
+            let url = `https://www.google.com/search?q=${encodeURIComponent('site:umall.one OR site:um.edu.mo ') + encodeURIComponent(inputText)}`;
+            openLink(url);
+        }
+
         return (
             <KeyboardAvoidingView
                 style={{
@@ -880,7 +891,10 @@ class Index extends Component {
                         returnKeyType={'search'}
                         selectionColor={themeColor}
                         blurOnSubmit={true}
-                        onSubmitEditing={() => Keyboard.dismiss()}
+                        onSubmitEditing={() => {
+                            Keyboard.dismiss();
+                            goToBrowser(inputText);
+                        }}
                     />
                     {/* 清空搜索框按鈕 */}
                     {inputText.length > 0 ? (
@@ -911,12 +925,7 @@ class Index extends Component {
                     }}
                     disabled={inputText == ''}
                     onPress={() => {
-                        trigger();
-                        logToFirebase('funcUse', {
-                            funcName: 'searchBar_features',
-                            searchBarDetail: inputText,
-                        });
-                        openLink(`https://www.google.com/search?q=${'site:umall.one OR site:um.edu.mo ' + encodeURIComponent(inputText)}`);
+                        goToBrowser(inputText);
                     }}
                 >
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
