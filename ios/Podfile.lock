@@ -439,6 +439,8 @@ PODS:
     - React-Core
   - RNPermissions (4.1.5):
     - React-Core
+  - RNReactNativeHapticFeedback (2.3.3):
+    - React-Core
   - RNReanimated (2.17.0):
     - DoubleConversion
     - FBLazyVector
@@ -537,6 +539,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNInAppBrowser (from `../node_modules/react-native-inappbrowser-reborn`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
+  - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -668,6 +671,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-inappbrowser-reborn"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
+  RNReactNativeHapticFeedback:
+    :path: "../node_modules/react-native-haptic-feedback"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -743,6 +748,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 30704285c8ef803f7705f92dd9428261ed756e24
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNPermissions: 294531ede5a64d1528463e88fffef05675842042
+  RNReactNativeHapticFeedback: abc58bfad697c6359c0776c6c6acdbbe1aa357ee
   RNReanimated: 1f117be601c59177816351a965bc57320b766c15
   RNScreens: afdbd43bcd6c81559917054da18ad101b4395000
   RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
