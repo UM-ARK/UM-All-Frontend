@@ -1119,7 +1119,7 @@ export default class index extends Component {
                                                 },
                                             },
                                             {
-                                                text: t("更新Add Drop數據", { ns: 'catalog' }),
+                                                text: t("更新Add Drop/Timetable數據", { ns: 'catalog' }),
                                                 onPress: async () => {
                                                     try {
                                                         await this.updateLocalCourseData('coursePlan');

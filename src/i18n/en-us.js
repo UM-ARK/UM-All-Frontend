@@ -85,7 +85,7 @@ export default {
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",
 
-        "更新Add Drop數據": "Update Add Drop data",
+        "更新Add Drop/Timetable數據": "Update Add Drop data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
     },
     timetable: {
