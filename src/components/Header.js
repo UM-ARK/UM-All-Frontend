@@ -6,6 +6,8 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Platform,
+    View,
+    StatusBar,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
@@ -24,7 +26,7 @@ class HeaderDIY extends Component {
 
     render() {
         return (
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}><Header
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>{Platform.OS === 'android' ? <Header
                 backgroundColor={COLOR_DIY.bg_color}
                 leftComponent={
                     <TouchableOpacity onPress={() => {
@@ -61,7 +63,32 @@ class HeaderDIY extends Component {
                     // 修復深色模式頂部小白條問題
                     borderBottomWidth: 0,
                 }}
-            /></TouchableWithoutFeedback>
+            /> : <View style={{ flexDirection: 'row', padding: scale(5) }}>
+                <StatusBar
+                    backgroundColor={'transparent'}
+                    barStyle={COLOR_DIY.barStyle}
+                />
+
+                <TouchableOpacity
+                    style={{ marginRight: 'auto' }}
+                    onPress={() => {
+                        trigger();
+                        this.context.goBack();
+                    }}>
+                    <Ionicons
+                        name="chevron-back-outline"
+                        size={scale(25)}
+                        color={COLOR_DIY.black.main}
+                    />
+                </TouchableOpacity>
+
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: COLOR_DIY.black.main,
+                    fontSize: scale(15),
+                }}>{this.props.title}</Text>
+
+            </View>}</TouchableWithoutFeedback>
         );
     }
 }
