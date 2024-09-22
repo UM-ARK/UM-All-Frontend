@@ -152,6 +152,9 @@ export default {
         "生存指南": "Survival",
         "內地生": "Mainland",
         "圖文包": "Package",
+
+
+        "關於澳大的一切...": "Anything about UM...",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
