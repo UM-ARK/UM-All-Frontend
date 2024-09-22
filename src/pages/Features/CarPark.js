@@ -72,7 +72,7 @@ class CarPark extends Component {
         const { data, Sort, Type, isLoading } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: bg_color }}>
-                <Header title={'車位訊息'} />
+                <Header title={'車位訊息'} iOSDIY={true} />
 
                 <ScrollView
                     contentContainerStyle={{ paddingHorizontal: scale(10) }}

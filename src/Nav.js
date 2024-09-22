@@ -89,6 +89,7 @@ class Nav extends Component {
                             // ...(Platform.OS === 'android' && TransitionPresets.ModalPresentationIOS),
                         }}
                     >
+                        {/* TODO: 如需修改為Modal展現的時候，需到Header組件添加 iOSDIY={true} 屬性 */}
                         {/* 服務頁 */}
                         {/* 澳大論壇 */}
                         {/* <Stack.Screen name="UMWhole" component={UMWhole} /> */}
