@@ -1057,7 +1057,7 @@ E11-0000
                 />
 
                 {/* 頁面標題 */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                     {/* 清空所有課表功能按鈕 */}
                     {allCourseAllTime && allCourseAllTime.length > 0 && (
                         <TouchableOpacity style={{
