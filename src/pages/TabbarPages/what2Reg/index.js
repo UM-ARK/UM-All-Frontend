@@ -802,6 +802,7 @@ export default class index extends Component {
                             paddingVertical: verticalScale(3),
                             color: black.main,
                             fontSize: scale(12),
+                            width: '100%',
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
