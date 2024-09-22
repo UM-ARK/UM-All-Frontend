@@ -29,6 +29,7 @@ export default {
 
         "更新": "Update",
         "搜索": "Search",
+        "設置": "Setting",
     },
     home: {
         "校園巴士": "Bus",

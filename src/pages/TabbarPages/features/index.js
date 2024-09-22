@@ -849,7 +849,7 @@ class Index extends Component {
                 />
 
                 <ScrollView showsVerticalScrollIndicator={true}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
                         {/* ARK Logo */}
                         <FastImage
                             source={require('../../../static/img/logo.png')}
@@ -863,6 +863,24 @@ class Index extends Component {
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
 
+                        {/* 跳轉設置/關於頁按鈕 */}
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute', right: scale(10),
+                                flexDirection: 'row', alignItems: 'center',
+                                backgroundColor: themeColor,
+                                borderRadius: scale(5),
+                                padding: scale(5),
+                            }}
+                            onPress={() => {
+                                trigger();
+                                this.props.navigation.navigate('AboutPage');
+                            }}
+                        >
+                            <Ionicons name={'build'} size={verticalScale(15)} color={white} />
+                            <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('設置')}</Text>
+                        </TouchableOpacity>
+
                         {/* 組織登入按鈕 */}
                         {false && (
                             <TouchableOpacity style={{
@@ -874,7 +892,7 @@ class Index extends Component {
                             }}
                                 onPress={() => {
                                     trigger();
-                                    // TODO: 跳轉組織登入
+                                    // 跳轉組織登入
                                     this.props.navigation.navigate('ClubLogin');
                                 }}
                             >
