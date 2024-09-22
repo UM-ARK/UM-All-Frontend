@@ -235,7 +235,7 @@ export default class index extends Component {
     // }
 
     // 更新Add Drop課表的數據
-    updateLocalCourseData = async (type) => {
+    updateLocalCourseData = async (type, callback) => {
         const storageMap = {
             'coursePlan': 'course_plan',
             'coursePlanTime': 'course_plan_time',
@@ -252,23 +252,53 @@ export default class index extends Component {
             'offerCourses': 's_offerCourses',
         };
 
+        // 儲存對應資料到localStorage中
+        const coverStorage = async (type, data) => {
+            try {
+                this.setState({ [stateMap[type]]: data });
+                const saveResult = await setLocalStorage(storageMap[type], data);
+                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            } catch (error) {
+                Alert.alert(``,
+                    '儲存課表數據失敗'
+                    , null, { cancelable: true })
+            }
+        }
+
         try {
             const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/master/src/static/UMCourses/${fileNameMap[type]}.json`)
             if (res.status == 200) {
                 const { data } = res;
-                this.setState({ [stateMap[type]]: data });
-                const saveResult = await setLocalStorage(storageMap[type], data);
-                if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-                Toast.show(`已拉取更新！`);
-                if (type === 'coursePlanTime') {
-                    Alert.alert(`ARK搵課提示`, `現在重啟APP以適配最新課表數據嗎？`, [
-                        {
-                            text: 'Yes', onPress: () => {
-                                RNRestart.Restart();
-                            }
-                        },
-                        { text: 'No', },
-                    ]);
+
+                // type為coursePlan、offerCourses時檢查updateTime
+                if (type == 'coursePlan' || type == 'offerCourses') {
+                    // 如果原儲存updateTime 與 請求數據的updateTime 不一致，拉取coursePlanTime後提示重啟更新
+                    if (this.state[stateMap[type]].updateTime != data.updateTime) {
+                        type === 'coursePlan' && await this.updateLocalCourseData('coursePlanTime', () => {
+                            Alert.alert(`ARK搵課提示`, `現在重啟APP以適配最新課表數據嗎？`, [
+                                {
+                                    text: 'Yes', onPress: () => {
+                                        RNRestart.Restart();
+                                    }
+                                },
+                                { text: 'No', },
+                            ]);
+                        });
+                    } else {
+                        Toast.show('已是最新課表數據！');
+                    }
+                }
+
+                // 存入緩存
+                await coverStorage(type, data);
+
+                // 最後一個拉取的數據完成，觸發提示
+                if (type === 'coursePlanTime' || type == 'offerCourses') {
+                    Toast.show(`已拉取更新！`);
+                }
+
+                if (callback && typeof callback === "function") {
+                    callback();
                 }
             }
         } catch (error) {
@@ -1060,11 +1090,10 @@ export default class index extends Component {
                         style={{ width: '100%' }}
                         stickyHeaderIndices={[1]}
                         keyboardDismissMode='on-drag'
-                    // showsVerticalScrollIndicator={false}
                     >
                         {/* 頁面標題欄 */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
-                            {/* TODO: 提示按鈕，包括更新數據 */}
+                            {/* 更新數據按鈕 */}
                             <TouchableOpacity
                                 style={{
                                     position: 'absolute',
@@ -1092,8 +1121,6 @@ export default class index extends Component {
                                                         await this.updateLocalCourseData('coursePlan');
                                                     } catch (error) {
                                                         alert(JSON.stringify(error));
-                                                    } finally {
-                                                        await this.updateLocalCourseData('coursePlanTime');
                                                     }
                                                 },
                                             },
@@ -1104,11 +1131,7 @@ export default class index extends Component {
                                     );
                                 }}
                             >
-                                <Ionicons
-                                    name={'build'}
-                                    size={verticalScale(15)}
-                                    color={white}
-                                />
+                                <Ionicons name={'build'} size={verticalScale(15)} color={white} />
                                 <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('更新')}</Text>
                             </TouchableOpacity>
 
@@ -1125,27 +1148,6 @@ export default class index extends Component {
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('ARK搵課', { ns: 'catalog' })}</Text>
                                 </View>
                             </View>
-
-                            {/* TODO: 更新數據按鈕 */}
-                            {false && <>
-                                <TouchableOpacity
-                                    onPress={() => this.updateLocalCourseData('coursePlan')}
-                                >
-                                    <Text>更新課表</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={() => this.updateLocalCourseData('coursePlanTime')}
-                                >
-                                    <Text>更新課表時間</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={() => this.updateLocalCourseData('offerCourses')}
-                                >
-                                    <Text>更新預選課</Text>
-                                </TouchableOpacity>
-                            </>}
                         </View>
 
                         <>
