@@ -623,18 +623,18 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 3.1.3;
+				CURRENT_PROJECT_VERSION = 3.2.0;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = UMALL/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = 3.1.3;
+				INFOPLIST_KEY_CFBundleDisplayName = 3.2.0;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.3;
+				MARKETING_VERSION = 3.2.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -661,17 +661,17 @@
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
-				CURRENT_PROJECT_VERSION = 3.1.3;
+				CURRENT_PROJECT_VERSION = 3.2.0;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				INFOPLIST_FILE = UMALL/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = 3.1.3;
+				INFOPLIST_KEY_CFBundleDisplayName = 3.2.0;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.3;
+				MARKETING_VERSION = 3.2.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
