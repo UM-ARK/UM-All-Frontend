@@ -22,8 +22,8 @@ project(':react-native-interactable').projectDir = new File(rootProject.projectD
 // include ':@react-native-community_cameraroll'
 // project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/cameraroll/android')
 // 新；https://github.com/react-native-cameraroll/react-native-cameraroll
-include ':@react-native-camera-roll_camera-roll'
-project(':@react-native-camera-roll_camera-roll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-camera-roll/camera-roll/android')
+// include ':@react-native-camera-roll_camera-roll'
+// project(':@react-native-camera-roll_camera-roll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-camera-roll/camera-roll/android')
 
 // https://github.com/junina-de/react-native-haptic-feedback
 include ':react-native-haptic-feedback'

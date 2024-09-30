@@ -2,7 +2,8 @@
 import { Platform, Alert, Linking, } from 'react-native';
 import { checkMultiple, PERMISSIONS, requestMultiple, } from 'react-native-permissions';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
-import RNFetchBlob from 'rn-fetch-blob';
+// import RNFetchBlob from 'rn-fetch-blob';
+import ReactNativeBlobUtil from 'react-native-blob-util'
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from "react-native-simple-toast";
 
@@ -52,7 +53,7 @@ export async function handleImageDownload(IMAGE_URL) {
     }
 
     // 保存圖片
-    RNFetchBlob.config({
+    ReactNativeBlobUtil.config({
         fileCache: true,
         appendExt: 'png',
     })

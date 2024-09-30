@@ -39,7 +39,7 @@
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
-            <!-- https://github.com/joltup/rn-fetch-blob#readme -->
+            <!-- https://github.com/RonRadtke/react-native-blob-util -->
             <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
         </intent-filter>
       </activity>
