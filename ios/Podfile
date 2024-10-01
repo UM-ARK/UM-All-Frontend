@@ -21,6 +21,8 @@ target 'UMALL' do
   # pod 'GoogleUtilities', :modular_headers => true
   # pod 'nanopb', :modular_headers => true
   $RNFirebaseAsStaticFramework = true
+  # 不需要廣告支持
+  $RNFirebaseAnalyticsWithoutAdIdSupport=true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
