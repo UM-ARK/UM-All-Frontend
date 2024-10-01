@@ -38,7 +38,7 @@ import moment from 'moment';
 import Toast from 'react-native-simple-toast';
 import RNRestart from 'react-native-restart';
 import { t } from "i18next";
-import ActionSheet from 'react-native-actionsheet'
+import ActionSheet from '@alessiocancian/react-native-actionsheet';
 import { Dialog, } from '@rneui/themed';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
@@ -1098,6 +1098,7 @@ export default class index extends Component {
                     ]}
                     cancelButtonIndex={2}
                     // destructiveButtonIndex={1}
+                    statusBarTranslucent={true}
                     onPress={async (index) => {
                         trigger();
                         switch (index) {
@@ -1127,6 +1128,7 @@ export default class index extends Component {
                     onBackdropPress={() => {
                         this.setState({ dialogVisible: false });
                     }}
+                    statusBarTranslucent={true}
                 >
                     <Dialog.Loading />
                 </Dialog>
