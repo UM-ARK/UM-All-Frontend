@@ -25,3 +25,5 @@ npm i --legacy-peer-deps
 # 使用本地服務器需要在WiFi處設置代理
 # 代理主機名：10.0.2.2
 # 代理端口：10809
+
+# 使用 npx patch-package react-native 為react-native打上補丁，用來修復ViewPropTypes問題
