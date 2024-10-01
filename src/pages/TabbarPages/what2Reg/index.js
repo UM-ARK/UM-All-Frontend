@@ -1101,7 +1101,6 @@ export default class index extends Component {
                     statusBarTranslucent={true}
                     theme='ios'
                     onPress={async (index) => {
-                        trigger();
                         switch (index) {
                             case 0:
                                 this.setState({ dialogVisible: true });
@@ -1130,6 +1129,9 @@ export default class index extends Component {
                         this.setState({ dialogVisible: false });
                     }}
                     statusBarTranslucent={true}
+                    overlayStyle={{
+                        backgroundColor: COLOR_DIY.bg_color
+                    }}
                 >
                     <Dialog.Loading />
                 </Dialog>
