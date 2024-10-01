@@ -206,7 +206,8 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
     },
     ContentContainer: {
-        justifyContent: 'space-between',
+        // justifyContent: 'space-between',
+        alignItems: 'flex-start',
         paddingHorizontal: scale(8),
         paddingVertical: verticalScale(8),
     },

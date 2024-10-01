@@ -69,11 +69,15 @@ export default {
         "Privacy Policy & User Agreement": "Privacy Policy & User Agreement",
 
         "圖片更新不及時？網站響應出錯？": "Pictures not updated in time? Website response error?",
-        "點我：清除APP內的圖片和Web緩存": "Click me: Clear the pictures and web cache in the APP",
+        "清除APP內所有緩存（包括課表模擬與時間版本）": "Clear all the cache in the APP(Including Catalog & Timetable)",
+        "清除APP內Cookies": "Clear all the Cookies in the APP",
 
         "重要提示": "Important Hints",
         "您可能需要重新加載圖片，會消耗流量！": "You may need to reload the image, which will consume traffic!",
+        "課表數據和版本將被還原，你需要再進行手動更新！": "The catalog data and version will be restored, and you need to manually update again!",
         "將清除所有緩存並重啟，您確定繼續嗎？": "All caches will be cleared and restarted. Are you sure you want to continue?",
+
+        "已清除Cookies": "Cookies cleared",
     },
     wiki: {
 
