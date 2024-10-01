@@ -80,7 +80,7 @@ class Index extends Component {
     state = {
         functionArr: [
             {
-                title: '💡 ' + t('校園資訊', { ns: 'features' }),
+                title: '🌟 ' + t('校園資訊', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -297,7 +297,7 @@ class Index extends Component {
                 ],
             },
             {
-                title: '📅 ' + t('預約服務', { ns: 'features' }),
+                title: '🗓️ ' + t('預約服務', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
