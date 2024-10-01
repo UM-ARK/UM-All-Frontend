@@ -170,7 +170,7 @@ class Index extends Component {
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'console-network',
-                        fn_name: t('公共電腦', { ns: 'features' }),
+                        fn_name: t('E6電腦', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {

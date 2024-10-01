@@ -115,7 +115,7 @@ export default {
         "課室佔用": "Classroom",
         "車位": "Park",
         "場地預約": "Booking",
-        "公共電腦": "Computer",
+        "E6電腦": "Computer",
         "儲物箱": "Box",
         "維修預約": "Repair",
         "體育預訂": "Sports",
