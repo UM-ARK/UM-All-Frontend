@@ -146,7 +146,7 @@ const toastKaomojiArr = [
     '(oﾟ▽ﾟ)o',
 ];
 
-const calItemWidth = scale(44.5);
+const calItemWidth = verticalScale(44.5);
 
 class HomeScreen extends Component {
     toastTimer = null;
@@ -476,7 +476,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -488,7 +488,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: scale(22),
+                                fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -500,7 +500,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: scale(22),
+                                fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -511,7 +511,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -950,8 +950,10 @@ class HomeScreen extends Component {
                                 alignSelf: 'center',
                                 backgroundColor: white, borderRadius: scale(10),
                                 width: '100%',
-                                // marginHorizontal: scale(10),
-                                marginTop: scale(5),
+                                marginTop: verticalScale(5),
+                            }}
+                            contentContainerStyle={{
+                                alignItems: 'center',
                             }}
                             maxItemsPerRow={6}
                             itemDimension={scale(50)}
