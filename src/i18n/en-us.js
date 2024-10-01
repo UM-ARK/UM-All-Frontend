@@ -108,7 +108,7 @@ export default {
     features: {
         "服務一覽": "All Services",
 
-        "校園服務": "Campus Services",
+        "校園資訊": "Campus Services",
         "校園巴士": "Bus",
         "校曆": "Calendar",
         "校園地圖": "Map",
@@ -127,8 +127,9 @@ export default {
         "打印餘額": "Balance",
         "更多服務": "More",
 
+        "預約服務": "Reservation Services",
 
-        "課業 & 發展": "Coursework & Development",
+        "課業發展": "Coursework & Development",
         "課表模擬": "Timetable",
         "選咩課": "What2Reg",
         "預選課": "PreEnroll",
