@@ -31,7 +31,8 @@ target 'UMALL' do
     :production => production,
     :hermes_enabled => flags[:hermes_enabled],
     :fabric_enabled => flags[:fabric_enabled],
-    :flipper_configuration => FlipperConfiguration.enabled,
+    # 0.69.12中啟用以下行將引發FlipperKit的報錯
+    # :flipper_configuration => FlipperConfiguration.enabled,
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
