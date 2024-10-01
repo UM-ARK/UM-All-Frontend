@@ -411,7 +411,7 @@ PODS:
     - React-perflogger (= 0.70.15)
   - ReactNativeUiLib (3.0.9):
     - React
-  - RNCAsyncStorage (1.24.0):
+  - RNCAsyncStorage (2.0.0):
     - React-Core
   - RNCClipboard (1.14.2):
     - React-Core
@@ -749,7 +749,7 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: 04332dda2f2335ea4ddaf9255de069d3269f4e8b
   ReactCommon: 200471e0841cf2f7cde1fa2ef3d3c199ed970c07
   ReactNativeUiLib: 8d3804947431a465a69f09c5e785c988314612a9
-  RNCAsyncStorage: ec53e44dc3e75b44aa2a9f37618a49c3bc080a7a
+  RNCAsyncStorage: d35c79ffba52c1013013e16b1fc295aec2feabb6
   RNCClipboard: 5e503962f0719ace8f7fdfe9c60282b526305c85
   RNDateTimePicker: 65e1d202799460b286ff5e741d8baf54695e8abd
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
