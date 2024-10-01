@@ -5690,7 +5690,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E21-1039",
+            "Classroom": "E21-1057",
             "Course Title Chi": "實用日文Ⅰ"
         },
         {
@@ -8326,7 +8326,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-09-19",
+    "updateTime": "2024-09-25",
     "academicYear": "24/25",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
