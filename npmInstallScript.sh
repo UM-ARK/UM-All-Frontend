@@ -30,3 +30,5 @@ npm i --legacy-peer-deps
 
 # 適用於 pod install 後，watchman權限未更新
 # 使用 watchman shutdown-server，使用watchman啟動，再進行 yarn start
+# 或使用：
+# watchman watch-del '/Users/linzhanyang/Documents/GitHub/UM-All-Frontend' ; watchman watch-project '/Users/linzhanyang/Documents/GitHub/UM-All-Frontend'
