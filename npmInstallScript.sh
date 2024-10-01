@@ -27,3 +27,6 @@ npm i --legacy-peer-deps
 # 代理端口：10809
 
 # 使用 npx patch-package react-native 為react-native打上補丁，用來修復ViewPropTypes問題
+
+# 適用於 pod install 後，watchman權限未更新
+# 使用 watchman shutdown-server，使用watchman啟動，再進行 yarn start
