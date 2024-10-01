@@ -4,6 +4,9 @@ import {
     Text,
     View,
     TouchableOpacity,
+    Linking,
+    Platform,
+    Alert,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
@@ -45,7 +48,8 @@ import {
     UM_LIB_BOOK,
     UM_PRINT,
     UM_PRINT_BALANCE,
-    SCAME
+    SCAME,
+    MAIL
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -55,6 +59,7 @@ import { trigger } from "../../../utils/trigger";
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -807,9 +812,9 @@ class Index extends Component {
                                     trigger();
                                     if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
-                                        Toast.show('已複製Link到剪貼板！');
+                                        Toast.show(t('已複製Link到剪貼板！'));
                                     } else {
-                                        Toast.show('這個功能沒有Link可以複製哦！');
+                                        Toast.show(t('這個功能沒有Link可以複製哦！'));
                                     }
                                 }}
                             >
@@ -855,24 +860,57 @@ class Index extends Component {
                 />
 
                 <ScrollView showsVerticalScrollIndicator={true} >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
-                        {/* ARK Logo */}
-                        <FastImage
-                            source={require('../../../static/img/logo.png')}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: verticalScale(3), paddingHorizontal: scale(10), }}>
+
+                        <TouchableOpacity
                             style={{
-                                height: iconSize, width: iconSize,
+                                // position: 'absolute', left: scale(10),
+                                flexDirection: 'row', alignItems: 'center',
+                                backgroundColor: themeColor,
                                 borderRadius: scale(5),
+                                padding: scale(5),
                             }}
-                        />
+                            onPress={() => {
+                                trigger();
+                                const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
+                                if (Platform.OS === 'android') {
+                                    Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
+                                        {
+                                            text: '複製Email', onPress: () => {
+                                                Clipboard.setString(MAIL);
+                                                Toast.show(t('已複製Mail到剪貼板！'));
+                                                Linking.openURL(mailMes);
+                                            }
+                                        },
+                                        { text: 'No', },
+                                    ]);
+                                }
+                                else {
+                                    Linking.openURL(mailMes);
+                                }
+                            }}
+                        >
+                            <MaterialIcons name={'feedback'} size={verticalScale(15)} color={white} />
+                            <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('反饋')}</Text>
+                        </TouchableOpacity>
+
                         {/* 標題 */}
-                        <View style={{ marginLeft: scale(5), }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
+                        <View style={{ flexDirection: 'row', }}>
+                            {/* ARK Logo */}
+                            <FastImage
+                                source={require('../../../static/img/logo.png')}
+                                style={{
+                                    height: iconSize, width: iconSize,
+                                    borderRadius: scale(5),
+                                }}
+                            />
+                            <Text style={{ marginLeft: scale(5), ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
 
                         {/* 跳轉設置/關於頁按鈕 */}
                         <TouchableOpacity
                             style={{
-                                position: 'absolute', right: scale(10),
+                                // position: 'absolute', right: scale(10),
                                 flexDirection: 'row', alignItems: 'center',
                                 backgroundColor: themeColor,
                                 borderRadius: scale(5),

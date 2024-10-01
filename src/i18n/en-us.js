@@ -30,6 +30,12 @@ export default {
         "更新": "Update",
         "搜索": "Search",
         "設置": "Setting",
+        "反饋": "Feedback",
+        "請在郵件中給我們建議！": "Please give us your suggestions via email!",
+        "複製Email": "Copy Email",
+        "已複製Mail到剪貼板！": "Mail copied to clipboard!",
+        "已複製Link到剪貼板！": "Link copied to clipboard!",
+        "這個功能沒有可複製的Link！": "There is no copyable Link for this function!",
     },
     home: {
         "校園巴士": "Bus",
