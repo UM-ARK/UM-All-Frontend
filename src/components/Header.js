@@ -27,7 +27,7 @@ class HeaderDIY extends Component {
 
     render() {
         return (
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>{this.props.iOSDIY && Platform.OS == 'ios' ?
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>{this.props.iOSDIY && Platform.OS == 'ios' && !Platform.isPad ?
                 <View style={{
                     flexDirection: 'row', padding: scale(15),
                     justifyContent: 'center', alignItems: 'center'
