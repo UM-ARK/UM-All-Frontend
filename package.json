@@ -5,7 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios --simulator=\"iPhone 15 Pro Max\"",
-    "iosBig": "react-native run-ios --simulator=\"iPad Pro (12.9-inch) (6th generation)\"",
+    "iosBig": "react-native run-ios --simulator=\"iPad Pro 13-inch (M4)\"",
     "start": "react-native start --reset-cache",
     "test": "jest",
     "lint": "eslint .",
