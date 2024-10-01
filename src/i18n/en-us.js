@@ -152,6 +152,7 @@ export default {
         "生存指南": "Survival",
         "內地生": "Mainland",
         "圖文包": "Package",
+        "防詐騙": "Scam",
 
 
         "關於澳大的一切...": "Anything about UM...",

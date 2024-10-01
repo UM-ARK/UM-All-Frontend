@@ -44,7 +44,8 @@ import {
     UM_FIND_BOOKS,
     UM_LIB_BOOK,
     UM_PRINT,
-    UM_PRINT_BALANCE
+    UM_PRINT_BALANCE,
+    SCAME
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -668,6 +669,19 @@ class Index extends Component {
                         webview_param: {
                             url: NEW_INFOG,
                             title: '澳大圖文包',
+                            text_color: '#012d56',
+                            bg_color_diy: '#fff',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'account-cash',
+                        fn_name: t('防詐騙', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: SCAME,
+                            title: '防詐騙',
                             text_color: '#012d56',
                             bg_color_diy: '#fff',
                         },
