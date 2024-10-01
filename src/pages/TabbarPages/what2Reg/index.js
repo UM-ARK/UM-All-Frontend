@@ -1099,6 +1099,7 @@ export default class index extends Component {
                     cancelButtonIndex={2}
                     // destructiveButtonIndex={1}
                     statusBarTranslucent={true}
+                    theme='ios'
                     onPress={async (index) => {
                         trigger();
                         switch (index) {
