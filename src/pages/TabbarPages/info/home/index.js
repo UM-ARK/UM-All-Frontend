@@ -378,7 +378,7 @@ class HomeScreen extends Component {
             type: 'arkToast',
             text1: toastKaomojiArr[toastKaoIdx],
             text2: toastTextArr[toastTextIdx],
-            topOffset: scale(100),
+            topOffset: verticalScale(120),
             onPress: () => Toast.hide(),
         })
 
