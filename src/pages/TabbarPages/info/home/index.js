@@ -28,6 +28,7 @@ import {
     ARK_WIKI,
     ARK_WIKI_RANDOM_TITLE,
     UM_Moodle,
+    ARK_WEB_CLUB_SIGNIN,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -214,11 +215,12 @@ class HomeScreen extends Component {
                     function_name: t('組織登入', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        if (this.state.showUpdateInfo) {
-                            Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
-                        } else {
-                            this.props.navigation.navigate('ClubLogin');
-                        }
+                        openLink(ARK_WEB_CLUB_SIGNIN);
+                        // if (this.state.showUpdateInfo) {
+                        //     Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
+                        // } else {
+                        //     this.props.navigation.navigate('ClubLogin');
+                        // }
                     },
                 },
             ],
