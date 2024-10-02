@@ -128,4 +128,20 @@ The following build commands failed:
 
 然後重新 Run 和 Build 試試。
 
+9. `pod install`時遇到`hermes-engine`報錯：
+
+```bash
+Fetching podspec for `hermes-engine` from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`
+[!] Failed to load 'hermes-engine' podspec:
+[!] Invalid `hermes-engine.podspec` file: undefined method `exists?' for class File.
+
+ #  from /pathToProject/UM-All-Frontend/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec:46
+ #  -------------------------------------------
+ #    source[:http] = "file://#{destination_path}"
+ >  elsif File.exists?(hermestag_file) && isInCI
+ #    Pod::UI.puts '[Hermes] Detected that you are on a React Native release branch, building Hermes from source but fetched from tag...'.yellow if Object.const_defined?("Pod::UI")
+```
+
+找到 `/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`，修改`File.exists?(hermestag_file)`為`File.exist?(hermestag_file)`。
+
 ---
