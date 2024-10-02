@@ -2,15 +2,28 @@ require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 pod 'Interactable', :path => '../node_modules/react-native-interactable'
 
-platform :ios, '13.0'
-install! 'cocoapods', :deterministic_uuids => false
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
+
+flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
+
+# ******** DIY Code Begin ********
+# 因為react-native-compressor的RCT-Folly問題，和Firebase問題，全局啟用
+use_modular_headers!
+# ******** DIY Code End ********
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
 
 target 'UMALL' do
   config = use_native_modules!
-  project './UMALL.xcodeproj'
+  # project './UMALL.xcodeproj'
 
+  # ******** DIY Code Begin ********
   # GoogleUtilities need, when pod install firebase
-  use_modular_headers!
   # use_frameworks! :linkage => :static
   # pod 'FirebaseCore', :modular_headers => true
   # pod 'FirebaseCoreExtension', :modular_headers => true
@@ -19,33 +32,65 @@ target 'UMALL' do
   # pod 'GoogleUtilities', :modular_headers => true
   # pod 'nanopb', :modular_headers => true
   $RNFirebaseAsStaticFramework = true
+  # 不需要廣告支持
+  $RNFirebaseAnalyticsWithoutAdIdSupport=true
+  # ******** DIY Code End ********
 
   # Flags change depending on the env values.
   flags = get_default_flags()
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # to enable hermes on iOS, change `false` to `true` and then install pods
+    # Hermes is now enabled by default. Disable by setting this flag to false.
+    # Upcoming versions of React Native may rely on get_default_flags(), but
+    # we make it explicit here to aid in the React Native upgrade process.
     :hermes_enabled => flags[:hermes_enabled],
     :fabric_enabled => flags[:fabric_enabled],
+    # Enables Flipper.
+    #
+    # Note that if you have use_frameworks! enabled, Flipper will not work and
+    # you should disable the next line.
+    # :flipper_configuration => flipper_config, # 0.69.12中啟用該行將引發FlipperKit的報錯
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  pod 'react-native-restart', :path => '../node_modules/react-native-restart'
 
   target 'UMALLTests' do
     inherit! :complete
     # Pods for testing
   end
 
-  # Enables Flipper.
-  # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable the next line.
-  # use_flipper!()
-
   post_install do |installer|
-    react_native_post_install(installer)
+    react_native_post_install(
+      installer,
+      # Set `mac_catalyst_enabled` to `true` in order to apply patches
+      # necessary for Mac Catalyst builds
+      :mac_catalyst_enabled => false
+    )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
+
+    # ******** DIY Code Begin ********
+    # Xcode16 bitcode問題導致 Archive 後無法發佈，方案：https://stackoverflow.com/questions/79022303/asset-validation-failed-nslocalizedrecoverysuggestion-invalid-executable-the-e/79022687#:~:text=In%20case%20you%20have%20already%20post_install%20has%20been%20used%20then%20copy%20and%20past%20the%20below%20script%20inside%20that.
+    # bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
+    # def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    #   framework_path = File.join(Dir.pwd, framework_relative_path)
+    #   command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+    #   puts "Stripping bitcode: #{command}"
+    #   system(command)
+    # end
+
+    # framework_paths = [
+    #   "Pods/LogRocket/LogRocket.xcframework/ios-arm64/LogRocket.framework/LogRocket",
+    #   "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/hermes",
+    #   "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/Versions/Current/hermes",
+    #   "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64/hermes.framework/hermes",
+    #   "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64_x86_64-maccatalyst/hermes.framework/hermes"
+    # ]
+
+    # framework_paths.each do |framework_relative_path|
+    #   strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    # end
+    # ******** DIY Code End ********
+
   end
 end

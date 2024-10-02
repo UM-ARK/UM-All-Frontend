@@ -84,7 +84,7 @@ class Nav extends Component {
                     {/* Modal動畫組 */}
                     <Stack.Group
                         screenOptions={{
-                            presentation: Platform.select({ android: 'card', default: 'modal' }),
+                            presentation: Platform.select({ android: 'card', ios: Platform.isPad ? 'card' : 'modal' }),
                             // Android可使用該選項啟用類iOS Modal動畫
                             // ...(Platform.OS === 'android' && TransitionPresets.ModalPresentationIOS),
                         }}

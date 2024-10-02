@@ -28,6 +28,7 @@ import {
     ARK_WIKI,
     ARK_WIKI_RANDOM_TITLE,
     UM_Moodle,
+    ARK_WEB_CLUB_SIGNIN,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -145,7 +146,7 @@ const toastKaomojiArr = [
     '(oﾟ▽ﾟ)o',
 ];
 
-const calItemWidth = scale(44.5);
+const calItemWidth = verticalScale(44.5);
 
 class HomeScreen extends Component {
     toastTimer = null;
@@ -214,11 +215,12 @@ class HomeScreen extends Component {
                     function_name: t('組織登入', { ns: 'home' }),
                     func: () => {
                         trigger();
-                        if (this.state.showUpdateInfo) {
-                            Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
-                        } else {
-                            this.props.navigation.navigate('ClubLogin');
-                        }
+                        openLink(ARK_WEB_CLUB_SIGNIN);
+                        // if (this.state.showUpdateInfo) {
+                        //     Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
+                        // } else {
+                        //     this.props.navigation.navigate('ClubLogin');
+                        // }
                     },
                 },
             ],
@@ -376,7 +378,7 @@ class HomeScreen extends Component {
             type: 'arkToast',
             text1: toastKaomojiArr[toastKaoIdx],
             text2: toastTextArr[toastTextIdx],
-            topOffset: scale(100),
+            topOffset: verticalScale(120),
             onPress: () => Toast.hide(),
         })
 
@@ -474,7 +476,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -486,7 +488,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: scale(22),
+                                fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -498,7 +500,7 @@ class HomeScreen extends Component {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: COLOR_DIY.trueWhite,
-                                fontSize: scale(22),
+                                fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                             }}>
@@ -509,7 +511,7 @@ class HomeScreen extends Component {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: COLOR_DIY.trueWhite,
-                            fontSize: scale(10),
+                            fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
@@ -948,8 +950,10 @@ class HomeScreen extends Component {
                                 alignSelf: 'center',
                                 backgroundColor: white, borderRadius: scale(10),
                                 width: '100%',
-                                // marginHorizontal: scale(10),
-                                marginTop: scale(5),
+                                marginTop: verticalScale(5),
+                            }}
+                            contentContainerStyle={{
+                                alignItems: 'center',
                             }}
                             maxItemsPerRow={6}
                             itemDimension={scale(50)}

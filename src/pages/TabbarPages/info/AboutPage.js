@@ -287,14 +287,13 @@ export default class AboutPage extends Component {
                                 borderRadius: scale(10),
                                 padding: scale(5),
                                 marginTop: scale(5),
-                                width: scale(215),
                             }}
                             activeOpacity={0.8}
                             onPress={() => {
                                 trigger();
                                 Alert.alert(
                                     t('重要提示', { ns: 'about' }),
-                                    `${t('您可能需要重新加載圖片，會消耗流量！', { ns: 'about' })}\n${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
+                                    `${t('您可能需要重新加載圖片，會消耗流量！', { ns: 'about' })}\n${t('課表數據和版本將被還原，你需要再進行手動更新！', { ns: 'about' })}\n${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
                                     [
                                         {
                                             text: "Yes",
@@ -320,7 +319,24 @@ export default class AboutPage extends Component {
 
                             }}>
                             <Text style={{ ...s.highlightText, color: white, }}>
-                                {`${t('點我：清除APP內的圖片和Web緩存', { ns: 'about' })}`}
+                                {`${t('清除APP內所有緩存（包括課表模擬與時間版本）', { ns: 'about' })}`}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: themeColor,
+                                borderRadius: scale(10),
+                                padding: scale(5),
+                                marginTop: scale(5),
+                            }}
+                            activeOpacity={0.8}
+                            onPress={async () => {
+                                trigger();
+                                await CookieManager.clearAll();
+                                Alert.alert('已清除Cookies');
+                            }}>
+                            <Text style={{ ...s.highlightText, color: white, }}>
+                                {`${t('清除APP內Cookies', { ns: 'about' })}`}
                             </Text>
                         </TouchableOpacity>
                     </HomeCard>

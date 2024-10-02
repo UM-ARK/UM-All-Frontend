@@ -38,6 +38,8 @@ import moment from 'moment';
 import Toast from 'react-native-simple-toast';
 import RNRestart from 'react-native-restart';
 import { t } from "i18next";
+import ActionSheet from '@alessiocancian/react-native-actionsheet';
+import { Dialog, } from '@rneui/themed';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
 const iconSize = scale(25);
@@ -169,6 +171,8 @@ export default class index extends Component {
             s_offerCourses: offerCourses,
             s_coursePlan: coursePlan,
             s_coursePlanTime: coursePlanTime,
+
+            dialogVisible: false,
         };
 
         this.textInputRef = React.createRef();
@@ -273,6 +277,7 @@ export default class index extends Component {
             const res = await axios.get(`https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/master/src/static/UMCourses/${fileNameMap[type]}.json`)
             if (res.status == 200) {
                 const { data } = res;
+                let toastMes = '已拉取更新！';
 
                 // type為coursePlan、offerCourses時檢查updateTime
                 if (type == 'coursePlan' || type == 'offerCourses') {
@@ -289,7 +294,7 @@ export default class index extends Component {
                             ]);
                         });
                     } else {
-                        Toast.show('已是最新課表數據！');
+                        toastMes = '已是最新課表數據！';
                     }
                 }
 
@@ -297,9 +302,7 @@ export default class index extends Component {
                 await coverStorage(type, data);
 
                 // 最後一個拉取的數據完成，觸發提示
-                if (type === 'coursePlanTime' || type == 'offerCourses') {
-                    Toast.show(`已拉取更新！`);
-                }
+                Toast.show(toastMes);
 
                 if (callback && typeof callback === "function") {
                     callback();
@@ -1085,6 +1088,54 @@ export default class index extends Component {
                     }}
                 />
 
+                <ActionSheet
+                    ref={o => this.ActionSheet = o}
+                    title={`${t('Add Drop Data Version', { ns: 'about' }) + this.state.s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`}
+                    options={[
+                        t("更新Pre Enroll數據", { ns: 'catalog' }),
+                        t("更新Add Drop/Timetable數據", { ns: 'catalog' }),
+                        'Cancel'
+                    ]}
+                    cancelButtonIndex={2}
+                    // destructiveButtonIndex={1}
+                    statusBarTranslucent={true}
+                    theme='ios'
+                    onPress={async (index) => {
+                        switch (index) {
+                            case 0:
+                                this.setState({ dialogVisible: true });
+                                await this.updateLocalCourseData('offerCourses');
+                                this.setState({ dialogVisible: false });
+                                break;
+                            case 1:
+                                try {
+                                    this.setState({ dialogVisible: true });
+                                    await this.updateLocalCourseData('coursePlan');
+                                } catch (error) {
+                                    alert(JSON.stringify(error));
+                                } finally {
+                                    this.setState({ dialogVisible: false });
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }}
+                />
+
+                <Dialog isVisible={this.state.dialogVisible}
+                    onBackdropPress={() => {
+                        this.setState({ dialogVisible: false });
+                    }}
+                    statusBarTranslucent={true}
+                    overlayStyle={{
+                        backgroundColor: COLOR_DIY.bg_color
+                    }}
+                >
+                    <Dialog.Loading />
+                </Dialog>
+
                 {isLoading ? (
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_DIY.bg_color, }}>
                         <Loading />
@@ -1110,30 +1161,7 @@ export default class index extends Component {
                                 }}
                                 onPress={() => {
                                     trigger();
-                                    Alert.alert('ARK搵課提示',
-                                        `${t('Add Drop Data Version', { ns: 'about' }) + this.state.s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + this.state.s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`,
-                                        [
-                                            {
-                                                text: t("更新Pre Enroll數據", { ns: 'catalog' }),
-                                                onPress: async () => {
-                                                    await this.updateLocalCourseData('offerCourses');
-                                                },
-                                            },
-                                            {
-                                                text: t("更新Add Drop/Timetable數據", { ns: 'catalog' }),
-                                                onPress: async () => {
-                                                    try {
-                                                        await this.updateLocalCourseData('coursePlan');
-                                                    } catch (error) {
-                                                        alert(JSON.stringify(error));
-                                                    }
-                                                },
-                                            },
-                                            {
-                                                text: "GOT IT",
-                                            },
-                                        ]
-                                    );
+                                    this.ActionSheet.show();
                                 }}
                             >
                                 <Ionicons name={'build'} size={verticalScale(15)} color={white} />

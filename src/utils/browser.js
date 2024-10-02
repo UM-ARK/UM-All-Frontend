@@ -20,7 +20,7 @@ export async function openLink(URL) {
                 preferredControlTintColor: white,
                 readerMode: false,
                 animated: true,
-                modalPresentationStyle: 'automatic',
+                modalPresentationStyle: Platform.isPad ? 'fullScreen' : 'automatic',
                 modalTransitionStyle: 'coverVertical',
                 modalEnabled: true,
                 enableBarCollapsing: true,

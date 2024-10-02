@@ -4,6 +4,9 @@ import {
     Text,
     View,
     TouchableOpacity,
+    Linking,
+    Platform,
+    Alert,
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
@@ -44,7 +47,9 @@ import {
     UM_FIND_BOOKS,
     UM_LIB_BOOK,
     UM_PRINT,
-    UM_PRINT_BALANCE
+    UM_PRINT_BALANCE,
+    SCAME,
+    MAIL
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -54,6 +59,7 @@ import { trigger } from "../../../utils/trigger";
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -79,7 +85,7 @@ class Index extends Component {
     state = {
         functionArr: [
             {
-                title: t('校園服務', { ns: 'features' }),
+                title: '🌟 ' + t('校園資訊', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -150,27 +156,9 @@ class Index extends Component {
                         go_where: 'CarPark', // a function
                     },
                     {
-                        icon_type: iconTypes.ionicons,
-                        icon_name: 'logo-dropbox',
-                        fn_name: t('場地預約', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_RBS,
-                            title: 'UM 場地預約',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#989898',
-                            // 標題背景顏色，默認為bg_color
-                            bg_color_diy: '#f8f8f8',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
-                    {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'console-network',
-                        fn_name: t('公共電腦', { ns: 'features' }),
+                        fn_name: t('E6電腦', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Webview',
                         webview_param: {
@@ -186,23 +174,136 @@ class Index extends Component {
                         },
                     },
                     {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'door-closed-lock',
-                        fn_name: t('儲物箱', { ns: 'features' }),
+                        icon_type: iconTypes.ionicons,
+                        icon_name: 'library',
+                        fn_name: t('圖書館', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
-                            url: UM_LOCKER,
-                            title: 'UM 儲物箱租借',
+                            url: UM_LIBRARY,
+                            title: 'UM 圖書館',
+                            // 標題顏色，默認為black.main
+                            text_color: '#010101',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#005f96',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'passport',
+                        fn_name: t('UM Pass', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_PASS,
+                            title: 'UM Pass系統',
+                            // 標題顏色，默認為black.main
+                            // text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#005f96',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'bullhorn',
+                        fn_name: t('電子公告', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_BULLETIN,
+                            title: '學生電子公告',
+                            text_color: COLOR_DIY.white,
+                            bg_color_diy: '#002c55',
+                            isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'printer-search',
+                        fn_name: t('打印餘額', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_PRINT_BALANCE,
+                            title: '打印',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'text-box-check',
+                        fn_name: t('失物認領', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_LOST_FOUND,
+                            title: '失物認領',
                             // 標題顏色，默認為black.main
                             text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
-                            bg_color_diy: '#347bb7',
+                            bg_color_diy: '#005f96',
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
                     },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'human-dolly',
+                        fn_name: t('職位空缺', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_JOB_SYSTEM,
+                            title: '職位空缺',
+                            // 標題顏色，默認為black.main
+                            // text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#23407d',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'food',
+                        fn_name: t('書院餐單', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_RC_MENU,
+                            title: '書院餐單',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'view-grid-plus',
+                        fn_name: t('更多服務', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_PORTAL,
+                            title: 'UM Portal',
+                            // 標題顏色，默認為black.main
+                            // text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            // bg_color_diy: '#005f96',
+                            // 狀態欄字體是否黑色，默認true
+                            // isBarStyleBlack: false,
+                        },
+                    },
+                ],
+            },
+            {
+                title: '🗓️ ' + t('預約服務', { ns: 'features' }),
+                fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'hammer-wrench',
@@ -241,18 +342,18 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.ionicons,
-                        icon_name: 'library',
-                        fn_name: t('圖書館', { ns: 'features' }),
+                        icon_name: 'logo-dropbox',
+                        fn_name: t('場地預約', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
-                            url: UM_LIBRARY,
-                            title: 'UM 圖書館',
+                            url: UM_RBS,
+                            title: 'UM 場地預約',
                             // 標題顏色，默認為black.main
-                            text_color: '#010101',
+                            // text_color: '#989898',
                             // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#005f96',
+                            bg_color_diy: '#f8f8f8',
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
@@ -270,20 +371,13 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'passport',
-                        fn_name: t('UM Pass', { ns: 'features' }),
+                        icon_name: 'cloud-print',
+                        fn_name: t('打印', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_PASS,
-                            title: 'UM Pass系統',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#005f96',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
+                            url: UM_PRINT,
+                            title: '打印',
                         },
                     },
                     {
@@ -306,62 +400,55 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'bullhorn',
-                        fn_name: t('電子公告', { ns: 'features' }),
+                        icon_name: 'door-closed-lock',
+                        fn_name: t('儲物箱', { ns: 'features' }),
                         needLogin: false,
-                        go_where: 'Webview',
+                        go_where: 'Linking',
                         webview_param: {
-                            url: UM_BULLETIN,
-                            title: '學生電子公告',
-                            text_color: COLOR_DIY.white,
-                            bg_color_diy: '#002c55',
+                            // import pathMap的鏈接進行跳轉
+                            url: UM_LOCKER,
+                            title: 'UM 儲物箱租借',
+                            // 標題顏色，默認為black.main
+                            text_color: '#fff',
+                            // 標題背景顏色，默認為bg_color
+                            bg_color_diy: '#347bb7',
+                            // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'cloud-print',
-                        fn_name: t('打印', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            url: UM_PRINT,
-                            title: '打印',
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'printer-search',
-                        fn_name: t('打印餘額', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            url: UM_PRINT_BALANCE,
-                            title: '打印',
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'view-grid-plus',
-                        fn_name: t('更多服務', { ns: 'features' }),
+                        icon_name: 'car-multiple',
+                        fn_name: t('泊車月票', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Linking',
                         webview_param: {
                             // import pathMap的鏈接進行跳轉
-                            url: UM_PORTAL,
-                            title: 'UM Portal',
+                            url: UM_PARK_APPLY,
+                            title: '泊車月票系統',
                             // 標題顏色，默認為black.main
-                            // text_color: '#fff',
+                            text_color: '#fff',
                             // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#005f96',
+                            bg_color_diy: '#005f96',
                             // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
+                            isBarStyleBlack: false,
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'badge-account',
+                        fn_name: t('證明文件', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_DOCUMENTS,
+                            title: 'UM 證明文件',
                         },
                     },
                 ],
             },
             {
-                title: t('課業 & 發展', { ns: 'features' }),
+                title: '🎓 ' + t('課業發展', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -525,17 +612,6 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'badge-account',
-                        fn_name: t('證明文件', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            url: UM_DOCUMENTS,
-                            title: 'UM 證明文件',
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'book-search',
                         fn_name: t('資源搜索', { ns: 'features' }),
                         needLogin: false,
@@ -547,91 +623,14 @@ class Index extends Component {
                     },
                 ],
             },
+            // {
+            //     title: t('生活服務', { ns: 'features' }),
+            //     fn: [
+
+            //     ],
+            // },
             {
-                title: t('生活服務', { ns: 'features' }),
-                fn: [
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'text-box-check',
-                        fn_name: t('失物認領', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_LOST_FOUND,
-                            title: '失物認領',
-                            // 標題顏色，默認為black.main
-                            text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            bg_color_diy: '#005f96',
-                            // 狀態欄字體是否黑色，默認true
-                            isBarStyleBlack: false,
-                        },
-                        // go_where: 'LostAndFound',
-                        // go_where: 'Webview',
-                        // webview_param: {
-                        //     // import pathMap的鏈接進行跳轉
-                        //     url: UM_LOST_FOUND,
-                        //     title: '失物認領',
-                        //     // 標題顏色，默認為black.main
-                        //     // text_color: '#fff',
-                        //     // 標題背景顏色，默認為bg_color
-                        //     // bg_color_diy: '#23407d',
-                        //     // 狀態欄字體是否黑色，默認true
-                        //     // isBarStyleBlack: false,
-                        // },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'car-multiple',
-                        fn_name: t('泊車月票', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_PARK_APPLY,
-                            title: '泊車月票系統',
-                            // 標題顏色，默認為black.main
-                            text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            bg_color_diy: '#005f96',
-                            // 狀態欄字體是否黑色，默認true
-                            isBarStyleBlack: false,
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'human-dolly',
-                        fn_name: t('職位空缺', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Linking',
-                        webview_param: {
-                            // import pathMap的鏈接進行跳轉
-                            url: UM_JOB_SYSTEM,
-                            title: '職位空缺',
-                            // 標題顏色，默認為black.main
-                            // text_color: '#fff',
-                            // 標題背景顏色，默認為bg_color
-                            // bg_color_diy: '#23407d',
-                            // 狀態欄字體是否黑色，默認true
-                            // isBarStyleBlack: false,
-                        },
-                    },
-                    {
-                        icon_type: iconTypes.materialCommunityIcons,
-                        icon_name: 'food',
-                        fn_name: t('書院餐單', { ns: 'features' }),
-                        needLogin: false,
-                        go_where: 'Webview',
-                        webview_param: {
-                            url: UM_RC_MENU,
-                            title: '書院餐單',
-                        },
-                    },
-                ],
-            },
-            {
-                title: t('新生推薦', { ns: 'features' }),
+                title: '😎 ' + t('新生推薦', { ns: 'features' }),
                 fn: [
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -668,6 +667,19 @@ class Index extends Component {
                         webview_param: {
                             url: NEW_INFOG,
                             title: '澳大圖文包',
+                            text_color: '#012d56',
+                            bg_color_diy: '#fff',
+                        },
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'account-cash',
+                        fn_name: t('防詐騙', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: SCAME,
+                            title: '防詐騙',
                             text_color: '#012d56',
                             bg_color_diy: '#fff',
                         },
@@ -800,9 +812,9 @@ class Index extends Component {
                                     trigger();
                                     if (go_where == 'Webview' || go_where == 'Linking') {
                                         Clipboard.setString(webview_param.url);
-                                        Toast.show('已複製Link到剪貼板！');
+                                        Toast.show(t('已複製Link到剪貼板！'));
                                     } else {
-                                        Toast.show('這個功能沒有Link可以複製哦！');
+                                        Toast.show(t('這個功能沒有Link可以複製哦！'));
                                     }
                                 }}
                             >
@@ -848,24 +860,57 @@ class Index extends Component {
                 />
 
                 <ScrollView showsVerticalScrollIndicator={true} >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
-                        {/* ARK Logo */}
-                        <FastImage
-                            source={require('../../../static/img/logo.png')}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: verticalScale(3), paddingHorizontal: scale(10), }}>
+
+                        <TouchableOpacity
                             style={{
-                                height: iconSize, width: iconSize,
+                                // position: 'absolute', left: scale(10),
+                                flexDirection: 'row', alignItems: 'center',
+                                backgroundColor: themeColor,
                                 borderRadius: scale(5),
+                                padding: scale(5),
                             }}
-                        />
+                            onPress={() => {
+                                trigger();
+                                const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
+                                if (Platform.OS === 'android') {
+                                    Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
+                                        {
+                                            text: '複製Email', onPress: () => {
+                                                Clipboard.setString(MAIL);
+                                                Toast.show(t('已複製Mail到剪貼板！'));
+                                                Linking.openURL(mailMes);
+                                            }
+                                        },
+                                        { text: 'No', },
+                                    ]);
+                                }
+                                else {
+                                    Linking.openURL(mailMes);
+                                }
+                            }}
+                        >
+                            <MaterialIcons name={'feedback'} size={verticalScale(15)} color={white} />
+                            <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('反饋')}</Text>
+                        </TouchableOpacity>
+
                         {/* 標題 */}
-                        <View style={{ marginLeft: scale(5), }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
+                        <View style={{ flexDirection: 'row', }}>
+                            {/* ARK Logo */}
+                            <FastImage
+                                source={require('../../../static/img/logo.png')}
+                                style={{
+                                    height: iconSize, width: iconSize,
+                                    borderRadius: scale(5),
+                                }}
+                            />
+                            <Text style={{ marginLeft: scale(5), ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('服務一覽', { ns: 'features' })}</Text>
                         </View>
 
                         {/* 跳轉設置/關於頁按鈕 */}
                         <TouchableOpacity
                             style={{
-                                position: 'absolute', right: scale(10),
+                                // position: 'absolute', right: scale(10),
                                 flexDirection: 'row', alignItems: 'center',
                                 backgroundColor: themeColor,
                                 borderRadius: scale(5),

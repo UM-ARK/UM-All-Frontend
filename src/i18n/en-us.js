@@ -30,6 +30,12 @@ export default {
         "更新": "Update",
         "搜索": "Search",
         "設置": "Setting",
+        "反饋": "Feedback",
+        "請在郵件中給我們建議！": "Please give us your suggestions via email!",
+        "複製Email": "Copy Email",
+        "已複製Mail到剪貼板！": "Mail copied to clipboard!",
+        "已複製Link到剪貼板！": "Link copied to clipboard!",
+        "這個功能沒有可複製的Link！": "There is no copyable Link for this function!",
     },
     home: {
         "校園巴士": "Bus",
@@ -69,11 +75,15 @@ export default {
         "Privacy Policy & User Agreement": "Privacy Policy & User Agreement",
 
         "圖片更新不及時？網站響應出錯？": "Pictures not updated in time? Website response error?",
-        "點我：清除APP內的圖片和Web緩存": "Click me: Clear the pictures and web cache in the APP",
+        "清除APP內所有緩存（包括課表模擬與時間版本）": "Clear all the cache in the APP(Including Catalog & Timetable)",
+        "清除APP內Cookies": "Clear all the Cookies in the APP",
 
         "重要提示": "Important Hints",
         "您可能需要重新加載圖片，會消耗流量！": "You may need to reload the image, which will consume traffic!",
+        "課表數據和版本將被還原，你需要再進行手動更新！": "The catalog data and version will be restored, and you need to manually update again!",
         "將清除所有緩存並重啟，您確定繼續嗎？": "All caches will be cleared and restarted. Are you sure you want to continue?",
+
+        "已清除Cookies": "Cookies cleared",
     },
     wiki: {
 
@@ -108,14 +118,14 @@ export default {
     features: {
         "服務一覽": "All Services",
 
-        "校園服務": "Campus Services",
+        "校園資訊": "Campus Services",
         "校園巴士": "Bus",
         "校曆": "Calendar",
         "校園地圖": "Map",
         "課室佔用": "Classroom",
         "車位": "Park",
         "場地預約": "Booking",
-        "公共電腦": "Computer",
+        "E6電腦": "Computer",
         "儲物箱": "Box",
         "維修預約": "Repair",
         "體育預訂": "Sports",
@@ -127,8 +137,9 @@ export default {
         "打印餘額": "Balance",
         "更多服務": "More",
 
+        "預約服務": "Reservation Services",
 
-        "課業 & 發展": "Coursework & Development",
+        "課業發展": "Coursework & Development",
         "課表模擬": "Timetable",
         "選咩課": "What2Reg",
         "預選課": "PreEnroll",
@@ -152,6 +163,7 @@ export default {
         "生存指南": "Survival",
         "內地生": "Mainland",
         "圖文包": "Package",
+        "防詐騙": "Scam",
 
 
         "關於澳大的一切...": "Anything about UM...",
