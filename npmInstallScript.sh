@@ -16,11 +16,14 @@ npm i --legacy-peer-deps
 
 # 打包發佈，需確保jdk版本為18.0.2.1
 # 在./android/目錄下
+# gradlew clean
 # gradlew assembleRelease
 # gradlew bundleRelease
 
 # 在android\app\build\outputs\apk\release目錄下
 # adb install app-release.apk
+# 指定device安裝
+# adb -s 128c3062 install app-release.apk
 
 # 使用本地服務器需要在WiFi處設置代理
 # 代理主機名：10.0.2.2
