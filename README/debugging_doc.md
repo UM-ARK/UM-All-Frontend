@@ -56,6 +56,9 @@
 1. ViewPropTypes 的棄用，參考教程進行補丁修復：https://stackoverflow.com/questions/72755476/invariant-violation-viewproptypes-has-been-removed-from-react-native-migrate-t ，使用`yarn postinstall`安裝先前的補丁，如再更新 RN 版本，需再修改`node_modules`中 react-native 的 index.js 代碼，再打上補丁。
 2. 部分第三方包使用了過時的`jcenter()`，主要是 Android 端問題，需使用 `mavenCentral()`代替，也是需要修改`node_modules`中對應的包的代碼。
 
+**2024.10.03 更新**
+RN 版本更新 0.71.19 後，使用 yarn3 作為新的 package 管理器，遵循說明 set version：https://yarnpkg.com/getting-started/install
+
 ### Android
 
 1. Android 檔案權限報錯-`Error: spawn ./gradlew EACCES`

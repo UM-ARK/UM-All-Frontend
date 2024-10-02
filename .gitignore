@@ -41,6 +41,18 @@ npm-debug.log
 yarn-error.log
 yarn.lock
 
+# .yarn yarn3
+# Yarn cache files
+.yarn/cache
+# Yarn Plug'n'Play files
+.pnp.*
+# Yarn unplugged packages
+.yarn/unplugged
+# Yarn build state
+.yarn/build-state.yml
+# Yarn install state
+.yarn/install-state.gz
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
