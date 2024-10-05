@@ -1,5 +1,5 @@
 # 忽略部分警告安裝npm
-npm i react-native-reanimated@3.8.1 --legacy-peer-deps
+npm i --legacy-peer-deps
 
 # 檢查漏洞
 # npm audit
