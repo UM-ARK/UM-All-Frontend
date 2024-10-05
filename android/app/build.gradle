@@ -119,11 +119,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
 
 
-
-    implementation project(path: ":react-native-interactable") // https://github.com/wix/react-native-interactable
-
     // 漸變庫安裝需要
-    implementation project(':react-native-linear-gradient')
+    // implementation project(':react-native-linear-gradient')
 
     // implementation project(':@react-native-community_cameraroll')  // https://github.com/react-native-cameraroll/react-native-cameraroll
     // implementation project(':@react-native-camera-roll_camera-roll')    // https://github.com/react-native-cameraroll/react-native-cameraroll
