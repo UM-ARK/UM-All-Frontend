@@ -20,7 +20,7 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
-ios/.xcode.env.local
+**/.xcode.env.local
 
 # Android/IntelliJ
 #
@@ -44,14 +44,6 @@ yarn.lock
 # .yarn yarn3
 # Yarn cache files
 .yarn/cache
-# Yarn Plug'n'Play files
-.pnp.*
-# Yarn unplugged packages
-.yarn/unplugged
-# Yarn build state
-.yarn/build-state.yml
-# Yarn install state
-.yarn/install-state.gz
 
 # fastlane
 #
@@ -69,7 +61,7 @@ yarn.lock
 *.jsbundle
 
 # Ruby / CocoaPods
-/ios/Pods/
+**/Pods/
 /vendor/bundle/
 
 # Temporary files created by Metro to check the health of the file watcher
@@ -77,6 +69,14 @@ yarn.lock
 
 # testing
 /coverage
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 ios/UMAllWhite.xcodeproj/project.pbxproj
 ios/UMAllWhite.xcodeproj/project.pbxproj
