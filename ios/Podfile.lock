@@ -1194,7 +1194,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNReanimated (3.8.1):
+  - RNReanimated (3.13.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1559,7 +1559,7 @@ SPEC CHECKSUMS:
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNPermissions: 294531ede5a64d1528463e88fffef05675842042
   RNReactNativeHapticFeedback: a1ed613d86e678202fe8bb930b92afa06f601cc3
-  RNReanimated: 8a4d86eb951a4a99d8e86266dc71d7735c0c30a9
+  RNReanimated: b8c6a25415d1efcb854590cacae34115bdffa29b
   RNScreens: e842cdccb23c0a084bd6307f6fa83fd1c1738029
   RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
   RNVectorIcons: 04d49881dab53fb3397b1129085271d9d21885c1

@@ -149,22 +149,6 @@
 		6072934728664212007FBD2F /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				6072934828664212007FBD2F /* Fontisto.ttf */,
-				6072934928664212007FBD2F /* Octicons.ttf */,
-				6072934A28664212007FBD2F /* Feather.ttf */,
-				6072934B28664212007FBD2F /* Entypo.ttf */,
-				6072934C28664212007FBD2F /* FontAwesome5_Brands.ttf */,
-				6072934D28664212007FBD2F /* MaterialCommunityIcons.ttf */,
-				6072934E28664212007FBD2F /* AntDesign.ttf */,
-				6072934F28664212007FBD2F /* Foundation.ttf */,
-				6072935028664212007FBD2F /* Ionicons.ttf */,
-				6072935128664212007FBD2F /* FontAwesome5_Solid.ttf */,
-				6072935228664212007FBD2F /* FontAwesome5_Regular.ttf */,
-				6072935328664212007FBD2F /* FontAwesome.ttf */,
-				6072935428664212007FBD2F /* Zocial.ttf */,
-				6072935528664212007FBD2F /* EvilIcons.ttf */,
-				6072935628664212007FBD2F /* SimpleLineIcons.ttf */,
-				6072935728664212007FBD2F /* MaterialIcons.ttf */,
 			);
 			name = Fonts;
 			path = "../node_modules/react-native-vector-icons/Fonts";
@@ -325,24 +309,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6072935828664212007FBD2F /* Fontisto.ttf in Resources */,
-				6072936328664212007FBD2F /* FontAwesome.ttf in Resources */,
-				6072935F28664212007FBD2F /* Foundation.ttf in Resources */,
-				6072936228664212007FBD2F /* FontAwesome5_Regular.ttf in Resources */,
-				6072936028664212007FBD2F /* Ionicons.ttf in Resources */,
-				6072936528664212007FBD2F /* EvilIcons.ttf in Resources */,
-				6072935B28664212007FBD2F /* Entypo.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				6072936428664212007FBD2F /* Zocial.ttf in Resources */,
-				6072936628664212007FBD2F /* SimpleLineIcons.ttf in Resources */,
-				6072935A28664212007FBD2F /* Feather.ttf in Resources */,
 				F88BA27F2ADEDFE8006EE818 /* GoogleService-Info.plist in Resources */,
-				6072935928664212007FBD2F /* Octicons.ttf in Resources */,
-				6072935C28664212007FBD2F /* FontAwesome5_Brands.ttf in Resources */,
-				6072935E28664212007FBD2F /* AntDesign.ttf in Resources */,
-				6072936728664212007FBD2F /* MaterialIcons.ttf in Resources */,
-				6072936128664212007FBD2F /* FontAwesome5_Solid.ttf in Resources */,
-				6072935D28664212007FBD2F /* MaterialCommunityIcons.ttf in Resources */,
 				F8F8A7182BD351ED001A3B95 /* PrivacyInfo.xcprivacy in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
