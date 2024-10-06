@@ -8,20 +8,15 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-# If you are using a `react-native-flipper` your iOS build will fail when `NO_FLIPPER=1` is set.
-# because `react-native-flipper` depends on (FlipperKit,...) that will be excluded
-#
-# To fix this you can also exclude `react-native-flipper` using a `react-native.config.js`
-# ```js
-# module.exports = {
-#   dependencies: {
-#     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
-# ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
-
 # ******** DIY Code Begin ********
 # 因為react-native-compressor的RCT-Folly問題，和Firebase問題，全局啟用
-use_modular_headers!
+# use_modular_headers!
+# 使用pod install --repo-update
+use_frameworks! :linkage => :static
+# 使用靜態框架，from Firebase/app安裝說明
+$RNFirebaseAsStaticFramework = true
+# 不需要廣告支持
+$RNFirebaseAnalyticsWithoutAdIdSupport=true
 # ******** DIY Code End ********
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -34,27 +29,8 @@ target 'UMALL' do
   config = use_native_modules!
   # project './UMALL.xcodeproj'
 
-  # ******** DIY Code Begin ********
-  # GoogleUtilities need, when pod install firebase
-  # use_frameworks! :linkage => :static
-  # pod 'FirebaseCore', :modular_headers => true
-  # pod 'FirebaseCoreExtension', :modular_headers => true
-  # pod 'FirebaseInstallations', :modular_headers => true
-  # pod 'GoogleDataTransport', :modular_headers => true
-  # pod 'GoogleUtilities', :modular_headers => true
-  # pod 'nanopb', :modular_headers => true
-  $RNFirebaseAsStaticFramework = true
-  # 不需要廣告支持
-  $RNFirebaseAnalyticsWithoutAdIdSupport=true
-  # ******** DIY Code End ********
-
   use_react_native!(
     :path => config[:reactNativePath],
-    # Enables Flipper.
-    #
-    # Note that if you have use_frameworks! enabled, Flipper will not work and
-    # you should disable the next line.
-    # :flipper_configuration => flipper_config, # 0.69.12中啟用該行將引發FlipperKit的報錯
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
@@ -69,7 +45,8 @@ target 'UMALL' do
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
     )
 
     # ******** DIY Code Begin ********
