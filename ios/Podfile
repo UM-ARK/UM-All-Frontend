@@ -4,7 +4,6 @@ require Pod::Executable.execute_command('node', ['-p',
     "react-native/scripts/react_native_pods.rb",
     {paths: [process.argv[1]]},
   )', __dir__]).strip
-pod 'Interactable', :path => '../node_modules/react-native-interactable'
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
@@ -49,14 +48,8 @@ target 'UMALL' do
   $RNFirebaseAnalyticsWithoutAdIdSupport=true
   # ******** DIY Code End ********
 
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-    # Hermes is now enabled by default. Disable by setting this flag to false.
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
     # Enables Flipper.
     #
     # Note that if you have use_frameworks! enabled, Flipper will not work and
@@ -78,7 +71,6 @@ target 'UMALL' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     # ******** DIY Code Begin ********
     # Xcode16 bitcode問題導致 Archive 後無法發佈，方案：https://stackoverflow.com/questions/79022303/asset-validation-failed-nslocalizedrecoverysuggestion-invalid-executable-the-e/79022687#:~:text=In%20case%20you%20have%20already%20post_install%20has%20been%20used%20then%20copy%20and%20past%20the%20below%20script%20inside%20that.

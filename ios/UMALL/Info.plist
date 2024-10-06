@@ -28,15 +28,13 @@
 	<false/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
-		</dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Need to play sound effects</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Need to upload image</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -45,8 +43,6 @@
 	<string>Need to upload image</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Need to upload image</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Need to play sound effects</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome5_Regular.ttf</string>
