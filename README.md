@@ -63,18 +63,19 @@ brew install cocoapods
 ```
 
 4. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `npm i --legacy-peer-deps` 安裝 npm 依賴
-2024年更新：在react-native@0.73+，使用`yarn install`安裝依賴。
+   2024 年更新：在react-native@0.73+，使用`yarn install`安裝依賴。
 5. Pod 自動鏈接好 iOS 的包
 
 ```console
 cd ios
 pod install --repo-update
 ```
+
 如有衝突可先刪除`./ios/Podfile.lock`文件再運行上述命令。
 
 6. 啟動 `Xcode` ，打開項目 `./ios/UMALL.xcworkspace`
 7. `Command + R` 運行項目，先除錯，沒有問題再回 VSCode 的命令行使用 `yarn ios` 啟動
-react-native@0.73+更新：需要在`Xcode -> Product -> Scheme -> Edit Scheme`，設置為Debug模式，Metro才能接收控制台命令進行調試和log。
+   react-native@0.73+更新：需要在`Xcode -> Product -> Scheme -> Edit Scheme`，設置為 Debug 模式，Metro 才能接收控制台命令進行調試和 log。
 
 ---
 
@@ -136,8 +137,10 @@ yarn ios --simulator="iPhone 15"
 
 -   當需要 log 出對象或者數組時，有 Chrome 的 Web Debugger 肯定更好用。
 -   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
--   新版項目因為使用了組件 react-native-reanimated 導致不支持遠程調試，現在需要使用[Flipper](https://fbflipper.com/).
--   下載 Flipper 後，Mac 和 Windows 可能還要安裝一兩個工具，比如 Windows 要安裝 OpenSSL，參考：https://www.cnblogs.com/dingshaohua/p/12271280.html
+    react-native@0.73+更新：
+-   iOS 模擬器`Open Debugger`可能無法正確跳轉到瀏覽器，
+    -   方法1：Chrome 可前往`chrome://inspect`，在`Remote Target`中找到`React Native Experimental (Improved Chrome Reloads)`下的 inspect 按鈕打開DevTools。
+    -   方法2：使用`sh debug.sh`，其實是運行`npx react-devtools`，然後再在模擬器中`Open Debugger`，即會使用該插件打開Console查看log。
 
 ---
 
