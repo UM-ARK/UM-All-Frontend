@@ -144,7 +144,7 @@ async function setLocalOpitons(filterOptions) {
     }
 }
 
-export default class index extends Component {
+export default class What2Reg extends Component {
     constructor() {
         super();
         this.state = {

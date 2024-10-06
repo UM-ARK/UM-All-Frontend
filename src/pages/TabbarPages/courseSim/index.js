@@ -107,7 +107,7 @@ function toDateTime(time) {
 };
 
 // TODO: 查看某時間段可選的CourseCode、Section
-export default class courseSim extends Component {
+export default class CourseSim extends Component {
     constructor() {
         super();
         this.verScroll = React.createRef();
