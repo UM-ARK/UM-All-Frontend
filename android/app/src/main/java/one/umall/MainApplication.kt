@@ -23,17 +23,15 @@ class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
     object : DefaultReactNativeHost(this) {
-      override fun getPackages(): List<ReactPackage> {
-        // val packages = PackageList(this).packages.toMutableList()
-        // Packages that cannot be autolinked yet can be added manually here, for example:
-        // packages.add(new MyReactNativePackage());
-        // packages.add(LinearGradientPackage())  // 漸變庫安裝需要
-        // packages.add(new RestartPackage());           // 重啟庫需要
-        // packages.add(new CameraRollPackage());      // 圖片保存需要
-        // packages.add(new RNReactNativeHapticFeedbackPackage());      // 震動
-        
-        // val packages = PackageList(this).packages.toMutableList()
-        return PackageList(this).packages
+      override fun getPackages(): List<ReactPackage> =
+        PackageList(this).packages.apply {
+          // Packages that cannot be autolinked yet can be added manually here, for example:
+          // add(MyReactNativePackage())
+
+          // packages.add(LinearGradientPackage())  // 漸變庫安裝需要
+          // packages.add(new RestartPackage());           // 重啟庫需要
+          // packages.add(new CameraRollPackage());      // 圖片保存需要
+          // packages.add(new RNReactNativeHapticFeedbackPackage());      // 震動
       }
 
       override fun getJSMainModuleName(): String = "index"
