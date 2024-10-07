@@ -1361,8 +1361,27 @@ PODS:
     - Yoga
   - react-native-cookies (6.2.1):
     - React-Core
-  - react-native-image-picker (4.10.3):
+  - react-native-image-picker (7.1.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-menu (1.1.3):
     - React
   - react-native-pager-view (6.4.1):
@@ -1674,13 +1693,13 @@ PODS:
     - React-logger (= 0.75.4)
     - React-perflogger (= 0.75.4)
     - React-utils (= 0.75.4)
-  - ReactNativeUiLib (3.0.9):
+  - ReactNativeUiLib (4.3.2):
     - React
   - RNCAsyncStorage (2.0.0):
     - React-Core
   - RNCClipboard (1.14.2):
     - React-Core
-  - RNDateTimePicker (7.7.0):
+  - RNDateTimePicker (8.2.0):
     - React-Core
   - RNFastImage (8.6.3):
     - React-Core
@@ -1806,7 +1825,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.32.0):
+  - RNScreens (3.34.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1828,7 +1847,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (12.5.1):
+  - RNSVG (15.7.1):
     - React-Core
   - RNVectorIcons (10.2.0):
     - DoubleConversion
@@ -2206,7 +2225,7 @@ SPEC CHECKSUMS:
   react-native-cameraroll: 77d8c06f9c667feda5b2d165ead8e2ddd2cf68a3
   react-native-compressor: cd814c512cfbadc66cd927743645c927f5531986
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
-  react-native-image-picker: 60f4246eb5bb7187fc15638a8c1f13abd3820695
+  react-native-image-picker: 5bd900eec966c8f9fe32c5ec844afcd71d052030
   react-native-menu: c30eb7a85d7b04d51945f61ea8a8986ed366ac5c
   react-native-pager-view: bf5b54e14d2cc9329875325d79a7e6e293fe8b44
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
@@ -2239,10 +2258,10 @@ SPEC CHECKSUMS:
   React-utils: d1bae5ac6a5fb94a772ebfc7a7e1aba3a6706a3a
   ReactCodegen: 99b435b58bd874bb0626b3fb16437d2e8735d370
   ReactCommon: 1007c09a406a451ddbd874e51511aa541d6034f6
-  ReactNativeUiLib: 8d3804947431a465a69f09c5e785c988314612a9
+  ReactNativeUiLib: acf5e70a64140d6f38a969978f090c16862c2d3d
   RNCAsyncStorage: d35c79ffba52c1013013e16b1fc295aec2feabb6
   RNCClipboard: 5e503962f0719ace8f7fdfe9c60282b526305c85
-  RNDateTimePicker: 4f3c4dbd4f908be32ec8c93f086e8924bd4a2e07
+  RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFBAnalytics: a4b31678170c29f91b3c63ce9bbcba76b33ef77e
   RNFBApp: 4122dd41d8d7ff017b6ecf777a6224f5b349ca04
@@ -2252,8 +2271,8 @@ SPEC CHECKSUMS:
   RNPermissions: 294531ede5a64d1528463e88fffef05675842042
   RNReactNativeHapticFeedback: 293365e4df1faef21be8b8efe22c7b217c5e695a
   RNReanimated: 5bc479ee962a00bc41a0cc573ff7daa083626173
-  RNScreens: 1f0c0da3236429518c0d9a8c4726511bcb84855f
-  RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
+  RNScreens: de55b9d7de8a017d1588dcb70415492d0b0597c2
+  RNSVG: 4590aa95758149fa27c5c83e54a6a466349a1688
   RNVectorIcons: 7b81882e9c9369031aede0016dee0fe415cf2f43
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
