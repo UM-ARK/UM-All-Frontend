@@ -29,6 +29,7 @@
 		60729387286644C7007FBD2F /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 60729377286644C7007FBD2F /* SimpleLineIcons.ttf */; };
 		60729388286644C7007FBD2F /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 60729378286644C7007FBD2F /* MaterialIcons.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8CD6C02E81C0A4EF028BABCC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8FE10A6D5AC12B531CA5AB84 /* PrivacyInfo.xcprivacy */; };
 		DB7BE4E83E6BA3E107E10E5E /* Pods_UMALL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B74EC323670F567D9DE26949 /* Pods_UMALL.framework */; };
 		F88BA27F2ADEDFE8006EE818 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F88BA27E2ADEDFE8006EE818 /* GoogleService-Info.plist */; };
 		F8F8A7192BD351ED001A3B95 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8F8A7172BD351ED001A3B95 /* PrivacyInfo.xcprivacy */; };
@@ -75,6 +76,7 @@
 		60729377286644C7007FBD2F /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SimpleLineIcons.ttf; sourceTree = "<group>"; };
 		60729378286644C7007FBD2F /* MaterialIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MaterialIcons.ttf; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = UMALL/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8FE10A6D5AC12B531CA5AB84 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = UMALL/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B74EC323670F567D9DE26949 /* Pods_UMALL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UMALL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8627636543C1840FEF137EB /* Pods-UMALL.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL.debug.xcconfig"; path = "Target Support Files/Pods-UMALL/Pods-UMALL.debug.xcconfig"; sourceTree = "<group>"; };
 		E7EF3E096BA3248E68586B58 /* Pods-UMALL.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL.release.xcconfig"; path = "Target Support Files/Pods-UMALL/Pods-UMALL.release.xcconfig"; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				8FE10A6D5AC12B531CA5AB84 /* PrivacyInfo.xcprivacy */,
 			);
 			name = UMALL;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				F88BA27F2ADEDFE8006EE818 /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				8CD6C02E81C0A4EF028BABCC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
