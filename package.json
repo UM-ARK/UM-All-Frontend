@@ -8,7 +8,7 @@
     "iosTrue": "react-native run-ios --device",
     "iosBig": "react-native run-ios --simulator=\"iPad Pro 13-inch (M4)\"",
     "lint": "eslint .",
-    "start": "react-native start --reset-cache",
+    "start": "react-native start --reset-cache --experimental-debugger",
     "test": "jest",
     "postinstall": "patch-package"
   },
