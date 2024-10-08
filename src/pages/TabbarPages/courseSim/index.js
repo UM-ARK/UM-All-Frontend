@@ -969,7 +969,7 @@ E11-0000
                                 }}
                                 onPress={() => {
                                     trigger();
-                                    this.bottomSheetRef.current?.snapToIndex(2);
+                                    this.bottomSheetRef.current?.snapToIndex(4);
                                     this.addAllSectionCourse(i['Course Code'], sectionObj);
                                     // 切換searchText為點擊的Code
                                     this.setState({ searchText: i['Course Code'] });
@@ -1185,7 +1185,15 @@ E11-0000
 
                 <CustomBottomSheet
                     ref={this.bottomSheetRef}
-                    setHasOpenFalse={() => { this.setState({ hasOpenCourseSearch: false }); }}>
+                    // setHasOpenFalse={() => { this.setState({ hasOpenCourseSearch: false }); }}
+                    // TODO: 嘗試優化中
+                    onStateChange={(idx) => {
+                        console.log(idx);
+                        if (idx == -1) {
+                            this.setState({ hasOpenCourseSearch: false })
+                        }
+                    }}
+                >
                     <this.renderCourseSearch />
                 </CustomBottomSheet>
             </View>}</SafeAreaInsetsContext.Consumer>

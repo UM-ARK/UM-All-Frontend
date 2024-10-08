@@ -1,10 +1,10 @@
-import { View, StyleSheet, Text, Button, Platform } from 'react-native';
+import { View, StyleSheet, Platform, } from 'react-native';
 import React, { forwardRef, useMemo, useState } from 'react';
-import BottomSheet, { useBottomSheet } from '@gorhom/bottom-sheet';
+import BottomSheet from '@gorhom/bottom-sheet';
 import { COLOR_DIY } from '../../../utils/uiMap';
 import { scale, verticalScale } from 'react-native-size-matters';
 
-const CustomBottomSheet = forwardRef((props, ref,) => {
+const CustomBottomSheet = forwardRef((props, ref) => {
     const snapPoints = useMemo(() => ['15%', '30%', '50%', '55%', '60%', '65%', '70%'], []);
     const [currentIdx, setIdx] = useState(-1);
 
@@ -17,15 +17,15 @@ const CustomBottomSheet = forwardRef((props, ref,) => {
                 default: 'extend',
                 android: 'interactive'
             })}
-            android_keyboardInputMode='adjustResize'
+            // android_keyboardInputMode='adjustResize'
             // keyboardBlurBehavior='restore'
             enablePanDownToClose={true}
             onChange={(index) => {
                 setIdx(index);
-                if (index != -1) {
-                    return;
-                }
-                props.setHasOpenFalse();
+                if (index != -1) return
+                // props.setHasOpenFalse();
+                // TODO: 嘗試優化中
+                props?.onStateChange && props.onStateChange(index);
             }}
             // 定義默認抓手指示橫條的樣式
             // handleIndicatorStyle={{ backgroundColor: COLOR_DIY.black }}
