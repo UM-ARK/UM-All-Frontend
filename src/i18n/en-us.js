@@ -166,7 +166,7 @@ export default {
         "防詐騙": "Scam",
 
 
-        "關於澳大的一切...": "Anything about UM...",
+        "提問：關於澳大的一切...": "Ask: Anything about UM...",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",

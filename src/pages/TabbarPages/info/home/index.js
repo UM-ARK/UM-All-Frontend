@@ -693,41 +693,37 @@ class HomeScreen extends Component {
             <KeyboardAvoidingView
                 style={{
                     alignItems: 'center', flexDirection: 'row',
-                    width: '100%',
-                    marginTop: scale(5), paddingHorizontal: scale(10),
-                    backgroundColor: 'transparent',
+                    width: '100%', height: verticalScale(33),
+                    marginTop: verticalScale(10),
+                    paddingHorizontal: scale(10),
                 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 {/* 搜索框 */}
                 <View style={{
                     backgroundColor: white,
-                    borderRadius: scale(10),
+                    borderRadius: scale(6),
                     flexDirection: 'row', alignItems: 'center',
                     marginRight: scale(5),
-                    paddingHorizontal: scale(5), paddingVertical: scale(3),
-                    flex: 1,
+                    flex: 1, height: '100%',
                 }}>
-                    {/* 搜索圖標，引導用戶 */}
-                    <Ionicons
-                        name={'search'}
-                        size={scale(15)}
-                        color={black.third}
-                    />
                     <TextInput
                         style={{
+                            marginLeft: scale(5),
                             ...uiStyle.defaultText,
-                            paddingVertical: verticalScale(3),
                             color: black.main,
                             fontSize: scale(12),
-                            width: '100%',
+                            alignItems: 'center', justifyContent: 'center',
+                            flex: 1,
                         }}
                         onChangeText={(inputText) => {
                             this.setState({ inputText });
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder={t("關於澳大的一切...", { ns: 'features' })}
+                        textAlign='center' verticalAlign='center' textAlignVertical='center'
+                        inputMode='search'
+                        placeholder={t("提問：關於澳大的一切...", { ns: 'features' })}
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => trigger()}
@@ -750,7 +746,7 @@ class HomeScreen extends Component {
                                     this.textInputRef.current.focus();
                                 })
                             }}
-                            style={{ padding: scale(3), marginLeft: 'auto' }}
+                            style={{ padding: scale(5), marginLeft: 'auto', paddingRight: scale(10) }}
                         >
                             <Ionicons
                                 name={'close-circle'}
@@ -766,13 +762,16 @@ class HomeScreen extends Component {
                         backgroundColor: inputText == '' ? COLOR_DIY.disabled : themeColor,
                         borderRadius: scale(6),
                         padding: scale(7), paddingHorizontal: scale(8),
-                        alignItems: 'center'
+                        alignItems: 'center', justifyContent: 'center',
+                        height: '100%',
+                        flexDirection: 'row',
                     }}
                     disabled={inputText == ''}
                     onPress={() => {
                         goToBrowser(inputText);
                     }}
                 >
+                    <Ionicons name={'search'} size={scale(15)} color={white} />
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
