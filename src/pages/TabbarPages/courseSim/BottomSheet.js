@@ -1,26 +1,28 @@
-import { View, StyleSheet, Text, Button } from 'react-native';
-import React, { forwardRef, useMemo } from 'react';
+import { View, StyleSheet, Text, Button, Platform } from 'react-native';
+import React, { forwardRef, useMemo, useState } from 'react';
 import BottomSheet, { useBottomSheet } from '@gorhom/bottom-sheet';
 import { COLOR_DIY } from '../../../utils/uiMap';
+import { scale, verticalScale } from 'react-native-size-matters';
 
-const CloseBtn = () => {
-    const { close } = useBottomSheet();
-
-    return <Button title="Close" onPress={() => close()} />;
-};
-
-const CustomBottomSheet = forwardRef((props, ref, ) => {
-    const snapPoints = useMemo(() => ['15%', '60%', '70%'], []);
+const CustomBottomSheet = forwardRef((props, ref,) => {
+    const snapPoints = useMemo(() => ['15%', '30%', '50%', '55%', '60%', '65%', '70%'], []);
+    const [currentIdx, setIdx] = useState(-1);
 
     return (
         <BottomSheet
             ref={ref}
             index={-1}
             snapPoints={snapPoints}
-            keyboardBehavior='extend'
+            keyboardBehavior={Platform.select({
+                default: 'extend',
+                android: 'interactive'
+            })}
+            android_keyboardInputMode='adjustResize'
+            // keyboardBlurBehavior='restore'
             enablePanDownToClose={true}
-            onChange={(index)=>{
-                if(index != -1){
+            onChange={(index) => {
+                setIdx(index);
+                if (index != -1) {
                     return;
                 }
                 props.setHasOpenFalse();
@@ -35,9 +37,18 @@ const CustomBottomSheet = forwardRef((props, ref, ) => {
             // }}
             backgroundStyle={{ backgroundColor: COLOR_DIY.bg_color }}
             style={{
-                shadowColor: COLOR_DIY.black,
-                shadowOpacity: 0.2,
-                shadowRadius: 10,
+                backgroundColor: COLOR_DIY.white,
+                borderRadius: scale(20),
+
+                // 增加陰影
+                ...(currentIdx != -1 && {
+                    ...COLOR_DIY.viewShadow,
+                    shadowOffset: { width: 0, height: 12, },
+                    shadowOpacity: 0.58,
+                    shadowRadius: verticalScale(12),
+                    // 適用於Android
+                    elevation: 24,
+                }),
             }}
         // 設置是否是否手勢拖動上下，會影響BottomSheet內的橫向滑動
         // enableContentPanningGesture={false}
@@ -45,7 +56,7 @@ const CustomBottomSheet = forwardRef((props, ref, ) => {
             <View style={styles.contentContainer}>
                 {props.children}
             </View>
-        </BottomSheet>
+        </BottomSheet >
     );
 });
 
@@ -55,12 +66,12 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     containerHeadline: {
-        fontSize: 24,
+        fontSize: scale(20),
         fontWeight: '600',
-        aligItems:'center',
-        textAlign:'center',
-        width:'100%',
-        padding: 10,
+        aligItems: 'center',
+        textAlign: 'center',
+        width: '100%',
+        padding: scale(10),
         color: COLOR_DIY.black
     }
 });

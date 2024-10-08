@@ -9,6 +9,7 @@ import {
     TextInput,
     Keyboard,
     FlatList,
+    Platform,
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -114,7 +115,7 @@ export default class CourseSim extends Component {
     constructor() {
         super();
         this.verScroll = React.createRef();
-        this.textSearchRef = React.createRef();
+        // this.textSearchRef = React.createRef();
 
         this.bottomSheetRef = React.createRef();
         this.snapPoints = ['25%', '50%', '75%'];
@@ -127,7 +128,7 @@ export default class CourseSim extends Component {
         courseCodeList: [],
         allCourseAllTime: [],
 
-        addMode: false,
+        // addMode: false,
         searchText: '',
 
         dayFilter: 'ALL',
@@ -159,11 +160,6 @@ export default class CourseSim extends Component {
         if (this.props.route.params) {
             this.readParams();
         }
-
-        // this.keyboardDidHideListener = Keyboard.addListener(
-        //     'keyboardDidHide',
-        //     this._keyboardDidHide,
-        // );
 
         // 頁面聚焦時觸發
         this.focusListener = this.props.navigation.addListener('focus', () => {
@@ -204,16 +200,6 @@ export default class CourseSim extends Component {
             this.addCourse(add);
         }
     }
-
-    // 鍵盤收起，使輸入框失焦
-    // _keyboardDidHide = async () => {
-    //     // 使输入框失去焦点
-    //     try {
-    //         this.textSearchRef.current.blur();
-    //     } catch (error) {
-    //         console.log('error', error);
-    //     }
-    // };
 
     // 處理課表數據，分析出用於render的數據
     handleCourseList = (courseCodeList) => {
@@ -537,7 +523,8 @@ export default class CourseSim extends Component {
                         // }}
                         onPress={() => {
                             trigger('rigid');
-                            this.setState({ addMode: false });
+                            // 收起BottomSheet
+                            this.bottomSheetRef.current?.close();
                         }}
                         delayLongPress={300}
                     >
@@ -701,7 +688,7 @@ export default class CourseSim extends Component {
                 )}
                 {/* 課表數據輸入框 */}
                 <TextInput
-                    ref={this.textSearchRef}
+                    // ref={this.textSearchRef}
                     selectTextOnFocus
                     multiline
                     numberOfLines={6}
@@ -728,7 +715,10 @@ E11-0000
                     }}
                     returnKeyType={'done'}
                     blurOnSubmit={true}
-                    onSubmitEditing={() => Keyboard.dismiss()}
+                    onSubmitEditing={() => {
+                        Keyboard.dismiss()
+                        this.importCourseData();
+                    }}
                     clearButtonMode='always'
                 />
                 <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third, }}>{`${t('↑記得先粘貼課表數據，再點擊導入哦', { ns: 'timetable' })}`}</Text>
@@ -870,12 +860,7 @@ E11-0000
                 height: haveSearchResult ? '100%' : scale(45),
                 width: '100%',
                 padding: scale(5),
-                // marginRight: scale(5),
                 marginTop: scale(5), marginBottom: scale(10),
-                // borderWidth: scale(1), 
-                // borderColor: themeColor,
-                // borderRadius: scale(10),
-                // backgroundColor: white,
                 ...COLOR_DIY.viewShadow,
             }}>
                 {/* 星期篩選 */}
@@ -892,20 +877,21 @@ E11-0000
                 }}>
                     {/* Add課搜索框 */}
                     <BottomSheetTextInput
-                        ref={this.textSearchRef}
-                        
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
-                            fontSize: scale(12),
+                            fontSize: scale(13),
                             padding: scale(5),
+                            height: '100%',
+                            alignItems: 'center', justifyContent: 'center',
+                            textAlign: 'center', textAlignVertical: 'center',
                         }}
                         onChangeText={(inputText) => {
                             this.setState({ searchText: inputText, });
                         }}
                         value={this.state.searchText}
                         selectTextOnFocus
-                        placeholder="ECE, 電氣, AIM..."
+                        placeholder="搜索課程：ECE, 電氣, AIM..."
                         placeholderTextColor={black.third}
                         returnKeyType={'search'}
                         selectionColor={themeColor}
@@ -914,15 +900,6 @@ E11-0000
                         clearButtonMode='always'
                     />
                 </View>
-
-                {/* {haveSearchResult? filterCourseList.map(i=>{
-                    return (
-                        <ScrollView>
-                            <Text>{JSON.stringify(i)}</Text>
-                        </ScrollView>
-                    );
-
-                }):null} */}
 
                 {/* 渲染搜索課程的結果 */}
                 <ScrollView
@@ -1012,15 +989,16 @@ E11-0000
                             {/* 只剩一節候選課程時，展示可選Section */}
                             {filterCourseList.length == 1 && sectionObj && (<>
                                 <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
-                                <ScrollView horizontal style={{width: scale(350)}}>
+                                <ScrollView horizontal style={{ width: scale(350) }}>
                                     {Object.keys(sectionObj).map(key => {
                                         const courseInfo = sectionObj[key][0];
                                         return <TouchableOpacity
-                                            style={{ 
+                                            style={{
                                                 marginRight: verticalScale(5),
-                                                backgroundColor: themeColorUltraLight, 
+                                                backgroundColor: themeColorUltraLight,
                                                 borderRadius: scale(5),
-                                                height: scale(100) }}
+                                                height: scale(100)
+                                            }}
                                             onPress={() => {
                                                 this.addCourse(courseInfo);
                                                 this.verScroll.current.scrollTo({ y: 0 });
@@ -1060,7 +1038,7 @@ E11-0000
     handleSearchFilterCourse = (inputText) => {
         const { s_coursePlanFile } = this.state;
         const coursePlanList = s_coursePlanFile.Courses;
-        inputText = inputText.toUpperCase();
+        inputText = inputText?.toUpperCase();
 
         let filterCourseList = [];
 
@@ -1138,16 +1116,21 @@ E11-0000
                         padding: scale(5),
                     }}
                         onPress={() => {
-                            trigger();
                             // 切換加課模式
-                            this.setState({ hasOpenCourseSearch: !this.state.hasOpenCourseSearch });
-                            if (!this.state.hasOpenCourseSearch) {
-                                this.bottomSheetRef.current?.snapToIndex(0);
-                            } else {
-                                this.bottomSheetRef.current?.close();
+                            trigger();
+                            const { hasOpenCourseSearch } = this.state;
+                            if (hasOpenCourseSearch) { this.bottomSheetRef.current?.close() }
+                            else {
+                                if (allCourseAllTime?.length > 0) {
+                                    // 有課，展開一點
+                                    this.bottomSheetRef.current?.snapToIndex(1);
+                                } else {
+                                    // 沒課，展開半屏
+                                    this.bottomSheetRef.current?.snapToIndex(2);
+                                }
                             }
-                            // this.setState({ addMode: !this.state.addMode });
-                            // this.verScroll.current.scrollTo({ y: 0 });
+                            this.setState({ hasOpenCourseSearch: !this.state.hasOpenCourseSearch });
+                            this.verScroll.current.scrollTo({ y: 0 });
                         }}
                     >
                         <Text style={{
@@ -1158,17 +1141,11 @@ E11-0000
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView
-                    // horizontal
-                    ref={this.verScroll}
-                    contentContainerStyle={{ flexDirection: 'row', width: '100%' }}
-                    keyboardDismissMode='on-drag'
-                // showsVerticalScrollIndicator={false}
-                >
+                <ScrollView ref={this.verScroll} keyboardDismissMode='on-drag'>
                     {/* 課表 / 首次使用提示 */}
-                    <View style={{ width: this.state.addMode ? '65%' : '100%' }}>
-                        {allCourseAllTime && allCourseAllTime.length > 0 ? (<View >
-                            {/* 渲染已保存的課表數據 */}
+                    <View style={{ flex: 1 }}>
+                        {allCourseAllTime && allCourseAllTime.length > 0 ? (
+                            // 渲染已保存的課表數據
                             <ScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
@@ -1177,11 +1154,11 @@ E11-0000
                                     return this.renderDay(day);
                                 })}
                             </ScrollView>
-                        </View>) : (this.renderFirstUse())}
+                        ) : (this.renderFirstUse())}
                     </View>
 
                     {/* 渲染選課的篩選列表 */}
-                    {this.state.addMode ?
+                    {false && this.state.addMode ?
                         <View style={{ width: '34%', }}>
                             {/* 搜索框引導文字 */}
                             {!this.state.searchText ?
@@ -1206,13 +1183,12 @@ E11-0000
                         : null}
                 </ScrollView>
 
-                <CustomBottomSheet 
-                    ref={this.bottomSheetRef} 
-                    title={'加課'} 
-                    setHasOpenFalse={()=>{this.setState({hasOpenCourseSearch:false});}}>
+                <CustomBottomSheet
+                    ref={this.bottomSheetRef}
+                    setHasOpenFalse={() => { this.setState({ hasOpenCourseSearch: false }); }}>
                     <this.renderCourseSearch />
                 </CustomBottomSheet>
-            </View>}</SafeAreaInsetsContext.Consumer  >
+            </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
 }
