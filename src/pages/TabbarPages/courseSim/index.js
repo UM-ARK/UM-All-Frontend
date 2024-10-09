@@ -981,7 +981,7 @@ E11-0000
                                     style={{ ...s.courseCard, }}
                                     onPress={() => {
                                         trigger();
-                                        this.bottomSheetRef.current?.snapToIndex(4);
+                                        this.bottomSheetRef.current?.snapToIndex(0);
                                         this.addAllSectionCourse(i['Course Code'], sectionObj);
                                         // 切換searchText為點擊的Code
                                         this.setState({ searchText: i['Course Code'] });
@@ -1036,6 +1036,7 @@ E11-0000
                                         </TouchableOpacity>
                                     }}
                                     ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
+                                    scrollEnabled={false}
                                 />
 
                                 {false && <BottomSheetScrollView horizontal>

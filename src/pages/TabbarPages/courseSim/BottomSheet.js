@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAnimatedStyle, withTiming, } from 'react-native-reanimated';
 
 const CustomBottomSheet = forwardRef((props, ref) => {
-    const snapPoints = useMemo(() => ['15%', '30%', '50%', '55%', '60%', '65%', '70%'], []);
+    const snapPoints = useMemo(() => ['15%', '30%', '50%', '70%'], []);
     const [currentIdx, setIdx] = useState(-1);
 
     const shadowRadiusValue = currentIdx !== -1 ? verticalScale(12) : 0;
