@@ -114,6 +114,8 @@ export default {
         "進入ISW複製": "Enter ISW to Copy",
         "↑記得先粘貼課表數據，再點擊導入哦": "↑Remember to paste the class schedule data first and then click Import",
         "一鍵導入到模擬課表": "Import to simulated timetable",
+
+        "搜索課程：ECE, 電氣, AIM...": "Search: ECE, Electrical, AIM...",
     },
     features: {
         "服務一覽": "All Services",

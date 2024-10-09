@@ -119,7 +119,7 @@ export default class CourseSim extends Component {
     constructor() {
         super();
         this.verScroll = React.createRef();
-        // this.textSearchRef = React.createRef();
+        this.textSearchRef = React.createRef();
 
         this.bottomSheetRef = React.createRef();
         this.snapPoints = ['25%', '50%', '75%'];
@@ -854,6 +854,7 @@ E11-0000
                     />
                     {/* Add課搜索框 */}
                     <BottomSheetTextInput
+                        ref={this.textSearchRef}
                         style={{
                             ...uiStyle.defaultText,
                             color: black.main,
@@ -867,7 +868,7 @@ E11-0000
                         onChangeText={(inputText) => this.setState({ searchText: inputText })}
                         value={searchText}
                         selectTextOnFocus
-                        placeholder="搜索課程：ECE, 電氣, AIM..."
+                        placeholder={t('搜索課程：ECE, 電氣, AIM...', { ns: 'timetable' })}
                         placeholderTextColor={black.third}
                         returnKeyType={'search'}
                         selectionColor={themeColor}
@@ -1167,12 +1168,10 @@ E11-0000
                         onPress={() => {
                             // 切換加課模式
                             trigger();
+                            // 收起鍵盤
+                            if (Keyboard.isVisible()) { Keyboard.dismiss() }
                             const { hasOpenCourseSearch } = this.state;
-                            if (hasOpenCourseSearch) {
-                                this.bottomSheetRef?.current?.close();
-                                // 收起鍵盤
-                                Keyboard.dismiss();
-                            }
+                            if (hasOpenCourseSearch) { this.bottomSheetRef?.current?.close() }
                             else {
                                 if (allCourseAllTime?.length > 0) {
                                     // 有課，展開一點
