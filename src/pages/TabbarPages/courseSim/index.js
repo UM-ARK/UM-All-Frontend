@@ -1168,7 +1168,11 @@ E11-0000
                             // 切換加課模式
                             trigger();
                             const { hasOpenCourseSearch } = this.state;
-                            if (hasOpenCourseSearch) { this.bottomSheetRef?.current?.close() }
+                            if (hasOpenCourseSearch) {
+                                this.bottomSheetRef?.current?.close();
+                                // 收起鍵盤
+                                Keyboard.dismiss();
+                            }
                             else {
                                 if (allCourseAllTime?.length > 0) {
                                     // 有課，展開一點
