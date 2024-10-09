@@ -15,7 +15,7 @@
   "dependencies": {
     "@alessiocancian/react-native-actionsheet": "^3.2.0",
     "@babel/plugin-proposal-decorators": "^7.24.7",
-    "@gorhom/bottom-sheet": "^4.6.4",
+    "@gorhom/bottom-sheet": "^5.0.0-alpha.11",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-camera-roll/camera-roll": "^7.8.3",
     "@react-native-clipboard/clipboard": "^1.14.2",
