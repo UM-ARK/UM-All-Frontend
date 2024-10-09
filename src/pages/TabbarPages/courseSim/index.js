@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
     View,
     Text,
-    ScrollView,
+    // ScrollView,
     TouchableOpacity,
     Alert,
     StyleSheet,
@@ -24,6 +24,11 @@ import { MenuView } from '@react-native-menu/menu';
 import Toast from 'react-native-simple-toast';
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
+import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import {
+    ScrollView,
+    // TouchableOpacity,
+} from "react-native-gesture-handler";
 
 import { getLocalStorage } from '../../../utils/storageKits';
 import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
@@ -33,13 +38,12 @@ import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
+import CustomBottomSheet from './BottomSheet';
+import CourseCard from '../what2Reg/component/CourseCard';
 
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-
-import CustomBottomSheet from './BottomSheet';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 // 設置本地緩存
 async function setLocalStorage(courseCodeList) {
@@ -495,36 +499,12 @@ export default class CourseSim extends Component {
                             alignItems: 'center', justifyContent: 'center',
                         }}
                         activeOpacity={0.8}
-                        // onPress={() => {
-                        //     trigger();
-                        //     Alert.alert("", `想知道關於${course['Course Code']}的...\n(長按可以刪除課程...)`,
-                        //         [
-                        //             {
-                        //                 text: "可選Section/老師",
-                        //                 onPress: () => {
-                        //                     trigger();
-                        //                     this.props.navigation.navigate('LocalCourse', course['Course Code']);
-                        //                 },
-                        //             },
-                        //             {
-                        //                 text: "課程Wiki",
-                        //                 onPress: () => {
-                        //                     trigger();
-                        //                     const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
-                        //                     this.props.navigation.navigate('Wiki', { url: URL });
-                        //                 },
-                        //             },
-                        //             {
-                        //                 text: "取消",
-                        //             },
-                        //         ],
-                        //         { cancelable: true, }
-                        //     );
-                        // }}
                         onPress={() => {
                             trigger('rigid');
                             // 收起BottomSheet
-                            this.bottomSheetRef.current?.close();
+                            if (this.state.hasOpenCourseSearch) {
+                                this.bottomSheetRef?.current?.snapToIndex(0);
+                            }
                         }}
                         delayLongPress={300}
                     >
@@ -849,32 +829,29 @@ E11-0000
     }
 
     renderCourseSearch = () => {
-        const filterCourseList = this.handleSearchFilterCourse(this.state.searchText);
+        const { searchText } = this.state;
+        const filterCourseList = this.handleSearchFilterCourse(searchText);
         // 是否有搜索結果
-        const haveSearchResult = this.state.searchText && filterCourseList.length > 0;
+        const haveSearchResult = searchText && filterCourseList.length > 0;
 
         const { s_coursePlanTimeFile } = this.state;
         const courseTimeList = s_coursePlanTimeFile.Courses;
         return (
-            <View style={{
-                height: haveSearchResult ? '100%' : scale(45),
-                width: '100%',
-                padding: scale(5),
-                marginTop: scale(5), marginBottom: scale(10),
-                ...COLOR_DIY.viewShadow,
-            }}>
-                {/* 星期篩選 */}
-                {/* {this.renderDayFilter()} */}
-
-                {/* 時間篩選 */}
-                {/* {this.renderTimeFilter()} */}
-
+            <View style={{ width: '100%', padding: scale(10), }}>
                 {/* 輸入框 */}
                 <View style={{
-                    borderColor: themeColor,
-                    height: scale(35),
+                    borderColor: themeColor, backgroundColor: COLOR_DIY.white,
+                    height: verticalScale(35),
                     borderWidth: scale(1), borderRadius: scale(5),
+                    flexDirection: 'row',
+                    alignItems: 'center',
                 }}>
+                    <Ionicons
+                        name="search"
+                        size={scale(20)}
+                        color={black.third}
+                        style={{ opacity: 0.4, position: 'absolute', left: scale(10), }}
+                    />
                     {/* Add課搜索框 */}
                     <BottomSheetTextInput
                         style={{
@@ -884,12 +861,11 @@ E11-0000
                             padding: scale(5),
                             height: '100%',
                             alignItems: 'center', justifyContent: 'center',
-                            textAlign: 'center', textAlignVertical: 'center',
+                            flex: 1,
                         }}
-                        onChangeText={(inputText) => {
-                            this.setState({ searchText: inputText, });
-                        }}
-                        value={this.state.searchText}
+                        textAlign='center' textAlignVertical='center'
+                        onChangeText={(inputText) => this.setState({ searchText: inputText })}
+                        value={searchText}
                         selectTextOnFocus
                         placeholder="搜索課程：ECE, 電氣, AIM..."
                         placeholderTextColor={black.third}
@@ -901,10 +877,54 @@ E11-0000
                     />
                 </View>
 
-                {/* 渲染搜索課程的結果 */}
-                <ScrollView
-                    horizontal>
-                    {haveSearchResult ? filterCourseList.map(i => {
+                <BottomSheetScrollView>
+                    {/* TODO: 一節課時的情況 */}
+                    {/* TODO: 一個Section時的情況 */}
+                    {/* 渲染搜索課程的結果 */}
+                    {haveSearchResult && filterCourseList?.length > 1 ?
+                        <BottomSheetFlatList
+                            data={filterCourseList}
+                            key={this.state.searchText}
+                            numColumns={filterCourseList.length}
+                            columnWrapperStyle={{ flexWrap: 'wrap' }}
+                            style={{ marginTop: scale(5) }}
+                            renderItem={({ item }) => {
+                                return <TouchableOpacity
+                                    style={{
+                                        ...s.courseCard,
+                                    }}
+                                    onPress={() => {
+                                        trigger();
+                                        // 從courseTimeList篩選所有的課程的Section、時間、老師
+                                        let sectionObj = {};
+                                        let codeRes = courseTimeList.filter(itm => {
+                                            return itm['Course Code'].toUpperCase().indexOf(item['Course Code']) != -1
+                                        });
+                                        codeRes.map(itm => {
+                                            let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
+                                            tempArr.push(itm);
+                                            sectionObj[itm['Section']] = tempArr;
+                                        })
+
+                                        // 切換searchText為點擊的Code
+                                        this.setState({ searchText: item['Course Code'] });
+                                        this.verScroll.current.scrollTo({ y: 0 });
+                                    }}
+                                >
+                                    <Text style={{
+                                        ...s.searchResultText,
+                                        fontSize: scale(15),
+                                        color: filterCourseList.length == 1 ? themeColor : black.third,
+                                        fontWeight: 'bold',
+                                    }}>{item['Course Code']}</Text>
+                                    <Text style={{ ...s.searchResultText, }}>{item['Course Title']}</Text>
+                                    <Text style={{ ...s.searchResultText, }}>{item['Course Title Chi']}</Text>
+                                </TouchableOpacity>
+                            }}
+                            ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
+                        /> : null}
+
+                    {haveSearchResult && filterCourseList.length == 1 ? filterCourseList.map(i => {
                         // 從courseTimeList篩選所有的課程的Section、時間、老師
                         let sectionObj = {};
                         if (filterCourseList.length == 1) {
@@ -918,7 +938,7 @@ E11-0000
                             })
                         }
 
-                        return (<View>
+                        return (<View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                             {/* 刪除該Code課程按鈕 */}
                             {filterCourseList.length == 1 && sectionObj && (
                                 <TouchableOpacity
@@ -954,50 +974,79 @@ E11-0000
                                 <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 全部放入課表</Text>
                             )}
 
-                            {/* 課程標題 */}
-                            <TouchableOpacity
-                                style={{
-                                    // marginBottom: scale(10),
-                                    // borderBottomWidth: scale(1),
-                                    // borderColor: themeColor,
-                                    width: scale(150),
-                                    height: scale(140),
-                                    padding: scale(2),
-                                    marginTop: scale(5),
-                                    marginRight: scale(10),
-                                    backgroundColor: COLOR_DIY.themeColorUltraLight,
-                                }}
-                                onPress={() => {
-                                    trigger();
-                                    this.bottomSheetRef.current?.snapToIndex(4);
-                                    this.addAllSectionCourse(i['Course Code'], sectionObj);
-                                    // 切換searchText為點擊的Code
-                                    this.setState({ searchText: i['Course Code'] });
-                                    this.verScroll.current.scrollTo({ y: 0 });
-                                }}
-                            >
-                                <Text style={{
-                                    ...s.searchResultText,
-                                    fontSize: scale(15),
-                                    color: filterCourseList.length == 1 ? themeColor : black.third,
-                                    fontWeight: 'bold',
-                                }}>{i['Course Code']}</Text>
-                                <Text style={{ ...s.searchResultText, }}>{i['Course Title']}</Text>
-                                <Text style={{ ...s.searchResultText, }}>{i['Course Title Chi']}</Text>
-                            </TouchableOpacity>
+                            {/* 課程卡片 */}
+                            {filterCourseList.length == 1 && (
+                                <TouchableOpacity
+                                    style={{ ...s.courseCard, }}
+                                    onPress={() => {
+                                        trigger();
+                                        this.bottomSheetRef.current?.snapToIndex(4);
+                                        this.addAllSectionCourse(i['Course Code'], sectionObj);
+                                        // 切換searchText為點擊的Code
+                                        this.setState({ searchText: i['Course Code'] });
+                                        this.verScroll.current.scrollTo({ y: 0 });
+                                    }}
+                                >
+                                    <Text style={{
+                                        ...s.searchResultText,
+                                        fontSize: scale(15),
+                                        color: filterCourseList.length == 1 ? themeColor : black.third,
+                                        fontWeight: 'bold',
+                                    }}>{i['Course Code']}</Text>
+                                    <Text style={{ ...s.searchResultText, }}>{i['Course Title']}</Text>
+                                    <Text style={{ ...s.searchResultText, }}>{i['Course Title Chi']}</Text>
+                                </TouchableOpacity>
+                            )}
 
                             {/* 只剩一節候選課程時，展示可選Section */}
                             {filterCourseList.length == 1 && sectionObj && (<>
                                 <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
-                                <ScrollView horizontal style={{ width: scale(350) }}>
+
+                                <BottomSheetFlatList
+                                    data={Object.keys(sectionObj)}
+                                    style={{ marginTop: scale(5) }}
+                                    numColumns={Object.keys(sectionObj).length}
+                                    columnWrapperStyle={{ flexWrap: 'wrap' }}
+                                    renderItem={({ item }) => {
+                                        const key = item;
+                                        const courseInfo = sectionObj[key][0];
+                                        return <TouchableOpacity
+                                            style={{ ...s.courseCard, }}
+                                            onPress={() => {
+                                                this.addCourse(courseInfo);
+                                                // TODO: Switch選擇是否打開自動收起Sheet模式
+                                                // this.verScroll.current.scrollTo({ y: 0 });
+                                                this.bottomSheetRef.current?.snapToIndex(0);
+                                            }}
+                                        >
+                                            {/* CPED1001、CPED1002特有不同Section不同課 */}
+                                            {(courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002') && (<>
+                                                <Text style={{ ...s.searchResultText, }}>{courseInfo['Course Title']}</Text>
+                                                <Text style={{ ...s.searchResultText, }}>{courseInfo['Course Title Chi']}</Text>
+                                            </>)}
+                                            {/* Section號碼 */}
+                                            <Text style={{ ...s.searchResultText, color: themeColor, fontSize: scale(15), fontWeight: 'bold' }}>{key}</Text>
+                                            {/* 老師名 */}
+                                            <Text style={{ ...s.searchResultText, color: themeColor }}>{courseInfo['Teacher Information']}</Text>
+                                            {/* 該Section上課時間 */}
+                                            {sectionObj[key].map(itm => {
+                                                return <Text style={{ ...s.searchResultText, }}>{itm['Day'] + ' ' + itm['Time From'] + ' ~ ' + itm['Time To']}</Text>
+                                            })}
+                                        </TouchableOpacity>
+                                    }}
+                                    ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
+                                />
+
+                                {false && <BottomSheetScrollView horizontal>
                                     {Object.keys(sectionObj).map(key => {
                                         const courseInfo = sectionObj[key][0];
                                         return <TouchableOpacity
                                             style={{
-                                                marginRight: verticalScale(5),
-                                                backgroundColor: themeColorUltraLight,
-                                                borderRadius: scale(5),
-                                                height: scale(100)
+                                                // marginRight: verticalScale(5),
+                                                // backgroundColor: themeColorUltraLight,
+                                                // borderRadius: scale(5),
+                                                // height: scale(100)
+                                                ...s.courseCard,
                                             }}
                                             onPress={() => {
                                                 this.addCourse(courseInfo);
@@ -1025,11 +1074,11 @@ E11-0000
                                             })}
                                         </TouchableOpacity>
                                     })}
-                                </ScrollView>
+                                </BottomSheetScrollView>}
                             </>)}
                         </View>)
                     }) : null}
-                </ScrollView>
+                </BottomSheetScrollView>
             </View>
         )
     }
@@ -1119,14 +1168,14 @@ E11-0000
                             // 切換加課模式
                             trigger();
                             const { hasOpenCourseSearch } = this.state;
-                            if (hasOpenCourseSearch) { this.bottomSheetRef.current?.close() }
+                            if (hasOpenCourseSearch) { this.bottomSheetRef?.current?.close() }
                             else {
                                 if (allCourseAllTime?.length > 0) {
                                     // 有課，展開一點
-                                    this.bottomSheetRef.current?.snapToIndex(1);
+                                    this.bottomSheetRef?.current?.snapToIndex(1);
                                 } else {
-                                    // 沒課，展開半屏
-                                    this.bottomSheetRef.current?.snapToIndex(2);
+                                    // 沒課，展開最大
+                                    this.bottomSheetRef?.current?.expand();
                                 }
                             }
                             this.setState({ hasOpenCourseSearch: !this.state.hasOpenCourseSearch });
@@ -1142,59 +1191,28 @@ E11-0000
                 </View>
 
                 <ScrollView ref={this.verScroll} keyboardDismissMode='on-drag'>
-                    {/* 課表 / 首次使用提示 */}
+                    {/* 渲染 課表 / 首次使用提示 */}
                     <View style={{ flex: 1 }}>
+                        {/* 渲染已保存的課表數據 */}
                         {allCourseAllTime && allCourseAllTime.length > 0 ? (
-                            // 渲染已保存的課表數據
-                            <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                style={{ marginHorizontal: scale(5) }}>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} >
                                 {dayList.map(day => {
                                     return this.renderDay(day);
                                 })}
                             </ScrollView>
                         ) : (this.renderFirstUse())}
                     </View>
-
-                    {/* 渲染選課的篩選列表 */}
-                    {false && this.state.addMode ?
-                        <View style={{ width: '34%', }}>
-                            {/* 搜索框引導文字 */}
-                            {!this.state.searchText ?
-                                <View style={{
-                                    flexDirection: 'row',
-                                    marginTop: verticalScale(5),
-                                    alignItems: 'center',
-                                }}>
-                                    <Ionicons
-                                        name="search"
-                                        size={verticalScale(12)}
-                                        color={themeColor}
-                                    />
-                                    <Text style={{
-                                        ...uiStyle.defaultText,
-                                        color: themeColor,
-                                    }}>Search↓</Text>
-                                </View>
-                                : null}
-                            {this.renderCourseSearch()}
-                        </View>
-                        : null}
                 </ScrollView>
 
                 <CustomBottomSheet
                     ref={this.bottomSheetRef}
-                    // setHasOpenFalse={() => { this.setState({ hasOpenCourseSearch: false }); }}
-                    // TODO: 嘗試優化中
-                    onStateChange={(idx) => {
-                        console.log(idx);
-                        if (idx == -1) {
+                    setHasOpenFalse={() => {
+                        if (this.state.hasOpenCourseSearch) {
                             this.setState({ hasOpenCourseSearch: false })
                         }
                     }}
                 >
-                    <this.renderCourseSearch />
+                    {this.renderCourseSearch()}
                 </CustomBottomSheet>
             </View>}</SafeAreaInsetsContext.Consumer>
         );
@@ -1223,5 +1241,11 @@ const s = StyleSheet.create({
         ...uiStyle.defaultText,
         color: black.third,
         textAlign: 'center',
+    },
+    courseCard: {
+        margin: scale(3),
+        padding: scale(5),
+        borderRadius: scale(6),
+        backgroundColor: COLOR_DIY.themeColorUltraLight,
     },
 });
