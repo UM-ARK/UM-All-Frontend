@@ -888,11 +888,13 @@ E11-0000
                             key={this.state.searchText}
                             numColumns={filterCourseList.length}
                             columnWrapperStyle={{ flexWrap: 'wrap' }}
-                            style={{ marginTop: scale(5) }}
+                            style={{ marginTop: scale(5), marginLeft: scale(10) }}
                             renderItem={({ item }) => {
                                 return <TouchableOpacity
                                     style={{
                                         ...s.courseCard,
+                                        width: scale(150),
+                                        height: scale(120)
                                     }}
                                     onPress={() => {
                                         trigger();
@@ -1002,17 +1004,19 @@ E11-0000
                             {/* 只剩一節候選課程時，展示可選Section */}
                             {filterCourseList.length == 1 && sectionObj && (<>
                                 <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
-
                                 <BottomSheetFlatList
                                     data={Object.keys(sectionObj)}
-                                    style={{ marginTop: scale(5) }}
+                                    style={{ marginTop: scale(5), marginLeft: scale(10) }}
                                     numColumns={Object.keys(sectionObj).length}
-                                    columnWrapperStyle={{ flexWrap: 'wrap' }}
+                                    columnWrapperStyle={Object.keys(sectionObj).length > 1 ? { flexWrap: 'wrap' } : null}
                                     renderItem={({ item }) => {
                                         const key = item;
                                         const courseInfo = sectionObj[key][0];
                                         return <TouchableOpacity
-                                            style={{ ...s.courseCard, }}
+                                            style={{ ...s.courseCard, 
+                                                width: scale(150),
+                                                height: scale(100)
+                                            }}
                                             onPress={() => {
                                                 this.addCourse(courseInfo);
                                                 // TODO: Switch選擇是否打開自動收起Sheet模式
@@ -1038,45 +1042,6 @@ E11-0000
                                     ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
                                     scrollEnabled={false}
                                 />
-
-                                {false && <BottomSheetScrollView horizontal>
-                                    {Object.keys(sectionObj).map(key => {
-                                        const courseInfo = sectionObj[key][0];
-                                        return <TouchableOpacity
-                                            style={{
-                                                // marginRight: verticalScale(5),
-                                                // backgroundColor: themeColorUltraLight,
-                                                // borderRadius: scale(5),
-                                                // height: scale(100)
-                                                ...s.courseCard,
-                                            }}
-                                            onPress={() => {
-                                                this.addCourse(courseInfo);
-                                                this.verScroll.current.scrollTo({ y: 0 });
-                                                this.bottomSheetRef.current?.snapToIndex(0);
-                                            }}
-                                        >
-                                            {/* CPED1001、CPED1002特有不同Section不同課 */}
-                                            {(courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002') && (
-                                                <>
-                                                    <Text style={{ ...s.searchResultText, }}>{courseInfo['Course Title']}</Text>
-                                                    <Text style={{ ...s.searchResultText, }}>{courseInfo['Course Title Chi']}</Text>
-                                                </>
-                                            )}
-                                            {/* Section號碼 */}
-                                            <Text style={{ ...s.searchResultText, color: themeColor, fontSize: scale(15), fontWeight: 'bold' }}>{key}</Text>
-                                            {/* 老師名 */}
-                                            <Text style={{ ...s.searchResultText, color: themeColor }}>{courseInfo['Teacher Information']}</Text>
-                                            {/* 該Section上課時間 */}
-                                            {sectionObj[key].map(itm => {
-                                                return <View>
-                                                    <Text style={{ ...s.searchResultText, }}>{itm['Day'] + ' ' + itm['Time From'] + ' ~ ' + itm['Time To']}</Text>
-                                                    {/* <Text>{itm['Time From'] + '~' + itm['Time To']}</Text> */}
-                                                </View>
-                                            })}
-                                        </TouchableOpacity>
-                                    })}
-                                </BottomSheetScrollView>}
                             </>)}
                         </View>)
                     }) : null}
