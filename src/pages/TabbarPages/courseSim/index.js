@@ -120,9 +120,7 @@ export default class CourseSim extends Component {
         super();
         this.verScroll = React.createRef();
         this.textSearchRef = React.createRef();
-
         this.bottomSheetRef = React.createRef();
-        this.snapPoints = ['25%', '50%', '75%'];
     }
 
     state = {
@@ -169,7 +167,6 @@ export default class CourseSim extends Component {
         this.focusListener = this.props.navigation.addListener('focus', () => {
             this.handleFocus();
         });
-
     }
 
     // componentWillUnmount() {
@@ -620,6 +617,7 @@ export default class CourseSim extends Component {
 
     clearCourse = () => {
         trigger();
+        this.bottomSheetRef?.current?.close();
         Alert.alert(``, `確定要清空當前的模擬課表嗎？`, [
             {
                 text: '確定清空',
@@ -879,8 +877,6 @@ E11-0000
                 </View>
 
                 <BottomSheetScrollView>
-                    {/* TODO: 一節課時的情況 */}
-                    {/* TODO: 一個Section時的情況 */}
                     {/* 渲染搜索課程的結果 */}
                     {haveSearchResult && filterCourseList?.length > 1 ?
                         <BottomSheetFlatList
@@ -893,8 +889,7 @@ E11-0000
                                 return <TouchableOpacity
                                     style={{
                                         ...s.courseCard,
-                                        width: scale(150),
-                                        height: scale(120)
+                                        // width: '45%',
                                     }}
                                     onPress={() => {
                                         trigger();
@@ -1006,16 +1001,19 @@ E11-0000
                                 <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
                                 <BottomSheetFlatList
                                     data={Object.keys(sectionObj)}
-                                    style={{ marginTop: scale(5), marginLeft: scale(10) }}
+                                    style={{ marginTop: scale(5), width: '100%' }}
                                     numColumns={Object.keys(sectionObj).length}
-                                    columnWrapperStyle={Object.keys(sectionObj).length > 1 ? { flexWrap: 'wrap' } : null}
+                                    columnWrapperStyle={Object.keys(sectionObj).length > 1 ? {
+                                        flexWrap: 'wrap',
+                                        alignItems: 'center', justifyContent: 'center',
+                                    } : null}
                                     renderItem={({ item }) => {
                                         const key = item;
                                         const courseInfo = sectionObj[key][0];
                                         return <TouchableOpacity
-                                            style={{ ...s.courseCard, 
-                                                width: scale(150),
-                                                height: scale(100)
+                                            style={{
+                                                ...s.courseCard,
+                                                width: '45%',
                                             }}
                                             onPress={() => {
                                                 this.addCourse(courseInfo);
