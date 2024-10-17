@@ -76,7 +76,7 @@
 		60729377286644C7007FBD2F /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SimpleLineIcons.ttf; sourceTree = "<group>"; };
 		60729378286644C7007FBD2F /* MaterialIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MaterialIcons.ttf; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = UMALL/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		8FE10A6D5AC12B531CA5AB84 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = UMALL/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8FE10A6D5AC12B531CA5AB84 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = UMALL/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B74EC323670F567D9DE26949 /* Pods_UMALL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UMALL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8627636543C1840FEF137EB /* Pods-UMALL.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL.debug.xcconfig"; path = "Target Support Files/Pods-UMALL/Pods-UMALL.debug.xcconfig"; sourceTree = "<group>"; };
 		E7EF3E096BA3248E68586B58 /* Pods-UMALL.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UMALL.release.xcconfig"; path = "Target Support Files/Pods-UMALL/Pods-UMALL.release.xcconfig"; sourceTree = "<group>"; };
@@ -175,6 +175,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				F8585DA52CC1933A006D3895 /* Recovered References */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -199,6 +200,30 @@
 				1C5D983E614368343BAD8024 /* Pods-UMALL-UMALLTests.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		F8585DA52CC1933A006D3895 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				6072936A286644C7007FBD2F /* Octicons.ttf */,
+				60729370286644C7007FBD2F /* Foundation.ttf */,
+				60729377286644C7007FBD2F /* SimpleLineIcons.ttf */,
+				60729371286644C7007FBD2F /* Ionicons.ttf */,
+				60729376286644C7007FBD2F /* EvilIcons.ttf */,
+				60729373286644C7007FBD2F /* FontAwesome5_Regular.ttf */,
+				60729375286644C7007FBD2F /* Zocial.ttf */,
+				6072936C286644C7007FBD2F /* Entypo.ttf */,
+				F8F8A7172BD351ED001A3B95 /* PrivacyInfo.xcprivacy */,
+				60729378286644C7007FBD2F /* MaterialIcons.ttf */,
+				6072936F286644C7007FBD2F /* AntDesign.ttf */,
+				60729372286644C7007FBD2F /* FontAwesome5_Solid.ttf */,
+				60729369286644C7007FBD2F /* Fontisto.ttf */,
+				6072936B286644C7007FBD2F /* Feather.ttf */,
+				6072936E286644C7007FBD2F /* MaterialCommunityIcons.ttf */,
+				6072936D286644C7007FBD2F /* FontAwesome5_Brands.ttf */,
+				60729374286644C7007FBD2F /* FontAwesome.ttf */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -555,18 +580,18 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 3.2.1.2;
+				CURRENT_PROJECT_VERSION = 3.2.2;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = UMALL/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = 3.2.1;
+				INFOPLIST_KEY_CFBundleDisplayName = 3.2.2;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -593,17 +618,17 @@
 				CODE_SIGN_ENTITLEMENTS = UMALL/UMALL.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
-				CURRENT_PROJECT_VERSION = 3.2.1.2;
+				CURRENT_PROJECT_VERSION = 3.2.2;
 				DEVELOPMENT_TEAM = UVSHNJYJWU;
 				INFOPLIST_FILE = UMALL/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = 3.2.1;
+				INFOPLIST_KEY_CFBundleDisplayName = 3.2.2;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
