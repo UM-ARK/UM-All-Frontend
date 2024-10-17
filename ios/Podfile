@@ -1,15 +1,22 @@
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
-pod 'Interactable', :path => '../node_modules/react-native-interactable'
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
-
 # ******** DIY Code Begin ********
 # 因為react-native-compressor的RCT-Folly問題，和Firebase問題，全局啟用
-use_modular_headers!
+# use_modular_headers!
+# 使用pod install --repo-update
+use_frameworks! :linkage => :static
+# 使用靜態框架，from Firebase/app安裝說明
+$RNFirebaseAsStaticFramework = true
+# 不需要廣告支持
+$RNFirebaseAnalyticsWithoutAdIdSupport=true
 # ******** DIY Code End ********
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -22,35 +29,8 @@ target 'UMALL' do
   config = use_native_modules!
   # project './UMALL.xcodeproj'
 
-  # ******** DIY Code Begin ********
-  # GoogleUtilities need, when pod install firebase
-  # use_frameworks! :linkage => :static
-  # pod 'FirebaseCore', :modular_headers => true
-  # pod 'FirebaseCoreExtension', :modular_headers => true
-  # pod 'FirebaseInstallations', :modular_headers => true
-  # pod 'GoogleDataTransport', :modular_headers => true
-  # pod 'GoogleUtilities', :modular_headers => true
-  # pod 'nanopb', :modular_headers => true
-  $RNFirebaseAsStaticFramework = true
-  # 不需要廣告支持
-  $RNFirebaseAnalyticsWithoutAdIdSupport=true
-  # ******** DIY Code End ********
-
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-    # Hermes is now enabled by default. Disable by setting this flag to false.
-    # Upcoming versions of React Native may rely on get_default_flags(), but
-    # we make it explicit here to aid in the React Native upgrade process.
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
-    # Enables Flipper.
-    #
-    # Note that if you have use_frameworks! enabled, Flipper will not work and
-    # you should disable the next line.
-    # :flipper_configuration => flipper_config, # 0.69.12中啟用該行將引發FlipperKit的報錯
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
@@ -61,13 +41,13 @@ target 'UMALL' do
   end
 
   post_install do |installer|
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
-      # Set `mac_catalyst_enabled` to `true` in order to apply patches
-      # necessary for Mac Catalyst builds
-      :mac_catalyst_enabled => false
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     # ******** DIY Code Begin ********
     # Xcode16 bitcode問題導致 Archive 後無法發佈，方案：https://stackoverflow.com/questions/79022303/asset-validation-failed-nslocalizedrecoverysuggestion-invalid-executable-the-e/79022687#:~:text=In%20case%20you%20have%20already%20post_install%20has%20been%20used%20then%20copy%20and%20past%20the%20below%20script%20inside%20that.

@@ -247,7 +247,6 @@ class UMEventDetail extends Component {
                                         chooseMode == index
                                             ? themeColor
                                             : bg_color,
-                                    marginHorizontal: scale(120),
                                 }}
                                 onPress={() => {
                                     trigger();

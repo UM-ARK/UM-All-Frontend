@@ -9,7 +9,6 @@ import {
 import CustomBottomSheet from './BottomSheet';
 
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import Carousel from 'react-native-snap-carousel';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 

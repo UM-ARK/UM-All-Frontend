@@ -114,6 +114,8 @@ export default {
         "進入ISW複製": "Enter ISW to Copy",
         "↑記得先粘貼課表數據，再點擊導入哦": "↑Remember to paste the class schedule data first and then click Import",
         "一鍵導入到模擬課表": "Import to simulated timetable",
+
+        "搜索課程：ECE, 電氣, AIM...": "Search: ECE, Electrical, AIM...",
     },
     features: {
         "服務一覽": "All Services",
@@ -166,7 +168,7 @@ export default {
         "防詐騙": "Scam",
 
 
-        "關於澳大的一切...": "Anything about UM...",
+        "提問：關於澳大的一切...": "Ask: Anything about UM...",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",

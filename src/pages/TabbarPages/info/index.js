@@ -68,14 +68,12 @@ class NewsScreen extends Component {
                         tabBarBounces: false,
                         tabBarActiveTintColor: COLOR_DIY.themeColor,
                         tabBarInactiveTintColor: COLOR_DIY.black.third,
-                    }}
-                    tabBarOptions={{
-                        pressColor: bg_color,
-                        indicatorStyle: {
+                        tabBarPressColor: bg_color,
+                        tabBarIndicatorStyle: {
                             backgroundColor: COLOR_DIY.themeColor,
                             width: tabWidth,
-                            left: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2,
-                        },
+                            left: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2
+                        }
                     }}
                     initialRouteName={'HomePage'}
                 >
