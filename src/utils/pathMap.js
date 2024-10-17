@@ -197,13 +197,12 @@ export const UM_PRINT_BALANCE = 'https://followyouprint.icto.um.edu.mo/adminport
 
 // 學業發展分類
 // 澳大 - UM Moodle
-export const UM_Moodle = 'https://ummoodle.um.edu.mo/my/';
+export const UM_Moodle = 'https://ummoodle.um.edu.mo/login/';
 // 澳大 - UM ISW
 export const UM_ISW = 'https://isw.um.edu.mo/siweb/faces/login.jspx';
 export const UM_ISW_NEW = 'https://isw.um.edu.mo/siapp';
 // 澳大 - UM 預選課
-export const UM_PRE_ENROLMENT =
-    'https://isw.um.edu.mo/sipeweb/faces/login.jspx';
+export const UM_PRE_ENROLMENT = 'https://isw.um.edu.mo/sipeweb/';
 // 澳大 - UM 選課模擬系統
 export const UM_COURSE_SIMU = 'https://kchomacau.github.io/timetable';
 // 澳大 - UM Add/Drop
