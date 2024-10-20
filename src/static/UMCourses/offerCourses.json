@@ -316,7 +316,7 @@
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "半導"
+            "Course Title Chi": "半導體材料與裝置"
         },
         {
             "Offering Unit": "FST",
@@ -826,7 +826,7 @@
             "Course Title": "Formal Software Specification",
             "Credit Units": 3,
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "正式軟體規格"
+            "Course Title Chi": "正式軟體規範"
         },
         {
             "Offering Unit": "FST",
@@ -981,7 +981,17 @@
             "Credit Units": 3,
             "Course For Info": "Course for :\n - FST - CVE17-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "畢業設計二"
+            "Course Title Chi": "畢業設計II"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "CEE",
+            "Course Code": "CIVL4002",
+            "Course Title": "Integrated Project Design",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "綜合項目設計"
         },
         {
             "Offering Unit": "FST",
@@ -1256,6 +1266,8 @@
             "Course Code": "COMM3017",
             "Course Title": "Scriptwriting",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Course For Info": "Course for :\n - FSS - COM17 / COM20\n",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "劇本創作"
         },
@@ -1410,6 +1422,16 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "ECE",
+            "Course Code": "ECEN2001",
+            "Course Title": "Measurement and Instrumentation",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "測量與儀器儀表"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
             "Course Code": "ECEN2002",
             "Course Title": "Electric Machines",
             "Credit Units": 3,
@@ -1426,6 +1448,16 @@
             "For Incoming Exchange Students": "Y",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "基礎電子學"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
+            "Course Code": "ECEN2004",
+            "Course Title": "Discrete Structure",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "離散結構"
         },
         {
             "Offering Unit": "FST",
@@ -1466,6 +1498,16 @@
             "For Incoming Exchange Students": "Y",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "電力系統工程與繼電器保護"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
+            "Course Code": "ECEN3001",
+            "Course Title": "Digital Signal Processing",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "數位訊號處理"
         },
         {
             "Offering Unit": "FST",
@@ -2591,7 +2633,7 @@
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "法語入門一"
+            "Course Title Chi": "法語入門I"
         },
         {
             "Offering Unit": "FAH",
@@ -3308,6 +3350,15 @@
             "Course Title Chi": "當代社會的關鍵問題"
         },
         {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
+            "Course Code": "GEST1012",
+            "Course Title": "Electricity and Life",
+            "Credit Units": 3,
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "電力與生活"
+        },
+        {
             "Offering Unit": "FED",
             "Course Code": "GESB1013",
             "Course Type": "GE Course",
@@ -3601,7 +3652,7 @@
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
             "Enrolled Year Level (on or above)": 2,
-            "Course Title Chi": "博弈論在政治和管理中的應用"
+            "Course Title Chi": "博弈論在政治和行政管理中的應用"
         },
         {
             "Offering Unit": "FSS",
@@ -6083,7 +6134,7 @@
             "Credit Units": 2,
             "Course For Info": "Course for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "刑法二（法律實務）（中文進行）"
+            "Course Title Chi": "刑法二（法律實務）（中文授課）"
         },
         {
             "Offering Unit": "FLL",
@@ -6153,7 +6204,7 @@
             "Credit Units": 1,
             "Course For Info": "Course for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "婚姻家庭法與繼承法（法律實務）（中文授課）"
+            "Course Title Chi": "世襲家庭法與繼承法（法律實務）（中文授課）"
         },
         {
             "Offering Unit": "FLL",
@@ -6176,7 +6227,7 @@
             "Course Title Chi": "世襲家庭法和繼承法（法律實踐）（以葡萄牙語進行）"
         }
     ],
-    "updateTime": "2024-10-17",
+    "updateTime": "2024-10-18",
     "academicYear": "24/25",
     "sem": "2",
     "remark": "用於Pre Enrollment期間的數據",
