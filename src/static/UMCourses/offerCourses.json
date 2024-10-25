@@ -1618,7 +1618,7 @@
             "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "基礎宏觀經濟學"
+            "Course Title Chi": "宏觀經濟學基礎"
         },
         {
             "Offering Unit": "FSS",
@@ -3820,6 +3820,7 @@
             "Course Title": "Developing Leadership",
             "Credit Units": 3,
             "Enrolled Year Level (on or above)": 2,
+            "Remarks": "This course is not open for pre-enrollment.",
             "Course Title Chi": "發展領導力"
         },
         {
@@ -3828,6 +3829,7 @@
             "Course Title": "Project on Social Awareness",
             "Credit Units": 1,
             "Enrolled Year Level (on or above)": 2,
+            "Remarks": "This course is not open for pre-enrollment.",
             "Course Title Chi": "社會意識項目"
         },
         {
@@ -3836,6 +3838,7 @@
             "Course Title": "Honours Project",
             "Credit Units": 3,
             "Enrolled Year Level (on or above)": 4,
+            "Remarks": "This course is not open for pre-enrollment.",
             "Course Title Chi": "榮譽項目"
         },
         {
@@ -4062,7 +4065,7 @@
             "Course Code": "IRTM1000",
             "Course Title": "Introduction to Integrated Resort Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA\n\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "綜合度假村管理概論"
         },
@@ -4072,7 +4075,7 @@
             "Course Code": "IRTM2000",
             "Course Title": "Introduction to Gaming Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "博彩管理概論"
         },
@@ -4082,7 +4085,7 @@
             "Course Code": "IRTM2001",
             "Course Title": "Psychology of Gambling",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "賭博心理學"
         },
@@ -4092,7 +4095,7 @@
             "Course Code": "IRTM3001",
             "Course Title": "Quality Service Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "優質服務管理"
         },
@@ -4102,7 +4105,7 @@
             "Course Code": "IRTM3002",
             "Course Title": "Convention and Exhibition Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "會展管理"
         },
@@ -4112,7 +4115,7 @@
             "Course Code": "IRTM3005",
             "Course Title": "Festival and Event Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "節日和活動管理"
         },
@@ -4122,7 +4125,7 @@
             "Course Code": "IRTM3012",
             "Course Title": "Gaming Law",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20 / IIR20-GMM20\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20 / IIR20-GMM20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "博彩法"
         },
@@ -4132,7 +4135,7 @@
             "Course Code": "IRTM3015",
             "Course Title": "Revenue Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "收入管理"
         },
@@ -4142,7 +4145,7 @@
             "Course Code": "IRTM3018",
             "Course Title": "Casino Mathematics",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "賭場數學"
         },
@@ -4152,7 +4155,7 @@
             "Course Code": "IRTM4000",
             "Course Title": "Strategic Management for the Resort and Gaming Industries",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "度假村和博彩業的策略管理"
         },
@@ -4162,7 +4165,7 @@
             "Course Code": "IRTM4002",
             "Course Title": "Global Issues in Resort and Gaming Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR / IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "度假村和博彩管理的全球問題"
         },
@@ -4182,7 +4185,7 @@
             "Course Code": "IRTM4005",
             "Course Title": "Graduation Project on Gaming Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-GMM20-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-GMM20-THIRD YEAR / IIR20-GMM20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "博彩管理畢業設計"
         },
@@ -4192,7 +4195,7 @@
             "Course Code": "IRTM4007",
             "Course Title": "Graduation Project on Hospitality Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - IIR20-CHM20-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "酒店管理畢業設計"
         },
@@ -4202,7 +4205,7 @@
             "Course Code": "IRTM4009",
             "Course Title": "Special Topics in Hotel and Resort Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA\n",
+            "Course For Info": "Course for :\n - FBA - IIM19\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "酒店及度假村管理專題"
         },
@@ -4261,7 +4264,7 @@
             "Course Code": "ISOM3002",
             "Course Title": "Analysis and Design of Information Systems",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "資訊系統分析與設計"
         },
@@ -4301,7 +4304,7 @@
             "Course Code": "ISOM3028",
             "Course Title": "Advanced Computer Programming",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "高階電腦程式設計"
         },
@@ -6129,6 +6132,16 @@
         {
             "Offering Unit": "FLL",
             "Offering Department": "MLS",
+            "Course Code": "TLL254-C",
+            "Course Title": "ADMINISTRATIVE LAW II (LEGAL PRACTICE) (CONDUCTED IN CHINESE)",
+            "Credit Units": 1,
+            "Course For Info": "Course for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "行政法二（法律實務）（中文授課）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
             "Course Code": "TLL354-C",
             "Course Title": "CRIMINAL LAW II (LEGAL PRACTICE) (CONDUCTED IN CHINESE)",
             "Credit Units": 2,
@@ -6204,7 +6217,7 @@
             "Credit Units": 1,
             "Course For Info": "Course for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "世襲家庭法與繼承法（法律實務）（中文授課）"
+            "Course Title Chi": "婚姻家庭法與繼承法（法律實務）（中文授課）"
         },
         {
             "Offering Unit": "FLL",
@@ -6227,7 +6240,7 @@
             "Course Title Chi": "世襲家庭法和繼承法（法律實踐）（以葡萄牙語進行）"
         }
     ],
-    "updateTime": "2024-10-18",
+    "updateTime": "2024-10-22",
     "academicYear": "24/25",
     "sem": "2",
     "remark": "用於Pre Enrollment期間的數據",
