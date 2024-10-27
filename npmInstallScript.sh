@@ -1,5 +1,7 @@
 # 忽略部分警告安裝npm
-npm i --legacy-peer-deps
+# npm i --legacy-peer-deps
+yarn install
+# yarn add xxxx@^x.x.x
 
 # 檢查漏洞
 # npm audit
