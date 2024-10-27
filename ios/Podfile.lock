@@ -1382,7 +1382,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-menu (1.1.3):
+  - react-native-menu (1.1.5):
     - React
   - react-native-pager-view (6.4.1):
     - DoubleConversion
@@ -1407,7 +1407,7 @@ PODS:
     - Yoga
   - react-native-restart (0.0.24):
     - React-Core
-  - react-native-safe-area-context (4.11.1):
+  - react-native-safe-area-context (4.12.0):
     - React-Core
   - react-native-simple-toast (3.3.1):
     - React-Core
@@ -1697,7 +1697,7 @@ PODS:
     - React
   - RNCAsyncStorage (2.0.0):
     - React-Core
-  - RNCClipboard (1.14.2):
+  - RNCClipboard (1.14.3):
     - React-Core
   - RNDateTimePicker (8.2.0):
     - React-Core
@@ -1714,7 +1714,7 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.20.0):
+  - RNGestureHandler (2.20.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2226,10 +2226,10 @@ SPEC CHECKSUMS:
   react-native-compressor: cd814c512cfbadc66cd927743645c927f5531986
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-image-picker: 5bd900eec966c8f9fe32c5ec844afcd71d052030
-  react-native-menu: c30eb7a85d7b04d51945f61ea8a8986ed366ac5c
+  react-native-menu: 6aa1e19da29cc4e83d641725ad01404cdb6d4257
   react-native-pager-view: bf5b54e14d2cc9329875325d79a7e6e293fe8b44
   react-native-restart: 45c8dca02491980f2958595333cbccd6877cb57e
-  react-native-safe-area-context: 5141f11858b033636f1788b14f32eaba92cee810
+  react-native-safe-area-context: 142fade490cbebbe428640b8cbdb09daf17e8191
   react-native-simple-toast: 1f1cc551d419bc0ab05dcb0136554006c274789d
   react-native-webview: d9a8bad8f501ca1b282165123ff7b3c16cd970df
   React-nativeconfig: 31072ab0146e643594f6959c7f970a04b6c9ddd0
@@ -2260,13 +2260,13 @@ SPEC CHECKSUMS:
   ReactCommon: 1007c09a406a451ddbd874e51511aa541d6034f6
   ReactNativeUiLib: acf5e70a64140d6f38a969978f090c16862c2d3d
   RNCAsyncStorage: d35c79ffba52c1013013e16b1fc295aec2feabb6
-  RNCClipboard: 5e503962f0719ace8f7fdfe9c60282b526305c85
+  RNCClipboard: 2821ac938ef46f736a8de0c8814845dde2dcbdfb
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFBAnalytics: a4b31678170c29f91b3c63ce9bbcba76b33ef77e
   RNFBApp: 4122dd41d8d7ff017b6ecf777a6224f5b349ca04
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: b1bde7ef45d1472a8145a143efc097df8a9173a4
+  RNGestureHandler: 4b397b156d173028ff97960b5ebacfbb21232081
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNPermissions: 294531ede5a64d1528463e88fffef05675842042
   RNReactNativeHapticFeedback: 293365e4df1faef21be8b8efe22c7b217c5e695a
