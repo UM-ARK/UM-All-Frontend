@@ -31,13 +31,14 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             android_keyboardInputMode='adjustResize'
             onClose={() => props?.setHasOpenFalse && props.setHasOpenFalse()}
             // enablePanDownToClose={true}
-            backgroundStyle={{ backgroundColor: COLOR_DIY.bg_color }}
+            backgroundStyle={{ backgroundColor: 'transparent' }}
             style={[{
                 shadowOffset: { width: 0, height: verticalScale(12) },
             }, animatedStyles]}
             handleStyle={{
                 backgroundColor: COLOR_DIY.white,
-                borderRadius: scale(50),
+                borderTopLeftRadius: scale(50),
+                borderTopRightRadius: scale(50),
             }}
             onChange={setIdx}
         // 可以通過react-native-gesture-handler的ScrollView替代react native ScrollView
