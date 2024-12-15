@@ -93,6 +93,7 @@ class Index extends Component {
                         fn_name: t('校園巴士', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'Bus', // a function
+                        describe: t('查看校巴到站情況', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -111,6 +112,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('查看澳大校曆發佈頁', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -129,6 +131,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('查看澳大校園地圖', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -147,6 +150,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('查看當前各課室佔用情況', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -154,6 +158,7 @@ class Index extends Component {
                         fn_name: t('車位', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'CarPark', // a function
+                        describe: t('查看當前澳大停車場剩餘車位', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -172,6 +177,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('查看E6電腦室使用情況', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.ionicons,
@@ -190,6 +196,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('直接前往圖書館主頁，能查看圖書館人數和搜索資源等', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -208,6 +215,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('進入UM PASS設置頁面', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -222,6 +230,7 @@ class Index extends Component {
                             bg_color_diy: '#002c55',
                             isBarStyleBlack: false,
                         },
+                        describe: t('查看澳大電子公告，最新的更新（未放到新聞和活動）會在這裡公示', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -233,6 +242,7 @@ class Index extends Component {
                             url: UM_PRINT_BALANCE,
                             title: '打印',
                         },
+                        describe: t('查看在澳大打印服務的餘額', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -251,6 +261,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('查看澳大官方失物認領列表', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -269,6 +280,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('查看澳大和其他公司在澳大發佈的招聘', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -280,6 +292,7 @@ class Index extends Component {
                             url: UM_RC_MENU,
                             title: '書院餐單',
                         },
+                        describe: t('查看澳大書院菜單', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -298,6 +311,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('進入澳大MyUM網頁查看完整功能', { ns: 'features' }),
                     },
                 ],
             },
@@ -321,6 +335,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('進入CMMS報修系統，可以對書院等各種設施的問題下單申請維修', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -339,6 +354,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('預約澳大體育場館的使用', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.ionicons,
@@ -357,6 +373,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('預約E6等建築的房間、場地', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -368,6 +385,7 @@ class Index extends Component {
                             url: UM_LIB_BOOK,
                             title: 'Lib房間',
                         },
+                        describe: t('預約圖書館房間', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -379,6 +397,7 @@ class Index extends Component {
                             url: UM_PRINT,
                             title: '打印',
                         },
+                        describe: t('可以線上傳文件，到E6等地方使用有Web Print標識的打印機打印', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -397,6 +416,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             // isBarStyleBlack: false,
                         },
+                        describe: t('為UM的各部門提意見，校方會對意見做出回應', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -415,6 +435,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('租用教學樓見到的鐵櫃儲物箱', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -433,6 +454,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('申請澳大的停車月票', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -444,6 +466,7 @@ class Index extends Component {
                             url: UM_DOCUMENTS,
                             title: 'UM 證明文件',
                         },
+                        describe: t('申請澳大相關的證明文件、學生證補辦等', { ns: 'features' }),
                     },
                 ],
             },
@@ -467,6 +490,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('UM Moodle，不想錯過DDL就要常看，可以把TimeLine板塊移動到最上方', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -474,6 +498,7 @@ class Index extends Component {
                         fn_name: 'Wiki',
                         needLogin: false,
                         go_where: 'Wiki', // a function
+                        describe: t('ARK Wiki，希望集成澳大的所有資訊、攻略、學習方法等', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -485,6 +510,7 @@ class Index extends Component {
                         //     url: UM_COURSE_SIMU,
                         //     title: '課表模擬(建議在電腦操作)',
                         // },
+                        describe: t('ARK課表模擬功能，選課時不用再對著Excel自己慢慢找啦！', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -503,6 +529,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('選咩課，UM Helper開發的課程評論網站', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -514,6 +541,7 @@ class Index extends Component {
                             url: UM_ISW,
                             title: 'UM ISW',
                         },
+                        describe: t('舊版ISW，看分、課表、繳費、個人資料設定等重要網站', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -525,6 +553,7 @@ class Index extends Component {
                             url: UM_ISW_NEW,
                             title: 'UM ISW',
                         },
+                        describe: t('全新版本的ISW，估計未來會主推這個系統', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -536,6 +565,7 @@ class Index extends Component {
                             url: UM_PRE_ENROLMENT,
                             title: '預選課(建議在電腦操作)',
                         },
+                        describe: t('預選課網站入口，一般在學期結尾進行', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -547,6 +577,7 @@ class Index extends Component {
                             url: UM_PRE_ENROLMENT_EXCEL,
                             title: '預選課(建議在電腦操作)',
                         },
+                        describe: t('進入澳大的預選表格、開課時間表的發佈頁', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -558,6 +589,7 @@ class Index extends Component {
                             url: UM_ADD_DROP,
                             title: '增補選(建議在電腦操作)',
                         },
+                        describe: t('Add Drop課的入口，在學期開始前', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -569,6 +601,7 @@ class Index extends Component {
                             url: UM_IMPORTANT_DATE,
                             title: '重要日期',
                         },
+                        describe: t('查看澳大本學年的重要日期，包括預選課、增補選、考試等重要時間點', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -580,6 +613,7 @@ class Index extends Component {
                             url: UM_WHOLE_PERSON,
                             title: '全人發展',
                         },
+                        describe: t('全人發展計劃的入口，拿到夠多的分數還有獎品', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -591,6 +625,7 @@ class Index extends Component {
                             url: UM_EXCHANGE,
                             title: 'UM 交流機會申請',
                         },
+                        describe: t('申請澳大的出外交流項目', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -609,6 +644,7 @@ class Index extends Component {
                             // 狀態欄字體是否黑色，默認true
                             isBarStyleBlack: false,
                         },
+                        describe: t('查看澳大獎學金介紹頁', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -620,6 +656,7 @@ class Index extends Component {
                             url: UM_FIND_BOOKS,
                             title: '資源搜索',
                         },
+                        describe: t('進入澳大圖書館的資源搜索頁，搜索澳大已購買的文獻資料、教科書等', { ns: 'features' }),
                     },
                 ],
             },
@@ -644,6 +681,7 @@ class Index extends Component {
                             text_color: COLOR_DIY.black.second,
                             bg_color_diy: '#ededed',
                         },
+                        describe: t('澳大生存指南公眾號歷史推文', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -657,6 +695,7 @@ class Index extends Component {
                             text_color: COLOR_DIY.black.second,
                             bg_color_diy: '#ededed',
                         },
+                        describe: t('澳大生存指南公眾號給內地新生的一些指南建議', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -670,6 +709,7 @@ class Index extends Component {
                             text_color: '#012d56',
                             bg_color_diy: '#fff',
                         },
+                        describe: t('澳大官方出品的新生圖文包，包括EELC等課程要求', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -683,6 +723,7 @@ class Index extends Component {
                             text_color: '#012d56',
                             bg_color_diy: '#fff',
                         },
+                        describe: t('防詐騙圖文包，外地同學初次到達澳門要注意！', { ns: 'features' }),
                     },
                 ],
             },
