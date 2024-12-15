@@ -30,7 +30,7 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             keyboardBlurBehavior='restore'
             android_keyboardInputMode='adjustResize'
             onClose={() => props?.setHasOpenFalse && props.setHasOpenFalse()}
-            // enablePanDownToClose={true}
+            enablePanDownToClose={props?.page == 'features' ? true : false}
             backgroundStyle={{ backgroundColor: 'transparent' }}
             style={[{
                 shadowOffset: { width: 0, height: verticalScale(12) },
