@@ -117,7 +117,6 @@ class UMEventPage extends Component {
                     zIndex: 999,
                     position: 'absolute',
                 }}
-                ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
                     { x: -scale(140), y: -verticalScale(220) },
