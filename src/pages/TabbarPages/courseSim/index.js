@@ -876,6 +876,10 @@ E11-0000
                     />
                 </View>
 
+                {/* TODO: 使用react-native-modal-datetime-picker製作一個星期幾、上課下課時間篩選器 */}
+                {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
+                {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
+
                 <BottomSheetScrollView>
                     {/* 渲染搜索課程的結果 */}
                     {haveSearchResult && filterCourseList?.length > 1 ?
