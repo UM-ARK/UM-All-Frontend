@@ -909,7 +909,7 @@ class Index extends Component {
                     Toast.show(t('已複製Link到剪貼板！'));
                 }}
             >
-                <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('複製功能Link')}</Text>
+                <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('複製功能Link', { ns: 'features' })}</Text>
             </TouchableOpacity>}
         </View>
     }
