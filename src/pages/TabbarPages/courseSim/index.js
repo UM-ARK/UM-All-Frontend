@@ -133,7 +133,7 @@ export default class CourseSim extends Component {
         allCourseAllTime: [],
 
         // addMode: false,
-        searchText: '',
+        searchText: null,
 
         dayFilter: dayList,
         timeFilterFrom: timeFrom,
@@ -830,8 +830,8 @@ E11-0000
     }
 
     renderCourseSearch = () => {
-        const { searchText } = this.state;
-        const filterCourseList = this.handleSearchFilterCourse(searchText);
+        const { searchText, dayFilter } = this.state;
+        const filterCourseList = searchText && this.handleSearchFilterCourse(searchText);
         // 是否有搜索結果
         const haveSearchResult = searchText && filterCourseList.length > 0;
 
@@ -879,13 +879,14 @@ E11-0000
                     />
                 </View>
 
-                {/* TODO: 使用react-native-modal-datetime-picker製作一個星期幾、上課下課時間篩選器 */}
-                {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
-                {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
-                {this.renderDayFilter()}
-                {this.renderTimeFilter()}
 
                 <BottomSheetScrollView>
+                    {/* TODO: 使用react-native-modal-datetime-picker製作一個星期幾、上課下課時間篩選器 */}
+                    {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
+                    {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
+                    {this.renderDayFilter()}
+                    {this.renderTimeFilter()}
+
                     {/* 渲染搜索課程的結果 */}
                     {haveSearchResult && filterCourseList?.length > 1 ?
                         <BottomSheetFlatList
@@ -935,6 +936,7 @@ E11-0000
                         // 從courseTimeList篩選所有的課程的Section、時間、老師
                         let sectionObj = {};
                         if (filterCourseList.length == 1) {
+                            // 找出該Course Code的所有Section
                             let codeRes = courseTimeList.filter(itm => {
                                 return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
                             });
@@ -1019,11 +1021,11 @@ E11-0000
                                     renderItem={({ item }) => {
                                         const key = item;
                                         const courseInfo = sectionObj[key][0];
-                                        return <TouchableOpacity
-                                            style={{
-                                                ...s.courseCard,
-                                                width: '45%',
-                                            }}
+                                        // 篩選該Section的上課時間是否在Filter內，全在才展示
+                                        const allDaysInFilter = sectionObj[key].every(course => dayFilter.includes(course.Day));
+
+                                        if (allDaysInFilter) return <TouchableOpacity
+                                            style={{ ...s.courseCard, width: '45%', }}
                                             onPress={() => {
                                                 this.addCourse(courseInfo);
                                                 // TODO: Switch選擇是否打開自動收起Sheet模式
@@ -1059,18 +1061,18 @@ E11-0000
 
     // 返回搜索候選所需的課程列表
     handleSearchFilterCourse = (inputText) => {
-        const { s_coursePlanFile } = this.state;
+        const { s_coursePlanFile, dayFilter } = this.state;
         const coursePlanList = s_coursePlanFile.Courses;
         inputText = inputText?.toUpperCase();
 
         let filterCourseList = [];
 
         filterCourseList = coursePlanList.filter(itm => {
-            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+            return (itm['Course Code'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title Chi'].indexOf(inputText) != -1
                 || itm['Teacher Information'].indexOf(inputText) != -1
-                || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1)
+                || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1))
         });
 
         return filterCourseList
