@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef, } from 'react';
 import {
     ScrollView,
     Text,
@@ -55,6 +55,7 @@ import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
 import { trigger } from "../../../utils/trigger";
+import CustomBottomSheet from "../courseSim/BottomSheet";
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -82,6 +83,8 @@ const { themeColor, white, black, } = COLOR_DIY;
 const iconSize = scale(25);
 
 class Index extends Component {
+    bottomSheetRef = React.createRef();
+
     state = {
         functionArr: [
             {
@@ -730,6 +733,7 @@ class Index extends Component {
         ],
         isLogin: false,
         showDialog: false,
+        bottomSheetInfo: null,
     };
 
     componentDidMount() {
@@ -848,15 +852,12 @@ class Index extends Component {
                                         this.setState({ showDialog: true });
                                     }
                                 }}
-                                // 複製相關網站link
+                                // 長按彈出BottomSheet查看功能描述以及可點擊複製Link
                                 onLongPress={() => {
                                     trigger();
-                                    if (go_where == 'Webview' || go_where == 'Linking') {
-                                        Clipboard.setString(webview_param.url);
-                                        Toast.show(t('已複製Link到剪貼板！'));
-                                    } else {
-                                        Toast.show(t('這個功能沒有Link可以複製哦！'));
-                                    }
+                                    this.setState({ bottomSheetInfo: item }, () => {
+                                        this.bottomSheetRef.current?.snapToIndex(1);
+                                    });
                                 }}
                             >
                                 {icon}
@@ -877,6 +878,38 @@ class Index extends Component {
                 />
             </View>
         );
+    }
+
+    renderBottomSheet() {
+        const { bottomSheetInfo } = this.state;
+        const { go_where, webview_param, needLogin } = bottomSheetInfo || {}; // 如果沒有bottomSheetInfo，則為空對象
+        const haveLink = (go_where == 'Webview' || go_where == 'Linking');
+        return <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_DIY.white, padding: scale(20) }}>
+            {/* 功能描述 */}
+            {bottomSheetInfo?.describe ? <Text
+                style={{
+                    ...uiStyle.defaultText,
+                    color: COLOR_DIY.black.main,
+                    textAlign: 'center'
+                }}>{bottomSheetInfo.describe}</Text> : null}
+
+            {/* 複製Link按鈕 */}
+            {haveLink && <TouchableOpacity
+                style={{
+                    backgroundColor: themeColor,
+                    borderRadius: scale(5),
+                    padding: scale(5),
+                    marginTop: verticalScale(10),
+                }}
+                onPress={() => {
+                    trigger();
+                    Clipboard.setString(webview_param.url);
+                    Toast.show(t('已複製Link到剪貼板！'));
+                }}
+            >
+                <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('複製功能Link')}</Text>
+            </TouchableOpacity>}
+        </View>
     }
 
     render() {
@@ -1024,6 +1057,13 @@ class Index extends Component {
                     }}
                     handleCancel={() => this.setState({ showDialog: false })}
                 />
+
+                <CustomBottomSheet
+                    ref={this.bottomSheetRef}
+                    page={'features'}
+                >
+                    {this.renderBottomSheet()}
+                </CustomBottomSheet>
             </View>}</SafeAreaInsetsContext.Consumer>
         );
     }
