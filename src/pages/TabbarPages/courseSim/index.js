@@ -44,6 +44,8 @@ import CourseCard from '../what2Reg/component/CourseCard';
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const timeFrom = '00:00';
+const timeTo = '23:59';
 
 // 設置本地緩存
 async function setLocalStorage(courseCodeList) {
@@ -133,12 +135,11 @@ export default class CourseSim extends Component {
         // addMode: false,
         searchText: '',
 
-        dayFilter: 'ALL',
-        // timeFilter: 'ALL',
-        // timeFilterFrom: '08:30',
-        // timeFilterTo: '22:00',
-        // showTimePickerFrom: false,
-        // showTimePickerTo: false,
+        dayFilter: dayList,
+        timeFilterFrom: timeFrom,
+        timeFilterTo: timeTo,
+        timePickerMode: 'from',
+        showTimePicker: false,
 
         s_coursePlanFile: coursePlanFile,
         s_coursePlanTimeFile: coursePlanTimeFile,
@@ -725,105 +726,107 @@ E11-0000
 
     renderDayFilter = () => {
         const { dayFilter } = this.state;
-        return (<View style={{ margin: scale(5), }}>
-            <FlatList
-                data={dayList}
-                horizontal
-                scrollEnabled
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item: itm }) => (
+
+        return (<View style={{
+            alignItems: 'center', justifyContent: 'center',
+            marginVertical: verticalScale(5), flexDirection: 'row',
+        }}>
+            {dayList.map(day => {
+                return (
                     <TouchableOpacity style={{
                         ...s.filterButtonContainer,
-                        backgroundColor: dayFilter == itm ? themeColor : white,
+                        backgroundColor: dayFilter.includes(day) ? themeColor : white,
                     }}
                         onPress={() => {
-                            this.setState({ dayFilter: itm })
+                            // TODO: 設置Filter後篩選對應的課程
+                            this.setState(prevState => {
+                                const newDayFilter = prevState.dayFilter.includes(day)
+                                    ? prevState.dayFilter.filter(d => d !== day)
+                                    : [...prevState.dayFilter, day];
+                                return { dayFilter: newDayFilter };
+                            });
                         }}
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: dayFilter == itm ? white : black.third,
-                        }}>{itm}</Text>
+                            color: dayFilter.includes(day) ? white : black.third,
+                        }}>{day}</Text>
                     </TouchableOpacity>
-                )}
-                ListHeaderComponent={() => (
-                    <TouchableOpacity style={{
-                        ...s.filterButtonContainer,
-                        backgroundColor: dayFilter == 'ALL' ? themeColor : white,
-                    }}
-                        onPress={() => {
-                            this.setState({ dayFilter: 'ALL' })
-                        }}
-                    >
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: dayFilter == 'ALL' ? white : black.third,
-                        }}>ALL</Text>
-                    </TouchableOpacity>
-                )}
-            />
+                )
+            })}
         </View>)
     }
 
     renderTimeFilter = () => {
-        const { timeFilter, timeFilterFrom, timeFilterTo, showTimePickerFrom, showTimePickerTo } = this.state;
-        return (<View style={{ flexDirection: 'row', marginHorizontal: scale(5) }}>
-            {/* ALL選項 */}
-            <TouchableOpacity style={{
-                ...s.filterButtonContainer,
-                backgroundColor: timeFilter == 'ALL' ? themeColor : white,
-            }}
-                onPress={() => {
-                    this.setState({ timeFilter: 'ALL' })
+        const { timeFilterFrom, timeFilterTo, showTimePicker, timePickerMode } = this.state;
+        const timeButton = (mode) => {
+            let backgroundColor = null;
+            let textColor = black.third;
+            if (mode == 'from') {
+                backgroundColor = timeFilterFrom == timeFrom ? null : themeColor;
+                textColor = timeFilterFrom == timeFrom ? black.third : white;
+            } else {
+                backgroundColor = timeFilterTo == timeTo ? null : themeColor;
+                textColor = timeFilterTo == timeTo ? black.third : white;
+            }
+            return (
+                <TouchableOpacity style={{
+                    flexDirection: 'row',
+                    ...s.filterButtonContainer,
+                    backgroundColor,
                 }}
-            >
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    color: timeFilter == 'ALL' ? white : black.third,
-                }}>ALL</Text>
-            </TouchableOpacity>
+                    onPress={() => {
+                        this.setState({ showTimePicker: true, timePickerMode: mode });
+                    }}
+                >
+                    <Text style={{ ...uiStyle.defaultText, color: textColor }}>
+                        {mode == 'from' ? timeFilterFrom : timeFilterTo}
+                    </Text>
+                </TouchableOpacity>
+            )
+        }
+
+        return (<View style={{
+            alignItems: 'center', justifyContent: 'center',
+            flexDirection: 'row',
+        }}>
+            {/* TODO: 還原時間篩選 */}
+            {(timeFilterFrom != timeFrom || timeFilterTo != timeTo) && (
+                <TouchableOpacity style={{ ...s.filterButtonContainer, backgroundColor: themeColorUltraLight, }}
+                    onPress={() => {
+                        // 清空時間篩選
+                        // TODO: 更新filter數據
+                        this.setState({ timeFilterFrom: timeFrom, timeFilterTo: timeTo });
+                    }}
+                >
+                    <Text style={{ ...uiStyle.defaultText, color: themeColor }}>Clear</Text>
+                </TouchableOpacity>
+            )}
 
             {/* 時間選項 */}
-            <TouchableOpacity style={{
-                flexDirection: 'row',
-                ...s.filterButtonContainer,
-                backgroundColor: timeFilter == 'TIME' ? themeColor : white,
-            }}
-                onPress={() => {
-                    this.setState({ timeFilter: 'TIME', showTimePickerFrom: true })
-                }}
-            >
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    color: timeFilter == 'TIME' ? white : black.third,
-                }}>{timeFilterFrom + ' - ' + timeFilterTo}</Text>
-            </TouchableOpacity>
+            {timeButton('from')}
+            <Text style={{ ...uiStyle.defaultText, color: black.third, }}>{' - '}</Text>
+            {timeButton('to')}
 
+            {/* 時間選擇器 */}
             <DateTimePickerModal
-                isVisible={showTimePickerFrom || showTimePickerTo}
-                // date={Date(timeFilterFrom)}
+                isVisible={showTimePicker}
                 mode='time'
-                // onConfirm={date => {
-                //     if (showTimePickerFrom) {
-                //         this.setState({
-                //             timeFilterFrom: date,
-                //             timeFilterTo: date,
-                //             showTimePickerFrom: false,
-                //         });
-                //     }
-                //     else if (showTimePickerTo) {
-                //         this.setState({
-                //             timeFilterTo: date,
-                //             showTimePickerTo: false,
-                //         });
-                //     }
-                // }}
+                onConfirm={date => {
+                    const formattedTime = moment(date).format('HH:mm');
+                    if (timePickerMode === 'from') {
+                        this.setState({ timeFilterFrom: formattedTime });
+                    } else {
+                        this.setState({ timeFilterTo: formattedTime });
+                    }
+                    // TODO: 更新filter數據
+                    this.setState({ showTimePicker: false });
+                }}
                 onCancel={() => {
-                    this.setState({ showTimePickerFrom: false, showTimePickerTo: false });
+                    this.setState({ showTimePicker: false });
                 }}
             />
-        </View>
-        )
+        </View>)
     }
 
     renderCourseSearch = () => {
@@ -879,6 +882,8 @@ E11-0000
                 {/* TODO: 使用react-native-modal-datetime-picker製作一個星期幾、上課下課時間篩選器 */}
                 {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
                 {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
+                {this.renderDayFilter()}
+                {this.renderTimeFilter()}
 
                 <BottomSheetScrollView>
                     {/* 渲染搜索課程的結果 */}
@@ -1205,8 +1210,9 @@ const s = StyleSheet.create({
         margin: scale(10),
     },
     filterButtonContainer: {
-        paddingHorizontal: scale(5), paddingVertical: scale(2),
-        borderRadius: scale(5),
+        paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
+        borderRadius: verticalScale(5),
+        marginHorizontal: scale(2.5),
     },
     searchResultText: {
         ...uiStyle.defaultText,
