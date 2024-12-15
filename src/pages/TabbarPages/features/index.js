@@ -891,7 +891,9 @@ class Index extends Component {
                     ...uiStyle.defaultText,
                     color: COLOR_DIY.black.main,
                     textAlign: 'center'
-                }}>{bottomSheetInfo.describe}</Text> : null}
+                }} selectable>
+                {bottomSheetInfo.describe}
+            </Text> : null}
 
             {/* 複製Link按鈕 */}
             {haveLink && <TouchableOpacity
