@@ -838,6 +838,7 @@ E11-0000
         const { s_coursePlanTimeFile } = this.state;
         const courseTimeList = s_coursePlanTimeFile.Courses;
 
+        // 整理所有候選課程的Section
         let courseCodeObj = {};
         if (haveSearchResult && filterCourseList.length >= 1) {
             filterCourseList.map(i => {
@@ -899,11 +900,10 @@ E11-0000
                 </View>
 
                 <BottomSheetScrollView>
-                    {/* TODO: 使用react-native-modal-datetime-picker製作一個星期幾、上課下課時間篩選器 */}
                     {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
                     {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
                     {this.renderDayFilter()}
-                    {this.renderTimeFilter()}
+                    {/* {this.renderTimeFilter()} */}
 
                     {/* 渲染搜索課程的結果 */}
                     {haveSearchResult && filterCourseList?.length > 1 ?
@@ -916,6 +916,7 @@ E11-0000
                             renderItem={({ item }) => {
                                 const sectionObj = courseCodeObj[item['Course Code']]
                                 // TODO: 篩選該Section的上課時間是否在Filter內，全在才展示
+                                // TODO: BUG: 應該修改為，全不在才不顯示
                                 let allDaysInFilter = false;
                                 for (let index = 0; index < Object.keys(sectionObj).length; index++) {
                                     const key = Object.keys(sectionObj)[index];
@@ -947,18 +948,19 @@ E11-0000
 
                     {haveSearchResult && filterCourseList.length == 1 ? filterCourseList.map(i => {
                         // 從courseTimeList篩選所有的課程的Section、時間、老師
-                        let sectionObj = {};
-                        if (filterCourseList.length == 1) {
-                            // 找出該Course Code的所有Section
-                            let codeRes = courseTimeList.filter(itm => {
-                                return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
-                            });
-                            codeRes.map(itm => {
-                                let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
-                                tempArr.push(itm);
-                                sectionObj[itm['Section']] = tempArr;
-                            })
-                        }
+                        const sectionObj = courseCodeObj[i['Course Code']];
+                        // let sectionObj = {};
+                        // if (filterCourseList.length == 1) {
+                        //     // 找出該Course Code的所有Section
+                        //     let codeRes = courseTimeList.filter(itm => {
+                        //         return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
+                        //     });
+                        //     codeRes.map(itm => {
+                        //         let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
+                        //         tempArr.push(itm);
+                        //         sectionObj[itm['Section']] = tempArr;
+                        //     })
+                        // }
 
                         return (<View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                             {/* 刪除該Code課程按鈕 */}
@@ -1036,6 +1038,7 @@ E11-0000
                                         const courseInfo = sectionObj[key][0];
                                         // 篩選該Section的上課時間是否在Filter內，全在才展示
                                         const allDaysInFilter = sectionObj[key].every(course => dayFilter.includes(course.Day));
+                                        // TODO: 時間篩選，但好像操作邏輯上不是很配合現在的星期篩選
 
                                         if (allDaysInFilter) return <TouchableOpacity
                                             style={{ ...s.courseCard, width: '45%', }}
