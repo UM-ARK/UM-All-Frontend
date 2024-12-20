@@ -4480,7 +4480,7 @@
             "Teacher Information": "CAI ZHONGYA",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
-            "Course Title Chi": "畢業設計二"
+            "Course Title Chi": "畢業設計II"
         },
         {
             "Offering Unit": "FST",
@@ -4492,7 +4492,7 @@
             "Teacher Information": "XU JIE",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
-            "Course Title Chi": "畢業設計二"
+            "Course Title Chi": "畢業設計II"
         },
         {
             "Offering Unit": "FST",
@@ -4504,7 +4504,7 @@
             "Teacher Information": "PAN MI",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
-            "Course Title Chi": "畢業設計二"
+            "Course Title Chi": "畢業設計II"
         },
         {
             "Offering Unit": "FST",
@@ -4516,7 +4516,7 @@
             "Teacher Information": "LI ZHENNING",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
-            "Course Title Chi": "畢業設計二"
+            "Course Title Chi": "畢業設計II"
         },
         {
             "Offering Unit": "FST",
@@ -4528,7 +4528,7 @@
             "Teacher Information": "JOEL OLIVEIRA REIS",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17\n",
-            "Course Title Chi": "畢業設計二"
+            "Course Title Chi": "畢業設計II"
         },
         {
             "Offering Unit": "FST",
@@ -8783,7 +8783,7 @@
             "Teacher Information": "CARLOS JORGE FERREIRA SILVESTRE",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - ECE19 / ECE21\n",
-            "Course Title Chi": "畢業設計II"
+            "Course Title Chi": "畢業設計二"
         },
         {
             "Offering Unit": "FST",
@@ -8795,7 +8795,7 @@
             "Teacher Information": "ZHU YAN",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - ECE21\n",
-            "Course Title Chi": "畢業設計II"
+            "Course Title Chi": "畢業設計二"
         },
         {
             "Offering Unit": "FST",
@@ -8807,7 +8807,7 @@
             "Teacher Information": "YIN JUN",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - ECE21\n",
-            "Course Title Chi": "畢業設計II"
+            "Course Title Chi": "畢業設計二"
         },
         {
             "Offering Unit": "FST",
@@ -8819,7 +8819,7 @@
             "Teacher Information": "LAO KENG WENG",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - ECE21\n",
-            "Course Title Chi": "畢業設計II"
+            "Course Title Chi": "畢業設計二"
         },
         {
             "Offering Unit": "FST",
@@ -8831,7 +8831,7 @@
             "Teacher Information": "ZHANG HONGCAI",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - ECE21\n",
-            "Course Title Chi": "畢業設計II"
+            "Course Title Chi": "畢業設計二"
         },
         {
             "Offering Unit": "FST",
@@ -8843,7 +8843,7 @@
             "Teacher Information": "SHAO YULIN",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - ECE21\n",
-            "Course Title Chi": "畢業設計II"
+            "Course Title Chi": "畢業設計二"
         },
         {
             "Offering Unit": "FST",
@@ -8905,7 +8905,7 @@
             "Time To": "17:15",
             "Classroom": "E6-1102C",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN19\n - FSS - MEC19\n",
-            "Course Title Chi": "基礎宏觀經濟學"
+            "Course Title Chi": "宏觀經濟學基礎"
         },
         {
             "Offering Unit": "FSS",
@@ -9484,7 +9484,7 @@
             "Time To": "12:45",
             "Classroom": "E22-3002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - ENG19\n",
-            "Course Title Chi": "英語教學概論"
+            "Course Title Chi": "英語語言教學概論"
         },
         {
             "Offering Unit": "FED",
@@ -19603,9 +19603,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "WANG QIAN",
             "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "14:30",
-            "Time To": "15:45",
+            "Day": "TUE",
+            "Time From": "19:00",
+            "Time To": "20:15",
             "Classroom": "E3-4043",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "商業定量推理"
@@ -19620,9 +19620,9 @@
             "Medium of Instruction": "English",
             "Teacher Information": "WANG QIAN",
             "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "14:30",
-            "Time To": "15:45",
+            "Day": "FRI",
+            "Time From": "19:00",
+            "Time To": "20:15",
             "Classroom": "E3-4043",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "商業定量推理"
@@ -22791,7 +22791,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-4012",
-            "Course Title Chi": "博弈論在政治和行政管理中的應用"
+            "Course Title Chi": "博弈論在政治和管理中的應用"
         },
         {
             "Offering Unit": "FSS",
@@ -24929,7 +24929,7 @@
             "Course Title": "Gaming Law",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TBC",
+            "Teacher Information": "JOÃO LORETO ILHÃO MOREIRA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "13:00",
@@ -24945,7 +24945,7 @@
             "Course Title": "Gaming Law",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TBC",
+            "Teacher Information": "JOÃO LORETO ILHÃO MOREIRA",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "13:00",
@@ -34430,7 +34430,7 @@
             "Time To": "15:45",
             "Classroom": "N21-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "心理學統計學II"
+            "Course Title Chi": "心理統計學II"
         },
         {
             "Offering Unit": "FSS",
@@ -34579,6 +34579,54 @@
         {
             "Offering Unit": "FSS",
             "Offering Department": "DPSY",
+            "Course Code": "PSYC4001",
+            "Course Title": "Research Project I",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "YAN MING",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "研究計畫一"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
+            "Course Code": "PSYC4001",
+            "Course Title": "Research Project I",
+            "Section": "002",
+            "Medium of Instruction": "English",
+            "Teacher Information": "GUO TIEYUAN",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "研究計畫一"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
+            "Course Code": "PSYC4001",
+            "Course Title": "Research Project I",
+            "Section": "003",
+            "Medium of Instruction": "English",
+            "Teacher Information": "MICHIEL MARTEN ARJEN SPAPÉ",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "研究計畫一"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
+            "Course Code": "PSYC4001",
+            "Course Title": "Research Project I",
+            "Section": "004",
+            "Medium of Instruction": "English",
+            "Teacher Information": "ZHANG HAOYUN",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "研究計畫一"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
             "Course Code": "PSYC4002",
             "Course Title": "Research Project II",
             "Section": "001",
@@ -34685,6 +34733,18 @@
             "Teacher Information": "ZHU NAN",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "研究計畫二"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
+            "Course Code": "PSYC4004",
+            "Course Title": "Field Experience II",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "KWAN YAN YEE LETTY / LAO CHAN FONG",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "實地體驗二"
         },
         {
             "Offering Unit": "FSS",

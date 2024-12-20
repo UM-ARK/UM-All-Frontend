@@ -2778,7 +2778,7 @@
             "Time To": "12:45",
             "Classroom": "E22-3002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - ENG19\n",
-            "Course Title Chi": "英語教學概論"
+            "Course Title Chi": "英語語言教學概論"
         },
         {
             "Offering Unit": "FED",
@@ -6248,7 +6248,7 @@
             "Course Title": "Gaming Law",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "TBC",
+            "Teacher Information": "JOÃO LORETO ILHÃO MOREIRA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "13:00",
@@ -8723,6 +8723,18 @@
         {
             "Offering Unit": "FSS",
             "Offering Department": "DPSY",
+            "Course Code": "PSYC4001",
+            "Course Title": "Research Project I",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "YAN MING",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "研究計畫一"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
             "Course Code": "PSYC4002",
             "Course Title": "Research Project II",
             "Section": "001",
@@ -8730,6 +8742,18 @@
             "Teacher Information": "CHI PEILIAN",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "研究計畫二"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
+            "Course Code": "PSYC4004",
+            "Course Title": "Field Experience II",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "KWAN YAN YEE LETTY / LAO CHAN FONG",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
+            "Course Title Chi": "實地體驗二"
         },
         {
             "Offering Unit": "FSS",
@@ -9010,7 +9034,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2024-12-17",
+    "updateTime": "2024-12-18",
     "academicYear": "24/25",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
