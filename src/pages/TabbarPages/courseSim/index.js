@@ -136,6 +136,7 @@ export default class CourseSim extends Component {
         searchText: null,
 
         dayFilter: dayList,
+        dayFilterChoice: null,
         timeFilterFrom: timeFrom,
         timeFilterTo: timeTo,
         timePickerMode: 'from',
@@ -725,7 +726,7 @@ E11-0000
     }
 
     renderDayFilter = () => {
-        const { dayFilter } = this.state;
+        const { dayFilter, dayFilterChoice, } = this.state;
 
         return (<View style={{
             alignItems: 'center', justifyContent: 'center',
@@ -735,21 +736,21 @@ E11-0000
                 return (
                     <TouchableOpacity style={{
                         ...s.filterButtonContainer,
-                        backgroundColor: dayFilter.includes(day) ? themeColor : white,
+                        backgroundColor: day === dayFilterChoice ? secondThemeColor : white,
+                        borderWidth: scale(1),
+                        borderColor: day === dayFilterChoice ? secondThemeColor : themeColor,
                     }}
                         onPress={() => {
-                            // TODO: 設置Filter後篩選對應的課程
-                            this.setState(prevState => {
-                                const newDayFilter = prevState.dayFilter.includes(day)
-                                    ? prevState.dayFilter.filter(d => d !== day)
-                                    : [...prevState.dayFilter, day];
-                                return { dayFilter: newDayFilter };
-                            });
+                            if (dayFilterChoice === day) {
+                                this.setState({ dayFilterChoice: null });
+                            } else {
+                                this.setState({ dayFilterChoice: day });
+                            }
                         }}
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: dayFilter.includes(day) ? white : black.third,
+                            color: day === dayFilterChoice ? white : themeColor,
                         }}>{day}</Text>
                     </TouchableOpacity>
                 )
@@ -830,7 +831,7 @@ E11-0000
     }
 
     renderCourseSearch = () => {
-        const { searchText, dayFilter } = this.state;
+        const { searchText, dayFilter, dayFilterChoice } = this.state;
         const filterCourseList = searchText && this.handleSearchFilterCourse(searchText);
         // 是否有搜索結果
         const haveSearchResult = searchText && filterCourseList.length > 0;
@@ -915,16 +916,17 @@ E11-0000
                             style={{ marginTop: scale(5), marginLeft: scale(10) }}
                             renderItem={({ item }) => {
                                 const sectionObj = courseCodeObj[item['Course Code']]
-                                // TODO: 篩選該Section的上課時間是否在Filter內，全在才展示
-                                // TODO: BUG: 應該修改為，全不在才不顯示
-                                let allDaysInFilter = false;
-                                for (let index = 0; index < Object.keys(sectionObj).length; index++) {
-                                    const key = Object.keys(sectionObj)[index];
-                                    allDaysInFilter = sectionObj[key].every(course => dayFilter.includes(course.Day));
-                                    if (allDaysInFilter) { break; }
-                                }
+                                // 篩選該Section的上課時間是否在Filter內，全不在才不顯示
+                                let dayInFilter = false;
+                                if (dayFilterChoice) {
+                                    for (let index = 0; index < Object.keys(sectionObj).length; index++) {
+                                        const key = Object.keys(sectionObj)[index];
+                                        dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        if (dayInFilter) { break; }
+                                    }
+                                } else { dayInFilter = true; }
 
-                                if (allDaysInFilter) return <TouchableOpacity
+                                if (dayInFilter) return <TouchableOpacity
                                     style={{ ...s.courseCard, }}
                                     onPress={() => {
                                         trigger();
@@ -1036,11 +1038,13 @@ E11-0000
                                     renderItem={({ item }) => {
                                         const key = item;
                                         const courseInfo = sectionObj[key][0];
-                                        // 篩選該Section的上課時間是否在Filter內，全在才展示
-                                        const allDaysInFilter = sectionObj[key].every(course => dayFilter.includes(course.Day));
-                                        // TODO: 時間篩選，但好像操作邏輯上不是很配合現在的星期篩選
+                                        // 篩選該Section的上課時間是否在Filter內，全不在才不展示
+                                        let dayInFilter = false;
+                                        if (dayFilterChoice) {
+                                            dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        } else { dayInFilter = true; }
 
-                                        if (allDaysInFilter) return <TouchableOpacity
+                                        if (dayInFilter) return <TouchableOpacity
                                             style={{ ...s.courseCard, width: '45%', }}
                                             onPress={() => {
                                                 this.addCourse(courseInfo);
