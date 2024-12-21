@@ -913,7 +913,7 @@ class HomeScreen extends Component {
                     }
 
                     {/* 快捷功能圖標 */}
-                    <View style={{ width: '100%', paddingHorizontal: scale(10) }}>
+                    <View style={{ width: '100%', paddingHorizontal: scale(10), alignSelf: 'center', }}>
                         <FlatGrid
                             style={{
                                 alignSelf: 'center',
