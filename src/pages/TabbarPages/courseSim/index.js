@@ -740,6 +740,7 @@ E11-0000
                         borderColor: day === dayFilterChoice ? secondThemeColor : themeColor,
                     }}
                         onPress={() => {
+                            trigger();
                             if (dayFilterChoice === day) {
                                 this.setState({
                                     dayFilterChoice: null,
@@ -780,6 +781,7 @@ E11-0000
                     borderWidth: scale(1), borderColor: themeColor, borderRadius: scale(5),
                 }}
                     onPress={() => {
+                        trigger();
                         this.setState({ showTimePicker: true, timePickerMode: mode });
                     }}
                 >
@@ -798,6 +800,7 @@ E11-0000
             {(timeFilterFrom != timeFrom || timeFilterTo != timeTo) && (
                 <TouchableOpacity style={{ ...s.filterButtonContainer, backgroundColor: themeColorUltraLight, }}
                     onPress={() => {
+                        trigger();
                         // 清空時間篩選
                         this.setState({ timeFilterFrom: timeFrom, timeFilterTo: timeTo });
                     }}
@@ -1077,6 +1080,7 @@ E11-0000
                                         if (dayInFilter) return <TouchableOpacity
                                             style={{ ...s.courseCard, width: '45%', }}
                                             onPress={() => {
+                                                trigger();
                                                 this.addCourse(courseInfo);
                                                 // TODO: Switch選擇是否打開自動收起Sheet模式
                                                 // this.verScroll.current.scrollTo({ y: 0 });
