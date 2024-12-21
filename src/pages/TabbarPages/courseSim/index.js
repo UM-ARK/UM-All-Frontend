@@ -1244,6 +1244,15 @@ E11-0000
                         }
                     }}
                 >
+                    {/* 數據日期版本 */}
+                    {this.state.searchText ? null : (
+                        <Text style={{
+                            alignSelf: 'center',
+                            ...uiStyle.defaultText, fontSize: scale(9), color: black.third,
+                        }}>
+                            Timetable Version: {this.state.s_coursePlanFile.updateTime}
+                        </Text>
+                    )}
                     {this.renderCourseSearch()}
                 </CustomBottomSheet>
             </View>}</SafeAreaInsetsContext.Consumer>
