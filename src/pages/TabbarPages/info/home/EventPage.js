@@ -244,12 +244,11 @@ class EventPage extends Component {
     render() {
         const { leftDataList, rightDataList, isLoading } = this.state;
         return (
-            <View
-                style={{
-                    flex: 1, backgroundColor: bg_color,
-                    alignItems: 'center', justifyContent: 'center',
-                    ...this.props.style,
-                }}>
+            <View style={{
+                flex: 1, backgroundColor: bg_color,
+                alignItems: 'center', justifyContent: 'center',
+                ...this.props.style,
+            }}>
                 {/* 加載狀態渲染骨架屏 */}
                 {this.state.isLoading ? (
                     <Loading />
