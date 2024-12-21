@@ -11,8 +11,8 @@ export default {
     // 關於頁
     about: {
         "APP Version": "當前應用版本: ",
-        "Add Drop Data Version": "Add Drop課表數據更新日期: ",
-        "PreEnroll Data Version": "預選課表數據更新日期: ",
+        "Add Drop Data Version": "Add Drop課表日期版本: ",
+        "PreEnroll Data Version": "預選課表數據日期版本: ",
         "Language Setting": "語言設置: ",
 
         "ARK Describe 1": "ARK ALL源自澳大同學為愛發電，並非官方應用程式！",
