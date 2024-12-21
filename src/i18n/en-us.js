@@ -116,6 +116,9 @@ export default {
         "一鍵導入到模擬課表": "Import to simulated timetable",
 
         "搜索課程：ECE, 電氣, AIM...": "Search: ECE, Electrical, AIM...",
+
+        "開始時間不能晚於結束時間！": "Cannot start later than end time!",
+        "結束時間不能早於開始時間！": "Cannot end earlier than start time!",
     },
     features: {
         "服務一覽": "All Services",
@@ -173,7 +176,7 @@ export default {
 
         // 功能說明
         "複製功能Link": "Copy this function link",
-        
+
         "查看校巴到站情況": "Check the bus arrival status",
         "查看澳大校曆發佈頁": "Check the UM calendar release page",
         "查看澳大校園地圖": "Check the UM campus map",

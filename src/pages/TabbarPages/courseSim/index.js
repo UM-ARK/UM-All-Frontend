@@ -116,7 +116,6 @@ function toDateTime(time) {
     return new Date(0, 0, 0, hours, minutes); // 使用一个固定的日期
 };
 
-// TODO: 查看某時間段可選的CourseCode、Section
 export default class CourseSim extends Component {
     constructor() {
         super();
@@ -742,7 +741,10 @@ E11-0000
                     }}
                         onPress={() => {
                             if (dayFilterChoice === day) {
-                                this.setState({ dayFilterChoice: null });
+                                this.setState({
+                                    dayFilterChoice: null,
+                                    timeFilterFrom: timeFrom, timeFilterTo: timeTo,  // 還原時間篩選
+                                });
                             } else {
                                 this.setState({ dayFilterChoice: day });
                             }
@@ -775,6 +777,7 @@ E11-0000
                     flexDirection: 'row',
                     ...s.filterButtonContainer,
                     backgroundColor,
+                    borderWidth: scale(1), borderColor: themeColor, borderRadius: scale(5),
                 }}
                     onPress={() => {
                         this.setState({ showTimePicker: true, timePickerMode: mode });
@@ -791,12 +794,11 @@ E11-0000
             alignItems: 'center', justifyContent: 'center',
             flexDirection: 'row',
         }}>
-            {/* TODO: 還原時間篩選 */}
+            {/* 還原時間篩選 */}
             {(timeFilterFrom != timeFrom || timeFilterTo != timeTo) && (
                 <TouchableOpacity style={{ ...s.filterButtonContainer, backgroundColor: themeColorUltraLight, }}
                     onPress={() => {
                         // 清空時間篩選
-                        // TODO: 更新filter數據
                         this.setState({ timeFilterFrom: timeFrom, timeFilterTo: timeTo });
                     }}
                 >
@@ -813,19 +815,28 @@ E11-0000
             <DateTimePickerModal
                 isVisible={showTimePicker}
                 mode='time'
+                date={timePickerMode == 'from' ? moment(timeFilterFrom, 'HH:mm').toDate() : moment(timeFilterTo, 'HH:mm').toDate()}
+                minuteInterval={5}
                 onConfirm={date => {
                     const formattedTime = moment(date).format('HH:mm');
                     if (timePickerMode === 'from') {
+                        if (moment(date).isSameOrAfter(moment(timeFilterTo, 'HH:mm'))) {
+                            // TODO: 翻譯
+                            Alert.alert(t('開始時間不能晚於結束時間！', { ns: 'timetable' }));
+                            return;
+                        }
                         this.setState({ timeFilterFrom: formattedTime });
                     } else {
+                        if (moment(date).isSameOrBefore(moment(timeFilterFrom, 'HH:mm'))) {
+                            // TODO: 翻譯
+                            Alert.alert(t('結束時間不能早於開始時間！', { ns: 'timetable' }));
+                            return;
+                        }
                         this.setState({ timeFilterTo: formattedTime });
                     }
-                    // TODO: 更新filter數據
                     this.setState({ showTimePicker: false });
                 }}
-                onCancel={() => {
-                    this.setState({ showTimePicker: false });
-                }}
+                onCancel={() => { this.setState({ showTimePicker: false }); }}
             />
         </View>)
     }
@@ -855,7 +866,6 @@ E11-0000
                 })
                 courseCodeObj[i['Course Code']] = sectionObj;
             })
-            // console.log('courseCodeObj', courseCodeObj);
         }
 
         return (
@@ -904,7 +914,7 @@ E11-0000
                     {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
                     {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
                     {this.renderDayFilter()}
-                    {/* {this.renderTimeFilter()} */}
+                    {this.state.dayFilterChoice && this.renderTimeFilter()}
 
                     {/* 渲染搜索課程的結果 */}
                     {haveSearchResult && filterCourseList?.length > 1 ?
@@ -921,7 +931,19 @@ E11-0000
                                 if (dayFilterChoice) {
                                     for (let index = 0; index < Object.keys(sectionObj).length; index++) {
                                         const key = Object.keys(sectionObj)[index];
-                                        dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        if (this.state.timeFilterFrom != timeFrom || this.state.timeFilterTo != timeTo) {
+                                            let timeInFilter = sectionObj[key].some(course => {
+                                                let courseTimeFrom = moment(course['Time From'], 'HH:mm');
+                                                let courseTimeTo = moment(course['Time To'], 'HH:mm');
+                                                let filterTimeFrom = moment(this.state.timeFilterFrom, 'HH:mm');
+                                                let filterTimeTo = moment(this.state.timeFilterTo, 'HH:mm');
+                                                return courseTimeFrom.isBetween(filterTimeFrom, filterTimeTo, null, '[]')
+                                                    || courseTimeTo.isBetween(filterTimeFrom, filterTimeTo, null, '[]');
+                                            });
+                                            dayInFilter = timeInFilter && sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        } else {
+                                            dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        }
                                         if (dayInFilter) { break; }
                                     }
                                 } else { dayInFilter = true; }
@@ -1041,7 +1063,15 @@ E11-0000
                                         // 篩選該Section的上課時間是否在Filter內，全不在才不展示
                                         let dayInFilter = false;
                                         if (dayFilterChoice) {
-                                            dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                            if (this.state.timeFilterFrom != timeFrom || this.state.timeFilterTo != timeTo) {
+                                                let timeFrom = moment(this.state.timeFilterFrom, 'HH:mm');
+                                                let timeTo = moment(this.state.timeFilterTo, 'HH:mm');
+                                                dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day
+                                                    && (moment(course['Time From'], 'HH:mm').isBetween(timeFrom, timeTo, null, '[]')
+                                                        || moment(course['Time To'], 'HH:mm').isBetween(timeFrom, timeTo, null, '[]')));
+                                            } else {
+                                                dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                            }
                                         } else { dayInFilter = true; }
 
                                         if (dayInFilter) return <TouchableOpacity
