@@ -2,34 +2,34 @@ PODS:
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.75.4)
-  - Firebase/AnalyticsWithoutAdIdSupport (11.2.0):
+  - Firebase/AnalyticsWithoutAdIdSupport (11.5.0):
     - Firebase/CoreOnly
-    - FirebaseAnalytics/WithoutAdIdSupport (~> 11.2.0)
-  - Firebase/CoreOnly (11.2.0):
-    - FirebaseCore (= 11.2.0)
-  - FirebaseAnalytics/WithoutAdIdSupport (11.2.0):
-    - FirebaseCore (~> 11.0)
+    - FirebaseAnalytics/WithoutAdIdSupport (~> 11.5.0)
+  - Firebase/CoreOnly (11.5.0):
+    - FirebaseCore (= 11.5.0)
+  - FirebaseAnalytics/WithoutAdIdSupport (11.5.0):
+    - FirebaseCore (= 11.5)
     - FirebaseInstallations (~> 11.0)
-    - GoogleAppMeasurement/WithoutAdIdSupport (= 11.2.0)
+    - GoogleAppMeasurement/WithoutAdIdSupport (= 11.5.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
     - GoogleUtilities/MethodSwizzler (~> 8.0)
     - GoogleUtilities/Network (~> 8.0)
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
     - nanopb (~> 3.30910.0)
-  - FirebaseCore (11.2.0):
-    - FirebaseCoreInternal (~> 11.0)
+  - FirebaseCore (11.5.0):
+    - FirebaseCoreInternal (= 11.5)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/Logger (~> 8.0)
-  - FirebaseCoreInternal (11.3.0):
+  - FirebaseCoreInternal (11.5.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
-  - FirebaseInstallations (11.3.0):
-    - FirebaseCore (~> 11.0)
+  - FirebaseInstallations (11.5.0):
+    - FirebaseCore (= 11.5)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
   - fmt (9.1.0)
   - glog (0.3.5)
-  - GoogleAppMeasurement/WithoutAdIdSupport (11.2.0):
+  - GoogleAppMeasurement/WithoutAdIdSupport (11.5.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
     - GoogleUtilities/MethodSwizzler (~> 8.0)
     - GoogleUtilities/Network (~> 8.0)
@@ -1705,12 +1705,12 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNFBAnalytics (21.0.0):
-    - Firebase/AnalyticsWithoutAdIdSupport (= 11.2.0)
+  - RNFBAnalytics (21.6.1):
+    - Firebase/AnalyticsWithoutAdIdSupport (= 11.5.0)
     - React-Core
     - RNFBApp
-  - RNFBApp (21.0.0):
-    - Firebase/CoreOnly (= 11.2.0)
+  - RNFBApp (21.6.1):
+    - Firebase/CoreOnly (= 11.5.0)
     - React-Core
   - RNFS (2.20.0):
     - React-Core
@@ -2178,14 +2178,14 @@ SPEC CHECKSUMS:
   boost: 4cb898d0bf20404aab1850c656dcea009429d6c1
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   FBLazyVector: 430e10366de01d1e3d57374500b1b150fe482e6d
-  Firebase: 98e6bf5278170668a7983e12971a66b2cd57fc8c
-  FirebaseAnalytics: c36efd5710c60c17558650fa58c2066eca7e9265
-  FirebaseCore: a282032ae9295c795714ded2ec9c522fc237f8da
-  FirebaseCoreInternal: ac26d09a70c730e497936430af4e60fb0c68ec4e
-  FirebaseInstallations: 58cf94dabf1e2bb2fa87725a9be5c2249171cda0
+  Firebase: 7a56fe4f56b5ab81b86a6822f5b8f909ae6fc7e2
+  FirebaseAnalytics: 2f4a11eeb7a0e9c6fcf642d4e6aaca7fa4d38c28
+  FirebaseCore: 93abc05437f8064cd2bc0a53b768fb0bc5a1d006
+  FirebaseCoreInternal: f47dd28ae7782e6a4738aad3106071a8fe0af604
+  FirebaseInstallations: d8063d302a426d114ac531cd82b1e335a0565745
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
-  GoogleAppMeasurement: 76d4f8b36b03bd8381fa9a7fe2cc7f99c0a2e93a
+  GoogleAppMeasurement: ee5c2d2242816773fbf79e5b0563f5355ef1c315
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   hermes-engine: ea92f60f37dba025e293cbe4b4a548fd26b610a0
   Interactable: 411887c89fa16ac41f8e7898aca06dcad55e5f22
@@ -2263,8 +2263,8 @@ SPEC CHECKSUMS:
   RNCClipboard: 2821ac938ef46f736a8de0c8814845dde2dcbdfb
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
-  RNFBAnalytics: a4b31678170c29f91b3c63ce9bbcba76b33ef77e
-  RNFBApp: 4122dd41d8d7ff017b6ecf777a6224f5b349ca04
+  RNFBAnalytics: 436346b1dfbcbc967f77639b7d77d900932ddbda
+  RNFBApp: a3c9c3b23aa2d77001ce62b5a997325927593c12
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 4b397b156d173028ff97960b5ebacfbb21232081
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
