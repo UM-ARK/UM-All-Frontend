@@ -606,7 +606,6 @@ class HomeScreen extends Component {
                     zIndex: 999,
                     position: 'absolute',
                 }}
-                ref="headInstance"
                 // 設定所有可吸附的屏幕位置 0,0為屏幕中心
                 snapPoints={[
                     { x: -scale(140), y: -verticalScale(220) },
@@ -781,12 +780,10 @@ class HomeScreen extends Component {
     render() {
         const { selectDay, isLoading } = this.state;
         return (
-            <View
-                style={{
-                    flex: 1, backgroundColor: bg_color,
-                    alignItems: 'center', justifyContent: 'center',
-                }}>
-
+            <View style={{
+                flex: 1, backgroundColor: bg_color,
+                alignItems: 'center', justifyContent: 'center',
+            }}>
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}
 
@@ -812,37 +809,10 @@ class HomeScreen extends Component {
                     showsVerticalScrollIndicator={true}
                     onScroll={this.handleScroll}
                     scrollEventThrottle={400}
-                    // stickyHeaderIndices={[0]}
-                    // stickyHeaderHiddenOnScroll
                     keyboardDismissMode={'on-drag'}
+                    contentContainerStyle={{ width: '100%' }}
                 >
-                    {false && (
-                        <View style={{
-                            alignSelf: 'center',
-                            alignItems: 'center', justifyContent: 'center',
-                            flexDirection: 'row',
-                            marginTop: verticalScale(10),
-                        }}>
-                            {/* ARK Logo */}
-                            <FastImage
-                                source={require('../../../../static/img/logo.png')}
-                                style={{
-                                    height: iconSize, width: iconSize,
-                                    borderRadius: scale(5),
-                                }}
-                            />
-                            <Text style={{
-                                fontSize: verticalScale(18),
-                                color: themeColor,
-                                fontWeight: 'bold',
-                                marginLeft: verticalScale(5),
-                            }}>ARK ALL 澳大方舟</Text>
-                        </View>
-                    )}
-
-                    <>
-                        {this.renderSearch()}
-                    </>
+                    {this.renderSearch()}
 
                     {/* 校曆列表 */}
                     {cal && cal.length > 0 ? (
@@ -943,7 +913,7 @@ class HomeScreen extends Component {
                     }
 
                     {/* 快捷功能圖標 */}
-                    <View style={{ width: '100%', paddingHorizontal: scale(10) }}>
+                    <View style={{ width: '100%', paddingHorizontal: scale(10), alignSelf: 'center', }}>
                         <FlatGrid
                             style={{
                                 alignSelf: 'center',
@@ -965,181 +935,156 @@ class HomeScreen extends Component {
                     </View>
 
                     {/* 更新提示 */}
-                    {
-                        this.state.showUpdateInfo ?
-                            <HomeCard style={{ alignSelf: 'center' }}>
-                                <View>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            color: black.second,
-                                            fontWeight: 'bold',
-                                            marginTop: scale(2),
-                                            alignSelf: 'center',
-                                            textAlign: 'center',
-                                        }}>
-                                        {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                    {this.state.showUpdateInfo ?
+                        <HomeCard style={{ alignSelf: 'center' }}>
+                            <View>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.second,
+                                        fontWeight: 'bold',
+                                        marginTop: scale(2),
+                                        alignSelf: 'center',
+                                        textAlign: 'center',
+                                    }}>
+                                    {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                                </Text>
+                                {/* 版本更新說明 */}
+                                {this.state.version_info ? (
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.second,
+                                        fontWeight: 'bold',
+                                        marginTop: scale(2),
+                                        alignSelf: 'center',
+                                    }}>
+                                        {'\n更新內容：\n' + this.state.version_info + '\n'}
                                     </Text>
-                                    {/* 版本更新說明 */}
-                                    {this.state.version_info ? (
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: black.second,
-                                            fontWeight: 'bold',
-                                            marginTop: scale(2),
-                                            alignSelf: 'center',
-                                        }}>
-                                            {'\n更新內容：\n' + this.state.version_info + '\n'}
-                                        </Text>
-                                    ) : null}
+                                ) : null}
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: themeColor,
+                                        marginTop: scale(5),
+                                        fontWeight: 'bold',
+                                    }}>
+                                    {`最新版本: ${this.state.app_version.lastest}`}
+                                </Text>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.third,
+                                        marginTop: scale(5),
+                                        fontWeight: 'bold',
+                                    }}>
+                                    {`你的版本: ${this.state.app_version.local}`}
+                                </Text>
+                                {Platform.OS === 'ios' ? null : (
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
+                                            alignSelf: 'center', textAlign: 'center',
                                             color: themeColor,
                                             marginTop: scale(5),
                                             fontWeight: 'bold',
                                         }}>
-                                        {`最新版本: ${this.state.app_version.lastest}`}
+                                        {`無Google Play Store用戶可以通過APK方式安裝~`}
                                     </Text>
+                                )}
+                                <TouchableOpacity
+                                    style={{
+                                        alignSelf: 'center',
+                                        marginTop: scale(5),
+                                        backgroundColor: themeColor,
+                                        borderRadius: scale(10),
+                                        paddingVertical: scale(5), paddingHorizontal: scale(8),
+                                    }}
+                                    activeOpacity={0.8}
+                                    onPress={() => {
+                                        trigger();
+                                        const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                        Linking.openURL(url);
+                                    }}>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
-                                            color: black.third,
-                                            marginTop: scale(5),
+                                            color: white,
                                             fontWeight: 'bold',
                                         }}>
-                                        {`你的版本: ${this.state.app_version.local}`}
+                                        {`點我更新 😉~`}
                                     </Text>
-                                    {Platform.OS === 'ios' ? null : (
-                                        <Text
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                alignSelf: 'center', textAlign: 'center',
-                                                color: themeColor,
-                                                marginTop: scale(5),
-                                                fontWeight: 'bold',
-                                            }}>
-                                            {`無Google Play Store用戶可以通過APK方式安裝~`}
-                                        </Text>
-                                    )}
-                                    <TouchableOpacity
-                                        style={{
-                                            alignSelf: 'center',
-                                            marginTop: scale(5),
-                                            backgroundColor: themeColor,
-                                            borderRadius: scale(10),
-                                            paddingVertical: scale(5), paddingHorizontal: scale(8),
-                                        }}
-                                        activeOpacity={0.8}
-                                        onPress={() => {
-                                            trigger();
-                                            const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                            Linking.openURL(url);
-                                        }}>
-                                        <Text
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                color: white,
-                                                fontWeight: 'bold',
-                                            }}>
-                                            {`點我更新 😉~`}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </HomeCard>
-                            : null
-                    }
+                                </TouchableOpacity>
+                            </View>
+                        </HomeCard>
+                        : null}
 
                     {/* 活動頁 */}
                     {this.state.networkError ? (
                         <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
-                    ) : null
-                        // (<>
-                        //     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>各組織可自行操作發佈活動! 立即進駐ARK!</Text>
-                        // </>)
-                    }
+                    ) : null}
                     <EventPage ref={this.eventPage} />
 
                 </ScrollView >
 
                 {/* 彈出提示登錄的Modal */}
-                {
-                    this.state.isShowModal && (
-                        <ModalBottom cancel={this.tiggerModalBottom}>
-                            <View
-                                style={{
-                                    padding: scale(20),
-                                    backgroundColor: COLOR_DIY.white,
-                                }}>
-                                <ScrollView
-                                    contentContainerStyle={{
-                                        alignItems: 'center',
-                                        marginBottom: scale(30),
+                {this.state.isShowModal && (
+                    <ModalBottom cancel={this.tiggerModalBottom}>
+                        <View style={{
+                            padding: scale(20),
+                            backgroundColor: COLOR_DIY.white,
+                        }}>
+                            <ScrollView contentContainerStyle={{
+                                alignItems: 'center',
+                                marginBottom: scale(30),
+                            }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(18),
+                                        color: COLOR_DIY.black.third,
+                                    }}>
+                                    歡迎來到ARK ALL~
+                                </Text>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(15),
+                                        color: COLOR_DIY.black.third,
+                                    }}>
+                                    登錄後體驗完整功能，現在去嗎？
+                                </Text>
+                                {/* 登錄按鈕 */}
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        marginTop: scale(10),
+                                        backgroundColor: COLOR_DIY.themeColor,
+                                        padding: scale(10),
+                                        borderRadius: scale(10),
+                                        justifyContent: 'center',
+                                        alignSelf: 'center',
+                                    }}
+                                    onPress={() => {
+                                        trigger();
+                                        this.setState({ isShowModal: false });
+                                        this.props.navigation.jumpTo(
+                                            'MeTabbar',
+                                        );
                                     }}>
                                     <Text
                                         style={{
                                             ...uiStyle.defaultText,
-                                            fontSize: scale(18),
-                                            color: COLOR_DIY.black.third,
-                                        }}>
-                                        歡迎來到ARK ALL~
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
                                             fontSize: scale(15),
-                                            color: COLOR_DIY.black.third,
+                                            color: 'white',
+                                            fontWeight: '500',
                                         }}>
-                                        登錄後體驗完整功能，現在去嗎？
+                                        現在登錄
                                     </Text>
-                                    {/* 登錄按鈕 */}
-                                    <TouchableOpacity
-                                        activeOpacity={0.8}
-                                        style={{
-                                            marginTop: scale(10),
-                                            backgroundColor: COLOR_DIY.themeColor,
-                                            padding: scale(10),
-                                            borderRadius: scale(10),
-                                            justifyContent: 'center',
-                                            alignSelf: 'center',
-                                        }}
-                                        onPress={() => {
-                                            trigger();
-                                            this.setState({ isShowModal: false });
-                                            this.props.navigation.jumpTo(
-                                                'MeTabbar',
-                                            );
-                                        }}>
-                                        <Text
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                fontSize: scale(15),
-                                                color: 'white',
-                                                fontWeight: '500',
-                                            }}>
-                                            現在登錄
-                                        </Text>
-                                    </TouchableOpacity>
-                                </ScrollView>
-                            </View>
-                        </ModalBottom>
-                    )
-                }
-
-                {/* Tost */}
-                {/* <Toast
-                    ref={toast => (this.toast = toast)}
-                    position="top"
-                    positionValue={'7%'}
-                    textStyle={{ color: COLOR_DIY.themeColor, fontWeight: 'bold', textAlign: 'center' }}
-                    style={{
-                        backgroundColor: COLOR_DIY.themeColorUltraLight,
-                        borderRadius: scale(10),
-                        borderWidth: 2,
-                        borderColor: COLOR_DIY.themeColor,
-                        ...viewShadow,
-                    }}
-                /> */}
+                                </TouchableOpacity>
+                            </ScrollView>
+                        </View>
+                    </ModalBottom>
+                )}
             </View >
         );
     }

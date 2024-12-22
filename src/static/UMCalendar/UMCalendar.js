@@ -479,7 +479,7 @@ export const UMCalendar = [
     "startDate": "2025-04-04T00:00:00+08:00",
     "endDate": "2025-04-05T00:00:00+08:00",
     "summary": "Cheng Ming Festival",
-    "summary_cn": "承明節"
+    "summary_cn": "清明節"
   },
   {
     "startDate": "2025-04-18T00:00:00+08:00",

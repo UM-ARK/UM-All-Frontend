@@ -44,6 +44,8 @@ import CourseCard from '../what2Reg/component/CourseCard';
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const timeFrom = '00:00';
+const timeTo = '23:59';
 
 // 設置本地緩存
 async function setLocalStorage(courseCodeList) {
@@ -114,7 +116,6 @@ function toDateTime(time) {
     return new Date(0, 0, 0, hours, minutes); // 使用一个固定的日期
 };
 
-// TODO: 查看某時間段可選的CourseCode、Section
 export default class CourseSim extends Component {
     constructor() {
         super();
@@ -131,14 +132,14 @@ export default class CourseSim extends Component {
         allCourseAllTime: [],
 
         // addMode: false,
-        searchText: '',
+        searchText: null,
 
-        dayFilter: 'ALL',
-        // timeFilter: 'ALL',
-        // timeFilterFrom: '08:30',
-        // timeFilterTo: '22:00',
-        // showTimePickerFrom: false,
-        // showTimePickerTo: false,
+        dayFilter: dayList,
+        dayFilterChoice: null,
+        timeFilterFrom: timeFrom,
+        timeFilterTo: timeTo,
+        timePickerMode: 'from',
+        showTimePicker: false,
 
         s_coursePlanFile: coursePlanFile,
         s_coursePlanTimeFile: coursePlanTimeFile,
@@ -724,116 +725,152 @@ E11-0000
     }
 
     renderDayFilter = () => {
-        const { dayFilter } = this.state;
-        return (<View style={{ margin: scale(5), }}>
-            <FlatList
-                data={dayList}
-                horizontal
-                scrollEnabled
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item: itm }) => (
+        const { dayFilter, dayFilterChoice, } = this.state;
+
+        return (<View style={{
+            alignItems: 'center', justifyContent: 'center',
+            marginVertical: verticalScale(5), flexDirection: 'row',
+        }}>
+            {dayList.map(day => {
+                return (
                     <TouchableOpacity style={{
                         ...s.filterButtonContainer,
-                        backgroundColor: dayFilter == itm ? themeColor : white,
+                        backgroundColor: day === dayFilterChoice ? secondThemeColor : white,
+                        borderWidth: scale(1),
+                        borderColor: day === dayFilterChoice ? secondThemeColor : themeColor,
                     }}
                         onPress={() => {
-                            this.setState({ dayFilter: itm })
+                            trigger();
+                            if (dayFilterChoice === day) {
+                                this.setState({
+                                    dayFilterChoice: null,
+                                    timeFilterFrom: timeFrom, timeFilterTo: timeTo,  // 還原時間篩選
+                                });
+                            } else {
+                                this.setState({ dayFilterChoice: day });
+                            }
                         }}
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: dayFilter == itm ? white : black.third,
-                        }}>{itm}</Text>
+                            color: day === dayFilterChoice ? white : themeColor,
+                        }}>{day}</Text>
                     </TouchableOpacity>
-                )}
-                ListHeaderComponent={() => (
-                    <TouchableOpacity style={{
-                        ...s.filterButtonContainer,
-                        backgroundColor: dayFilter == 'ALL' ? themeColor : white,
-                    }}
-                        onPress={() => {
-                            this.setState({ dayFilter: 'ALL' })
-                        }}
-                    >
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: dayFilter == 'ALL' ? white : black.third,
-                        }}>ALL</Text>
-                    </TouchableOpacity>
-                )}
-            />
+                )
+            })}
         </View>)
     }
 
     renderTimeFilter = () => {
-        const { timeFilter, timeFilterFrom, timeFilterTo, showTimePickerFrom, showTimePickerTo } = this.state;
-        return (<View style={{ flexDirection: 'row', marginHorizontal: scale(5) }}>
-            {/* ALL選項 */}
-            <TouchableOpacity style={{
-                ...s.filterButtonContainer,
-                backgroundColor: timeFilter == 'ALL' ? themeColor : white,
-            }}
-                onPress={() => {
-                    this.setState({ timeFilter: 'ALL' })
+        const { timeFilterFrom, timeFilterTo, showTimePicker, timePickerMode } = this.state;
+        const timeButton = (mode) => {
+            let backgroundColor = null;
+            let textColor = black.third;
+            if (mode == 'from') {
+                backgroundColor = timeFilterFrom == timeFrom ? null : themeColor;
+                textColor = timeFilterFrom == timeFrom ? black.third : white;
+            } else {
+                backgroundColor = timeFilterTo == timeTo ? null : themeColor;
+                textColor = timeFilterTo == timeTo ? black.third : white;
+            }
+            return (
+                <TouchableOpacity style={{
+                    flexDirection: 'row',
+                    ...s.filterButtonContainer,
+                    backgroundColor,
+                    borderWidth: scale(1), borderColor: themeColor, borderRadius: scale(5),
                 }}
-            >
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    color: timeFilter == 'ALL' ? white : black.third,
-                }}>ALL</Text>
-            </TouchableOpacity>
+                    onPress={() => {
+                        trigger();
+                        this.setState({ showTimePicker: true, timePickerMode: mode });
+                    }}
+                >
+                    <Text style={{ ...uiStyle.defaultText, color: textColor }}>
+                        {mode == 'from' ? timeFilterFrom : timeFilterTo}
+                    </Text>
+                </TouchableOpacity>
+            )
+        }
+
+        return (<View style={{
+            alignItems: 'center', justifyContent: 'center',
+            flexDirection: 'row',
+        }}>
+            {/* 還原時間篩選 */}
+            {(timeFilterFrom != timeFrom || timeFilterTo != timeTo) && (
+                <TouchableOpacity style={{ ...s.filterButtonContainer, backgroundColor: themeColorUltraLight, }}
+                    onPress={() => {
+                        trigger();
+                        // 清空時間篩選
+                        this.setState({ timeFilterFrom: timeFrom, timeFilterTo: timeTo });
+                    }}
+                >
+                    <Text style={{ ...uiStyle.defaultText, color: themeColor }}>Clear</Text>
+                </TouchableOpacity>
+            )}
 
             {/* 時間選項 */}
-            <TouchableOpacity style={{
-                flexDirection: 'row',
-                ...s.filterButtonContainer,
-                backgroundColor: timeFilter == 'TIME' ? themeColor : white,
-            }}
-                onPress={() => {
-                    this.setState({ timeFilter: 'TIME', showTimePickerFrom: true })
-                }}
-            >
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    color: timeFilter == 'TIME' ? white : black.third,
-                }}>{timeFilterFrom + ' - ' + timeFilterTo}</Text>
-            </TouchableOpacity>
+            {timeButton('from')}
+            <Text style={{ ...uiStyle.defaultText, color: black.third, }}>{' - '}</Text>
+            {timeButton('to')}
 
+            {/* 時間選擇器 */}
             <DateTimePickerModal
-                isVisible={showTimePickerFrom || showTimePickerTo}
-                // date={Date(timeFilterFrom)}
+                isVisible={showTimePicker}
                 mode='time'
-                // onConfirm={date => {
-                //     if (showTimePickerFrom) {
-                //         this.setState({
-                //             timeFilterFrom: date,
-                //             timeFilterTo: date,
-                //             showTimePickerFrom: false,
-                //         });
-                //     }
-                //     else if (showTimePickerTo) {
-                //         this.setState({
-                //             timeFilterTo: date,
-                //             showTimePickerTo: false,
-                //         });
-                //     }
-                // }}
-                onCancel={() => {
-                    this.setState({ showTimePickerFrom: false, showTimePickerTo: false });
+                date={timePickerMode == 'from' ? moment(timeFilterFrom, 'HH:mm').toDate() : moment(timeFilterTo, 'HH:mm').toDate()}
+                minuteInterval={5}
+                onConfirm={date => {
+                    const formattedTime = moment(date).format('HH:mm');
+                    if (timePickerMode === 'from') {
+                        if (moment(date).isSameOrAfter(moment(timeFilterTo, 'HH:mm'))) {
+                            // TODO: 翻譯
+                            Alert.alert(t('開始時間不能晚於結束時間！', { ns: 'timetable' }));
+                            return;
+                        }
+                        this.setState({ timeFilterFrom: formattedTime });
+                    } else {
+                        if (moment(date).isSameOrBefore(moment(timeFilterFrom, 'HH:mm'))) {
+                            // TODO: 翻譯
+                            Alert.alert(t('結束時間不能早於開始時間！', { ns: 'timetable' }));
+                            return;
+                        }
+                        this.setState({ timeFilterTo: formattedTime });
+                    }
+                    this.setState({ showTimePicker: false });
                 }}
+                onCancel={() => { this.setState({ showTimePicker: false }); }}
             />
-        </View>
-        )
+        </View>)
     }
 
     renderCourseSearch = () => {
-        const { searchText } = this.state;
-        const filterCourseList = this.handleSearchFilterCourse(searchText);
+        const { searchText, dayFilter, dayFilterChoice } = this.state;
+        const filterCourseList = searchText && this.handleSearchFilterCourse(searchText);
         // 是否有搜索結果
         const haveSearchResult = searchText && filterCourseList.length > 0;
 
         const { s_coursePlanTimeFile } = this.state;
         const courseTimeList = s_coursePlanTimeFile.Courses;
+
+        // 整理所有候選課程的Section
+        let courseCodeObj = {};
+        if (haveSearchResult && filterCourseList.length >= 1) {
+            filterCourseList.map(i => {
+                let sectionObj = {};
+                // 找出該Course Code的所有Section
+                let codeRes = courseTimeList.filter(itm => {
+                    return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
+                });
+                codeRes.map(itm => {
+                    let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
+                    tempArr.push(itm);
+                    sectionObj[itm['Section']] = tempArr;
+                })
+                courseCodeObj[i['Course Code']] = sectionObj;
+            })
+        }
+
         return (
             <View style={{ width: '100%', padding: scale(10), }}>
                 {/* 輸入框 */}
@@ -877,6 +914,11 @@ E11-0000
                 </View>
 
                 <BottomSheetScrollView>
+                    {/* 默認直接顯示星期幾全選，時間00:00~23:59 */}
+                    {/* 只要初始值改變，就改變渲染出對應的篩選結果 */}
+                    {this.renderDayFilter()}
+                    {this.state.dayFilterChoice && this.renderTimeFilter()}
+
                     {/* 渲染搜索課程的結果 */}
                     {haveSearchResult && filterCourseList?.length > 1 ?
                         <BottomSheetFlatList
@@ -886,24 +928,33 @@ E11-0000
                             columnWrapperStyle={{ flexWrap: 'wrap' }}
                             style={{ marginTop: scale(5), marginLeft: scale(10) }}
                             renderItem={({ item }) => {
-                                return <TouchableOpacity
-                                    style={{
-                                        ...s.courseCard,
-                                        // width: '45%',
-                                    }}
+                                const sectionObj = courseCodeObj[item['Course Code']]
+                                // 篩選該Section的上課時間是否在Filter內，全不在才不顯示
+                                let dayInFilter = false;
+                                if (dayFilterChoice) {
+                                    for (let index = 0; index < Object.keys(sectionObj).length; index++) {
+                                        const key = Object.keys(sectionObj)[index];
+                                        if (this.state.timeFilterFrom != timeFrom || this.state.timeFilterTo != timeTo) {
+                                            let timeInFilter = sectionObj[key].some(course => {
+                                                let courseTimeFrom = moment(course['Time From'], 'HH:mm');
+                                                let courseTimeTo = moment(course['Time To'], 'HH:mm');
+                                                let filterTimeFrom = moment(this.state.timeFilterFrom, 'HH:mm');
+                                                let filterTimeTo = moment(this.state.timeFilterTo, 'HH:mm');
+                                                return courseTimeFrom.isBetween(filterTimeFrom, filterTimeTo, null, '[]')
+                                                    || courseTimeTo.isBetween(filterTimeFrom, filterTimeTo, null, '[]');
+                                            });
+                                            dayInFilter = timeInFilter && sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        } else {
+                                            dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                        }
+                                        if (dayInFilter) { break; }
+                                    }
+                                } else { dayInFilter = true; }
+
+                                if (dayInFilter) return <TouchableOpacity
+                                    style={{ ...s.courseCard, }}
                                     onPress={() => {
                                         trigger();
-                                        // 從courseTimeList篩選所有的課程的Section、時間、老師
-                                        let sectionObj = {};
-                                        let codeRes = courseTimeList.filter(itm => {
-                                            return itm['Course Code'].toUpperCase().indexOf(item['Course Code']) != -1
-                                        });
-                                        codeRes.map(itm => {
-                                            let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
-                                            tempArr.push(itm);
-                                            sectionObj[itm['Section']] = tempArr;
-                                        })
-
                                         // 切換searchText為點擊的Code
                                         this.setState({ searchText: item['Course Code'] });
                                         this.verScroll.current.scrollTo({ y: 0 });
@@ -924,17 +975,19 @@ E11-0000
 
                     {haveSearchResult && filterCourseList.length == 1 ? filterCourseList.map(i => {
                         // 從courseTimeList篩選所有的課程的Section、時間、老師
-                        let sectionObj = {};
-                        if (filterCourseList.length == 1) {
-                            let codeRes = courseTimeList.filter(itm => {
-                                return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
-                            });
-                            codeRes.map(itm => {
-                                let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
-                                tempArr.push(itm);
-                                sectionObj[itm['Section']] = tempArr;
-                            })
-                        }
+                        const sectionObj = courseCodeObj[i['Course Code']];
+                        // let sectionObj = {};
+                        // if (filterCourseList.length == 1) {
+                        //     // 找出該Course Code的所有Section
+                        //     let codeRes = courseTimeList.filter(itm => {
+                        //         return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
+                        //     });
+                        //     codeRes.map(itm => {
+                        //         let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
+                        //         tempArr.push(itm);
+                        //         sectionObj[itm['Section']] = tempArr;
+                        //     })
+                        // }
 
                         return (<View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                             {/* 刪除該Code課程按鈕 */}
@@ -1010,12 +1063,24 @@ E11-0000
                                     renderItem={({ item }) => {
                                         const key = item;
                                         const courseInfo = sectionObj[key][0];
-                                        return <TouchableOpacity
-                                            style={{
-                                                ...s.courseCard,
-                                                width: '45%',
-                                            }}
+                                        // 篩選該Section的上課時間是否在Filter內，全不在才不展示
+                                        let dayInFilter = false;
+                                        if (dayFilterChoice) {
+                                            if (this.state.timeFilterFrom != timeFrom || this.state.timeFilterTo != timeTo) {
+                                                let timeFrom = moment(this.state.timeFilterFrom, 'HH:mm');
+                                                let timeTo = moment(this.state.timeFilterTo, 'HH:mm');
+                                                dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day
+                                                    && (moment(course['Time From'], 'HH:mm').isBetween(timeFrom, timeTo, null, '[]')
+                                                        || moment(course['Time To'], 'HH:mm').isBetween(timeFrom, timeTo, null, '[]')));
+                                            } else {
+                                                dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                            }
+                                        } else { dayInFilter = true; }
+
+                                        if (dayInFilter) return <TouchableOpacity
+                                            style={{ ...s.courseCard, width: '45%', }}
                                             onPress={() => {
+                                                trigger();
                                                 this.addCourse(courseInfo);
                                                 // TODO: Switch選擇是否打開自動收起Sheet模式
                                                 // this.verScroll.current.scrollTo({ y: 0 });
@@ -1050,18 +1115,18 @@ E11-0000
 
     // 返回搜索候選所需的課程列表
     handleSearchFilterCourse = (inputText) => {
-        const { s_coursePlanFile } = this.state;
+        const { s_coursePlanFile, dayFilter } = this.state;
         const coursePlanList = s_coursePlanFile.Courses;
         inputText = inputText?.toUpperCase();
 
         let filterCourseList = [];
 
         filterCourseList = coursePlanList.filter(itm => {
-            return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
+            return (itm['Course Code'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title Chi'].indexOf(inputText) != -1
                 || itm['Teacher Information'].indexOf(inputText) != -1
-                || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1)
+                || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1))
         });
 
         return filterCourseList
@@ -1179,6 +1244,15 @@ E11-0000
                         }
                     }}
                 >
+                    {/* 數據日期版本 */}
+                    {this.state.searchText ? null : (
+                        <Text style={{
+                            alignSelf: 'center',
+                            ...uiStyle.defaultText, fontSize: scale(9), color: black.third,
+                        }}>
+                            Timetable Version: {this.state.s_coursePlanFile.updateTime}
+                        </Text>
+                    )}
                     {this.renderCourseSearch()}
                 </CustomBottomSheet>
             </View>}</SafeAreaInsetsContext.Consumer>
@@ -1201,8 +1275,9 @@ const s = StyleSheet.create({
         margin: scale(10),
     },
     filterButtonContainer: {
-        paddingHorizontal: scale(5), paddingVertical: scale(2),
-        borderRadius: scale(5),
+        paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
+        borderRadius: verticalScale(5),
+        marginHorizontal: scale(2.5),
     },
     searchResultText: {
         ...uiStyle.defaultText,
