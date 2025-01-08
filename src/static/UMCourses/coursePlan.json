@@ -2472,7 +2472,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E4-G068",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN19\n - FSS - MEC19\n",
+            "\"Class For \/ Class Not For\" Information": "Class for :\n - FSS - ECN17\n- FSS - ECN19\n - FSS - MEC19\n",
             "Course Title Chi": "中級微觀經濟學II"
         },
         {
@@ -9302,7 +9302,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2025-01-07",
+    "updateTime": "2025-01-08",
     "academicYear": "24/25",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
