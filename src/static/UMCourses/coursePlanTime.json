@@ -8700,10 +8700,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LAW MAN KAY",
             "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "11:00",
-            "Time To": "12:45",
-            "Classroom": "E11-1027",
+            "Day": "WED",
+            "Time From": "17:30",
+            "Time To": "19:15",
+            "Classroom": "E11-1026",
             "Course Title Chi": "物聯網工作坊"
         },
         {
@@ -8716,9 +8716,9 @@
             "Teacher Information": "LAW MAN KAY",
             "Lecture / Lab": "Lab",
             "Lab Information": "LAB-L02",
-            "Day": "FRI",
-            "Time From": "11:00",
-            "Time To": "12:45",
+            "Day": "SAT",
+            "Time From": "17:30",
+            "Time To": "19:15",
             "Classroom": "E11-1027",
             "Course Title Chi": "物聯網工作坊"
         },
@@ -34846,7 +34846,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-2106",
+            "Classroom": "E21-2111",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
             "Course Title Chi": "畢業設計"
         },
@@ -34862,7 +34862,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E21-2106",
+            "Classroom": "E21-2111",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
             "Course Title Chi": "畢業設計"
         },
@@ -35269,6 +35269,17 @@
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
             "Course Title Chi": "研究計畫一"
+        },
+        {
+            "Offering Unit": "FSS",
+            "Offering Department": "DPSY",
+            "Course Code": "PSYC4001",
+            "Course Title": "Research Project I",
+            "Section": "005",
+            "Medium of Instruction": "English",
+            "Teacher Information": "LIU LULU",
+            "Lecture \/ Lab": "Lecture",
+            "\"Class For \/ Class Not For\" Information": "Class for :\n - FSS - PSY17 \/ PSY20\n"
         },
         {
             "Offering Unit": "FSS",
