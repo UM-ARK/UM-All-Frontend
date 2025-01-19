@@ -27,7 +27,7 @@
             "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-3013",
             "Course Title Chi": "管理會計一"
         },
         {
@@ -560,7 +560,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2017",
+            "Classroom": "E22-4004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC17 / BEC20 / BEC22 / GBS20\n",
             "Course Title Chi": "中級微觀經濟學"
         },
@@ -2380,10 +2380,10 @@
             "Medium of Instruction": "English",
             "Teacher Information": "LAW MAN KAY",
             "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "11:00",
-            "Time To": "12:45",
-            "Classroom": "E11-1027",
+            "Day": "WED",
+            "Time From": "17:30",
+            "Time To": "19:15",
+            "Classroom": "E11-1026",
             "Course Title Chi": "物聯網工作坊"
         },
         {
@@ -2472,7 +2472,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E4-G068",
-            "\"Class For \/ Class Not For\" Information": "Class for :\n - FSS - ECN17\n- FSS - ECN19\n - FSS - MEC19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN17\n- FSS - ECN19\n - FSS - MEC19\n",
             "Course Title Chi": "中級微觀經濟學II"
         },
         {
@@ -2987,7 +2987,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-3002",
+            "Classroom": "E33-1045",
             "Course Title Chi": "小學教育綜合活動教學與設計"
         },
         {
@@ -3145,7 +3145,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "15:45",
-            "Classroom": "E22-3002",
+            "Classroom": "E33-G015",
             "Course Title Chi": "學科教學法二（中文）"
         },
         {
@@ -3244,7 +3244,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-3011",
+            "Classroom": "E33-1045",
             "Course Title Chi": "評估幼兒"
         },
         {
@@ -3314,7 +3314,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-3011",
+            "Classroom": "E33-G015",
             "Course Title Chi": "小學語文教學"
         },
         {
@@ -3342,7 +3342,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-3002",
+            "Classroom": "E33-G015",
             "Course Title Chi": "課室管理"
         },
         {
@@ -4138,7 +4138,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E22-4012",
+            "Classroom": "E22-2015",
             "Course Title Chi": "文學專題I"
         },
         {
@@ -4831,7 +4831,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-G053 ",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "商業定量推理"
         },
@@ -6859,7 +6859,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1031",
+            "Classroom": "E21-1043",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "人文專題II"
         },
@@ -6875,7 +6875,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-G016",
+            "Classroom": "E21-G012",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "日本社會與文化II"
         },
@@ -8487,7 +8487,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "E3-3033",
+            "Classroom": "E22-2014",
             "Course Title Chi": "西方哲學概論"
         },
         {
@@ -8547,7 +8547,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E3-3033",
+            "Classroom": "E21-1031",
             "Course Title Chi": "語言哲學"
         },
         {
@@ -9079,7 +9079,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E21-G009",
+            "Classroom": "E21-G035",
             "Course Title Chi": "社會學導論"
         },
         {
@@ -9302,7 +9302,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2025-01-14",
+    "updateTime": "2025-01-17",
     "academicYear": "24/25",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
