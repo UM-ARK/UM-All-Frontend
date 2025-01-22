@@ -2903,7 +2903,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E33-3037",
+            "Classroom": "E33-1030",
             "Course Title Chi": "學科教學法二（英語）"
         },
         {
@@ -2917,7 +2917,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E33-3037",
+            "Classroom": "E33-G015",
             "Course Title Chi": "幼稚園語文教學"
         },
         {
@@ -3085,7 +3085,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E33-3035 / E33-3042",
+            "Classroom": "E33-G016 / E33-3042",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FED - INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22\n",
             "Course Title Chi": "將資訊科技融入教學"
         },
@@ -3356,7 +3356,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E22-3013",
+            "Classroom": "E33-G016",
             "Course Title Chi": "小學英語教學II"
         },
         {
@@ -4499,7 +4499,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E4-1051",
+            "Classroom": "E3-3033",
             "Course Title Chi": "大中華與全球經濟"
         },
         {
@@ -9302,7 +9302,7 @@
             "Course Title Chi": "大學英文II（教程）"
         }
     ],
-    "updateTime": "2025-01-17",
+    "updateTime": "2025-01-21",
     "academicYear": "24/25",
     "sem": "2",
     "remark": "用於Add Drop期間的數據，帶課表時間"
