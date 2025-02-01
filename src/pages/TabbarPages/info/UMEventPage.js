@@ -136,10 +136,7 @@ class UMEventPage extends Component {
                 <TouchableWithoutFeedback
                     onPress={() => {
                         trigger();
-                        this.virtualizedList.current.scrollTo && this.virtualizedList.current.scrollTo({
-                            x: 0,
-                            y: 0,
-                        });
+                        this.virtualizedList?.current?.scrollToIndex({ index: 0 });
                     }}>
                     <View
                         style={{
@@ -168,6 +165,7 @@ class UMEventPage extends Component {
         const { data, isLoading } = this.state;
         return (
             <VirtualizedList
+                ref={this.virtualizedList}
                 data={data}
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
@@ -197,18 +195,19 @@ class UMEventPage extends Component {
                 ListFooterComponent={() => (
                     <View style={{ marginBottom: scale(50) }}></View>
                 )}
-                // refreshControl={
-                //     <RefreshControl
-                //         colors={[themeColor]}
-                //         tintColor={themeColor}
-                //         refreshing={isLoading}
-                //         onRefresh={() => {
-                //             // 展示Loading標識
-                //             this.setState({ isLoading: true });
-                //             this.getData();
-                //         }}
-                //     />
-                // }
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={isLoading}
+                        onRefresh={() => {
+                            // 展示Loading標識
+                            this.setState({ isLoading: true }, () => {
+                                this.getData();
+                            });
+                        }}
+                    />
+                }
                 directionalLockEnabled
                 alwaysBounceHorizontal={false}
             />
@@ -227,9 +226,9 @@ class UMEventPage extends Component {
             }}>
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}
-                <ScrollView
+
+                {isLoading ? (<ScrollView
                     showsVerticalScrollIndicator={true}
-                    ref={this.virtualizedList}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -237,14 +236,15 @@ class UMEventPage extends Component {
                             refreshing={this.state.isLoading}
                             onRefresh={() => {
                                 // 展示Loading標識
-                                this.setState({ isLoading: true });
-                                this.getData();
+                                this.setState({ isLoading: true }, () => {
+                                    this.getData();
+                                });
                             }}
                         />
                     }
                 >
-                    {isLoading ? (<Loading />) : (this.state.data != undefined ? this.renderPage() : <Loading />)}
-                </ScrollView>
+                    <Loading />
+                </ScrollView>) : (this.state.data != undefined ? this.renderPage() : <Loading />)}
             </View>
         );
     }

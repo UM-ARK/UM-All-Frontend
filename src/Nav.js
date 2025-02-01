@@ -30,22 +30,22 @@ import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
 
 // import ChatDetail from './pages/TabbarPages/message/ChatDetail';
 
-import What2RegTabIndex from './pages/TabbarPages/what2Reg';
-import What2RegCourse from './pages/TabbarPages/what2Reg/pages/Course';
-import What2RegComment from './pages/TabbarPages/what2Reg/pages/Comment';
-import What2RegNewComment from './pages/TabbarPages/what2Reg/pages/NewComment';
-import What2RegRelateCourses from './pages/TabbarPages/what2Reg/pages/RelateCourses';
-import What2RegProf from './pages/TabbarPages/what2Reg/pages/Prof';
+// import What2RegTabIndex from './pages/TabbarPages/what2Reg';
+// import What2RegCourse from './pages/TabbarPages/what2Reg/pages/Course';
+// import What2RegComment from './pages/TabbarPages/what2Reg/pages/Comment';
+// import What2RegNewComment from './pages/TabbarPages/what2Reg/pages/NewComment';
+// import What2RegRelateCourses from './pages/TabbarPages/what2Reg/pages/RelateCourses';
+// import What2RegProf from './pages/TabbarPages/what2Reg/pages/Prof';
 import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 
-import courseSimIndex from './pages/TabbarPages/courseSim';
+// import courseSimIndex from './pages/TabbarPages/courseSim';
 
 import Webviewer from './components/Webviewer';
 import AllEvents from './pages/TabbarPages/info/club/AllEvents';
-import UMWhole from './pages/Features/UMWhole';
-import What2Reg from './pages/Features/What2Reg';
+// import UMWhole from './pages/Features/UMWhole';
+// import What2Reg from './pages/Features/What2Reg';
 import Bus from './pages/Features/Bus';
-import LostAndFound from './pages/Features/LostAndFound';
+// import LostAndFound from './pages/Features/LostAndFound';
 import CarPark from './pages/Features/CarPark';
 
 import TestScreen from './test/test';

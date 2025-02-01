@@ -204,7 +204,8 @@ export default class CourseCard extends Component {
                                     });
                                     this.context.navigate('LocalCourse', courseCode)
                                 }}
-                                delayLongPress={200}
+                                // BUG: 此處小於300ms的長按事件容易被Menu誤認為點擊事件
+                                delayLongPress={300}
                             // 獲取當前位置距離屏幕頂端的高度
                             // onLayout={event => {
                             //     const { layout } = event.nativeEvent;
