@@ -947,15 +947,16 @@ class HomeScreen extends Component {
                         alignSelf: "center",
                         width: screenWidth * 0.8,
                     }}>
-                        {this.state.upcomingCourse ? (
-                            // <Text>{JSON.stringify(this.state.upcomingCourse)}</Text>
-                            <TouchableScale
-                                style={{
-                                    width: "100%",
-                                }}
-                                onPress={() => {
-                                    this.props.navigation.navigate("CourseSimTab");
-                                }}>
+                        <TouchableScale
+                            style={{
+                                width: "100%",
+                            }}
+                            onPress={() => {
+                                this.props.navigation.navigate("CourseSimTab");
+                            }}>
+                            {this.state.upcomingCourse ? (
+                                // <Text>{JSON.stringify(this.state.upcomingCourse)}</Text>
+
                                 <View
                                     style={{
                                         display: "flex",
@@ -963,26 +964,32 @@ class HomeScreen extends Component {
                                         width: "100%",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        gap: 2,
+                                        gap: 2.5,
                                         backgroundColor: this.state.upcomingCourse["color"] || themeColorUltraLight,
                                         paddingHorizontal: scale(20),
                                         paddingVertical: scale(10),
                                         marginTop: verticalScale(5),
                                         borderRadius: scale(5),
                                     }}>
-                                    <Text style={{ color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰下節課：`}</Text>
+                                    <Text style={{ color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
                                     <Text style={{ color: black.main, opacity: 0.7, }}>{this.state.upcomingCourse["Course Code"]}</Text>
                                     <Text style={{ color: black.main, opacity: 0.7, }}>{this.state.upcomingCourse["Time From"]}</Text>
                                 </View>
-                            </TouchableScale>
-                        ) : (
-                            <View style={{
-                                margintTop: verticalScale(5),
-                                paddingVertical: verticalScale(5),
-                            }}>
-                                <Text>{`接下來無課程~`}</Text>
-                            </View>
-                        )}
+
+                            ) : (
+                                <View style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    width: "100%",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    margintTop: verticalScale(5),
+                                    paddingVertical: scale(10),
+                                }}>
+                                    <Text>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
+                                </View>
+                            )}
+                        </TouchableScale>
                     </View>
 
                     {/* 快捷功能圖標 */}
