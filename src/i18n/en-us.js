@@ -119,6 +119,8 @@ export default {
 
         "開始時間不能晚於結束時間！": "Cannot start later than end time!",
         "結束時間不能早於開始時間！": "Cannot end earlier than start time!",
+        "下節課：": "Next Class:",
+        "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
     },
     features: {
         "服務一覽": "All Services",
