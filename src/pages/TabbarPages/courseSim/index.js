@@ -40,6 +40,7 @@ import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from './BottomSheet';
 import CourseCard from '../what2Reg/component/CourseCard';
+import { setLocalStorage } from '../../../utils/storageKits';
 
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -48,15 +49,14 @@ const timeFrom = '00:00';
 const timeTo = '23:59';
 
 // 設置本地緩存
-async function setLocalStorage(courseCodeList) {
-    try {
-        const strCourseCodeList = JSON.stringify(courseCodeList);
-        await AsyncStorage.setItem('ARK_Timetable_Storage', strCourseCodeList)
-            .catch(e => console.log('AsyncStorage Error', e));
-    } catch (e) {
-        alert(e);
-    }
-}
+// async function setLocalStorage(courseCodeList) {
+//     const strCourseCodeList = JSON.stringify(courseCodeList);
+//     await AsyncStorage.setItem('ARK_Timetable_Storage', strCourseCodeList)
+//         .catch((e) => {
+//             console.log('AsyncStorage Error', e);
+//             alert(e);
+//         });
+// }
 
 function parseImportData(inputText) {
     let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
@@ -262,8 +262,31 @@ export default class CourseSim extends Component {
             allCourseAllTime.push(...this_courseTimeList);
         });
 
+        // 存儲一周的課節課表，用於在首頁展示下節課程。
+        const s_allCourseAllTime = allCourseAllTime.reduce((acc, courseTime) => {
+            const day = courseTime["Day"];
+            if (!acc[day]) {
+                acc[day] = [];
+            }
+            acc[day].push({
+                "Course Code": courseTime["Course Code"],
+                "Section": courseTime["Section"],
+                "Time From": courseTime["Time From"],
+                "color": courseTime["color"],
+            });
+
+            acc[day].sort((a, b) =>
+                // new Date(`1970-01-01T${a["Time From"]}`) - new Date(`1970-01-01T${b["Time From"]}`)
+                moment(a["Time From"], "HH:mm").diff(moment(b["Time From"], "HH:mm"))
+            );
+            return acc;
+        }, {});
+
         this.setState({ allCourseAllTime, u_codeSectionList });
-        setLocalStorage(u_codeSectionList);
+        setLocalStorage("ARK_Timetable_Storage", u_codeSectionList);
+        setLocalStorage("ARK_WeekTimetable_Storage", s_allCourseAllTime);
+
+        // await AsyncStorage.setItem('ARK_Timetable_Week_Storage', allCourseAllTime);
     }
 
     // 渲染一列（一天）的課表
@@ -655,7 +678,7 @@ export default class CourseSim extends Component {
                         importTimeTableText: null,
                         searchText: null,
                     });
-                    setLocalStorage([]);
+                    setLocalStorage("ARK_Timetable_Storage", []);
                     this.verScroll.current.scrollTo({ y: 0 });
                 },
                 style: 'destructive',

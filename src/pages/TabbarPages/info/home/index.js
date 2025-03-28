@@ -55,6 +55,7 @@ import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
 import { openLink } from '../../../../utils/browser.js';
+import { getLocalStorage } from '../../../../utils/storageKits.js';
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 const iconSize = verticalScale(25);
@@ -245,6 +246,8 @@ class HomeScreen extends Component {
             isLoadMore: false,
 
             inputText: '',
+
+            upcomingCourse: null,
         };
     }
 
@@ -265,6 +268,8 @@ class HomeScreen extends Component {
 
         // 捕捉應用狀態監聽器
         this.appStateListener = AppState.addEventListener('change', this.handleAppStateChange);
+
+        this.getUpcomingCourse();
     }
 
     componentWillUnmount() {
@@ -380,7 +385,9 @@ class HomeScreen extends Component {
             text2: toastTextArr[toastTextIdx],
             topOffset: verticalScale(120),
             onPress: () => Toast.hide(),
-        })
+        });
+
+        this.getUpcomingCourse();
 
         // TODO: 會出現教授的名字，暫且擱置
         // const URL = ARK_WIKI_RANDOM_TITLE;
@@ -446,6 +453,25 @@ class HomeScreen extends Component {
                 return t('周日', { ns: 'home' });
         }
     }
+
+    /**
+     * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
+     */
+    getUpcomingCourse = async () => {
+
+        const s_allCourseAllTime = await getLocalStorage('ARK_WeekTimetable_Storage');
+        const curTime = moment().format("HH:mm");
+        const curDay = now.format("ddd").toUpperCase();
+
+        // console.log(s_allCourseAllTime);
+        // const curTime = "16:00";
+        // const curDay = "FRI";
+
+        const todayCourses = Object.entries(s_allCourseAllTime).filter(([day, courses]) => day == curDay)[0][1] || [];
+        const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
+        this.setState({ upcomingCourse: upComing[0] });
+    }
+
 
     // 渲染顶部校历图标
     renderCal = (item, index) => {
@@ -911,6 +937,53 @@ class HomeScreen extends Component {
                         </View>
                     ) : null
                     }
+
+                    {/** 即將到來的課程 */}
+                    <View style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        alignSelf: "center",
+                        width: screenWidth * 0.8,
+                    }}>
+                        {this.state.upcomingCourse ? (
+                            // <Text>{JSON.stringify(this.state.upcomingCourse)}</Text>
+                            <TouchableScale
+                                style={{
+                                    width: "100%",
+                                }}
+                                onPress={() => {
+                                    this.props.navigation.navigate("CourseSimTab");
+                                }}>
+                                <View
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: 'row',
+                                        width: "100%",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 2,
+                                        backgroundColor: this.state.upcomingCourse["color"] || themeColorUltraLight,
+                                        paddingHorizontal: scale(20),
+                                        paddingVertical: scale(10),
+                                        marginTop: verticalScale(5),
+                                        borderRadius: scale(5),
+                                    }}>
+                                    <Text style={{ color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰下節課：`}</Text>
+                                    <Text style={{ color: black.main, opacity: 0.7, }}>{this.state.upcomingCourse["Course Code"]}</Text>
+                                    <Text style={{ color: black.main, opacity: 0.7, }}>{this.state.upcomingCourse["Time From"]}</Text>
+                                </View>
+                            </TouchableScale>
+                        ) : (
+                            <View style={{
+                                margintTop: verticalScale(5),
+                                paddingVertical: verticalScale(5),
+                            }}>
+                                <Text>{`接下來無課程~`}</Text>
+                            </View>
+                        )}
+                    </View>
 
                     {/* 快捷功能圖標 */}
                     <View style={{ width: '100%', paddingHorizontal: scale(10), alignSelf: 'center', }}>
