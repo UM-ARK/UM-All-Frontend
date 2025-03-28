@@ -242,33 +242,24 @@ export default class CourseSim extends Component {
         const all_courseTimeList = s_coursePlanTimeFile.Courses;    // 所有课程的所有时间
 
         // Key: course code; value: List, 這周內不同時間所有的該Course Code-section的課程。
-        let courseScheduleByCode = {};
-        u_codeSectionList.forEach(codeSection => {
+        let allCourseAllTime = [];
+        u_codeSectionList.forEach((codeSection, i) => {
+            // 遍歷用戶選擇課程：所有code-section。
             // 這門課當前的唯一性
             const this_courseCode = codeSection['Course Code'];
             const this_section = codeSection["Section"];
 
-            // 给定当前course code和section,找到這門課這個section的所有上課时间
+            // 给定当前course code和section,找到這門課這個section的所有上課时间。
+            // 這裡，一個課被分裂成多個課節（以時間區分）。每個課節同意分配一個顏色。
             let this_courseTimeList = all_courseTimeList.filter(courseTime =>
                 courseTime['Course Code'] == this_courseCode &&
-                courseTime['Section'] == this_section);
+                courseTime['Section'] == this_section).map(this_courseTime => ({
+                    ...this_courseTime,
+                    'color': TIME_TABLE_COLOR[i]
+                }));
 
-            // 初始化或合并数组
-            courseScheduleByCode[this_courseCode] = [
-                ...(courseScheduleByCode[this_courseCode] || []),
-                ...this_courseTimeList
-            ];
-        });
-
-        // 一周內所有課程節數：Code, section, time.
-        let allCourseAllTime = [];
-        Object.entries(courseScheduleByCode).forEach(([courseCode, courseList], id) => {
-            // 遍歷每個課程code，對應一個List，List中包含這週所有這節課的上課時間.
-            const color = TIME_TABLE_COLOR[id];
-            courseList.map(itm => {
-                itm['color'] = color;
-            });
-            allCourseAllTime.push(...courseList);
+            // 這門課的所有課節加入周內所有課節。
+            allCourseAllTime.push(...this_courseTimeList);
         });
 
         this.setState({ allCourseAllTime, u_codeSectionList });
