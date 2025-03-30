@@ -255,7 +255,7 @@ export default class CourseSim extends Component {
                 courseTime['Course Code'] == this_courseCode &&
                 courseTime['Section'] == this_section).map(this_courseTime => ({
                     ...this_courseTime,
-                    'color': TIME_TABLE_COLOR[i]
+                    'color': TIME_TABLE_COLOR[i % TIME_TABLE_COLOR.length]
                 }));
 
             // 這門課的所有課節加入周內所有課節。
