@@ -742,16 +742,11 @@ class EventDetail extends Component {
                 )}
 
                 {/* 彈出層展示圖片查看器 */}
-                {/* <ImageScrollViewer
-                    ref={this.imageScrollViewer}
-                    imageUrls={imageUrls}
-                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
-                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
-                /> */}
                 <ARKImageView
                     ref={this.arkImageView}
                     imageUrls={imageUrls}
                 />
+
                 {/* Dialog提示登錄 */}
                 <DialogDIY
                     showDialog={this.state.showDialog}
