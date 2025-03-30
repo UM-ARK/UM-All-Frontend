@@ -14,8 +14,10 @@ const ARKImageView = forwardRef((props, ref) => {
 
     const { imageUrls } = props;
     const [visible, setVisible] = useState(false);
+    const [startIndex, setStartIndex] = useState(0);
 
-    const onRequireOpen = () => {
+    const onRequireOpen = (index = 0) => {
+        setStartIndex(index);
         setVisible(true);
     };
 
@@ -27,7 +29,7 @@ const ARKImageView = forwardRef((props, ref) => {
     return (
         <ImageView
             images={imageUrls}
-            imageIndex={0}
+            imageIndex={startIndex}
             visible={visible}
             onRequestClose={() => { setVisible(false); }}
             presentationStyle='overFullScreen'

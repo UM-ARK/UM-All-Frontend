@@ -68,8 +68,6 @@ const CLUB_IMAGE_WIDTH = scale(66);
 const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 class ClubDetail extends Component {
-    imageScrollViewer = React.createRef(null);
-
     arkImageView = React.createRef(null);
 
     state = {
@@ -417,8 +415,6 @@ class ClubDetail extends Component {
                         } else {
                             this.setState({ imageUrls: [{ uri: bgImgUrl }] });
                         }
-                        // this.imageScrollViewer.current.handleOpenImage(0);
-                        // this.setState({ isImageViewVisible: true });
                         this.arkImageView.current.onRequireOpen();
                     }}
                     activeOpacity={1}>
@@ -475,8 +471,6 @@ class ClubDetail extends Component {
                             onPress={() => {
                                 trigger();
                                 this.setState({ imageUrls: [{ uri: logo_url }] });
-                                // this.imageScrollViewer.current.tiggerModal();
-                                // this.setState({ isImageViewVisible: true });
                                 this.arkImageView.current.onRequireOpen();
                             }}>
                             <View style={styles.clubLogoContainer}>

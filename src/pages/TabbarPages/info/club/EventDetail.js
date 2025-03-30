@@ -36,6 +36,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import Toast, { DURATION } from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
+import ARKImageView from '../../../../components/ARKImageView';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -63,6 +64,8 @@ class EventDetail extends Component {
     };
 
     imageScrollViewer = React.createRef(null);
+
+    arkImageView = React.createRef(null);
 
     componentDidMount() {
         let globalData = this.props.RootStore;
@@ -143,7 +146,7 @@ class EventDetail extends Component {
                         startTimeStamp: eventData.startdatetime,
                         finishTimeStamp: eventData.enddatetime,
                         type: eventData.type,
-                        imageUrls: eventData.cover_image_url,
+                        imageUrls: [{ uri: eventData.cover_image_url }],
                         relateImgUrl:
                             eventData.relate_image_url &&
                                 eventData.relate_image_url.length > 0
@@ -456,8 +459,9 @@ class EventDetail extends Component {
                 <TouchableOpacity
                     style={{ flex: 1, position: 'relative' }}
                     onPress={() => {
-                        this.setState({ imageUrls: coverImgUrl });
-                        this.imageScrollViewer.current.handleOpenImage(0);
+                        this.setState({ imageUrls: [{ uri: coverImgUrl }] });
+                        // this.imageScrollViewer.current.handleOpenImage(0);
+                        this.arkImageView.current.onRequireOpen();
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
@@ -601,7 +605,7 @@ class EventDetail extends Component {
                             }}
                             activeOpacity={0.7}
                             onPress={() => {
-                                this.setState({ imageUrls: relateImgUrl });
+                                this.setState({ imageUrls: relateImgUrl.map(url => ({ uri: url })) });
                                 this.imageScrollViewer.current.tiggerModal();
                             }}>
                             {/* 卡片標題 */}
@@ -640,11 +644,9 @@ class EventDetail extends Component {
                                             activeOpacity={0.8}
                                             onPress={() => {
                                                 this.setState({
-                                                    imageUrls: relateImgUrl,
+                                                    imageUrls: relateImgUrl.map(url => ({ uri: url })),
                                                 });
-                                                this.imageScrollViewer.current.handleOpenImage(
-                                                    index,
-                                                );
+                                                this.arkImageView.current.onRequireOpen(1);
                                             }}>
                                             <FastImage
                                                 source={{
@@ -740,13 +742,16 @@ class EventDetail extends Component {
                 )}
 
                 {/* 彈出層展示圖片查看器 */}
-                <ImageScrollViewer
+                {/* <ImageScrollViewer
                     ref={this.imageScrollViewer}
                     imageUrls={imageUrls}
                 // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
                 // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
+                /> */}
+                <ARKImageView
+                    ref={this.arkImageView}
+                    imageUrls={imageUrls}
                 />
-
                 {/* Dialog提示登錄 */}
                 <DialogDIY
                     showDialog={this.state.showDialog}
