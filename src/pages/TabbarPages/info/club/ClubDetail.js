@@ -55,6 +55,9 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MenuView } from '@react-native-menu/menu';
 
+import ImageView from "react-native-image-viewing";
+import ARKImageView from '../../../../components/ARKImageView';
+
 // 解構uiMap的數據
 const { bg_color, white, black, themeColor, viewShadow } = COLOR_DIY;
 
@@ -66,6 +69,8 @@ const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 class ClubDetail extends Component {
     imageScrollViewer = React.createRef(null);
+
+    arkImageView = React.createRef(null);
 
     state = {
         clubData: undefined,
@@ -405,12 +410,16 @@ class ClubDetail extends Component {
                             clubData.club_photos_list.length > 0
                         ) {
                             this.setState({
-                                imageUrls: clubData.club_photos_list,
+                                // Image View要求的格式
+                                imageUrls: clubData.club_photos_list.map((url, id) => ({ uri: url })),
                             });
+                            // console.log(clubData.club_photos_list);
                         } else {
-                            this.setState({ imageUrls: bgImgUrl });
+                            this.setState({ imageUrls: [{ uri: bgImgUrl }] });
                         }
-                        this.imageScrollViewer.current.handleOpenImage(0);
+                        // this.imageScrollViewer.current.handleOpenImage(0);
+                        // this.setState({ isImageViewVisible: true });
+                        this.arkImageView.current.onRequireOpen();
                     }}
                     activeOpacity={1}>
                     {/* 返回按鈕 */}
@@ -465,8 +474,10 @@ class ClubDetail extends Component {
                         <TouchableWithoutFeedback
                             onPress={() => {
                                 trigger();
-                                this.setState({ imageUrls: logo_url });
-                                this.imageScrollViewer.current.tiggerModal();
+                                this.setState({ imageUrls: [{ uri: logo_url }] });
+                                // this.imageScrollViewer.current.tiggerModal();
+                                // this.setState({ isImageViewVisible: true });
+                                this.arkImageView.current.onRequireOpen();
                             }}>
                             <View style={styles.clubLogoContainer}>
                                 <FastImage
@@ -572,11 +583,12 @@ class ClubDetail extends Component {
                                                     onPress={() => {
                                                         this.setState({
                                                             imageUrls:
-                                                                clubData.club_photos_list,
+                                                                clubData.club_photos_list.slice(1).map((url, id) => ({ uri: url })),
                                                         });
-                                                        this.imageScrollViewer.current.handleOpenImage(
-                                                            index,
-                                                        );
+                                                        // this.setState({
+                                                        //     isImageViewVisible: true,
+                                                        // })
+                                                        this.arkImageView.current.onRequireOpen();
                                                     }}>
                                                     <FastImage
                                                         source={{
@@ -837,13 +849,10 @@ class ClubDetail extends Component {
                     </View>
                 )}
 
-                {/* 彈出層展示圖片查看器 */}
-                <ImageScrollViewer
-                    ref={this.imageScrollViewer}
-                    imageUrls={imageUrls}
-                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
-                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
-                />
+                {/**一个浮起来待命中的图片查看器 */}
+                <ARKImageView
+                    ref={this.arkImageView}
+                    imageUrls={imageUrls} />
 
                 {/* 彈出層提示 */}
                 <DialogDIY
