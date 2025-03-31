@@ -17,7 +17,6 @@ import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
 import Header from '../../../../components/Header';
@@ -62,8 +61,6 @@ class EventDetail extends Component {
         toastColor: themeColor,
         showUpInfo: false,
     };
-
-    imageScrollViewer = React.createRef(null);
 
     arkImageView = React.createRef(null);
 
@@ -460,7 +457,6 @@ class EventDetail extends Component {
                     style={{ flex: 1, position: 'relative' }}
                     onPress={() => {
                         this.setState({ imageUrls: [{ uri: coverImgUrl }] });
-                        // this.imageScrollViewer.current.handleOpenImage(0);
                         this.arkImageView.current.onRequireOpen();
                     }}
                     activeOpacity={1}>
@@ -605,8 +601,11 @@ class EventDetail extends Component {
                             }}
                             activeOpacity={0.7}
                             onPress={() => {
-                                this.setState({ imageUrls: relateImgUrl.map(url => ({ uri: url })) });
-                                this.imageScrollViewer.current.tiggerModal();
+                                this.setState({
+                                    imageUrls: relateImgUrl.map(url => ({ uri: url }))
+                                });
+                                // this.imageScrollViewer.current.tiggerModal();
+                                this.arkImageView.current.onRequireOpen(1);
                             }}>
                             {/* 卡片標題 */}
                             <View
@@ -646,7 +645,7 @@ class EventDetail extends Component {
                                                 this.setState({
                                                     imageUrls: relateImgUrl.map(url => ({ uri: url })),
                                                 });
-                                                this.arkImageView.current.onRequireOpen(1);
+                                                this.arkImageView.current.onRequireOpen(index);
                                             }}>
                                             <FastImage
                                                 source={{

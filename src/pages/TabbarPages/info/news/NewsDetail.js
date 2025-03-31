@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import Header from '../../../../components/Header';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -26,6 +25,7 @@ import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 import { trigger } from '../../../../utils/trigger';
+import ARKImageView from '../../../../components/ARKImageView';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -45,7 +45,7 @@ let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 class NewsDetail extends Component {
-    imageScrollViewer = React.createRef(null);
+    arkImageView = React.createRef(null);
 
     constructor(props) {
         super(props);
@@ -277,9 +277,7 @@ class NewsDetail extends Component {
                                 // 打開圖片瀏覽大圖
                                 onPress={() => {
                                     trigger();
-                                    this.imageScrollViewer.current.handleOpenImage(
-                                        index,
-                                    );
+                                    this.arkImageView.current.onRequireOpen(index);
                                 }}>
                                 <FastImage
                                     source={{
@@ -328,10 +326,9 @@ class NewsDetail extends Component {
                     </View>
 
                     {/* 彈出層展示圖片查看器 */}
-                    <ImageScrollViewer
-                        ref={this.imageScrollViewer}
-                        imageUrls={imageUrls}
-                    />
+                    <ARKImageView
+                        ref={this.arkImageView}
+                        imageUrls={imageUrls.map((url, id) => ({ uri: url }))} />
                     <View style={{ marginBottom: scale(50) }} />
                 </ScrollView>
             </View>

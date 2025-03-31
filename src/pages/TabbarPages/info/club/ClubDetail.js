@@ -31,7 +31,6 @@ import { handleLogout } from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
@@ -577,12 +576,11 @@ class ClubDetail extends Component {
                                                     onPress={() => {
                                                         this.setState({
                                                             imageUrls:
-                                                                clubData.club_photos_list.slice(1).map((url, id) => ({ uri: url })),
+                                                                clubData.club_photos_list.map((url, id) => ({ uri: url })),
                                                         });
-                                                        // this.setState({
-                                                        //     isImageViewVisible: true,
-                                                        // })
-                                                        this.arkImageView.current.onRequireOpen();
+                                                        // 這裡有個小trick: 圖片查看器的開始索引是1，而這個數組的開始索引是0.
+                                                        // 但是很巧的是，圖片數組的第一個是社團logo，所以這裡可以直接使用index。
+                                                        this.arkImageView.current.onRequireOpen(index);
                                                     }}>
                                                     <FastImage
                                                         source={{

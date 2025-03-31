@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
