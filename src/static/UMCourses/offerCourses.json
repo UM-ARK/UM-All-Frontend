@@ -7,7 +7,7 @@
             "Course Title": "Principles of Financial Accounting",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA\n - FBA - BIA25 / GBS22-SECOND YEAR / IIR20-FIRST YEAR / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA\n - FBA - BIA25 / GBS22-SECOND YEAR / IIR20-FIRST YEAR / ",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "財務會計原理"
         },
@@ -622,6 +622,26 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "CIS",
+            "Course Code": "CISC3010",
+            "Course Title": "Distributed Computer Systems",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "分散式電腦系統"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "CIS",
+            "Course Code": "CISC3011",
+            "Course Title": "Digital Image Processing",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "數位影像處理"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "CIS",
             "Course Code": "CISC3012",
             "Course Title": "Artificial Intelligence",
             "Credit Units": 3,
@@ -746,7 +766,7 @@
             "Course Title": "Computer Science",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course not for :\n - FST - CPS17\n",
+            "Course For Info": "Course not for :\n - FST - CPS19\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "計算機科學"
         },
@@ -1288,6 +1308,7 @@
             "Course Code": "ECON1000",
             "Course Title": "Basic Microeconomics",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "基礎微觀經濟學"
@@ -1298,6 +1319,7 @@
             "Course Code": "ECON1002",
             "Course Title": "Mathematics I",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "數學 I"
@@ -1308,6 +1330,7 @@
             "Course Code": "ECON2000",
             "Course Title": "Statistics I",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "統計學 I"
@@ -1318,6 +1341,7 @@
             "Course Code": "ECON2002",
             "Course Title": "Intermediate Microeconomics I",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "中級微觀經濟學I"
@@ -1328,6 +1352,7 @@
             "Course Code": "ECON2004",
             "Course Title": "Intermediate Macroeconomics I",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "中級宏觀經濟學 I"
@@ -1338,6 +1363,7 @@
             "Course Code": "ECON3001",
             "Course Title": "Money and Banking",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 3,
             "Course Title Chi": "貨幣與銀行"
@@ -1408,6 +1434,7 @@
             "Course Code": "ECON4009",
             "Course Title": "The Modern Macao Economy",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FSS - ECN17 / ECN19\n - FSS - MEC19\n",
             "Enrolled Year Level (on or above)": 4,
             "Course Title Chi": "現代澳門經濟"
@@ -1563,7 +1590,7 @@
             "Course Title": "Sociology of Education",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course not for :\n - FED - CHN19 / CHN25 / ENG19 / PPE19 / PYE19 / PYE22\n",
+            "Course For Info": "Course not for :\n - FED - CHN19 / CHN25 / ENG19 / PYE19 / PYE22\n",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "教育社會學"
         },
@@ -1725,7 +1752,7 @@
             "Course Title": "Introduction to Special Education",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course not for :\n - FED - PPE19 / PYE19 / PYE22\n",
+            "Course For Info": "Course not for :\n - FED - INS19 / INS23 / MAS19 / PPE19 / PYE19 / PYE22",
             "Enrolled Year Level (on or above)": 3,
             "Course Title Chi": "特殊教育導論"
         },
@@ -1745,7 +1772,7 @@
             "Course Title": "Teacher Ethics and Teacher Professional Development",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course not for :\n - FED - CHN19 / INS19 / INS23 / MAS19 / PYE22\n",
+            "Course For Info": "Course not for :\n - FED - CHN19 / PYE22",
             "Enrolled Year Level (on or above)": 3,
             "Course Title Chi": "教師道德與教師專業發展"
         },
@@ -2108,22 +2135,22 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "EME",
-            "Course Code": "EMEN3015",
-            "Course Title": "Finite Element Techniques in Engineering",
-            "Credit Units": 3,
-            "For Incoming Exchange Students": "Y",
-            "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "工程中的有限元素技術"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "EME",
             "Course Code": "EMEN3025",
             "Course Title": "Fire Protection Engineering",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "消防工程"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "EME",
+            "Course Code": "EMEN3027",
+            "Course Title": "Mechanical Behaviour of Engineering Materials and Basic Failure Analysis",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "工程材料的力學行為與基本失效分析"
         },
         {
             "Offering Unit": "FST",
@@ -2361,7 +2388,7 @@
             "Course Title": "Financial Management",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - BAM19 / BAM22 / FNM19\n - FBA - ACC21 / BIA19 / FIC20 / GBM20 / GBM22-FOURTH YEAR / GBS20 / GBS22-FOURTH YEAR / HRM20 / HRM22-FOURTH YEAR / IIR20 / MKG22-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BAM19 / BAM22 / FNM19\n - FBA - ACC21 / BEC20 / BEC22-THIRD YEAR / BEC22-FOURTH YEAR / BIA19 / BIA25 / FIC20 / FIC22-THIRD YEAR / GBM20 / GBM22-THIRD YEAR / GBM22-FOURTH YEAR / GBS20 / GBS22-THIRD YEAR / GBS22-FOURTH YEAR / HRM20 / HRM22-THIRD YEAR / HRM22-FOURTH YEAR / IIR20 / MKG22-THIRD YEAR / MKG22-FOURTH YEAR / MKG17\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "財務管理"
         },
@@ -2422,7 +2449,7 @@
             "Course Code": "FINC4008",
             "Course Title": "International Finance and Global Issues",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FIC20 / FIC22-FOURTH YEAR / FNC17 / FNC20\n",
+            "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FIC20 / FIC22-FOURTH YEAR / FNC17 / FNC20 / GBS20-FOURTH YEAR / GBS22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "國際金融與全球議題"
         },
@@ -3640,7 +3667,7 @@
             "Course Code": "ISOM1005",
             "Course Title": "Introduction to Business Intelligence and Information",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BAM22 / BIM25 / GBS22-SECOND YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BAM22 / BIM25 / BIA19-SECOND YEAR / BIA25-FIRST YEAR / GBS22-FIRST YEAR / GBS22-SECOND YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "商業智慧與資訊簡介"
         },
@@ -3650,7 +3677,7 @@
             "Course Code": "ISOM2002",
             "Course Title": "Statistics and Data Analysis",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - ACC21-SECOND YEAR / BIA19-SECOND YEAR / FNC20-SECOND YEAR\n",
+            "Course For Info": "Course for :\n - FBA - ACC21-SECOND YEAR / BIA19-SECOND YEAR / BIA25-FIRST YEAR / FNC20-SECOND YEAR / FBA-THIRD YEAR / FBA-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "統計與數據分析"
         },
@@ -3671,7 +3698,7 @@
             "Course Title": "Programming for Business Analytics",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - BIA19-SECOND YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA25-FIRST YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "商業分析程式設計"
         },
@@ -3681,7 +3708,7 @@
             "Course Code": "ISOM3000",
             "Course Title": "Database Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - ACC19 / ACC21-SECOND YEAR / BIA19-SECOND YEAR\n",
+            "Course For Info": "Course for :\n - FBA - ACC19 / ACC21-THIRD YEAR / BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA25-FIRST YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "資料庫管理"
         },
@@ -3691,7 +3718,7 @@
             "Course Code": "ISOM3015",
             "Course Title": "Big Data Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "大數據管理"
         },
@@ -3721,7 +3748,7 @@
             "Course Code": "ISOM3030",
             "Course Title": "Quantitative Decision Analysis",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / FIC22-THIRD YEAR / GBM22-THIRD YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / FIC22-THIRD YEAR / GBM22-THIRD YEAR / FBA-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "定量決策分析"
         },
@@ -3742,7 +3769,7 @@
             "Course Title": "Business Project Management",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "商業專案管理"
         },
@@ -3752,7 +3779,7 @@
             "Course Code": "ISOM4006",
             "Course Title": "Project and Quality Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - FIC20-FOURTH YEAR / FIC22-FOURTH YEAR / GBM20-FOURTH YEAR / GBM22-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - FIC20-FOURTH YEAR / FIC22-FOURTH YEAR / GBM20-FOURTH YEAR / GBM22-FOURTH YEAR / GBS20-THIRD YEAR / GBS20-FOURTH YEAR \n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "專案與品質管理"
         },
@@ -4449,7 +4476,7 @@
             "Course Title": "Business Communications",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - BEC22-SECOND YEAR / FIC22-SECOND YEAR / GBM22-SECOND YEAR / GBS22-SECOND YEAR / HRM22-SECOND YEAR / MKG22-SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BEC22-SECOND YEAR / FIC22-SECOND YEAR / GBM22-SECOND YEAR / GBS22-FIRST YEAR / GBS22-SECOND YEAR / HRM22-SECOND YEAR / MKG22-SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "商業通訊"
         },
@@ -4460,7 +4487,7 @@
             "Course Title": "Organizational Behavior",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - GBS22-FIRST YEAR / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "組織行為學"
         },
@@ -4515,7 +4542,7 @@
             "Course Title": "Research Methods",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - GBM22-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "研究方法"
         },
@@ -4603,7 +4630,7 @@
             "Course Title": "Principles of Marketing",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - GBS22-SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - GBS22-FIRST YEAR / GBS22-SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "行銷原理"
         },
@@ -4658,7 +4685,7 @@
             "Course Title": "Pricing Strategy",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA - FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - GBS20-THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "定價策略"
         },
@@ -5738,7 +5765,7 @@
             "Course Title Chi": "民事訴訟法 I（法律實務）"
         }
     ],
-    "updateTime": "2025-04-22",
+    "updateTime": "2025-04-25",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Pre Enrollment期間的數據",
