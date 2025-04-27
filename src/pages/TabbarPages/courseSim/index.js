@@ -40,6 +40,7 @@ import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from './BottomSheet';
 import CourseCard from '../what2Reg/component/CourseCard';
+import { setLocalStorage } from '../../../utils/storageKits';
 
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -48,15 +49,14 @@ const timeFrom = '00:00';
 const timeTo = '23:59';
 
 // 設置本地緩存
-async function setLocalStorage(courseCodeList) {
-    try {
-        const strCourseCodeList = JSON.stringify(courseCodeList);
-        await AsyncStorage.setItem('ARK_Timetable_Storage', strCourseCodeList)
-            .catch(e => console.log('AsyncStorage Error', e));
-    } catch (e) {
-        alert(e);
-    }
-}
+// async function setLocalStorage(courseCodeList) {
+//     const strCourseCodeList = JSON.stringify(courseCodeList);
+//     await AsyncStorage.setItem('ARK_Timetable_Storage', strCourseCodeList)
+//         .catch((e) => {
+//             console.log('AsyncStorage Error', e);
+//             alert(e);
+//         });
+// }
 
 function parseImportData(inputText) {
     let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
@@ -128,8 +128,8 @@ export default class CourseSim extends Component {
         // 導入課表功能
         importTimeTableText: null,
 
-        courseCodeList: [],
-        allCourseAllTime: [],
+        u_codeSectionList: [],     // 用戶自己選擇的課程，唯一性：Course Code, Section
+        allCourseAllTime: [],      // 用戶一周內所有課程節，唯一性：Course Code, Section, Time
 
         // addMode: false,
         searchText: null,
@@ -141,7 +141,28 @@ export default class CourseSim extends Component {
         timePickerMode: 'from',
         showTimePicker: false,
 
+
+        // 這兩個是緩存的該學期所有課程
         s_coursePlanFile: coursePlanFile,
+
+        /**
+         * {"Courses": [{
+         * "Classroom": "E22-2017", 
+         * "Course Code": "ACCT1000", 
+         * "Course Title": "Principles of Financial Accounting", 
+         * "Course Title Chi": "財務會計原理", 
+         * "Day": "TUE", 
+         * "Lecture / Lab": 
+         * "Lecture", 
+         * "Medium of Instruction": "English", 
+         * "Offering Department": "AIM", 
+         * "Offering Unit": "FBA", 
+         * "Section": "001", 
+         * "Teacher Information": "TCHIANG VAN KAM", 
+         * "Time From": "13:00", 
+         * "Time To": "14:15"
+         * }, ...]}
+         */
         s_coursePlanTimeFile: coursePlanTimeFile,
 
 
@@ -153,11 +174,16 @@ export default class CourseSim extends Component {
 
         await this.readLocalCourseData();
 
+        // 自己選的課
         const strCourseCodeList = await AsyncStorage.getItem('ARK_Timetable_Storage');
-        const courseCodeList = strCourseCodeList ? JSON.parse(strCourseCodeList) : null;
+        const u_codeSectionList = strCourseCodeList ? JSON.parse(strCourseCodeList) : null;
 
-        if (courseCodeList && courseCodeList.length > 0) {
-            this.handleCourseList(courseCodeList);
+        if (u_codeSectionList && u_codeSectionList.length > 0) {
+            this.handleCourseList(u_codeSectionList);
+            // console.log(courseCodeList);
+            // const test = this.state.s_coursePlanFile;
+            // console.log(test.updateTime[0]);
+            // console.log(courseCodeList);
         }
 
         if (this.props.route.params) {
@@ -203,43 +229,64 @@ export default class CourseSim extends Component {
         }
     }
 
-    // 處理課表數據，分析出用於render的數據
-    handleCourseList = (courseCodeList) => {
+
+    /**
+     * 輸入用戶選擇課程的列表，輸出用戶所有的課程課表。
+     * 輸入：課程列表，唯一性定義：Code, section. 不包含時間。
+     * 輸出：課程列表，唯一性定義：Code, section, time。
+     * @param {*} u_codeSectionList 用戶選擇課程。單個課程{"Course Code": string, "Section": string}
+     */
+    handleCourseList = (u_codeSectionList) => {
+        // 讀取存儲的所有課程
         const { s_coursePlanTimeFile } = this.state;
-        const courseTimeList = s_coursePlanTimeFile.Courses;
-        let courseScheduleByCode = {};
-        courseCodeList.map(i => {
-            let tempArr = [];
-            courseTimeList.map(itm => {
-                if (itm['Course Code'] == i['Course Code'] && itm['Section'] == i['Section']) {
-                    tempArr.push(itm);
-                }
-            })
+        const all_courseTimeList = s_coursePlanTimeFile.Courses;    // 所有课程的所有时间
 
-            if (courseScheduleByCode[i['Course Code']]) {
-                tempArr.push(...courseScheduleByCode[i['Course Code']]);
-            }
-            courseScheduleByCode[i['Course Code']] = tempArr;
-        })
-
+        // Key: course code; value: List, 這周內不同時間所有的該Course Code-section的課程。
         let allCourseAllTime = [];
-        // 上一步已將可能相同的Code的多個Section數據放到同一個對象中
-        // 對courseCodeList去重
-        let codeListTemp = JSON.parse(JSON.stringify(courseCodeList));
-        codeListTemp = codeListTemp.filter((item, index) => codeListTemp.findIndex(i => i['Course Code'] === item['Course Code']) === index);
-        codeListTemp.map((i, idx) => {
-            // 某課程一星期所有的上課時間
-            let singleCourseAllTime = courseScheduleByCode[i['Course Code']];
-            // 插入自定義的課表顏色
-            singleCourseAllTime.map(itm => {
-                itm['color'] = TIME_TABLE_COLOR[idx];
-            })
-            // 一星期所有課程的上課時間
-            allCourseAllTime.push(...singleCourseAllTime);
-        })
+        u_codeSectionList.forEach((codeSection, i) => {
+            // 遍歷用戶選擇課程：所有code-section。
+            // 這門課當前的唯一性
+            const this_courseCode = codeSection['Course Code'];
+            const this_section = codeSection["Section"];
 
-        this.setState({ allCourseAllTime, courseCodeList });
-        setLocalStorage(courseCodeList);
+            // 给定当前course code和section,找到這門課這個section的所有上課时间。
+            // 這裡，一個課被分裂成多個課節（以時間區分）。每個課節同意分配一個顏色。
+            let this_courseTimeList = all_courseTimeList.filter(courseTime =>
+                courseTime['Course Code'] == this_courseCode &&
+                courseTime['Section'] == this_section).map(this_courseTime => ({
+                    ...this_courseTime,
+                    'color': TIME_TABLE_COLOR[i % TIME_TABLE_COLOR.length]
+                }));
+
+            // 這門課的所有課節加入周內所有課節。
+            allCourseAllTime.push(...this_courseTimeList);
+        });
+
+        // 存儲一周的課節課表，用於在首頁展示下節課程。
+        const s_allCourseAllTime = allCourseAllTime.reduce((acc, courseTime) => {
+            const day = courseTime["Day"];
+            if (!acc[day]) {
+                acc[day] = [];
+            }
+            acc[day].push({
+                "Course Code": courseTime["Course Code"],
+                "Section": courseTime["Section"],
+                "Time From": courseTime["Time From"],
+                "color": courseTime["color"],
+            });
+
+            acc[day].sort((a, b) =>
+                // new Date(`1970-01-01T${a["Time From"]}`) - new Date(`1970-01-01T${b["Time From"]}`)
+                moment(a["Time From"], "HH:mm").diff(moment(b["Time From"], "HH:mm"))
+            );
+            return acc;
+        }, {});
+
+        this.setState({ allCourseAllTime, u_codeSectionList });
+        setLocalStorage("ARK_Timetable_Storage", u_codeSectionList);
+        setLocalStorage("ARK_WeekTimetable_Storage", s_allCourseAllTime);
+
+        // await AsyncStorage.setItem('ARK_Timetable_Week_Storage', allCourseAllTime);
     }
 
     // 渲染一列（一天）的課表
@@ -350,7 +397,7 @@ export default class CourseSim extends Component {
             {timeReminderText}
         </Text> : null;
 
-        let hasDuplicate = hasSpecificDuplicate(this.state.courseCodeList, 'Course Code', course['Course Code']);
+        let hasDuplicate = hasSpecificDuplicate(this.state.u_codeSectionList, 'Course Code', course['Course Code']);
 
         return (
             <View>
@@ -396,7 +443,7 @@ export default class CourseSim extends Component {
                                             text: "Yes",
                                             onPress: () => {
                                                 trigger();
-                                                let { courseCodeList } = this.state;
+                                                let { u_codeSectionList: courseCodeList } = this.state;
                                                 let tempArr = [];
                                                 courseCodeList.map(i => {
                                                     if (course['Course Code'] != i['Course Code']) {
@@ -567,7 +614,7 @@ export default class CourseSim extends Component {
 
     addCourse = (course) => {
         trigger();
-        let { courseCodeList } = this.state;
+        let { u_codeSectionList: courseCodeList } = this.state;
         let tempArr = [];
         courseCodeList.map(i => {
             if (i['Course Code'] != course['Course Code']) {
@@ -583,7 +630,7 @@ export default class CourseSim extends Component {
     }
 
     addAllSectionCourse = (courseCode, sectionObj) => {
-        let courseCodeList = this.state.courseCodeList;
+        let courseCodeList = this.state.u_codeSectionList;
         // 刪除原多餘的相同Code
         let tempArr = [];
         courseCodeList.map(itm => {
@@ -605,7 +652,7 @@ export default class CourseSim extends Component {
     // 刪除所選課程
     dropCourse = (course) => {
         trigger();
-        const { courseCodeList } = this.state;
+        const { u_codeSectionList: courseCodeList } = this.state;
         let newList = [];
         courseCodeList.map(i => {
             if (!(i['Course Code'] == course['Course Code'] && i['Section'] == course['Section'])) {
@@ -631,7 +678,7 @@ export default class CourseSim extends Component {
                         importTimeTableText: null,
                         searchText: null,
                     });
-                    setLocalStorage([]);
+                    setLocalStorage("ARK_Timetable_Storage", []);
                     this.verScroll.current.scrollTo({ y: 0 });
                 },
                 style: 'destructive',
@@ -1001,7 +1048,7 @@ E11-0000
                                     }}
                                     onPress={() => {
                                         trigger();
-                                        let { courseCodeList } = this.state;
+                                        let { u_codeSectionList: courseCodeList } = this.state;
                                         let tempArr = [];
                                         courseCodeList.map(itm => {
                                             if (itm['Course Code'] != i['Course Code']) {

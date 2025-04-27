@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -22,6 +21,7 @@ import moment, { lang } from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 import { trigger } from '../../../../utils/trigger';
+import ARKImageView from '../../../../components/ARKImageView';
 
 // 解構全局ui設計顏色
 const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
@@ -31,7 +31,7 @@ const { width: PAGE_WIDTH } = Dimensions.get('window');
 const COMPONENT_WIDTH = scale(320);
 
 class UMEventDetail extends Component {
-    imageScrollViewer = React.createRef(null);
+    arkImageView = React.createRef(null);
 
     constructor(props) {
         super(props);
@@ -452,13 +452,11 @@ class UMEventDetail extends Component {
         return (
             <View style={{ backgroundColor: bg_color, flex: 1 }}>
                 <Header title={'活動詳情'} iOSDIY={true} />
+
                 {/* 彈出層展示圖片查看器 */}
-                <ImageScrollViewer
-                    ref={this.imageScrollViewer}
-                    imageUrls={imageUrls}
-                // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
-                // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
-                />
+                <ARKImageView
+                    ref={this.arkImageView}
+                    imageUrls={[{ uri: imageUrls }]} />
 
                 <ScrollView>
                     {/* 文本模式選擇 3語切換 */}
@@ -489,7 +487,7 @@ class UMEventDetail extends Component {
                         // 瀏覽大圖
                         onPress={() => {
                             trigger();
-                            this.imageScrollViewer.current.handleOpenImage(0);
+                            this.arkImageView.current.onRequireOpen();
                         }}>
                         <FastImage
                             source={{
