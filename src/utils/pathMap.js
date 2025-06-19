@@ -181,19 +181,21 @@ export const UM_LIBRARY = 'https://library.um.edu.mo';
 // 澳大 - UM Pass
 export const UM_PASS = 'https://umpass.um.edu.mo';
 // 澳大 - 好意見計劃
-export const UM_COMMENTS = 'https://isw.um.edu.mo/qmweb/faces/app/addComments.jspx';
+export const UM_COMMENTS = 'https://isw.um.edu.mo/suggestion/index.html#/suggestion-list';
 // 澳大 - UM Portal
 export const UM_PORTAL = 'https://myum.um.edu.mo';
 // 澳大 - 學生電子公告
 export const UM_BULLETIN = 'https://e-bulletin.um.edu.mo/';
 // 澳大 - 找書
-export const UM_FIND_BOOKS = 'https://umlibrary.primo.exlibrisgroup.com/discovery/login?vid=853UOM_INST:umlibrary&lang=zh-tw';
+export const UM_FIND_BOOKS = 'https://umlibrary.primo.exlibrisgroup.com/discovery/login?vid=853UOM_INST:umlibrary';
 // 澳大 - 圖書館預約
 export const UM_LIB_BOOK = 'https://lib-booking.library.um.edu.mo/';
 // 澳大 - 學生打印
 export const UM_PRINT = 'https://followyouprint.icto.um.edu.mo/websubmit/';
 // 澳大 - 打印餘額
 export const UM_PRINT_BALANCE = 'https://followyouprint.icto.um.edu.mo/adminportal';
+// 澳大 - 圖書館資源佔用
+export const UM_LIB_USING = 'https://library.um.edu.mo/lib_services/IT_services_cn';
 
 // 學業發展分類
 // 澳大 - UM Moodle
@@ -217,6 +219,8 @@ export const UM_SCHOLARSHIP =
     'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
 // 澳大 - 證明文件
 export const UM_DOCUMENTS = 'https://ops.fo.um.edu.mo/services/?lang=zh-hant';
+// 澳大 - 論文時間安排計劃
+export const UM_PAPER_PLAN = 'http://library2.um.edu.mo/html/services/reference/a_cal/index_wo_layout.php';
 // 澳大 - 預選課Excel表格
 export const UM_PRE_ENROLMENT_EXCEL = 'https://reg.um.edu.mo/current-students/enrolment-and-examinations/course-enrolment/pre-enrolment/?lang=zh-hant';
 // 澳大 - 重要日期
@@ -265,3 +269,9 @@ export const NEW_SCZN = 'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum
 export const NEW_MAINLAND = 'https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=2476350502922977281';
 // 防詐騙
 export const SCAME = 'https://sds.sao.um.edu.mo/projects/judicial-police-notes/?lang=zh-hant';
+// 新生註冊
+export const NEW_REG = 'https://reg.um.edu.mo/admissions/registration/?lang=zh-hant';
+// 校友會
+export const UM_ALUMNI = 'https://ado.um.edu.mo/alumni-community/alumni-associations/?lang=zh-hant';
+// 書院大全
+export const UM_RC = 'https://ado.um.edu.mo/rc/?lang=zh-hant';

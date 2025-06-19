@@ -49,7 +49,12 @@ import {
     UM_PRINT,
     UM_PRINT_BALANCE,
     SCAME,
-    MAIL
+    MAIL,
+    NEW_REG,
+    UM_LIB_USING,
+    UM_PAPER_PLAN,
+    UM_RC,
+    UM_ALUMNI,
 } from '../../../utils/pathMap';
 import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -200,6 +205,19 @@ class Index extends Component {
                             // isBarStyleBlack: false,
                         },
                         describe: t('直接前往圖書館主頁，能查看圖書館人數和搜索資源等', { ns: 'features' }),
+                    },
+                    {
+                        icon_type: iconTypes.ionicons,
+                        icon_name: 'book',
+                        fn_name: t('Lib佔用', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_LIB_USING,
+                            title: 'UM 圖書館資源佔用',
+                            text_color: '#010101',
+                        },
+                        describe: t('包含圖書館的電腦、房間佔用情況、其他科技資訊等', { ns: 'features' }),
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
@@ -509,10 +527,6 @@ class Index extends Component {
                         fn_name: t('課表模擬', { ns: 'features' }),
                         needLogin: false,
                         go_where: 'CourseSimTab',
-                        // webview_param: {
-                        //     url: UM_COURSE_SIMU,
-                        //     title: '課表模擬(建議在電腦操作)',
-                        // },
                         describe: t('ARK課表模擬功能，選課時不用再對著Excel自己慢慢找啦！', { ns: 'features' }),
                     },
                     {
@@ -661,14 +675,20 @@ class Index extends Component {
                         },
                         describe: t('進入澳大圖書館的資源搜索頁，搜索澳大已購買的文獻資料、教科書等', { ns: 'features' }),
                     },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'typewriter',
+                        fn_name: t('論文計劃', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Linking',
+                        webview_param: {
+                            url: UM_PAPER_PLAN,
+                            title: '論文計劃',
+                        },
+                        describe: t('你的論文計劃小幫手', { ns: 'features' }),
+                    },
                 ],
             },
-            // {
-            //     title: t('生活服務', { ns: 'features' }),
-            //     fn: [
-
-            //     ],
-            // },
             {
                 title: '😎 ' + t('新生推薦', { ns: 'features' }),
                 fn: [
@@ -702,6 +722,20 @@ class Index extends Component {
                     },
                     {
                         icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'account-box',
+                        fn_name: t('新生註冊', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: NEW_REG,
+                            title: '新生註冊',
+                            text_color: '#012d56',
+                            bg_color_diy: '#fff',
+                        },
+                        describe: t('新生註冊圖文包及相關資料', { ns: 'features' }),
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
                         icon_name: 'account-heart',
                         fn_name: t('圖文包', { ns: 'features' }),
                         needLogin: false,
@@ -727,6 +761,34 @@ class Index extends Component {
                             bg_color_diy: '#fff',
                         },
                         describe: t('防詐騙圖文包，外地同學初次到達澳門要注意！', { ns: 'features' }),
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'account-supervisor-circle',
+                        fn_name: t('書院', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_RC,
+                            title: '書院',
+                            text_color: '#012d56',
+                            bg_color_diy: '#fff',
+                        },
+                        describe: t('書院大全，快捷找到對應書院主頁', { ns: 'features' }),
+                    },
+                    {
+                        icon_type: iconTypes.materialCommunityIcons,
+                        icon_name: 'account-multiple',
+                        fn_name: t('校友會', { ns: 'features' }),
+                        needLogin: false,
+                        go_where: 'Webview',
+                        webview_param: {
+                            url: UM_ALUMNI,
+                            title: '校友會',
+                            text_color: '#012d56',
+                            bg_color_diy: '#fff',
+                        },
+                        describe: t('UM校友會，也可以找到其他校友相關資訊的網站', { ns: 'features' }),
                     },
                 ],
             },

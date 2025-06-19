@@ -137,6 +137,7 @@ export default {
         "維修預約": "Repair",
         "體育預訂": "Sports",
         "圖書館": "Library",
+        "Lib佔用": "Lib Using",
         "Lib房間": "Lib Rooms",
         "UM提意見": "Feedback",
         "電子公告": "Bulletin",
@@ -157,6 +158,7 @@ export default {
         "獎學金": "Scholarship",
         "證明文件": "Certificate",
         "資源搜索": "Resource Finder",
+        "論文計劃": "Essay Plan",
 
 
         "生活服務": "Domestic Services",
@@ -168,9 +170,12 @@ export default {
 
         "新生推薦": "Recommended for Freshmen",
         "生存指南": "Survival",
+        "新生註冊": "Registration",
         "內地生": "Mainland",
         "圖文包": "Package",
         "防詐騙": "Scam",
+        "書院": "RC",
+        "校友會": "Alumni",
 
 
         "提問：關於澳大的一切...": "Ask: Anything about UM...",
@@ -186,6 +191,7 @@ export default {
         "查看當前澳大停車場剩餘車位": "Check the remaining parking spaces in UM",
         "查看E6電腦室使用情況": "Check the usage of E6 computer room",
         "直接前往圖書館主頁，能查看圖書館人數和搜索資源等": "Go directly to the library homepage to check the number of people in the library and search for resources",
+        "包含圖書館的電腦、房間佔用情況、其他科技資訊等": "Contains library computers, room occupancy, other technological information, etc.",
         "進入UM PASS設置頁面": "Enter the UM PASS settings page",
         "查看澳大電子公告，最新的更新（未放到新聞和活動）會在這裡公示": "Check the UM electronic bulletin, the latest updates (not posted in news and events) will be announced here",
         "查看在澳大打印服務的餘額": "Check the balance of printing services in UM",
@@ -216,10 +222,14 @@ export default {
         "申請澳大的出外交流項目": "Apply for UM's outbound exchange program",
         "查看澳大獎學金介紹頁": "Check the UM scholarship introduction page",
         "進入澳大圖書館的資源搜索頁，搜索澳大已購買的文獻資料、教科書等": "Enter the resource search page of the UM library to search for literature materials, textbooks, etc. purchased by UM",
+        "你的論文計劃小幫手": "Your essay planning assistant",
         "澳大生存指南公眾號歷史推文": "Historical tweets of the UM Survival Guide public account",
         "澳大生存指南公眾號給內地新生的一些指南建議": "Some guide suggestions for mainland freshmen from the UM Survival Guide public account",
+        "新生註冊圖文包及相關資料": "New Student Registration Package and Related Materials",
         "澳大官方出品的新生圖文包，包括EELC等課程要求": "UM official freshman graphic package, including EELC and other course requirements",
         "防詐騙圖文包，外地同學初次到達澳門要注意！": "Anti-fraud graphic package, students from other places should pay attention when they first arrive in Macau!",
+        "書院大全，快捷找到對應書院主頁": "A list of colleges, quickly find the homepage of the corresponding college",
+        "UM校友會，也可以找到其他校友相關資訊的網站": "UM Alumni Association, where you can also find other alumni-related information",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
