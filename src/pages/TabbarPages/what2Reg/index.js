@@ -40,6 +40,7 @@ import RNRestart from 'react-native-restart';
 import { t } from "i18next";
 import ActionSheet from '@alessiocancian/react-native-actionsheet';
 import { Dialog, } from '@rneui/themed';
+import lodash from 'lodash';
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
 const iconSize = scale(25);
@@ -223,11 +224,6 @@ export default class What2Reg extends Component {
             // console.log('err', e);
             Alert.alert('ARK Courses error, 請聯繫開發者！', e)
         } finally {
-            // TODO: 需不需要每天自動更新課表數據？
-            // const storageFileCheckDate = await getLocalStorage('course_file_check_date');
-            // if (moment(storageFileCheckDate).isBefore(moment().format("YYYY-MM-DD")) || storageFileCheckDate == undefined) {
-            // await this.updateLocalCourseData('coursePlanTime');
-            // }
             this.getClassifyCourse();
         }
     };
@@ -321,12 +317,6 @@ export default class What2Reg extends Component {
         }
     }
 
-    // 鍵盤收起，使輸入框失焦
-    // _keyboardDidHide = () => {
-    //     // 使输入框失去焦点
-    //     this.textInputRef.current.blur();
-    // };
-
     // 對開課數據進行分類
     getClassifyCourse = () => {
         const { s_offerCourses, s_coursePlan } = this.state;
@@ -334,54 +324,33 @@ export default class What2Reg extends Component {
         let { filterOptions } = this.state;
 
         // 開設課程的學院名列表
-        let offerFacultyList = [];
-        // GE課程代號列表
-        let offerGEList = [];
-        // 學系/部門名列表
-        let offerDepaList = [];
-        // 根據學院名，篩選各自部門/學系
-        let offerFacultyDepaListObj = [];
+        let offerFacultyList = lodash.uniq(
+            offerCourseList.map(itm => itm['Offering Unit'])).sort();
 
-        offerCourseList.map(itm => {
-            const facultyName = itm['Offering Unit'];
-            const depaName = itm['Offering Department'];
-            const courseCode = itm['Course Code'].substring(0, 4);
-            if (facultyName != undefined && (offerFacultyList.indexOf(facultyName) == -1)) {
-                offerFacultyList.push(facultyName)
-            }
-            if (courseCode != undefined && courseCode.substring(0, 2) == 'GE' && (offerGEList.indexOf(courseCode) == -1)) {
-                offerGEList.push(courseCode)
-            }
-            if (depaName != undefined && (offerDepaList.indexOf(depaName) == -1)) {
-                offerDepaList.push(depaName)
-                let arr = facultyName in offerFacultyDepaListObj ? offerFacultyDepaListObj[facultyName] : [];
-                arr.push(depaName)
-                offerFacultyDepaListObj[facultyName] = arr;
-            }
-        })
+        // GE課程代號列表
+        let offerGEList = lodash.uniq(
+            offerCourseList.filter(itm => itm['Course Code']?.startsWith('GE'))
+                .map(itm => itm['Course Code'].substring(0, 4))
+        ).sort();
 
         // 根據學院/機構名，篩選各自開課
-        let offerCourseByFaculty = {};
-        offerFacultyList.map(facultyName => {
-            offerCourseByFaculty[facultyName] = offerCourseList.filter(itm => {
-                return itm['Offering Unit'] == facultyName
-            });
-            if (!(facultyName in offerFacultyDepaListObj)) {
-                offerFacultyDepaListObj[facultyName] = [];
-            }
+        let offerCourseByFaculty = lodash.groupBy(offerCourseList, 'Offering Unit');
+
+        // 根據學院名，篩選各自部門/學系
+        let offerFacultyDepaListObj = [];
+        offerFacultyList.forEach(faculty => {
+            offerFacultyDepaListObj[faculty] = lodash.compact(
+                lodash.uniqBy(offerCourseByFaculty[faculty], 'Offering Department')
+                    .map(i => i['Offering Department']).sort()
+            )
         })
 
         // 根據部門篩選各自開課
-        let offerCourseByDepa = {};
-        offerDepaList.map(depaName => {
-            offerCourseByDepa[depaName] = offerCourseList.filter(itm => {
-                return itm['Offering Department'] == depaName
-            });
-        })
+        let offerCourseByDepa = lodash.groupBy(offerCourseList, 'Offering Department');
 
         // 根據GE門類篩選各自開課
         let offerCourseByGE = {};
-        offerGEList.map(GEName => {
+        offerGEList.forEach(GEName => {
             offerCourseByGE[GEName] = offerCourseList.filter(itm => {
                 return itm['Course Code'].substring(0, 4) == GEName
             });
@@ -908,39 +877,6 @@ export default class What2Reg extends Component {
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
                     </TouchableOpacity>
                 </MenuView>
-                {/* 課程搜索按鈕 */}
-                {/* <TouchableOpacity
-                    style={{
-                        backgroundColor: inputOK ? themeColor : 'gray',
-                        borderRadius: scale(10),
-                        padding: scale(5), paddingHorizontal: scale(8),
-                        alignItems: 'center'
-                    }}
-                    disabled={isLoading || !inputOK}
-                    onPress={() => {
-                        trigger();
-                        this.jumpToWebRelateCoursePage({ inputText, type: 'course' })
-                    }}
-                >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>查課</Text>
-                </TouchableOpacity> */}
-                {/* 教授搜索按鈕 */}
-                {/* <TouchableOpacity
-                    style={{
-                        backgroundColor: inputOK ? themeColor : 'gray',
-                        borderRadius: scale(10),
-                        padding: scale(5), paddingHorizontal: scale(8),
-                        alignItems: 'center',
-                        marginHorizontal: scale(5)
-                    }}
-                    disabled={isLoading || !inputOK}
-                    onPress={() => {
-                        trigger();
-                        this.jumpToWebRelateCoursePage({ inputText, type: 'prof' })
-                    }}
-                >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white }}>搵講師</Text>
-                </TouchableOpacity> */}
             </KeyboardAvoidingView>
         )
     }
