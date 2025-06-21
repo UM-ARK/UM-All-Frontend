@@ -388,20 +388,6 @@ class HomeScreen extends Component {
         });
 
         this.getUpcomingCourse();
-
-        // TODO: 會出現教授的名字，暫且擱置
-        // const URL = ARK_WIKI_RANDOM_TITLE;
-        // await axios.get(URL)
-        //     .then(res => {
-        //         let result = res.data;
-        //         if (result) {
-        //             let randomTitle = result.query.random[0].title;
-        //             console.log(randomTitle);
-        //         }
-        //     })
-        //     .catch(err => {
-        //         Alert.alert('', 'Wiki請求錯誤' + JSON.stringify(err))
-        //     })
     }
 
     // 獲取日曆數據
@@ -458,18 +444,18 @@ class HomeScreen extends Component {
      * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
      */
     getUpcomingCourse = async () => {
+        try {
+            const now = moment(new Date());
+            const s_allCourseAllTime = await getLocalStorage('ARK_WeekTimetable_Storage');
+            const curTime = moment().format("HH:mm");
+            const curDay = now.format("ddd").toUpperCase();
 
-        const s_allCourseAllTime = await getLocalStorage('ARK_WeekTimetable_Storage');
-        const curTime = moment().format("HH:mm");
-        const curDay = now.format("ddd").toUpperCase();
-
-        // console.log(s_allCourseAllTime);
-        // const curTime = "16:00";
-        // const curDay = "FRI";
-
-        const todayCourses = Object.entries(s_allCourseAllTime).filter(([day, courses]) => day == curDay)[0][1] || [];
-        const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
-        this.setState({ upcomingCourse: upComing[0] });
+            const todayCourses = Object.entries(s_allCourseAllTime).filter(([day, courses]) => day == curDay)[0][1] || [];
+            const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
+            this.setState({ upcomingCourse: upComing[0] });
+        } catch (error) {
+            console.log('error', error);
+        }
     }
 
 
