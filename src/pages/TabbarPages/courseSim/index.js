@@ -41,6 +41,7 @@ import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from './BottomSheet';
 import CourseCard from '../what2Reg/component/CourseCard';
 import { setLocalStorage } from '../../../utils/storageKits';
+import uniq from 'lodash/uniq';
 
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -53,7 +54,7 @@ function parseImportData(inputText) {
 
     if (matchRes && matchRes.length > 0) {
         // 去重
-        matchRes = matchRes.filter((item, index) => matchRes.findIndex(i => i === item) === index);
+        matchRes = uniq(matchRes);
 
         // 構建數據格式 Array
         let courseCodeList = [];

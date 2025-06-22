@@ -975,12 +975,11 @@ export default class What2Reg extends Component {
             // 搜索合併
             filterCourseList = filterCourseList.concat(coursePlanSearchList)
             // 搜索去重
-            filterCourseList = filterCourseList.filter((item, index) => filterCourseList.findIndex(i => i['Course Code'] === item['Course Code']) === index);
+            filterCourseList = lodash.uniqBy(filterCourseList, 'Course Code');
         }
 
         // 搜索結果排序
-        filterCourseList.sort((a, b) => a['Course Code'].substring(4, 8).localeCompare(b['Course Code'].substring(4, 8), 'es', { sensitivity: 'base' }));
-        filterCourseList.sort((a, b) => a['Course Code'].substring(0, 3).localeCompare(b['Course Code'].substring(0, 3), 'es', { sensitivity: 'base' }));
+        filterCourseList = lodash.sortBy(filterCourseList, ['Course Code']);
 
         return filterCourseList
     }
