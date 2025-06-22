@@ -131,7 +131,7 @@ class EventDetail extends Component {
                         eventData.relate_image_url.length > 0
                     ) {
                         let addHostArr = [];
-                        eventData.relate_image_url.map(itm => {
+                        eventData.relate_image_url.forEach(itm => {
                             addHostArr.push(BASE_HOST + itm);
                         });
                         eventData.relate_image_url = addHostArr;

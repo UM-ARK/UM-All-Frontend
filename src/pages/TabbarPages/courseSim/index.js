@@ -48,16 +48,6 @@ const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
 
-// 設置本地緩存
-// async function setLocalStorage(courseCodeList) {
-//     const strCourseCodeList = JSON.stringify(courseCodeList);
-//     await AsyncStorage.setItem('ARK_Timetable_Storage', strCourseCodeList)
-//         .catch((e) => {
-//             console.log('AsyncStorage Error', e);
-//             alert(e);
-//         });
-// }
-
 function parseImportData(inputText) {
     let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
 
@@ -67,7 +57,7 @@ function parseImportData(inputText) {
 
         // 構建數據格式 Array
         let courseCodeList = [];
-        matchRes.map(text => {
+        matchRes.forEach(text => {
             // Section部份左右括號的index
             let lbIdx = text.indexOf("(");
             let rbIdx = text.indexOf(")");
@@ -445,7 +435,7 @@ export default class CourseSim extends Component {
                                                 trigger();
                                                 let { u_codeSectionList: courseCodeList } = this.state;
                                                 let tempArr = [];
-                                                courseCodeList.map(i => {
+                                                courseCodeList.forEach(i => {
                                                     if (course['Course Code'] != i['Course Code']) {
                                                         tempArr.push(i);
                                                     }
@@ -616,7 +606,7 @@ export default class CourseSim extends Component {
         trigger();
         let { u_codeSectionList: courseCodeList } = this.state;
         let tempArr = [];
-        courseCodeList.map(i => {
+        courseCodeList.forEach(i => {
             if (i['Course Code'] != course['Course Code']) {
                 tempArr.push(i);
             }
@@ -633,14 +623,14 @@ export default class CourseSim extends Component {
         let courseCodeList = this.state.u_codeSectionList;
         // 刪除原多餘的相同Code
         let tempArr = [];
-        courseCodeList.map(itm => {
+        courseCodeList.forEach(itm => {
             if (itm['Course Code'] != courseCode) {
                 tempArr.push(itm);
             }
         })
         courseCodeList = tempArr;
         // 插入所有Section
-        Object.keys(sectionObj).map(key => {
+        Object.keys(sectionObj).forEach(key => {
             courseCodeList.push({
                 'Course Code': courseCode,
                 'Section': key,
@@ -654,7 +644,7 @@ export default class CourseSim extends Component {
         trigger();
         const { u_codeSectionList: courseCodeList } = this.state;
         let newList = [];
-        courseCodeList.map(i => {
+        courseCodeList.forEach(i => {
             if (!(i['Course Code'] == course['Course Code'] && i['Section'] == course['Section'])) {
                 newList.push(i);
             }
@@ -903,13 +893,13 @@ E11-0000
         // 整理所有候選課程的Section
         let courseCodeObj = {};
         if (haveSearchResult && filterCourseList.length >= 1) {
-            filterCourseList.map(i => {
+            filterCourseList.forEach(i => {
                 let sectionObj = {};
                 // 找出該Course Code的所有Section
                 let codeRes = courseTimeList.filter(itm => {
                     return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
                 });
-                codeRes.map(itm => {
+                codeRes.forEach(itm => {
                     let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
                     tempArr.push(itm);
                     sectionObj[itm['Section']] = tempArr;
@@ -1023,18 +1013,6 @@ E11-0000
                     {haveSearchResult && filterCourseList.length == 1 ? filterCourseList.map(i => {
                         // 從courseTimeList篩選所有的課程的Section、時間、老師
                         const sectionObj = courseCodeObj[i['Course Code']];
-                        // let sectionObj = {};
-                        // if (filterCourseList.length == 1) {
-                        //     // 找出該Course Code的所有Section
-                        //     let codeRes = courseTimeList.filter(itm => {
-                        //         return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
-                        //     });
-                        //     codeRes.map(itm => {
-                        //         let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
-                        //         tempArr.push(itm);
-                        //         sectionObj[itm['Section']] = tempArr;
-                        //     })
-                        // }
 
                         return (<View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                             {/* 刪除該Code課程按鈕 */}
@@ -1050,7 +1028,7 @@ E11-0000
                                         trigger();
                                         let { u_codeSectionList: courseCodeList } = this.state;
                                         let tempArr = [];
-                                        courseCodeList.map(itm => {
+                                        courseCodeList.forEach(itm => {
                                             if (itm['Course Code'] != i['Course Code']) {
                                                 tempArr.push(itm);
                                             }

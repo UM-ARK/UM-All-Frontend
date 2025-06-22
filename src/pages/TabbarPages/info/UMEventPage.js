@@ -61,7 +61,7 @@ class UMEventPage extends Component {
                 // 分隔今天/未來的活動 和 過往的活動
                 let resultList = [];
                 let outdatedList = [];
-                result.map((itm) => {
+                result.forEach((itm) => {
                     let beginMomentDate = moment(itm.common.dateFrom);
                     if (nowMomentDate.isSame(beginMomentDate, 'day') || beginMomentDate.isSameOrAfter(nowMomentDate)) {
                         resultList.push(itm);

@@ -113,7 +113,7 @@ class NewsPage extends Component {
                 let title_en = '';
                 // 葡文標題
                 let title_pt = '';
-                topNews.details.map(item => {
+                topNews.details.forEach(item => {
                     if (item.locale == 'en_US') {
                         title_en = item.title;
                     } else if (item.locale == 'pt_PT') {

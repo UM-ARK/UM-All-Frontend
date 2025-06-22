@@ -61,7 +61,7 @@ class ClubPage extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let clubDataList = json.content;
-                    clubDataList.map(itm => {
+                    clubDataList.forEach(itm => {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
                     originClubDataList = clubDataList;
@@ -128,7 +128,7 @@ class ClubPage extends Component {
     separateDataList = (clubDataList) => {
         let newClubData = {};
         if (clubDataList && clubDataList.length > 0) {
-            clubTagList.map((itm) => {
+            clubTagList.forEach((itm) => {
                 // console.log('過濾' + itm, clubFilter(clubDataList, itm));
                 newClubData[itm] = clubFilter(clubDataList, itm);
             })

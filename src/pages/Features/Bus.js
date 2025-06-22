@@ -209,7 +209,7 @@ class BusScreen extends Component {
         const { busPositionArr } = this.state;
         let borderColor = themeColor;
         if (busPositionArr.length > 0) {
-            busPositionArr.map(item => {
+            busPositionArr.forEach(item => {
                 if (item.index / 2 == index) {
                     borderColor = secondThemeColor;
                 }
@@ -339,17 +339,15 @@ class BusScreen extends Component {
                                     width: scale(160),
                                 }}>
                                 {busInfoArr.length > 0
-                                    ? this.state.busInfoArr.map(item => (
-                                        <Text
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                color: black.third,
-                                                fontSize: scale(10),
-                                            }}>
+                                    ? this.state.busInfoArr.map(item =>
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            fontSize: scale(10),
+                                        }}>
                                             {item}
                                         </Text>
-                                    ))
-                                    : null}
+                                    ) : null}
                             </View>
 
                             {/* 巴士圖標 */}
@@ -368,8 +366,7 @@ class BusScreen extends Component {
                                             }}
                                         />
                                     </TouchableScale>
-                                ))
-                                : null}
+                                )) : null}
 
                             {/* 巴士站點文字 */}
                             {this.renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}

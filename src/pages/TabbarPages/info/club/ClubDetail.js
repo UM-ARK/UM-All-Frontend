@@ -131,7 +131,7 @@ class ClubDetail extends Component {
                         clubData.club_photos_list.length > 0
                     ) {
                         let addHostArr = [];
-                        clubData.club_photos_list.map(itm => {
+                        clubData.club_photos_list.forEach(itm => {
                             addHostArr.push(BASE_HOST + itm);
                         });
                         clubData.club_photos_list = addHostArr;
@@ -180,7 +180,7 @@ class ClubDetail extends Component {
                     let addHostArr = [];
                     // 圖片類型服務器返回相對路徑，請記住加上域名
                     if (eventData.length > 0) {
-                        eventData.map(itm => {
+                        eventData.forEach(itm => {
                             itm.cover_image_url =
                                 BASE_HOST + itm.cover_image_url;
                         });

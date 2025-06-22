@@ -644,13 +644,11 @@ export default class What2Reg extends Component {
         }
 
         return (
-            <View
-                style={{
-                    backgroundColor: white,
-                    borderRadius: scale(10),
-                    padding: scale(5),
-                    margin: scale(5), marginHorizontal: scale(10),
-                }}>
+            <View style={{
+                backgroundColor: white, borderRadius: scale(10),
+                margin: scale(5), marginHorizontal: scale(10),
+                padding: scale(5),
+            }}>
                 {/* 渲染Add Drop，Pre Enroll選擇 */}
                 {this.renderADPESwitch()}
 
@@ -668,31 +666,29 @@ export default class What2Reg extends Component {
                         </Text>
                         {/* 具體GE課程分類按鈕 */}
                         <View style={{ flexDirection: 'row', marginVertical: scale(5), }}>
-                            {offerGEList.length > 0 && offerGEList.map(itm => {
-                                return (
-                                    <TouchableScale style={{
-                                        ...s.classItm,
-                                        paddingHorizontal: scale(5), paddingVertical: scale(3),
-                                        borderColor: filterOptions.GE === itm ? themeColor : black.third,
-                                        backgroundColor: filterOptions.GE === itm ? themeColor : null,
+                            {offerGEList.length > 0 && offerGEList.map(itm =>
+                                <TouchableScale style={{
+                                    ...s.classItm,
+                                    paddingHorizontal: scale(5), paddingVertical: scale(3),
+                                    borderColor: filterOptions.GE === itm ? themeColor : black.third,
+                                    backgroundColor: filterOptions.GE === itm ? themeColor : null,
+                                }}
+                                    onPress={() => {
+                                        trigger();
+                                        filterOptions.GE = itm;
+                                        let filterCourseList = offerCourseByGE[itm];
+                                        this.setState({ filterOptions, filterCourseList, scrollData: {} })
+                                        setLocalOpitons(filterOptions);
                                     }}
-                                        onPress={() => {
-                                            trigger();
-                                            filterOptions.GE = itm;
-                                            let filterCourseList = offerCourseByGE[itm];
-                                            this.setState({ filterOptions, filterCourseList, scrollData: {} })
-                                            setLocalOpitons(filterOptions);
-                                        }}
-                                    >
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: filterOptions.GE === itm ? white : black.third,
-                                            fontWeight: filterOptions.GE === itm ? '900' : 'normal',
-                                            fontSize: scale(12)
-                                        }}>{itm}</Text>
-                                    </TouchableScale>
-                                )
-                            })}
+                                >
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        color: filterOptions.GE === itm ? white : black.third,
+                                        fontWeight: filterOptions.GE === itm ? '900' : 'normal',
+                                        fontSize: scale(12)
+                                    }}>{itm}</Text>
+                                </TouchableScale>
+                            )}
                         </View>
                     </View>
                 ) : (
@@ -907,7 +903,7 @@ export default class What2Reg extends Component {
     renderFirstLetterNav = (filterCourseList) => {
         const { scrollData } = this.state;
         let firstLetterList = [];
-        filterCourseList.map((itm) => {
+        filterCourseList.forEach(itm => {
             const firstLetter = itm['Course Code'][0];
             if (firstLetter != undefined && firstLetterList.indexOf(firstLetter) == -1) {
                 firstLetterList.push(firstLetter)
@@ -922,9 +918,8 @@ export default class What2Reg extends Component {
                 padding: scale(3),
                 ...viewShadow,
             }}>
-                {firstLetterList.map(itm => {
-                    return <TouchableScale
-                        style={{ padding: scale(3), }}
+                {firstLetterList.map(itm =>
+                    <TouchableScale style={{ padding: scale(3), }}
                         onPress={() => {
                             // 滑動到對應的首字母課程
                             trigger();
@@ -935,7 +930,7 @@ export default class What2Reg extends Component {
                     >
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(15), color: themeColor }}>{itm}</Text>
                     </TouchableScale>
-                })}
+                )}
             </View>
         ) : null
     }

@@ -65,7 +65,7 @@ class NewsDetail extends Component {
         // 葡文
         let title_pt = '';
         let content_pt = '';
-        newsData.details.map(item => {
+        newsData.details.forEach(item => {
             if (item.locale == 'en_US') {
                 title_en = item.title;
                 content_en = item.content;

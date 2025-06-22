@@ -94,7 +94,7 @@ class EventPage extends Component {
         let leftDataList = [];
         let rightDataList = [];
 
-        eventList.map((itm, idx) => {
+        eventList.forEach((itm, idx) => {
             // 圖片類型服務器返回相對路徑，請記住加上域名
             if (itm.cover_image_url.indexOf(BASE_HOST) == -1) {
                 itm.cover_image_url = BASE_HOST + itm.cover_image_url;
@@ -121,7 +121,7 @@ class EventPage extends Component {
         // 當前時刻時間戳
         let nowTime = moment(new Date());
 
-        eventList.map((itm, idx) => {
+        eventList.forEach((itm, idx) => {
             if (nowTime.isBefore(moment(itm.enddatetime))) {
                 if (idx >= 1) {
                     notFinishEvent.push(itm);

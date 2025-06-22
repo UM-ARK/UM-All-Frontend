@@ -62,7 +62,7 @@ class AllEvents extends Component {
                 let json = res.data;
                 if (json.message == 'success') {
                     let newDataArr = json.content;
-                    newDataArr.map(itm => {
+                    newDataArr.forEach(itm => {
                         itm.cover_image_url = BASE_HOST + itm.cover_image_url;
                     });
                     if (newDataArr.length < num_of_item) {

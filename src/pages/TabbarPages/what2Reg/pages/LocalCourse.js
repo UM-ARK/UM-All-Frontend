@@ -90,7 +90,7 @@ export default class LocalCourse extends Component {
         else {
             // 按section分離課程數據
             let relateSectionObj = {};
-            relateCourseList.map(itm => {
+            relateCourseList.forEach(itm => {
                 let tempItm = relateSectionObj[itm.Section] ? relateSectionObj[itm.Section] : [];
                 tempItm.push(itm);
                 relateSectionObj[itm.Section] = tempItm;

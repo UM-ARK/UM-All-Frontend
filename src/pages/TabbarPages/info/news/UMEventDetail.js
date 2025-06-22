@@ -96,7 +96,7 @@ class UMEventDetail extends Component {
         let contactFax_pt = '';
         let contactMail_pt = '';
 
-        eventData.details.map(item => {
+        eventData.details.forEach(item => {
             if (item.locale == 'en_US') {
                 title_en = item.title;
                 content_en = item.content;
