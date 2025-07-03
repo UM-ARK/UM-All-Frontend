@@ -108,12 +108,9 @@ function toDateTime(time) {
 };
 
 export default class CourseSim extends Component {
-    constructor() {
-        super();
-        this.verScroll = React.createRef();
-        this.textSearchRef = React.createRef();
-        this.bottomSheetRef = React.createRef();
-    }
+    verScroll = React.createRef();
+    textSearchRef = React.createRef();
+    bottomSheetRef = React.createRef();
 
     state = {
         // 導入課表功能
@@ -135,27 +132,7 @@ export default class CourseSim extends Component {
 
         // 這兩個是緩存的該學期所有課程
         s_coursePlanFile: coursePlanFile,
-
-        /**
-         * {"Courses": [{
-         * "Classroom": "E22-2017", 
-         * "Course Code": "ACCT1000", 
-         * "Course Title": "Principles of Financial Accounting", 
-         * "Course Title Chi": "財務會計原理", 
-         * "Day": "TUE", 
-         * "Lecture / Lab": 
-         * "Lecture", 
-         * "Medium of Instruction": "English", 
-         * "Offering Department": "AIM", 
-         * "Offering Unit": "FBA", 
-         * "Section": "001", 
-         * "Teacher Information": "TCHIANG VAN KAM", 
-         * "Time From": "13:00", 
-         * "Time To": "14:15"
-         * }, ...]}
-         */
         s_coursePlanTimeFile: coursePlanTimeFile,
-
 
         hasOpenCourseSearch: false,
     }
@@ -187,28 +164,10 @@ export default class CourseSim extends Component {
         });
     }
 
-    // componentWillUnmount() {
-    //     this.keyboardDidHideListener.remove();
-    // }
-
     // 頁面聚焦時觸發
     handleFocus = () => {
-        // this.readLocalCourseData();
         if (this.props.route.params) {
             this.readParams();
-        }
-    }
-
-    // 讀取本地緩存的課表數據
-    readLocalCourseData = async () => {
-        const storageCoursePlan = await getLocalStorage('course_plan');
-        if (storageCoursePlan) {
-            this.setState({ s_coursePlanFile: storageCoursePlan });
-        }
-
-        const storageCoursePlanList = await getLocalStorage('course_plan_time');
-        if (storageCoursePlanList) {
-            this.setState({ s_coursePlanTimeFile: storageCoursePlanList });
         }
     }
 
@@ -220,6 +179,22 @@ export default class CourseSim extends Component {
         }
     }
 
+    /**
+     * 讀取本地緩存的課表數據。
+     * 
+     * 存入state的s_coursePlanFile, s_coursePlanTimeFile中
+     */
+    readLocalCourseData = async () => {
+        const storageCoursePlan = await getLocalStorage('course_plan');
+        if (storageCoursePlan) {
+            this.setState({ s_coursePlanFile: storageCoursePlan });
+        }
+
+        const storageCoursePlanList = await getLocalStorage('course_plan_time');
+        if (storageCoursePlanList) {
+            this.setState({ s_coursePlanTimeFile: storageCoursePlanList });
+        }
+    }
 
     /**
      * 輸入用戶選擇課程的列表，輸出用戶所有的課程課表。
