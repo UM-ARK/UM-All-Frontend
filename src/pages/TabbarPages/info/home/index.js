@@ -54,6 +54,7 @@ import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
+import lodash from 'lodash';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
 
@@ -450,7 +451,7 @@ class HomeScreen extends Component {
             const curTime = moment().format("HH:mm");
             const curDay = now.format("ddd").toUpperCase();
 
-            const todayCourses = Object.entries(s_allCourseAllTime).filter(([day, courses]) => day == curDay)[0][1] || [];
+            const todayCourses = lodash.get(s_allCourseAllTime, curDay, []);
             const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
             this.setState({ upcomingCourse: upComing[0] });
         } catch (error) {

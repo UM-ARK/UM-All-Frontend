@@ -42,6 +42,7 @@ import CustomBottomSheet from './BottomSheet';
 import CourseCard from '../what2Reg/component/CourseCard';
 import { setLocalStorage } from '../../../utils/storageKits';
 import uniq from 'lodash/uniq';
+import lodash from 'lodash';
 
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -56,49 +57,31 @@ function parseImportData(inputText) {
         // 去重
         matchRes = uniq(matchRes);
 
-        // 構建數據格式 Array
-        let courseCodeList = [];
-        matchRes.forEach(text => {
+        return matchRes.map(text => {
             // Section部份左右括號的index
-            let lbIdx = text.indexOf("(");
-            let rbIdx = text.indexOf(")");
+            const lbIdx = text.indexOf("(");
+            const rbIdx = text.indexOf(")");
             // 對於特殊的 GESB1001/1002/1003，記錄 / 從左到右第一次出現的index，不存在 / 時返回 -1
-            let slashIdx = text.indexOf("/");
+            const slashIdx = text.indexOf("/");
 
             // 定位至CourseCode後一位的index
             // 例：GESB1001/1002，courseCodeBound = 8
             // 例：GEGA1000(001)，courseCodeBound = 8
-            let courseCodeBound = slashIdx == -1 ? lbIdx : slashIdx;
+            const courseCodeBound = slashIdx === -1 ? lbIdx : slashIdx;
 
             // 截取CourseCode的字符
-            let courseCode = text.substring(0, courseCodeBound);
-            let section = text.substring(lbIdx + 1, rbIdx);
-            let obj = {
+            const courseCode = text.substring(0, courseCodeBound);
+            const section = text.substring(lbIdx + 1, rbIdx);
+
+            return {
                 'Course Code': courseCode,
                 'Section': section
-            }
-            courseCodeList.push(obj);
-        })
-
-        return courseCodeList;
+            };
+        });
     }
     else {
         return null
     }
-}
-
-// 判斷Object Array內是否有某個Key的Value重複
-function hasSpecificDuplicate(array, key, value) {
-    let count = 0;
-
-    for (const obj of array) {
-        if (obj[key] === value) { count++; }
-
-        // 如果找到多於1次，直接返回true
-        if (count > 1) { return true; }
-    }
-
-    return false;
 }
 
 // 將 HH:mm 時間轉為Date對象，用於排序
@@ -148,10 +131,6 @@ export default class CourseSim extends Component {
 
         if (u_codeSectionList && u_codeSectionList.length > 0) {
             this.handleCourseList(u_codeSectionList);
-            // console.log(courseCodeList);
-            // const test = this.state.s_coursePlanFile;
-            // console.log(test.updateTime[0]);
-            // console.log(courseCodeList);
         }
 
         if (this.props.route.params) {
@@ -363,7 +342,8 @@ export default class CourseSim extends Component {
             {timeReminderText}
         </Text> : null;
 
-        let hasDuplicate = hasSpecificDuplicate(this.state.u_codeSectionList, 'Course Code', course['Course Code']);
+        // 判斷是否有重複的課程，即添加了同一課程的多個Section
+        const hasDuplicate = lodash.countBy(this.state.u_codeSectionList, 'Course Code')[course['Course Code']] > 1;
 
         return (
             <View>
@@ -409,15 +389,11 @@ export default class CourseSim extends Component {
                                             text: "Yes",
                                             onPress: () => {
                                                 trigger();
-                                                let { u_codeSectionList: courseCodeList } = this.state;
-                                                let tempArr = [];
-                                                courseCodeList.forEach(i => {
-                                                    if (course['Course Code'] != i['Course Code']) {
-                                                        tempArr.push(i);
-                                                    }
-                                                })
-                                                courseCodeList = tempArr;
-                                                this.handleCourseList(courseCodeList);
+                                                // 僅保留非當前courseCode的課程
+                                                const tempList = lodash.filter(this.state.u_codeSectionList,
+                                                    i => course['Course Code'] !== i['Course Code']
+                                                );
+                                                this.handleCourseList(tempList);
                                                 this.verScroll.current.scrollTo({ y: 0 });
                                             },
                                             style: 'destructive',
@@ -580,51 +556,35 @@ export default class CourseSim extends Component {
 
     addCourse = (course) => {
         trigger();
-        let { u_codeSectionList: courseCodeList } = this.state;
-        let tempArr = [];
-        courseCodeList.forEach(i => {
-            if (i['Course Code'] != course['Course Code']) {
-                tempArr.push(i);
+        // 使用 lodash 过滤掉相同 Course Code 的课程，然后添加新课程
+        const tempList = [
+            ...lodash.filter(this.state.u_codeSectionList, i => i['Course Code'] !== course['Course Code']),
+            {
+                'Course Code': course['Course Code'],
+                'Section': course['Section'],
             }
-        })
-        courseCodeList = tempArr;
-        courseCodeList.push({
-            'Course Code': course['Course Code'],
-            'Section': course['Section'],
-        })
-        this.handleCourseList(courseCodeList);
+        ];
+        this.handleCourseList(tempList);
     }
 
     addAllSectionCourse = (courseCode, sectionObj) => {
-        let courseCodeList = this.state.u_codeSectionList;
-        // 刪除原多餘的相同Code
-        let tempArr = [];
-        courseCodeList.forEach(itm => {
-            if (itm['Course Code'] != courseCode) {
-                tempArr.push(itm);
-            }
-        })
-        courseCodeList = tempArr;
-        // 插入所有Section
-        Object.keys(sectionObj).forEach(key => {
-            courseCodeList.push({
+        // 使用 lodash 过滤掉相同 Course Code 的课程，然后添加所有新的 Section
+        const tempList = [
+            ...lodash.filter(this.state.u_codeSectionList, itm => itm['Course Code'] !== courseCode),
+            ...lodash.map(Object.keys(sectionObj), key => ({
                 'Course Code': courseCode,
                 'Section': key,
-            })
-        })
-        this.handleCourseList(courseCodeList);
+            }))
+        ];
+        this.handleCourseList(tempList);
     }
 
     // 刪除所選課程
     dropCourse = (course) => {
         trigger();
-        const { u_codeSectionList: courseCodeList } = this.state;
-        let newList = [];
-        courseCodeList.forEach(i => {
-            if (!(i['Course Code'] == course['Course Code'] && i['Section'] == course['Section'])) {
-                newList.push(i);
-            }
-        })
+        const newList = lodash.filter(this.state.u_codeSectionList, i =>
+            !(i['Course Code'] === course['Course Code'] && i['Section'] === course['Section'])
+        );
         this.handleCourseList(newList);
         Toast.show(`已刪除${course['Course Code'] + '-' + course['Section']}`)
     }
@@ -1002,15 +962,10 @@ E11-0000
                                     }}
                                     onPress={() => {
                                         trigger();
-                                        let { u_codeSectionList: courseCodeList } = this.state;
-                                        let tempArr = [];
-                                        courseCodeList.forEach(itm => {
-                                            if (itm['Course Code'] != i['Course Code']) {
-                                                tempArr.push(itm);
-                                            }
-                                        })
-                                        courseCodeList = tempArr;
-                                        this.handleCourseList(courseCodeList);
+                                        const tempList = lodash.filter(this.state.u_codeSectionList,
+                                            itm => itm['Course Code'] !== i['Course Code']
+                                        );
+                                        this.handleCourseList(tempList);
                                         this.verScroll.current.scrollTo({ y: 0 });
                                     }}
                                 >
