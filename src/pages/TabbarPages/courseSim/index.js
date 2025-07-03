@@ -228,8 +228,8 @@ export default class CourseSim extends Component {
         }, {});
 
         this.setState({ allCourseAllTime, u_codeSectionList });
-        setLocalStorage("ARK_Timetable_Storage", u_codeSectionList);
-        setLocalStorage("ARK_WeekTimetable_Storage", s_allCourseAllTime);
+        setLocalStorage("ARK_Timetable_Storage", u_codeSectionList);    // 數組，僅包含courseCode和Section
+        setLocalStorage("ARK_WeekTimetable_Storage", s_allCourseAllTime); // key為 Day，value為該天的所有完整課程數組
 
         // await AsyncStorage.setItem('ARK_Timetable_Week_Storage', allCourseAllTime);
     }
@@ -599,12 +599,13 @@ export default class CourseSim extends Component {
                     trigger();
                     this.setState({
                         allCourseAllTime: [],
-                        courseCodeList: [],
+                        u_codeSectionList: [],
 
                         importTimeTableText: null,
                         searchText: null,
                     });
                     setLocalStorage("ARK_Timetable_Storage", []);
+                    setLocalStorage("ARK_WeekTimetable_Storage", []);
                     this.verScroll.current.scrollTo({ y: 0 });
                 },
                 style: 'destructive',
