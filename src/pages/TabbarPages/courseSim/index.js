@@ -104,6 +104,7 @@ export default class CourseSim extends Component {
 
         // addMode: false,
         searchText: null,
+        perSearchText: null,
 
         dayFilter: dayList,
         dayFilterChoice: null,
@@ -861,6 +862,26 @@ E11-0000
                         color={black.third}
                         style={{ opacity: 0.4, position: 'absolute', left: scale(10), }}
                     />
+                    {/* 回退上一個搜索按鈕 */}
+                    {this.state.perSearchText ? <TouchableOpacity
+                        style={{
+                            borderWidth: scale(1), borderRadius: scale(5),
+                            borderColor: themeColor, padding: scale(3),
+                            position: 'absolute', left: scale(40),
+                            zIndex: 999,
+                        }}
+                        onPress={() => {
+                            this.setState({
+                                searchText: this.state.perSearchText, // 切換searchText為上一個搜索的CourseCode
+                                perSearchText: null,
+                            })
+                        }}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: themeColor,
+                        }}>Back</Text>
+                    </TouchableOpacity> : null}
                     {/* Add課搜索框 */}
                     <BottomSheetTextInput
                         ref={this.textSearchRef}
@@ -874,7 +895,12 @@ E11-0000
                             flex: 1,
                         }}
                         textAlign='center' textAlignVertical='center'
-                        onChangeText={(inputText) => this.setState({ searchText: inputText })}
+                        onChangeText={(inputText) => {
+                            this.setState({ searchText: inputText })
+                            if (inputText.length == 0) {
+                                this.setState({ perSearchText: null })
+                            }
+                        }}
                         value={searchText}
                         selectTextOnFocus
                         placeholder={t('搜索課程：ECE, 電氣, AIM...', { ns: 'timetable' })}
@@ -930,7 +956,10 @@ E11-0000
                                     onPress={() => {
                                         trigger();
                                         // 切換searchText為點擊的Code
-                                        this.setState({ searchText: item['Course Code'] });
+                                        this.setState({
+                                            searchText: item['Course Code'],
+                                            perSearchText: this.state.searchText, // 記下上一個搜索的CourseCode
+                                        });
                                         this.verScroll.current.scrollTo({ y: 0 });
                                     }}
                                 >
