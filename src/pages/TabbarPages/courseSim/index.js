@@ -832,16 +832,10 @@ E11-0000
         let courseCodeObj = {};
         if (haveSearchResult && filterCourseList.length >= 1) {
             filterCourseList.forEach(i => {
-                let sectionObj = {};
                 // 找出該Course Code的所有Section
-                let codeRes = courseTimeList.filter(itm => {
-                    return itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1
-                });
-                codeRes.forEach(itm => {
-                    let tempArr = sectionObj[itm['Section']] ? (sectionObj[itm['Section']]) : [];
-                    tempArr.push(itm);
-                    sectionObj[itm['Section']] = tempArr;
-                })
+                let codeRes = courseTimeList.filter(itm =>
+                    itm['Course Code'].toUpperCase().indexOf(i['Course Code']) != -1);
+                const sectionObj = lodash.groupBy(codeRes, 'Section');
                 courseCodeObj[i['Course Code']] = sectionObj;
             })
         }
@@ -932,24 +926,26 @@ E11-0000
                                 // 篩選該Section的上課時間是否在Filter內，全不在才不顯示
                                 let dayInFilter = false;
                                 if (dayFilterChoice) {
-                                    for (let index = 0; index < Object.keys(sectionObj).length; index++) {
-                                        const key = Object.keys(sectionObj)[index];
+                                    dayInFilter = lodash.some(Object.keys(sectionObj), key => {
                                         if (this.state.timeFilterFrom != timeFrom || this.state.timeFilterTo != timeTo) {
-                                            let timeInFilter = sectionObj[key].some(course => {
-                                                let courseTimeFrom = moment(course['Time From'], 'HH:mm');
-                                                let courseTimeTo = moment(course['Time To'], 'HH:mm');
-                                                let filterTimeFrom = moment(this.state.timeFilterFrom, 'HH:mm');
-                                                let filterTimeTo = moment(this.state.timeFilterTo, 'HH:mm');
-                                                return courseTimeFrom.isBetween(filterTimeFrom, filterTimeTo, null, '[]')
-                                                    || courseTimeTo.isBetween(filterTimeFrom, filterTimeTo, null, '[]');
+                                            const timeInFilter = lodash.some(sectionObj[key], course => {
+                                                const courseTimeFrom = moment(course['Time From'], 'HH:mm');
+                                                const courseTimeTo = moment(course['Time To'], 'HH:mm');
+                                                const filterTimeFrom = moment(this.state.timeFilterFrom, 'HH:mm');
+                                                const filterTimeTo = moment(this.state.timeFilterTo, 'HH:mm');
+
+                                                // 检查时间重叠：课程开始时间 < 筛选结束时间 && 课程结束时间 > 筛选开始时间
+                                                const hasTimeOverlap = courseTimeFrom.isBefore(filterTimeTo) && courseTimeTo.isAfter(filterTimeFrom);
+                                                return hasTimeOverlap;
                                             });
-                                            dayInFilter = timeInFilter && sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                            return timeInFilter && lodash.some(sectionObj[key], course => dayFilterChoice === course.Day);
                                         } else {
-                                            dayInFilter = sectionObj[key].some(course => dayFilterChoice === course.Day);
+                                            return lodash.some(sectionObj[key], course => dayFilterChoice === course.Day);
                                         }
-                                        if (dayInFilter) { break; }
-                                    }
-                                } else { dayInFilter = true; }
+                                    });
+                                } else {
+                                    dayInFilter = true;
+                                }
 
                                 if (dayInFilter) return <TouchableOpacity
                                     style={{ ...s.courseCard, }}
