@@ -29,7 +29,7 @@ const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 
 const daySorter = {
     'MON': 1,
-    'THE': 2,
+    'TUE': 2,
     'WED': 3,
     'THU': 4,
     'FRI': 5,
@@ -38,13 +38,9 @@ const daySorter = {
 }
 
 // 按星期一到星期天排序
-function daySort(objArr) {
-    return objArr.sort((a, b) => {
-        let day1 = a.Day;
-        let day2 = b.Day;
-        return daySorter[day1] - daySorter[day2];
-    })
-}
+const daySort = (objArr) => {
+    return lodash.sortBy(objArr, item => daySorter[item.Day]);
+};
 
 export default class LocalCourse extends Component {
     static contextType = NavigationContext;

@@ -90,6 +90,20 @@ function toDateTime(time) {
     return new Date(0, 0, 0, hours, minutes); // 使用一个固定的日期
 };
 
+const daySorter = {
+    'MON': 1,
+    'TUE': 2,
+    'WED': 3,
+    'THU': 4,
+    'FRI': 5,
+    'SAT': 6,
+    'SUN': 7,
+}
+// 按星期一到星期天排序
+const daySort = (objArr) => {
+    return lodash.sortBy(objArr, item => daySorter[item.Day]);
+};
+
 export default class CourseSim extends Component {
     verScroll = React.createRef();
     textSearchRef = React.createRef();
@@ -1045,6 +1059,7 @@ E11-0000
                                     renderItem={({ item }) => {
                                         const key = item;
                                         const courseInfo = sectionObj[key][0];
+                                        sectionObj[key] = daySort(sectionObj[key]);
                                         // 篩選該Section的上課時間是否在Filter內，全不在才不展示
                                         let dayInFilter = false;
                                         if (dayFilterChoice) {
@@ -1079,9 +1094,8 @@ E11-0000
                                             {/* 老師名 */}
                                             <Text style={{ ...s.searchResultText, color: themeColor }}>{courseInfo['Teacher Information']}</Text>
                                             {/* 該Section上課時間 */}
-                                            {sectionObj[key].map(itm => {
-                                                return <Text style={{ ...s.searchResultText, }}>{itm['Day'] + ' ' + itm['Time From'] + ' ~ ' + itm['Time To']}</Text>
-                                            })}
+                                            {sectionObj[key].map(itm =>
+                                                <Text style={{ ...s.searchResultText, }}>{itm['Day'] + ' ' + itm['Time From'] + ' ~ ' + itm['Time To']}</Text>)}
                                         </TouchableOpacity>
                                     }}
                                     ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
