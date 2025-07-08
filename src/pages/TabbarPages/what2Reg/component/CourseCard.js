@@ -9,7 +9,7 @@ import { trigger } from '../../../../utils/trigger';
 
 import { scale } from "react-native-size-matters";
 import { NavigationContext } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MenuView } from '@react-native-menu/menu';
 import TouchableScale from "react-native-touchable-scale";
 
@@ -266,6 +266,7 @@ export default class CourseCard extends Component {
                     )
                 }}
                 key={data.length}
+                scrollEnabled={false}
                 keyExtractor={(item, index) => index}
                 initialNumToRender={10}
                 windowSize={21}

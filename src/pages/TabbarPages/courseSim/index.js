@@ -202,51 +202,39 @@ export default class CourseSim extends Component {
         const all_courseTimeList = s_coursePlanTimeFile.Courses;    // 所有课程的所有时间
 
         // Key: course code; value: List, 這周內不同時間所有的該Course Code-section的課程。
-        let allCourseAllTime = [];
-        u_codeSectionList.forEach((codeSection, i) => {
-            // 遍歷用戶選擇課程：所有code-section。
-            // 這門課當前的唯一性
+        const allCourseAllTime = lodash.chain(u_codeSectionList).map((codeSection, i) => {
             const this_courseCode = codeSection['Course Code'];
-            const this_section = codeSection["Section"];
+            const this_section = codeSection['Section'];
 
-            // 给定当前course code和section,找到這門課這個section的所有上課时间。
-            // 這裡，一個課被分裂成多個課節（以時間區分）。每個課節同意分配一個顏色。
-            let this_courseTimeList = all_courseTimeList.filter(courseTime =>
-                courseTime['Course Code'] == this_courseCode &&
-                courseTime['Section'] == this_section).map(this_courseTime => ({
-                    ...this_courseTime,
+            return lodash.chain(all_courseTimeList)
+                .filter(courseTime =>
+                    courseTime['Course Code'] === this_courseCode &&
+                    courseTime['Section'] === this_section
+                )
+                .map(courseTime => ({
+                    ...courseTime,
                     'color': TIME_TABLE_COLOR[i % TIME_TABLE_COLOR.length]
-                }));
-
-            // 這門課的所有課節加入周內所有課節。
-            allCourseAllTime.push(...this_courseTimeList);
-        });
+                }))
+                .value();
+        }).flatten().value();
 
         // 存儲一周的課節課表，用於在首頁展示下節課程。
-        const s_allCourseAllTime = allCourseAllTime.reduce((acc, courseTime) => {
-            const day = courseTime["Day"];
-            if (!acc[day]) {
-                acc[day] = [];
-            }
-            acc[day].push({
-                "Course Code": courseTime["Course Code"],
-                "Section": courseTime["Section"],
-                "Time From": courseTime["Time From"],
-                "color": courseTime["color"],
-            });
-
-            acc[day].sort((a, b) =>
-                // new Date(`1970-01-01T${a["Time From"]}`) - new Date(`1970-01-01T${b["Time From"]}`)
-                moment(a["Time From"], "HH:mm").diff(moment(b["Time From"], "HH:mm"))
-            );
-            return acc;
-        }, {});
+        const s_allCourseAllTime = lodash.chain(allCourseAllTime).groupBy('Day')
+            .mapValues(courses =>
+                lodash.chain(courses)
+                    .map(courseTime => ({
+                        "Course Code": courseTime["Course Code"],
+                        "Section": courseTime["Section"],
+                        "Time From": courseTime["Time From"],
+                        "color": courseTime["color"],
+                    }))
+                    .sortBy(course => moment(course["Time From"], "HH:mm"))
+                    .value()
+            ).value();
 
         this.setState({ allCourseAllTime, u_codeSectionList });
         setLocalStorage("ARK_Timetable_Storage", u_codeSectionList);    // 數組，僅包含courseCode和Section
         setLocalStorage("ARK_WeekTimetable_Storage", s_allCourseAllTime); // key為 Day，value為該天的所有完整課程數組
-
-        // await AsyncStorage.setItem('ARK_Timetable_Week_Storage', allCourseAllTime);
     }
 
     // 渲染一列（一天）的課表
@@ -1111,21 +1099,17 @@ E11-0000
 
     // 返回搜索候選所需的課程列表
     handleSearchFilterCourse = (inputText) => {
-        const { s_coursePlanFile, dayFilter } = this.state;
+        const { s_coursePlanFile } = this.state;
         const coursePlanList = s_coursePlanFile.Courses;
-        inputText = inputText?.toUpperCase();
+        const upperInputText = inputText?.toUpperCase();
 
-        let filterCourseList = [];
-
-        filterCourseList = coursePlanList.filter(itm => {
-            return (itm['Course Code'].toUpperCase().indexOf(inputText) != -1
-                || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
-                || itm['Course Title Chi'].indexOf(inputText) != -1
-                || itm['Teacher Information'].indexOf(inputText) != -1
-                || (itm['Offering Department'] && itm['Offering Department'].indexOf(inputText) != -1))
+        return lodash.filter(coursePlanList, itm => {
+            return itm['Course Code'].toUpperCase().includes(upperInputText) ||
+                itm['Course Title'].toUpperCase().includes(upperInputText) ||
+                itm['Course Title Chi'].includes(inputText) ||
+                itm['Teacher Information'].includes(upperInputText) ||
+                (itm['Offering Department'] && itm['Offering Department'].includes(upperInputText));
         });
-
-        return filterCourseList
     }
 
     render() {

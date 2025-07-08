@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, memo, } from 'react';
 import {
     StyleSheet,
     Text,
@@ -144,6 +144,14 @@ async function setLocalOpitons(filterOptions) {
         Alert.alert(JSON.stringify(e));
     }
 }
+
+// 优化 CourseCard 组件
+const OptimizedCourseCard = memo(({ data, mode, handleSetLetterData }) => {
+    return <CourseCard data={data} mode={mode} handleSetLetterData={handleSetLetterData} />;
+}, (prevProps, nextProps) => {
+    return lodash.isEqual(prevProps.data, nextProps.data) &&
+        prevProps.mode === nextProps.mode;
+});
 
 export default class What2Reg extends Component {
     constructor() {
@@ -1119,7 +1127,7 @@ export default class What2Reg extends Component {
                                 <View style={{ alignSelf: 'center' }}>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                                 </View>
-                                <CourseCard data={searchFilterCourse} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
+                                <OptimizedCourseCard data={searchFilterCourse} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
                             </>
                         ) : (<>
                             {/* 篩選列表 */}
@@ -1128,7 +1136,7 @@ export default class What2Reg extends Component {
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList && filterCourseList.length > 0 ? (
                                 <View style={{ alignItems: 'center' }}>
-                                    <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
+                                    <OptimizedCourseCard data={filterCourseList} mode={'json'} handleSetLetterData={this.handleSetLetterData} />
                                 </View>
                             ) : null}
                         </>)}
