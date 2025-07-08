@@ -936,14 +936,15 @@ export default class What2Reg extends Component {
     }
 
     handleSetLetterData = (letterData) => {
-        let { scrollData } = this.state;
         const letter = Object.keys(letterData)[0];
-        if (
-            !(letter in scrollData)
-            || letterData[letter] < scrollData[letter]
-        ) {
-            scrollData[letter] = letterData[letter];
-        }
+        this.setState(prevState => {
+            const newScrollData = { ...prevState.scrollData };
+            if (!(letter in newScrollData)
+                || letterData[letter] < newScrollData[letter]) {
+                newScrollData[letter] = letterData[letter];
+                return { scrollData: newScrollData };
+            }
+        });
     }
 
     // 返回搜索候選所需的課程列表
@@ -1126,16 +1127,6 @@ export default class What2Reg extends Component {
                         ) : (<>
                             {/* 篩選列表 */}
                             {this.renderFilterView()}
-
-                            {/* <Text style={{
-                                ...uiStyle.defaultText,
-                                alignSelf: 'center',
-                                // fontSize: scale(13),
-                                color: black.third,
-                                // fontWeight: 'bold',
-                            }}>
-                                短按查Wiki，長按查Section !!!
-                            </Text> */}
 
                             {/* 渲染篩選出的課程 */}
                             {filterCourseList && filterCourseList.length > 0 ? (
