@@ -104,6 +104,7 @@ export default class LocalCourse extends Component {
                     schedulesObj[itm] = daySort(schedulesObj[itm])
                     const courseInfo = schedulesObj[itm][0];
                     let isPE = courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002';
+                    console.log('schedulesObj[itm]', schedulesObj[itm]);
 
                     return (
                         <MenuView
@@ -194,7 +195,8 @@ export default class LocalCourse extends Component {
                                     </View>
                                 )}
 
-                                {schedulesObj[itm].length > 1 && (
+                                {/* schedulesObj[itm]內都存在Time From字段，才展示Section */}
+                                {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
                                     <View style={{ flexDirection: 'row' }}>
                                         {schedulesObj[itm].map(sameSection => {
                                             return <View style={{
@@ -326,7 +328,7 @@ export default class LocalCourse extends Component {
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title Chi']}</Text>
                         </View>)}
 
-                        {schedulesObj[itm].length > 1 && (
+                        {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
                             <View style={{ flexDirection: 'row' }}>
                                 {schedulesObj[itm].map(sameSection => {
                                     return <View style={{
