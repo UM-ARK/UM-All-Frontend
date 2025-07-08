@@ -188,31 +188,36 @@ export default class LocalCourse extends Component {
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title']}</Text>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title Chi']}</Text>
                                 </View>)}
-                                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
-                                </View>
+                                {courseInfo['Teacher Information'] && (
+                                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: themeColor }}>{courseInfo['Teacher Information']}</Text>
+                                    </View>
+                                )}
 
-                                <View style={{ flexDirection: 'row', }}>
-                                    {schedulesObj[itm].map(sameSection => {
-                                        return <View style={{
-                                            margin: scale(5),
-                                            alignItems: 'center',
-                                        }}>
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
-                                            {'Classroom' in sameSection && sameSection['Classroom'] ? (
-                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
-                                            ) : null}
-                                            {'Time From' in sameSection && sameSection['Time From'] ? (
-                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
-                                            ) : null}
-                                        </View>
-                                    })}
-                                </View>
+                                {schedulesObj[itm].length > 1 && (
+                                    <View style={{ flexDirection: 'row' }}>
+                                        {schedulesObj[itm].map(sameSection => {
+                                            return <View style={{
+                                                margin: scale(5),
+                                                alignItems: 'center',
+                                            }}>
+                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
+                                                {'Classroom' in sameSection && sameSection['Classroom'] ? (
+                                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                                ) : null}
+                                                {'Time From' in sameSection && sameSection['Time From'] ? (
+                                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
+                                                ) : null}
+                                            </View>
+                                        })}
+                                    </View>
+                                )}
                             </TouchableOpacity>
                         </MenuView>
                     )
                 }}
                 ListFooterComponent={() => <View style={{ marginBottom: scale(50) }} />}
+                scrollEnabled={false}
             />
         )
     }
@@ -321,22 +326,24 @@ export default class LocalCourse extends Component {
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title Chi']}</Text>
                         </View>)}
 
-                        <View style={{ flexDirection: 'row', }}>
-                            {schedulesObj[itm].map(sameSection => {
-                                return <View style={{
-                                    margin: scale(5),
-                                    alignItems: 'center',
-                                }}>
-                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
-                                    {'Classroom' in sameSection && sameSection['Classroom'] ? (
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
-                                    ) : null}
-                                    {'Time From' in sameSection && sameSection['Time From'] ? (
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
-                                    ) : null}
-                                </View>
-                            })}
-                        </View>
+                        {schedulesObj[itm].length > 1 && (
+                            <View style={{ flexDirection: 'row' }}>
+                                {schedulesObj[itm].map(sameSection => {
+                                    return <View style={{
+                                        margin: scale(5),
+                                        alignItems: 'center',
+                                    }}>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
+                                        {'Classroom' in sameSection && sameSection['Classroom'] ? (
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                        ) : null}
+                                        {'Time From' in sameSection && sameSection['Time From'] ? (
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
+                                        ) : null}
+                                    </View>
+                                })}
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </MenuView>
             )
