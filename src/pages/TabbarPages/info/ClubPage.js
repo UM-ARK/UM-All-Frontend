@@ -93,6 +93,7 @@ class ClubPage extends Component {
                 // 每個項目的間距
                 // spacing={scale(12)}
                 renderItem={({ item }) => <ClubCard data={item} />}
+                key={tag}
                 keyExtractor={item => item._id}
                 directionalLockEnabled
                 alwaysBounceHorizontal={false}

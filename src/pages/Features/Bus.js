@@ -354,6 +354,7 @@ class BusScreen extends Component {
                             {busPositionArr.length > 0
                                 ? busPositionArr.map(item => (
                                     <TouchableScale style={busStyleArr[item.index]} activeScale={0.6}
+                                        key={item.index}
                                         onPress={() => {
                                             trigger();
                                             this.fetchBusInfo();

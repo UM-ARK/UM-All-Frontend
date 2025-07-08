@@ -240,6 +240,7 @@ class UMEventDetail extends Component {
                     if (item.available == 1) {
                         return (
                             <TouchableScale
+                                key={index}
                                 activeOpacity={0.8}
                                 style={{
                                     ...styles.languageModeButtonContainer,

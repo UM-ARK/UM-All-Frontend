@@ -199,10 +199,11 @@ export default class LocalCourse extends Component {
                                 {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
                                     <View style={{ flexDirection: 'row' }}>
                                         {schedulesObj[itm].map(sameSection => {
-                                            return <View style={{
-                                                margin: scale(5),
-                                                alignItems: 'center',
-                                            }}>
+                                            return <View key={sameSection['Day'] + sameSection['Classroom']}
+                                                style={{
+                                                    margin: scale(5),
+                                                    alignItems: 'center',
+                                                }}>
                                                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
                                                 {'Classroom' in sameSection && sameSection['Classroom'] ? (
                                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>

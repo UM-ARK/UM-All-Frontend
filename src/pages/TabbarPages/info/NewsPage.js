@@ -315,13 +315,10 @@ class NewsPage extends Component {
 
     render() {
         return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: COLOR_DIY.bg_color,
-                }}>
+            <View style={{
+                flex: 1, justifyContent: 'center', alignItems: 'center',
+                backgroundColor: COLOR_DIY.bg_color,
+            }}>
                 {/* 懸浮可拖動按鈕 */}
                 {this.state.isLoading ? null : this.renderGoTopButton()}
 
@@ -348,9 +345,11 @@ class NewsPage extends Component {
                         }>
                         <Loading />
                     </ScrollView>
-                ) : (
-                    // 渲染新聞列表
-                    <VirtualizedList
+                ) : null}
+
+                {/* 渲染新聞列表 */}
+                {this.state.isLoading ? null : (
+                    <View style={{ flex: 1, }}><VirtualizedList
                         data={this.state.newsList}
                         ref={this.virtualizedList}
                         // 初始渲染的元素，設置為剛好覆蓋屏幕
@@ -383,8 +382,7 @@ class NewsPage extends Component {
                         }
                         directionalLockEnabled
                         alwaysBounceHorizontal={false}
-                    />
-                )}
+                    /></View>)}
             </View>
         );
     }

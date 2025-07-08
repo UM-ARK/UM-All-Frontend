@@ -265,6 +265,7 @@ class NewsDetail extends Component {
                         spacing={scale(15)}
                         renderItem={({ item, index }) => (
                             <TouchableScale
+                                key={index}
                                 activeOpacity={0.7}
                                 style={{
                                     width: COMPONENT_WIDTH,
@@ -315,6 +316,7 @@ class NewsDetail extends Component {
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
+                        scrollEnabled={false}
                     />
 
                     {/* 正文 */}

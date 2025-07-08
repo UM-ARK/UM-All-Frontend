@@ -637,6 +637,7 @@ class EventDetail extends Component {
                                 {relateImgUrl.map((item, index) => {
                                     return (
                                         <TouchableOpacity
+                                            key={index}
                                             activeOpacity={0.8}
                                             onPress={() => {
                                                 this.setState({
