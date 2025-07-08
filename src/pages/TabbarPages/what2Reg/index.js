@@ -421,9 +421,10 @@ export default class What2Reg extends Component {
                             try {
                                 filterOptions.mode = itm;
                                 COURSE_MODE = itm;
-                                this.getClassifyCourse();
-                                this.setState({ filterOptions });
-                                setLocalOpitons(filterOptions);
+                                this.setState({ filterOptions }, () => {
+                                    this.getClassifyCourse();
+                                    setLocalOpitons(filterOptions);
+                                });
                             } catch (error) {
                                 Alert.alert(JSON.stringify(error))
                             }
@@ -749,28 +750,24 @@ export default class What2Reg extends Component {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 {/* 搜索框 */}
-                <View
-                    style={{
-                        backgroundColor: white,
-                        borderWidth: scale(2), borderColor: themeColor, borderRadius: scale(10),
-                        flexDirection: 'row', alignItems: 'center',
-                        marginRight: scale(5),
-                        paddingHorizontal: scale(5), paddingVertical: scale(3),
-                        flex: 1,
-                    }}>
+                <View style={{
+                    backgroundColor: white,
+                    borderWidth: scale(2), borderColor: themeColor, borderRadius: scale(10),
+                    flexDirection: 'row', alignItems: 'center',
+                    marginRight: scale(5),
+                    paddingHorizontal: scale(5), paddingVertical: scale(3),
+                    flex: 1,
+                }}>
                     {/* 搜索圖標，引導用戶 */}
-                    <Ionicons
-                        name={'search'}
-                        size={scale(15)}
-                        color={black.third}
-                    />
+                    <Ionicons name={'search'} size={scale(15)} color={black.third} />
                     <TextInput
                         style={{
                             ...uiStyle.defaultText,
                             paddingVertical: verticalScale(3),
+                            paddingHorizontal: scale(5),
                             color: black.main,
                             fontSize: scale(12),
-                            width: '100%',
+                            flex: 1,
                         }}
                         onChangeText={(inputText) => {
                             this.setState({
