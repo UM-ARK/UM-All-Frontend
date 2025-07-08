@@ -23,7 +23,7 @@
     "@react-native-cookies/cookies": "^6.2.1",
     "@react-native-firebase/analytics": "21.6.1",
     "@react-native-firebase/app": "21.6.1",
-    "@react-native-menu/menu": "^1.2.2",
+    "@react-native-menu/menu": "^1.2.3",
     "@react-native/gradle-plugin": "^0.75.4",
     "@react-navigation/material-top-tabs": "^6.6.14",
     "@react-navigation/native": "^6.1.18",
@@ -85,7 +85,7 @@
     "react-native-touchable-scale": "^2.2.0",
     "react-native-ui-lib": "^7.34.5",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-webview": "^13.13.2",
+    "react-native-webview": "^13.15.0",
     "styled-components": "^6.1.13"
   },
   "devDependencies": {
