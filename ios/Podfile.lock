@@ -1384,7 +1384,7 @@ PODS:
     - Yoga
   - react-native-menu (1.2.3):
     - React
-  - react-native-pager-view (6.4.1):
+  - react-native-pager-view (6.8.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1697,7 +1697,7 @@ PODS:
     - React
   - RNCAsyncStorage (2.2.0):
     - React-Core
-  - RNCClipboard (1.16.1):
+  - RNCClipboard (1.16.3):
     - React-Core
   - RNDateTimePicker (8.4.2):
     - React-Core
@@ -1825,7 +1825,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.34.0):
+  - RNScreens (3.37.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2227,7 +2227,7 @@ SPEC CHECKSUMS:
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-image-picker: 90e570e3ca0d4bf618da7c24a89dba848acee6b4
   react-native-menu: 70a2aeaeb0a6da0db4e08d8531cdf1d20b702cbf
-  react-native-pager-view: b466d0c2a37d506d20a5041b8a5eba79fa175420
+  react-native-pager-view: 0688f302c6a183c7433fdd2d66d98c78b1160fb6
   react-native-restart: df7caae89026a8ab2ecdd82839978f657701f51d
   react-native-safe-area-context: 827032edf27079702cbd006f11dc79451a2d744b
   react-native-simple-toast: 4c9cc976cb92b6e5fb555e7c57fce38b90a56d07
@@ -2260,7 +2260,7 @@ SPEC CHECKSUMS:
   ReactCommon: 23eed247b5c8e57b59a823ce209353883da61dd2
   ReactNativeUiLib: 4990e6d7c99b57513540f317b5fb560eacb8fbb5
   RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
-  RNCClipboard: ee059e6006b137e369caed5eb852b4aad9f5d886
+  RNCClipboard: f6679d470d0da2bce2a37b0af7b9e0bf369ecda5
   RNDateTimePicker: 392bdc0d6863b5de2fe9b957c82c25b6a038db29
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
   RNFBAnalytics: 94644fb92ff1105e51b3b5cab65ab4c8dd4a5660
@@ -2271,7 +2271,7 @@ SPEC CHECKSUMS:
   RNPermissions: 2bde0f50340b36bef585008b5762500ca8c277d6
   RNReactNativeHapticFeedback: c873497ad3f9fa80447baa18daa9474e671d24bf
   RNReanimated: bd3da720fbd5baafadea9302e898696a76f66ad3
-  RNScreens: f608e369383b866daacbedfd24733b6639736c28
+  RNScreens: 929d5858d322a2ae0cb272511f992c0acec69208
   RNSVG: 38b927ba26d717c85522fbf9a04b87dcd2d8227a
   RNVectorIcons: 55221459225ae0fe7a5ab6b029378c79f1a82d8f
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
