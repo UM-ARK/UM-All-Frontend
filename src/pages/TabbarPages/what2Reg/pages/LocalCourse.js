@@ -104,7 +104,6 @@ export default class LocalCourse extends Component {
                     schedulesObj[itm] = daySort(schedulesObj[itm])
                     const courseInfo = schedulesObj[itm][0];
                     let isPE = courseInfo['Course Code'] == 'CPED1001' || courseInfo['Course Code'] == 'CPED1002';
-                    console.log('schedulesObj[itm]', schedulesObj[itm]);
 
                     return (
                         <MenuView
