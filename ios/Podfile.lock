@@ -1693,6 +1693,27 @@ PODS:
     - React-logger (= 0.75.4)
     - React-perflogger (= 0.75.4)
     - React-utils (= 0.75.4)
+  - ReactNativeBlur (0.1.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - ReactNativeUiLib (4.3.2):
     - React
   - RNCAsyncStorage (2.2.0):
@@ -1956,6 +1977,7 @@ DEPENDENCIES:
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "ReactNativeBlur (from `../node_modules/@sbaiahmed1/react-native-blur`)"
   - ReactNativeUiLib (from `../node_modules/react-native-ui-lib`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
@@ -2139,6 +2161,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  ReactNativeBlur:
+    :path: "../node_modules/@sbaiahmed1/react-native-blur"
   ReactNativeUiLib:
     :path: "../node_modules/react-native-ui-lib"
   RNCAsyncStorage:
@@ -2258,6 +2282,7 @@ SPEC CHECKSUMS:
   React-utils: 0dbea1179726ad65a1b13470a3f3c73da98f4496
   ReactCodegen: f961bc28110632dd4c8e8d95c1a80f5344022cd2
   ReactCommon: 23eed247b5c8e57b59a823ce209353883da61dd2
+  ReactNativeBlur: 231a3ce3df896067e5e9a060be61c8bd382b2ca3
   ReactNativeUiLib: 4990e6d7c99b57513540f317b5fb560eacb8fbb5
   RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
   RNCClipboard: f6679d470d0da2bce2a37b0af7b9e0bf369ecda5

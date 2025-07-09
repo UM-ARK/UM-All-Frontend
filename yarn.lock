@@ -3489,6 +3489,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sbaiahmed1/react-native-blur@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@sbaiahmed1/react-native-blur@npm:0.1.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 7f7e0fcc13bdea937ab4c9a4a0de69503e1d9eacf9b025ea44e8d884590f0d2aef27738b1ecdf7bad3a56afb234642c32d2af75da3d7974f36564a4f7fd9b1fd
+  languageName: node
+  linkType: hard
+
 "@sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
@@ -12312,6 +12322,7 @@ __metadata:
     "@react-navigation/stack": ^6
     "@rneui/base": ^4.0.0-rc.5
     "@rneui/themed": ^4.0.0-rc.5
+    "@sbaiahmed1/react-native-blur": ^0.1.2
     "@types/react": ^18.2.6
     "@types/react-test-renderer": ^18.0.0
     axios: ^1.10.0
