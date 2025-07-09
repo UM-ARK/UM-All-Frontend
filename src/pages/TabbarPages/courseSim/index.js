@@ -43,6 +43,9 @@ import CourseCard from '../what2Reg/component/CourseCard';
 import { setLocalStorage } from '../../../utils/storageKits';
 import uniq from 'lodash/uniq';
 import lodash from 'lodash';
+import OpenCC from 'opencc-js';
+
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
 const iconSize = scale(25);
@@ -1107,6 +1110,7 @@ E11-0000
             return itm['Course Code'].toUpperCase().includes(upperInputText) ||
                 itm['Course Title'].toUpperCase().includes(upperInputText) ||
                 itm['Course Title Chi'].includes(inputText) ||
+                itm['Course Title Chi'].includes(converter(inputText)) ||
                 itm['Teacher Information'].includes(upperInputText) ||
                 (itm['Offering Department'] && itm['Offering Department'].includes(upperInputText));
         });

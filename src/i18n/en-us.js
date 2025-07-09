@@ -90,7 +90,7 @@ export default {
     },
     catalog: {
         "ARK搵課": "ARK Catalog",
-        "試試ECE or Electrical or 電氣（區分簡繁）": "Try ECE or Electrical or 電氣",
+        "試試ECE or Electrical or 電氣": "Try ECE or Electrical or 電氣",
 
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",

@@ -41,6 +41,9 @@ import { t } from "i18next";
 import ActionSheet from '@alessiocancian/react-native-actionsheet';
 import { Dialog, } from '@rneui/themed';
 import lodash from 'lodash';
+import OpenCC from 'opencc-js';
+
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
 const iconSize = scale(25);
@@ -786,7 +789,7 @@ export default class What2Reg extends Component {
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        placeholder={t("試試ECE or Electrical or 電氣（區分簡繁）", { ns: 'catalog' })}
+                        placeholder={t("試試ECE or Electrical or 電氣", { ns: 'catalog' })}
                         placeholderTextColor={black.third}
                         ref={this.textInputRef}
                         onFocus={() => trigger()}
@@ -964,6 +967,7 @@ export default class What2Reg extends Component {
             return itm['Course Code'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title'].toUpperCase().indexOf(inputText) != -1
                 || itm['Course Title Chi'].indexOf(inputText) != -1
+                || itm['Course Title Chi'].indexOf(converter(inputText)) != -1
         });
 
         // 篩選課表時間Excel的數據
