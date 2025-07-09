@@ -1108,7 +1108,7 @@ export default class What2Reg extends Component {
                                 <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('更新')}</Text>
                             </TouchableOpacity>
 
-                            <View style={{ flexDirection: 'row' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 {/* ARK Logo */}
                                 <FastImage
                                     source={require('../../../static/img/logo.png')}

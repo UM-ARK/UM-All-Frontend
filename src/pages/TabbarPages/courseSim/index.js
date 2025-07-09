@@ -1155,7 +1155,7 @@ E11-0000
                         </TouchableOpacity>
                     )}
 
-                    <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
                         {/* ARK Logo */}
                         <FastImage
                             source={require('../../../static/img/logo.png')}
