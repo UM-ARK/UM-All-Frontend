@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
     ScrollView,
     View,
@@ -59,7 +59,6 @@ import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
 
 const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
-const iconSize = verticalScale(25);
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -79,6 +78,7 @@ const iconTypes = {
 };
 
 let cal = UMCalendar;
+const calItemWidth = verticalScale(44.5);
 
 const toastTextArr = [
     `ARK ALL全力加載中!!!`,
@@ -148,173 +148,139 @@ const toastKaomojiArr = [
     '(oﾟ▽ﾟ)o',
 ];
 
-const calItemWidth = verticalScale(44.5);
-
-class HomeScreen extends Component {
-    toastTimer = null;
-    calScrollRef = React.createRef(null);
-    eventPage = React.createRef(null);
-    scrollView = React.createRef(null);
-    textInputRef = React.createRef(null);
-
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            // 快捷功能入口
-            functionArray: [
-                {
-                    icon_name: 'bus',
-                    icon_type: iconTypes.ionicons,
-                    function_name: t('校園巴士', { ns: 'home' }),
-                    func: () => {
-                        trigger();
-                        this.props.navigation.navigate('Bus');
-                    },
-                },
-                {
-                    icon_name: 'alpha-m-circle-outline',
-                    icon_type: iconTypes.materialCommunityIcons,
-                    function_name: t('Moodle', { ns: 'home' }),
-                    func: () => {
-                        trigger();
-                        logToFirebase('openPage', { page: 'moodle' });
-                        openLink(UM_Moodle);
-                    },
-                },
-                {
-                    icon_name: require('../../../../static/img/logo.png'),
-                    icon_type: iconTypes.img,
-                    function_name: t('澳大方舟', { ns: 'home' }),
-                    func: () => {
-                        trigger();
-                        this.onRefresh();
-                        this.getAppData();
-                        this.getCal();
-                        // 刷新重新請求活動頁數據
-                        this.eventPage.current.onRefresh();
-                    },
-                },
-                {
-                    icon_name: 'coffee',
-                    icon_type: iconTypes.materialCommunityIcons,
-                    function_name: t('支持我們', { ns: 'home' }),
-                    func: () => {
-                        trigger();
-                        let webview_param = {
-                            url: GITHUB_DONATE,
-                            title: '支持我們',
-                            text_color: white,
-                            bg_color_diy: themeColor,
-                            isBarStyleBlack: false,
-                        };
-                        this.props.navigation.navigate('Webviewer', webview_param);
-                    },
-                },
-                {
-                    icon_name: 'people',
-                    icon_type: iconTypes.ionicons,
-                    function_name: t('組織登入', { ns: 'home' }),
-                    func: () => {
-                        trigger();
-                        openLink(ARK_WEB_CLUB_SIGNIN);
-                        // if (this.state.showUpdateInfo) {
-                        //     Alert.alert(`重要提示!`, `請使用最新版APP進行登錄!\n快更新APP吧!`);
-                        // } else {
-                        //     this.props.navigation.navigate('ClubLogin');
-                        // }
-                    },
-                },
-            ],
-
-            selectDay: 0,
-
-            isShowModal: false,
-
-            isLoading: true,
-
-            // 是否提示更新
-            showUpdateInfo: false,
-
-            app_version: {
-                lastest: '',
-                local: '',
+const HomeScreen = ({ navigation }) => {
+    // 狀態
+    const [functionArray, setFunctionArray] = useState([
+        {
+            icon_name: 'bus',
+            icon_type: iconTypes.ionicons,
+            function_name: t('校園巴士', { ns: 'home' }),
+            func: () => {
+                trigger();
+                navigation.navigate('Bus');
             },
-            version_info: null,
+        },
+        {
+            icon_name: 'alpha-m-circle-outline',
+            icon_type: iconTypes.materialCommunityIcons,
+            function_name: t('Moodle', { ns: 'home' }),
+            func: () => {
+                trigger();
+                logToFirebase('openPage', { page: 'moodle' });
+                openLink(UM_Moodle);
+            },
+        },
+        {
+            icon_name: require('../../../../static/img/logo.png'),
+            icon_type: iconTypes.img,
+            function_name: t('澳大方舟', { ns: 'home' }),
+            func: () => {
+                trigger();
+                onRefresh();
+                getAppData();
+                // getCal();
+                // 刷新重新請求活動頁數據
+                eventPage.current.onRefresh();
+            },
+        },
+        {
+            icon_name: 'coffee',
+            icon_type: iconTypes.materialCommunityIcons,
+            function_name: t('支持我們', { ns: 'home' }),
+            func: () => {
+                trigger();
+                let webview_param = {
+                    url: GITHUB_DONATE,
+                    title: '支持我們',
+                    text_color: white,
+                    bg_color_diy: themeColor,
+                    isBarStyleBlack: false,
+                };
+                navigation.navigate('Webviewer', webview_param);
+            },
+        },
+        {
+            icon_name: 'people',
+            icon_type: iconTypes.ionicons,
+            function_name: t('組織登入', { ns: 'home' }),
+            func: () => {
+                trigger();
+                openLink(ARK_WEB_CLUB_SIGNIN);
+            },
+        },
+    ]);
+    const [selectDay, setSelectDay] = useState(0);
+    const [isShowModal, setIsShowModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [showUpdateInfo, setShowUpdateInfo] = useState(false);
+    const [app_version, setAppVersion] = useState({ lastest: '', local: '' });
+    const [version_info, setVersionInfo] = useState(null);
+    const [networkError, setNetworkError] = useState(false);
+    const [isLoadMore, setIsLoadMore] = useState(false);
+    const [inputText, setInputText] = useState('');
+    const [upcomingCourse, setUpcomingCourse] = useState(null);
 
-            networkError: false,
+    // ref
+    const calScrollRef = useRef(null);
+    const eventPage = useRef(null);
+    const scrollView = useRef(null);
+    const textInputRef = useRef(null);
+    const toastTimer = useRef(null);
+    const appStateListener = useRef(null);
 
-            isLoadMore: false,
+    // 生命週期
+    useEffect(() => {
+        getAppData(false);
+        getCal();
 
-            inputText: '',
-
-            upcomingCourse: null,
-        };
-    }
-
-    componentDidMount() {
-        let globalData = this.props.RootStore;
-        // 已登錄學生賬號
-        if (globalData.userInfo && globalData.userInfo.stdData) {
-            this.setState({ isShowModal: false });
-            this.getAppData(true);
-        } else {
-            this.getAppData(false);
-        }
-        this.getCal();
-
-        this.toastTimer = setTimeout(() => {
-            this.onRefresh();
+        toastTimer.current = setTimeout(() => {
+            onRefresh();
         }, 1000);
 
-        // 捕捉應用狀態監聽器
-        this.appStateListener = AppState.addEventListener('change', this.handleAppStateChange);
+        appStateListener.current = AppState.addEventListener('change', handleAppStateChange);
 
-        this.getUpcomingCourse();
-    }
+        getUpcomingCourse();
 
-    componentWillUnmount() {
-        this.toastTimer && clearTimeout(this.toastTimer);
-        // 移除監聽器
-        if (this.appStateListener) {
-            this.appStateListener.remove();
-        }
-    }
+        return () => {
+            // componentWillUnmount
+            if (toastTimer.current) clearTimeout(toastTimer.current);
+            if (appStateListener.current) appStateListener.current.remove();
+        };
+    }, []);
 
-    handleAppStateChange = (nextAppState) => {
+    // 其餘方法轉為函式
+    const handleAppStateChange = (nextAppState) => {
         if (AppState.currentState == 'active') {
-            // 確認後台返回到 HomePage 主頁，進行刷新
-            if (this.props.navigation?.isFocused()) {
-                this.setState({ isLoading: true });
-                this.getAppData(false);
-                this.getCal();
-                this.onRefresh();
-                this.eventPage.current.onRefresh();
+            if (navigation?.isFocused()) {
+                setIsLoading(true);
+                getAppData(false);
+                onRefresh();
+                eventPage.current?.onRefresh();
             }
         }
     };
 
-    getAppData = async isLogin => {
+    const getAppData = async (isLogin) => {
         let URL = BASE_URI + GET.APP_INFO;
-        this.setState({ isLoading: true })
+        setIsLoading(true);
         await axios
             .get(URL)
             .then(res => {
                 let json = res.data;
                 if (json.message == 'success') {
-                    this.checkInfo(json.content, isLogin);
+                    checkInfo(json.content, isLogin);
                 }
             })
             .catch(err => {
                 if (err.code == 'ERR_NETWORK' || err.code == 'ECONNABORTED') {
-                    this.setState({ networkError: true });
+                    setNetworkError(true);
                 }
             }).finally(() => {
-                this.setState({ isLoading: false });
+                setIsLoading(false);
             })
     };
 
-    checkInfo = async (serverInfo, isLogin) => {
+    const checkInfo = async (serverInfo, isLogin) => {
         try {
             const strAppInfo = await AsyncStorage.getItem('appInfo');
             if (strAppInfo == null) {
@@ -340,13 +306,12 @@ class HomeScreen extends Component {
             // APP版本滯後，提示下載新版本
             const shouldUpdate = versionStringCompare(packageInfo.version, serverInfo.app_version) == -1;
             if (shouldUpdate) {
-                this.setState({
-                    showUpdateInfo: shouldUpdate,
-                    app_version: {
-                        lastest: serverInfo.app_version,
-                        local: packageInfo.version,
-                    }
-                })
+                setShowUpdateInfo(shouldUpdate);
+                setAppVersion({
+                    lastest: serverInfo.app_version,
+                    local: packageInfo.version,
+                });
+
                 Alert.alert(`ARK ${serverInfo.app_version} 現可更新！！`,
                     'version_info' in serverInfo
                         ? serverInfo.version_info
@@ -365,19 +330,21 @@ class HomeScreen extends Component {
                         },
                     ])
                 if ('version_info' in serverInfo) {
-                    this.setState({ version_info: serverInfo.version_info });
+                    setVersionInfo(serverInfo.version_info);
                 }
             }
         } catch (e) {
             // console.error(e);
         }
         finally {
-            this.setState({ isLoading: false, networkError: false });
+            setIsLoading(false);
+            setNetworkError(false);
         }
     };
 
     // 刷新主頁時展示隨機Toast
-    onRefresh = () => {
+    const onRefresh = useCallback(() => {
+        getCal();
         const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
         const toastKaoIdx = Math.round(Math.random() * (toastKaomojiArr.length - 1));
         Toast.show({
@@ -388,39 +355,45 @@ class HomeScreen extends Component {
             onPress: () => Toast.hide(),
         });
 
-        this.getUpcomingCourse();
-    }
+        getUpcomingCourse();
+    }, []);
 
     // 獲取日曆數據
-    getCal = () => {
+    const getCal = useCallback(() => {
         // 先到網站獲取ics link，https://reg.um.edu.mo/university-almanac/?lang=zh-hant
         // 使用ical-to-json工具轉為json格式，https://github.com/cwlsn/ics-to-json/
         // 放入static/UMCalendar中覆蓋
         // ***務必注意key、value的大小寫！！**
-        const nowTimeStamp = moment(new Date());
+        const nowTimeStamp = moment(new Date()); // 获取今天的开始时间
         const CAL_LENGTH = cal.length;
-        let { selectDay } = this.state;
-        // 同日或未來的重要時間設為選中日
+        let newSelectDay = selectDay;
+
+        // 當前時間已經過去，選擇校曆最後一天
         if (nowTimeStamp.isSameOrAfter(cal[CAL_LENGTH - 1].startDate)) {
-            selectDay = CAL_LENGTH - 1;
-            this.setState({ selectDay });
+            newSelectDay = CAL_LENGTH - 1;
         }
         else if (nowTimeStamp.isSameOrAfter(cal[0].startDate)) {
-            for (let i = 0; i < CAL_LENGTH; i++) {
+            // 校曆已經開始，選擇校曆中今天或今天之後的一日
+            for (let i = 0; i <= CAL_LENGTH; i++) {
                 if (moment(cal[i].startDate).isSameOrAfter(nowTimeStamp)) {
-                    selectDay = i;
-                    this.setState({ selectDay });
+                    newSelectDay = i;
                     break;
                 }
             }
         }
-        // 自動滾動到校曆的selectDay
-        if (this.calScrollRef) {
-            this.calScrollRef.current.scrollToOffset({ offset: selectDay * calItemWidth });
-        }
-    };
 
-    getWeek(date) {
+        setSelectDay(newSelectDay);
+
+        // 延迟滚动，确保状态更新后再滚动
+        setTimeout(() => {
+            calScrollRef?.current.scrollToOffset({
+                offset: newSelectDay * calItemWidth,
+                animated: true
+            });
+        }, 100);
+    }, []);
+
+    const getWeek = (date) => {
         // 参数时间戳
         let week = moment(date).day();
         switch (week) {
@@ -439,12 +412,12 @@ class HomeScreen extends Component {
             case 0:
                 return t('周日', { ns: 'home' });
         }
-    }
+    };
 
     /**
      * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
      */
-    getUpcomingCourse = async () => {
+    const getUpcomingCourse = async () => {
         try {
             const now = moment(new Date());
             const s_allCourseAllTime = await getLocalStorage('ARK_WeekTimetable_Storage');
@@ -453,16 +426,15 @@ class HomeScreen extends Component {
 
             const todayCourses = lodash.get(s_allCourseAllTime, curDay, []);
             const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
-            this.setState({ upcomingCourse: upComing[0] });
+            // TODO: 深淺模式切換時，由於緩存未刷新，顏色沒有進入深淺模式狀態
+            setUpcomingCourse(upComing[0]);
         } catch (error) {
             console.log('error', error);
         }
-    }
-
+    };
 
     // 渲染顶部校历图标
-    renderCal = (item, index) => {
-        const { selectDay } = this.state;
+    const renderCal = (item, index) => {
         const momentItm = moment(item.startDate).format("YYYYMMDD");
         // 渲染所選日期
         let isThisDateSelected = selectDay == index;
@@ -476,7 +448,7 @@ class HomeScreen extends Component {
                 style={{ width: calItemWidth, margin: verticalScale(3), }}
                 onPress={() => {
                     trigger();
-                    this.setState({ selectDay: index });
+                    setSelectDay(index);
                 }}
             >
                 <View style={{
@@ -528,7 +500,7 @@ class HomeScreen extends Component {
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
                         }}>
-                            {this.getWeek(item.startDate)}
+                            {getWeek(item.startDate)}
                         </Text>
                     </View>
                 </View>
@@ -545,8 +517,8 @@ class HomeScreen extends Component {
         );
     };
 
-    // 渲染快捷功能卡片的圖標
-    GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
+    // 渲染功能圖標
+    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
         let imageSize = verticalScale(27);
         let iconSize = verticalScale(30);
@@ -606,12 +578,10 @@ class HomeScreen extends Component {
     };
 
     // 打開/關閉底部Modal
-    tiggerModalBottom = () => {
-        this.setState({ isShowModal: !this.state.isShowModal });
-    };
+    const tiggerModalBottom = () => setIsShowModal(!isShowModal);
 
-    // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
+    // 懸浮按鈕
+    const renderGoTopButton = () => {
         const { viewShadow } = COLOR_DIY;
         return (
             <Interactable.View
@@ -638,12 +608,8 @@ class HomeScreen extends Component {
                 <TouchableWithoutFeedback
                     onPress={() => {
                         trigger();
-                        // 回頂，需先創建ref，可以在this.refs直接找到方法引用
-                        this.scrollView.current.scrollTo({
-                            x: 0,
-                            y: 0,
-                            duration: 500, // 回頂時間
-                        });
+                        // 回頂
+                        scrollView.current.scrollTo({ x: 0, y: 0, duration: 500 });
                     }}>
                     <View
                         style={{
@@ -667,30 +633,28 @@ class HomeScreen extends Component {
         );
     };
 
-    handleScroll = (event) => {
+    // 處理 Scroll
+    const handleScroll = (event) => {
+        // ...同原本，使用 setIsLoadMore
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
-        const { isLoadMore, isLoading } = this.state;
 
-        // 接近底部時，獲取更多數據
+        // TODO: 接近底部時，獲取更多數據
         if (isCloseToBottom && !isLoadMore && !isLoading) {
-            const thisFunc = this.eventPage.current;
+            const thisFunc = eventPage.current;
             if (!thisFunc.state.noMoreData) {
-                this.setState({ isLoadMore: true }, () => {
-                    thisFunc.loadMoreData();
-                    // 延時鎖，避免到底觸發過多次
-                    setTimeout(() => {
-                        this.setState({ isLoadMore: false });
-                    }, 1000);
-                });
+                setIsLoadMore(true);
+                thisFunc.loadMoreData();
+                // 延時鎖，避免到底觸發過多次
+                setTimeout(() => {
+                    setIsLoadMore(false);
+                }, 1000);
             }
         }
     };
 
     // 搜索框
-    renderSearch = () => {
-        const { inputText, } = this.state;
-
+    const renderSearch = () => {
         const goToBrowser = (inputText) => {
             trigger();
             logToFirebase('funcUse', {
@@ -729,7 +693,7 @@ class HomeScreen extends Component {
                             flex: 1,
                         }}
                         onChangeText={(inputText) => {
-                            this.setState({ inputText });
+                            setInputText(inputText);
                         }}
                         value={inputText}
                         selectTextOnFocus
@@ -737,7 +701,7 @@ class HomeScreen extends Component {
                         inputMode='search'
                         placeholder={t("提問：關於澳大的一切...", { ns: 'features' })}
                         placeholderTextColor={black.third}
-                        ref={this.textInputRef}
+                        ref={textInputRef}
                         onFocus={() => trigger()}
                         returnKeyType={'search'}
                         selectionColor={themeColor}
@@ -754,9 +718,8 @@ class HomeScreen extends Component {
                         <TouchableOpacity
                             onPress={() => {
                                 trigger();
-                                this.setState({ inputText: '' }, () => {
-                                    this.textInputRef.current.focus();
-                                })
+                                setInputText('');
+                                textInputRef.current.focus();
                             }}
                             style={{ padding: scale(5), marginLeft: 'auto', paddingRight: scale(10) }}
                         >
@@ -788,373 +751,355 @@ class HomeScreen extends Component {
                 </TouchableOpacity>
             </KeyboardAvoidingView>
         )
-    }
+    };
 
-    render() {
-        const { selectDay, isLoading } = this.state;
-        return (
-            <View style={{
-                flex: 1, backgroundColor: bg_color,
-                alignItems: 'center', justifyContent: 'center',
-            }}>
-                {/* 懸浮可拖動按鈕 */}
-                {isLoading ? null : this.renderGoTopButton()}
+    // 主渲染
+    return (
+        <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
+            {isLoading ? null : renderGoTopButton()}
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={isLoading}
+                        onRefresh={async () => {
+                            setIsLoading(true);
+                            onRefresh();
+                            getAppData();
+                            // getCal();
+                            await eventPage.current?.onRefresh();
+                        }}
+                    />
+                }
+                alwaysBounceHorizontal={false}
+                ref={scrollView}
+                showsVerticalScrollIndicator={true}
+                onScroll={handleScroll}
+                scrollEventThrottle={400}
+                keyboardDismissMode={'on-drag'}
+                contentContainerStyle={{ width: '100%' }}
+            >
+                {renderSearch()}
 
-                {/* 主页本体 */}
-                <ScrollView
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={this.state.isLoading}
-                            onRefresh={async () => {
-                                this.setState({ isLoading: true });
-                                this.onRefresh();
-                                this.getAppData();
-                                this.getCal();
-                                // 刷新重新請求活動頁數據
-                                await this.eventPage.current.onRefresh();
+                {/* 校曆列表 */}
+                {cal && cal.length > 0 ? (
+                    <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center', }}>
+                        <VirtualizedList
+                            data={cal}
+                            ref={calScrollRef}
+                            initialNumToRender={selectDay <= 11 ? 11 : selectDay}
+                            windowSize={4}
+                            initialScrollIndex={selectDay < cal.length ? selectDay : 0}
+                            getItemLayout={(data, index) => {
+                                const layoutSize = calItemWidth;
+                                return {
+                                    length: layoutSize,
+                                    offset: layoutSize * index,
+                                    index,
+                                };
                             }}
+                            // 渲染每个列表项的方法
+                            renderItem={({ item, index }) => renderCal(item, index)}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            getItem={getItem}
+                            // 渲染項目數量
+                            getItemCount={getItemCount}
+                            key={'#'}
+                            // 列表primary key
+                            keyExtractor={(item, index) => index}
+                            ListHeaderComponent={
+                                <View style={{ marginLeft: scale(20) }} />
+                            }
+                            ListFooterComponent={
+                                <View style={{ marginRight: scale(20) }} />
+                            }
                         />
-                    }
-                    alwaysBounceHorizontal={false}
-                    ref={this.scrollView}
-                    showsVerticalScrollIndicator={true}
-                    onScroll={this.handleScroll}
-                    scrollEventThrottle={400}
-                    keyboardDismissMode={'on-drag'}
-                    contentContainerStyle={{ width: '100%' }}
-                >
-                    {this.renderSearch()}
 
-                    {/* 校曆列表 */}
-                    {cal && cal.length > 0 ? (
-                        <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center', }}>
-                            <VirtualizedList
-                                data={cal}
-                                ref={this.calScrollRef}
-                                initialNumToRender={selectDay <= 11 ? 11 : selectDay}
-                                windowSize={4}
-                                initialScrollIndex={selectDay < cal.length ? selectDay : 0}
-                                getItemLayout={(data, index) => {
-                                    const layoutSize = calItemWidth;
-                                    return {
-                                        length: layoutSize,
-                                        offset: layoutSize * index,
-                                        index,
-                                    };
+                        {/* 校曆日期描述 */}
+                        {cal[selectDay] && 'summary' in cal[selectDay] ? (
+                            <View style={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'row',
+                                marginTop: verticalScale(5),
+                            }}>
+                                {/* 左Emoji */}
+                                <Text selectable style={{
+                                    ...uiStyle.defaultText,
+                                    textAlign: 'center',
+                                    fontSize: verticalScale(12),
                                 }}
-                                // 渲染每个列表项的方法
-                                renderItem={({ item, index }) => this.renderCal(item, index)}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                getItem={getItem}
-                                // 渲染項目數量
-                                getItemCount={getItemCount}
-                                key={'#'}
-                                // 列表primary key
-                                keyExtractor={(item, index) => index}
-                                ListHeaderComponent={
-                                    <View style={{ marginLeft: scale(20) }} />
-                                }
-                                ListFooterComponent={
-                                    <View style={{ marginRight: scale(20) }} />
-                                }
-                            />
+                                >
+                                    {VERSION_EMOJI.ve_Left + '\n\n'}
+                                </Text>
 
-                            {/* 校曆日期描述 */}
-                            {cal[selectDay] && 'summary' in cal[selectDay] ? (
+                                {/* 校曆內容描述 */}
                                 <View style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexDirection: 'row',
-                                    marginTop: verticalScale(5),
+                                    backgroundColor: themeColorUltraLight,
+                                    borderRadius: scale(5),
+                                    paddingVertical: verticalScale(2), paddingHorizontal: scale(5),
+                                    width: screenWidth * 0.8,
                                 }}>
-                                    {/* 左Emoji */}
-                                    <Text selectable style={{
-                                        ...uiStyle.defaultText,
-                                        textAlign: 'center',
-                                        fontSize: verticalScale(12),
-                                    }}
+                                    <Text
+                                        selectable
+                                        style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: verticalScale(12) }}
                                     >
-                                        {VERSION_EMOJI.ve_Left + '\n\n'}
-                                    </Text>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
+                                            {'📅 校曆 Upcoming:' + '\n'}
+                                        </Text>
 
-                                    {/* 校曆內容描述 */}
-                                    <View style={{
-                                        backgroundColor: themeColorUltraLight,
-                                        borderRadius: scale(5),
-                                        paddingVertical: verticalScale(2), paddingHorizontal: scale(5),
-                                        width: screenWidth * 0.8,
-                                    }}>
-                                        <Text
-                                            selectable
-                                            style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: verticalScale(12) }}
-                                        >
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
-                                                {'📅 校曆 Upcoming:' + '\n'}
-                                            </Text>
-
-                                            {/* 如果時間差大於1天，展示活動的時間差 */}
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
-                                                {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
-                                                    `${moment(cal[selectDay].startDate).format("YYYY-MM-DD")} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format("YYYY-MM-DD")}\n`
-                                                ) : null}
-                                            </Text>
-
-                                            {cal[selectDay].summary}
-
-                                            {'summary_cn' in cal[selectDay] ? (
-                                                '\n' + cal[selectDay].summary_cn
+                                        {/* 如果時間差大於1天，展示活動的時間差 */}
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
+                                            {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1 ? (
+                                                `${moment(cal[selectDay].startDate).format("YYYY-MM-DD")} ~ ${moment(cal[selectDay].endDate).subtract(1, 'days').format("YYYY-MM-DD")}\n`
                                             ) : null}
                                         </Text>
-                                    </View>
 
-                                    {/* 右Emoji */}
-                                    <Text selectable style={{
-                                        ...uiStyle.defaultText,
-                                        textAlign: 'center',
-                                        fontSize: verticalScale(12)
-                                    }}>
-                                        {'\n\n' + VERSION_EMOJI.ve_Right}
+                                        {cal[selectDay].summary}
+
+                                        {'summary_cn' in cal[selectDay] ? (
+                                            '\n' + cal[selectDay].summary_cn
+                                        ) : null}
                                     </Text>
                                 </View>
-                            ) : null}
 
-                        </View>
-                    ) : null
-                    }
-
-                    {/** 即將到來的課程 */}
-                    <View style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        alignSelf: "center",
-                        width: screenWidth * 0.8,
-                    }}>
-                        <TouchableScale
-                            style={{
-                                width: "100%",
-                            }}
-                            onPress={() => {
-                                this.props.navigation.navigate("CourseSimTab");
-                            }}>
-                            {this.state.upcomingCourse ? (
-                                // <Text>{JSON.stringify(this.state.upcomingCourse)}</Text>
-
-                                <View
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: 'row',
-                                        width: "100%",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        gap: 2.5,
-                                        backgroundColor: this.state.upcomingCourse["color"] || themeColorUltraLight,
-                                        paddingHorizontal: scale(20),
-                                        paddingVertical: scale(10),
-                                        marginTop: verticalScale(5),
-                                        borderRadius: scale(5),
-                                    }}>
-                                    <Text style={{ color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
-                                    <Text style={{ color: black.main, opacity: 0.7, }}>{this.state.upcomingCourse["Course Code"]}</Text>
-                                    <Text style={{ color: black.main, opacity: 0.7, }}>{this.state.upcomingCourse["Time From"]}</Text>
-                                </View>
-
-                            ) : (
-                                <View style={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    width: "100%",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    margintTop: verticalScale(5),
-                                    paddingVertical: scale(10),
+                                {/* 右Emoji */}
+                                <Text selectable style={{
+                                    ...uiStyle.defaultText,
+                                    textAlign: 'center',
+                                    fontSize: verticalScale(12)
                                 }}>
-                                    <Text>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
-                                </View>
-                            )}
-                        </TouchableScale>
-                    </View>
-
-                    {/* 快捷功能圖標 */}
-                    <View style={{ width: '100%', paddingHorizontal: scale(10), alignSelf: 'center', }}>
-                        <FlatGrid
-                            style={{
-                                alignSelf: 'center',
-                                backgroundColor: white, borderRadius: scale(10),
-                                width: '100%',
-                                marginTop: verticalScale(5),
-                            }}
-                            contentContainerStyle={{
-                                alignItems: 'center',
-                            }}
-                            maxItemsPerRow={6}
-                            itemDimension={scale(50)}
-                            spacing={scale(5)}
-                            data={this.state.functionArray}
-                            renderItem={({ item }) => this.GetFunctionIcon(item)}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    </View>
-
-                    {/* 更新提示 */}
-                    {this.state.showUpdateInfo ?
-                        <HomeCard style={{ alignSelf: 'center' }}>
-                            <View>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: black.second,
-                                        fontWeight: 'bold',
-                                        marginTop: scale(2),
-                                        alignSelf: 'center',
-                                        textAlign: 'center',
-                                    }}>
-                                    {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                                    {'\n\n' + VERSION_EMOJI.ve_Right}
                                 </Text>
-                                {/* 版本更新說明 */}
-                                {this.state.version_info ? (
-                                    <Text style={{
-                                        ...uiStyle.defaultText,
-                                        color: black.second,
-                                        fontWeight: 'bold',
-                                        marginTop: scale(2),
-                                        alignSelf: 'center',
-                                    }}>
-                                        {'\n更新內容：\n' + this.state.version_info + '\n'}
-                                    </Text>
-                                ) : null}
+                            </View>
+                        ) : null}
+
+                    </View>
+                ) : null}
+
+                {/** 即將到來的課程 */}
+                <View style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    alignSelf: "center",
+                    width: screenWidth * 0.8,
+                }}>
+                    <TouchableScale
+                        style={{
+                            width: "100%",
+                        }}
+                        onPress={() => {
+                            navigation.navigate("CourseSimTab");
+                        }}>
+                        {upcomingCourse ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row', flex: 1,
+                                    alignItems: "center", justifyContent: "center",
+                                    gap: scale(3),
+                                    backgroundColor: upcomingCourse["color"] || themeColorUltraLight,
+                                    paddingHorizontal: scale(20), paddingVertical: scale(10),
+                                    marginTop: verticalScale(5),
+                                    borderRadius: scale(5),
+                                }}>
+                                <Text style={{ color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
+                                <Text style={{ color: black.main, opacity: 0.7, }}>{upcomingCourse["Course Code"]}</Text>
+                                <Text style={{ color: black.main, opacity: 0.7, }}>{upcomingCourse["Time From"]}</Text>
+                            </View>
+
+                        ) : (
+                            <View style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                width: "100%",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                margintTop: verticalScale(5),
+                                paddingVertical: scale(10),
+                            }}>
+                                <Text>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
+                            </View>
+                        )}
+                    </TouchableScale>
+                </View>
+
+                {/* 快捷功能圖標 */}
+                <View style={{ width: '100%', paddingHorizontal: scale(10), alignSelf: 'center', }}>
+                    <FlatGrid
+                        style={{
+                            alignSelf: 'center',
+                            backgroundColor: white, borderRadius: scale(10),
+                            width: '100%',
+                            marginTop: verticalScale(5),
+                        }}
+                        contentContainerStyle={{
+                            alignItems: 'center',
+                        }}
+                        maxItemsPerRow={6}
+                        itemDimension={scale(50)}
+                        spacing={scale(5)}
+                        data={functionArray}
+                        renderItem={({ item }) => GetFunctionIcon(item)}
+                        showsVerticalScrollIndicator={false}
+                        scrollEnabled={false}
+                    />
+                </View>
+
+                {/* 更新提示 */}
+                {showUpdateInfo ?
+                    <HomeCard style={{ alignSelf: 'center' }}>
+                        <View>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontWeight: 'bold',
+                                    marginTop: scale(2),
+                                    alignSelf: 'center',
+                                    textAlign: 'center',
+                                }}>
+                                {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                            </Text>
+                            {/* 版本更新說明 */}
+                            {version_info ? (
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontWeight: 'bold',
+                                    marginTop: scale(2),
+                                    alignSelf: 'center',
+                                }}>
+                                    {'\n更新內容：\n' + version_info + '\n'}
+                                </Text>
+                            ) : null}
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: themeColor,
+                                    marginTop: scale(5),
+                                    fontWeight: 'bold',
+                                }}>
+                                {`最新版本: ${app_version.lastest}`}
+                            </Text>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    marginTop: scale(5),
+                                    fontWeight: 'bold',
+                                }}>
+                                {`你的版本: ${app_version.local}`}
+                            </Text>
+                            {Platform.OS === 'ios' ? null : (
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
+                                        alignSelf: 'center', textAlign: 'center',
                                         color: themeColor,
                                         marginTop: scale(5),
                                         fontWeight: 'bold',
                                     }}>
-                                    {`最新版本: ${this.state.app_version.lastest}`}
+                                    {`無Google Play Store用戶可以通過APK方式安裝~`}
                                 </Text>
+                            )}
+                            <TouchableOpacity
+                                style={{
+                                    alignSelf: 'center',
+                                    marginTop: scale(5),
+                                    backgroundColor: themeColor,
+                                    borderRadius: scale(10),
+                                    paddingVertical: scale(5), paddingHorizontal: scale(8),
+                                }}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                    trigger();
+                                    const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
+                                    Linking.openURL(url);
+                                }}>
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
-                                        color: black.third,
-                                        marginTop: scale(5),
+                                        color: white,
                                         fontWeight: 'bold',
                                     }}>
-                                    {`你的版本: ${this.state.app_version.local}`}
+                                    {`點我更新 😉~`}
                                 </Text>
-                                {Platform.OS === 'ios' ? null : (
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            alignSelf: 'center', textAlign: 'center',
-                                            color: themeColor,
-                                            marginTop: scale(5),
-                                            fontWeight: 'bold',
-                                        }}>
-                                        {`無Google Play Store用戶可以通過APK方式安裝~`}
-                                    </Text>
-                                )}
-                                <TouchableOpacity
-                                    style={{
-                                        alignSelf: 'center',
-                                        marginTop: scale(5),
-                                        backgroundColor: themeColor,
-                                        borderRadius: scale(10),
-                                        paddingVertical: scale(5), paddingHorizontal: scale(8),
-                                    }}
-                                    activeOpacity={0.8}
-                                    onPress={() => {
-                                        trigger();
-                                        const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                        Linking.openURL(url);
-                                    }}>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            color: white,
-                                            fontWeight: 'bold',
-                                        }}>
-                                        {`點我更新 😉~`}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </HomeCard>
-                        : null}
+                            </TouchableOpacity>
+                        </View>
+                    </HomeCard>
+                    : null}
 
-                    {/* 活動頁 */}
-                    {this.state.networkError ? (
-                        <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
-                    ) : null}
-                    <EventPage ref={this.eventPage} />
-
-                </ScrollView >
-
-                {/* 彈出提示登錄的Modal */}
-                {this.state.isShowModal && (
-                    <ModalBottom cancel={this.tiggerModalBottom}>
-                        <View style={{
-                            padding: scale(20),
-                            backgroundColor: COLOR_DIY.white,
+                {/* 活動頁 */}
+                {networkError ? (
+                    <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
+                ) : null}
+                <EventPage ref={eventPage} />
+            </ScrollView>
+            {/* Modal */}
+            {isShowModal && (
+                <ModalBottom cancel={tiggerModalBottom}>
+                    <View style={{
+                        padding: scale(20),
+                        backgroundColor: COLOR_DIY.white,
+                    }}>
+                        <ScrollView contentContainerStyle={{
+                            alignItems: 'center',
+                            marginBottom: scale(30),
                         }}>
-                            <ScrollView contentContainerStyle={{
-                                alignItems: 'center',
-                                marginBottom: scale(30),
-                            }}>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        fontSize: scale(18),
-                                        color: COLOR_DIY.black.third,
-                                    }}>
-                                    歡迎來到ARK ALL~
-                                </Text>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(18),
+                                    color: COLOR_DIY.black.third,
+                                }}>
+                                歡迎來到ARK ALL~
+                            </Text>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(15),
+                                    color: COLOR_DIY.black.third,
+                                }}>
+                                登錄後體驗完整功能，現在去嗎？
+                            </Text>
+                            {/* 登錄按鈕 */}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={{
+                                    marginTop: scale(10),
+                                    backgroundColor: COLOR_DIY.themeColor,
+                                    padding: scale(10),
+                                    borderRadius: scale(10),
+                                    justifyContent: 'center',
+                                    alignSelf: 'center',
+                                }}
+                                onPress={() => {
+                                    trigger();
+                                    setIsShowModal(false);
+                                    navigation.jumpTo(
+                                        'MeTabbar',
+                                    );
+                                }}>
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
                                         fontSize: scale(15),
-                                        color: COLOR_DIY.black.third,
+                                        color: 'white',
+                                        fontWeight: '500',
                                     }}>
-                                    登錄後體驗完整功能，現在去嗎？
+                                    現在登錄
                                 </Text>
-                                {/* 登錄按鈕 */}
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        marginTop: scale(10),
-                                        backgroundColor: COLOR_DIY.themeColor,
-                                        padding: scale(10),
-                                        borderRadius: scale(10),
-                                        justifyContent: 'center',
-                                        alignSelf: 'center',
-                                    }}
-                                    onPress={() => {
-                                        trigger();
-                                        this.setState({ isShowModal: false });
-                                        this.props.navigation.jumpTo(
-                                            'MeTabbar',
-                                        );
-                                    }}>
-                                    <Text
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(15),
-                                            color: 'white',
-                                            fontWeight: '500',
-                                        }}>
-                                        現在登錄
-                                    </Text>
-                                </TouchableOpacity>
-                            </ScrollView>
-                        </View>
-                    </ModalBottom>
-                )}
-            </View >
-        );
-    }
-}
+                            </TouchableOpacity>
+                        </ScrollView>
+                    </View>
+                </ModalBottom>
+            )}
+        </View>
+    );
+};
 
-export default inject('RootStore')(HomeScreen);
+export default HomeScreen;
