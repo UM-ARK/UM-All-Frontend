@@ -7,7 +7,7 @@ import What2RegTabIndex from '../pages/TabbarPages/what2Reg';
 import ARKWiki from '../pages/TabbarPages/arkwiki';
 import CourseSim from '../pages/TabbarPages/courseSim';
 
-import { COLOR_DIY } from '../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../components/ThemeContext';
 import { trigger } from '../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -21,16 +21,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 const Tab = createBottomTabNavigator();
 
 export default function MyTabs() {
-
+    const { theme } = useTheme();
+    const { themeColor, bg_color, black, white } = theme;
     return (
         <Tab.Navigator
             tabBarOptions={{
-                inactiveTintColor: COLOR_DIY.black.main,
+                inactiveTintColor: black.main,
             }}
             appearance={{
-                activeTabBackgrounds: COLOR_DIY.themeColor,
-                activeColors: COLOR_DIY.white,
-                tabBarBackground: COLOR_DIY.bg_color,
+                activeTabBackgrounds: themeColor,
+                activeColors: white,
+                tabBarBackground: bg_color,
                 whenInactiveShow: 'both',
                 tabButtonLayout: 'vertical',
             }}
@@ -66,7 +67,7 @@ export default function MyTabs() {
                             name="pie-chart"
                             size={scale(16)}
                             color={
-                                focused ? color : COLOR_DIY.black.main
+                                focused ? color : black.main
                             }
                             focused={focused}
                         />
@@ -87,7 +88,7 @@ export default function MyTabs() {
                             name="file-document-edit-outline"
                             size={scale(16)}
                             color={
-                                focused ? color : COLOR_DIY.black.main
+                                focused ? color : black.main
                             }
                             focused={focused}
                         />
@@ -108,7 +109,7 @@ export default function MyTabs() {
                             name="database-search-outline"
                             size={scale(16)}
                             color={
-                                focused ? color : COLOR_DIY.black.main
+                                focused ? color : black.main
                             }
                             focused={focused}
                         />
@@ -129,7 +130,7 @@ export default function MyTabs() {
                             name="table-clock"
                             size={scale(16)}
                             color={
-                                focused ? color : COLOR_DIY.black.main
+                                focused ? color : black.main
                             }
                             focused={focused}
                         />
@@ -149,7 +150,7 @@ export default function MyTabs() {
                             name="grid"
                             size={scale(16)}
                             color={
-                                focused ? color : COLOR_DIY.black.main
+                                focused ? color : black.main
                             }
                             focused={focused}
                         />
