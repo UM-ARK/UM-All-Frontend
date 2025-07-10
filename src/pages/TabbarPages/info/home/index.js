@@ -880,7 +880,9 @@ const HomeScreen = ({ navigation }) => {
                                             ) : null}
                                         </Text>
 
-                                        {cal[selectDay].summary}
+                                        <Text style={{ fontSize: verticalScale(10) }}>
+                                            {cal[selectDay].summary}
+                                        </Text>
 
                                         {'summary_cn' in cal[selectDay] ? (
                                             '\n' + cal[selectDay].summary_cn
