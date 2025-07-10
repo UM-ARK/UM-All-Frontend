@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, Dimensions, Alert, Linking, Appearance, AppState } from 'react-native';
+import { View, Image, Dimensions, Alert, Linking, Appearance, AppState, useColorScheme } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
-import { COLOR_DIY, isLight, uiStyle } from './src/utils/uiMap';
+import { uiStyle } from './src/utils/uiMap';
 import { BASE_HOST } from './src/utils/pathMap';
 import { setLanguage, setLocalStorage } from './src/i18n/i18n';
 import { checkLocalCourseVersion } from './src/utils/checkCoursesKits';
+import { ThemeProvider, themes } from "./src/components/ThemeContext";
 
 import { Provider } from 'mobx-react';
 import AnimatedSplash from 'react-native-animated-splash-screen';
@@ -18,83 +19,15 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import RNRestart from 'react-native-restart';
 import { t } from 'i18next';
 
-const { bg_color } = COLOR_DIY;
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
-
-// 自定義Toast外觀
-const toastConfig = {
-    arkToast: (props) => (
-        <BaseToast
-            {...props}
-            style={{
-                borderLeftColor: COLOR_DIY.themeColor,
-                backgroundColor: COLOR_DIY.white,
-                width: '80%',
-                height: scale(60),
-            }}
-            contentContainerStyle={{ paddingHorizontal: scale(15) }}
-            text1Style={{
-                ...uiStyle.defaultText,
-                color: COLOR_DIY.black.main,
-                fontSize: scale(15),
-            }}
-            text2Style={{
-                ...uiStyle.defaultText,
-                color: COLOR_DIY.black.third,
-                fontSize: scale(10),
-            }}
-        />
-    ),
-    error: (props) => (
-        <ErrorToast
-            {...props}
-            style={{
-                borderLeftColor: COLOR_DIY.unread,
-                backgroundColor: COLOR_DIY.white,
-                width: '80%',
-                height: scale(60),
-            }}
-            text1Style={{
-                ...uiStyle.defaultText,
-                color: COLOR_DIY.black.main,
-                fontSize: scale(15),
-            }}
-            text2Style={{
-                ...uiStyle.defaultText,
-                color: COLOR_DIY.black.main,
-                fontSize: scale(10),
-            }}
-        />
-    ),
-    warning: (props) => (
-        <BaseToast
-            {...props}
-            style={{
-                borderLeftColor: COLOR_DIY.warning,
-                backgroundColor: COLOR_DIY.white,
-                width: '80%',
-                height: scale(60),
-            }}
-            contentContainerStyle={{ paddingHorizontal: scale(15) }}
-            text1Style={{
-                ...uiStyle.defaultText,
-                color: COLOR_DIY.black.main,
-                fontSize: scale(15),
-            }}
-            text2Style={{
-                ...uiStyle.defaultText,
-                color: COLOR_DIY.black.third,
-                fontSize: scale(10),
-            }}
-        />
-    ),
-};
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [languageOK, setLanguageOK] = useState(false);
     const [scheme, setScheme] = useState(Appearance.getColorScheme());
+    const isLight = useColorScheme() === 'light';
+    const theme = themes[isLight ? 'light' : 'dark'];
 
     // 開屏動畫
     useEffect(() => {
@@ -124,21 +57,90 @@ const App = () => {
         init();
 
         // Appearance 監聽器
-        const appearanceListener = Appearance.addChangeListener(({ colorScheme }) => {
-            setScheme(colorScheme);
-            schemeChange(colorScheme);
-        });
+        // const appearanceListener = Appearance.addChangeListener(({ colorScheme }) => {
+        //     setScheme(colorScheme);
+        //     schemeChange(colorScheme);
+        // });
 
         // AppState 監聽器，後台返回ARK時觸發
-        const appStateListener = AppState.addEventListener('change', (nextAppState) => {
-            schemeChange(scheme);
-        });
+        // const appStateListener = AppState.addEventListener('change', (nextAppState) => {
+        //     schemeChange(scheme);
+        // });
 
         return () => {
-            appearanceListener.remove();
-            appStateListener.remove();
+            // appearanceListener.remove();
+            // appStateListener.remove();
         };
     }, [scheme]);
+
+    // 自定義Toast外觀
+    const toastConfig = {
+        arkToast: (props) => (
+            <BaseToast
+                {...props}
+                style={{
+                    borderLeftColor: theme.themeColor,
+                    backgroundColor: theme.white,
+                    width: '80%',
+                    height: scale(60),
+                }}
+                contentContainerStyle={{ paddingHorizontal: scale(15) }}
+                text1Style={{
+                    ...uiStyle.defaultText,
+                    color: theme.black.main,
+                    fontSize: scale(15),
+                }}
+                text2Style={{
+                    ...uiStyle.defaultText,
+                    color: theme.black.third,
+                    fontSize: scale(10),
+                }}
+            />
+        ),
+        error: (props) => (
+            <ErrorToast
+                {...props}
+                style={{
+                    borderLeftColor: theme.unread,
+                    backgroundColor: theme.white,
+                    width: '80%',
+                    height: scale(60),
+                }}
+                text1Style={{
+                    ...uiStyle.defaultText,
+                    color: theme.black.main,
+                    fontSize: scale(15),
+                }}
+                text2Style={{
+                    ...uiStyle.defaultText,
+                    color: theme.black.main,
+                    fontSize: scale(10),
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{
+                    borderLeftColor: theme.warning,
+                    backgroundColor: theme.white,
+                    width: '80%',
+                    height: scale(60),
+                }}
+                contentContainerStyle={{ paddingHorizontal: scale(15) }}
+                text1Style={{
+                    ...uiStyle.defaultText,
+                    color: theme.black.main,
+                    fontSize: scale(15),
+                }}
+                text2Style={{
+                    ...uiStyle.defaultText,
+                    color: theme.black.third,
+                    fontSize: scale(10),
+                }}
+            />
+        ),
+    };
 
     // 檢查語言設定
     const checkLanguage = async () => {
@@ -202,12 +204,14 @@ const App = () => {
                     }}
                 />
             }
-            backgroundColor={bg_color}
+            backgroundColor={theme.bg_color}
         >
             <SafeAreaProvider>
                 {languageOK ? (
                     <Provider RootStore={RootStore}>
-                        <Nav />
+                        <ThemeProvider>
+                            <Nav />
+                        </ThemeProvider>
                         <Toast config={toastConfig} />
                     </Provider>
                 ) : null}
