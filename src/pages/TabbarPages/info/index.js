@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { View, Platform, Dimensions } from 'react-native';
 
-import { COLOR_DIY } from '../../../utils/uiMap';
 import { trigger } from '../../../utils/trigger';
+import { useTheme } from '../../../components/ThemeContext';
 import HomePage from './home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
@@ -15,7 +15,6 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 
-const { bg_color, black, themeColor } = COLOR_DIY;
 const Tab = createMaterialTopTabNavigator();
 
 const tabWidth = verticalScale(25);
@@ -23,6 +22,8 @@ const numOfTabs = 5;
 
 export default function NewsScreen() {
     const insets = useContext(SafeAreaInsetsContext);
+    const { theme } = useTheme();
+    const { bg_color, black, themeColor } = theme;
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
@@ -30,7 +31,7 @@ export default function NewsScreen() {
                 backgroundColor={bg_color}
                 statusBarProps={{
                     backgroundColor: 'transparent',
-                    barStyle: COLOR_DIY.barStyle,
+                    barStyle: theme.barStyle,
                 }}
                 containerStyle={{
                     height: Platform.select({

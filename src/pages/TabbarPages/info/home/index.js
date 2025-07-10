@@ -17,7 +17,8 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, VERSION_EMOJI, isLight } from '../../../../utils/uiMap.js';
+import { uiStyle, VERSION_EMOJI, } from '../../../../utils/uiMap.js';
+import { useTheme } from '../../../../components/ThemeContext';
 import {
     GITHUB_DONATE,
     BASE_HOST,
@@ -58,8 +59,6 @@ import { t } from "i18next";
 import lodash from 'lodash';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
-
-const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -151,8 +150,11 @@ const toastKaomojiArr = [
 ];
 
 const HomeScreen = ({ navigation }) => {
+    const { theme } = useTheme();
+    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = theme;
+
     // 狀態
-    const [functionArray, setFunctionArray] = useState([
+    const functionArray = [
         {
             icon_name: 'bus',
             icon_type: iconTypes.ionicons,
@@ -210,7 +212,7 @@ const HomeScreen = ({ navigation }) => {
                 openLink(ARK_WEB_CLUB_SIGNIN);
             },
         },
-    ]);
+    ];
     const [selectDay, setSelectDay] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -462,10 +464,10 @@ const HomeScreen = ({ navigation }) => {
                         {/* 年份 */}
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: COLOR_DIY.trueWhite,
+                            color: theme.trueWhite,
                             fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                            opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+                            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                         }}>
                             {momentItm.substring(0, 4)}
                         </Text>
@@ -474,10 +476,10 @@ const HomeScreen = ({ navigation }) => {
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: COLOR_DIY.trueWhite,
+                                color: theme.trueWhite,
                                 fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                                opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+                                opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                             }}>
                             {momentItm.substring(4, 6)}
                         </Text>
@@ -486,10 +488,10 @@ const HomeScreen = ({ navigation }) => {
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                color: COLOR_DIY.trueWhite,
+                                color: theme.trueWhite,
                                 fontSize: verticalScale(22),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                                opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+                                opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                             }}>
                             {momentItm.substring(6, 8)}
                         </Text>
@@ -497,10 +499,10 @@ const HomeScreen = ({ navigation }) => {
                         {/* 星期幾 */}
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: COLOR_DIY.trueWhite,
+                            color: theme.trueWhite,
                             fontSize: verticalScale(10),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                            opacity: !isThisDateSelected && !isLight ? 0.5 : 1,
+                            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                         }}>
                             {getWeek(item.startDate)}
                         </Text>
@@ -508,7 +510,7 @@ const HomeScreen = ({ navigation }) => {
                 </View>
                 {isEssencial ? (
                     <View style={{
-                        backgroundColor: COLOR_DIY.warning,
+                        backgroundColor: theme.warning,
                         borderRadius: scale(50),
                         width: verticalScale(8), height: verticalScale(8),
                         position: 'absolute',
@@ -531,7 +533,7 @@ const HomeScreen = ({ navigation }) => {
                 <Ionicons
                     name={icon_name}
                     size={iconSize}
-                    color={COLOR_DIY.themeColor}
+                    color={theme.themeColor}
                 />
             );
         } else if (icon_type == 'MaterialCommunityIcons') {
@@ -539,7 +541,7 @@ const HomeScreen = ({ navigation }) => {
                 <MaterialCommunityIcons
                     name={icon_name}
                     size={iconSize + scale(3)}
-                    color={COLOR_DIY.themeColor}
+                    color={theme.themeColor}
                 />
             );
         } else if (icon_type == 'FontAwesome5') {
@@ -547,7 +549,7 @@ const HomeScreen = ({ navigation }) => {
                 <FontAwesome5
                     name={icon_name}
                     size={iconSize - scale(4)}
-                    color={COLOR_DIY.themeColor}
+                    color={theme.themeColor}
                 />
             );
         } else if (icon_type == 'img') {
@@ -555,7 +557,7 @@ const HomeScreen = ({ navigation }) => {
                 <FastImage
                     source={icon_name}
                     style={{
-                        backgroundColor: COLOR_DIY.trueWhite,
+                        backgroundColor: theme.trueWhite,
                         height: imageSize, width: imageSize,
                         borderRadius: verticalScale(8),
                     }}
@@ -589,7 +591,7 @@ const HomeScreen = ({ navigation }) => {
                         ...uiStyle.defaultText,
                         fontSize: verticalScale(8),
                         fontWeight: 'bold',
-                        color: COLOR_DIY.themeColor,
+                        color: theme.themeColor,
                         textAlign: 'center',
                     }}
                         numberOfLines={2}
@@ -606,7 +608,7 @@ const HomeScreen = ({ navigation }) => {
 
     // 懸浮按鈕
     const renderGoTopButton = () => {
-        const { viewShadow } = COLOR_DIY;
+        const { viewShadow } = theme;
         return (
             <Interactable.View
                 style={{
@@ -639,7 +641,7 @@ const HomeScreen = ({ navigation }) => {
                         style={{
                             width: scale(50),
                             height: scale(50),
-                            backgroundColor: COLOR_DIY.white,
+                            backgroundColor: theme.white,
                             borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -649,7 +651,7 @@ const HomeScreen = ({ navigation }) => {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={COLOR_DIY.themeColor}
+                            color={theme.themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -659,14 +661,15 @@ const HomeScreen = ({ navigation }) => {
 
     // 處理 Scroll
     const handleScroll = (event) => {
-        // ...同原本，使用 setIsLoadMore
+        if (isLoading || isLoadMore) return;
         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
 
-        // TODO: 接近底部時，獲取更多數據
+        // 接近底部時，獲取更多數據
         if (isCloseToBottom && !isLoadMore && !isLoading) {
             const thisFunc = eventPage.current;
-            if (!thisFunc.state.noMoreData) {
+            // 如果當前頁面有更多數據，則加載更多
+            if (!thisFunc.getNoMoreData()) {
                 setIsLoadMore(true);
                 thisFunc.loadMoreData();
                 // 延時鎖，避免到底觸發過多次
@@ -758,7 +761,7 @@ const HomeScreen = ({ navigation }) => {
                 {/* 搜索按鈕 */}
                 <TouchableOpacity
                     style={{
-                        backgroundColor: inputText == '' ? COLOR_DIY.disabled : themeColor,
+                        backgroundColor: inputText == '' ? theme.disabled : themeColor,
                         borderRadius: scale(6),
                         padding: scale(7), paddingHorizontal: scale(8),
                         alignItems: 'center', justifyContent: 'center',
@@ -1068,7 +1071,7 @@ const HomeScreen = ({ navigation }) => {
                 <ModalBottom cancel={tiggerModalBottom}>
                     <View style={{
                         padding: scale(20),
-                        backgroundColor: COLOR_DIY.white,
+                        backgroundColor: theme.white,
                     }}>
                         <ScrollView contentContainerStyle={{
                             alignItems: 'center',
@@ -1078,7 +1081,7 @@ const HomeScreen = ({ navigation }) => {
                                 style={{
                                     ...uiStyle.defaultText,
                                     fontSize: scale(18),
-                                    color: COLOR_DIY.black.third,
+                                    color: theme.black.third,
                                 }}>
                                 歡迎來到ARK ALL~
                             </Text>
@@ -1086,7 +1089,7 @@ const HomeScreen = ({ navigation }) => {
                                 style={{
                                     ...uiStyle.defaultText,
                                     fontSize: scale(15),
-                                    color: COLOR_DIY.black.third,
+                                    color: theme.black.third,
                                 }}>
                                 登錄後體驗完整功能，現在去嗎？
                             </Text>
@@ -1095,7 +1098,7 @@ const HomeScreen = ({ navigation }) => {
                                 activeOpacity={0.8}
                                 style={{
                                     marginTop: scale(10),
-                                    backgroundColor: COLOR_DIY.themeColor,
+                                    backgroundColor: theme.themeColor,
                                     padding: scale(10),
                                     borderRadius: scale(10),
                                     justifyContent: 'center',
