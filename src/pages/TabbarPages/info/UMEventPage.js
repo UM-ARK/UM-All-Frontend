@@ -8,7 +8,7 @@ import {
     VirtualizedList,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 
@@ -21,8 +21,6 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 
-const { black, white, themeColor } = COLOR_DIY;
-
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
     return data[index];
@@ -34,6 +32,7 @@ const getItemCount = data => {
 
 class UMEventPage extends Component {
     virtualizedList = React.createRef(null);
+    static contextType = ThemeContext;
 
     state = {
         data: undefined,
@@ -110,7 +109,8 @@ class UMEventPage extends Component {
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
+        const { theme } = this.context;
+        const { white, themeColor, black, viewShadow } = theme;
         return (
             <Interactable.View
                 style={{
@@ -142,7 +142,7 @@ class UMEventPage extends Component {
                         style={{
                             width: scale(50),
                             height: scale(50),
-                            backgroundColor: COLOR_DIY.white,
+                            backgroundColor: white,
                             borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -152,7 +152,7 @@ class UMEventPage extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={COLOR_DIY.themeColor}
+                            color={themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -162,6 +162,8 @@ class UMEventPage extends Component {
 
     // 渲染主要內容
     renderPage = () => {
+        const { theme } = this.context;
+        const { black, white, themeColor } = theme;
         const { data, isLoading } = this.state;
         return (
             <VirtualizedList
@@ -216,13 +218,15 @@ class UMEventPage extends Component {
 
     render() {
         const { isLoading } = this.state;
+        const { theme } = this.context;
+        const { black, white, themeColor } = theme;
 
         return (
             <View style={{
                 flex: 1,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: COLOR_DIY.bg_color,
+                backgroundColor: theme.bg_color,
             }}>
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}

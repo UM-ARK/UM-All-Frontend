@@ -948,7 +948,10 @@ const HomeScreen = ({ navigation }) => {
                                 margintTop: verticalScale(5),
                                 paddingVertical: scale(10),
                             }}>
-                                <Text>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                }}>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
                             </View>
                         )}
                     </TouchableScale>

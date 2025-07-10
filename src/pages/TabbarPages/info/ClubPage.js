@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Text,
-    View,
-    RefreshControl,
-    TouchableOpacity,
-    Linking,
-    ScrollView,
-    Alert,
-} from 'react-native';
+import { Text, View, RefreshControl, TouchableOpacity, ScrollView, Alert, } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
