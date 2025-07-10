@@ -8,8 +8,7 @@ import {
     Dimensions,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle } from '../../../../utils/uiMap';
-import { useTheme } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
 
 import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
@@ -21,9 +20,28 @@ import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 
-const { black, white, themeColor, viewShadow, bg_color } = COLOR_DIY;
-
 const EventPage = forwardRef((props, ref) => {
+    const { theme } = useTheme();
+    const { black, white, themeColor, viewShadow, bg_color } = theme;
+
+    const s = StyleSheet.create({
+        waterFlowContainer: {
+            flexDirection: 'row',
+            width: '100%',
+            backgroundColor: bg_color,
+        },
+        loadMore: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: themeColor,
+            paddingHorizontal: scale(10),
+            paddingVertical: scale(10),
+            borderRadius: scale(15),
+            marginBottom: scale(5),
+            ...viewShadow,
+        },
+    });
+
     const [dataPage, setDataPage] = useState(1);
     const [eventDataList, setEventDataList] = useState([]);
     const [leftDataList, setLeftDataList] = useState([]);
@@ -260,24 +278,6 @@ const EventPage = forwardRef((props, ref) => {
             ) : null)}
         </View>
     );
-});
-
-const s = StyleSheet.create({
-    waterFlowContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        backgroundColor: bg_color,
-    },
-    loadMore: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: themeColor,
-        paddingHorizontal: scale(10),
-        paddingVertical: scale(10),
-        borderRadius: scale(15),
-        marginBottom: scale(5),
-        ...viewShadow,
-    },
 });
 
 export default EventPage;
