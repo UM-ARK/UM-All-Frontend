@@ -3,7 +3,7 @@ import {
     ScrollView, Text, View, TouchableOpacity, Linking, Platform, Alert,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import {
     UM_MAP,
     UM_RBS,
@@ -50,7 +50,6 @@ import {
     UM_RC,
     UM_ALUMNI,
 } from '../../../utils/pathMap';
-import DialogDIY from '../../../components/DialogDIY';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
 import { trigger } from "../../../utils/trigger";
@@ -77,11 +76,12 @@ const iconTypes = {
     img: 'img',
 };
 
-const { themeColor, white, black, } = COLOR_DIY;
-
 const iconSize = scale(25);
 
 function Index({ navigation }) {
+    const { theme } = useTheme();
+    const { themeColor, white, black, trueWhite, bg_color, barStyle } = theme;
+
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
     // SafeAreaInsetsContext
@@ -244,7 +244,7 @@ function Index({ navigation }) {
                     webview_param: {
                         url: UM_BULLETIN,
                         title: '學生電子公告',
-                        text_color: COLOR_DIY.white,
+                        text_color: white,
                         bg_color_diy: '#002c55',
                         isBarStyleBlack: false,
                     },
@@ -698,7 +698,7 @@ function Index({ navigation }) {
                     webview_param: {
                         url: NEW_SCZN,
                         title: '新鮮人要知道的億些Tips',
-                        text_color: COLOR_DIY.black.second,
+                        text_color: black.second,
                         bg_color_diy: '#ededed',
                     },
                     describe: t('澳大生存指南公眾號歷史推文', { ns: 'features' }),
@@ -712,7 +712,7 @@ function Index({ navigation }) {
                     webview_param: {
                         url: NEW_MAINLAND,
                         title: '成為賭王前的億些入學須知',
-                        text_color: COLOR_DIY.black.second,
+                        text_color: black.second,
                         bg_color_diy: '#ededed',
                     },
                     describe: t('澳大生存指南公眾號給內地新生的一些指南建議', { ns: 'features' }),
@@ -803,8 +803,7 @@ function Index({ navigation }) {
     const GetFunctionCard = useCallback((title, fn_list) => (
         <View key={title}
             style={{
-                flex: 1,
-                backgroundColor: COLOR_DIY.white,
+                flex: 1, backgroundColor: white,
                 borderRadius: scale(10),
                 marginHorizontal: scale(10),
                 marginTop: verticalScale(10),
@@ -820,7 +819,7 @@ function Index({ navigation }) {
                 <Text style={{
                     ...uiStyle.defaultText,
                     fontSize: verticalScale(12),
-                    color: COLOR_DIY.black.main,
+                    color: black.main,
                     fontWeight: 'bold',
                 }}>
                     {title}
@@ -834,11 +833,11 @@ function Index({ navigation }) {
                 renderItem={({ item }) => {
                     let icon = null;
                     if (item.icon_type === 'ionicons') {
-                        icon = <Ionicons name={item.icon_name} size={verticalScale(30)} color={COLOR_DIY.themeColor} />;
+                        icon = <Ionicons name={item.icon_name} size={verticalScale(30)} color={themeColor} />;
                     } else if (item.icon_type === 'MaterialCommunityIcons') {
-                        icon = <MaterialCommunityIcons name={item.icon_name} size={verticalScale(30)} color={COLOR_DIY.themeColor} />;
+                        icon = <MaterialCommunityIcons name={item.icon_name} size={verticalScale(30)} color={themeColor} />;
                     } else if (item.icon_type === 'img') {
-                        icon = <FastImage source={{ uri: item.icon_name }} style={{ backgroundColor: COLOR_DIY.trueWhite, height: scale(60), width: scale(60) }} />;
+                        icon = <FastImage source={{ uri: item.icon_name }} style={{ backgroundColor: trueWhite, height: scale(60), width: scale(60) }} />;
                     }
                     const { go_where, webview_param, needLogin } = item;
                     return (
@@ -869,7 +868,7 @@ function Index({ navigation }) {
                             <Text style={{
                                 ...uiStyle.defaultText,
                                 fontSize: verticalScale(10),
-                                color: COLOR_DIY.black.second,
+                                color: black.second,
                                 textAlign: 'center',
                             }}>
                                 {item.fn_name}
@@ -881,7 +880,7 @@ function Index({ navigation }) {
                 scrollEnabled={false}
             />
         </View>
-    ), [navigation]);  // useCallback依賴於此
+    ), [white]);  // useCallback依賴於此
 
     // BottomSheet內容渲染
     const renderBottomSheet = () => {
@@ -889,10 +888,10 @@ function Index({ navigation }) {
         const { go_where, webview_param, describe } = bottomSheetInfo;
         const haveLink = (go_where === 'Webview' || go_where === 'Linking');
         return (
-            <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_DIY.white, padding: scale(20) }}>
+            <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: white, padding: scale(20) }}>
                 {describe && <Text style={{
                     ...uiStyle.defaultText,
-                    color: COLOR_DIY.black.main,
+                    color: black.main,
                     textAlign: 'center'
                 }} selectable>{describe}</Text>}
                 {haveLink && <TouchableOpacity
@@ -915,12 +914,12 @@ function Index({ navigation }) {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
+        <View style={{ flex: 1, backgroundColor: bg_color }}>
             <Header
-                backgroundColor={COLOR_DIY.bg_color}
+                backgroundColor={bg_color}
                 statusBarProps={{
                     backgroundColor: 'transparent',
-                    barStyle: COLOR_DIY.barStyle,
+                    barStyle: barStyle,
                 }}
                 containerStyle={{
                     height: Platform.select({
