@@ -43,6 +43,7 @@ import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import { inject } from 'mobx-react';
@@ -74,6 +75,7 @@ const getItemCount = data => {
 const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
+    fontAwesome5: 'FontAwesome5',
     img: 'img',
 };
 
@@ -184,8 +186,8 @@ const HomeScreen = ({ navigation }) => {
             },
         },
         {
-            icon_name: 'coffee',
-            icon_type: iconTypes.materialCommunityIcons,
+            icon_name: 'donate',
+            icon_type: iconTypes.fontAwesome5,
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
@@ -520,13 +522,15 @@ const HomeScreen = ({ navigation }) => {
     // 渲染功能圖標
     const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
-        let imageSize = verticalScale(27);
-        let iconSize = verticalScale(30);
+        const imageSize = verticalScale(25);
+        const iconSize = verticalScale(25);
+        const containerSize = verticalScale(40); // 固定容器大小
+
         if (icon_type == 'ionicons') {
             icon = (
                 <Ionicons
                     name={icon_name}
-                    size={iconSize - 2}
+                    size={iconSize}
                     color={COLOR_DIY.themeColor}
                 />
             );
@@ -534,7 +538,15 @@ const HomeScreen = ({ navigation }) => {
             icon = (
                 <MaterialCommunityIcons
                     name={icon_name}
-                    size={iconSize}
+                    size={iconSize + scale(3)}
+                    color={COLOR_DIY.themeColor}
+                />
+            );
+        } else if (icon_type == 'FontAwesome5') {
+            icon = (
+                <FontAwesome5
+                    name={icon_name}
+                    size={iconSize - scale(4)}
                     color={COLOR_DIY.themeColor}
                 />
             );
@@ -544,10 +556,8 @@ const HomeScreen = ({ navigation }) => {
                     source={icon_name}
                     style={{
                         backgroundColor: COLOR_DIY.trueWhite,
-                        height: imageSize,
-                        width: imageSize,
-                        borderRadius: verticalScale(10),
-                        marginBottom: verticalScale(1),
+                        height: imageSize, width: imageSize,
+                        borderRadius: verticalScale(8),
                     }}
                 />
             );
@@ -558,21 +568,35 @@ const HomeScreen = ({ navigation }) => {
                 style={{
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginBottom: scale(-5),
+                    width: containerSize,
+                    height: containerSize,
                 }}
                 onPress={func}>
-                {icon}
-                {function_name && (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(10),
-                            fontWeight: 'bold',
-                            color: COLOR_DIY.themeColor,
-                        }}>
+                <View style={{
+                    width: verticalScale(25),
+                    height: verticalScale(25),
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: verticalScale(2),
+                }}>
+                    {icon}
+                </View>
+
+                {function_name && (<View style={{
+                    width: '100%',
+                }}>
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        fontSize: verticalScale(8),
+                        fontWeight: 'bold',
+                        color: COLOR_DIY.themeColor,
+                        textAlign: 'center',
+                    }}
+                        numberOfLines={2}
+                    >
                         {function_name}
                     </Text>
-                )}
+                </View>)}
             </TouchableOpacity>
         );
     };
@@ -767,7 +791,6 @@ const HomeScreen = ({ navigation }) => {
                             setIsLoading(true);
                             onRefresh();
                             getAppData();
-                            // getCal();
                             await eventPage.current?.onRefresh();
                         }}
                     />
@@ -778,7 +801,7 @@ const HomeScreen = ({ navigation }) => {
                 onScroll={handleScroll}
                 scrollEventThrottle={400}
                 keyboardDismissMode={'on-drag'}
-                contentContainerStyle={{ width: '100%' }}
+                contentContainerStyle={{ width: '100%', alignItems: 'center', }}
             >
                 {renderSearch()}
 
@@ -881,7 +904,6 @@ const HomeScreen = ({ navigation }) => {
 
                 {/** 即將到來的課程 */}
                 <View style={{
-                    display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
@@ -928,20 +950,20 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
                 {/* 快捷功能圖標 */}
-                <View style={{ width: '100%', paddingHorizontal: scale(10), alignSelf: 'center', }}>
+                <View style={{
+                    width: '100%', width: screenWidth * 0.8,
+                    marginTop: verticalScale(5),
+                    alignSelf: 'center', alignItems: 'center',
+                }}>
                     <FlatGrid
                         style={{
-                            alignSelf: 'center',
                             backgroundColor: white, borderRadius: scale(10),
                             width: '100%',
-                            marginTop: verticalScale(5),
                         }}
-                        contentContainerStyle={{
-                            alignItems: 'center',
-                        }}
-                        maxItemsPerRow={6}
+                        contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', }}
+                        maxItemsPerRow={5}
                         itemDimension={scale(50)}
-                        spacing={scale(5)}
+                        spacing={scale(3)}
                         data={functionArray}
                         renderItem={({ item }) => GetFunctionIcon(item)}
                         showsVerticalScrollIndicator={false}
