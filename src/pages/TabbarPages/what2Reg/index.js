@@ -45,7 +45,7 @@ import OpenCC from 'opencc-js';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
-const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor } = COLOR_DIY;
+const { themeColor, themeColorUltraLight, black, white, viewShadow, disabled, secondThemeColor, what2reg_color, bg_color, barStyle } = COLOR_DIY;
 const iconSize = scale(25);
 
 // TODO: BUG：用PreEnroll模式搜索時，會將屬於AddDrop課搜索出來並打上PreEnroll標籤
@@ -238,16 +238,6 @@ export default class What2Reg extends Component {
             this.getClassifyCourse();
         }
     };
-
-    // 軟鍵盤監聽是否隱藏，隱藏時使輸入框失焦
-    // keyboardDidHideListener = Keyboard.addListener(
-    //     'keyboardDidHide',
-    //     this._keyboardDidHide,
-    // );
-
-    // componentWillUnmount() {
-    //     this.keyboardDidHideListener.remove();
-    // }
 
     // 更新Add Drop課表的數據
     updateLocalCourseData = async (type, callback) => {
@@ -901,7 +891,7 @@ export default class What2Reg extends Component {
             url: URI,
             title: inputText,
             text_color: white,
-            bg_color_diy: COLOR_DIY.what2reg_color,
+            bg_color_diy: what2reg_color,
             isBarStyleBlack: false,
         };
         this.props.navigation.navigate('Webviewer', webview_param);
@@ -1007,14 +997,14 @@ export default class What2Reg extends Component {
         return (
             <SafeAreaInsetsContext.Consumer>{(insets) => <View style={{
                 flex: 1,
-                backgroundColor: COLOR_DIY.bg_color,
+                backgroundColor: bg_color,
                 alignItems: 'center', justifyContent: 'center'
             }}>
                 <Header
-                    backgroundColor={COLOR_DIY.bg_color}
+                    backgroundColor={bg_color}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: COLOR_DIY.barStyle,
+                        barStyle: barStyle,
                     }}
                     containerStyle={{
                         // 修復頂部空白過多問題
@@ -1070,14 +1060,14 @@ export default class What2Reg extends Component {
                     }}
                     statusBarTranslucent={true}
                     overlayStyle={{
-                        backgroundColor: COLOR_DIY.bg_color
+                        backgroundColor: bg_color
                     }}
                 >
                     <Dialog.Loading />
                 </Dialog>
 
                 {isLoading ? (
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_DIY.bg_color, }}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: bg_color, }}>
                         <Loading />
                     </View>
                 ) : (<>
