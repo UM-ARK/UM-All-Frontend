@@ -9,7 +9,7 @@ import {
     Alert,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
@@ -22,7 +22,6 @@ import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { FlatList } from 'react-native';
 
-const { themeColor, black, white } = COLOR_DIY;
 const COMPONENT_WIDTH = scale(90);
 // 65 寬度，一行3個
 let originClubDataList = [];
@@ -37,6 +36,7 @@ clubFilter = (clubDataList, tag) => {
 
 class ClubPage extends Component {
     scrollViewRef = React.createRef(null);
+    static contextType = ThemeContext;
 
     state = {
         clubDataList: undefined,
@@ -85,6 +85,8 @@ class ClubPage extends Component {
     }
 
     renderClub = (clubDataList, tag) => {
+        const { theme } = this.context;
+        const { themeColor, black, white } = theme;
         return (
             <FlatGrid
                 // 每个项目的最小宽度或高度（像素）
@@ -140,6 +142,8 @@ class ClubPage extends Component {
     }
 
     renderBottomInfo = () => {
+        const { theme } = this.context;
+        const { themeColor, black, white } = theme;
         return (
             <View style={{ marginBottom: scale(20) }}>
                 <Text
@@ -194,9 +198,11 @@ class ClubPage extends Component {
     };
 
     render() {
+        const { theme } = this.context;
+        const { themeColor, black, white } = theme;
         const { clubDataList, isLoading, isOtherViewVisible } = this.state;
         return (
-            <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ flex: 1, backgroundColor: theme.bg_color, alignItems: 'center', justifyContent: 'center' }}>
                 {/* 側邊分類導航 */}
                 {clubDataList != undefined && 'ARK' in clubDataList && isOtherViewVisible && !isLoading ? (
                     <View style={{
@@ -207,7 +213,7 @@ class ClubPage extends Component {
                         opacity: 0.9,
                         backgroundColor: white,
                         borderRadius: scale(10),
-                        ...COLOR_DIY.viewShadow,
+                        ...theme.viewShadow,
                     }}>
                         <FlatList
                             data={clubTagList}
