@@ -14,7 +14,7 @@ import {
     Linking,
 } from 'react-native';
 
-import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { clubTagMap } from '../../../../utils/clubMap';
 import { setAPPInfo } from '../../../../utils/storageKits';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';

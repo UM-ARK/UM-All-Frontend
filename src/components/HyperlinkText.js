@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, Linking } from 'react-native';
 
-import { COLOR_DIY, ToastText } from '../utils/uiMap';
+import { COLOR_DIY } from '../utils/uiMap';
 import { trigger } from '../utils/trigger';
 import { openLink } from '../utils/browser';
 

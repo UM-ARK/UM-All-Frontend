@@ -13,7 +13,7 @@ import {
     Platform,
 } from 'react-native';
 
-import { COLOR_DIY, ToastText, uiStyle, } from '../../../../utils/uiMap';
+import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
 import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
