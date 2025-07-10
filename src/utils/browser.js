@@ -1,14 +1,11 @@
-import {
-    Linking,
-    Alert,
-    Platform,
-} from 'react-native';
+import { Linking, Alert, Platform, } from 'react-native';
 
 import { InAppBrowser } from 'react-native-inappbrowser-reborn'
 import { COLOR_DIY } from './uiMap';
-const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = COLOR_DIY;
+const { white, themeColor } = COLOR_DIY;
 
 // 使用Chrome、Safari等瀏覽器以選項卡形式打開鏈接，URL需要帶有https://
+// TODO: 非組件無法使用useTheme()，需要傳入themeColor、white等參數
 export async function openLink(URL) {
     try {
         const url = URL;
@@ -28,7 +25,7 @@ export async function openLink(URL) {
                 showTitle: true,
                 toolbarColor: themeColor,
                 secondaryToolbarColor: themeColor,
-                navigationBarColor: COLOR_DIY.white,
+                navigationBarColor: white,
                 navigationBarDividerColor: white,
                 enableUrlBarHiding: true,
                 enableDefaultShare: true,
