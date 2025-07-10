@@ -6,7 +6,7 @@ import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import ARKWiki from './pages/TabbarPages/arkwiki';
 import CourseSim from './pages/TabbarPages/courseSim';
 
-import { COLOR_DIY } from './utils/uiMap';
+import { useTheme } from './components/ThemeContext';
 import { trigger } from './utils/trigger';
 
 import { scale } from 'react-native-size-matters';
@@ -19,15 +19,16 @@ import { t } from 'i18next';
 const Tabs = AnimatedTabBarNavigator();
 
 const Tabbar = () => {
+    const { theme } = useTheme();
     return (
         <Tabs.Navigator
             tabBarOptions={{
-                inactiveTintColor: COLOR_DIY.black.main,
+                inactiveTintColor: theme.black.main,
             }}
             appearance={{
-                activeTabBackgrounds: COLOR_DIY.themeColor,
-                activeColors: COLOR_DIY.white,
-                tabBarBackground: COLOR_DIY.bg_color,
+                activeTabBackgrounds: theme.themeColor,
+                activeColors: theme.white,
+                tabBarBackground: theme.bg_color,
                 whenInactiveShow: 'both',
                 tabButtonLayout: 'vertical',
             }}
@@ -41,7 +42,7 @@ const Tabbar = () => {
                         <Icon
                             name="pie-chart"
                             size={scale(15)}
-                            color={focused ? color : COLOR_DIY.black.main}
+                            color={focused ? color : theme.black.main}
                             focused={focused}
                         />
                     ),
@@ -60,7 +61,7 @@ const Tabbar = () => {
                         <MaterialCommunityIcons
                             name="file-document-edit-outline"
                             size={scale(18)}
-                            color={focused ? color : COLOR_DIY.black.main}
+                            color={focused ? color : theme.black.main}
                             focused={focused}
                         />
                     ),
@@ -79,7 +80,7 @@ const Tabbar = () => {
                         <MaterialCommunityIcons
                             name="database-search-outline"
                             size={scale(18)}
-                            color={focused ? color : COLOR_DIY.black.main}
+                            color={focused ? color : theme.black.main}
                             focused={focused}
                         />
                     ),
@@ -98,7 +99,7 @@ const Tabbar = () => {
                         <MaterialCommunityIcons
                             name="table-clock"
                             size={scale(18)}
-                            color={focused ? color : COLOR_DIY.black.main}
+                            color={focused ? color : theme.black.main}
                             focused={focused}
                         />
                     ),
@@ -117,7 +118,7 @@ const Tabbar = () => {
                         <Icon
                             name="grid"
                             size={scale(15)}
-                            color={focused ? color : COLOR_DIY.black.main}
+                            color={focused ? color : theme.black.main}
                             focused={focused}
                         />
                     ),
