@@ -147,7 +147,7 @@ const NewsDetail = ({ route, navigation }) => {
     ]);
 
     const [chooseMode, setChooseMode] = useState(0);
-    const [imgLoading, setImgLoading] = useState(true);
+    const [imgLoading, setImgLoading] = useState([]);
 
     // 存放新聞數據
     const [data] = useState({
@@ -169,6 +169,11 @@ const NewsDetail = ({ route, navigation }) => {
             FastImage.clearMemoryCache();
         };
     }, []);
+
+    // 初始化图片加载状态
+    useEffect(() => {
+        setImgLoading(new Array(data.imageUrls.length).fill(true)); // 默认所有图片都在加载
+    }, [data.imageUrls]);
 
     // 判斷語言是否存在，更新 LanguageMode.available
     useEffect(() => {
@@ -273,10 +278,18 @@ const NewsDetail = ({ route, navigation }) => {
                             <FastImage
                                 source={{ uri: item }}
                                 style={{ width: '100%', height: '100%' }}
-                                onLoadStart={() => setImgLoading(true)}
-                                onLoad={() => setImgLoading(false)}
+                                onLoadStart={() => {
+                                    const newLoadingState = [...imgLoading];
+                                    newLoadingState[index] = true; // 设置当前图片为加载中
+                                    setImgLoading(newLoadingState);
+                                }}
+                                onLoadEnd={() => {
+                                    const newLoadingState = [...imgLoading];
+                                    newLoadingState[index] = false; // 设置当前图片为加载完成
+                                    setImgLoading(newLoadingState);
+                                }}
                             />
-                            {imgLoading && (
+                            {imgLoading[index] && (
                                 <View style={{
                                     width: '100%',
                                     height: '100%',
