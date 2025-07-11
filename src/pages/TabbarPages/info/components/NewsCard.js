@@ -1,4 +1,4 @@
-import React, { Component, useContext, useState } from 'react';
+import React, { Component, useContext, useState, memo, useCallback, } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
@@ -10,6 +10,17 @@ import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
+const getDateColor = (type, beginMomentDate, nowMomentDate, themeColor, secondThemeColor, black) => {
+    if (type === 'event') {
+        if (beginMomentDate.isSameOrAfter(nowMomentDate)) {
+            return secondThemeColor;
+        }
+        if (beginMomentDate.isSame(nowMomentDate, 'day')) {
+            return themeColor;
+        }
+    }
+    return black.third;
+};
 
 const NewsCard = ({ data, type = 'news' }) => {
     // NavigationContext组件可以在非基页面拿到路由信息
@@ -25,7 +36,6 @@ const NewsCard = ({ data, type = 'news' }) => {
             marginVertical: verticalScale(5),
             marginHorizontal: scale(10),
             borderRadius: scale(10),
-            // ...viewShadow,
         },
         newsCardContentContainer: {
             flexDirection: 'row',
@@ -40,20 +50,11 @@ const NewsCard = ({ data, type = 'news' }) => {
     });
 
     // 开始日期
-    let beginDate = type === 'event' ? data.common.dateFrom : data.common.publishDate;
-    let beginMomentDate = moment(beginDate);
-    let nowMomentDate = moment(new Date());
-    let dateColor = black.third;
-
+    const beginDate = type === 'event' ? data.common.dateFrom : data.common.publishDate;
+    const beginMomentDate = moment(beginDate);
+    const nowMomentDate = moment(new Date());
     // 活动类型日期颜色
-    if (type === 'event') {
-        if (beginMomentDate.isSameOrAfter(nowMomentDate)) {
-            dateColor = secondThemeColor;
-        }
-        if (beginMomentDate.isSame(nowMomentDate, 'day')) {
-            dateColor = themeColor;
-        }
-    }
+    const dateColor = getDateColor(type, beginMomentDate, nowMomentDate, themeColor, secondThemeColor, black);
 
     // 匹配对应语言的标题
     let title_cn = '';
@@ -81,7 +82,7 @@ const NewsCard = ({ data, type = 'news' }) => {
     }
 
     // 点击跳转逻辑
-    const handlePress = () => {
+    const handlePress = useCallback(() => {
         trigger();
         setTimeout(() => {
             navigation.navigate(
@@ -89,7 +90,7 @@ const NewsCard = ({ data, type = 'news' }) => {
                 { data },
             );
         }, 50);
-    };
+    }, [navigation, type, data]);
 
     return (
         <TouchableScale
@@ -156,28 +157,26 @@ const NewsCard = ({ data, type = 'news' }) => {
                 {/* 新闻卡片配图 */}
                 {haveImage && (
                     <View style={{ alignSelf: 'center' }}>
-                        <View
-                            style={{
-                                borderRadius: scale(10),
-                                overflow: 'hidden',
-                                ...viewShadow,
-                                backgroundColor: white,
-                            }}>
+                        <View style={{
+                            borderRadius: scale(10),
+                            overflow: 'hidden',
+                            ...viewShadow,
+                            backgroundColor: white,
+                        }}>
                             <FastImage
                                 source={{ uri: imageUrls }}
-                                onLoadStart={() => setImgLoading(true)}
-                                onLoad={() => setImgLoading(false)}
+                                onLoadEnd={() => setImgLoading(false)}
+                                onError={() => setImgLoading(true)}
                                 style={styles.newsCardImg}
                                 resizeMode={FastImage.resizeMode.cover}
                             />
                             {imgLoading && (
-                                <View
-                                    style={{
-                                        ...styles.newsCardImg,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        position: 'absolute',
-                                    }}>
+                                <View style={{
+                                    ...styles.newsCardImg,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
                                     <ActivityIndicator
                                         size={'large'}
                                         color={themeColor}
