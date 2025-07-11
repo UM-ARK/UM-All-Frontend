@@ -116,6 +116,8 @@ const NewsPage = () => {
 
             // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
             const filteredNewsList = result.filter(item => item.details.length > 0);
+            // TODO: 每次返回2.5MB，需要優化。
+            // 3.x版本返回的是25個新聞，現在返回100條新聞，嘗試採取UM API的分頁加載方式
 
             setTopNews(topNewsData);
             setNewsList(filteredNewsList);
