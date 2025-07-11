@@ -541,7 +541,7 @@ const UMEventDetail = ({ route, navigation }) => {
                                         show = show + ', ';
                                     }
                                     return (
-                                        <Text style={styles.content}>
+                                        <Text style={styles.content} key={idx} >
                                             {show}
                                         </Text>
                                     );

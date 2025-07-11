@@ -740,7 +740,7 @@ const EventDetail = (props) => {
             <Toast
                 ref={toast}
                 position="top"
-                positionValue={'10%'}
+                positionValue={PAGE_HEIGHT * 0.1}
                 textStyle={{ color: white }}
                 style={{
                     backgroundColor: toastColor,
