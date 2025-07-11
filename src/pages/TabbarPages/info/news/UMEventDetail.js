@@ -22,7 +22,7 @@ const UMEventDetail = ({ route, navigation }) => {
             padding: scale(10),
             marginVertical: scale(5),
             borderRadius: scale(10),
-            ...viewShadow,
+            // ...viewShadow,
         },
         imgContainer: {
             width: COMPONENT_WIDTH,
@@ -208,7 +208,7 @@ const UMEventDetail = ({ route, navigation }) => {
                             activeOpacity={0.8}
                             style={{
                                 ...styles.languageModeButtonContainer,
-                                backgroundColor: chooseMode === index ? themeColor : bg_color,
+                                backgroundColor: chooseMode === index ? themeColor : white,
                             }}
                             onPress={() => {
                                 trigger();
@@ -217,7 +217,7 @@ const UMEventDetail = ({ route, navigation }) => {
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
-                                    color: chooseMode === index ? bg_color : themeColor,
+                                    color: chooseMode === index ? white : themeColor,
                                 }}>
                                 {item.name}
                             </Text>
