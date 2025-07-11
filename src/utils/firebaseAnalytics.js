@@ -1,4 +1,5 @@
-import analytics from '@react-native-firebase/analytics';
+import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
+import { getApp } from '@react-native-firebase/app';
 
 // 分析指標
 // 頁面
@@ -11,5 +12,6 @@ import analytics from '@react-native-firebase/analytics';
 
 // 傳輸到Firebase事件
 export async function logToFirebase(eventName, optionObj) {
-    await analytics().logEvent(eventName, optionObj)
+    const analytics = getAnalytics(getApp());
+    await logEvent(analytics, eventName, optionObj);
 }

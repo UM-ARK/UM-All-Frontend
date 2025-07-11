@@ -8,17 +8,6 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-# ******** DIY Code Begin ********
-# 因為react-native-compressor的RCT-Folly問題，和Firebase問題，全局啟用
-# use_modular_headers!
-# 使用pod install --repo-update
-use_frameworks! :linkage => :static
-# 使用靜態框架，from Firebase/app安裝說明
-$RNFirebaseAsStaticFramework = true
-# 不需要廣告支持
-$RNFirebaseAnalyticsWithoutAdIdSupport=true
-# ******** DIY Code End ********
-
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
@@ -29,8 +18,25 @@ target 'UMALL' do
   config = use_native_modules!
   # project './UMALL.xcodeproj'
 
+  # ******** DIY Code Begin ********
+  # 因為react-native-compressor的RCT-Folly問題，和Firebase問題，全局啟用
+  # use_modular_headers!
+  # 使用pod install --repo-update
+  use_frameworks! :linkage => :static
+  # 使用靜態框架，from Firebase/app安裝說明
+  $RNFirebaseAsStaticFramework = true
+  # 不需要廣告支持
+  $RNFirebaseAnalyticsWithoutAdIdSupport=true
+
+  # 嘗試使用bridge模式
+  flags = get_default_flags()
+  # ******** DIY Code End ********
+
   use_react_native!(
     :path => config[:reactNativePath],
+    # 嘗試使用bridge模式，為了Firebase
+    :hermes_enabled => flags[:hermes_enabled],
+    :fabric_enabled => flags[:fabric_enabled],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
