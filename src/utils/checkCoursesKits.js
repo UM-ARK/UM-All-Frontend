@@ -5,6 +5,10 @@ import coursePlan from '../static/UMCourses/coursePlan';
 import coursePlanTime from '../static/UMCourses/coursePlanTime';
 
 
+// TODO: 只有App.js調用該函數
+// 檢查本地課程版本，若有更新則覆蓋本地緩存
+// APP包更新時，會覆蓋本地緩存
+// 其餘更新從服務器獲取，選課頁手動更新
 export async function checkLocalCourseVersion() {
     const storageOfferCourses = await getLocalStorage('offer_courses');
     if (storageOfferCourses) {
