@@ -189,17 +189,16 @@ const EventCard = ({ data, RootStore }) => {
 
                     {/* website類型活動展示link圖標 */}
                     {type === 'WEBSITE' && (
-                        <View
-                            style={{
-                                position: 'absolute', zIndex: 2,
-                                top: 10, right: 10,
-                                transform: [{ rotate: '-45deg' }],
-                                ...viewShadow,
-                            }}>
+                        <View style={{
+                            position: 'absolute', zIndex: 2,
+                            top: 10, right: 10,
+                            transform: [{ rotate: '-45deg' }],
+                        }}>
                             <Ionicons
                                 name={'link'}
                                 size={verticalScale(20)}
                                 color={white}
+                                style={{ ...viewShadow }}
                             />
                         </View>
                     )}
@@ -277,8 +276,9 @@ const EventCard = ({ data, RootStore }) => {
                         </View>
                     </View>
                 </View>
-            ) : null}
-        </TouchableScale>
+            ) : null
+            }
+        </TouchableScale >
     );
 };
 
