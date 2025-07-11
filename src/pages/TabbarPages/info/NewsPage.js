@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import {
     View,
     Text,
@@ -37,9 +37,6 @@ const getItem = (data, index) => {
 const getItemCount = data => {
     return data.length;
 };
-
-// 頭條新聞數據Obj，不要刪掉，作為全局變量給另一個func調用
-let topNews = {};
 
 const NewsPage = () => {
     const { theme } = useContext(ThemeContext);
@@ -118,11 +115,13 @@ const NewsPage = () => {
             result.splice(chooseTopNewsIndex, 1); // 刪除數組中頭條新聞的數據，剩下的全部渲染到新聞列表
 
             // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
-            const filteredNewsList = result.filter(item => item.details.length > 0).slice(0, 25);
+            const filteredNewsList = result.filter(item => item.details.length > 0);
 
             setTopNews(topNewsData);
             setNewsList(filteredNewsList);
-            setIsLoading(false);
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 100);
         } catch (error) {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 setIsLoading(true);
@@ -133,7 +132,7 @@ const NewsPage = () => {
     };
 
     // 頭條新聞的渲染
-    const renderTopNews = () => {
+    const renderTopNews = useCallback(() => {
         const imageUrls = topNews.common.imageUrls || [];
         // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
         // 中文標題
@@ -173,8 +172,7 @@ const NewsPage = () => {
                                     // cache: FastImage.cacheControl.web,
                                 }}
                                 style={{ width: '100%', height: '100%' }}
-                                onLoadStart={setImgLoading(true)}
-                                onLoad={setImgLoading(false)}>
+                                onLoadEnd={() => setImgLoading(false)}>
                                 {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                                 <View style={styles.topNewsOverlay}>
                                     {/* Top Story字樣 */}
@@ -226,9 +224,9 @@ const NewsPage = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </View >
         );
-    };
+    }, [topNews, bg_color, imgLoading]);
 
     // 渲染懸浮可拖動按鈕
     const renderGoTopButton = () => (
@@ -307,6 +305,8 @@ const NewsPage = () => {
                             refreshing={isScrollViewLoading}
                             onRefresh={() => {
                                 setIsScrollViewLoading(true);
+                                setImgLoading(true);
+                                setIsLoading(true);
                                 getData();
                             }}
                         />
@@ -322,7 +322,8 @@ const NewsPage = () => {
                     ref={virtualizedList}
                     // 初始渲染的元素，設置為剛好覆蓋屏幕
                     initialNumToRender={4}
-                    windowSize={3}
+                    windowSize={8}
+                    maxToRenderPerBatch={8}
                     renderItem={({ item }) => <NewsCard data={item} />}
                     contentContainerStyle={{ width: '100%' }}
                     keyExtractor={item => item._id}
@@ -344,6 +345,7 @@ const NewsPage = () => {
                             onRefresh={() => {
                                 // 展示Loading標識
                                 setIsLoading(true);
+                                setImgLoading(true);
                                 getData();
                             }}
                         />
