@@ -275,3 +275,6 @@ export const NEW_REG = 'https://reg.um.edu.mo/admissions/registration/?lang=zh-h
 export const UM_ALUMNI = 'https://ado.um.edu.mo/alumni-community/alumni-associations/?lang=zh-hant';
 // 書院大全
 export const UM_RC = 'https://ado.um.edu.mo/rc/?lang=zh-hant';
+
+// 澳大 - 組織架構
+export const UM_ORG = 'https://api.data.um.edu.mo/service/aboutum/organizational_units/all';

@@ -787,6 +787,14 @@ function Index({ navigation }) {
                     },
                     describe: t('UM校友會，也可以找到其他校友相關資訊的網站', { ns: 'features' }),
                 },
+                {
+                    icon_type: iconTypes.materialCommunityIcons,
+                    icon_name: 'account-multiple',
+                    fn_name: t('澳大組織', { ns: 'features' }),
+                    needLogin: false,
+                    go_where: 'UMOrg',
+                    describe: t('UM組織，提供各種校內組織的資訊', { ns: 'features' }),
+                },
             ],
         },
     ]);
