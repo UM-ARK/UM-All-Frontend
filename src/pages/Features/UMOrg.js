@@ -177,8 +177,9 @@ const UMOrg = () => {
                     })}
                 </ScrollView>
             ) : (
-                <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text>No Data</Text>
+                <View style={{ padding: scale(10), alignItems: 'center', justifyContent: 'center' }}>
+                    <Loading></Loading>
+                    <Text style={{ ...uiStyle, color: black.main }}>No Data</Text>
                 </View>
             )}
         </View>
