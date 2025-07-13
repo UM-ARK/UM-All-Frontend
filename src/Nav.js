@@ -26,6 +26,7 @@ import Webviewer from './components/Webviewer';
 import AllEvents from './pages/TabbarPages/info/club/AllEvents';
 import Bus from './pages/Features/Bus';
 import CarPark from './pages/Features/CarPark';
+import UMOrg from './pages/Features/UMOrg';
 
 import TestScreen from './test/test';
 
@@ -74,6 +75,7 @@ const Nav = () => {
                     {/* 服務頁 */}
                     <Stack.Screen name="Bus" component={Bus} />
                     <Stack.Screen name="CarPark" component={CarPark} />
+                    <Stack.Screen name="UMOrg" component={UMOrg} />
 
                     {/* 資訊頁 */}
                     <Stack.Screen name="ClubDetail" component={ClubDetail} />
