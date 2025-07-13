@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo, } from 'react';
+import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation, } from 'react-native';
 import { Input } from '@rneui/themed';
 
 // 引入本地工具
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
-import { UM_API_TOKEN, UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP, UM_ORG, } from '../../utils/pathMap';
+import { UM_API_TOKEN, UM_ORG, } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
-import LoadingDotsDIY from '../../components/LoadingDots';
 import { trigger } from '../../utils/trigger';
+import Loading from '../../components/Loading';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Modal from 'react-native-modal';
-import { DOMParser } from "react-native-html-parser";
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
 // import Toast from 'react-native-toast-message';
@@ -21,119 +19,111 @@ import TouchableScale from "react-native-touchable-scale";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
-import { red } from 'react-native-reanimated/lib/typescript/Colors';
-
-// import { UMAPITOKEN } from '../../utils/umApiToken';
-// import { UM_API_TOKEN, UM_ORG } from '../../utils/pathMap';
-import { set } from 'mobx';
 import { Button } from 'react-native-ui-lib';
-
-const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
+import lodash from 'lodash';
+import OpenCC from 'opencc-js';
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 
 const OrgInfo = (props) => {
     const { orgData } = props;
-
     const [isExpanded, setIsExpanded] = useState(true);
+    const { theme } = useTheme();
+    const { bg_color, white, black, themeColor, secondThemeColor, themeColorLight, themeColorUltraLight, viewShadow, eventColor } = theme;
+
+    // 為折疊子部門添加動畫
+    const toggleExpand = () => {
+        // 添加动画
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setIsExpanded(prev => !prev);
+    };
+
+    const openGoogleSearch = useCallback((query) => {
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent('site:umall.one OR site:um.edu.mo ' + query)}`;
+        openLink(searchUrl);
+    }, [orgData]);
 
     return (
-        <View style={{ marginBottom: 16, padding: 10, backgroundColor: '#fff', borderRadius: 8, gap: 10 }}>
+        <View style={{
+            marginBottom: verticalScale(16),
+            paddingHorizontal: scale(10), paddingTop: verticalScale(10),
+            backgroundColor: white, borderRadius: scale(8),
+        }}>
             <View style={{
-                paddingRight: 10,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+                paddingBottom: verticalScale(10),
             }}>
-                <View>
-                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{orgData.chinUnitName}</Text>
-                    <Text style={{ color: '#666', fontSize: 11 }}>{orgData.unitName}</Text>
-                    <Text style={{ color: '#666', fontSize: 11 }}>{orgData.portUnitName}</Text>
-                </View>
+                {/* 點擊主部門標題可觸發折疊 */}
+                <TouchableOpacity style={{ width: '90%', }}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                        if (orgData.subUnit && orgData.subUnit.length > 1) {
+                            toggleExpand();
+                        } else {
+                            openGoogleSearch(orgData.unitName);
+                        }
+                    }}>
+                    <Text style={{ ...uiStyle, fontWeight: 'bold', color: black.main, fontSize: verticalScale(16), }}>
+                        {orgData.chinUnitName}
+                        <Text style={{ color: isExpanded ? black.third : themeColor, fontSize: verticalScale(12), }}>{orgData.unitCode}</Text>
+                        {orgData.subUnit && orgData.subUnit.length > 1 && (
+                            <Ionicons name={isExpanded ? "chevron-down-outline" : "chevron-up-outline"}
+                                size={scale(14)}
+                                color={isExpanded ? black.second : themeColor} />
+                        )}
+                    </Text>
+                    <Text style={{ ...uiStyle, color: black.third, fontSize: verticalScale(12) }}>{lodash.startCase(lodash.toLower(orgData.unitName))}</Text>
+                    {/* 葡語名，一般很少說 */}
+                    {/* <Text style={{ ...uiStyle, color: black.third, fontSize: verticalScale(11) }}>{orgData.portUnitName}</Text> */}
+                </TouchableOpacity>
+                {/* 搜索按鈕 */}
                 <TouchableOpacity
                     style={{
-                        backgroundColor: '#f0f0f0',
-                        padding: 9,
-                        borderRadius: 50,
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        backgroundColor: eventColor.imageCard,
+                        padding: scale(9), borderRadius: scale(50),
+                        alignSelf: 'flex-start'
                     }}
-                    onPress={() => {
-                        openLink(`https://www.google.com/search?q=${orgData.unitName.split(" ").join("+")}+University+of+Macau`);
-                    }}>
+                    onPress={() => openGoogleSearch(orgData.unitName)}>
                     <Ionicons
                         name="search-outline"
-                        style={{}}
+                        style={{ color: black.second }}
                         size={scale(18)} />
                 </TouchableOpacity>
             </View>
-            <Button
-                style={{ backgroundColor: "#0000000f" }}
-                onPress={() => setIsExpanded(!isExpanded)}>
-                {isExpanded ?
-                    (<Ionicons name="chevron-up-outline" size={scale(12)} />) :
-                    (<Ionicons name="chevron-down-outline" size={scale(12)} />)}
-            </Button>
-            <ScrollView style={{
-                height: isExpanded ? 'auto' : 0,
-                transitionProperty: "all",
-                transitionTimingFunction: "ease-in-out",
-                transitionDuration: "0.3s"
-            }}>
+
+            {/* 子部門 */}
+            <ScrollView style={{ height: isExpanded ? 'auto' : 0, }}>
                 {orgData.subUnit && orgData.subUnit.map((subUnit, unit_key) => {
-                    return subUnit ? (
+                    return subUnit && (
                         <TouchableOpacity
                             key={unit_key}
                             style={{
-                                marginBottom: 8,
-                                backgroundColor: '#f0f0f0',
-                                padding: 5, borderRadius: 5
-                            }} onPress={() => {
-                                openLink(`https://www.google.com/search?q=${subUnit.subUnitName.split(" ").join("+")}+University+of+Macau`);
-                            }}>
-                            <Text>{subUnit.chinSubUnitName}</Text>
-                            <Text>{subUnit.subUnitName}</Text>
+                                marginBottom: verticalScale(8),
+                                backgroundColor: eventColor.imageCard,
+                                padding: scale(5), borderRadius: scale(5),
+                                alignSelf: 'flex-start',
+                            }} onPress={() => openGoogleSearch(subUnit.subUnitName)}>
+                            <Text style={{ ...uiStyle, color: black.second, }}>
+                                {subUnit.chinSubUnitName}
+                                <Text style={{ color: black.third, }}>{subUnit.subUnitCode}</Text>
+                            </Text>
+                            <Text style={{ ...uiStyle, color: black.second, fontSize: verticalScale(10) }}>{lodash.startCase(lodash.toLower(subUnit.subUnitName))}</Text>
                         </TouchableOpacity>
-                    ) : null;
+                    )
                 })}
 
             </ScrollView>
-            {/* <View><Text>{JSON.stringify(org.subUnit)}</Text></View> */}
-
         </View>
     );
 }
 
 const UMOrg = () => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
-    const s = StyleSheet.create({
-        container: {
-            flex: 1,
-            flexDirection: 'column',
-        },
-        arrowSize: {
-            width: scale(35),
-            height: scale(35),
-            resizeMode: 'contain',
-        },
-        dotSize: {
-            width: scale(21),
-            height: scale(21),
-            resizeMode: 'contain',
-        },
-        infoContainer: {
-            position: 'absolute',
-            marginHorizontal: scale(10),
-            backgroundColor: white,
-            borderRadius: scale(10),
-            ...viewShadow,
-            paddingHorizontal: scale(10),
-            paddingVertical: scale(3),
-        },
-    });
+    const { bg_color, white, black, themeColor, } = theme;
 
     const [orgData, setOrgData] = useState([]);
     const [displayOrgData, setDisplayOrgData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     async function getUMOrg() {
         const res = await axios.get(
@@ -147,27 +137,46 @@ const UMOrg = () => {
             // const processedData = data._embedded.map(org => {...org,})
             setOrgData(data._embedded);
             setDisplayOrgData(data._embedded);
+        }).finally(() => {
+            setLoading(false);
         });
     }
 
     useEffect(() => {
+        logToFirebase('openPage', { page: 'UMOrg' });
         getUMOrg();
     }, []);
 
-
     return (
-        <View>
+        <View style={{ flex: 1, backgroundColor: bg_color, }}>
             <Header title={"UM組織"} iOSDIY={true} />
-            {/* <Text style={{ backgroundColor: '#2f3a79', marginTop: 100 }}>{JSON.stringify(orgData[0]) || "No Data found"}</Text> */}
 
-            <Input placeholder="Search..." onChange={(e) => {
-                console.log(e.nativeEvent.text);
-                setDisplayOrgData(orgData.filter(org => (
-                    org.chinUnitName.toLowerCase().includes(e.nativeEvent.text.toLowerCase()) ||
-                    org.unitName.toLowerCase().includes(e.nativeEvent.text.toLowerCase()) ||
-                    org.portUnitName.toLowerCase().includes(e.nativeEvent.text.toLowerCase())
-                )));
+            {/* 搜索框 */}
+            <Input placeholder="Search..." style={{color: black.main}} onChange={(e) => {
+                const searchText = e.nativeEvent.text.toLowerCase();
+                setDisplayOrgData(orgData.filter(org => {
+                    // 检查主组织的名称和代码
+                    const matchesMainOrg =
+                        org.chinUnitName.toLowerCase().includes(converter(searchText)) ||
+                        org.unitName.toLowerCase().includes(searchText) ||
+                        org.unitCode.toLowerCase().includes(searchText);
+
+                    // 检查子组织的名称和代码
+                    const matchesSubUnit =
+                        org.subUnit &&
+                        Array.isArray(org.subUnit) && // 确保 org.subUnit 是数组
+                        org.subUnit.some(
+                            (subUnit) =>
+                                subUnit && (
+                                    subUnit.subUnitName.toLowerCase().includes(searchText) ||
+                                    subUnit.subUnitCode.toLowerCase().includes(searchText) ||
+                                    subUnit.chinSubUnitName.toLowerCase().includes(converter(searchText))
+                                ));
+
+                    return matchesMainOrg || matchesSubUnit;
+                }));
             }} />
+
             {displayOrgData && displayOrgData.length > 0 ? (
                 <ScrollView style={{ paddingHorizontal: 10, marginBottom: 100 }}>
                     {displayOrgData.map((org, index) => {
@@ -178,8 +187,11 @@ const UMOrg = () => {
                 </ScrollView>
             ) : (
                 <View style={{ padding: scale(10), alignItems: 'center', justifyContent: 'center' }}>
-                    <Loading></Loading>
-                    <Text style={{ ...uiStyle, color: black.main }}>No Data</Text>
+                    {loading ? (
+                        <Loading />
+                    ) : (
+                        <Text style={{ ...uiStyle, color: black.main }}>No results found</Text>
+                    )}
                 </View>
             )}
         </View>
