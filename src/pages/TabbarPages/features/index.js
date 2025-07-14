@@ -68,13 +68,10 @@ import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
+import { functionArr } from './FeatureList';
 
 // 定義可使用icon，注意大小寫
-const iconTypes = {
-    ionicons: 'ionicons',
-    materialCommunityIcons: 'MaterialCommunityIcons',
-    img: 'img',
-};
+
 
 const iconSize = scale(25);
 
