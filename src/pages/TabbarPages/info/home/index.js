@@ -121,38 +121,38 @@ const HomeScreen = ({ navigation }) => {
                 eventPage.current.onRefresh();
             },
         },
-        // {
-        //     icon_name: 'donate',
-        //     icon_type: iconTypes.fontAwesome5,
-        //     function_name: t('支持我們', { ns: 'home' }),
-        //     func: () => {
-        //         trigger();
-        //         let webview_param = {
-        //             url: GITHUB_DONATE,
-        //             title: '支持我們',
-        //             text_color: white,
-        //             bg_color_diy: themeColor,
-        //             isBarStyleBlack: false,
-        //         };
-        //         navigation.navigate('Webviewer', webview_param);
-        //     },
-        // },
         {
-            icon_name: 'graduation-cap',
+            icon_name: 'donate',
             icon_type: iconTypes.fontAwesome5,
-            function_name: "學生會",
+            function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
-                let webViewParam = {
-                    url: 'https://info.umsu.org.mo/listdoc?_selector%5Bopen_doc_category_id%5D=1',
-                    title: '學生會通告',
+                let webview_param = {
+                    url: GITHUB_DONATE,
+                    title: '支持我們',
                     text_color: white,
                     bg_color_diy: themeColor,
                     isBarStyleBlack: false,
                 };
-                navigation.navigate('Webviewer', webViewParam);
-            }
+                navigation.navigate('Webviewer', webview_param);
+            },
         },
+        // {
+        //     icon_name: 'graduation-cap',
+        //     icon_type: iconTypes.fontAwesome5,
+        //     function_name: "學生會",
+        //     func: () => {
+        //         trigger();
+        //         let webViewParam = {
+        //             url: 'https://info.umsu.org.mo/listdoc?_selector%5Bopen_doc_category_id%5D=1',
+        //             title: '學生會通告',
+        //             text_color: white,
+        //             bg_color_diy: themeColor,
+        //             isBarStyleBlack: false,
+        //         };
+        //         navigation.navigate('Webviewer', webViewParam);
+        //     }
+        // },
         {
             icon_name: 'people',
             icon_type: iconTypes.ionicons,
