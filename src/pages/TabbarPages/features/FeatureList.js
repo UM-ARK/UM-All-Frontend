@@ -1,4 +1,4 @@
-import {t} from "i18next";
+import { t } from "i18next";
 import {
     UM_MAP,
     UM_RBS,
@@ -320,7 +320,7 @@ export const functionArr = [
                 },
                 describe: t('進入CMMS報修系統，可以對書院等各種設施的問題下單申請維修', { ns: 'features' }),
             },
-                        {
+            {
                 icon_type: iconTypes.ionicons,
                 icon_name: 'book',
                 fn_name: t('Lib佔用', { ns: 'features' }),
