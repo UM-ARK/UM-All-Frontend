@@ -152,6 +152,7 @@ export default {
         "電子公告": "Bulletin",
         "打印": "Print",
         "打印餘額": "Balance",
+        "學生會": "Student Union",
         "更多服務": "More",
 
         "預約服務": "Reservation Services",

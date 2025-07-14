@@ -313,6 +313,20 @@ function Index({ navigation }) {
                 },
                 {
                     icon_type: iconTypes.materialCommunityIcons,
+                    icon_name: 'school',
+                    fn_name: t('學生會', { ns: 'features' }),
+                    needLogin: false,
+                    go_where: 'Webview',
+                    webview_param: {
+                        url: 'https://info.umsu.org.mo/listdoc?_selector%5Bopen_doc_category_id%5D=1',
+                        title: '學生會通告',
+                        text_color: white,
+                        bg_color_diy: themeColor,
+                        isBarStyleBlack: false,
+                    }
+                },
+                {
+                    icon_type: iconTypes.materialCommunityIcons,
                     icon_name: 'view-grid-plus',
                     fn_name: t('更多服務', { ns: 'features' }),
                     needLogin: false,

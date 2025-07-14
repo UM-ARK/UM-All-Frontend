@@ -37,6 +37,7 @@ import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
 import { versionStringCompare } from '../../../../utils/versionKits.js';
 import packageInfo from '../../../../../package.json';
 import { UMCalendar } from '../../../../static/UMCalendar/UMCalendar.js';
+import { getWeek } from '../../../../static/UMCalendar/CalendarConst.js'
 import HomeCard from './components/HomeCard.js';
 import { screenWidth } from '../../../../utils/stylesKits.js';
 import { trigger } from '../../../../utils/trigger.js';
@@ -59,6 +60,7 @@ import { t } from "i18next";
 import lodash from 'lodash';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
+import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import { useTranslation } from 'react-i18next';
 
 const getItem = (data, index) => {
@@ -81,74 +83,6 @@ const iconTypes = {
 
 let cal = UMCalendar;
 const calItemWidth = verticalScale(44.5);
-
-const toastTextArr = [
-    `ARK ALL全力加載中!!!`,
-    `點擊頂部校曆看看最近有什麼假期~`,
-    `快試試底部幾個按鈕都有什麼功能~`,
-    `別只看校巴啦! 也來寫寫Wiki!`,
-    `Wiki在電腦上編輯更方便哦!`,
-    `ARK ALL為愛發電ing...`,
-    `記住我們的官網 ${BASE_HOST} !!!`,
-    `記住Wiki的官網 ${ARK_WIKI} !!!`,
-    `ARK 就是 方舟 !!!`,
-    `ARK Wiki - 澳大人的維基百科!!!`,
-    `快喊上你心愛的社團進駐ARK!!!`,
-    `在關於頁找到我們的郵箱!!!`,
-    `到底什麼才是ARK???`,
-    `今天也要加油!!! UMer!!! `,
-    `快把ARK介紹給學弟學妹學長學姐`,
-    `今天你更新ARK了嗎?`,
-    `澳大資訊一次看完!!!`,
-    `快試試看校園巴士!!!`,
-    `快試試看ARK找課!!!`,
-    `快試試看ARK課表模擬!!!`,
-    `快看看ARK Wiki有什麼新東西!!!`,
-    `一起來加入方舟計劃!!!一起來寫Wiki!!!`,
-    `前人種樹 後人乘涼 多想從前就有Wiki...`,
-    `Wiki是百科、知識庫、攻略站、博客 是UM All In One!`,
-    `讓我們在Wiki打造澳大最強知識庫!!!`,
-    `不要讓學習的辛苦白費 共享到Wiki吧!!!`,
-    `UM All In One 就在ARK ALL`,
-    `又是選不上課的一天...`,
-    `今天會下雨嗎`,
-    `今天不能熬夜`,
-    `今天又掉了多少根頭髮`,
-    `週末還有多少天`,
-    `我覺得和你挺有緣的 來App Store給個好評吧~`,
-    `快去進駐組織頁看看有無你愛的社團!!!`,
-    `你在這裡刷新多少次了???`,
-    `開發者這麼努力 不向朋友推薦一下ARK嗎...`,
-    `朝著UMer人手一個ARK的目標努力著... `,
-    `想來開發/學習? 歡迎聯繫我們!!!`,
-    `我們的郵箱是 ${MAIL} !!!`,
-    `這麼良心的APP還不推薦給朋友們嗎`,
-    `開發者的錢包快被掏空...`,
-    `再刷新我就累了...`,
-];
-const toastKaomojiArr = [
-    '(>ω･* )ﾉ',
-    'ヾ(ｏ･ω･)ﾉ',
-    '( • ̀ω•́ )✧',
-    '(*/ω＼*)',
-    'ヾ(❀^ω^)ﾉﾞ',
-    '(~o￣3￣)~',
-    '∠( °ω°)／',
-    `＼\٩('ω')و/／`,
-    '✧⁺⸜(●˙▾˙●)⸝⁺✧',
-    '(｡◝ᴗ◜｡)',
-    'ヽ(^ω^)ﾉ',
-    '(ﾟωﾟ)ﾉ☆',
-    '(*￣3￣)╭',
-    '(ಥ_ಥ)',
-    '(￣.￣)',
-    '٩(๑>◡<๑)۶',
-    '(T ^ T)',
-    'ㄟ( ▔, ▔ )ㄏ',
-    '(▼へ▼メ)',
-    '￣▽￣',
-    '(oﾟ▽ﾟ)o',
-];
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
@@ -188,21 +122,37 @@ const HomeScreen = ({ navigation }) => {
                 eventPage.current.onRefresh();
             },
         },
+        // {
+        //     icon_name: 'donate',
+        //     icon_type: iconTypes.fontAwesome5,
+        //     function_name: t('支持我們', { ns: 'home' }),
+        //     func: () => {
+        //         trigger();
+        //         let webview_param = {
+        //             url: GITHUB_DONATE,
+        //             title: '支持我們',
+        //             text_color: white,
+        //             bg_color_diy: themeColor,
+        //             isBarStyleBlack: false,
+        //         };
+        //         navigation.navigate('Webviewer', webview_param);
+        //     },
+        // },
         {
-            icon_name: 'donate',
+            icon_name: 'graduation-cap',
             icon_type: iconTypes.fontAwesome5,
-            function_name: t('支持我們', { ns: 'home' }),
+            function_name: "學生會",
             func: () => {
                 trigger();
-                let webview_param = {
-                    url: GITHUB_DONATE,
-                    title: '支持我們',
+                let webViewParam = {
+                    url: 'https://info.umsu.org.mo/listdoc?_selector%5Bopen_doc_category_id%5D=1',
+                    title: '學生會通告',
                     text_color: white,
                     bg_color_diy: themeColor,
                     isBarStyleBlack: false,
                 };
-                navigation.navigate('Webviewer', webview_param);
-            },
+                navigation.navigate('Webviewer', webViewParam);
+            }
         },
         {
             icon_name: 'people',
@@ -400,26 +350,6 @@ const HomeScreen = ({ navigation }) => {
         }, 100);
     }, []);
 
-    const getWeek = (date) => {
-        // 参数时间戳
-        let week = moment(date).day();
-        switch (week) {
-            case 1:
-                return t('周一', { ns: 'home' });
-            case 2:
-                return t('周二', { ns: 'home' });
-            case 3:
-                return t('周三', { ns: 'home' });
-            case 4:
-                return t('周四', { ns: 'home' });
-            case 5:
-                return t('周五', { ns: 'home' });
-            case 6:
-                return t('周六', { ns: 'home' });
-            case 0:
-                return t('周日', { ns: 'home' });
-        }
-    };
 
     /**
      * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
@@ -460,7 +390,7 @@ const HomeScreen = ({ navigation }) => {
                 <View style={{
                     backgroundColor,
                     borderRadius: scale(8),
-                    paddingHorizontal: scale(5), paddingVertical: verticalScale(3),
+                    paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
