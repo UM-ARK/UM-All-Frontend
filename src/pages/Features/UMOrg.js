@@ -149,7 +149,7 @@ const UMOrg = () => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, }}>
-            <Header title={"UM組織"} iOSDIY={true} />
+            <Header title={t('澳大部門', { ns: 'features' })} iOSDIY={true} />
 
             {/* 搜索框 */}
             <Input placeholder="Search..." style={{color: black.main}} onChange={(e) => {

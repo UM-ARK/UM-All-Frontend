@@ -176,6 +176,7 @@ export default {
         "防詐騙": "Scam",
         "書院": "RC",
         "校友會": "Alumni",
+        "澳大部門": "Organization",
 
 
         "提問：關於澳大的一切...": "Ask: Anything about UM...",
@@ -233,5 +234,5 @@ export default {
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
-    }
+    },
 }
