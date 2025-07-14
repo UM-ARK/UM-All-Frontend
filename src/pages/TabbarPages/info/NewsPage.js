@@ -295,11 +295,6 @@ const NewsPage = () => {
             {isLoading ? (
                 // 渲染Loading時的骨架屏
                 <ScrollView
-                    contentContainerStyle={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        backgroundColor: bg_color,
-                    }}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}

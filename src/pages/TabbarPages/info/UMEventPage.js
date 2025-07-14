@@ -102,8 +102,6 @@ class UMEventPage extends Component {
             } else {
                 alert('未知錯誤，請聯繫開發者！')
             }
-        } finally {
-            this.setState({ isLoading: false });
         }
     }
 
@@ -219,14 +217,12 @@ class UMEventPage extends Component {
     render() {
         const { isLoading } = this.state;
         const { theme } = this.context;
-        const { black, white, themeColor } = theme;
+        const { black, white, themeColor, bg_color, } = theme;
 
         return (
             <View style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: theme.bg_color,
+                flex: 1, alignItems: 'center', justifyContent: 'center',
+                backgroundColor: bg_color,
             }}>
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}
@@ -248,7 +244,7 @@ class UMEventPage extends Component {
                     }
                 >
                     <Loading />
-                </ScrollView>) : (this.state.data != undefined ? this.renderPage() : <Loading />)}
+                </ScrollView>) : (this.state.data != undefined && this.renderPage())}
             </View>
         );
     }
