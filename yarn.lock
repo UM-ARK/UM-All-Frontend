@@ -3467,7 +3467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rneui/base@npm:^4.0.0-rc.5":
+"@rneui/base@npm:^4.0.0-rc.8":
   version: 4.0.0-rc.8
   resolution: "@rneui/base@npm:4.0.0-rc.8"
   dependencies:
@@ -3484,7 +3484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rneui/themed@npm:^4.0.0-rc.5":
+"@rneui/themed@npm:^4.0.0-rc.8":
   version: 4.0.0-rc.8
   resolution: "@rneui/themed@npm:4.0.0-rc.8"
   peerDependencies:
@@ -12332,8 +12332,8 @@ __metadata:
     "@react-navigation/native": ^6
     "@react-navigation/native-stack": ^6
     "@react-navigation/stack": ^6
-    "@rneui/base": ^4.0.0-rc.5
-    "@rneui/themed": ^4.0.0-rc.5
+    "@rneui/base": ^4.0.0-rc.8
+    "@rneui/themed": ^4.0.0-rc.8
     "@sbaiahmed1/react-native-blur": ^0.1.2
     "@types/react": ^18.2.6
     "@types/react-test-renderer": ^18.0.0
