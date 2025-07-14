@@ -1,4 +1,4 @@
-import {t} from "i18next";
+import { t } from "i18next";
 import {
     UM_MAP,
     UM_RBS,
@@ -138,7 +138,7 @@ export const functionArr = [
                 webview_param: {
                     // import pathMap的鏈接進行跳轉
                     url: UM_COMPUTER_ROOM,
-                    title: '電腦室使用情況',
+                    title: '電腦室使情況',
                     // 標題顏色，默認為black.main
                     // text_color: '#989898',
                     // 標題背景顏色，默認為bg_color
@@ -166,19 +166,6 @@ export const functionArr = [
                     // isBarStyleBlack: false,
                 },
                 describe: t('直接前往圖書館主頁，能查看圖書館人數和搜索資源等', { ns: 'features' }),
-            },
-            {
-                icon_type: iconTypes.ionicons,
-                icon_name: 'book',
-                fn_name: t('Lib佔用', { ns: 'features' }),
-                needLogin: false,
-                go_where: 'Linking',
-                webview_param: {
-                    url: UM_LIB_USING,
-                    title: 'UM 圖書館資源佔用',
-                    text_color: '#010101',
-                },
-                describe: t('包含圖書館的電腦、房間佔用情況、其他科技資訊等', { ns: 'features' }),
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -332,6 +319,19 @@ export const functionArr = [
                     // isBarStyleBlack: false,
                 },
                 describe: t('進入CMMS報修系統，可以對書院等各種設施的問題下單申請維修', { ns: 'features' }),
+            },
+            {
+                icon_type: iconTypes.ionicons,
+                icon_name: 'book',
+                fn_name: t('Lib佔用', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'Linking',
+                webview_param: {
+                    url: UM_LIB_USING,
+                    title: 'UM 圖書館資源佔用',
+                    text_color: '#010101',
+                },
+                describe: t('包含圖書館的電腦、房間佔用情況、其他科技資訊等', { ns: 'features' }),
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
