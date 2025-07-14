@@ -15,13 +15,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
 // import Toast from 'react-native-toast-message';
-import TouchableScale from "react-native-touchable-scale";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { t } from 'i18next';
-import Toast from 'react-native-simple-toast';
-import { Button } from 'react-native-ui-lib';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
+
+import SearchInput from '../../components/SearchInput';
+
+
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 
@@ -152,10 +151,11 @@ const UMOrg = () => {
             <Header title={"UM組織"} iOSDIY={true} />
 
             {/* 搜索框 */}
-            <Input placeholder="Search..." style={{color: black.main}} onChange={(e) => {
-                const searchText = e.nativeEvent.text.toLowerCase();
-                setDisplayOrgData(orgData.filter(org => {
-                    // 检查主组织的名称和代码
+            <SearchInput 
+                theme={theme}
+                itemList={orgData}
+                filter={(org, searchText)=>{
+                    // 检查组织名称
                     const matchesMainOrg =
                         org.chinUnitName.toLowerCase().includes(converter(searchText)) ||
                         org.unitName.toLowerCase().includes(searchText) ||
@@ -174,8 +174,12 @@ const UMOrg = () => {
                                 ));
 
                     return matchesMainOrg || matchesSubUnit;
-                }));
-            }} />
+                }}
+                displayResult={(searchedOrgData)=>{
+                    setDisplayOrgData(searchedOrgData)
+                }}/>
+
+
 
             {displayOrgData && displayOrgData.length > 0 ? (
                 <ScrollView style={{ paddingHorizontal: 10, marginBottom: 100 }}>
