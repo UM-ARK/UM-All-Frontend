@@ -31,7 +31,8 @@ import {
 } from "react-native-gesture-handler";
 
 import { getLocalStorage } from '../../../utils/storageKits';
-import { COLOR_DIY, uiStyle, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
+import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
+import { COLOR_DIY, TIME_TABLE_COLOR, } from '../../../utils/uiMap';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import { openLink } from "../../../utils/browser";
@@ -39,7 +40,6 @@ import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "..
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from './BottomSheet';
-import CourseCard from '../what2Reg/component/CourseCard';
 import { setLocalStorage } from '../../../utils/storageKits';
 import uniq from 'lodash/uniq';
 import lodash from 'lodash';
@@ -47,11 +47,13 @@ import OpenCC from 'opencc-js';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
-const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, } = COLOR_DIY;
+const { themeColor, themeColorUltraLight, secondThemeColor, black, white, bg_color, unread, success, trueWhite, barStyle, } = COLOR_DIY;
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
+
+// TODO: 選課頁更新數據，現在不會重載APP，別的頁面聚焦到這個頁面時，待添加重新讀取緩存數據
 
 function parseImportData(inputText) {
     let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
@@ -525,7 +527,7 @@ export default class CourseSim extends Component {
                         {/* 上課時間 */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }}>
                             {/* 開始時間 */}
-                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.black.main, fontWeight: '600', opacity: 0.8 }}>
+                            <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', opacity: 0.8 }}>
                                 {course['Time From']}
                             </Text>
                             {/* 引導用戶操作圖標 */}
@@ -536,7 +538,7 @@ export default class CourseSim extends Component {
                                 style={{ opacity: 0.4 }}
                             />
                             {/* 結束時間 */}
-                            <Text style={{ ...uiStyle.defaultText, color: COLOR_DIY.black.main, fontWeight: '600', opacity: 0.8 }}>
+                            <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', opacity: 0.8 }}>
                                 {course['Time To']}
                             </Text>
                         </View>
@@ -685,7 +687,7 @@ E11-0000
                 <TouchableOpacity
                     style={{
                         ...s.buttonContainer,
-                        backgroundColor: this.state.importTimeTableText ? COLOR_DIY.success : 'gray',
+                        backgroundColor: this.state.importTimeTableText ? success : 'gray',
                     }}
                     onPress={this.importCourseData}
                     disabled={!this.state.importTimeTableText}
@@ -849,7 +851,7 @@ E11-0000
             <View style={{ width: '100%', padding: scale(10), }}>
                 {/* 輸入框 */}
                 <View style={{
-                    borderColor: themeColor, backgroundColor: COLOR_DIY.white,
+                    borderColor: themeColor, backgroundColor: white,
                     height: verticalScale(35),
                     borderWidth: scale(1), borderRadius: scale(5),
                     flexDirection: 'row',
@@ -1002,7 +1004,7 @@ E11-0000
                                 >
                                     <Text style={{
                                         ...s.searchResultText,
-                                        color: COLOR_DIY.trueWhite,
+                                        color: trueWhite,
                                         fontWeight: 'bold',
                                     }} >{`刪除所有${i['Course Code']}`}</Text>
                                 </TouchableOpacity>
@@ -1124,7 +1126,7 @@ E11-0000
                     backgroundColor={bg_color}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: COLOR_DIY.barStyle,
+                        barStyle: barStyle,
                     }}
                     containerStyle={{
                         // 修復頂部空白過多問題
@@ -1272,6 +1274,6 @@ const s = StyleSheet.create({
         margin: scale(3),
         padding: scale(5),
         borderRadius: scale(6),
-        backgroundColor: COLOR_DIY.themeColorUltraLight,
+        backgroundColor: themeColorUltraLight,
     },
 });
