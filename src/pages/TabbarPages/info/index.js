@@ -66,6 +66,7 @@ export default function NewsScreen() {
                         width: tabWidth,
                         left: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2,
                     },
+                    lazy: true,
                 }}
                 initialRouteName="HomePage"
             >
