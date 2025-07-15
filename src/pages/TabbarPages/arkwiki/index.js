@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
 import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
@@ -32,6 +32,7 @@ const ARKWiki = (props) => {
         }
     })
 
+    const insets = useContext(SafeAreaInsetsContext);
 
     // 初始狀態
     const [currentURL, setCurrentURL] = useState(
@@ -122,218 +123,216 @@ const ARKWiki = (props) => {
     };
 
     return (
-        <SafeAreaInsetsContext.Consumer>
-            {(insets) => (
-                <View style={{ flex: 1 }}>
-                    <Header
-                        // Wiki的默認配色
-                        backgroundColor={white}
-                        statusBarProps={{
-                            backgroundColor: 'transparent',
-                            barStyle: barStyle,
-                        }}
-                        containerStyle={{
-                            // 修復頂部空白過多問題
-                            height: Platform.select({
-                                android: scale(38),
-                                default: insets.top,
-                            }),
-                            paddingTop: 0,
-                            // 修復深色模式頂部小白條問題
-                            borderBottomWidth: 0,
-                        }}
-                    />
+        <View style={{ flex: 1 }}>
+            <Header
+                // Wiki的默認配色
+                backgroundColor={white}
+                statusBarProps={{
+                    backgroundColor: 'transparent',
+                    barStyle: barStyle,
+                }}
+                containerStyle={{
+                    // 修復頂部空白過多問題
+                    height: Platform.select({
+                        android: scale(38),
+                        default: insets.top,
+                    }),
+                    paddingTop: 0,
+                    // 修復深色模式頂部小白條問題
+                    borderBottomWidth: 0,
+                }}
+            />
 
-                    {/* 頂部工具欄 */}
-                    <View
+            {/* 頂部工具欄 */}
+            <View
+                style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: white,
+                    paddingVertical: scale(5),
+                }}
+            >
+                {/* 主頁按鈕 */}
+                <TouchableScale
+                    style={{
+                        alignSelf: 'center',
+                        position: 'absolute',
+                        left: scale(10),
+                    }}
+                    onPress={returnWikiHome}
+                >
+                    <MaterialCommunityIcons
+                        name="home-outline"
+                        size={scale(28)}
+                        color={themeColor}
+                    />
+                </TouchableScale>
+
+                {/* 回退按鈕 */}
+                {canGoBack ? (
+                    <TouchableScale
                         style={{
-                            flexDirection: 'row',
-                            width: '100%',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: white,
-                            paddingVertical: scale(5),
+                            alignSelf: 'center',
+                            position: 'absolute',
+                            left: scale(45),
+                        }}
+                        onPress={() => {
+                            webviewRef.current.goBack();
+                            trigger();
                         }}
                     >
-                        {/* 主頁按鈕 */}
-                        <TouchableScale
-                            style={{
-                                alignSelf: 'center',
-                                position: 'absolute',
-                                left: scale(10),
-                            }}
-                            onPress={returnWikiHome}
-                        >
-                            <MaterialCommunityIcons
-                                name="home-outline"
-                                size={scale(28)}
-                                color={themeColor}
-                            />
-                        </TouchableScale>
-
-                        {/* 回退按鈕 */}
-                        {canGoBack ? (
-                            <TouchableScale
-                                style={{
-                                    alignSelf: 'center',
-                                    position: 'absolute',
-                                    left: scale(45),
-                                }}
-                                onPress={() => {
-                                    webviewRef.current.goBack();
-                                    trigger();
-                                }}
-                            >
-                                <MaterialCommunityIcons
-                                    name="arrow-left-circle-outline"
-                                    size={scale(25)}
-                                    color={themeColor}
-                                />
-                            </TouchableScale>
-                        ) : null}
-
-                        {/* 前進按鈕 */}
-                        {canGoForward ? (
-                            <TouchableScale
-                                style={{
-                                    alignSelf: 'center',
-                                    position: 'absolute',
-                                    left: scale(75),
-                                }}
-                                onPress={() => {
-                                    webviewRef.current.goForward();
-                                    trigger();
-                                }}
-                            >
-                                <MaterialCommunityIcons
-                                    name="arrow-right-circle-outline"
-                                    size={scale(25)}
-                                    color={themeColor}
-                                />
-                            </TouchableScale>
-                        ) : null}
-
-                        {/* ARK Logo */}
-                        <TouchableScale
-                            style={{ flexDirection: 'row' }}
-                            onPress={goRandomPage}
-                        >
-                            <FastImage
-                                source={require('../../../static/img/logo.png')}
-                                style={{
-                                    height: iconSize,
-                                    width: iconSize,
-                                    borderRadius: scale(5),
-                                }}
-                            />
-                            {/* 標題 */}
-                            <View style={{ marginLeft: scale(5) }}>
-                                <Text style={s.titleText}>ARK Wiki</Text>
-                            </View>
-                        </TouchableScale>
-
-                        {/* 搜索按鈕 */}
-                        <TouchableScale
-                            style={{
-                                alignSelf: 'center',
-                                position: 'absolute',
-                                right: scale(65),
-                            }}
-                            onPress={() => {
-                                trigger();
-                                setCurrentURL(ARK_WIKI_SEARCH);
-                                // webviewRef.current?.reload();
-                            }}
-                        >
-                            <Ionicons
-                                name="search"
-                                size={scale(25)}
-                                color={themeColor}
-                            />
-                        </TouchableScale>
-
-                        {/* 刷新按鈕 */}
-                        <TouchableScale
-                            style={{
-                                alignSelf: 'center',
-                                position: 'absolute',
-                                right: scale(35),
-                            }}
-                            onPress={() => {
-                                webviewRef.current.reload();
-                                trigger();
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="refresh"
-                                size={scale(28)}
-                                color={themeColor}
-                            />
-                        </TouchableScale>
-
-                        {/* 分享按鈕 */}
-                        <TouchableScale
-                            style={{
-                                alignSelf: 'center',
-                                position: 'absolute',
-                                right: scale(10),
-                            }}
-                            onPress={() => {
-                                trigger();
-                                Clipboard.setString(currentURL);
-                                Toast.show({
-                                    type: 'arkToast',
-                                    text1: '已複製當前頁面鏈接到粘貼板！',
-                                    text2: '快去和小夥伴分享吧~',
-                                    topOffset: scale(100),
-                                    onPress: () => Toast.hide(),
-                                });
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="share-variant"
-                                size={scale(23)}
-                                color={themeColor}
-                            />
-                        </TouchableScale>
-                    </View>
-
-                    {!isLoaded ? (
-                        <Progress.Bar
-                            progress={progress}
-                            borderWidth={0}
-                            borderRadius={0}
-                            width={null} // null -> 寬度為全屏
-                            height={2}
+                        <MaterialCommunityIcons
+                            name="arrow-left-circle-outline"
+                            size={scale(25)}
                             color={themeColor}
                         />
-                    ) : null}
+                    </TouchableScale>
+                ) : null}
 
-                    <WebView
-                        ref={webviewRef}
-                        source={{ uri: currentURL }}
-                        originWhitelist={['*']}
-                        startInLoadingState={true}
-                        pullToRefreshEnabled
-                        allowFileAccess
-                        allowUniversalAccessFromFileURLs
-                        cacheEnabled={true}
-                        // IOS
-                        sharedCookiesEnabled
-                        enableApplePay={true}
-                        // Android
-                        thirdPartyCookiesEnabled
-                        domStorageEnabled={true}
-                        // 前進、回退按鈕所需判斷邏輯
-                        onNavigationStateChange={onNavigationStateChange}
-                        // 進度條展示
-                        onLoadProgress={event => setProgress(event.nativeEvent.progress)}
-                        onLoadStart={() => {
-                            setIsLoaded(false);
-                            setProgress(0);
+                {/* 前進按鈕 */}
+                {canGoForward ? (
+                    <TouchableScale
+                        style={{
+                            alignSelf: 'center',
+                            position: 'absolute',
+                            left: scale(75),
                         }}
-                        onLoadEnd={() => setIsLoaded(true)}
-                        injectedJavaScript={`
+                        onPress={() => {
+                            webviewRef.current.goForward();
+                            trigger();
+                        }}
+                    >
+                        <MaterialCommunityIcons
+                            name="arrow-right-circle-outline"
+                            size={scale(25)}
+                            color={themeColor}
+                        />
+                    </TouchableScale>
+                ) : null}
+
+                {/* ARK Logo */}
+                <TouchableScale
+                    style={{ flexDirection: 'row' }}
+                    onPress={goRandomPage}
+                >
+                    <FastImage
+                        source={require('../../../static/img/logo.png')}
+                        style={{
+                            height: iconSize,
+                            width: iconSize,
+                            borderRadius: scale(5),
+                        }}
+                    />
+                    {/* 標題 */}
+                    <View style={{ marginLeft: scale(5) }}>
+                        <Text style={s.titleText}>ARK Wiki</Text>
+                    </View>
+                </TouchableScale>
+
+                {/* 搜索按鈕 */}
+                <TouchableScale
+                    style={{
+                        alignSelf: 'center',
+                        position: 'absolute',
+                        right: scale(65),
+                    }}
+                    onPress={() => {
+                        trigger();
+                        setCurrentURL(ARK_WIKI_SEARCH);
+                        // webviewRef.current?.reload();
+                    }}
+                >
+                    <Ionicons
+                        name="search"
+                        size={scale(25)}
+                        color={themeColor}
+                    />
+                </TouchableScale>
+
+                {/* 刷新按鈕 */}
+                <TouchableScale
+                    style={{
+                        alignSelf: 'center',
+                        position: 'absolute',
+                        right: scale(35),
+                    }}
+                    onPress={() => {
+                        webviewRef.current.reload();
+                        trigger();
+                    }}
+                >
+                    <MaterialCommunityIcons
+                        name="refresh"
+                        size={scale(28)}
+                        color={themeColor}
+                    />
+                </TouchableScale>
+
+                {/* 分享按鈕 */}
+                <TouchableScale
+                    style={{
+                        alignSelf: 'center',
+                        position: 'absolute',
+                        right: scale(10),
+                    }}
+                    onPress={() => {
+                        trigger();
+                        Clipboard.setString(currentURL);
+                        Toast.show({
+                            type: 'arkToast',
+                            text1: '已複製當前頁面鏈接到粘貼板！',
+                            text2: '快去和小夥伴分享吧~',
+                            topOffset: scale(100),
+                            onPress: () => Toast.hide(),
+                        });
+                    }}
+                >
+                    <MaterialCommunityIcons
+                        name="share-variant"
+                        size={scale(23)}
+                        color={themeColor}
+                    />
+                </TouchableScale>
+            </View>
+
+            {!isLoaded ? (
+                <Progress.Bar
+                    progress={progress}
+                    borderWidth={0}
+                    borderRadius={0}
+                    width={null} // null -> 寬度為全屏
+                    height={2}
+                    color={themeColor}
+                />
+            ) : null}
+
+            <WebView
+                ref={webviewRef}
+                source={{ uri: currentURL }}
+                originWhitelist={['*']}
+                startInLoadingState={true}
+                pullToRefreshEnabled
+                allowFileAccess
+                allowUniversalAccessFromFileURLs
+                cacheEnabled={true}
+                // IOS
+                sharedCookiesEnabled
+                enableApplePay={true}
+                // Android
+                thirdPartyCookiesEnabled
+                domStorageEnabled={true}
+                // 前進、回退按鈕所需判斷邏輯
+                onNavigationStateChange={onNavigationStateChange}
+                // 進度條展示
+                onLoadProgress={event => setProgress(event.nativeEvent.progress)}
+                onLoadStart={() => {
+                    setIsLoaded(false);
+                    setProgress(0);
+                }}
+                onLoadEnd={() => setIsLoaded(true)}
+                injectedJavaScript={`
               window.applyPref = () => {
                 const a = "skin-citizen-", b = "skin-citizen-theme",
                   c = a => window.localStorage.getItem(a),
@@ -384,10 +383,8 @@ const ARKWiki = (props) => {
 
               (() => { window.applyPref() })();
             `}
-                    />
-                </View>
-            )}
-        </SafeAreaInsetsContext.Consumer>
+            />
+        </View>
     );
 };
 

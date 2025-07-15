@@ -84,7 +84,6 @@ function Index({ navigation }) {
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
-    // SafeAreaInsetsContext
     const insets = useContext(SafeAreaInsetsContext);
 
     // functionArr 直接複製 class 中的 state 初始化內容

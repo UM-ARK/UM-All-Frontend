@@ -1,4 +1,4 @@
-import React, { Component, memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { Component, memo, useState, useCallback, useRef, useEffect, useMemo, useContext } from 'react';
 import {
     StyleSheet,
     Text,
@@ -193,6 +193,8 @@ const What2Reg = (props) => {
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
     const actionSheetRef = useRef(null);
+
+    const insets = useContext(SafeAreaInsetsContext);
 
     // 3.0開始，優先使用本地緩存的offerCourses數據展示，後台對比雲端數據版本，提示更新
     useEffect(() => {
@@ -981,7 +983,7 @@ const What2Reg = (props) => {
             : inputText.length > 2 ? handleSearchFilterCourse(inputText) : null;
     }, [inputText]);
 
-    return (<SafeAreaInsetsContext.Consumer>{(insets) => (
+    return (
         <View style={{
             flex: 1, backgroundColor: bg_color,
             alignItems: 'center', justifyContent: 'center'
@@ -1128,7 +1130,7 @@ const What2Reg = (props) => {
             )}
 
         </View>
-    )}</SafeAreaInsetsContext.Consumer>)
+    )
 }
 
 export default What2Reg;
