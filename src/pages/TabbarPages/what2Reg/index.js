@@ -310,7 +310,7 @@ const What2Reg = (props) => {
                             // });
                         }
                     } else {
-                        toastMes = '已是最新課表數據！';
+                        toastMes = t('已是最新課表數據！', { ns: 'catalog' });
                     }
                 }
 
@@ -327,7 +327,7 @@ const What2Reg = (props) => {
         } catch (error) {
             Alert.alert(
                 '',
-                '自動連線至Github更新課程數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或與作者反饋\nQAQ...',
+                `自動連線至Github更新課程數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或與作者反饋\nQAQ...`,
                 null,
                 { cancelable: true }
             );
@@ -1006,7 +1006,7 @@ const What2Reg = (props) => {
 
             <ActionSheet
                 ref={actionSheetRef}
-                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_offerCourses.updateTime}\n\n如作者已上傳最新課表數據，可直接點擊下方按鈕更新！\n或可附件最新的課表Excel，Email提醒作者更新！\n\n如日期已更新，課表數據未更新，可重啟APP再試~`}
+                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_offerCourses.updateTime}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
                 options={actionSheetOptions}
                 cancelButtonIndex={2}
                 statusBarTranslucent={true}

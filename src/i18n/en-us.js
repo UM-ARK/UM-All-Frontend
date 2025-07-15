@@ -95,14 +95,23 @@ export default {
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",
 
-        "更新Add Drop/Timetable數據": "Update Add Drop data",
+        "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
+
+        "ARK搵課提示": "What2Reg",
+        "現在重啟APP以適配最新課表數據嗎？": "Restart the app now to adapt to the latest timetable data?",
+        "已是最新課表數據！": "The timetable data is already up to date!",
+        "點擊下方按鈕更新！檢查作者是否上傳最新數據~": "Click the button below to update! Check if the author has uploaded the latest data~",
+        "或可附件最新的課表Excel，Email提醒作者更新！": "Or you can attach the latest timetable Excel and email the author to remind them to update!",
+        "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
         "關閉": "Close",
         "搵課/加課": "Add",
         "清空": "Clear",
+        "晚上": "Evening",
+        "下午": "Afternoon",
 
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
