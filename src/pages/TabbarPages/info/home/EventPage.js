@@ -115,7 +115,7 @@ const EventPage = forwardRef((props, ref) => {
                 setLeftDataList([]);
                 setRightDataList([]);
             } else {
-                alert('未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
+                alert('組織活動頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
             }
         } finally {
             setIsLoading(false);

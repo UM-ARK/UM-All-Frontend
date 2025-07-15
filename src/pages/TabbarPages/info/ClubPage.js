@@ -71,7 +71,7 @@ class ClubPage extends Component {
                 // 網絡錯誤
                 this.setState({ isLoading: false, clubDataList: undefined, });
             } else {
-                Alert.alert('未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
+                Alert.alert('組織頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
             }
         }
     }

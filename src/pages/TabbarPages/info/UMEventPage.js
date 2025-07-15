@@ -100,7 +100,7 @@ class UMEventPage extends Component {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 this.setState({ data: undefined, isLoading: false });
             } else {
-                alert('未知錯誤，請聯繫開發者！')
+                alert('澳大活動頁，未知錯誤，請聯繫開發者！')
             }
         }
     }
