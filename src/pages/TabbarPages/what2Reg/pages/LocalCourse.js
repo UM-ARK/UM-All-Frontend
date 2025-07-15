@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { Text, View, ScrollView, TouchableOpacity, FlatList, Alert, StyleSheet, } from 'react-native'
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
@@ -47,9 +47,8 @@ const LocalCourse = (props) => {
     const [relateTeacherObj, setRelateTeacherObj] = useState(null);
     const [courseInfo, setCourseInfo] = useState(null);
 
-    // componentDidMount
     useEffect(() => {
-        (async () => {
+        const init = async () => {
             try {
                 const storageCoursePlanList = await getLocalStorage('course_plan_time');
                 if (storageCoursePlanList) {
@@ -57,22 +56,27 @@ const LocalCourse = (props) => {
                 }
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
-            } finally {
-                searchCourse();
             }
-        })();
+        }
+
+        init();
     }, []);
 
-    // 搜尋課程
-    const searchCourse = useCallback(() => {
-        const coursePlanList = s_coursePlanTime.Courses;
-        const relateList = coursePlanList.filter(itm =>
+    const coursePlanList = useMemo(() => {
+        return s_coursePlanTime.Courses || [];
+    }, [s_coursePlanTime]);
+
+    const relateList = useMemo(() => {
+        return coursePlanList.filter(itm =>
             itm['Course Code'].toUpperCase().includes(courseCode)
         );
+    }, [coursePlanList, courseCode]);
 
+    useEffect(() => {
         // 預選有，但課表時間Excel沒有的課程，直接跳轉選咩課
         if (relateList.length === 0) {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+            setIsLoading(true);
             navigation.goBack();
             navigation.navigate('Wiki', { url: URL });
         } else {
@@ -84,13 +88,14 @@ const LocalCourse = (props) => {
             setCourseInfo(relateList[0]);
             setIsLoading(false);
         }
-    }, [courseCode, navigation, white, s_coursePlanTime]);
+    }, [relateList]);
 
     // 渲染可選section
     const renderSchedules = (schedulesObj) => {
         const schedulesArr = Object.keys(schedulesObj);
         return (
             <FlatList
+                key={schedulesArr.length}   // 綁定key用於強制渲染
                 data={schedulesArr}
                 numColumns={schedulesArr.length}
                 columnWrapperStyle={schedulesArr.length > 1 ? { flexWrap: 'wrap' } : null}
@@ -419,7 +424,7 @@ const LocalCourse = (props) => {
                     {renderGroupChoice()}
 
                     {/* 可選教授和Section */}
-                    {relateSectionObj && groupChoice === 'section'
+                    {groupChoice === 'section' && relateSectionObj
                         ? renderSchedules(relateSectionObj)
                         : renderTeacherSchedules(relateSectionObj)}
                 </ScrollView>
