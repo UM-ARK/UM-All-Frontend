@@ -27,7 +27,7 @@ import { getLocalStorage, setLocalStorage, logAllStorage } from '../../../utils/
 
 import axios from "axios";
 import { scale, verticalScale } from "react-native-size-matters";
-import { Header } from '@rneui/themed';
+import { Header, Dialog } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,7 +39,6 @@ import Toast from 'react-native-simple-toast';
 import RNRestart from 'react-native-restart';
 import { t } from "i18next";
 import ActionSheet from '@alessiocancian/react-native-actionsheet';
-import { Dialog, } from '@rneui/themed';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 
