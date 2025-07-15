@@ -28,6 +28,7 @@ import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
 import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 const IMG_WIDTH = scale(160);
 const iconSize = verticalScale(25);
@@ -58,6 +59,8 @@ const AboutPage = () => {
 
     const [s_offerCourses, setSOfferCourses] = useState(offerCourseFile);
     const [s_coursePlan, setSCoursePlan] = useState(coursePlanFile);
+
+    const { i18n } = useTranslation();
 
     useEffect(() => {
         async function fetchStorage() {
@@ -119,12 +122,17 @@ const AboutPage = () => {
                         <Text style={{ ...s.highlightText }}>{s_offerCourses.updateTime}</Text>
                     </Text>
 
-                    <View style={{ flexDirection: 'row' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                         <Text style={{ ...s.bodyText }}>
                             {t('Language Setting', { ns: 'about' })}
                         </Text>
                         <TouchableOpacity
-                            style={{ ...s.buttonContainer }}
+                            style={{
+                                ...s.buttonContainer,
+                                backgroundColor: i18n.language === 'tc' ? themeColor : null,
+                                borderWidth: verticalScale(1),
+                                borderColor: i18n.language === 'tc' ? 'transparent' : themeColor,
+                            }}
                             onPress={() => {
                                 trigger();
                                 Alert.alert('確定切換到繁體中文版嗎？', '將重啟APP。', [
@@ -141,10 +149,15 @@ const AboutPage = () => {
                                 ]);
                             }}
                         >
-                            <Text style={{ ...s.highlightText, color: white }}>中</Text>
+                            <Text style={{ ...s.highlightText, color: i18n.language === 'tc' ? white : themeColor }}>中</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={{ ...s.buttonContainer }}
+                            style={{
+                                ...s.buttonContainer,
+                                backgroundColor: i18n.language === 'en' ? themeColor : null,
+                                borderWidth: verticalScale(1),
+                                borderColor: i18n.language === 'en' ? 'transparent' : themeColor,
+                            }}
                             onPress={() => {
                                 trigger();
                                 Alert.alert('Are you sure to switch to the English version?', 'The APP will be restarted.', [
@@ -161,7 +174,7 @@ const AboutPage = () => {
                                 ]);
                             }}
                         >
-                            <Text style={{ ...s.highlightText, color: white }}>EN</Text>
+                            <Text style={{ ...s.highlightText, color: i18n.language === 'en' ? white : themeColor }}>EN</Text>
                         </TouchableOpacity>
                     </View>
                 </HomeCard>
@@ -171,50 +184,51 @@ const AboutPage = () => {
                     <Text style={{ ...s.bodyText }}>
                         {t("ARK Describe 1", { ns: 'about' })}
                     </Text>
-                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                    {/* 開源地址 */}
+                    <View style={{ flexDirection: 'row', }}>
                         <Text style={{ ...s.bodyText }}>
                             {t("ARK Describe 4_1", { ns: 'about' })}
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() => {
-                                trigger();
-                                openLink(GITHUB_PAGE);
-                            }}
-                        >
-                            <Text style={{ ...s.highlightText }}>Github</Text>
-                        </TouchableOpacity>
-                        <Text style={{ ...s.bodyText }}>
-                            {t("ARK Describe 4_2", { ns: 'about' })}
+                            <Text style={{ ...s.highlightText }}
+                                onPress={() => {
+                                    trigger();
+                                    openLink(GITHUB_PAGE);
+                                }}
+                            >
+                                Github
+                            </Text>
+                            <Text style={{ ...s.bodyText }}>
+                                {t("ARK Describe 4_2", { ns: 'about' })}
+                            </Text>
                         </Text>
                     </View>
                     <Text style={{ ...s.bodyText }}>
                         {t("ARK Describe 5", { ns: 'about' })}
                     </Text>
 
-                    <View style={{ alignItems: 'center', flexDirection: 'row', marginTop: scale(5) }}>
+                    {/* 官網 */}
+                    <View style={{ flexDirection: 'row', marginTop: scale(5) }}>
                         <Text style={{ ...s.bodyText }}>
                             {t("Official Website", { ns: 'about' })}
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() => {
+                            <Text style={{ ...s.highlightText }} onPress={() => {
                                 trigger();
                                 openLink(BASE_HOST);
                             }}
-                        >
-                            <Text style={{ ...s.highlightText }}>{BASE_HOST}</Text>
-                        </TouchableOpacity>
+                                selectable
+                            >{BASE_HOST}</Text>
+                        </Text>
                     </View>
-                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                    {/* Email */}
+                    <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...s.bodyText }}>
                             {`Email: `}
+                            <Text style={{ ...s.highlightText }}
+                                selectable
+                                onPress={() => {
+                                    trigger();
+                                    Linking.openURL('mailto:' + MAIL);
+                                }}
+                            >{MAIL}</Text>
                         </Text>
-                        <TouchableOpacity
-                            onPress={() => {
-                                trigger();
-                                Linking.openURL('mailto:' + MAIL);
-                            }}>
-                            <Text style={{ ...s.highlightText }}>{MAIL}</Text>
-                        </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
@@ -386,7 +400,7 @@ const AboutPage = () => {
                     </HomeCard>
                 )}
             </ScrollView>
-        </View>
+        </View >
     );
 };
 
