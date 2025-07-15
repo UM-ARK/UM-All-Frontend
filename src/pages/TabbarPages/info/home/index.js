@@ -59,6 +59,7 @@ import { t } from "i18next";
 import lodash from 'lodash';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
+import { useTranslation } from 'react-i18next';
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -151,7 +152,7 @@ const toastKaomojiArr = [
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
-    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow } = theme;
+    const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
 
     // 狀態
     const functionArray = [
@@ -231,6 +232,8 @@ const HomeScreen = ({ navigation }) => {
     const textInputRef = useRef(null);
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
+
+    const { i18n } = useTranslation();
 
     // 生命週期
     useEffect(() => {
@@ -430,7 +433,6 @@ const HomeScreen = ({ navigation }) => {
 
             const todayCourses = lodash.get(s_allCourseAllTime, curDay, []);
             const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
-            // TODO: 深淺模式切換時，由於緩存未刷新，顏色沒有進入深淺模式狀態
             setUpcomingCourse(upComing[0]);
         } catch (error) {
             console.log('error', error);
@@ -928,14 +930,14 @@ const HomeScreen = ({ navigation }) => {
                                     flexDirection: 'row', flex: 1,
                                     alignItems: "center", justifyContent: "center",
                                     gap: scale(3),
-                                    backgroundColor: upcomingCourse["color"] || themeColorUltraLight,
+                                    backgroundColor: TIME_TABLE_COLOR[lodash.random(0, TIME_TABLE_COLOR.length - 1)],
                                     paddingHorizontal: scale(20), paddingVertical: scale(10),
                                     marginTop: verticalScale(5),
                                     borderRadius: scale(5),
                                 }}>
-                                <Text style={{ color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
-                                <Text style={{ color: black.main, opacity: 0.7, }}>{upcomingCourse["Course Code"]}</Text>
-                                <Text style={{ color: black.main, opacity: 0.7, }}>{upcomingCourse["Time From"]}</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Course Code"]}</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Time From"]}</Text>
                             </View>
 
                         ) : (
@@ -951,6 +953,7 @@ const HomeScreen = ({ navigation }) => {
                                 <Text style={{
                                     ...uiStyle.defaultText,
                                     color: black.second,
+                                    fontSize: i18n.resolvedLanguage === 'en' ? verticalScale(10) : verticalScale(12),
                                 }}>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
                             </View>
                         )}
