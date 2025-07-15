@@ -292,22 +292,22 @@ const What2Reg = (props) => {
                         type === 'coursePlan' ? s_coursePlan : s_offerCourses;
                     if (currentState.updateTime !== data.updateTime) {
                         if (type === 'coursePlan') {
-                            await updateLocalCourseData('coursePlanTime')
-                            // await updateLocalCourseData('coursePlanTime', () => {
-                            //     Alert.alert(
-                            //         `ARK搵課提示`,
-                            //         `現在重啟APP以適配最新課表數據嗎？`,
-                            //         [
-                            //             {
-                            //                 text: 'Yes',
-                            //                 onPress: () => {
-                            //                     RNRestart.Restart();
-                            //                 },
-                            //             },
-                            //             { text: 'No' },
-                            //         ]
-                            //     );
-                            // });
+                            await updateLocalCourseData('coursePlanTime', () => {
+                                Alert.alert(
+                                    t(`ARK搵課提示`, { ns: 'catalog' }),
+                                    t(`現在重啟APP以適配最新課表數據嗎？`, { ns: 'catalog' }),
+                                    [
+                                        {
+                                            text: 'Yes',
+                                            onPress: () => RNRestart.Restart(),
+                                        },
+                                        {
+                                            text: 'No',
+                                            style: 'cancel',
+                                        },
+                                    ]
+                                );
+                            });
                         }
                     } else {
                         toastMes = t('已是最新課表數據！', { ns: 'catalog' });
