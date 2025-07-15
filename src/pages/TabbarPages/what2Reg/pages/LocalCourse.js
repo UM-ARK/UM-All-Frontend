@@ -87,7 +87,7 @@ const LocalCourse = (props) => {
     }, [courseCode, navigation, white, s_coursePlanTime]);
 
     // 渲染可選section
-    const renderSchedules = useCallback((schedulesObj) => {
+    const renderSchedules = (schedulesObj) => {
         const schedulesArr = Object.keys(schedulesObj);
         return (
             <FlatList
@@ -213,10 +213,10 @@ const LocalCourse = (props) => {
                 scrollEnabled={false}
             />
         );
-    }, [navigation, white]);
+    };
 
     // 按老師分組
-    const renderTeacherSchedules = useCallback((schedulesObj) => {
+    const renderTeacherSchedules = (schedulesObj) => {
         if (!relateTeacherObj) return null;
         const teacherArr = lodash.keys(relateTeacherObj);
 
@@ -355,7 +355,7 @@ const LocalCourse = (props) => {
                 )}
             </View>
         ));
-    }, [relateTeacherObj, navigation, white]);
+    };
 
     // Group By 切換
     const renderGroupChoice = useCallback(() => {
