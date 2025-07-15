@@ -33,6 +33,7 @@ const getItemCount = data => {
 class UMEventPage extends Component {
     virtualizedList = React.createRef(null);
     static contextType = ThemeContext;
+    progressRef = React.createRef(0);
 
     state = {
         data: undefined,
@@ -52,6 +53,12 @@ class UMEventPage extends Component {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
+                onDownloadProgress: progressEvent => {
+                    const loadedMB = progressEvent.loaded / 1024 / 1024;
+                    let progress = loadedMB / 0.1; // 假設API返回數據大小約為2MB
+                    if (progress > 1) progress = 0.95; // 確保進度不超過1
+                    this.progressRef.current = progress; // 更新進度條
+                }
             }).then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
@@ -243,7 +250,7 @@ class UMEventPage extends Component {
                         />
                     }
                 >
-                    <Loading />
+                    <Loading progress={this.progressRef.current} />
                 </ScrollView>) : (this.state.data != undefined && this.renderPage())}
             </View>
         );

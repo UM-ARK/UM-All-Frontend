@@ -80,6 +80,8 @@ const NewsPage = () => {
     const [topNews, setTopNews] = useState({});
     const [imgLoading, setImgLoading] = useState(true);
 
+    const progressRef = useRef(0);
+
     // 請求澳大新聞API
     useEffect(() => {
         getData();
@@ -89,11 +91,18 @@ const NewsPage = () => {
     // 請求澳大api返回新聞數據
     const getData = async () => {
         try {
+            const totalMB = 2;  // TODO: 這裡的2MB是預計API返回的數據大小，實際上可能會更大，需要減小流量
             const res = await axios.get(UM_API_NEWS, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
+                },
+                onDownloadProgress: progressEvent => {
+                    const loadedMB = progressEvent.loaded / 1024 / 1024;
+                    let progress = loadedMB / totalMB;
+                    if (progress > 1) progress = 0.95; // 確保進度不超過1
+                    progressRef.current = progress;
                 },
             });
             const result = res.data._embedded;
@@ -308,7 +317,7 @@ const NewsPage = () => {
                             }}
                         />
                     }>
-                    <Loading />
+                    <Loading progress={progressRef.current} />
                 </ScrollView>
             ) : null}
 

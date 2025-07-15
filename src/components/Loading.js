@@ -3,23 +3,23 @@ import { View, Text, } from 'react-native';
 
 import LoadingDotsDIY from './LoadingDots';
 import { useTheme, themes, uiStyle } from '../components/ThemeContext';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from "i18next";
+import { LinearProgress } from '@rneui/themed';
 
-export default function Loading() {
+export default function Loading({ progress = 0.5 }) {
     const { theme } = useTheme();
     const { black, white, themeColor, bg_color } = theme;
     return (
-        <View
-            style={{
-                paddingHorizontal: scale(20),
-                paddingVertical: scale(10),
-                borderRadius: scale(12),
-                borderWidth: scale(2),
-                borderColor: themeColor,
-                alignItems: 'center',
-                backgroundColor: bg_color,
-            }}>
+        <View style={{
+            paddingHorizontal: scale(20),
+            paddingVertical: scale(10),
+            borderRadius: scale(12),
+            borderWidth: scale(2),
+            borderColor: themeColor,
+            alignItems: 'center',
+            backgroundColor: bg_color,
+        }}>
             <Text
                 style={{
                     ...uiStyle.defaultText,
@@ -30,9 +30,16 @@ export default function Loading() {
                 }}>
                 {t('ARK ALL瘋狂加載中')}
             </Text>
-            <View style={{ marginVertical: scale(10), }}>
+            <View style={{ marginVertical: verticalScale(10), }}>
                 <LoadingDotsDIY />
             </View>
+            <LinearProgress
+                style={{ marginVertical: verticalScale(10) }}
+                color={themeColor}
+                value={progress}
+                animation={{ duration: 3000 }}
+                variant="determinate"
+            />
             <Text
                 style={{
                     ...uiStyle.defaultText,
