@@ -323,7 +323,8 @@ function Index({ navigation }) {
                         text_color: white,
                         bg_color_diy: themeColor,
                         isBarStyleBlack: false,
-                    }
+                    },
+                    describe: t('查看澳大學生會通告頁', { ns: 'features' }),
                 },
                 {
                     icon_type: iconTypes.materialCommunityIcons,

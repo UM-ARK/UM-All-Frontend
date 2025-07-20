@@ -209,6 +209,7 @@ export default {
         "查看澳大官方失物認領列表": "Check the official lost and found list of UM",
         "查看澳大和其他公司在澳大發佈的招聘": "Check the recruitment posted by UM and other companies in UM",
         "查看澳大書院菜單": "Check the UM college menu",
+        "查看澳大學生會通告頁": "Check the UM student union announcement page",
         "進入澳大MyUM網頁查看完整功能": "Enter the UM MyUM webpage to view the full functions",
         "進入CMMS報修系統，可以對書院等各種設施的問題下單申請維修": "Enter the CMMS repair system to place an order for repairs to various facilities such as colleges",
         "預約澳大體育場館的使用": "Reserve the use of UM sports venues",
