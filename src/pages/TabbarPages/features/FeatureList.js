@@ -138,7 +138,7 @@ export const functionArr = [
                 webview_param: {
                     // import pathMap的鏈接進行跳轉
                     url: UM_COMPUTER_ROOM,
-                    title: '電腦室使情況',
+                    title: '電腦室使用情況',
                     // 標題顏色，默認為black.main
                     // text_color: '#989898',
                     // 標題背景顏色，默認為bg_color
@@ -266,16 +266,15 @@ export const functionArr = [
             {
                 icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'school',
-                fn_name: "學生會",
+                fn_name: t('學生會', { ns: 'features' }),
                 needLogin: false,
                 go_where: 'Webview',
                 webview_param: {
                     url: 'https://info.umsu.org.mo/listdoc?_selector%5Bopen_doc_category_id%5D=1',
                     title: '學生會通告',
-                    // text_color: white,
-                    // bg_color_diy: themeColor,
                     isBarStyleBlack: false,
-                }
+                },
+                describe: t('查看澳大學生會通告頁', { ns: 'features' }),
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
