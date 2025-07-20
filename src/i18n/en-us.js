@@ -242,6 +242,7 @@ export default {
         "防詐騙圖文包，外地同學初次到達澳門要注意！": "Anti-fraud graphic package, students from other places should pay attention when they first arrive in Macau!",
         "書院大全，快捷找到對應書院主頁": "A list of colleges, quickly find the homepage of the corresponding college",
         "UM校友會，也可以找到其他校友相關資訊的網站": "UM Alumni Association, where you can also find other alumni-related information",
+        "UM部門，提供各種校內部門的資訊": "UM Departments, providing information on various campus departments",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",

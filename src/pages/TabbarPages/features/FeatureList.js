@@ -767,10 +767,10 @@ export const functionArr = [
             {
                 icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'account-multiple',
-                fn_name: t('澳大組織', { ns: 'features' }),
+                fn_name: t('澳大部門', { ns: 'features' }),
                 needLogin: false,
                 go_where: 'UMOrg',
-                describe: t('UM組織，提供各種校內組織的資訊', { ns: 'features' }),
+                describe: t('UM部門，提供各種校內部門的資訊', { ns: 'features' }),
             },
         ],
     },
