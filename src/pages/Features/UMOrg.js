@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation, } from 'react-native';
 import { Input } from '@rneui/themed';
 
@@ -125,26 +125,40 @@ const UMOrg = () => {
     const [displayOrgData, setDisplayOrgData] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const controller = new AbortController();
+    const searchTextRef = useRef(null);
+
     async function getUMOrg() {
-        const res = await axios.get(
-            UM_ORG, {
-            headers: {
-                Accept: 'application/json',
-                Authorization: UM_API_TOKEN,
-            },
-        }).then((res) => {
+        try {
+            const res = await axios.get(UM_ORG, {
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: UM_API_TOKEN,
+                },
+                signal: controller.signal,
+            })
+
             const data = res.data;
-            // const processedData = data._embedded.map(org => {...org,})
             setOrgData(data._embedded);
             setDisplayOrgData(data._embedded);
-        }).finally(() => {
+            setTimeout(() => {
+                setLoading(false);
+            }, 100);
+        } catch (error) {
+            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
+                Toast.show('Network Error!');
+            }
             setLoading(false);
-        });
+        }
     }
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'UMOrg' });
         getUMOrg();
+
+        return () => {
+            controller.abort();
+        }
     }, []);
 
     return (
@@ -152,7 +166,7 @@ const UMOrg = () => {
             <Header title={t('澳大部門', { ns: 'features' })} iOSDIY={true} />
 
             {/* 搜索框 */}
-            <Input placeholder="Search..." style={{color: black.main}} onChange={(e) => {
+            <Input placeholder="Search..." style={{ color: black.main }} onChange={(e) => {
                 const searchText = e.nativeEvent.text.toLowerCase();
                 setDisplayOrgData(orgData.filter(org => {
                     // 检查主组织的名称和代码
@@ -175,25 +189,38 @@ const UMOrg = () => {
 
                     return matchesMainOrg || matchesSubUnit;
                 }));
-            }} />
+            }} ref={searchTextRef} clearButtonMode='always' />
 
+            {/* TODO: 增加下滑刷新 */}
             {displayOrgData && displayOrgData.length > 0 ? (
-                <ScrollView style={{ paddingHorizontal: 10, marginBottom: 100 }}>
+                <ScrollView>
                     {displayOrgData.map((org, index) => {
                         return org ? (
                             <OrgInfo orgData={org} key={index} />
                         ) : null;
                     })}
                 </ScrollView>
-            ) : (
-                <View style={{ padding: scale(10), alignItems: 'center', justifyContent: 'center' }}>
-                    {loading ? (
-                        <Loading />
-                    ) : (
+            ) : (<View style={{ alignItems: 'center' }}>
+                {loading ? (<View><Loading /></View>) : (
+                    <ScrollView refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={loading}
+                            onRefresh={() => {
+                                setLoading(true);
+                                getUMOrg();
+                                if (searchTextRef.current) {
+                                    searchTextRef.current.clear(); // 清空搜索框
+                                }
+                            }}
+                        />
+                    }>
                         <Text style={{ ...uiStyle, color: black.main }}>No results found</Text>
-                    )}
-                </View>
-            )}
+                        <Text style={{ ...uiStyle, color: black.main }}>Please try to refresh</Text>
+                    </ScrollView>
+                )}
+            </View>)}
         </View>
     );
 };
