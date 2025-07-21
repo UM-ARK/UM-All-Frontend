@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, } from 'react-native';
 
-import LoadingDotsDIY from './LoadingDots';
 import { useTheme, themes, uiStyle } from '../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from "i18next";
@@ -30,9 +29,6 @@ export default function Loading({ progress = 0.5 }) {
                 }}>
                 {t('ARK ALL瘋狂加載中')}
             </Text>
-            <View style={{ marginVertical: verticalScale(10), }}>
-                <LoadingDotsDIY />
-            </View>
             <LinearProgress
                 style={{ marginVertical: verticalScale(10) }}
                 color={themeColor}
