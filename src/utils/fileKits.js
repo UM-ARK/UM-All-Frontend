@@ -59,7 +59,7 @@ export async function handleImageDownload(IMAGE_URL) {
     })
         .fetch('GET', IMAGE_URL)
         .then(res => {
-            CameraRoll.save(res.data, { type: 'photo' })
+            CameraRoll.save(res.data, { type: 'photo', album: 'ARK ALL' })
                 .then(res => {
                     Toast.show('保存成功 😊 ~')
                 })

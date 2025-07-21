@@ -2822,12 +2822,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-camera-roll/camera-roll@npm:^7.8.3":
-  version: 7.8.3
-  resolution: "@react-native-camera-roll/camera-roll@npm:7.8.3"
+"@react-native-camera-roll/camera-roll@npm:^7.10.1":
+  version: 7.10.1
+  resolution: "@react-native-camera-roll/camera-roll@npm:7.10.1"
   peerDependencies:
     react-native: ">=0.59"
-  checksum: 1465566ed52b6e1478debcebc1bcaecbd6752611064d7fd5a0c4ed06deb702626ebd945c7ca664d5d070f822a4d3338e5dbb447a9acb27adb35dd77f8bfba2f9
+  checksum: 70173af66061bd322eda356656165ab0d644f3d4d005586340198b5c2bfbf3eac4713893c7fd5a213e6c3f282d70ee1d52e5b917999652060be9122dc92b33a0
   languageName: node
   linkType: hard
 
@@ -12315,7 +12315,7 @@ __metadata:
     "@babel/runtime": ^7.25.6
     "@gorhom/bottom-sheet": 5.1.4
     "@react-native-async-storage/async-storage": ^2.2.0
-    "@react-native-camera-roll/camera-roll": ^7.8.3
+    "@react-native-camera-roll/camera-roll": ^7.10.1
     "@react-native-clipboard/clipboard": ^1.16.3
     "@react-native-community/datetimepicker": ^8.4.2
     "@react-native-cookies/cookies": ^6.2.1

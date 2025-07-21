@@ -1314,7 +1314,7 @@ PODS:
     - Yoga
   - react-native-blob-util (0.19.11):
     - React-Core
-  - react-native-cameraroll (7.8.3):
+  - react-native-cameraroll (7.10.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2243,7 +2243,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: b2642edd9be75d51ead8cda109c986665eae09cf
   React-microtasksnativemodule: 94f7e35c4984282f04f946fb1be1d008aff4bdf0
   react-native-blob-util: f7234c91ad0e3faeee51b3edee80b61553f74993
-  react-native-cameraroll: b3c93fee9288f74e2addaa6801f09b7f5fc10cbd
+  react-native-cameraroll: 7c940bc33a6d27cc80d0638491a2b753dc36e535
   react-native-compressor: bd55d101791ac221400aeb6b254a2e11db4367e1
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-image-picker: 90e570e3ca0d4bf618da7c24a89dba848acee6b4
