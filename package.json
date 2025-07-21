@@ -53,6 +53,7 @@
     "react-native-animated-splash-screen": "^2.0.5",
     "react-native-blob-util": "^0.19.11",
     "react-native-compressor": "^1.9.0",
+    "react-native-countdown-circle-timer": "^3.2.1",
     "react-native-easy-toast": "^2.3.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-fs": "^2.20.0",

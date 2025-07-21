@@ -7,9 +7,8 @@ import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP, } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
-import LoadingDotsDIY from '../../components/LoadingDots';
 import { trigger } from '../../utils/trigger';
-
+import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import { DOMParser } from "react-native-html-parser";
@@ -21,9 +20,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
 
-let busIcon = require('../../static/img/Bus/bus.png');
-let busRouteImg = require('../../static/img/Bus/bus_route.png');
-let stopImgArr = [
+const busIcon = require('../../static/img/Bus/bus.png');
+const busRouteImg = require('../../static/img/Bus/bus_route.png');
+const stopImgArr = [
     require('../../static/img/Bus/stopImg/PGH.jpg'),
     require('../../static/img/Bus/stopImg/E4.jpg'),
     require('../../static/img/Bus/stopImg/N2.jpg'),
@@ -137,6 +136,8 @@ const BusScreen = () => {
     const [toastColor, setToastColor] = useState(themeColor);
     const [busUrl, setBusUrl] = useState(BUS_URL_DEFAULT);
 
+    const controller = new AbortController();
+
     // busStyleArr 使用 useMemo 儲存，避免每次重新建立
     const busStyleArr = useMemo(() => [
         { position: 'absolute', left: scale(255), top: scale(450) }, // PGH
@@ -180,14 +181,17 @@ const BusScreen = () => {
             fetchBusInfo();
         }, 7000);
 
-        return () => clearInterval(timer);
+        return () => {
+            controller.abort(); // 清理請求
+            clearInterval(timer);
+        };
     }, [busUrl]);
 
     // 爬蟲campus Bus
-    const fetchBusInfo = useCallback(async () => {
+    const fetchBusInfo = async () => {
         setIsLoading(true);
         try {
-            const res = await axios.get(busUrl);
+            const res = await axios.get(busUrl, { signal: controller.signal });
             const result = getBusData(res.data);
 
             // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
@@ -206,20 +210,21 @@ const BusScreen = () => {
             setIsLoading(false);
             Toast.show('網絡錯誤！🆘');
         }
-    }, [busUrl]);
+    };
 
     // 控制彈出層打開 or 關閉
-    const toggleModal = useCallback((index) => {
+    const toggleModal = (index) => {
         trigger();
         setClickStopIndex(index);
         setIsModalVisible(prev => !prev);
-    }, []);
+    };
 
     // 點擊刷新
-    const onBusIconPress = useCallback(() => {
+    const onBusIconPress = () => {
         trigger();
+        controller.abort(); // 取消之前的請求
         fetchBusInfo();
-    }, [fetchBusInfo]);
+    };
 
     // 巴士站點文字渲染
     const renderBusStopText = useCallback((left, top, buildingCode, text, index) => {
@@ -356,7 +361,19 @@ const BusScreen = () => {
                             left: scale(130),
                             width: scale(35),
                         }}>
-                            <LoadingDotsDIY />
+                            <CountdownCircleTimer
+                                isPlaying
+                                duration={7}
+                                colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+                                strokeWidth={verticalScale(5)}
+                                colorsTime={[7, 5, 2, 0]}
+                                size={scale(35)}
+                                onComplete={() => {
+                                    return { shouldRepeat: true }
+                                }}
+                            >
+                                {({ remainingTime }) => <Text style={{ ...uiStyle.defaultText, color: black.third }}>{remainingTime}</Text>}
+                            </CountdownCircleTimer>
                         </View>
                     </ImageBackground>
                 </ScrollView>
