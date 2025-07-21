@@ -6,7 +6,7 @@ import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import ARKWiki from './pages/TabbarPages/arkwiki';
 import CourseSim from './pages/TabbarPages/courseSim';
 
-import { useTheme } from './components/ThemeContext';
+import { uiStyle, useTheme } from './components/ThemeContext';
 import { trigger } from './utils/trigger';
 
 import { scale } from 'react-native-size-matters';
@@ -24,6 +24,10 @@ const Tabbar = () => {
         <Tabs.Navigator
             tabBarOptions={{
                 inactiveTintColor: theme.black.main,
+                labelStyle: {  // 這裡設定label的字體大小
+                    ...uiStyle.defaultText,
+                    fontSize: scale(10),
+                },
             }}
             appearance={{
                 activeTabBackgrounds: theme.themeColor,
