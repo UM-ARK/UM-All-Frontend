@@ -45,7 +45,7 @@ export default function NewsScreen() {
             <Tab.Navigator
                 screenOptions={{
                     tabBarLabelStyle: {
-                        fontSize: verticalScale(10),
+                        fontSize: verticalScale(9),
                         fontWeight: 'bold',
                     },
                     tabBarStyle: {
