@@ -4,6 +4,7 @@ import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
 import ARKWiki from './pages/TabbarPages/arkwiki';
+import ARKHarbor from './pages/TabbarPages/arkHarbor';
 import CourseSim from './pages/TabbarPages/courseSim';
 
 import { uiStyle, useTheme } from './components/ThemeContext';
@@ -15,6 +16,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
 import { t } from 'i18next';
+import { openLink } from './utils/browser';
+import { ARK_HARBOR } from './utils/pathMap';
 
 const Tabs = AnimatedTabBarNavigator();
 
@@ -73,6 +76,28 @@ const Tabbar = () => {
                 }}
                 listeners={() => ({
                     tabPress: () => trigger(),
+                })}
+            />
+
+            <Tabs.Screen
+                name="Harbor"
+                component={ARKHarbor}
+                options={{
+                    tabBarIcon: ({ focused, color }) => (
+                        <MaterialCommunityIcons
+                            name="file-document-edit-outline"
+                            size={scale(18)}
+                            color={focused ? color : theme.black.main}
+                            focused={focused}
+                        />
+                    ),
+                    title: t('論壇'),
+                }}
+                listeners={() => ({
+                    tabPress: () => {
+                        trigger();
+                        openLink(ARK_HARBOR);
+                    },
                 })}
             />
 

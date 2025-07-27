@@ -24,6 +24,8 @@ export const GITHUB_ACTIVITY = GITHUB_FRONT_BASE + 'activity';
 // 組織賬號登入
 export const ARK_WEB_CLUB_SIGNIN = BASE_HOST + '/clubsignin';
 
+export const ARK_HARBOR = 'https://harbor.umall.one';
+
 export const ARK_WIKI = 'https://wiki.umall.one';
 
 export const ARK_WIKI_SEARCH = ARK_WIKI + '/wiki/Special:Search?search=';
