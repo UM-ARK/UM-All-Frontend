@@ -23,6 +23,7 @@ import TouchableScale from 'react-native-touchable-scale';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { NavigationContext } from '@react-navigation/native';
+import lodash from 'lodash';
 
 const EventPage = forwardRef((props, ref) => {
     const { theme } = useTheme();
@@ -73,19 +74,15 @@ const EventPage = forwardRef((props, ref) => {
 
     const getTopicData = async () => {
         try {
-            const URL = ARK_HARBOR_LATEST + `?page=${dataPage - 1}`;
+            const URL = ARK_HARBOR_LATEST;
             const res = await axios.get(URL);
             if (res.data) {
                 const data = res.data;
                 const topics = data.topic_list.topics || [];
                 // 可以在這裡處理頂部數據
-                // 如果dataPage>1，則給harborData增值，第一次加載則直接賦值
-                if (dataPage > 1) {
-                    if (topics.length > 0) {
-                        setHarborData(prev => [...prev, ...topics]);
-                    }
-                } else {
-                    setHarborData(topics);
+                if (topics.length > 0) {
+                    const newTopic = lodash.sampleSize(topics, 10);
+                    setHarborData(newTopic);
                 }
             }
         } catch (error) {
@@ -224,16 +221,6 @@ const EventPage = forwardRef((props, ref) => {
 
         // eventList为空时，直接将harbor随机均分到两列
         if (!eventList || eventList.length === 0) {
-            // const harborCopy = harborData.map(item => ({ ...item, type: 'harbor' }));
-            // 随机打乱
-            // for (let i = harborCopy.length - 1; i > 0; i--) {
-            //     const j = Math.floor(Math.random() * (i + 1));
-            //     [harborCopy[i], harborCopy[j]] = [harborCopy[j], harborCopy[i]];
-            // }
-            // // 均分
-            // const mid = Math.ceil(harborCopy.length / 2);
-            // leftList = harborCopy.slice(0, mid);
-            // rightList = harborCopy.slice(mid);
             setLeftDataList(leftHarbor);
             setRightDataList(rightHarbor);
             setEventDataList([]);
@@ -355,11 +342,11 @@ const EventPage = forwardRef((props, ref) => {
                             return renderHarborMessage(item);
                         }
                     } else {
-                        return <EventCard key={item._id} data={item} />
+                        return <EventCard data={item} />
                     }
                 }}
                 scrollEnabled={false}
-                keyExtractor={item => item._id}
+                keyExtractor={item => item._id ? String(item._id) : String(item.id)}
             />
         </View>)
     }
