@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo, memo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
@@ -282,4 +282,4 @@ const EventCard = ({ data, RootStore }) => {
     );
 };
 
-export default inject('RootStore')(EventCard);
+export default inject('RootStore')(memo(EventCard));
