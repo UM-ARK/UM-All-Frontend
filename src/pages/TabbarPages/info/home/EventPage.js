@@ -343,44 +343,37 @@ const EventPage = forwardRef((props, ref) => {
         );
     };
 
+    const renderOneList = (dataList) => {
+        return (<View>
+            <FlatList
+                data={dataList}
+                renderItem={({ item }) => {
+                    if (item.type === 'harbor') {
+                        if (item.pinned === false) {
+                            return renderHarborMessage(item);
+                        }
+                    } else {
+                        return <EventCard key={item._id} data={item} />
+                    }
+                }}
+                scrollEnabled={false}
+                keyExtractor={item => item._id}
+            />
+        </View>)
+    }
+
     // 渲染主要內容
     const renderPage = () => {
         return (
             <View style={s.waterFlowContainer}>
                 {/* 左側的列 放置雙數下標的圖片 從0開始 */}
                 <View>
-                    <FlatList
-                        data={leftDataList}
-                        renderItem={({ item }) => {
-                            if (item.type === 'harbor') {
-                                if (item.pinned === false) {
-                                    return renderHarborMessage(item);
-                                }
-                            } else {
-                                return <EventCard data={item} />
-                            }
-                        }}
-                        scrollEnabled={false}
-                        keyExtractor={item => item._id}
-                    />
+                    {renderOneList(leftDataList)}
                 </View>
                 {/* 右側的列 放置單數下標的圖片 */}
-                <View style={{ alignItems: 'center' }}>
+                <View >
                     {rightDataList.length > 0 ? (
-                        <FlatList
-                            data={rightDataList}
-                            renderItem={({ item }) => {
-                                if (item.type === 'harbor') {
-                                    if (item.pinned === false) {
-                                        return renderHarborMessage(item);
-                                    }
-                                } else {
-                                    return <EventCard data={item} />
-                                }
-                            }}
-                            scrollEnabled={false}
-                            keyExtractor={item => item._id}
-                        />
+                        renderOneList(rightDataList)
                     ) : (
                         <Text style={{ ...uiStyle.defaultText }}>No more data</Text>
                     )}
