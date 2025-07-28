@@ -9,6 +9,7 @@ export default {
         "資訊": "Info",
         "搵課": "Catalog",
         "百科": "Wiki",
+        "論壇": "Harbor",
         "課表": "Table",
         "服務": "Service",
         "組織": "Club",
@@ -41,6 +42,7 @@ export default {
         "校園巴士": "Bus",
         "支持我們": "Donate",
         "澳大方舟": "ARK",
+        "職涯港": "Harbor",
         "方舟百科": "Wiki",
         "組織登入": "Club In",
 
