@@ -1,12 +1,12 @@
-import { Linking, Alert, Platform, } from 'react-native';
+import { Linking, Alert, Platform, Appearance } from 'react-native';
 
 import { InAppBrowser } from 'react-native-inappbrowser-reborn'
-import { COLOR_DIY } from './uiMap';
-const { white, themeColor } = COLOR_DIY;
+import { themes } from "../components/ThemeContext";
 
 // 使用Chrome、Safari等瀏覽器以選項卡形式打開鏈接，URL需要帶有https://
-// TODO: 非組件無法使用useTheme()，需要傳入themeColor、white等參數
 export async function openLink(URL) {
+    const colorScheme = Appearance.getColorScheme(); // 'light' 或 'dark'
+    const { white, themeColor } = themes[colorScheme] || themes.light;
     try {
         const url = URL;
         if (await InAppBrowser.isAvailable()) {
