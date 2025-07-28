@@ -10,7 +10,7 @@ import {
 
 import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
 
-import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';
+import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
@@ -18,7 +18,10 @@ import EventCard from '../components/EventCard';
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
+import TouchableScale from 'react-native-touchable-scale';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { openLink } from '../../../../utils/browser';
 
 const EventPage = forwardRef((props, ref) => {
     const { theme } = useTheme();
@@ -48,6 +51,8 @@ const EventPage = forwardRef((props, ref) => {
     const [rightDataList, setRightDataList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [noMoreData, setNoMoreData] = useState(false);
+    const [harborData, setHarborData] = useState([]);
+    const [eventRawList, setEventRawList] = useState([]);  // 把活動原始數據也存 state
 
     // 暴露方法給父組件
     useImperativeHandle(ref, () => ({
@@ -56,9 +61,40 @@ const EventPage = forwardRef((props, ref) => {
         onRefresh,
     }))
 
+
+    // 初始化數據
     useEffect(() => {
+        getTopicData();
         getData(false);
     }, []);
+
+    const getTopicData = async () => {
+        try {
+            const URL = ARK_HARBOR_LATEST + `?page=${dataPage - 1}`;
+            const res = await axios.get(URL);
+            if (res.data) {
+                const data = res.data;
+                const topics = data.topic_list.topics || [];
+                // 可以在這裡處理頂部數據
+                // 如果dataPage>1，則給harborData增值，第一次加載則直接賦值
+                if (dataPage > 1) {
+                    if (topics.length > 0) {
+                        setHarborData(prev => [...prev, ...topics]);
+                    }
+                } else {
+                    setHarborData(topics);
+                }
+            }
+        } catch (error) {
+            console.log('Error fetching topic data:', error);
+        }
+    }
+
+    useEffect(() => {
+        const filteredData = getNotFinishEvent(eventRawList, noMoreData);
+        separateData(filteredData);
+    }, [harborData, eventRawList])
+
 
     // 當dataPage變化時，重新獲取數據
     // 這裡的dataPage是用來控制頁碼的，當頁碼變化時，會重新獲取數據
@@ -96,16 +132,14 @@ const EventPage = forwardRef((props, ref) => {
                 }
 
                 if (dataPage === 1) {
-                    const filteredData = getNotFinishEvent(newDataArr, loadMore);
-                    separateData(filteredData);
+                    setEventRawList(newDataArr);
                 } else if (eventDataList.length > 0) {
                     let tempArr = eventDataList.concat(newDataArr);
-                    const filteredData = getNotFinishEvent(tempArr, loadMore);
-                    separateData(filteredData);
+                    setEventRawList(tempArr);
                 }
             } else if (json.code === '2') {
                 alert('已無更多數據');
-                setNoMoreData(true);
+                noMore = true;
             } else {
                 alert('數據出錯，請聯繫開發者');
             }
@@ -123,10 +157,86 @@ const EventPage = forwardRef((props, ref) => {
         }
     };
 
+    const insertToList = (list, harborArr) => {
+        const now = moment();
+        // 找到所有未過期活動的插入點（前後）
+        const validIndexes = list
+            .map((item, idx) => (item.enddatetime && now.isBefore(moment(item.enddatetime)) ? idx : -1))
+            .filter(idx => idx !== -1);
+        let insertPositions = Array.from(new Set(
+            validIndexes.flatMap(idx => [idx, idx + 1])
+        )).filter(pos => pos >= 0 && pos <= list.length);
+
+        // 隨機打亂插入點
+        for (let i = insertPositions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [insertPositions[i], insertPositions[j]] = [insertPositions[j], insertPositions[i]];
+        }
+
+        // 隨機打亂 harborArr
+        for (let i = harborArr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [harborArr[i], harborArr[j]] = [harborArr[j], harborArr[i]];
+        }
+
+        // 只插入到未過期活動的前後，剩下的放末尾
+        let used = 0;
+        harborArr.forEach((harborItem, i) => {
+            if (insertPositions.length > 0 && i < insertPositions.length) {
+                list.splice(insertPositions[i], 0, harborItem);
+                // 插入後，所有後面的插入點都要+1
+                insertPositions = insertPositions.map(pos => pos > insertPositions[i] ? pos + 1 : pos);
+                used++;
+            }
+        });
+        // 剩下的 harbor 插入到最後一個未過期活動的後面
+        if (harborArr.length > used) {
+            // 找到最後一個未過期活動的下標
+            const now = moment();
+            let lastValidIdx = -1;
+            for (let i = list.length - 1; i >= 0; i--) {
+                if (list[i].enddatetime && now.isBefore(moment(list[i].enddatetime))) {
+                    lastValidIdx = i;
+                    break;
+                }
+            }
+            // 插入到最後一個未過期活動的後面，如果沒有未過期活動則插到末尾
+            const insertIdx = lastValidIdx >= 0 ? lastValidIdx + 1 : list.length;
+            list.splice(insertIdx, 0, ...harborArr.slice(used));
+        }
+    };
+
     const separateData = (eventList) => {
         // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
         let leftList = [];
         let rightList = [];
+
+        let harborCopy = harborData.map(item => ({ ...item, type: 'harbor' }));
+        for (let i = harborCopy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [harborCopy[i], harborCopy[j]] = [harborCopy[j], harborCopy[i]];
+        }
+        const mid = Math.ceil(harborCopy.length / 2);
+        let leftHarbor = harborCopy.slice(0, mid);
+        let rightHarbor = harborCopy.slice(mid);
+
+        // eventList为空时，直接将harbor随机均分到两列
+        if (!eventList || eventList.length === 0) {
+            // const harborCopy = harborData.map(item => ({ ...item, type: 'harbor' }));
+            // 随机打乱
+            // for (let i = harborCopy.length - 1; i > 0; i--) {
+            //     const j = Math.floor(Math.random() * (i + 1));
+            //     [harborCopy[i], harborCopy[j]] = [harborCopy[j], harborCopy[i]];
+            // }
+            // // 均分
+            // const mid = Math.ceil(harborCopy.length / 2);
+            // leftList = harborCopy.slice(0, mid);
+            // rightList = harborCopy.slice(mid);
+            setLeftDataList(leftHarbor);
+            setRightDataList(rightHarbor);
+            setEventDataList([]);
+            return;
+        }
 
         eventList.forEach((itm, idx) => {
             // 圖片類型服務器返回相對路徑，請記住加上域名
@@ -139,6 +249,11 @@ const EventPage = forwardRef((props, ref) => {
                 rightList.push(itm);
             }
         });
+
+        if (harborCopy.length > 0) {
+            insertToList(leftList, leftHarbor);
+            insertToList(rightList, rightHarbor);
+        }
 
         setLeftDataList(leftList);
         setRightDataList(rightList);
@@ -193,6 +308,7 @@ const EventPage = forwardRef((props, ref) => {
         setIsLoading(true);
 
         setTimeout(() => {
+            getTopicData();
             getData(false);
         }, 100);
     };
@@ -235,7 +351,15 @@ const EventPage = forwardRef((props, ref) => {
                 <View>
                     <FlatList
                         data={leftDataList}
-                        renderItem={({ item }) => <EventCard data={item} />}
+                        renderItem={({ item }) => {
+                            if (item.type === 'harbor') {
+                                if (item.pinned === false) {
+                                    return renderHarborMessage(item);
+                                }
+                            } else {
+                                return <EventCard data={item} />
+                            }
+                        }}
                         scrollEnabled={false}
                         keyExtractor={item => item._id}
                     />
@@ -245,7 +369,15 @@ const EventPage = forwardRef((props, ref) => {
                     {rightDataList.length > 0 ? (
                         <FlatList
                             data={rightDataList}
-                            renderItem={({ item }) => <EventCard data={item} />}
+                            renderItem={({ item }) => {
+                                if (item.type === 'harbor') {
+                                    if (item.pinned === false) {
+                                        return renderHarborMessage(item);
+                                    }
+                                } else {
+                                    return <EventCard data={item} />
+                                }
+                            }}
                             scrollEnabled={false}
                             keyExtractor={item => item._id}
                         />
@@ -254,6 +386,93 @@ const EventPage = forwardRef((props, ref) => {
                     )}
                 </View>
             </View>
+        );
+    };
+
+    // 渲染harbor的消息
+    const renderHarborMessage = (item) => {
+        // unicode_title    直接返回對應的Emoji
+        // title            例如:heart_eyes:以字符串形式返回
+        // excerpt          主題內容
+        // id               主題ID
+        // like_count       點讚數
+        // reply_count      回復數
+        // views            瀏覽數
+        // pinned           是否置頂
+        // console.log('渲染harbor消息:', item);
+        return (
+            <TouchableScale style={{
+                backgroundColor: white, borderRadius: scale(8),
+                margin: scale(5), padding: scale(10),
+                width: scale(160),
+                alignItems: 'flex-start'
+            }}
+                onPress={() => {
+                    // TODO: 用戶偏好是Webview則導航到Tabbar
+                    openLink({ URL: ARK_HARBOR_TOPIC + item.id, mode: 'fullScreen' });
+                }}
+            >
+                <Text style={{ ...uiStyle.defaultText, fontWeight: '500', color: black.second }} numberOfLines={2}>
+                    {item.unicode_title ? item.unicode_title : item.title}
+                </Text>
+                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, marginTop: verticalScale(4), }} numberOfLines={3}>{item.excerpt}</Text>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                    <View style={{
+                        paddingHorizontal: scale(2), paddingVertical: scale(1),
+                        borderColor: themeColor,
+                        borderRadius: scale(20), borderWidth: scale(1),
+                        marginTop: scale(2),
+                    }}>
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            fontSize: scale(7),
+                            color: themeColor
+                        }}>
+                            職涯港
+                        </Text>
+                    </View>
+
+                    {/* 點讚數 回復數 瀏覽數 */}
+                    <View style={{ marginTop: scale(2), flexDirection: 'row', alignItems: 'center' }}>
+                        {item?.like_count > 0 && (
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(10),
+                                color: themeColor,
+                                marginLeft: scale(5),
+                            }}>
+                                <MaterialCommunityIcons name="thumb-up" />
+                                {item.like_count}
+                            </Text>
+                        )}
+
+                        {item?.reply_count > 0 && (
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(10),
+                                color: themeColor,
+                                marginLeft: scale(5),
+                            }}>
+                                <MaterialCommunityIcons name="comment" />
+                                {item.reply_count}
+                            </Text>
+                        )}
+
+                        {item?.views > 0 && (
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(10),
+                                color: themeColor,
+                                marginLeft: scale(5),
+                            }}>
+                                <MaterialCommunityIcons name="eye" />
+                                {item.views}
+                            </Text>
+                        )}
+                    </View>
+                </View>
+            </TouchableScale>
         );
     };
 
