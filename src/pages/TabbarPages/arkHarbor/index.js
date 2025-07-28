@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
-import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler, } from 'react-native';
+import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
@@ -22,7 +22,7 @@ const iconSize = scale(25);
 
 const ARKHarbor = (props) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, wiki_bg_color, barStyle, isLight } = theme;
+    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color } = theme;
     const s = StyleSheet.create({
         titleText: {
             ...uiStyle.defaultText,
@@ -43,17 +43,17 @@ const ARKHarbor = (props) => {
 
     const webviewRef = useRef();
 
-    // 未打開Wiki的狀態下從別的頁面跳轉至Wiki
+    // TODO: 基於用戶偏好是Webview
+    // 未打開Harbor的狀態下從別的頁面跳轉至Harbor
     useEffect(() => {
         if (props.route.params && props.route.params.url) {
             setCurrentURL(props.route.params.url);
-            // webviewRef.current?.reload();
         }
     }, []);
 
-    // componentDidMount & componentWillUnmount 對應
+    // 監聽Android返回鍵
     useEffect(() => {
-        logToFirebase('openPage', { page: 'wiki' });
+        logToFirebase('openPage', { page: 'harbor' });
         let focusListener, blurListener;
         if (Platform.OS === 'android') {
             focusListener = props.navigation.addListener('focus', () => {
@@ -72,6 +72,7 @@ const ARKHarbor = (props) => {
     }, []);
 
     // componentDidUpdate: 監聽 route.params 變化
+    // TODO: 用戶偏好是Webview時，導航到此處
     useEffect(() => {
         if (props.route.params && props.route.params.url !== currentURL) {
             setCurrentURL(props.route.params.url);
@@ -95,36 +96,26 @@ const ARKHarbor = (props) => {
         setCanGoForward(webViewState.canGoForward);
     };
 
-    // 返回ARK Wiki的主頁
-    const returnWikiHome = () => {
-        trigger();
-        setCurrentURL(ARK_HARBOR);
-        // webviewRef.current?.reload();
-        Toast.show({
-            type: 'arkToast',
-            text1: '正全力返回主頁！',
-            topOffset: scale(100),
-            onPress: () => Toast.hide(),
+    // Tabbar控制GoHome
+    useEffect(() => {
+        const sub = DeviceEventEmitter.addListener('harborGoHome', () => {
+            // 調用 goHome
+            setCurrentURL(ARK_HARBOR);
+            Toast.show({
+                type: 'arkToast',
+                text1: '正全力返回主頁！',
+                topOffset: scale(100),
+                onPress: () => Toast.hide(),
+            });
         });
-    };
-
-    const goRandomPage = () => {
-        trigger();
-        setCurrentURL(ARK_WIKI_RANDOM_PAGE);
-        // webviewRef.current?.reload();
-        Toast.show({
-            type: 'arkToast',
-            text1: '正為你打開隨機條目！',
-            topOffset: scale(100),
-            onPress: () => Toast.hide(),
-        });
-    };
+        return () => sub.remove();
+    }, [])
 
     return (
         <View style={{ flex: 1 }}>
             <Header
-                // Wiki的默認配色
-                backgroundColor={white}
+                // harbor的默認配色
+                backgroundColor={harbor_bg_color}
                 statusBarProps={{
                     backgroundColor: 'transparent',
                     barStyle: barStyle,
@@ -141,162 +132,6 @@ const ARKHarbor = (props) => {
                 }}
             />
 
-            {/* 頂部工具欄 */}
-            {false && (
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        width: '100%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: white,
-                        paddingVertical: scale(5),
-                    }}
-                >
-                    {/* 主頁按鈕 */}
-                    <TouchableScale
-                        style={{
-                            alignSelf: 'center',
-                            position: 'absolute',
-                            left: scale(10),
-                        }}
-                        onPress={returnWikiHome}
-                    >
-                        <MaterialCommunityIcons
-                            name="home-outline"
-                            size={scale(28)}
-                            color={themeColor}
-                        />
-                    </TouchableScale>
-
-                    {/* 回退按鈕 */}
-                    {canGoBack ? (
-                        <TouchableScale
-                            style={{
-                                alignSelf: 'center',
-                                position: 'absolute',
-                                left: scale(45),
-                            }}
-                            onPress={() => {
-                                webviewRef.current.goBack();
-                                trigger();
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="arrow-left-circle-outline"
-                                size={scale(25)}
-                                color={themeColor}
-                            />
-                        </TouchableScale>
-                    ) : null}
-
-                    {/* 前進按鈕 */}
-                    {canGoForward ? (
-                        <TouchableScale
-                            style={{
-                                alignSelf: 'center',
-                                position: 'absolute',
-                                left: scale(75),
-                            }}
-                            onPress={() => {
-                                webviewRef.current.goForward();
-                                trigger();
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="arrow-right-circle-outline"
-                                size={scale(25)}
-                                color={themeColor}
-                            />
-                        </TouchableScale>
-                    ) : null}
-
-                    {/* ARK Logo */}
-                    <TouchableScale
-                        style={{ flexDirection: 'row' }}
-                        onPress={goRandomPage}
-                    >
-                        <FastImage
-                            source={require('../../../static/img/logo.png')}
-                            style={{
-                                height: iconSize,
-                                width: iconSize,
-                                borderRadius: scale(5),
-                            }}
-                        />
-                        {/* 標題 */}
-                        <View style={{ marginLeft: scale(5) }}>
-                            <Text style={s.titleText}>ARK Wiki</Text>
-                        </View>
-                    </TouchableScale>
-
-                    {/* 搜索按鈕 */}
-                    <TouchableScale
-                        style={{
-                            alignSelf: 'center',
-                            position: 'absolute',
-                            right: scale(65),
-                        }}
-                        onPress={() => {
-                            trigger();
-                            setCurrentURL(ARK_WIKI_SEARCH);
-                            // webviewRef.current?.reload();
-                        }}
-                    >
-                        <Ionicons
-                            name="search"
-                            size={scale(25)}
-                            color={themeColor}
-                        />
-                    </TouchableScale>
-
-                    {/* 刷新按鈕 */}
-                    <TouchableScale
-                        style={{
-                            alignSelf: 'center',
-                            position: 'absolute',
-                            right: scale(35),
-                        }}
-                        onPress={() => {
-                            webviewRef.current.reload();
-                            trigger();
-                        }}
-                    >
-                        <MaterialCommunityIcons
-                            name="refresh"
-                            size={scale(28)}
-                            color={themeColor}
-                        />
-                    </TouchableScale>
-
-                    {/* 分享按鈕 */}
-                    <TouchableScale
-                        style={{
-                            alignSelf: 'center',
-                            position: 'absolute',
-                            right: scale(10),
-                        }}
-                        onPress={() => {
-                            trigger();
-                            Clipboard.setString(currentURL);
-                            Toast.show({
-                                type: 'arkToast',
-                                text1: '已複製當前頁面鏈接到粘貼板！',
-                                text2: '快去和小夥伴分享吧~',
-                                topOffset: scale(100),
-                                onPress: () => Toast.hide(),
-                            });
-                        }}
-                    >
-                        <MaterialCommunityIcons
-                            name="share-variant"
-                            size={scale(23)}
-                            color={themeColor}
-                        />
-                    </TouchableScale>
-                </View>
-            )}
-
             {!isLoaded ? (
                 <Progress.Bar
                     progress={progress}
@@ -308,6 +143,7 @@ const ARKHarbor = (props) => {
                 />
             ) : null}
 
+            {/* TODO: 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}
             <WebView
                 ref={webviewRef}
                 source={{ uri: currentURL }}
@@ -318,10 +154,11 @@ const ARKHarbor = (props) => {
                 allowUniversalAccessFromFileURLs
                 cacheEnabled={true}
                 // IOS
-                sharedCookiesEnabled
-                enableApplePay={true}
+                sharedCookiesEnabled={true}              // iOS
+                // enableApplePay={true}
                 // Android
                 thirdPartyCookiesEnabled
+                javaScriptCanOpenWindowsAutomatically
                 domStorageEnabled={true}
                 // 前進、回退按鈕所需判斷邏輯
                 onNavigationStateChange={onNavigationStateChange}

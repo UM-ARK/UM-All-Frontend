@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert, DeviceEventEmitter, } from "react-native";
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
@@ -9,6 +10,8 @@ import CourseSim from './pages/TabbarPages/courseSim';
 
 import { uiStyle, useTheme } from './components/ThemeContext';
 import { trigger } from './utils/trigger';
+import { openLink } from './utils/browser';
+import { ARK_HARBOR } from './utils/pathMap';
 
 import { scale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Feather';
@@ -16,8 +19,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
 import { t } from 'i18next';
-import { openLink } from './utils/browser';
-import { ARK_HARBOR } from './utils/pathMap';
 
 const Tabs = AnimatedTabBarNavigator();
 
@@ -85,7 +86,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name="file-document-edit-outline"
+                            name="forum-outline"
                             size={scale(18)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
@@ -96,8 +97,36 @@ const Tabbar = () => {
                 listeners={() => ({
                     tabPress: () => {
                         trigger();
-                        openLink(ARK_HARBOR);
+                        // TODO: 判斷用戶的設定是看Webview還是Browser
+                        // openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
                     },
+                    tabLongPress: (e) => {
+                        Alert.alert(
+                            '此按鈕默認行為Default Action',
+                            '(您可以隨時長按修改)\nWebview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)\nBrowser(Default)：在瀏覽器中打開論壇',
+                            [
+                                {
+                                    text: 'Webview(App內嵌)',
+                                    onPress: () => {
+                                        // TODO: 寫入緩存，設置用戶的偏好
+                                    },
+                                },
+                                {
+                                    text: 'Browser(Default)',
+                                    onPress: () => {
+                                        // TODO: 寫入緩存，設置用戶的偏好
+                                        // TODO: 打開Browser
+                                    },
+                                },
+                                {
+                                    text: 'Refresh to Webview Homepage',
+                                    onPress: () => {
+                                        DeviceEventEmitter.emit('harborGoHome')
+                                    },
+                                },
+                            ],
+                        );
+                    }
                 })}
             />
 
