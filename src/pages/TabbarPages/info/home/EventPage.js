@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useContext } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useContext, useCallback } from 'react';
 import {
     Text,
     View,
@@ -66,50 +66,46 @@ const EventPage = forwardRef((props, ref) => {
         onRefresh,
     }));
 
-    // 初始化數據
+    // 首次加載時，獲取數據
     useEffect(() => {
-        getTopicData();
-        getData(false);
+        getAPIData();
     }, []);
 
-    const getTopicData = async () => {
-        try {
-            const URL = ARK_HARBOR_LATEST;
-            const res = await axios.get(URL);
-            if (res.data) {
-                const data = res.data;
-                const topics = data.topic_list.topics || [];
-                // 可以在這裡處理頂部數據
-                if (topics.length > 0) {
-                    const newTopic = lodash.sampleSize(topics, 10);
-                    setHarborData(newTopic);
-                }
-            }
-        } catch (error) {
-            console.log('Error fetching topic data:', error);
-        }
-    }
-
+    // 監聽dataPage變化時，重新獲取數據
     useEffect(() => {
-        const filteredData = getNotFinishEvent(eventRawList, noMoreData);
-        separateData(filteredData);
-    }, [harborData, eventRawList])
-
-    // 當dataPage變化時，重新獲取數據
-    // 這裡的dataPage是用來控制頁碼的，當頁碼變化時，會重新獲取數據
-    // 這樣可以實現瀑布流的加載更多功能
-    // 當dataPage為1時，不需要重新獲取數據，因為已經在useEffect中獲取過數據了
-    useEffect(() => {
+        // dataPage控制頁碼，頁碼變化時，會重新獲取數據，實現瀑布流的加載更多功能
         if (dataPage === 1) return;
-
         if (isLoading) return;
         if (noMoreData) return;
         // 當dataPage變化時，重新獲取數據
         Toast.show('數據加載中...');
-        getData(true);
+        getEventData();
     }, [dataPage]);
 
-    const getData = async (loadMore) => {
+    useEffect(() => {
+        const filteredData = getNotFinishEvent(eventRawList, noMoreData);
+        separateData(filteredData);
+    }, [eventRawList]);
+
+    useEffect(() => {
+        // TODO: 只在dataPage===1時插入Harbor數據，到Left和Rightlist中
+    }, [harborData])
+
+
+    /**
+     * 請求API數據，獲取ARK組織活動數據和ARK Harbor數據
+     * @returns {void}
+     */
+    const getAPIData = () => {
+        getHarborData();
+        getEventData();
+    }
+
+    /**
+     * 獲取ARK Event數據
+     * @param {boolean} loadMore 
+     */
+    const getEventData = async () => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 10;
         let noMore = true;
@@ -155,6 +151,27 @@ const EventPage = forwardRef((props, ref) => {
             setNoMoreData(noMore);
         }
     };
+
+    /**
+     * 獲取ARK Harbor Latest數據
+     * @returns {Promise<Array>} 返回隨機選取的10條數據
+     */
+    const getHarborData = async () => {
+        try {
+            const URL = ARK_HARBOR_LATEST;
+            const res = await axios.get(URL);
+            if (res.data) {
+                const data = res.data;
+                const topics = data.topic_list.topics || [];
+                if (topics.length > 0) {
+                    const newTopic = lodash.sampleSize(topics, 10);
+                    setHarborData(newTopic);
+                }
+            }
+        } catch (error) {
+            console.log('Error fetching topic data:', error);
+        }
+    }
 
     const insertToList = (list, harborArr) => {
         const now = moment();
@@ -297,8 +314,7 @@ const EventPage = forwardRef((props, ref) => {
         setIsLoading(true);
 
         setTimeout(() => {
-            getTopicData();
-            getData(false);
+            getAPIData();
         }, 100);
     };
 
@@ -349,7 +365,7 @@ const EventPage = forwardRef((props, ref) => {
                 keyExtractor={item => item._id ? String(item._id) : String(item.id)}
             />
         </View>)
-    }
+    };
 
     // 渲染主要內容
     const renderPage = () => {
