@@ -690,5 +690,29 @@ export const UMCalendar = [
     "endDate": "2025-08-01T00:00:00+08:00",
     "summary": "Last day of Summer Term",
     "summary_cn": "夏季學期的最後一天"
-  }
+  },
+  {
+    "startDate": "2025-08-04T00:00:00+08:00",
+    "endDate": "2025-08-05T00:00:00+08:00",
+    "summary": "Last day of Student Summer Recess",
+    "summary_cn": "學生暑假的最後一天"
+  },
+  {
+    "startDate": "2025-08-18T00:00:00+08:00",
+    "endDate": "2025-08-19T00:00:00+08:00",
+    "summary": "First day of 1st semester's classes",
+    "summary_cn": "第一學期課程的第一天"
+  },
+  {
+    "startDate": "2025-10-01T00:00:00+08:00",
+    "endDate": "2025-10-02T00:00:00+08:00",
+    "summary": "National Day of the People's Republic of China",
+    "summary_cn": "中華人民共和國國慶日"
+  },
+  {
+    "startDate": "2025-10-02T00:00:00+08:00",
+    "endDate": "2025-10-03T00:00:00+08:00",
+    "summary": "National Day of the People's Republic of China",
+    "summary_cn": "中華人民共和國國慶日翌日"
+  },
 ];
