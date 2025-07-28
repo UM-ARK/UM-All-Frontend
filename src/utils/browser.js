@@ -4,20 +4,27 @@ import { InAppBrowser } from 'react-native-inappbrowser-reborn'
 import { themes } from "../components/ThemeContext";
 
 // 使用Chrome、Safari等瀏覽器以選項卡形式打開鏈接，URL需要帶有https://
-export async function openLink(URL) {
+export async function openLink(props) {
     const colorScheme = Appearance.getColorScheme(); // 'light' 或 'dark'
     const { white, themeColor } = themes[colorScheme] || themes.light;
     try {
-        const url = URL;
+        let url = '';
+        let iosModalMode = 'automatic';
+        if (typeof props == 'object') {
+            url = props.URL;
+            iosModalMode = props.mode || 'automatic';
+        } else if (typeof props == 'string') {
+            url = props;
+        }
         if (await InAppBrowser.isAvailable()) {
-            const result = await InAppBrowser.open(url, {
+            await InAppBrowser.open(url, {
                 // iOS Properties
                 dismissButtonStyle: 'close',
                 preferredBarTintColor: themeColor,
                 preferredControlTintColor: white,
                 readerMode: false,
                 animated: true,
-                modalPresentationStyle: Platform.isPad ? 'fullScreen' : 'automatic',
+                modalPresentationStyle: Platform.isPad ? 'fullScreen' : iosModalMode,
                 modalTransitionStyle: 'coverVertical',
                 modalEnabled: true,
                 enableBarCollapsing: true,
