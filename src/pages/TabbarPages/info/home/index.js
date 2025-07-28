@@ -30,6 +30,7 @@ import {
     ARK_WIKI_RANDOM_TITLE,
     UM_Moodle,
     ARK_WEB_CLUB_SIGNIN,
+    ARK_HARBOR,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -112,14 +113,14 @@ const HomeScreen = ({ navigation }) => {
         {
             icon_name: require('../../../../static/img/logo.png'),
             icon_type: iconTypes.img,
-            function_name: t('澳大方舟', { ns: 'home' }),
+            function_name: t('職涯港', { ns: 'home' }),
             func: () => {
                 trigger();
-                onRefresh();
-                getAppData();
-                // getCal();
+                // onRefresh();
+                // getAppData();
                 // 刷新重新請求活動頁數據
-                eventPage.current.onRefresh();
+                // eventPage.current.onRefresh();
+                openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
             },
         },
         {
