@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useContext } from 'react';
 import {
     Text,
     View,
@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
-
 import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
+import { openLink } from '../../../../utils/browser';
 
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
@@ -21,11 +21,13 @@ import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from 'react-native-touchable-scale';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { openLink } from '../../../../utils/browser';
+import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { NavigationContext } from '@react-navigation/native';
 
 const EventPage = forwardRef((props, ref) => {
     const { theme } = useTheme();
     const { black, white, themeColor, viewShadow, bg_color } = theme;
+    const navigation = useContext(NavigationContext);
 
     const s = StyleSheet.create({
         waterFlowContainer: {
@@ -54,13 +56,14 @@ const EventPage = forwardRef((props, ref) => {
     const [harborData, setHarborData] = useState([]);
     const [eventRawList, setEventRawList] = useState([]);  // 把活動原始數據也存 state
 
+    const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
+
     // 暴露方法給父組件
     useImperativeHandle(ref, () => ({
         getNoMoreData: () => noMoreData,    // 返回noMoreData狀態
         loadMoreData,
         onRefresh,
-    }))
-
+    }));
 
     // 初始化數據
     useEffect(() => {
@@ -94,7 +97,6 @@ const EventPage = forwardRef((props, ref) => {
         const filteredData = getNotFinishEvent(eventRawList, noMoreData);
         separateData(filteredData);
     }, [harborData, eventRawList])
-
 
     // 當dataPage變化時，重新獲取數據
     // 這裡的dataPage是用來控制頁碼的，當頁碼變化時，會重新獲取數據
@@ -400,9 +402,16 @@ const EventPage = forwardRef((props, ref) => {
                 width: scale(160),
                 alignItems: 'flex-start'
             }}
-                onPress={() => {
-                    // TODO: 用戶偏好是Webview則導航到Tabbar
-                    openLink({ URL: ARK_HARBOR_TOPIC + item.id, mode: 'fullScreen' });
+                onPress={async () => {
+                    const settingStr = await getItem();
+                    const setting = settingStr ? JSON.parse(settingStr) : null;
+                    // 用戶偏好是Webview則導航到Tabbar
+                    if (setting && setting.tabbarMode == 'webview') {
+                        const URL = ARK_HARBOR_TOPIC + item.id;
+                        navigation.navigate('Harbor', { url: URL });
+                    } else {
+                        openLink({ URL: ARK_HARBOR_TOPIC + item.id, mode: 'fullScreen' });
+                    }
                 }}
             >
                 <Text style={{ ...uiStyle.defaultText, fontWeight: '500', color: black.second }} numberOfLines={2}>

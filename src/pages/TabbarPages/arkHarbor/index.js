@@ -3,20 +3,19 @@ import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, } fr
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
-import { scale } from 'react-native-size-matters';
-import FastImage from 'react-native-fast-image';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Clipboard from '@react-native-clipboard/clipboard';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
 import * as Progress from 'react-native-progress';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { t } from "i18next";
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
-import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE, ARK_HARBOR } from '../../../utils/pathMap';
+import { ARK_HARBOR } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { openLink } from '../../../utils/browser';
 
 const iconSize = scale(25);
 
@@ -29,7 +28,21 @@ const ARKHarbor = (props) => {
             fontSize: scale(18),
             color: themeColor,
             fontWeight: '600'
-        }
+        },
+        settingButtonContainer: {
+            width: scale(200),
+            margin: scale(10),
+            padding: scale(5), paddingVertical: scale(10),
+            borderRadius: scale(5),
+            backgroundColor: themeColor,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        settingText: {
+            ...uiStyle.defaultText,
+            fontSize: scale(16),
+            color: white,
+        },
     })
 
     const insets = useContext(SafeAreaInsetsContext);
@@ -40,10 +53,22 @@ const ARKHarbor = (props) => {
     const [canGoForward, setCanGoForward] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [harborSetting, setHarborSetting] = useState(null);
 
     const webviewRef = useRef();
 
-    // TODO: 基於用戶偏好是Webview
+    const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
+
+    const readItemFromStorage = async () => {
+        const item = await getItem();
+        const parsedItem = item ? JSON.parse(item) : null;
+        setHarborSetting(parsedItem);
+
+        if (parsedItem.tabbarMode === 'webview') {
+            logToFirebase('openPage', { page: 'harbor_webview' });
+        }
+    };
+
     // 未打開Harbor的狀態下從別的頁面跳轉至Harbor
     useEffect(() => {
         if (props.route.params && props.route.params.url) {
@@ -51,9 +76,18 @@ const ARKHarbor = (props) => {
         }
     }, []);
 
+    // componentDidUpdate: 監聽 route.params 變化
+    useEffect(() => {
+        readItemFromStorage();
+
+        if (props.route.params && props.route.params.url !== currentURL) {
+            setCurrentURL(props.route.params.url);
+            // webviewRef.current?.reload();
+        }
+    }, [props.route.params]);
+
     // 監聽Android返回鍵
     useEffect(() => {
-        logToFirebase('openPage', { page: 'harbor' });
         let focusListener, blurListener;
         if (Platform.OS === 'android') {
             focusListener = props.navigation.addListener('focus', () => {
@@ -70,15 +104,6 @@ const ARKHarbor = (props) => {
             }
         };
     }, []);
-
-    // componentDidUpdate: 監聽 route.params 變化
-    // TODO: 用戶偏好是Webview時，導航到此處
-    useEffect(() => {
-        if (props.route.params && props.route.params.url !== currentURL) {
-            setCurrentURL(props.route.params.url);
-            // webviewRef.current?.reload();
-        }
-    }, [props.route.params]);
 
     // Android 返回鍵處理
     const onAndroidBackPress = useCallback(() => {
@@ -143,33 +168,59 @@ const ARKHarbor = (props) => {
                 />
             ) : null}
 
-            {/* TODO: 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}
-            <WebView
-                ref={webviewRef}
-                source={{ uri: currentURL }}
-                originWhitelist={['*']}
-                startInLoadingState={true}
-                pullToRefreshEnabled
-                allowFileAccess
-                allowUniversalAccessFromFileURLs
-                cacheEnabled={true}
-                // IOS
-                sharedCookiesEnabled={true}              // iOS
-                // enableApplePay={true}
-                // Android
-                thirdPartyCookiesEnabled
-                javaScriptCanOpenWindowsAutomatically
-                domStorageEnabled={true}
-                // 前進、回退按鈕所需判斷邏輯
-                onNavigationStateChange={onNavigationStateChange}
-                // 進度條展示
-                onLoadProgress={event => setProgress(event.nativeEvent.progress)}
-                onLoadStart={() => {
-                    setIsLoaded(false);
-                    setProgress(0);
-                }}
-                onLoadEnd={() => setIsLoaded(true)}
-            />
+            {/* 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}
+            {harborSetting && harborSetting.tabbarMode === 'webview' ? (
+                <WebView
+                    ref={webviewRef}
+                    source={{ uri: currentURL }}
+                    originWhitelist={['*']}
+                    startInLoadingState={true}
+                    pullToRefreshEnabled
+                    allowFileAccess
+                    allowUniversalAccessFromFileURLs
+                    cacheEnabled={true}
+                    // IOS
+                    sharedCookiesEnabled={true}              // iOS
+                    // enableApplePay={true}
+                    // Android
+                    thirdPartyCookiesEnabled
+                    javaScriptCanOpenWindowsAutomatically
+                    domStorageEnabled={true}
+                    // 前進、回退按鈕所需判斷邏輯
+                    onNavigationStateChange={onNavigationStateChange}
+                    // 進度條展示
+                    onLoadProgress={event => setProgress(event.nativeEvent.progress)}
+                    onLoadStart={() => {
+                        setIsLoaded(false);
+                        setProgress(0);
+                    }}
+                    onLoadEnd={() => setIsLoaded(true)}
+                />
+            ) : (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ ...s.settingText, color: black.main, }}>{t("長按底部論壇Tabbar打開偏好設置", { ns: 'harbor' })}</Text>
+                    <Text style={{ ...s.settingText, color: black.main, textAlign: 'center', marginVertical: verticalScale(5), }}>{t("Webview版概率出現登錄錯誤，建議使用Browser版", { ns: 'harbor' })}</Text>
+
+                    <TouchableScale style={{ ...s.settingButtonContainer, }}
+                        onPress={() => {
+                            trigger();
+                            openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+                        }}
+                    >
+                        <Text style={{ ...s.settingText, }}>{t("進入Browser版論壇", { ns: 'harbor' })}</Text>
+                    </TouchableScale>
+
+                    <TouchableScale style={{ ...s.settingButtonContainer, }}
+                        onPress={() => {
+                            trigger();
+                            setHarborSetting({ tabbarMode: 'webview' });
+                            setCurrentURL(ARK_HARBOR);
+                        }}
+                    >
+                        <Text style={{ ...s.settingText, }}>{t("進入Webview版論壇", { ns: 'harbor' })}</Text>
+                    </TouchableScale>
+                </View>
+            )}
         </View>
     );
 };
