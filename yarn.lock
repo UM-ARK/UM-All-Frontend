@@ -7342,6 +7342,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"intl-pluralrules@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "intl-pluralrules@npm:2.0.1"
+  checksum: e07d5818a0583decb24677f958689f4dfc3c62d972d897c576917aefcd6af429ce8c1eee77af9e2fbf4fce71a800851fe1c33970f7ca56efbe3e70c023e658c1
+  languageName: node
+  linkType: hard
+
 "invariant@npm:*, invariant@npm:2.2.4, invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
@@ -12344,6 +12351,7 @@ __metadata:
     eslint: ^8.57.1
     fbjs: ^3.0.5
     i18next: ^23.16.8
+    intl-pluralrules: ^2.0.1
     jest: ^29.6.3
     lodash: ^4.17.21
     mobx: ^6.13.7
