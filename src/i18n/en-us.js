@@ -90,6 +90,17 @@ export default {
     wiki: {
 
     },
+    harbor: {
+        "長按底部論壇Tabbar打開偏好設置": "Long press the bottom Harbor Tabbar to open preference settings",
+        "Webview版概率出現登錄錯誤，建議使用Browser版": "Webview version may encounter login errors, it is recommended to use the Browser version",
+        "進入Webview版論壇": "Enter Webview version of Harbor",
+        "進入Browser版論壇": "Enter Browser version of Harbor",
+
+        "默認打開方式": "Default Opening Method",
+        "您可以隨時長按修改": "You can long press to modify at any time",
+        "Webview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)": "Webview: In-app Harbor (automatic login not available, Microsoft login may fail)",
+        "Browser(Default)：在瀏覽器中打開論壇": "Browser(Default): Open Harbor in the browser",
+    },
     catalog: {
         "ARK搵課": "ARK Catalog",
         "試試ECE or Electrical or 電氣": "Try ECE or Electrical or 電氣",
