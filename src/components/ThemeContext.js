@@ -51,6 +51,9 @@ const getColorDiy = (isLight) => ({
     // ARK Wiki配色
     wiki_bg_color: isLight ? '#fff' : '#272729',
 
+    // Harbor頁面配色
+    harbor_bg_color: isLight ? '#fbfdff' : '#111111',
+
     // What2Reg，選咩課配色
     what2reg_color: '#30548b',
 
