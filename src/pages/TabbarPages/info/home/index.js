@@ -765,9 +765,8 @@ const HomeScreen = ({ navigation }) => {
                             getItem={getItem}
                             // 渲染項目數量
                             getItemCount={getItemCount}
-                            key={'#'}
                             // 列表primary key
-                            keyExtractor={(item, index) => index}
+                            keyExtractor={(item, index) => item.startDate + index}
                             ListHeaderComponent={
                                 <View style={{ marginLeft: scale(20) }} />
                             }
