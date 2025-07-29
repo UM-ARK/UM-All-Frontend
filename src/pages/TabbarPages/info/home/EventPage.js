@@ -87,25 +87,21 @@ const EventPage = forwardRef((props, ref) => {
         separateData(filteredData);
     }, [eventRawList]);
 
-    useEffect(() => {
-        // TODO: 只在dataPage===1時插入Harbor數據，到Left和Rightlist中
-    }, [harborData])
-
 
     /**
      * 請求API數據，獲取ARK組織活動數據和ARK Harbor數據
      * @returns {void}
      */
-    const getAPIData = () => {
+    const getAPIData = (page = dataPage) => {
         getHarborData();
-        getEventData();
+        getEventData(page);
     }
 
     /**
      * 獲取ARK Event數據
      * @param {boolean} loadMore 
      */
-    const getEventData = async () => {
+    const getEventData = async (page = dataPage) => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
         let num_of_item = 10;
         let noMore = true;
@@ -114,7 +110,7 @@ const EventPage = forwardRef((props, ref) => {
             const res = await axios.get(URL, {
                 params: {
                     num_of_item,
-                    page: dataPage,
+                    page: page,
                 },
             });
             const json = res.data;
@@ -126,7 +122,7 @@ const EventPage = forwardRef((props, ref) => {
                     noMore = false;
                 }
 
-                if (dataPage === 1) {
+                if (page === 1) {
                     setEventRawList(newDataArr);
                 } else if (eventDataList.length > 0) {
                     let tempArr = eventDataList.concat(newDataArr);
@@ -244,19 +240,22 @@ const EventPage = forwardRef((props, ref) => {
             return;
         }
 
+        // 分割 eventList 為左右兩列
         eventList.forEach((itm, idx) => {
             // 圖片類型服務器返回相對路徑，請記住加上域名
             if (itm.cover_image_url.indexOf(BASE_HOST) === -1) {
                 itm.cover_image_url = BASE_HOST + itm.cover_image_url;
             }
-            if (idx % 2 === 0) {
-                leftList.push(itm);
-            } else {
-                rightList.push(itm);
-            }
         });
 
-        if (harborCopy.length > 0) {
+        [leftList, rightList] = [
+            lodash.filter(eventList, (_, idx) => idx % 2 === 0),
+            lodash.filter(eventList, (_, idx) => idx % 2 === 1)
+        ];
+
+        // lodash對leftList和rightList進行去重
+        leftList = lodash.uniqBy(leftList, '_id');
+        rightList = lodash.uniqBy(rightList, '_id');
             insertToList(leftList, leftHarbor);
             insertToList(rightList, rightHarbor);
         }
@@ -309,13 +308,19 @@ const EventPage = forwardRef((props, ref) => {
     const onRefresh = () => {
         trigger();
         setDataPage(1);
-        setLeftDataList([]);
-        setRightDataList([]);
+        setTimeout(() => {
+            setLeftDataList([]);
+            setRightDataList([]);
+            setEventDataList([]);
+            setHarborData([]);
+            setEventRawList([]);
+            setNoMoreData(false);
+        }, 300);
         setIsLoading(true);
 
         setTimeout(() => {
-            getAPIData();
-        }, 100);
+            getAPIData(1);
+        }, 300);
     };
 
     const renderLoadMoreView = () => {
