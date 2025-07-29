@@ -170,6 +170,7 @@ const EventPage = forwardRef((props, ref) => {
                     const newTopic = lodash.sampleSize(topics, 10);
                     let harborCopy = newTopic.map(item => ({ ...item, type: 'harbor' }));
                     harborCopy = lodash.shuffle(harborCopy);
+                    harborCopy = lodash.uniqBy(harborCopy, 'id'); // 去重
                     setHarborData(harborCopy);
                 }
             }
@@ -179,14 +180,15 @@ const EventPage = forwardRef((props, ref) => {
     }
 
     const insertToList = (list, harborArr) => {
+        let listCopy = lodash.cloneDeep(list);
         const now = moment();
         // 找到所有未過期活動的插入點（前後）
-        const validIndexes = list
+        const validIndexes = listCopy
             .map((item, idx) => (item.enddatetime && now.isBefore(moment(item.enddatetime)) ? idx : -1))
             .filter(idx => idx !== -1);
         let insertPositions = Array.from(new Set(
             validIndexes.flatMap(idx => [idx, idx + 1])
-        )).filter(pos => pos >= 0 && pos <= list.length);
+        )).filter(pos => pos >= 0 && pos <= listCopy.length);
 
         // 隨機打亂插入點
         for (let i = insertPositions.length - 1; i > 0; i--) {
@@ -194,17 +196,11 @@ const EventPage = forwardRef((props, ref) => {
             [insertPositions[i], insertPositions[j]] = [insertPositions[j], insertPositions[i]];
         }
 
-        // 隨機打亂 harborArr
-        for (let i = harborArr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [harborArr[i], harborArr[j]] = [harborArr[j], harborArr[i]];
-        }
-
         // 只插入到未過期活動的前後，剩下的放末尾
         let used = 0;
         harborArr.forEach((harborItem, i) => {
             if (insertPositions.length > 0 && i < insertPositions.length) {
-                list.splice(insertPositions[i], 0, harborItem);
+                listCopy.splice(insertPositions[i], 0, harborItem);
                 // 插入後，所有後面的插入點都要+1
                 insertPositions = insertPositions.map(pos => pos > insertPositions[i] ? pos + 1 : pos);
                 used++;
@@ -215,16 +211,18 @@ const EventPage = forwardRef((props, ref) => {
             // 找到最後一個未過期活動的下標
             const now = moment();
             let lastValidIdx = -1;
-            for (let i = list.length - 1; i >= 0; i--) {
-                if (list[i].enddatetime && now.isBefore(moment(list[i].enddatetime))) {
+            for (let i = listCopy.length - 1; i >= 0; i--) {
+                if (listCopy[i].enddatetime && now.isBefore(moment(listCopy[i].enddatetime))) {
                     lastValidIdx = i;
                     break;
                 }
             }
             // 插入到最後一個未過期活動的後面，如果沒有未過期活動則插到末尾
-            const insertIdx = lastValidIdx >= 0 ? lastValidIdx + 1 : list.length;
-            list.splice(insertIdx, 0, ...harborArr.slice(used));
+            const insertIdx = lastValidIdx >= 0 ? lastValidIdx + 1 : listCopy.length;
+            listCopy.splice(insertIdx, 0, ...harborArr.slice(used));
         }
+
+        return listCopy;
     };
 
     const separateData = (eventList) => {
@@ -257,10 +255,10 @@ const EventPage = forwardRef((props, ref) => {
         ];
 
         // 併入渲染的left和rightlist
-        if (!lodash.isEqual(leftList, leftDataList)) {
+        if (dataPage > 1 && !lodash.isEqual(leftList, leftDataList)) {
             leftList = leftDataList.concat(leftList);
         }
-        if (!lodash.isEqual(rightList, rightDataList)) {
+        if (dataPage > 1 && !lodash.isEqual(rightList, rightDataList)) {
             rightList = rightDataList.concat(rightList);
         }
 
@@ -269,8 +267,8 @@ const EventPage = forwardRef((props, ref) => {
         rightList = lodash.uniqBy(rightList, item => item._id || item.id);
 
         if (harborData.length > 0 && dataPage === 1) {
-            insertToList(leftList, leftHarbor);
-            insertToList(rightList, rightHarbor);
+            leftList = insertToList(leftList, leftHarbor);
+            rightList = insertToList(rightList, rightHarbor);
         }
 
         setLeftDataList(leftList);
@@ -324,12 +322,14 @@ const EventPage = forwardRef((props, ref) => {
         setTimeout(() => {
             setLeftDataList([]);
             setRightDataList([]);
+        }, 300);
+
+        setTimeout(() => {
             setEventDataList([]);
             setHarborData([]);
             setEventRawList([]);
-            setNoMoreData(false);
+            setNoMoreData(true);
         }, 300);
-        setIsLoading(true);
 
         setTimeout(() => {
             getAPIData(1);
