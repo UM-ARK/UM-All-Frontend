@@ -44,6 +44,7 @@ import {
     UM_PAPER_PLAN,
     UM_RC,
     UM_ALUMNI,
+    ARK_HARBOR,
 } from '../../../utils/pathMap';
 
 const iconTypes = {
@@ -666,6 +667,20 @@ export const functionArr = [
     {
         title: '😎 ' + t('新生推薦', { ns: 'features' }),
         fn: [
+            {
+                icon_type: iconTypes.materialCommunityIcons,
+                icon_name: 'forum',
+                fn_name: t('職涯港', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'Webview',
+                webview_param: {
+                    url: ARK_HARBOR,
+                    title: '新鮮人要知道的億些Tips',
+                    // text_color: black.second,
+                    bg_color_diy: '#ededed',
+                },
+                describe: t('ARK職涯港論壇！求職、美食、校友應有盡有！', { ns: 'features' }),
+            },
             {
                 icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'ghost',
