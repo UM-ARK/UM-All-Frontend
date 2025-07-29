@@ -170,7 +170,6 @@ const EventPage = forwardRef((props, ref) => {
                     const newTopic = lodash.sampleSize(topics, 10);
                     let harborCopy = newTopic.map(item => ({ ...item, type: 'harbor' }));
                     harborCopy = lodash.shuffle(harborCopy);
-                    harborCopy = lodash.uniqBy(harborCopy, 'id'); // 去重
                     setHarborData(harborCopy);
                 }
             }
@@ -435,7 +434,7 @@ const EventPage = forwardRef((props, ref) => {
                     }
                 }}
             >
-                <Text style={{ ...uiStyle.defaultText, fontWeight: '500', color: black.second }} numberOfLines={2}>
+                <Text style={{ ...uiStyle.defaultText, fontWeight: '500', fontSize: scale(12), color: black.second }} numberOfLines={2}>
                     {item.unicode_title ? item.unicode_title : item.title}
                 </Text>
                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, marginTop: verticalScale(4), }} numberOfLines={3}>{item.excerpt}</Text>
@@ -465,7 +464,7 @@ const EventPage = forwardRef((props, ref) => {
                                 color: themeColor,
                                 marginLeft: scale(5),
                             }}>
-                                <MaterialCommunityIcons name="thumb-up" />
+                                <MaterialCommunityIcons name="thumb-up" size={scale(10)} />
                                 {item.like_count}
                             </Text>
                         )}
@@ -477,7 +476,7 @@ const EventPage = forwardRef((props, ref) => {
                                 color: themeColor,
                                 marginLeft: scale(5),
                             }}>
-                                <MaterialCommunityIcons name="comment" />
+                                <MaterialCommunityIcons name="comment" size={scale(10)} />
                                 {item.reply_count}
                             </Text>
                         )}
@@ -489,7 +488,7 @@ const EventPage = forwardRef((props, ref) => {
                                 color: themeColor,
                                 marginLeft: scale(5),
                             }}>
-                                <MaterialCommunityIcons name="eye" />
+                                <MaterialCommunityIcons name="eye" size={scale(10)} />
                                 {item.views}
                             </Text>
                         )}

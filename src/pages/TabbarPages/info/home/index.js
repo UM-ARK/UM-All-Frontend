@@ -458,7 +458,7 @@ const HomeScreen = ({ navigation }) => {
     const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
         const imageSize = verticalScale(25);
-        const iconSize = verticalScale(25);
+        const iconSize = verticalScale(23);
         const containerSize = verticalScale(40); // 固定容器大小
 
         if (icon_type == 'ionicons') {
@@ -481,7 +481,7 @@ const HomeScreen = ({ navigation }) => {
             icon = (
                 <FontAwesome5
                     name={icon_name}
-                    size={iconSize - scale(4)}
+                    size={iconSize - verticalScale(3)}
                     color={theme.themeColor}
                 />
             );
