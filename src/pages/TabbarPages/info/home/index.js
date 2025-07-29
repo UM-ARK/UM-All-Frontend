@@ -852,6 +852,7 @@ const HomeScreen = ({ navigation }) => {
                             width: "100%",
                         }}
                         onPress={() => {
+                            trigger();
                             navigation.navigate("CourseSimTab");
                         }}>
                         {upcomingCourse ? (

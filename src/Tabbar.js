@@ -164,10 +164,7 @@ const Tabbar = () => {
                         }
                     },
                     tabLongPress: async () => {
-                        // const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
-                        // const harborSettingStr = await getItem();
-                        // console.log('harborSettingStr', harborSettingStr);
-
+                        trigger();
                         // 長按進入設定
                         askHarborSetting();
                     }
