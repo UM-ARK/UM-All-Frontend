@@ -69,23 +69,18 @@ const ARKHarbor = (props) => {
         }
     };
 
-    // 未打開Harbor的狀態下從別的頁面跳轉至Harbor
-    useEffect(() => {
-        if (props.route.params && props.route.params.url) {
-            setCurrentURL(props.route.params.url);
-        }
-    }, []);
-
     // componentDidUpdate: 監聽 route.params 變化
     useEffect(() => {
         readItemFromStorage();
 
         if (props.route.params && props.route.params.url !== currentURL) {
-            setCurrentURL(props.route.params.url);
+            const { url } = props.route.params;
+            setCurrentURL(url);
             // webviewRef.current?.reload();
         }
     }, [props.route.params]);
 
+    // TODO: 待測試
     // 監聽Android返回鍵
     useEffect(() => {
         let focusListener, blurListener;
@@ -116,9 +111,10 @@ const ARKHarbor = (props) => {
 
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
     const onNavigationStateChange = (webViewState) => {
-        setCurrentURL(webViewState.url);
+        // setCurrentURL(webViewState.url);
+        // currentURL.current = webViewState.url; // 更新當前URL
         setCanGoBack(webViewState.canGoBack);
-        setCanGoForward(webViewState.canGoForward);
+        // setCanGoForward(webViewState.canGoForward);
     };
 
     // Tabbar控制GoHome
@@ -126,6 +122,7 @@ const ARKHarbor = (props) => {
         const sub = DeviceEventEmitter.addListener('harborGoHome', () => {
             // 調用 goHome
             setCurrentURL(ARK_HARBOR);
+            webviewRef.current?.reload();
             Toast.show({
                 type: 'arkToast',
                 text1: '正全力返回主頁！',
@@ -214,7 +211,9 @@ const ARKHarbor = (props) => {
                         onPress={() => {
                             trigger();
                             setHarborSetting({ tabbarMode: 'webview' });
-                            setCurrentURL(ARK_HARBOR);
+                            // setCurrentURL(ARK_HARBOR);
+                            currentURL.current = ARK_HARBOR;
+                            webviewRef.current?.reload();
                         }}
                     >
                         <Text style={{ ...s.settingText, }}>{t("進入Webview版論壇", { ns: 'harbor' })}</Text>

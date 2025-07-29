@@ -44,14 +44,7 @@ const ARKWiki = (props) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
     const webviewRef = useRef();
-
-    // 未打開Wiki的狀態下從別的頁面跳轉至Wiki
-    useEffect(() => {
-        if (props.route.params && props.route.params.url) {
-            setCurrentURL(props.route.params.url);
-            // webviewRef.current?.reload();
-        }
-    }, []);
+    const currentURLRef = useRef(currentURL);
 
     // componentDidMount & componentWillUnmount 對應
     useEffect(() => {
@@ -77,7 +70,6 @@ const ARKWiki = (props) => {
     useEffect(() => {
         if (props.route.params && props.route.params.url !== currentURL) {
             setCurrentURL(props.route.params.url);
-            // webviewRef.current?.reload();
         }
     }, [props.route.params]);
 
@@ -92,7 +84,8 @@ const ARKWiki = (props) => {
 
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
     const onNavigationStateChange = (webViewState) => {
-        setCurrentURL(webViewState.url);
+        // setCurrentURL(webViewState.url);
+        currentURLRef.current = webViewState.url; // 更新當前URL引用
         setCanGoBack(webViewState.canGoBack);
         setCanGoForward(webViewState.canGoForward);
     };
@@ -279,7 +272,7 @@ const ARKWiki = (props) => {
                     }}
                     onPress={() => {
                         trigger();
-                        Clipboard.setString(currentURL);
+                        Clipboard.setString(currentURLRef.current);
                         Toast.show({
                             type: 'arkToast',
                             text1: '已複製當前頁面鏈接到粘貼板！',
