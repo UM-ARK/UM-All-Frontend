@@ -145,7 +145,7 @@ const Tabbar = () => {
                             focused={focused}
                         />
                     ),
-                    title: t('論壇'),
+                    title: t('職涯港'),
                 }}
                 listeners={() => ({
                     tabPress: async () => {

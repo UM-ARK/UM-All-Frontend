@@ -9,7 +9,7 @@ export default {
         "資訊": "Info",
         "搵課": "Catalog",
         "百科": "Wiki",
-        "論壇": "Harbor",
+        "職涯港": "Harbor",
         "課表": "Table",
         "服務": "Service",
         "組織": "Club",
@@ -192,6 +192,7 @@ export default {
 
 
         "新生推薦": "Recommended for Freshmen",
+        "職涯港": "Harbor",
         "生存指南": "Survival",
         "新生註冊": "Registration",
         "內地生": "Mainland",
@@ -248,6 +249,7 @@ export default {
         "查看澳大獎學金介紹頁": "Check the UM scholarship introduction page",
         "進入澳大圖書館的資源搜索頁，搜索澳大已購買的文獻資料、教科書等": "Enter the resource search page of the UM library to search for literature materials, textbooks, etc. purchased by UM",
         "你的論文計劃小幫手": "Your essay planning assistant",
+        "ARK職涯港論壇！求職、美食、校友應有盡有！": "ARK Harbor Forum! Job hunting, food, alumni, everything you need!",
         "澳大生存指南公眾號歷史推文": "Historical tweets of the UM Survival Guide public account",
         "澳大生存指南公眾號給內地新生的一些指南建議": "Some guide suggestions for mainland freshmen from the UM Survival Guide public account",
         "新生註冊圖文包及相關資料": "New Student Registration Package and Related Materials",
