@@ -71,7 +71,19 @@ const EventPage = forwardRef((props, ref) => {
         getAPIData();
     }, []);
 
-    // 監聽dataPage變化時，重新獲取數據
+    useEffect(() => {
+        const filteredData = getNotFinishEvent(eventRawList, noMoreData);
+        separateData(filteredData);
+    }, [eventRawList]);
+
+    useEffect(() => {
+        // 當harborData變化時，重新分割數據
+        if (dataPage === 1 && harborData.length > 0) {
+            separateData(eventDataList);
+        }
+    }, [harborData]);
+
+    // 監聽dataPage變化，重新獲取數據
     useEffect(() => {
         // dataPage控制頁碼，頁碼變化時，會重新獲取數據，實現瀑布流的加載更多功能
         if (dataPage === 1) return;
@@ -79,13 +91,12 @@ const EventPage = forwardRef((props, ref) => {
         if (noMoreData) return;
         // 當dataPage變化時，重新獲取數據
         Toast.show('數據加載中...');
+        if (!harborData || harborData.length === 0) {
+            getHarborData();
+        }
+        setNoMoreData(true);
         getEventData();
     }, [dataPage]);
-
-    useEffect(() => {
-        const filteredData = getNotFinishEvent(eventRawList, noMoreData);
-        separateData(filteredData);
-    }, [eventRawList]);
 
 
     /**
@@ -122,12 +133,8 @@ const EventPage = forwardRef((props, ref) => {
                     noMore = false;
                 }
 
-                if (page === 1) {
-                    setEventRawList(newDataArr);
-                } else if (eventDataList.length > 0) {
-                    let tempArr = eventDataList.concat(newDataArr);
-                    setEventRawList(tempArr);
-                }
+                // 交給分割兩列的函數處理合併
+                setEventRawList(newDataArr);
             } else if (json.code === '2') {
                 alert('已無更多數據');
                 noMore = true;
@@ -161,7 +168,9 @@ const EventPage = forwardRef((props, ref) => {
                 const topics = data.topic_list.topics || [];
                 if (topics.length > 0) {
                     const newTopic = lodash.sampleSize(topics, 10);
-                    setHarborData(newTopic);
+                    let harborCopy = newTopic.map(item => ({ ...item, type: 'harbor' }));
+                    harborCopy = lodash.shuffle(harborCopy);
+                    setHarborData(harborCopy);
                 }
             }
         } catch (error) {
@@ -223,39 +232,43 @@ const EventPage = forwardRef((props, ref) => {
         let leftList = [];
         let rightList = [];
 
-        let harborCopy = harborData.map(item => ({ ...item, type: 'harbor' }));
-        for (let i = harborCopy.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [harborCopy[i], harborCopy[j]] = [harborCopy[j], harborCopy[i]];
-        }
-        const mid = Math.ceil(harborCopy.length / 2);
-        let leftHarbor = harborCopy.slice(0, mid);
-        let rightHarbor = harborCopy.slice(mid);
-
+        const [leftHarbor, rightHarbor] = lodash.chunk(harborData, Math.ceil(harborData.length / 2));
         // eventList为空时，直接将harbor随机均分到两列
         if (!eventList || eventList.length === 0) {
+            if (harborData.length === 0) {
+                return;
+            }
             setLeftDataList(leftHarbor);
             setRightDataList(rightHarbor);
-            setEventDataList([]);
             return;
         }
 
-        // 分割 eventList 為左右兩列
+        // 將圖片類型的服務器返回的相對路徑加上域名
         eventList.forEach((itm, idx) => {
             // 圖片類型服務器返回相對路徑，請記住加上域名
             if (itm.cover_image_url.indexOf(BASE_HOST) === -1) {
                 itm.cover_image_url = BASE_HOST + itm.cover_image_url;
             }
         });
-
+        // lodash 分割 eventList 為左右兩列
         [leftList, rightList] = [
             lodash.filter(eventList, (_, idx) => idx % 2 === 0),
             lodash.filter(eventList, (_, idx) => idx % 2 === 1)
         ];
 
+        // 併入渲染的left和rightlist
+        if (!lodash.isEqual(leftList, leftDataList)) {
+            leftList = leftDataList.concat(leftList);
+        }
+        if (!lodash.isEqual(rightList, rightDataList)) {
+            rightList = rightDataList.concat(rightList);
+        }
+
         // lodash對leftList和rightList進行去重
-        leftList = lodash.uniqBy(leftList, '_id');
-        rightList = lodash.uniqBy(rightList, '_id');
+        leftList = lodash.uniqBy(leftList, item => item._id || item.id);
+        rightList = lodash.uniqBy(rightList, item => item._id || item.id);
+
+        if (harborData.length > 0 && dataPage === 1) {
             insertToList(leftList, leftHarbor);
             insertToList(rightList, rightHarbor);
         }
@@ -402,7 +415,6 @@ const EventPage = forwardRef((props, ref) => {
         // reply_count      回復數
         // views            瀏覽數
         // pinned           是否置頂
-        // console.log('渲染harbor消息:', item);
         return (
             <TouchableScale style={{
                 backgroundColor: white, borderRadius: scale(8),
@@ -411,6 +423,7 @@ const EventPage = forwardRef((props, ref) => {
                 alignItems: 'flex-start'
             }}
                 onPress={async () => {
+                    trigger();
                     const settingStr = await getItem();
                     const setting = settingStr ? JSON.parse(settingStr) : null;
                     // 用戶偏好是Webview則導航到Tabbar
