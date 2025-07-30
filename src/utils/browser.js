@@ -3,6 +3,15 @@ import { Linking, Alert, Platform, Appearance } from 'react-native';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn'
 import { themes } from "../components/ThemeContext";
 
+function isIOSVersion26() {
+    if (Platform.OS !== 'ios') return false;
+
+    const version = Platform.Version; // 可能是 "16.4" 或数字
+    const majorVersion = typeof version === 'string' ? parseInt(version.split('.')[0], 10) : version;
+
+    return majorVersion === 26;
+}
+
 // 使用Chrome、Safari等瀏覽器以選項卡形式打開鏈接，URL需要帶有https://
 export async function openLink(props) {
     const colorScheme = Appearance.getColorScheme(); // 'light' 或 'dark'
@@ -10,12 +19,20 @@ export async function openLink(props) {
     try {
         let url = '';
         let iosModalMode = 'automatic';
+        let modalEnabled = true;
         if (typeof props == 'object') {
+            if (props.mode === 'fullScreen') { modalEnabled = false; }
             url = props.URL;
-            iosModalMode = props.mode || 'automatic';
+            if (isIOSVersion26()) {
+                iosModalMode = 'fullScreen';
+            } else {
+                iosModalMode = props.mode || 'automatic';
+            }
         } else if (typeof props == 'string') {
             url = props;
+            if (isIOSVersion26()) { iosModalMode = 'fullScreen'; }
         }
+
         if (await InAppBrowser.isAvailable()) {
             await InAppBrowser.open(url, {
                 // iOS Properties
@@ -26,7 +43,7 @@ export async function openLink(props) {
                 animated: true,
                 modalPresentationStyle: Platform.isPad ? 'fullScreen' : iosModalMode,
                 modalTransitionStyle: 'coverVertical',
-                modalEnabled: true,
+                modalEnabled: isIOSVersion26() ? false : modalEnabled,  // TODO: 暫時iOS26沒有modal的視圖，直接push到新頁面
                 enableBarCollapsing: true,
                 // Android Properties
                 showTitle: true,
