@@ -8,7 +8,6 @@ import {
     TouchableOpacity,
     Platform,
     FlatList,
-    KeyboardAvoidingView,
     Keyboard,
     Alert,
 } from "react-native";
@@ -706,15 +705,12 @@ const What2Reg = (props) => {
 
     // 搜索框
     const renderSearch = () => (
-        <KeyboardAvoidingView
-            style={{
-                alignItems: 'center', flexDirection: 'row',
-                width: '100%',
-                marginTop: scale(5), paddingHorizontal: scale(10),
-                backgroundColor: 'transparent',
-            }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <View style={{
+            alignItems: 'center', flexDirection: 'row',
+            width: '100%',
+            marginTop: scale(5), paddingHorizontal: scale(10),
+            backgroundColor: 'transparent',
+        }}>
             {/* 搜索框 */}
             <View style={{
                 backgroundColor: white,
@@ -832,7 +828,7 @@ const What2Reg = (props) => {
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
                 </TouchableOpacity>
             </MenuView>
-        </KeyboardAvoidingView>
+        </View>
     );
 
     // 渲染首字母側邊導航

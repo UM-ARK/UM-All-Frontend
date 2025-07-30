@@ -344,7 +344,7 @@ const HomeScreen = ({ navigation }) => {
 
         // 延迟滚动，确保状态更新后再滚动
         setTimeout(() => {
-            calScrollRef?.current.scrollToOffset({
+            calScrollRef?.current?.scrollToOffset({
                 offset: newSelectDay * calItemWidth,
                 animated: true
             });
@@ -600,9 +600,9 @@ const HomeScreen = ({ navigation }) => {
 
         // 接近底部時，獲取更多數據
         if (isCloseToBottom && !isLoadMore && !isLoading) {
-            const thisFunc = eventPage.current;
+            const thisFunc = eventPage?.current;
             // 如果當前頁面有更多數據，則加載更多
-            if (!thisFunc.getNoMoreData()) {
+            if (thisFunc && !thisFunc.getNoMoreData()) {
                 setIsLoadMore(true);
                 thisFunc.loadMoreData();
                 // 延時鎖，避免到底觸發過多次
@@ -623,17 +623,16 @@ const HomeScreen = ({ navigation }) => {
             });
             let url = `https://www.google.com/search?q=${encodeURIComponent('site:umall.one OR site:um.edu.mo ') + encodeURIComponent(inputText)}`;
             openLink(url);
-        }
+        };
 
         return (
-            <KeyboardAvoidingView
+            <View
                 style={{
                     alignItems: 'center', flexDirection: 'row',
                     width: '100%', height: verticalScale(33),
                     marginTop: verticalScale(10),
                     paddingHorizontal: scale(10),
                 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 {/* 搜索框 */}
                 <View style={{
@@ -709,7 +708,7 @@ const HomeScreen = ({ navigation }) => {
                     <Ionicons name={'search'} size={scale(15)} color={white} />
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
                 </TouchableOpacity>
-            </KeyboardAvoidingView>
+            </View>
         )
     };
 
