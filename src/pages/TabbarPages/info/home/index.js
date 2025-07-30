@@ -31,6 +31,7 @@ import {
     UM_Moodle,
     ARK_WEB_CLUB_SIGNIN,
     ARK_HARBOR,
+    ARK_HARBOR_LOGIN,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -155,13 +156,22 @@ const HomeScreen = ({ navigation }) => {
         //         navigation.navigate('Webviewer', webViewParam);
         //     }
         // },
+        // {
+        //     icon_name: 'people',
+        //     icon_type: iconTypes.ionicons,
+        //     function_name: t('組織登入', { ns: 'home' }),
+        //     func: () => {
+        //         trigger();
+        //         openLink(ARK_WEB_CLUB_SIGNIN);
+        //     },
+        // },
         {
-            icon_name: 'people',
+            icon_name: 'log-in',
             icon_type: iconTypes.ionicons,
-            function_name: t('組織登入', { ns: 'home' }),
+            function_name: t('論壇登入', { ns: 'home' }),
             func: () => {
                 trigger();
-                openLink(ARK_WEB_CLUB_SIGNIN);
+                openLink(ARK_HARBOR_LOGIN);
             },
         },
     ];

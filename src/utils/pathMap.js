@@ -25,6 +25,7 @@ export const GITHUB_ACTIVITY = GITHUB_FRONT_BASE + 'activity';
 export const ARK_WEB_CLUB_SIGNIN = BASE_HOST + '/clubsignin';
 
 export const ARK_HARBOR = 'https://harbor.umall.one';
+export const ARK_HARBOR_LOGIN = ARK_HARBOR + '/login';
 export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
 export const ARK_HARBOR_TOPIC = ARK_HARBOR + '/t/topic/';

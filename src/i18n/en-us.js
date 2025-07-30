@@ -45,6 +45,7 @@ export default {
         "職涯港": "Harbor",
         "方舟百科": "Wiki",
         "組織登入": "Club In",
+        "論壇登入": "Forum In",
 
         "周一": "MON",
         "周二": "TUE",
