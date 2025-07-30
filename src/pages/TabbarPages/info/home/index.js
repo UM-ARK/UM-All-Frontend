@@ -44,10 +44,15 @@ import HomeCard from './components/HomeCard.js';
 import { screenWidth } from '../../../../utils/stylesKits.js';
 import { trigger } from '../../../../utils/trigger.js';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
+import { openLink } from '../../../../utils/browser.js';
+import { getLocalStorage } from '../../../../utils/storageKits.js';
+import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
+import CustomBottomSheet from '../../courseSim/BottomSheet';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import { inject } from 'mobx-react';
@@ -60,9 +65,6 @@ import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
 import lodash from 'lodash';
-import { openLink } from '../../../../utils/browser.js';
-import { getLocalStorage } from '../../../../utils/storageKits.js';
-import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import { useTranslation } from 'react-i18next';
 
 const getItem = (data, index) => {
@@ -80,6 +82,7 @@ const iconTypes = {
     ionicons: 'ionicons',
     materialCommunityIcons: 'MaterialCommunityIcons',
     fontAwesome5: 'FontAwesome5',
+    materialIcons: 'MaterialIcons',
     img: 'img',
 };
 
@@ -125,46 +128,14 @@ const HomeScreen = ({ navigation }) => {
             },
         },
         {
-            icon_name: 'donate',
-            icon_type: iconTypes.fontAwesome5,
+            icon_name: 'volunteer-activism',
+            icon_type: iconTypes.materialIcons,
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
-                let webview_param = {
-                    url: GITHUB_DONATE,
-                    title: '支持我們',
-                    text_color: white,
-                    bg_color_diy: themeColor,
-                    isBarStyleBlack: false,
-                };
-                navigation.navigate('Webviewer', webview_param);
+                bottomSheetRef.current?.expand();
             },
         },
-        // {
-        //     icon_name: 'graduation-cap',
-        //     icon_type: iconTypes.fontAwesome5,
-        //     function_name: "學生會",
-        //     func: () => {
-        //         trigger();
-        //         let webViewParam = {
-        //             url: 'https://info.umsu.org.mo/listdoc?_selector%5Bopen_doc_category_id%5D=1',
-        //             title: '學生會通告',
-        //             text_color: white,
-        //             bg_color_diy: themeColor,
-        //             isBarStyleBlack: false,
-        //         };
-        //         navigation.navigate('Webviewer', webViewParam);
-        //     }
-        // },
-        // {
-        //     icon_name: 'people',
-        //     icon_type: iconTypes.ionicons,
-        //     function_name: t('組織登入', { ns: 'home' }),
-        //     func: () => {
-        //         trigger();
-        //         openLink(ARK_WEB_CLUB_SIGNIN);
-        //     },
-        // },
         {
             icon_name: 'log-in',
             icon_type: iconTypes.ionicons,
@@ -495,6 +466,14 @@ const HomeScreen = ({ navigation }) => {
                     color={theme.themeColor}
                 />
             );
+        } else if (icon_type == 'MaterialIcons') {
+            icon = (
+                <MaterialIcons
+                    name={icon_name}
+                    size={iconSize - verticalScale(3)}
+                    color={theme.themeColor}
+                />
+            )
         } else if (icon_type == 'img') {
             icon = (
                 <FastImage
