@@ -21,7 +21,7 @@ const iconSize = scale(25);
 
 const ARKHarbor = (props) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color } = theme;
+    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color } = theme;
     const s = StyleSheet.create({
         titleText: {
             ...uiStyle.defaultText,
@@ -194,7 +194,7 @@ const ARKHarbor = (props) => {
                     onLoadEnd={() => setIsLoaded(true)}
                 />
             ) : (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bg_color, }}>
                     <Text style={{ ...s.settingText, color: black.main, }}>{t("長按底部論壇Tabbar打開偏好設置", { ns: 'harbor' })}</Text>
                     <Text style={{ ...s.settingText, color: black.main, textAlign: 'center', marginVertical: verticalScale(5), }}>{t("Webview版概率出現登錄錯誤，建議使用Browser版", { ns: 'harbor' })}</Text>
 
