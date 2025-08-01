@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
     ScrollView,
     View,
@@ -14,6 +14,7 @@ import {
     KeyboardAvoidingView,
     TextInput,
     Keyboard,
+    FlatList,
 } from 'react-native';
 
 // 本地工具
@@ -48,6 +49,7 @@ import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../courseSim/BottomSheet';
+import HyperlinkText from '../../../../components/HyperlinkText.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -66,6 +68,14 @@ import TouchableScale from "react-native-touchable-scale";
 import { t } from "i18next";
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
+import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+
+const paymentArr = [
+    require('../../../../static/img/donate/boc.jpg'),
+    require('../../../../static/img/donate/mpay.jpg'),
+    require('../../../../static/img/donate/wechat.jpg'),
+    require('../../../../static/img/donate/alipay.jpg'),
+]
 
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
@@ -164,6 +174,7 @@ const HomeScreen = ({ navigation }) => {
     const textInputRef = useRef(null);
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
+    const bottomSheetRef = useRef(null);
 
     const { i18n } = useTranslation();
 
@@ -701,6 +712,68 @@ const HomeScreen = ({ navigation }) => {
         )
     };
 
+    const paymentTextArr = useMemo(() => [
+        t('中國銀行澳門↓', { ns: 'home' }),
+        t('Mpay↓', { ns: 'home' }),
+        t('微信↓', { ns: 'home' }),
+        t('支付寶↓', { ns: 'home' }),
+    ], [t]);
+    const renderBottomSheet = () => {
+        return (
+            <BottomSheetScrollView>
+                <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(10), }}>
+                    <HyperlinkText linkStyle={{ color: themeColor }} navigation={navigation}>
+                        <Text style={{
+                            ...uiStyle.defaultText, fontWeight: '500',
+                            color: black.main,
+                        }}>
+                            {t('捐贈UM ARK，Push開發者，讓ARK ALL更健康發展！', { ns: 'home' })}
+                            {'\n'}
+                            {t(`原文Link：`, { ns: 'home' })}
+                            {GITHUB_DONATE}
+                        </Text>
+                    </HyperlinkText>
+
+                    <Text style={{ ...uiStyle.defaultText, color: black.third, }}>
+                        {t('您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！', { ns: 'home' })}
+                        {'\n'}
+                        {t('目前每年需要的維護費用約為1.5k RMB(此數字可能更新不及時)，純為愛發電中QAQ', { ns: 'home' })}
+                    </Text>
+
+                    <HyperlinkText linkStyle={{ color: themeColor }} navigation={navigation}>
+                        <Text style={{ ...uiStyle.defaultText, color: black.third, marginTop: verticalScale(10) }}>
+                            {t('如您已完成捐贈，可發送成功截圖到 umacark@gmail.com 。我們將展示捐贈榜！', { ns: 'home' })}
+                        </Text>
+                    </HyperlinkText>
+
+                    <FlatList
+                        data={paymentArr}
+                        renderItem={({ item, index }) => {
+                            return <View style={{
+                                width: scale(300), height: verticalScale(200),
+                                marginTop: verticalScale(20),
+                                alignItems: 'center',
+                            }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: themeColor,
+                                    fontWeight: '500'
+                                }}>
+                                    {paymentTextArr[index]}
+                                </Text>
+                                <FastImage
+                                    source={item}
+                                    style={{ width: '100%', height: '100%', }}
+                                    resizeMode={FastImage.resizeMode.contain}
+                                />
+                            </View>
+                        }}
+                    />
+                </View>
+            </BottomSheetScrollView>
+        )
+    }
+
     // 主渲染
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
@@ -1051,6 +1124,10 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 </ModalBottom>
             )}
+
+            <CustomBottomSheet ref={bottomSheetRef} page={'home'}>
+                {renderBottomSheet()}
+            </CustomBottomSheet>
         </View>
     );
 };
