@@ -88,7 +88,7 @@
     "react-native-tab-view": "^3.5.2",
     "react-native-toast-message": "^2.3.3",
     "react-native-touchable-scale": "^2.2.0",
-    "react-native-ui-lib": "^7.34.5",
+    "react-native-ui-lib": "^7.45.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "^13.15.0",
     "styled-components": "^6.1.13"
