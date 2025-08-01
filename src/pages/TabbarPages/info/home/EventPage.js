@@ -144,8 +144,6 @@ const EventPage = forwardRef((props, ref) => {
         } catch (error) {
             if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
                 Toast.show('網絡錯誤！請檢查網絡再試');
-                setLeftDataList([]);
-                setRightDataList([]);
             } else {
                 alert('組織活動頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
             }
