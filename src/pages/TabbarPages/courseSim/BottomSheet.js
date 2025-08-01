@@ -9,7 +9,7 @@ import { useAnimatedStyle, withTiming, } from 'react-native-reanimated';
 
 const CustomBottomSheet = forwardRef((props, ref) => {
     const { theme } = useTheme();
-    const { white, } = theme;
+    const { white, black, } = theme;
     const styles = StyleSheet.create({
         contentContainer: {
             flex: 1,
@@ -40,8 +40,9 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             keyboardBlurBehavior='restore'
             android_keyboardInputMode='adjustResize'
             onClose={() => props?.setHasOpenFalse && props.setHasOpenFalse()}
-            enablePanDownToClose={props?.page == 'features' ? true : false}
+            enablePanDownToClose={['features', 'home'].includes(props?.page) ? true : false}
             backgroundStyle={{ backgroundColor: 'transparent' }}
+            handleIndicatorStyle={{ backgroundColor: black.third }}
             style={[{
                 shadowOffset: { width: 0, height: verticalScale(12) },
             }, animatedStyles]}
