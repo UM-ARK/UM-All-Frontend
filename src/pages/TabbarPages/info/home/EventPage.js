@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useContext, useCallback } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useContext, useCallback, memo } from 'react';
 import {
     Text,
     View,
@@ -521,4 +521,4 @@ const EventPage = forwardRef((props, ref) => {
     );
 });
 
-export default EventPage;
+export default memo(EventPage);
