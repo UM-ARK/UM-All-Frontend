@@ -16,6 +16,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
 import { t } from 'i18next';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 
 const Tabs = AnimatedTabBarNavigator();
 
@@ -83,8 +84,8 @@ const Tabbar = () => {
                 component={ARKHarbor}
                 options={{
                     tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name="forum-outline"
+                        <MaterialDesignIcons
+                            name="chat-processing-outline"
                             size={scale(18)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
