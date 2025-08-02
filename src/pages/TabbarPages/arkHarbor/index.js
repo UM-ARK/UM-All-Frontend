@@ -31,7 +31,7 @@ const ARKHarbor = (props) => {
             fontWeight: '600'
         },
         settingButtonContainer: {
-            width: scale(200),
+            width: scale(240),
             margin: scale(10),
             padding: scale(5), paddingVertical: scale(10),
             borderRadius: scale(5),
@@ -265,7 +265,7 @@ const ARKHarbor = (props) => {
                             });
                         }}
                     >
-                        <Text style={{ ...s.settingText, }}>{t("進入Webview版(BUG)", { ns: 'harbor' })}{'🙅🏻'}</Text>
+                        <Text style={{ ...s.settingText, }}>{t("進入Webview版", { ns: 'harbor' })}{'(BUG)🤷🏻'}</Text>
                     </TouchableScale>
 
                     {/* TODO: 有保存的設定時才顯示 */}
