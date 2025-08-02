@@ -268,7 +268,7 @@ const ARKHarbor = (props) => {
                         <Text style={{ ...s.settingText, }}>{t("進入Webview版", { ns: 'harbor' })}{'(BUG)🤷🏻'}</Text>
                     </TouchableScale>
 
-                    {/* TODO: 有保存的設定時才顯示 */}
+                    {/* 有保存的設定時才顯示 */}
                     {harborSetting && harborSetting.tabbarMode && (
                         <TouchableScale style={{ ...s.settingButtonContainer, backgroundColor: black.third }}
                             onPress={() => {
@@ -291,6 +291,7 @@ const ARKHarbor = (props) => {
                         trigger();
                         webviewRef.current?.reload();
                     }}
+                    disabled={openSetting}
                 >
                     <MaterialDesignIcons
                         name={'refresh-circle'}
@@ -302,7 +303,7 @@ const ARKHarbor = (props) => {
                 <TouchableOpacity
                     style={s.button}
                     onPress={handleBackPress}
-                    disabled={canGoBack ? false : true}>
+                    disabled={openSetting || (canGoBack ? false : true)}>
                     <MaterialDesignIcons
                         name={'arrow-left-circle'}
                         size={iconSize}
@@ -313,7 +314,7 @@ const ARKHarbor = (props) => {
                 <TouchableOpacity
                     style={s.button}
                     onPress={handleForwardPress}
-                    disabled={canGoForward ? false : true}>
+                    disabled={openSetting || (canGoForward ? false : true)}>
                     <MaterialDesignIcons
                         name={'arrow-right-circle'}
                         size={iconSize}
