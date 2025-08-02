@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
-import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback, useContext, useMemo } from 'react';
+import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, TouchableOpacity, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
@@ -9,6 +9,8 @@ import * as Progress from 'react-native-progress';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import Share from 'react-native-share';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { ARK_HARBOR } from '../../../utils/pathMap';
@@ -17,11 +19,10 @@ import { trigger } from "../../../utils/trigger";
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { openLink } from '../../../utils/browser';
 
-const iconSize = scale(25);
 
 const ARKHarbor = (props) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color } = theme;
+    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color, viewShadow, } = theme;
     const s = StyleSheet.create({
         titleText: {
             ...uiStyle.defaultText,
@@ -43,21 +44,48 @@ const ARKHarbor = (props) => {
             fontSize: scale(16),
             color: white,
         },
-    })
+        navContainer: {
+            // position: 'absolute',
+            bottom: 0,
+            height: verticalScale(25),
+            width: '100%',
+            backgroundColor: bg_color,
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',
+            alignItems: 'center',
+            opacity: 0.9,
+        },
+        button: {
+            // marginBottom: scale(10),
+        },
+    });
+    const iconSize = useMemo(() => verticalScale(20), []);
 
     const insets = useContext(SafeAreaInsetsContext);
 
     // 初始狀態
     const [currentURL, setCurrentURL] = useState(ARK_HARBOR);
+    const [currentTitle, setCurrentTitle] = useState('ARK Harbor');
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [harborSetting, setHarborSetting] = useState(null);
+    const [needRefresh, setNeedRefresh] = useState(false);
 
     const webviewRef = useRef();
 
     const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
+
+    // 點擊後退按鈕觸發
+    const handleBackPress = () => {
+        webviewRef.current.goBack();
+    };
+
+    // 點擊前進按鈕觸發
+    const handleForwardPress = () => {
+        webviewRef.current.goForward();
+    };
 
     const readItemFromStorage = async () => {
         const item = await getItem();
@@ -80,7 +108,7 @@ const ARKHarbor = (props) => {
         }
     }, [props.route.params]);
 
-    // TODO: 待測試
+    // TODO: 待測試，似乎有問題
     // 監聽Android返回鍵
     useEffect(() => {
         let focusListener, blurListener;
@@ -111,10 +139,10 @@ const ARKHarbor = (props) => {
 
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
     const onNavigationStateChange = (webViewState) => {
-        // setCurrentURL(webViewState.url);
-        // currentURL.current = webViewState.url; // 更新當前URL
+        setCurrentTitle(webViewState.title);
+        setCurrentURL(webViewState.url);
         setCanGoBack(webViewState.canGoBack);
-        // setCanGoForward(webViewState.canGoForward);
+        setCanGoForward(webViewState.canGoForward);
     };
 
     // Tabbar控制GoHome
@@ -131,7 +159,7 @@ const ARKHarbor = (props) => {
             });
         });
         return () => sub.remove();
-    }, [])
+    }, []);
 
     return (
         <View style={{ flex: 1 }}>
@@ -195,6 +223,7 @@ const ARKHarbor = (props) => {
                 />
             ) : (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bg_color, }}>
+                    {/* {renderFloatButton()} */}
                     <Text style={{ ...s.settingText, color: black.main, }}>{t("長按底部論壇Tabbar打開偏好設置", { ns: 'harbor' })}</Text>
                     <Text style={{ ...s.settingText, color: black.main, textAlign: 'center', marginVertical: verticalScale(5), }}>{t("Webview版概率出現登錄錯誤，建議使用Browser版", { ns: 'harbor' })}</Text>
 
@@ -220,6 +249,81 @@ const ARKHarbor = (props) => {
                     </TouchableScale>
                 </View>
             )}
+            {/* Browser/Webview/回主頁 按鈕 */}
+            <View style={[s.navContainer,]}>
+                {/* 刷新按鈕 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={() => {
+                        webviewRef.current?.reload();
+                    }}
+                >
+                    <MaterialDesignIcons
+                        name={'refresh-circle'}
+                        size={iconSize}
+                        color={black.main}
+                    />
+                </TouchableOpacity>
+                {/* 後退按鈕 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={handleBackPress}
+                    disabled={canGoBack ? false : true}>
+                    <MaterialDesignIcons
+                        name={'arrow-left-circle'}
+                        size={iconSize}
+                        color={canGoBack ? black.main : 'grey'}
+                    />
+                </TouchableOpacity>
+                {/* 前進按鈕 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={handleForwardPress}
+                    disabled={canGoForward ? false : true}>
+                    <MaterialDesignIcons
+                        name={'arrow-right-circle'}
+                        size={iconSize}
+                        color={canGoForward ? black.main : 'grey'}
+                    />
+                </TouchableOpacity>
+                {/* 分享按鈕 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={() => {
+                        const shareOptions = {
+                            title: 'ARK職涯港',
+                            message: currentTitle + ' \n' + currentURL,
+                            url: currentURL,
+                        };
+
+                        Share.open(shareOptions)
+                            .then(res => { console.log(res); })
+                            .catch(err => { err && console.log(err); });
+                    }}
+                >
+                    <MaterialDesignIcons
+                        name={'share-circle'}
+                        size={iconSize}
+                        color={black.main}
+                    />
+                </TouchableOpacity>
+                {/* 打開瀏覽器 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={() => {
+                        trigger();
+                        openLink({ URL: currentURL, mode: 'fullScreen' });
+                        logToFirebase('openPage', { page: 'harbor_browser' });
+                    }}
+                >
+                    <MaterialDesignIcons
+                        name={'open-in-app'}
+                        size={iconSize}
+                        color={black.main}
+                    />
+                </TouchableOpacity>
+            </View>
+
         </View>
     );
 };
