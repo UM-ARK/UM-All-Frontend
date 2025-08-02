@@ -46,25 +46,25 @@ const ARKWiki = (props) => {
     const webviewRef = useRef();
     const currentURLRef = useRef(currentURL);
 
-    // componentDidMount & componentWillUnmount 對應
+    // 監聽Android返回鍵
     useEffect(() => {
-        logToFirebase('openPage', { page: 'wiki' });
-        let focusListener, blurListener;
         if (Platform.OS === 'android') {
-            focusListener = props.navigation.addListener('focus', () => {
-                BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
-            });
-            blurListener = props.navigation.addListener('blur', () => {
-                BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
-            });
+            const onBackPress = () => {
+                if (canGoBack && webviewRef.current) {
+                    webviewRef.current.goBack();
+                    return true; // 阻止默認返回行為
+                }
+                return false; // 讓系統處理（如退出頁面）
+            };
+
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            // 卸載時移除監聽
+            return () => {
+                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+            };
         }
-        return () => {
-            if (Platform.OS === 'android') {
-                focusListener && focusListener();
-                blurListener && blurListener();
-            }
-        };
-    }, []);
+    }, [canGoBack]);
 
     // componentDidUpdate: 監聽 route.params 變化
     useEffect(() => {
@@ -72,15 +72,6 @@ const ARKWiki = (props) => {
             setCurrentURL(props.route.params.url);
         }
     }, [props.route.params]);
-
-    // Android 返回鍵處理
-    const onAndroidBackPress = useCallback(() => {
-        if (canGoBack && webviewRef.current) {
-            webviewRef.current.goBack();
-            return true;
-        }
-        return false;
-    }, [canGoBack]);
 
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
     const onNavigationStateChange = (webViewState) => {
