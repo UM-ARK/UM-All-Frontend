@@ -79,11 +79,13 @@ const ARKHarbor = (props) => {
 
     // 點擊後退按鈕觸發
     const handleBackPress = () => {
+        trigger();
         webviewRef.current.goBack();
     };
 
     // 點擊前進按鈕觸發
     const handleForwardPress = () => {
+        trigger();
         webviewRef.current.goForward();
     };
 
@@ -255,6 +257,7 @@ const ARKHarbor = (props) => {
                 <TouchableOpacity
                     style={s.button}
                     onPress={() => {
+                        trigger();
                         webviewRef.current?.reload();
                     }}
                 >
@@ -290,6 +293,7 @@ const ARKHarbor = (props) => {
                 <TouchableOpacity
                     style={s.button}
                     onPress={() => {
+                        trigger();
                         const shareOptions = {
                             title: 'ARK職涯港',
                             message: currentTitle + ' \n' + currentURL,
