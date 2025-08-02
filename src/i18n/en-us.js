@@ -104,8 +104,9 @@ export default {
     harbor: {
         "長按底部論壇Tabbar打開偏好設置": "Long press the bottom Harbor Tabbar to open preference settings",
         "Webview版概率出現登錄錯誤，建議使用Browser版": "Webview version may encounter login errors, it is recommended to use the Browser version",
-        "進入Webview版論壇": "Enter Webview version of Harbor",
-        "進入Browser版論壇": "Enter Browser version of Harbor",
+        "進入Browser版": "Enter Browser version",
+        "進入Webview版": "Enter Webview version",
+        "退出設定": "Exit Settings",
 
         "默認打開方式": "Default Opening Method",
         "您可以隨時長按修改": "You can long press to modify at any time",

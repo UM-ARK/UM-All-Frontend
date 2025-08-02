@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useContext, useMemo } from 'react';
-import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, TouchableOpacity, Alert, } from 'react-native';
+import { View, Text, Platform, StyleSheet, BackHandler, TouchableOpacity, Alert, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
@@ -71,7 +71,7 @@ const ARKHarbor = (props) => {
     const [progress, setProgress] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [harborSetting, setHarborSetting] = useState(null);
-    const [needRefresh, setNeedRefresh] = useState(false);
+    const [openSetting, setOpenSetting] = useState(false);
 
     const webviewRef = useRef();
 
@@ -147,74 +147,23 @@ const ARKHarbor = (props) => {
         setCanGoForward(webViewState.canGoForward);
     };
 
-    // Tabbar控制GoHome
+    // 判斷是否有設定用戶打開偏好
     useEffect(() => {
-        const sub = DeviceEventEmitter.addListener('harborGoHome', () => {
-            // 調用 goHome
-            setCurrentURL(ARK_HARBOR);
-            webviewRef.current?.reload();
-            Toast.show({
-                type: 'arkToast',
-                text1: '正全力返回主頁！',
-                topOffset: scale(100),
-                onPress: () => Toast.hide(),
-            });
-        });
-        return () => sub.remove();
-    }, []);
+        const getSettings = async () => {
+            const harborSettingStr = await getItem();
 
-    const askHarborSetting = () => {
-        const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
+            if (harborSettingStr == null) {
+                setOpenSetting(true);
+            } else {
+                const harborSetting = harborSettingStr ? JSON.parse(harborSettingStr) : {};
+                // 存在設定，並且是browser模式
+                if (harborSetting.tabbarMode === 'browser') {
+                    openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+                }
+            }
+        }
 
-        Alert.alert(
-            t("默認打開方式", { ns: 'harbor' }),
-            `(${t("您可以隨時長按修改", { ns: 'harbor' })})\n${t("Webview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)", { ns: 'harbor' })}\n${t("Browser(Default)：在瀏覽器中打開論壇", { ns: 'harbor' })}`,
-            [
-                {
-                    text: 'Browser(Default)',
-                    onPress: async () => {
-                        await setItem(JSON.stringify({ ...settings, tabbarMode: 'browser' }));
-                        const settings = await getItem();
-                        // console.log('ARK_Harbor_Setting設置為', settings);
-
-                        Toast.show({
-                            type: 'arkToast',
-                            text1: 'Set browser mode',
-                            topOffset: scale(100),
-                            onPress: () => Toast.hide(),
-                        });
-
-                        logToFirebase('openPage', { page: 'harbor_browser' });
-                        openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
-                    },
-                },
-                {
-                    text: 'Webview(App內嵌)',
-                    onPress: async () => {
-                        await setItem(JSON.stringify({ ...settings, tabbarMode: 'webview' }));
-                        const settings = await getItem();
-                        // console.log('ARK_Harbor_Setting設置為', settings);
-                        Toast.show({
-                            type: 'arkToast',
-                            text1: 'Set webview mode',
-                            topOffset: scale(100),
-                            onPress: () => Toast.hide(),
-                        });
-                    },
-                },
-                {
-                    text: 'Refresh to Webview Homepage',
-                    onPress: () => {
-                        DeviceEventEmitter.emit('harborGoHome')
-                    },
-                },
-            ],
-        );
-    };
-
-    useEffect(() => {
-
-
+        getSettings();
     }, [])
 
 
@@ -251,7 +200,7 @@ const ARKHarbor = (props) => {
             ) : null}
 
             {/* 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}
-            {harborSetting && harborSetting.tabbarMode === 'webview' ? (
+            {!openSetting && harborSetting && harborSetting.tabbarMode === 'webview' ? (
                 <WebView
                     ref={webviewRef}
                     source={{ uri: currentURL }}
@@ -279,34 +228,61 @@ const ARKHarbor = (props) => {
                     onLoadEnd={() => setIsLoaded(true)}
                 />
             ) : (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bg_color, }}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bg_color, paddingHorizontal: scale(10), }}>
                     {/* {renderFloatButton()} */}
-                    <Text style={{ ...s.settingText, color: black.main, }}>{t("長按底部論壇Tabbar打開偏好設置", { ns: 'harbor' })}</Text>
+                    <Text style={{ ...s.settingText, color: black.main, }}>{t("默認打開方式", { ns: 'harbor' })}</Text>
                     <Text style={{ ...s.settingText, color: black.main, textAlign: 'center', marginVertical: verticalScale(5), }}>{t("Webview版概率出現登錄錯誤，建議使用Browser版", { ns: 'harbor' })}</Text>
 
                     <TouchableScale style={{ ...s.settingButtonContainer, }}
                         onPress={() => {
                             trigger();
+                            setHarborSetting({ tabbarMode: 'browser' });
+                            setItem(JSON.stringify({ tabbarMode: 'browser' }));
                             openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+                            Toast.show({
+                                type: 'arkToast',
+                                text1: 'Set browser mode',
+                                topOffset: scale(100),
+                                onPress: () => Toast.hide(),
+                            });
                         }}
                     >
-                        <Text style={{ ...s.settingText, }}>{t("進入Browser版論壇", { ns: 'harbor' })}</Text>
+                        <Text style={{ ...s.settingText, }}>{t("進入Browser版", { ns: 'harbor' })}{'👍🏻'}</Text>
                     </TouchableScale>
 
-                    <TouchableScale style={{ ...s.settingButtonContainer, }}
+                    <TouchableScale style={{ ...s.settingButtonContainer, opacity: 0.75 }}
                         onPress={() => {
                             trigger();
                             setHarborSetting({ tabbarMode: 'webview' });
-                            // setCurrentURL(ARK_HARBOR);
-                            currentURL.current = ARK_HARBOR;
-                            webviewRef.current?.reload();
+                            setItem(JSON.stringify({ tabbarMode: 'webview' }));
+                            setCurrentURL(ARK_HARBOR);
+                            setOpenSetting(false);
+                            Toast.show({
+                                type: 'arkToast',
+                                text1: 'Set webview mode',
+                                topOffset: scale(100),
+                                onPress: () => Toast.hide(),
+                            });
                         }}
                     >
-                        <Text style={{ ...s.settingText, }}>{t("進入Webview版論壇", { ns: 'harbor' })}</Text>
+                        <Text style={{ ...s.settingText, }}>{t("進入Webview版(BUG)", { ns: 'harbor' })}{'🙅🏻'}</Text>
                     </TouchableScale>
+
+                    {/* TODO: 有保存的設定時才顯示 */}
+                    {harborSetting && harborSetting.tabbarMode && (
+                        <TouchableScale style={{ ...s.settingButtonContainer, backgroundColor: black.third }}
+                            onPress={() => {
+                                trigger();
+                                setOpenSetting(false);
+                            }}
+                        >
+                            <Text style={{ ...s.settingText, }}>{t("退出設定", { ns: 'harbor' })}</Text>
+                        </TouchableScale>
+                    )}
                 </View>
             )}
-            {/* Browser/Webview/回主頁 按鈕 */}
+
+            {/* Browser/Webview/回主頁 導航按鈕 */}
             <View style={[s.navContainer,]}>
                 {/* 刷新按鈕 */}
                 <TouchableOpacity
@@ -386,8 +362,8 @@ const ARKHarbor = (props) => {
                     style={s.button}
                     onPress={() => {
                         trigger();
-                        // TODO: 打開ARK Harbor設置頁面
-                        askHarborSetting();
+                        // 打開ARK Harbor設置頁面
+                        setOpenSetting(!openSetting);
                     }}
                 >
                     <MaterialDesignIcons
