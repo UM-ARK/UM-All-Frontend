@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useContext, useMemo } from 'react';
-import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, TouchableOpacity, } from 'react-native';
+import { View, Text, Platform, StyleSheet, BackHandler, DeviceEventEmitter, TouchableOpacity, Alert, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
@@ -162,6 +162,61 @@ const ARKHarbor = (props) => {
         });
         return () => sub.remove();
     }, []);
+
+    const askHarborSetting = () => {
+        const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
+
+        Alert.alert(
+            t("默認打開方式", { ns: 'harbor' }),
+            `(${t("您可以隨時長按修改", { ns: 'harbor' })})\n${t("Webview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)", { ns: 'harbor' })}\n${t("Browser(Default)：在瀏覽器中打開論壇", { ns: 'harbor' })}`,
+            [
+                {
+                    text: 'Browser(Default)',
+                    onPress: async () => {
+                        await setItem(JSON.stringify({ ...settings, tabbarMode: 'browser' }));
+                        const settings = await getItem();
+                        // console.log('ARK_Harbor_Setting設置為', settings);
+
+                        Toast.show({
+                            type: 'arkToast',
+                            text1: 'Set browser mode',
+                            topOffset: scale(100),
+                            onPress: () => Toast.hide(),
+                        });
+
+                        logToFirebase('openPage', { page: 'harbor_browser' });
+                        openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+                    },
+                },
+                {
+                    text: 'Webview(App內嵌)',
+                    onPress: async () => {
+                        await setItem(JSON.stringify({ ...settings, tabbarMode: 'webview' }));
+                        const settings = await getItem();
+                        // console.log('ARK_Harbor_Setting設置為', settings);
+                        Toast.show({
+                            type: 'arkToast',
+                            text1: 'Set webview mode',
+                            topOffset: scale(100),
+                            onPress: () => Toast.hide(),
+                        });
+                    },
+                },
+                {
+                    text: 'Refresh to Webview Homepage',
+                    onPress: () => {
+                        DeviceEventEmitter.emit('harborGoHome')
+                    },
+                },
+            ],
+        );
+    };
+
+    useEffect(() => {
+
+
+    }, [])
+
 
     return (
         <View style={{ flex: 1 }}>
@@ -326,6 +381,22 @@ const ARKHarbor = (props) => {
                         color={black.main}
                     />
                 </TouchableOpacity>
+                {/* 設置按鈕 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={() => {
+                        trigger();
+                        // TODO: 打開ARK Harbor設置頁面
+                        askHarborSetting();
+                    }}
+                >
+                    <MaterialDesignIcons
+                        name={'cog-outline'}
+                        size={iconSize}
+                        color={black.main}
+                    />
+                </TouchableOpacity>
+
             </View>
 
         </View>
