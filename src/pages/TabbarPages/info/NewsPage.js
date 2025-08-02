@@ -1,9 +1,8 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import {
     View,
     Text,
     VirtualizedList,
-    Dimensions,
     ScrollView,
     RefreshControl,
     StyleSheet,
@@ -14,7 +13,7 @@ import {
 
 import NewsCard from './components/NewsCard';
 
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
@@ -25,11 +24,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
-
-// const { width: PAGE_WIDTH } = Dimensions.get('window');
-// const { height: PAGE_HEIGHT } = Dimensions.get('window');
-
-const { white, black, viewShadow, bg_color, themeColor } = COLOR_DIY;
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -44,125 +38,130 @@ const getItemCount = data => {
     return data.length;
 };
 
-// 頭條新聞數據Obj，不要刪掉，作為全局變量給另一個func調用
-let topNews = {};
+const NewsPage = () => {
+    const { theme } = useContext(ThemeContext);
+    const { white, black, viewShadow, bg_color, themeColor, trueWhite, } = theme;
+    const styles = StyleSheet.create({
+        topNewsContainer: {
+            borderRadius: scale(10),
+            overflow: 'hidden',
+            marginHorizontal: scale(10),
+            marginVertical: verticalScale(5),
+            height: verticalScale(200),
+            backgroundColor: white,
+            ...viewShadow,
+        },
+        topNewsOverlay: {
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: verticalScale(15),
+            justifyContent: 'flex-end',
+        },
+        topNewsPosition: {
+            position: 'absolute',
+            top: verticalScale(10),
+            left: scale(15),
+        },
+        topNewsText: {
+            ...uiStyle.defaultText,
+            color: trueWhite,
+            fontWeight: 'bold',
+            fontSize: verticalScale(20),
+        },
+    });
 
-class NewsPage extends Component {
-    static contextType = NavigationContext;
+    const navigation = useContext(NavigationContext);
+    const virtualizedList = useRef(null);
 
-    virtualizedList = React.createRef(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isScrollViewLoading, setIsScrollViewLoading] = useState(false);
+    const [newsList, setNewsList] = useState([]);
+    const [topNews, setTopNews] = useState({});
+    const [imgLoading, setImgLoading] = useState(true);
 
-    constructor() {
-        super();
-        this.state = {
-            isLoading: true,
-            isScrollViewLoading: false,
-            newsList: [],
-            topNews: {},
-            imgLoading: true,
-        };
+    const progressRef = useRef(0);
 
-        // 請求澳大新聞API
-        this.getData();
-    }
-
-    componentWillUnmount() {
-        FastImage.clearMemoryCache();
-    }
+    // 請求澳大新聞API
+    useEffect(() => {
+        getData();
+        return () => FastImage.clearMemoryCache();
+    }, []);
 
     // 請求澳大api返回新聞數據
-    getData = async () => {
+    const getData = async () => {
         try {
-            axios.get(UM_API_NEWS, {
+            const totalMB = 2;  // TODO: 這裡的2MB是預計API返回的數據大小，實際上可能會更大，需要減小流量
+            const res = await axios.get(UM_API_NEWS, {
                 // 請求頭配置
                 headers: {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
-            }).then(res => {
-                let result = res.data._embedded;
-                // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
-                let chooseTopNewsIndex = 0;
-                while (true) {
-                    if ('imageUrls' in result[chooseTopNewsIndex].common) {
-                        // 有圖
-                        break;
-                    } else {
-                        // 沒圖
-                        chooseTopNewsIndex++;
-                    }
+                onDownloadProgress: progressEvent => {
+                    const loadedMB = progressEvent.loaded / 1024 / 1024;
+                    let progress = loadedMB / totalMB;
+                    if (progress > 1) progress = 0.95; // 確保進度不超過1
+                    progressRef.current = progress;
+                },
+            });
+            const result = res.data._embedded;
+
+            // 有時會沒有圖片imageUrls數組，所以只選擇有圖的新聞作為頭條
+            let chooseTopNewsIndex = 0;
+            while (true) {
+                if ('imageUrls' in result[chooseTopNewsIndex].common) {
+                    // 有圖
+                    break;
+                } else {
+                    // 沒圖
+                    chooseTopNewsIndex++;
                 }
+            }
 
-                // 頭條指定為當天最新的、有圖的新聞
-                topNews = result[chooseTopNewsIndex];
-                result.splice(chooseTopNewsIndex, 1); // 刪除數組中頭條新聞的數據，剩下的全部渲染到新聞列表
+            // 頭條指定為當天最新的、有圖的新聞
+            const topNewsData = result[chooseTopNewsIndex];
+            result.splice(chooseTopNewsIndex, 1); // 刪除數組中頭條新聞的數據，剩下的全部渲染到新聞列表
 
-                // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
-                let newsList = [];
-                const newsNum = 25;
-                for (let i = 0; i < (result.length >= newsNum ? newsNum : result.length); i++) {
-                    if (result[i].details.length > 0) {
-                        newsList.push(result[i]);
-                    }
-                }
+            // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
+            const filteredNewsList = result.filter(item => item.details.length > 0);
+            // TODO: 每次返回2.5MB，需要優化。
+            // 3.x版本返回的是25個新聞，現在返回100條新聞，嘗試採取UM API的分頁加載方式
 
-                // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
-                // 中文標題
-                let title_cn = '';
-                // 英文標題
-                let title_en = '';
-                // 葡文標題
-                let title_pt = '';
-                topNews.details.map(item => {
-                    if (item.locale == 'en_US') {
-                        title_en = item.title;
-                    } else if (item.locale == 'pt_PT') {
-                        title_pt = item.title;
-                    } else if (item.locale == 'zh_TW') {
-                        title_cn = item.title;
-                    }
-                });
-
-                this.setState({
-                    newsList,
-                    topNews: {
-                        // 發佈日期
-                        publishDate: topNews.common.publishDate,
-                        // 中文標題
-                        title_cn,
-                        // 英文標題
-                        title_en,
-                        // 葡文標題
-                        title_pt,
-                        // 相片數組
-                        imageUrls: topNews.common.imageUrls,
-                    },
-                    isLoading: false,
-                });
-            })
+            setTopNews(topNewsData);
+            setNewsList(filteredNewsList);
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 100);
         } catch (error) {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                this.setState({ isLoading: true });
+                setIsLoading(true);
             } else {
-                alert('未知錯誤，請聯繫開發者！')
+                alert('澳大新聞頁，未知錯誤，請聯繫開發者！')
             }
         }
-    }
+    };
 
     // 頭條新聞的渲染
-    renderTopNews = () => {
-        const {
-            // 發佈日期
-            publishDate,
-            // 中文標題
-            title_cn,
-            // 英文標題
-            title_en,
-            // 葡文標題
-            title_pt,
-            // 相片數組
-            imageUrls,
-        } = this.state.topNews;
+    const renderTopNews = useCallback(() => {
+        const imageUrls = topNews.common.imageUrls || [];
+        // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
+        // 中文標題
+        let title_cn = '';
+        // 英文標題
+        let title_en = '';
+        // 葡文標題
+        let title_pt = '';
+
+        topNews.details.forEach(item => {
+            if (item.locale == 'en_US') {
+                title_en = item.title;
+            } else if (item.locale == 'pt_PT') {
+                title_pt = item.title;
+            } else if (item.locale == 'zh_TW') {
+                title_cn = item.title;
+            }
+        });
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
@@ -172,252 +171,196 @@ class NewsPage extends Component {
                 <View style={styles.topNewsContainer}>
                     <View style={{ width: '100%' }}>
                         {/* 圖片背景 */}
-                        {this.state.topNews.imageUrls && (
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => {
-                                    trigger();
-                                    this.context.navigate('NewsDetail', {
-                                        data: topNews,
-                                    });
-                                }}>
-                                <FastImage
-                                    source={{
-                                        uri: imageUrls[0].replace(
-                                            'http:',
-                                            'https:',
-                                        ),
-                                        // cache: FastImage.cacheControl.web,
-                                    }}
-                                    style={{ width: '100%', height: '100%' }}
-                                    onLoadStart={() => {
-                                        this.setState({ imgLoading: true });
-                                    }}
-                                    onLoad={() => {
-                                        this.setState({ imgLoading: false });
-                                    }}>
-                                    {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                                    <View style={styles.topNewsOverlay}>
-                                        {/* Top Story字樣 */}
-                                        <View style={styles.topNewsPosition}>
-                                            <Text style={styles.topNewsText}>
-                                                Top Story @ UM
-                                            </Text>
-                                        </View>
-
-                                        {/* 標題 */}
-                                        <View
-                                            style={{
-                                                alignSelf: 'center',
-                                                justifyContent: 'center',
-                                                width: '100%',
-                                            }}>
-                                            <Text
-                                                style={{
-                                                    ...uiStyle.defaultText,
-                                                    color: COLOR_DIY.trueWhite,
-                                                    fontWeight: 'bold',
-                                                    fontSize: verticalScale(18),
-                                                }}
-                                                numberOfLines={3}>
-                                                {title_en}
-                                            </Text>
-                                            <Text
-                                                style={{
-                                                    ...uiStyle.defaultText,
-                                                    color: COLOR_DIY.trueWhite,
-                                                    fontWeight: 'bold',
-                                                    fontSize: verticalScale(13),
-                                                }}>
-                                                {title_cn}
-                                            </Text>
-                                        </View>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                trigger();
+                                navigation.navigate('NewsDetail', { data: topNews, });
+                            }}>
+                            <FastImage
+                                source={{
+                                    uri: imageUrls[0].replace('http:', 'https:'),
+                                    // cache: FastImage.cacheControl.web,
+                                }}
+                                style={{ width: '100%', height: '100%' }}
+                                onLoadEnd={() => setImgLoading(false)}>
+                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
+                                <View style={styles.topNewsOverlay}>
+                                    {/* Top Story字樣 */}
+                                    <View style={styles.topNewsPosition}>
+                                        <Text style={styles.topNewsText}>
+                                            Top Story @ UM
+                                        </Text>
                                     </View>
 
-                                    {this.state.imgLoading ? (
-                                        <View
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                position: 'absolute',
-                                            }}>
-                                            <ActivityIndicator
-                                                size={'large'}
-                                                color={COLOR_DIY.white}
-                                            />
-                                        </View>
-                                    ) : null}
-                                </FastImage>
-                            </TouchableOpacity>
-                        )}
+                                    {/* 標題 */}
+                                    <View style={{
+                                        alignSelf: 'center',
+                                        justifyContent: 'center',
+                                        width: '100%',
+                                    }}>
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            color: trueWhite,
+                                            fontWeight: 'bold',
+                                            fontSize: verticalScale(18),
+                                        }}
+                                            numberOfLines={3}>
+                                            {title_en}
+                                        </Text>
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            color: trueWhite,
+                                            fontWeight: 'bold',
+                                            fontSize: verticalScale(13),
+                                        }}>
+                                            {title_cn}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                {imgLoading ? (<View style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                    <ActivityIndicator
+                                        size={'large'}
+                                        color={white}
+                                    />
+                                </View>) : null}
+                            </FastImage>
+                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </View >
         );
-    };
+    }, [topNews, bg_color, imgLoading]);
 
     // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
-        return (
-            <Interactable.View
-                style={{
-                    zIndex: 999,
-                    position: 'absolute',
-                }}
-                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-                snapPoints={[
-                    { x: -scale(140), y: -verticalScale(220) },
-                    { x: scale(140), y: -verticalScale(220) },
-                    { x: -scale(140), y: -verticalScale(120) },
-                    { x: scale(140), y: -verticalScale(120) },
-                    { x: -scale(140), y: verticalScale(0) },
-                    { x: scale(140), y: verticalScale(0) },
-                    { x: -scale(140), y: verticalScale(120) },
-                    { x: scale(140), y: verticalScale(120) },
-                    { x: -scale(140), y: verticalScale(220) },
-                    { x: scale(140), y: verticalScale(220) },
-                ]}
-                // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-                {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        trigger();
-                        this.virtualizedList.current.scrollToOffset({
-                            x: 0,
-                            y: 0,
-                        });
-                    }}>
-                    <View
-                        style={{
-                            width: scale(50),
-                            height: scale(50),
-                            backgroundColor: COLOR_DIY.white,
-                            borderRadius: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...viewShadow,
-                            margin: scale(5),
-                        }}>
-                        <Ionicons
-                            name={'chevron-up'}
-                            size={scale(40)}
-                            color={COLOR_DIY.themeColor}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-            </Interactable.View>
-        );
-    };
-
-    render() {
-        return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: COLOR_DIY.bg_color,
+    const renderGoTopButton = () => (
+        <Interactable.View
+            style={{
+                zIndex: 999,
+                position: 'absolute',
+            }}
+            // 設定所有可吸附的屏幕位置 0,0為屏幕中心
+            snapPoints={[
+                { x: -scale(140), y: -verticalScale(220) },
+                { x: scale(140), y: -verticalScale(220) },
+                { x: -scale(140), y: -verticalScale(120) },
+                { x: scale(140), y: -verticalScale(120) },
+                { x: -scale(140), y: verticalScale(0) },
+                { x: scale(140), y: verticalScale(0) },
+                { x: -scale(140), y: verticalScale(120) },
+                { x: scale(140), y: verticalScale(120) },
+                { x: -scale(140), y: verticalScale(220) },
+                { x: scale(140), y: verticalScale(220) },
+            ]}
+            // 設定初始吸附位置
+            initialPosition={{ x: scale(140), y: verticalScale(220) }}>
+            {/* 懸浮吸附按鈕，回頂箭頭 */}
+            <TouchableWithoutFeedback
+                onPress={() => {
+                    trigger();
+                    virtualizedList.current.scrollToOffset({
+                        x: 0,
+                        y: 0,
+                    });
                 }}>
-                {/* 懸浮可拖動按鈕 */}
-                {this.state.isLoading ? null : this.renderGoTopButton()}
-
-                {/* 新聞列表 */}
-                {/* 判斷是否加載中 */}
-                {this.state.isLoading ? (
-                    // 渲染Loading時的骨架屏
-                    <ScrollView
-                        contentContainerStyle={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            backgroundColor: bg_color,
-                        }}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={this.state.isScrollViewLoading}
-                                onRefresh={() => {
-                                    this.setState({ isScrollViewLoading: true });
-                                    this.getData();
-                                }}
-                            />
-                        }>
-                        <Loading />
-                    </ScrollView>
-                ) : (
-                    // 渲染新聞列表
-                    <VirtualizedList
-                        data={this.state.newsList}
-                        ref={this.virtualizedList}
-                        // 初始渲染的元素，設置為剛好覆蓋屏幕
-                        initialNumToRender={4}
-                        windowSize={3}
-                        renderItem={({ item }) => <NewsCard data={item} />}
-                        contentContainerStyle={{ width: '100%' }}
-                        keyExtractor={itm => itm._id}
-                        // 整理item數據
-                        getItem={getItem}
-                        // 渲染項目數量
-                        getItemCount={getItemCount}
-                        // 列表頭部渲染的組件 - 頭條新聞
-                        ListHeaderComponent={this.renderTopNews}
-                        // 列表底部渲染，防止Tabbar遮擋
-                        ListFooterComponent={() => (
-                            <View style={{ marginTop: scale(100) }}></View>
-                        )}
-                        refreshControl={
-                            <RefreshControl
-                                colors={[themeColor]}
-                                tintColor={themeColor}
-                                refreshing={this.state.isLoading}
-                                onRefresh={() => {
-                                    // 展示Loading標識
-                                    this.setState({ isLoading: true });
-                                    this.getData();
-                                }}
-                            />
-                        }
-                        directionalLockEnabled
-                        alwaysBounceHorizontal={false}
+                <View
+                    style={{
+                        width: scale(50),
+                        height: scale(50),
+                        backgroundColor: white,
+                        borderRadius: scale(50),
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        ...viewShadow,
+                        margin: scale(5),
+                    }}>
+                    <Ionicons
+                        name={'chevron-up'}
+                        size={scale(40)}
+                        color={themeColor}
                     />
-                )}
-            </View>
-        );
-    }
-}
+                </View>
+            </TouchableWithoutFeedback>
+        </Interactable.View>
+    );
 
-const styles = StyleSheet.create({
-    topNewsContainer: {
-        borderRadius: scale(10),
-        overflow: 'hidden',
-        marginHorizontal: scale(10),
-        marginVertical: verticalScale(5),
-        height: verticalScale(200),
-        backgroundColor: white,
-        ...viewShadow,
-    },
-    topNewsOverlay: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: verticalScale(15),
-        justifyContent: 'flex-end',
-    },
-    topNewsPosition: {
-        position: 'absolute',
-        top: verticalScale(10),
-        left: scale(15),
-    },
-    topNewsText: {
-        ...uiStyle.defaultText,
-        color: COLOR_DIY.trueWhite,
-        fontWeight: 'bold',
-        fontSize: verticalScale(20),
-    },
-});
+    return (
+        <View style={{
+            flex: 1, justifyContent: 'center', alignItems: 'center',
+            backgroundColor: bg_color,
+        }}>
+            {/* 懸浮可拖動按鈕 */}
+            {isLoading ? null : renderGoTopButton()}
+
+            {/* 新聞列表 */}
+            {/* 判斷是否加載中 */}
+            {isLoading ? (
+                // 渲染Loading時的骨架屏
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={isScrollViewLoading}
+                            onRefresh={() => {
+                                setIsScrollViewLoading(true);
+                                setImgLoading(true);
+                                setIsLoading(true);
+                                getData();
+                            }}
+                        />
+                    }>
+                    <Loading progress={progressRef.current} />
+                </ScrollView>
+            ) : null}
+
+            {/* 渲染新聞列表 */}
+            {isLoading ? null : (
+                <View style={{ flex: 1, }}><VirtualizedList
+                    data={newsList}
+                    ref={virtualizedList}
+                    // 初始渲染的元素，設置為剛好覆蓋屏幕
+                    initialNumToRender={4}
+                    windowSize={8}
+                    maxToRenderPerBatch={8}
+                    renderItem={({ item }) => <NewsCard data={item} />}
+                    contentContainerStyle={{ width: '100%' }}
+                    keyExtractor={item => item._id}
+                    // 整理item數據
+                    getItem={getItem}
+                    // 渲染項目數量
+                    getItemCount={getItemCount}
+                    // 列表頭部渲染的組件 - 頭條新聞
+                    ListHeaderComponent={renderTopNews}
+                    // 列表底部渲染，防止Tabbar遮擋
+                    ListFooterComponent={() => (
+                        <View style={{ marginTop: scale(100) }}></View>
+                    )}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={isLoading}
+                            onRefresh={() => {
+                                // 展示Loading標識
+                                setIsLoading(true);
+                                setImgLoading(true);
+                                getData();
+                            }}
+                        />
+                    }
+                    directionalLockEnabled
+                    alwaysBounceHorizontal={false}
+                /></View>)}
+        </View>
+    );
+};
 
 export default NewsPage;

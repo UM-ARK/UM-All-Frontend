@@ -51,7 +51,7 @@ class ImageScrollViewer extends Component {
         if (typeof imageUrls == 'string') {
             imageUrlsObjArr.push({ url: imageUrls });
         } else {
-            imageUrls.map(item => {
+            imageUrls.forEach(item => {
                 if (typeof item == 'object' && item.url) {
                     imageUrlsObjArr.push(item);
                 } else {

@@ -1,24 +1,14 @@
-import React, { Component } from 'react';
-import {
-    Text,
-    View,
-    TouchableOpacity,
-    StyleSheet,
-    Image,
-    ImageBackground,
-    ScrollView,
-    RefreshControl,
-} from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, } from 'react-native';
 
 // 引入本地工具
-import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
 import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP, } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
-import LoadingDotsDIY from '../../components/LoadingDots';
 import { trigger } from '../../utils/trigger';
-
+import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import { DOMParser } from "react-native-html-parser";
@@ -30,14 +20,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
 
-const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } =
-    COLOR_DIY;
-// const { width: PAGE_WIDTH } = Dimensions.get('window'); // screen 包括navi bar
-// const { height: PAGE_HEIGHT } = Dimensions.get('window');
-
-let busIcon = require('../../static/img/Bus/bus.png');
-let busRouteImg = require('../../static/img/Bus/bus_route.png');
-let stopImgArr = [
+const busIcon = require('../../static/img/Bus/bus.png');
+const busRouteImg = require('../../static/img/Bus/bus_route.png');
+const stopImgArr = [
     require('../../static/img/Bus/stopImg/PGH.jpg'),
     require('../../static/img/Bus/stopImg/E4.jpg'),
     require('../../static/img/Bus/stopImg/N2.jpg'),
@@ -110,115 +95,151 @@ function getBusData(busInfoHtml) {
     };
 }
 
-let BUS_URL = UM_BUS_LOOP_ZH;
+const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
 
 // 巴士報站頁 - 畫面佈局與渲染
-class BusScreen extends Component {
-    timer = null;
+const BusScreen = () => {
+    const { theme } = useTheme();
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
+    const s = StyleSheet.create({
+        container: {
+            flex: 1,
+            flexDirection: 'column',
+        },
+        arrowSize: {
+            width: scale(35),
+            height: scale(35),
+            resizeMode: 'contain',
+        },
+        dotSize: {
+            width: scale(21),
+            height: scale(21),
+            resizeMode: 'contain',
+        },
+        infoContainer: {
+            position: 'absolute',
+            marginHorizontal: scale(10),
+            backgroundColor: white,
+            borderRadius: scale(10),
+            ...viewShadow,
+            paddingHorizontal: scale(10),
+            paddingVertical: scale(3),
+        },
+    });
 
-    state = {
-        busPositionArr: [],
-        // Example: busPositionArr: [{index: 0}],
-        busInfoArr: [],
-        // 彈出層默認關閉
-        isModalVisible: false,
-        // 彈出層內容
-        modalContent: ['text', 'stopImage', 'busName'],
-        // 點擊站點的數組索引
-        clickStopIndex: 0,
-        isLoading: true,
-        toastColor: themeColor,
-    };
+    const [busPositionArr, setBusPositionArr] = useState([]);
+    const [busInfoArr, setBusInfoArr] = useState([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [modalContent] = useState(['text', 'stopImage', 'busName']); // 目前未見修改需求，保持不變
+    const [clickStopIndex, setClickStopIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [toastColor, setToastColor] = useState(themeColor);
+    const [busUrl, setBusUrl] = useState(BUS_URL_DEFAULT);
 
-    async componentDidMount() {
-        BUS_URL = await AsyncStorage.getItem('language').then(res => {
+    const controller = new AbortController();
+
+    // busStyleArr 使用 useMemo 儲存，避免每次重新建立
+    const busStyleArr = useMemo(() => [
+        { position: 'absolute', left: scale(255), top: scale(450) }, // PGH
+        { position: 'absolute', left: scale(255), top: scale(380) }, // PGH ~ E4
+        { position: 'absolute', left: scale(255), top: scale(300) }, // E4
+        { position: 'absolute', left: scale(255), top: scale(200) }, // E4 ~ N2
+        { position: 'absolute', left: scale(255), top: scale(80) },  // N2
+        { position: 'absolute', left: scale(160), top: scale(30) },  // N2 ~ N6
+        { position: 'absolute', left: scale(75), top: scale(58) },   // N6
+        { position: 'absolute', left: scale(30), top: scale(120) },  // N6 ~ E11
+        { position: 'absolute', left: scale(30), top: scale(155) },  // E11
+        { position: 'absolute', left: scale(30), top: scale(210) },  // E11 ~ E21
+        { position: 'absolute', left: scale(30), top: scale(265) },  // N21
+        { position: 'absolute', left: scale(30), top: scale(330) },  // N21 ~ E32
+        { position: 'absolute', left: scale(30), top: scale(390) },  // E32
+        { position: 'absolute', left: scale(30), top: scale(500) },  // E32 ~ S4
+        { position: 'absolute', left: scale(190), top: scale(493) }, // s4
+        { position: 'absolute', left: scale(255), top: scale(500) }, // s4 ~ PGH
+    ], []);
+
+    // 取得語言設定並設定 BUS_URL
+    useEffect(() => {
+        AsyncStorage.getItem('language').then(res => {
             const lng = JSON.parse(res);
-            // 當為中文設置
-            if (lng != 'tc') {
-                return UM_BUS_LOOP_EN;
+            if (lng !== 'tc') {
+                setBusUrl(UM_BUS_LOOP_EN);
             } else {
-                return UM_BUS_LOOP_ZH;
+                setBusUrl(UM_BUS_LOOP_ZH);
             }
-        })
+        });
 
         logToFirebase('openPage', { page: 'bus' });
-        // 打開Bus頁時直接請求巴士報站的數據
-        this.fetchBusInfo();
+    }, []);
 
-        // 定時自動刷新巴士數據
-        this.timer = setInterval(() => {
-            // this.onRefresh();
-            this.fetchBusInfo();
+    // 自動刷新定時器
+    useEffect(() => {
+        // 首次載入即呼叫
+        fetchBusInfo();
+
+        const timer = setInterval(() => {
+            fetchBusInfo();
         }, 7000);
-    }
 
-    componentWillUnmount() {
-        clearInterval(this.timer);
-    }
+        return () => {
+            controller.abort(); // 清理請求
+            clearInterval(timer);
+        };
+    }, [busUrl]);
 
     // 爬蟲campus Bus
-    fetchBusInfo = async () => {
-        await axios.get(BUS_URL)
-            .then(res => getBusData(res.data))
-            .then(result => {
-                // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
-                result.busInfoArr.shift(); // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
+    const fetchBusInfo = async () => {
+        setIsLoading(true);
+        try {
+            const res = await axios.get(busUrl, { signal: controller.signal });
+            const result = getBusData(res.data);
 
-                this.setState({
-                    busInfoArr: result.busInfoArr,
-                    busPositionArr: result.busPositionArr,
-                    haveBus: result.busPositionArr.length > 0 ? true : false,
-                    isLoading: false,
-                });
-                if (this.state.busPositionArr.length == 0) {
-                    // this.setState({ toastColor: COLOR_DIY.warning });
-                    // Toast.show({
-                    //     type: 'warning',
-                    //     text1: '當前沒有巴士~',
-                    //     text2: '[]~(￣▽￣)~* 👋',
-                    //     topOffset: scale(100),
-                    //     onPress: () => Toast.hide(),
-                    // });
-                    Toast.show('當前沒有巴士~ []~(￣▽￣)~*👋');
-                } else {
-                    // this.setState({ toastColor: themeColor });
-                    // Toast.show({
-                    //     type: 'arkToast',
-                    //     text1: 'Data is Loading~',
-                    //     text2: '幫你刷新了一下~ []~(￣▽￣)~* 👋',
-                    //     topOffset: scale(100),
-                    //     onPress: () => Toast.hide(),
-                    // });
-                    Toast.show('已自動刷新！點擊巴士圖標可手動刷新 []~(￣▽￣)~*👋');
-                }
-            })
-            .catch(error => {
-                // this.setState({ toastColor: COLOR_DIY.warning });
-                // Toast.show({
-                //     type: 'error',
-                //     text1: '網絡錯誤！',
-                //     topOffset: scale(100),
-                //     onPress: () => Toast.hide(),
-                // });
-                Toast.show('網絡錯誤！🆘');
-            });
+            // TODO: busInfoArr服務正常時，有時length為3，有時為4。為4時缺失“下一班車時間”資訊。
+            result.busInfoArr.shift(); // 移除數組第一位的 “澳大環校穿梭巴士報站資訊” 字符串
+
+            setBusInfoArr(result.busInfoArr);
+            setBusPositionArr(result.busPositionArr);
+            setIsLoading(false);
+
+            if (result.busPositionArr.length === 0) {
+                Toast.show('當前沒有巴士~ []~(￣▽￣)~*👋');
+            } else {
+                Toast.show('已自動刷新！點擊巴士圖標可手動刷新 []~(￣▽￣)~*👋');
+            }
+        } catch (error) {
+            setIsLoading(false);
+            Toast.show('網絡錯誤！🆘');
+        }
+    };
+
+    // 控制彈出層打開 or 關閉
+    const toggleModal = (index) => {
+        trigger();
+        setClickStopIndex(index);
+        setIsModalVisible(prev => !prev);
+    };
+
+    // 點擊刷新
+    const onBusIconPress = () => {
+        trigger();
+        controller.abort(); // 取消之前的請求
+        fetchBusInfo();
     };
 
     // 巴士站點文字渲染
-    renderBusStopText = (left, top, buildingCode, text, index) => {
-        const { busPositionArr } = this.state;
+    const renderBusStopText = useCallback((left, top, buildingCode, text, index) => {
         let borderColor = themeColor;
-        if (busPositionArr.length > 0) {
-            busPositionArr.map(item => {
-                if (item.index / 2 == index) {
-                    borderColor = secondThemeColor;
-                }
-            });
-        }
+        busPositionArr.forEach(item => {
+            if (item.index / 2 === index) {
+                borderColor = secondThemeColor;
+            }
+        });
 
         return (
             <TouchableScale
-                onPress={this.toggleModal.bind(this, index)}
+                key={`stopText-${index}`}
+                onPress={() => toggleModal(index)
+                }
                 style={{
                     position: 'absolute', left: scale(left), top: scale(top),
                     paddingHorizontal: scale(5), paddingVertical: scale(2),
@@ -229,241 +250,162 @@ class BusScreen extends Component {
                     {buildingCode}
                     <Text style={{ ...uiStyle.defaultText, fontWeight: 'normal' }}>{' ' + text}</Text>
                 </Text>
-            </TouchableScale>
+            </TouchableScale >
         );
-    };
+    }, [busPositionArr]);
 
-    // 控制彈出層打開 or 關閉
-    toggleModal = index => {
-        trigger();
-        this.setState({
-            isModalVisible: !this.state.isModalVisible,
-            clickStopIndex: index,
-        });
-    };
+    return (
+        <View style={{ flex: 1, backgroundColor: bg_color }}>
+            <Header title={t('校園巴士', { ns: 'features' })} iOSDIY={true} />
 
-    onRefresh = () => {
-        this.setState({ isLoading: true });
-        this.fetchBusInfo();
-    };
-
-    render() {
-        let busStyleArr = [
-            // 巴士到達位置，0為PGH，1為PGH~E4路上，2為E4
-            { position: 'absolute', left: scale(255), top: scale(450) }, // PGH
-            { position: 'absolute', left: scale(255), top: scale(380) }, // PGH ~ E4
-            { position: 'absolute', left: scale(255), top: scale(300) }, // E4
-            { position: 'absolute', left: scale(255), top: scale(200) }, // E4 ~ N2
-            { position: 'absolute', left: scale(255), top: scale(80) }, // N2
-            { position: 'absolute', left: scale(160), top: scale(30) }, // N2 ~ N6
-            { position: 'absolute', left: scale(75), top: scale(58) }, // N6
-            { position: 'absolute', left: scale(30), top: scale(120) }, // N6 ~ E11
-            { position: 'absolute', left: scale(30), top: scale(155) }, // E11
-            { position: 'absolute', left: scale(30), top: scale(210) }, // E11 ~ E21
-            { position: 'absolute', left: scale(30), top: scale(265) }, // N21
-            { position: 'absolute', left: scale(30), top: scale(330) }, // N21 ~ E32
-            { position: 'absolute', left: scale(30), top: scale(390) }, // E32
-            { position: 'absolute', left: scale(30), top: scale(500) }, // E32 ~ S4
-            { position: 'absolute', left: scale(190), top: scale(493) }, // s4
-            { position: 'absolute', left: scale(255), top: scale(500) }, // s4 ~ PGH
-        ];
-
-        const { busPositionArr, busInfoArr, toastColor, isLoading } = this.state;
-
-        return (
-            <View style={{ flex: 1, backgroundColor: bg_color }}>
-                <Header title={t('校園巴士', { ns: 'features' })} iOSDIY={true} />
-
-                <ScrollView
-                    bounces={false}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={isLoading}
-                            onRefresh={this.onRefresh}
-                        />
-                    }>
-                    <ScrollView horizontal={false}>
-                        <ImageBackground
-                            style={{
-                                width: scale(310),
-                                height: scale(600),
-                                marginLeft: scale(25),
-                                marginBottom: scale(40),
-                            }}
-                            source={busRouteImg}
-                            resizeMode={'contain'}>
-                            {/* Data From */}
-                            <View
-                                style={{
-                                    ...s.infoContainer,
-                                    left: scale(60),
-                                    top: scale(575),
-                                    marginTop: scale(10),
-                                }}>
-                                <Text
-                                    style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>
-                                    Data From: cmdo.um.edu.mo
-                                </Text>
-                            </View>
-                            {/* 澳大地圖 */}
-                            <TouchableOpacity
-                                style={{
-                                    ...s.infoContainer,
-                                    left: scale(110),
-                                    top: scale(350),
-                                }}
-                                onPress={() => {
-                                    trigger();
-                                    // Linking.openURL(UM_MAP);
-                                    // const webview_param = {
-                                    //     url: UM_MAP,
-                                    //     title: '校園地圖',
-                                    //     text_color: black.main,
-                                    //     bg_color_diy: '#ffffff',
-                                    //     isBarStyleBlack: true,
-                                    // };
-                                    // this.props.navigation.navigate('Webviewer', webview_param);
-                                    openLink(UM_MAP);
-                                }}
-                            >
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>
-                            </TouchableOpacity>
-                            {/* Bus運行信息的渲染 */}
-                            <View
-                                style={{
-                                    ...s.infoContainer,
-                                    left: scale(65),
-                                    top: scale(185),
-                                    width: scale(160),
-                                }}>
-                                {busInfoArr.length > 0
-                                    ? this.state.busInfoArr.map(item => (
-                                        <Text
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                color: black.third,
-                                                fontSize: scale(10),
-                                            }}>
-                                            {item}
-                                        </Text>
-                                    ))
-                                    : null}
-                            </View>
-
-                            {/* 巴士圖標 */}
-                            {busPositionArr.length > 0
-                                ? busPositionArr.map(item => (
-                                    <TouchableScale style={busStyleArr[item.index]} activeScale={0.6}
-                                        onPress={() => {
-                                            trigger();
-                                            this.fetchBusInfo();
-                                        }}>
-                                        <Image
-                                            source={busIcon}
-                                            style={{
-                                                width: scale(30),
-                                                height: scale(30),
-                                            }}
-                                        />
-                                    </TouchableScale>
-                                ))
-                                : null}
-
-                            {/* 巴士站點文字 */}
-                            {this.renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}
-                            {this.renderBusStopText(145, 302, 'E4', '劉少榮樓', 1)}
-                            {this.renderBusStopText(145, 82, 'N2', '大學會堂', 2)}
-                            {this.renderBusStopText(45, 90, 'N6', '行政樓', 3)}
-                            {this.renderBusStopText(79, 160, 'E11', '科技學院', 4)}
-                            {this.renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
-                            {this.renderBusStopText(79, 395, 'E32', '法學院', 6)}
-                            {this.renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
-
-                            <View style={{
-                                position: 'absolute',
-                                top: scale(5),
-                                left: scale(130),
-                                width: scale(35),
-                            }}>
-                                <LoadingDotsDIY />
-                            </View>
-                        </ImageBackground>
-                    </ScrollView>
-                </ScrollView>
-
-                {/* 彈出層 - 展示站點圖片 */}
-                <Modal
-                    isVisible={this.state.isModalVisible}
-                    onBackdropPress={this.toggleModal.bind(
-                        this,
-                        this.state.clickStopIndex,
-                    )}
-                    animationIn="zoomIn"
-                    animationOut="zoomOut"
-                    animationInTiming={500}
-                    animationOutTiming={500}
-                    backdropOpacity={0.4}
-                    backdropTransitionOutTiming={500}>
-                    <View
+            <ScrollView
+                bounces={false}
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={isLoading}
+                        onRefresh={fetchBusInfo}
+                    />
+                }>
+                <ScrollView horizontal={false}>
+                    <ImageBackground
                         style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                        {/* 關閉圖標 - 引導用戶點擊背景關閉彈出層 */}
+                            width: scale(310),
+                            height: scale(600),
+                            marginLeft: scale(25),
+                            marginBottom: scale(40),
+                        }}
+                        source={busRouteImg}
+                        resizeMode={'contain'}>
+                        {/* Data From */}
+                        <View
+                            style={{
+                                ...s.infoContainer,
+                                left: scale(60),
+                                top: scale(575),
+                                marginTop: scale(10),
+                            }}>
+                            <Text
+                                style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>
+                                Data From: cmdo.um.edu.mo
+                            </Text>
+                        </View>
+                        {/* 澳大地圖 */}
                         <TouchableOpacity
                             style={{
-                                position: 'absolute',
-                                right: scale(5),
-                                top: scale(45)
+                                ...s.infoContainer,
+                                left: scale(110),
+                                top: scale(350),
                             }}
-                            onPress={this.toggleModal.bind(
-                                this,
-                                this.state.clickStopIndex,
-                            )}>
-                            <Ionicons
-                                name={'close-circle'}
-                                size={scale(35)}
-                                color={white}
-                            />
+                            onPress={() => {
+                                trigger();
+                                openLink(UM_MAP);
+                            }}
+                        >
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>
                         </TouchableOpacity>
-                        <Image
-                            source={stopImgArr[this.state.clickStopIndex]}
-                            style={{ height: '60%' }}
-                            resizeMode="contain"
-                        />
-                    </View>
-                </Modal>
-            </View>
-        );
-    }
-}
+                        {/* Bus運行信息的渲染 */}
+                        <View
+                            style={{
+                                ...s.infoContainer,
+                                left: scale(65),
+                                top: scale(185),
+                                width: scale(160),
+                            }}>
+                            {busInfoArr.length > 0
+                                ? busInfoArr.map((item, idx) => (
+                                    <Text
+                                        key={`busInfo-${idx}`}
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            fontSize: scale(10),
+                                        }}>
+                                        {item}
+                                    </Text>
+                                )) : null}
+                        </View>
 
-const s = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'column',
-    },
-    arrowSize: {
-        width: scale(35),
-        height: scale(35),
-        resizeMode: 'contain',
-    },
-    dotSize: {
-        width: scale(21),
-        height: scale(21),
-        resizeMode: 'contain',
-    },
-    infoContainer: {
-        position: 'absolute',
-        marginHorizontal: scale(10),
-        backgroundColor: white,
-        borderRadius: scale(10),
-        ...viewShadow,
-        paddingHorizontal: scale(10),
-        paddingVertical: scale(3),
-    },
-});
+                        {/* 巴士圖標 */}
+                        {busPositionArr.length > 0
+                            ? busPositionArr.map(item => (
+                                <TouchableScale
+                                    style={busStyleArr[item.index]}
+                                    activeScale={0.6}
+                                    key={`busIcon-${item.index}`}
+                                    onPress={onBusIconPress}>
+                                    <Image
+                                        source={busIcon}
+                                        style={{
+                                            width: scale(30),
+                                            height: scale(30),
+                                        }}
+                                    />
+                                </TouchableScale>
+                            )) : null}
+
+                        {/* 巴士站點文字 */}
+                        {renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}
+                        {renderBusStopText(145, 302, 'E4', '劉少榮樓', 1)}
+                        {renderBusStopText(145, 82, 'N2', '大學會堂', 2)}
+                        {renderBusStopText(45, 90, 'N6', '行政樓', 3)}
+                        {renderBusStopText(79, 160, 'E11', '科技學院', 4)}
+                        {renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
+                        {renderBusStopText(79, 395, 'E32', '法學院', 6)}
+                        {renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
+
+                        <View style={{
+                            position: 'absolute',
+                            top: scale(5),
+                            left: scale(130),
+                            width: scale(35),
+                        }}>
+                            <CountdownCircleTimer
+                                isPlaying
+                                duration={7}
+                                colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+                                strokeWidth={verticalScale(5)}
+                                colorsTime={[7, 5, 2, 0]}
+                                size={scale(35)}
+                                onComplete={() => {
+                                    return { shouldRepeat: true }
+                                }}
+                            >
+                                {({ remainingTime }) => <Text style={{ ...uiStyle.defaultText, color: black.third }}>{remainingTime}</Text>}
+                            </CountdownCircleTimer>
+                        </View>
+                    </ImageBackground>
+                </ScrollView>
+            </ScrollView>
+
+            {/* 彈出層 - 展示站點圖片 */}
+            <Modal
+                isVisible={isModalVisible}
+                onBackdropPress={() => toggleModal(clickStopIndex)}
+                animationIn="zoomIn"
+                animationOut="zoomOut"
+                animationInTiming={500}
+                animationOutTiming={500}
+                backdropOpacity={0.4}
+                backdropTransitionOutTiming={500}
+                style={{
+                    margin: 0, // 去除默认的边距
+                    justifyContent: 'center', // 垂直居中
+                    alignItems: 'center',    // 水平居中
+                }}
+            >
+                <TouchableWithoutFeedback
+                    onPress={() => toggleModal(clickStopIndex)}>
+                    <Image
+                        source={stopImgArr[clickStopIndex]}
+                        style={{ width: '100%', height: '50%', }}
+                        resizeMode="contain"
+                    />
+                </TouchableWithoutFeedback>
+            </Modal>
+        </View>
+    );
+};
 
 export default BusScreen;

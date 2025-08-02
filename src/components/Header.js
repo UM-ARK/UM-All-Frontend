@@ -1,8 +1,7 @@
 // 普通的只帶返回按鈕的白底黑字Header，需傳遞title屬性
-import React, { Component } from 'react';
+import React, { useContext } from 'react';
 import {
     TouchableOpacity,
-    Appearance,
     TouchableWithoutFeedback,
     Keyboard,
     Platform,
@@ -11,7 +10,7 @@ import {
     Text,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from './ThemeContext';
 import { trigger } from '../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -20,65 +19,69 @@ import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 
-class HeaderDIY extends Component {
+const HeaderDIY = (props) => {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
-    static contextType = NavigationContext;
+    const navigation = useContext(NavigationContext);
+    const { theme } = useTheme();
+    const { barStyle, black, bg_color, } = theme;
 
-    render() {
-        return (
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>{this.props.iOSDIY && Platform.OS == 'ios' && !Platform.isPad ?
+    return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            {props.iOSDIY && Platform.OS === 'ios' && !Platform.isPad ? (
                 <View style={{
-                    flexDirection: 'row', padding: scale(15),
-                    justifyContent: 'center', alignItems: 'center'
+                    flexDirection: 'row',
+                    padding: scale(15),
+                    justifyContent: 'center',
+                    alignItems: 'center',
                 }}>
                     <StatusBar
                         backgroundColor={'transparent'}
-                        barStyle={COLOR_DIY.barStyle}
+                        barStyle={barStyle}
                     />
 
                     <TouchableOpacity
                         style={{ position: 'absolute', left: scale(5) }}
                         onPress={() => {
                             trigger();
-                            this.context.goBack();
+                            navigation.goBack();
                         }}>
                         <Ionicons
                             name="chevron-back-outline"
                             size={scale(25)}
-                            color={COLOR_DIY.black.main}
+                            color={black.main}
                         />
                     </TouchableOpacity>
 
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: COLOR_DIY.black.main,
+                        color: black.main,
                         fontSize: verticalScale(15),
                         alignSelf: 'center',
-                    }}>{this.props.title}</Text>
+                    }}>
+                        {props.title}
+                    </Text>
                 </View>
-
-                :
-
+            ) : (
                 <Header
-                    backgroundColor={COLOR_DIY.bg_color}
+                    backgroundColor={bg_color}
                     leftComponent={
                         <TouchableOpacity onPress={() => {
                             trigger();
-                            this.context.goBack();
+                            navigation.goBack();
                         }}>
                             <Ionicons
                                 name="chevron-back-outline"
                                 size={scale(25)}
-                                color={COLOR_DIY.black.main}
+                                color={black.main}
                             />
                         </TouchableOpacity>
                     }
                     centerComponent={{
-                        text: this.props.title,
+                        text: props.title,
                         style: {
                             ...uiStyle.defaultText,
-                            color: COLOR_DIY.black.main,
+                            color: black.main,
                             fontSize: scale(15),
                         },
                     }}
@@ -89,15 +92,16 @@ class HeaderDIY extends Component {
                     }}
                     statusBarProps={{
                         backgroundColor: 'transparent',
-                        barStyle: COLOR_DIY.barStyle,
+                        barStyle: barStyle,
                     }}
                     containerStyle={{
                         // 修復深色模式頂部小白條問題
                         borderBottomWidth: 0,
                     }}
-                />}</TouchableWithoutFeedback>
-        );
-    }
-}
+                />
+            )}
+        </TouchableWithoutFeedback>
+    );
+};
 
 export default HeaderDIY;

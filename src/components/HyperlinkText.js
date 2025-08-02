@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, Linking } from 'react-native';
 
-import { COLOR_DIY, ToastText } from '../utils/uiMap';
+import { useTheme } from "../components/ThemeContext";
 import { trigger } from '../utils/trigger';
 import { openLink } from '../utils/browser';
 
@@ -10,20 +10,15 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from "react-native-toast-message";
 import { scale } from 'react-native-size-matters';
 
-const HyperlinkText = ({
-    children,
-    title,
-    linkStyle,
-    style,
-    navigation,
-    beforeJump,
-}) => {
+const HyperlinkText = ({ children, title, linkStyle, style, navigation, beforeJump, }) => {
+    const { theme } = useTheme();
+    const { themeColor } = theme;
     // 定義默認參數
     let webview_param = {
         url: '',
         title: '',
         text_color: '#FFF',
-        bg_color_diy: COLOR_DIY.themeColor,
+        bg_color_diy: themeColor,
         isBarStyleBlack: false,
     };
 

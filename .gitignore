@@ -22,6 +22,9 @@ DerivedData
 *.xcuserstate
 **/.xcode.env.local
 
+# VSCode
+.vscode
+
 # Android/IntelliJ
 #
 build/
@@ -39,7 +42,8 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
-yarn.lock
+# yarn.lock
+package-lock.json
 
 # .yarn yarn3
 # Yarn cache files

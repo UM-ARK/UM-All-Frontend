@@ -1,12 +1,22 @@
 import { View, StyleSheet, Platform, } from 'react-native';
 import React, { forwardRef, useMemo, useState } from 'react';
 import BottomSheet from '@gorhom/bottom-sheet';
-import { COLOR_DIY } from '../../../utils/uiMap';
+
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAnimatedStyle, withTiming, } from 'react-native-reanimated';
 
 const CustomBottomSheet = forwardRef((props, ref) => {
+    const { theme } = useTheme();
+    const { white, black, } = theme;
+    const styles = StyleSheet.create({
+        contentContainer: {
+            flex: 1,
+            backgroundColor: white,
+        },
+    });
+
     const snapPoints = useMemo(() => ['15%', '30%', '50%', '70%'], []);
     const [currentIdx, setIdx] = useState(-1);
 
@@ -30,13 +40,14 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             keyboardBlurBehavior='restore'
             android_keyboardInputMode='adjustResize'
             onClose={() => props?.setHasOpenFalse && props.setHasOpenFalse()}
-            enablePanDownToClose={props?.page == 'features' ? true : false}
+            enablePanDownToClose={['features', 'home'].includes(props?.page) ? true : false}
             backgroundStyle={{ backgroundColor: 'transparent' }}
+            handleIndicatorStyle={{ backgroundColor: black.third }}
             style={[{
                 shadowOffset: { width: 0, height: verticalScale(12) },
             }, animatedStyles]}
             handleStyle={{
-                backgroundColor: COLOR_DIY.white,
+                backgroundColor: white,
                 borderTopLeftRadius: scale(50),
                 borderTopRightRadius: scale(50),
             }}
@@ -49,13 +60,6 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             </View>
         </BottomSheet >
     );
-});
-
-const styles = StyleSheet.create({
-    contentContainer: {
-        flex: 1,
-        backgroundColor: COLOR_DIY.white,
-    },
 });
 
 export default CustomBottomSheet;

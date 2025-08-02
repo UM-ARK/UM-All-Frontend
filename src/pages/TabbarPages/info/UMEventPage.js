@@ -8,7 +8,7 @@ import {
     VirtualizedList,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 
@@ -21,8 +21,6 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 
-const { black, white, themeColor } = COLOR_DIY;
-
 const getItem = (data, index) => {
     // data為VirtualizedList設置的data，index為當前渲染到的下標
     return data[index];
@@ -34,6 +32,8 @@ const getItemCount = data => {
 
 class UMEventPage extends Component {
     virtualizedList = React.createRef(null);
+    static contextType = ThemeContext;
+    progressRef = React.createRef(0);
 
     state = {
         data: undefined,
@@ -53,6 +53,12 @@ class UMEventPage extends Component {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
                 },
+                onDownloadProgress: progressEvent => {
+                    const loadedMB = progressEvent.loaded / 1024 / 1024;
+                    let progress = loadedMB / 0.1; // 假設API返回數據大小約為2MB
+                    if (progress > 1) progress = 0.95; // 確保進度不超過1
+                    this.progressRef.current = progress; // 更新進度條
+                }
             }).then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
@@ -61,7 +67,7 @@ class UMEventPage extends Component {
                 // 分隔今天/未來的活動 和 過往的活動
                 let resultList = [];
                 let outdatedList = [];
-                result.map((itm) => {
+                result.forEach((itm) => {
                     let beginMomentDate = moment(itm.common.dateFrom);
                     if (nowMomentDate.isSame(beginMomentDate, 'day') || beginMomentDate.isSameOrAfter(nowMomentDate)) {
                         resultList.push(itm);
@@ -101,16 +107,15 @@ class UMEventPage extends Component {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 this.setState({ data: undefined, isLoading: false });
             } else {
-                alert('未知錯誤，請聯繫開發者！')
+                alert('澳大活動頁，未知錯誤，請聯繫開發者！')
             }
-        } finally {
-            this.setState({ isLoading: false });
         }
     }
 
     // 渲染懸浮可拖動按鈕
     renderGoTopButton = () => {
-        const { white, black, viewShadow } = COLOR_DIY;
+        const { theme } = this.context;
+        const { white, themeColor, black, viewShadow } = theme;
         return (
             <Interactable.View
                 style={{
@@ -142,7 +147,7 @@ class UMEventPage extends Component {
                         style={{
                             width: scale(50),
                             height: scale(50),
-                            backgroundColor: COLOR_DIY.white,
+                            backgroundColor: white,
                             borderRadius: scale(50),
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -152,7 +157,7 @@ class UMEventPage extends Component {
                         <Ionicons
                             name={'chevron-up'}
                             size={scale(40)}
-                            color={COLOR_DIY.themeColor}
+                            color={themeColor}
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -162,6 +167,8 @@ class UMEventPage extends Component {
 
     // 渲染主要內容
     renderPage = () => {
+        const { theme } = this.context;
+        const { black, white, themeColor } = theme;
         const { data, isLoading } = this.state;
         return (
             <VirtualizedList
@@ -216,13 +223,13 @@ class UMEventPage extends Component {
 
     render() {
         const { isLoading } = this.state;
+        const { theme } = this.context;
+        const { black, white, themeColor, bg_color, } = theme;
 
         return (
             <View style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: COLOR_DIY.bg_color,
+                flex: 1, alignItems: 'center', justifyContent: 'center',
+                backgroundColor: bg_color,
             }}>
                 {/* 懸浮可拖動按鈕 */}
                 {isLoading ? null : this.renderGoTopButton()}
@@ -243,8 +250,8 @@ class UMEventPage extends Component {
                         />
                     }
                 >
-                    <Loading />
-                </ScrollView>) : (this.state.data != undefined ? this.renderPage() : <Loading />)}
+                    <Loading progress={this.progressRef.current} />
+                </ScrollView>) : (this.state.data != undefined && this.renderPage())}
             </View>
         );
     }

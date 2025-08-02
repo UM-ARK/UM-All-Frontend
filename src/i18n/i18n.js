@@ -1,4 +1,5 @@
 import { Alert } from "react-native";
+import 'intl-pluralrules';
 import i18n, { changeLanguage } from "i18next";
 import { initReactI18next } from "react-i18next";
 import RNRestart from 'react-native-restart';

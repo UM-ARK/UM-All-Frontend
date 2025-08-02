@@ -112,19 +112,3 @@ export const uiStyle = StyleSheet.create({
         alignItems: 'center',
     },
 });
-
-export const ToastText = props => {
-    let backgroundColor = uiStyle.toastContainer.backgroundColor;
-    if (props.backgroundColor) {
-        backgroundColor = props.backgroundColor;
-    }
-    return (
-        <View style={{ ...uiStyle.toastContainer, backgroundColor }}>
-            <Text style={{
-                color: props.textColor ? props.textColor : COLOR_DIY.white,
-                ...uiStyle.defaultText,
-                ...props.textStyle,
-            }}>{props.text}</Text>
-        </View>
-    );
-};

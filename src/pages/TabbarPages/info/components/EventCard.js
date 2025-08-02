@@ -1,39 +1,72 @@
-import React, { Component } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Dimensions,
-    TouchableOpacity,
-    ActivityIndicator,
-} from 'react-native';
+import React, { useState, useEffect, useContext, useMemo, memo } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../../../../utils/uiMap';
+import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
 
-// import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { inject } from 'mobx-react';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import TouchableScale from "react-native-touchable-scale";
+import { inject } from 'mobx-react';
 
 const IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
 
-// 解構全局ui設計顏色
-const { white, black, viewShadow, bg_color } = COLOR_DIY;
-
-class EventCard extends Component {
+const EventCard = ({ data, RootStore }) => {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
-    static contextType = NavigationContext;
+    const navigation = useContext(NavigationContext);
 
-    state = {
+    const { theme } = useTheme();
+    const { white, black, viewShadow, bg_color } = theme;
+
+    const styles = StyleSheet.create({
+        // 右上角紅點提示位置
+        rightTopIconPosition: {
+            position: 'absolute',
+            right: 0,
+            top: 0,
+        },
+        // 紅點標籤樣式
+        unFinish: {
+            paddingHorizontal: scale(2),
+            paddingVertical: scale(1),
+            borderColor: theme.secondThemeColor,
+            borderRadius: scale(20),
+            borderWidth: scale(1),
+            zIndex: 9,
+        },
+        stateNoticeText: {
+            ...uiStyle.defaultText,
+            fontSize: verticalScale(7),
+        },
+        title: {
+            container: {
+                backgroundColor: white,
+                width: IMAGE_SIZE,
+                padding: scale(8),
+            },
+            text: {
+                ...uiStyle.defaultText,
+                color: black.main,
+                fontWeight: '500',
+                fontSize: verticalScale(11),
+            },
+            disabledText: {
+                ...uiStyle.defaultText,
+                color: black.third,
+                fontWeight: '500',
+                fontSize: verticalScale(11),
+            }
+        },
+    });
+
+    const [state, setState] = useState({
         coverImgUrl: undefined,
         title: undefined,
         clubName: undefined,
@@ -44,12 +77,13 @@ class EventCard extends Component {
         type: undefined,
         imgLoading: true,
         isAdmin: false,
-    };
+        eventData: undefined,
+    });
 
-    componentDidMount() {
-        // 解構this.props.data數據
-        const eventData = this.props.data;
-        this.setState({
+    useEffect(() => {
+        const eventData = data;
+        setState(prevState => ({
+            ...prevState,
             coverImgUrl: eventData.cover_image_url.replace('http:', 'https:'),
             title: eventData.title,
             clubName: eventData.club_name,
@@ -58,298 +92,194 @@ class EventCard extends Component {
             type: eventData.type,
             link: eventData.link,
             eventData,
-        });
-        let globalData = this.props.RootStore;
-        // 社團賬號登錄
-        if (globalData.userInfo && globalData.userInfo.clubData) {
-            this.setState({ isAdmin: true });
-        }
-    }
+            // 社團賬號登錄
+            isAdmin: RootStore.userInfo && RootStore.userInfo.clubData ? true : false,
+        }));
+    }, [data, RootStore]);
 
-    handleJumpToDetail = () => {
-        const { type, link, title, isAdmin } = this.state;
+    const handleJumpToDetail = () => {
+        const { type, link, title, isAdmin, eventData } = state;
         trigger();
-        // let webview_param = {
-        //     // import pathMap的鏈接進行跳轉
-        //     url: link,
-        //     title: title,
-        //     // 標題顏色，默認為black.main
-        //     // text_color: '#002c55',
-        //     // 標題背景顏色，默認為bg_color
-        //     // bg_color_diy: '#fff',
-        //     // 狀態欄字體是否黑色，默認true
-        //     // isBarStyleBlack: false,
-        // };
-        // 延時看到回彈動畫後跳轉
         setTimeout(() => {
-            if (type == 'WEBSITE') {
+            if (type === 'WEBSITE') {
                 if (isAdmin) {
                     // 跳轉活動info編輯頁，並傳遞刷新函數
-                    this.context.navigate('EventSetting', {
+                    navigation.navigate('EventSetting', {
                         mode: 'edit',
-                        eventData: { _id: this.state.eventData._id },
+                        eventData: { _id: eventData._id },
                     });
                 } else {
-                    // this.context.navigate('Webviewer', webview_param);
                     openLink(link);
                 }
             } else {
-                this.context.navigate('EventDetail', {
-                    data: this.state.eventData,
+                navigation.navigate('EventDetail', {
+                    data: eventData,
                 });
             }
         }, 50);
         logToFirebase('clickEvent', {
             title: title,
-            clubName: this.state.clubName,
-        })
+            clubName: state.clubName,
+        });
     };
 
-    render() {
-        const {
-            coverImgUrl,
-            title,
-            clubName,
-            finishTimeStamp,
-            startTimeStamp,
-            link,
-            relateImgUrl,
-            type,
-        } = this.state;
+    const {
+        coverImgUrl,
+        title,
+        clubName,
+        finishTimeStamp,
+        startTimeStamp,
+        type,
+        imgLoading,
+    } = state;
 
-        // 當前時刻時間戳
-        let nowTimeStamp = moment(new Date()).valueOf();
-        // 活動進行中標誌
-        let isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
-        // 活動即將結束標誌
-        let isAlmost =
-            moment(finishTimeStamp).diff(moment(nowTimeStamp), 'days') <= 3 &&
-                moment(finishTimeStamp).isSameOrAfter(nowTimeStamp)
-                ? true
-                : false;
+    // 當前時刻時間戳
+    const nowTimeStamp = moment(new Date()).valueOf();
+    // 活動進行中標誌
+    const isFinish = nowTimeStamp > moment(finishTimeStamp).valueOf();
+    // 活動即將結束標誌
+    const isAlmost =
+        moment(finishTimeStamp).diff(moment(nowTimeStamp), 'days') <= 3 &&
+        moment(finishTimeStamp).isSameOrAfter(nowTimeStamp);
 
-        return (
-            <TouchableScale
-                style={{
-                    backgroundColor: white,
-                    borderRadius: BORDER_RADIUS,
-                    margin: scale(5),
-                }}
-                activeOpacity={0.9}
-                onPress={this.handleJumpToDetail}>
-                {/* 即將結束標識 */}
-                {/* {isAlmost ? (
-                    <View
+    return (
+        <TouchableScale
+            style={{
+                backgroundColor: white,
+                borderRadius: BORDER_RADIUS,
+                margin: scale(5),
+            }}
+            activeOpacity={0.9}
+            onPress={handleJumpToDetail}>
+            {coverImgUrl ? (
+                <View
+                    style={{
+                        borderRadius: BORDER_RADIUS,
+                        overflow: 'hidden',
+                    }}>
+                    <FastImage
+                        source={{
+                            uri: coverImgUrl,
+                        }}
                         style={{
-                            ...styles.rightTopIconPosition,
-                            ...styles.unFinish,
-                            backgroundColor: COLOR_DIY.unread,
-                            zIndex: 9,
-                        }}>
-                        <Text style={{ fontSize: scale(10), color: white }}>
-                            將結束
-                        </Text>
-                    </View>
-                ) : (
-                    isFinish ? null : (
-                        <View
-                            style={{
-                                ...styles.rightTopIconPosition,
-                                ...styles.unFinish,
-                                zIndex: 9,
-                            }}>
-                            <Text style={{ fontSize: scale(10), color: white }}>
-                                進行中
-                            </Text>
-                        </View>
-                    )
-                )} */}
-                {coverImgUrl ? (
-                    <View
-                        style={{
-                            borderRadius: BORDER_RADIUS,
-                            overflow: 'hidden',
-                        }}>
-                        <FastImage
-                            source={{
-                                uri: coverImgUrl,
-                                // cache: FastImage.cacheControl.web,
-                            }}
-                            // fallback={Platform.OS === 'android'}
-                            style={{
-                                width: IMAGE_SIZE,
-                                height: IMAGE_SIZE,
-                                backgroundColor: white,
-                                opacity: isFinish ? 0.5 : 1,
-                            }}
-                            resizeMode={FastImage.resizeMode.cover}
-                            onLoadStart={() => {
-                                this.setState({ imgLoading: true });
-                            }}
-                            onLoad={() => {
-                                this.setState({ imgLoading: false });
-                            }}>
-                            {this.state.imgLoading ? (
-                                <View
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        position: 'absolute',
-                                    }}>
-                                    <ActivityIndicator
-                                        size={'large'}
-                                        color={COLOR_DIY.themeColor}
-                                    />
-                                </View>
-                            ) : null}
-                        </FastImage>
-
-                        {/* website類型活動展示link圖標 */}
-                        {this.state.type === 'WEBSITE' ? (
+                            width: IMAGE_SIZE,
+                            height: IMAGE_SIZE,
+                            backgroundColor: white,
+                            opacity: isFinish ? 0.5 : 1,
+                        }}
+                        resizeMode={FastImage.resizeMode.cover}
+                        onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
+                        onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}>
+                        {imgLoading && (
                             <View
                                 style={{
-                                    position: 'absolute', zIndex: 2,
-                                    top: 10, right: 10,
-                                    transform: [{ rotate: '-45deg' }],
-                                    ...viewShadow,
-                                }}
-                            >
-                                <Ionicons
-                                    name={'link'}
-                                    size={verticalScale(20)}
-                                    color={white}
+                                    width: '100%',
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'absolute',
+                                }}>
+                                <ActivityIndicator
+                                    size={'large'}
+                                    color={theme.themeColor}
                                 />
                             </View>
-                        ) : null}
+                        )}
+                    </FastImage>
 
-                        {/* 活動簡單描述 */}
-                        <View style={styles.title.container}>
-                            <View style={{ width: '100%' }}>
-                                {/* 活動標題 */}
-                                <Text
-                                    style={isFinish ? styles.title.disabledText : styles.title.text}
-                                    numberOfLines={3}>
-                                    {title}
-                                </Text>
-                                {/* 標識 & 組織名 */}
-                                <View style={{
-                                    marginTop: scale(5),
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    width: '100%'
-                                }}>
-                                    {/* 即將結束標識 */}
-                                    {isAlmost ? (
-                                        <View
-                                            style={{
-                                                // ...styles.rightTopIconPosition,
-                                                ...styles.unFinish,
-                                                borderColor: COLOR_DIY.unread,
-                                            }}>
+                    {/* website類型活動展示link圖標 */}
+                    {type === 'WEBSITE' && (
+                        <View style={{
+                            position: 'absolute', zIndex: 2,
+                            top: 10, right: 10,
+                            transform: [{ rotate: '-45deg' }],
+                        }}>
+                            <Ionicons
+                                name={'link'}
+                                size={verticalScale(20)}
+                                color={white}
+                                style={{ ...viewShadow }}
+                            />
+                        </View>
+                    )}
+
+                    {/* 活動簡單描述 */}
+                    <View style={styles.title.container}>
+                        <View style={{ width: '100%' }}>
+                            {/* 活動標題 */}
+                            <Text
+                                style={isFinish ? styles.title.disabledText : styles.title.text}
+                                numberOfLines={3}>
+                                {title}
+                            </Text>
+                            {/* 標識 & 組織名 */}
+                            <View style={{
+                                marginTop: scale(5),
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                width: '100%'
+                            }}>
+                                {/* 即將結束標識 */}
+                                {isAlmost ? (
+                                    <View
+                                        style={{
+                                            ...styles.unFinish,
+                                            borderColor: theme.unread,
+                                        }}>
+                                        <Text style={{
+                                            ...styles.stateNoticeText,
+                                            color: theme.unread
+                                        }}>
+                                            將結束
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    isFinish ? (
+                                        <View style={{
+                                            paddingHorizontal: scale(1),
+                                            borderColor: black.third, borderWidth: scale(1), borderRadius: scale(4)
+                                        }}>
                                             <Text style={{
                                                 ...styles.stateNoticeText,
-                                                color: COLOR_DIY.unread
+                                                color: black.third
                                             }}>
-                                                將結束
+                                                UP
                                             </Text>
                                         </View>
                                     ) : (
-                                        isFinish ? (
-                                            <View style={{
-                                                paddingHorizontal: scale(1),
-                                                borderColor: black.third, borderWidth: scale(1), borderRadius: scale(4)
+                                        <View style={{ ...styles.unFinish }}>
+                                            <Text style={{
+                                                ...styles.stateNoticeText,
+                                                color: theme.secondThemeColor
                                             }}>
-                                                <Text style={{
-                                                    ...styles.stateNoticeText,
-                                                    color: black.third
-                                                }}>
-                                                    UP
-                                                </Text>
-                                            </View>
-                                        ) : (
-                                            <View
-                                                // ...styles.rightTopIconPosition,
-                                                style={{ ...styles.unFinish }}>
-                                                <Text style={{
-                                                    ...styles.stateNoticeText,
-                                                    color: COLOR_DIY.secondThemeColor
-                                                }}>
-                                                    進行中
-                                                </Text>
-                                            </View>
-                                        )
-                                    )}
-                                    {/* 組織名 */}
-                                    <View style={{
-                                        // marginLeft: isFinish ? null : scale(3),
-                                        marginLeft: scale(3),
-                                        width: isFinish ? '100%' : '80%',
-                                    }}>
-                                        <Text
-                                            numberOfLines={1}
-                                            style={{
-                                                ...uiStyle.defaultText,
-                                                color: black.third,
-                                                fontSize: verticalScale(9),
-                                            }}>
-                                            {clubName}
-                                        </Text>
-                                    </View>
+                                                進行中
+                                            </Text>
+                                        </View>
+                                    )
+                                )}
+                                {/* 組織名 */}
+                                <View style={{
+                                    marginLeft: scale(3),
+                                    width: isFinish ? '100%' : '80%',
+                                }}>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            fontSize: verticalScale(9),
+                                        }}>
+                                        {clubName}
+                                    </Text>
                                 </View>
                             </View>
                         </View>
                     </View>
-                ) : null}
-            </TouchableScale>
-        );
-    }
-}
+                </View>
+            ) : null
+            }
+        </TouchableScale >
+    );
+};
 
-const styles = StyleSheet.create({
-    // 右上角紅點提示位置
-    rightTopIconPosition: {
-        position: 'absolute',
-        right: 0,
-        top: 0,
-    },
-    // 紅點標籤樣式
-    unFinish: {
-        paddingHorizontal: scale(2),
-        paddingVertical: scale(1),
-        borderColor: COLOR_DIY.secondThemeColor,
-        borderRadius: scale(20),
-        borderWidth: scale(1),
-        zIndex: 9,
-        // ...COLOR_DIY.viewShadow,
-    },
-    stateNoticeText: {
-        ...uiStyle.defaultText,
-        fontSize: verticalScale(7),
-    },
-    title: {
-        container: {
-            backgroundColor: white,
-            width: IMAGE_SIZE,
-            padding: scale(8),
-            // flexDirection: 'row',
-            // alignItems: 'center',
-        },
-        text: {
-            ...uiStyle.defaultText,
-            color: black.main,
-            fontWeight: '500',
-            fontSize: verticalScale(11),
-        },
-        disabledText: {
-            ...uiStyle.defaultText,
-            color: black.third,
-            fontWeight: '500',
-            fontSize: verticalScale(11),
-        }
-
-    },
-});
-
-export default inject('RootStore')(EventCard);
+export default inject('RootStore')(memo(EventCard));

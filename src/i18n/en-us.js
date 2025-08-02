@@ -9,6 +9,7 @@ export default {
         "資訊": "Info",
         "搵課": "Catalog",
         "百科": "Wiki",
+        "職涯港": "Harbor",
         "課表": "Table",
         "服務": "Service",
         "組織": "Club",
@@ -41,8 +42,10 @@ export default {
         "校園巴士": "Bus",
         "支持我們": "Donate",
         "澳大方舟": "ARK",
+        "職涯港": "Harbor",
         "方舟百科": "Wiki",
         "組織登入": "Club In",
+        "論壇登入": "Forum In",
 
         "周一": "MON",
         "周二": "TUE",
@@ -51,6 +54,16 @@ export default {
         "周五": "FRI",
         "周六": "SAT",
         "周日": "SUN",
+
+        "中國銀行澳門↓": "BOC Macau ↓",
+        "微信↓": "WeChat Pay ↓",
+        "支付寶↓": "Alipay ↓",
+
+        "捐贈UM ARK，Push開發者，讓ARK ALL更健康發展！": "Donate to UM ARK, push developers, and make ARK ALL greater!",
+        "原文Link：": "Original Link: ",
+        "您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！": "Your valuable sponsorship will be used for the upgrade and maintenance of various applications and services of ARK!",
+        "目前每年需要的維護費用約為1.5k RMB(此數字可能更新不及時)，純為愛發電中QAQ": "The annual maintenance cost is about 1.5k RMB (this figure may not be updated in time), purely for love and support QAQ",
+        "如您已完成捐贈，可發送成功截圖到 umacark@gmail.com 。我們將展示捐贈榜！": "If you have completed the donation, you can send a successful screenshot to umacark@gmail.com. We will display the donation list!",
     },
     // 關於頁
     about: {
@@ -88,21 +101,42 @@ export default {
     wiki: {
 
     },
+    harbor: {
+        "長按底部論壇Tabbar打開偏好設置": "Long press the bottom Harbor Tabbar to open preference settings",
+        "Webview版概率出現登錄錯誤，建議使用Browser版": "Webview version may encounter login errors, it is recommended to use the Browser version",
+        "進入Browser版": "Enter Browser version",
+        "進入Webview版": "Enter Webview version",
+        "退出設定": "Exit Settings",
+
+        "默認打開方式": "Default Opening Method",
+        "您可以隨時長按修改": "You can long press to modify at any time",
+        "Webview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)": "Webview: In-app Harbor (automatic login not available, Microsoft login may fail)",
+        "Browser(Default)：在瀏覽器中打開論壇": "Browser(Default): Open Harbor in the browser",
+    },
     catalog: {
         "ARK搵課": "ARK Catalog",
-        "試試ECE or Electrical or 電氣（區分簡繁）": "Try ECE or Electrical or 電氣",
+        "試試ECE or Electrical or 電氣": "Try ECE or Electrical or 電氣",
 
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",
 
-        "更新Add Drop/Timetable數據": "Update Add Drop data",
+        "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
+
+        "ARK搵課提示": "What2Reg",
+        "現在重啟APP以適配最新課表數據嗎？": "Restart the app now to adapt to the latest timetable data?",
+        "已是最新課表數據！": "The timetable data is already up to date!",
+        "點擊下方按鈕更新！檢查作者是否上傳最新數據~": "Click the button below to update! Check if the author has uploaded the latest data~",
+        "或可附件最新的課表Excel，Email提醒作者更新！": "Or you can attach the latest timetable Excel and email the author to remind them to update!",
+        "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
         "關閉": "Close",
         "搵課/加課": "Add",
         "清空": "Clear",
+        "晚上": "Evening",
+        "下午": "Afternoon",
 
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
@@ -119,6 +153,8 @@ export default {
 
         "開始時間不能晚於結束時間！": "Cannot start later than end time!",
         "結束時間不能早於開始時間！": "Cannot end earlier than start time!",
+        "下節課：": "Next Class:",
+        "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
     },
     features: {
         "服務一覽": "All Services",
@@ -135,11 +171,13 @@ export default {
         "維修預約": "Repair",
         "體育預訂": "Sports",
         "圖書館": "Library",
+        "Lib佔用": "Lib Using",
         "Lib房間": "Lib Rooms",
         "UM提意見": "Feedback",
         "電子公告": "Bulletin",
         "打印": "Print",
         "打印餘額": "Balance",
+        "學生會": "Student Union",
         "更多服務": "More",
 
         "預約服務": "Reservation Services",
@@ -155,6 +193,7 @@ export default {
         "獎學金": "Scholarship",
         "證明文件": "Certificate",
         "資源搜索": "Resource Finder",
+        "論文計劃": "Essay Plan",
 
 
         "生活服務": "Domestic Services",
@@ -165,10 +204,15 @@ export default {
 
 
         "新生推薦": "Recommended for Freshmen",
+        "職涯港": "Harbor",
         "生存指南": "Survival",
+        "新生註冊": "Registration",
         "內地生": "Mainland",
         "圖文包": "Package",
         "防詐騙": "Scam",
+        "書院": "RC",
+        "校友會": "Alumni",
+        "澳大部門": "Organization",
 
 
         "提問：關於澳大的一切...": "Ask: Anything about UM...",
@@ -184,12 +228,14 @@ export default {
         "查看當前澳大停車場剩餘車位": "Check the remaining parking spaces in UM",
         "查看E6電腦室使用情況": "Check the usage of E6 computer room",
         "直接前往圖書館主頁，能查看圖書館人數和搜索資源等": "Go directly to the library homepage to check the number of people in the library and search for resources",
+        "包含圖書館的電腦、房間佔用情況、其他科技資訊等": "Contains library computers, room occupancy, other technological information, etc.",
         "進入UM PASS設置頁面": "Enter the UM PASS settings page",
         "查看澳大電子公告，最新的更新（未放到新聞和活動）會在這裡公示": "Check the UM electronic bulletin, the latest updates (not posted in news and events) will be announced here",
         "查看在澳大打印服務的餘額": "Check the balance of printing services in UM",
         "查看澳大官方失物認領列表": "Check the official lost and found list of UM",
         "查看澳大和其他公司在澳大發佈的招聘": "Check the recruitment posted by UM and other companies in UM",
         "查看澳大書院菜單": "Check the UM college menu",
+        "查看澳大學生會通告頁": "Check the UM student union announcement page",
         "進入澳大MyUM網頁查看完整功能": "Enter the UM MyUM webpage to view the full functions",
         "進入CMMS報修系統，可以對書院等各種設施的問題下單申請維修": "Enter the CMMS repair system to place an order for repairs to various facilities such as colleges",
         "預約澳大體育場館的使用": "Reserve the use of UM sports venues",
@@ -214,12 +260,18 @@ export default {
         "申請澳大的出外交流項目": "Apply for UM's outbound exchange program",
         "查看澳大獎學金介紹頁": "Check the UM scholarship introduction page",
         "進入澳大圖書館的資源搜索頁，搜索澳大已購買的文獻資料、教科書等": "Enter the resource search page of the UM library to search for literature materials, textbooks, etc. purchased by UM",
+        "你的論文計劃小幫手": "Your essay planning assistant",
+        "ARK職涯港論壇！求職、美食、校友應有盡有！": "ARK Harbor Forum! Job hunting, food, alumni, everything you need!",
         "澳大生存指南公眾號歷史推文": "Historical tweets of the UM Survival Guide public account",
         "澳大生存指南公眾號給內地新生的一些指南建議": "Some guide suggestions for mainland freshmen from the UM Survival Guide public account",
+        "新生註冊圖文包及相關資料": "New Student Registration Package and Related Materials",
         "澳大官方出品的新生圖文包，包括EELC等課程要求": "UM official freshman graphic package, including EELC and other course requirements",
         "防詐騙圖文包，外地同學初次到達澳門要注意！": "Anti-fraud graphic package, students from other places should pay attention when they first arrive in Macau!",
+        "書院大全，快捷找到對應書院主頁": "A list of colleges, quickly find the homepage of the corresponding college",
+        "UM校友會，也可以找到其他校友相關資訊的網站": "UM Alumni Association, where you can also find other alumni-related information",
+        "UM部門，提供各種校內部門的資訊": "UM Departments, providing information on various campus departments",
     },
     club: {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
-    }
+    },
 }
