@@ -11,6 +11,7 @@ import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import Share from 'react-native-share';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { ARK_HARBOR } from '../../../utils/pathMap';
@@ -140,23 +141,22 @@ const ARKHarbor = (props) => {
     };
 
     // 判斷是否有設定用戶打開偏好
-    useEffect(() => {
-        const getSettings = async () => {
-            const harborSettingStr = await getItem();
-
-            if (harborSettingStr == null) {
-                setOpenSetting(true);
-            } else {
-                const harborSetting = harborSettingStr ? JSON.parse(harborSettingStr) : {};
-                // 存在設定，並且是browser模式
-                if (harborSetting.tabbarMode === 'browser') {
-                    openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+    useFocusEffect(
+        useCallback(() => {
+            const getSettings = async () => {
+                const harborSettingStr = await getItem();
+                if (harborSettingStr == null) {
+                    setOpenSetting(true);
+                } else {
+                    const harborSetting = harborSettingStr ? JSON.parse(harborSettingStr) : {};
+                    if (harborSetting.tabbarMode === 'browser') {
+                        openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+                    }
                 }
-            }
-        }
-
-        getSettings();
-    }, [])
+            };
+            getSettings();
+        }, [])
+    );
 
 
     return (

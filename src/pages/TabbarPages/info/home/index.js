@@ -129,7 +129,7 @@ const HomeScreen = ({ navigation }) => {
             icon_type: iconTypes.img,
             function_name: t('ARK', { ns: 'home' }),
             func: () => {
-                // trigger();
+                trigger();
                 // onRefresh();
                 // getAppData();
                 // 刷新重新請求活動頁數據
