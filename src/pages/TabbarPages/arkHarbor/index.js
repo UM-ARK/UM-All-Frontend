@@ -74,6 +74,7 @@ const ARKHarbor = (props) => {
     const [openSetting, setOpenSetting] = useState(false);
 
     const webviewRef = useRef();
+    const currentURLRef = useRef(ARK_HARBOR);
 
     const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
 
@@ -103,10 +104,9 @@ const ARKHarbor = (props) => {
     useEffect(() => {
         readItemFromStorage();
 
-        if (props.route.params && props.route.params.url !== currentURL) {
+        if (props.route.params && props.route.params.url !== currentURLRef.current) {
             const { url } = props.route.params;
             setCurrentURL(url);
-            // webviewRef.current?.reload();
         }
     }, [props.route.params]);
 
@@ -133,7 +133,8 @@ const ARKHarbor = (props) => {
     // Webview導航狀態改變時調用，能獲取當前頁面URL與是否能回退
     const onNavigationStateChange = (webViewState) => {
         setCurrentTitle(webViewState.title);
-        setCurrentURL(webViewState.url);
+        // setCurrentURL(webViewState.url);
+        currentURLRef.current = webViewState.url; // 更新當前URL引用
         setCanGoBack(webViewState.canGoBack);
         setCanGoForward(webViewState.canGoForward);
     };
@@ -319,8 +320,8 @@ const ARKHarbor = (props) => {
                         trigger();
                         const shareOptions = {
                             title: 'ARK職涯港',
-                            message: currentTitle + ' \n' + currentURL,
-                            url: currentURL,
+                            message: currentTitle + ' \n' + currentURLRef.current,
+                            url: currentURLRef.current,
                         };
 
                         Share.open(shareOptions)
@@ -339,7 +340,7 @@ const ARKHarbor = (props) => {
                     style={s.button}
                     onPress={() => {
                         trigger();
-                        openLink({ URL: currentURL, mode: 'fullScreen' });
+                        openLink({ URL: currentURLRef.current, mode: 'fullScreen' });
                         logToFirebase('openPage', { page: 'harbor_browser' });
                     }}
                 >
@@ -354,6 +355,7 @@ const ARKHarbor = (props) => {
                     style={s.button}
                     onPress={() => {
                         trigger();
+                        setCurrentURL(currentURLRef.current); // 確保設置頁面打開時URL正確
                         // 打開ARK Harbor設置頁面
                         setOpenSetting(!openSetting);
                     }}
