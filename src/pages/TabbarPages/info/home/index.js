@@ -502,10 +502,8 @@ const HomeScreen = ({ navigation }) => {
         return (
             <TouchableOpacity
                 style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: containerSize,
-                    height: containerSize,
+                    justifyContent: 'center', alignItems: 'center',
+                    width: containerSize, height: containerSize,
                 }}
                 onPress={func}>
                 <View style={{
@@ -955,20 +953,15 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
                 {/* 快捷功能圖標 */}
-                <View style={{
-                    width: '100%', width: screenWidth * 0.8,
-                    marginTop: verticalScale(5),
-                    alignSelf: 'center', alignItems: 'center',
-                }}>
+                <View style={{ width: screenWidth * 0.8, marginTop: verticalScale(5), }}>
                     <FlatGrid
                         style={{
                             backgroundColor: white, borderRadius: scale(10),
-                            width: '100%',
                         }}
-                        contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', }}
+                        itemContainerStyle={{ alignItems: 'center', justifyContent: 'center', }}
                         maxItemsPerRow={5}
                         itemDimension={scale(50)}
-                        spacing={scale(3)}
+                        spacing={verticalScale(2)}
                         data={functionArray}
                         renderItem={({ item }) => GetFunctionIcon(item)}
                         showsVerticalScrollIndicator={false}

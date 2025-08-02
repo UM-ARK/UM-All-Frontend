@@ -4,52 +4,7 @@ import {
 } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
-import {
-    UM_MAP,
-    UM_RBS,
-    UM_COMPUTER_ROOM,
-    UM_SPORT_BOOKING,
-    UM_CMMS,
-    UM_LOCKER,
-    UM_PORTAL,
-    UM_CALENDAR,
-    UM_Moodle,
-    WHAT_2_REG,
-    UM_PRE_ENROLMENT,
-    UM_ADD_DROP,
-    UM_WHOLE_PERSON,
-    UM_EXCHANGE,
-    UM_SCHOLARSHIP,
-    UM_PARK_APPLY,
-    UM_JOB_SYSTEM,
-    UM_CLASSROOM_MAP,
-    UM_PASS,
-    UM_LIBRARY,
-    UM_COURSE_SIMU,
-    UM_ISW,
-    UM_ISW_NEW,
-    NEW_INFOG,
-    UM_DOCUMENTS,
-    NEW_SCZN,
-    NEW_MAINLAND,
-    UM_COMMENTS,
-    UM_PRE_ENROLMENT_EXCEL,
-    UM_IMPORTANT_DATE,
-    UM_BULLETIN,
-    UM_RC_MENU,
-    UM_LOST_FOUND,
-    UM_FIND_BOOKS,
-    UM_LIB_BOOK,
-    UM_PRINT,
-    UM_PRINT_BALANCE,
-    SCAME,
-    MAIL,
-    NEW_REG,
-    UM_LIB_USING,
-    UM_PAPER_PLAN,
-    UM_RC,
-    UM_ALUMNI,
-} from '../../../utils/pathMap';
+import { MAIL, } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
 import { trigger } from "../../../utils/trigger";
@@ -62,7 +17,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FlatGrid } from 'react-native-super-grid';
 import FastImage from 'react-native-fast-image';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { inject } from 'mobx-react';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
@@ -121,6 +75,7 @@ function Index({ navigation }) {
                 maxItemsPerRow={5}
                 itemDimension={scale(50)}
                 spacing={scale(10)}
+                itemContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
                 data={fn_list}
                 renderItem={({ item }) => {
                     let icon = null;
