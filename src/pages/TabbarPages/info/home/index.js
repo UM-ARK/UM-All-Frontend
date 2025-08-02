@@ -97,7 +97,7 @@ const iconTypes = {
 };
 
 let cal = UMCalendar;
-const calItemWidth = verticalScale(44.5);
+const calItemWidth = verticalScale(36);
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
@@ -391,7 +391,7 @@ const HomeScreen = ({ navigation }) => {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: theme.trueWhite,
-                            fontSize: verticalScale(10),
+                            fontSize: verticalScale(8),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                         }}>
@@ -403,7 +403,7 @@ const HomeScreen = ({ navigation }) => {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: theme.trueWhite,
-                                fontSize: verticalScale(22),
+                                fontSize: verticalScale(15),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                             }}>
@@ -415,7 +415,7 @@ const HomeScreen = ({ navigation }) => {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: theme.trueWhite,
-                                fontSize: verticalScale(22),
+                                fontSize: verticalScale(15),
                                 fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                             }}>
@@ -426,7 +426,7 @@ const HomeScreen = ({ navigation }) => {
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: theme.trueWhite,
-                            fontSize: verticalScale(10),
+                            fontSize: verticalScale(8),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                         }}>
