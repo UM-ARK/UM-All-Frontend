@@ -25,6 +25,7 @@
     "@react-native-firebase/analytics": "^22.4.0",
     "@react-native-firebase/app": "^22.4.0",
     "@react-native-menu/menu": "^1.2.3",
+    "@react-native-vector-icons/material-design-icons": "^12.2.0",
     "@react-native/gradle-plugin": "^0.75.4",
     "@react-navigation/bottom-tabs": "^6",
     "@react-navigation/material-top-tabs": "^6",

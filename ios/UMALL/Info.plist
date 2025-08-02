@@ -38,7 +38,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Need to upload image</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Need to upload image</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -64,6 +64,7 @@
 		<string>Octicons.ttf</string>
 		<string>Zocial.ttf</string>
 		<string>Fontisto.ttf</string>
+		<string>MaterialDesignIcons.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -76,7 +77,7 @@
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>UIStatusBarStyle</key>
-	<string></string>
+	<string/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>

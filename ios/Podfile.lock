@@ -1409,6 +1409,7 @@ PODS:
   - react-native-simple-toast (3.3.2):
     - React-Core
     - Toast (~> 4)
+  - react-native-vector-icons-material-design-icons (12.2.0)
   - react-native-webview (13.15.0):
     - DoubleConversion
     - glog
@@ -1947,6 +1948,7 @@ DEPENDENCIES:
   - react-native-restart (from `../node_modules/react-native-restart`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
+  - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -2104,6 +2106,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-simple-toast:
     :path: "../node_modules/react-native-simple-toast"
+  react-native-vector-icons-material-design-icons:
+    :path: "../node_modules/@react-native-vector-icons/material-design-icons"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-nativeconfig:
@@ -2252,6 +2256,7 @@ SPEC CHECKSUMS:
   react-native-restart: df7caae89026a8ab2ecdd82839978f657701f51d
   react-native-safe-area-context: 0f7bf11598f9a61b7ceac8dc3f59ef98697e99e1
   react-native-simple-toast: 4c9cc976cb92b6e5fb555e7c57fce38b90a56d07
+  react-native-vector-icons-material-design-icons: 6220289718af16d5eeaf5deab51f10568bbe4df5
   react-native-webview: 6f8a8a6eff025113d1c81b8c2bb5481401e5f653
   React-nativeconfig: c7743aabd506fc9756e2bc3225b44f6a6f4490c9
   React-NativeModulesApple: 007ac9ffc5e43040a7e0d70c04ad4a8b845a832c
