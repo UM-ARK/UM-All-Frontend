@@ -7487,6 +7487,11 @@ react-native-screens@^3.3:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
+react-native-share@^12.1.2:
+  version "12.1.2"
+  resolved "https://registry.yarnpkg.com/react-native-share/-/react-native-share-12.1.2.tgz#9776a4efec96a79d59242ddbc6f151a0511d4bfb"
+  integrity sha512-cZTygBR1q2y0seqORu+ejvrvX6FuXqCXDEqzOfSuJexCiO5/V0EglMA3YUxlQppS2eB5QWK0RLwcqoD3xCaZPQ==
+
 react-native-simple-toast@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/react-native-simple-toast/-/react-native-simple-toast-3.3.2.tgz#9f1c3a92bb56424d3e5d3bc7caf3f29dee819d9b"

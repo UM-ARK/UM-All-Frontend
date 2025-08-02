@@ -82,6 +82,7 @@
     "react-native-restart": "0.0.24",
     "react-native-safe-area-context": "^5.5.1",
     "react-native-screens": "^3.3",
+    "react-native-share": "^12.1.2",
     "react-native-simple-toast": "^3.3.2",
     "react-native-size-matters": "^0.4.2",
     "react-native-super-grid": "^6.0.1",
