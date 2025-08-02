@@ -145,8 +145,8 @@ const IntegratedWebView = ({
                 cacheMode={'LOAD_NO_CACHE'}
                 // 自動注入賬號密碼
                 injectedJavaScript={`
-                    document.getElementById("userNameInput").value="${UmPassInfo.account}";
-                    document.getElementById("passwordInput").value="${UmPassInfo.password}";
+                    document.getElementById("userNameInput").value="${UmPassInfo?.account}";
+                    document.getElementById("passwordInput").value="${UmPassInfo?.password}";
                 `}
             />
 
@@ -157,7 +157,7 @@ const IntegratedWebView = ({
                     onForwardPress={handleForwardPress}
                     canGoBack={canGoBack}
                     canGoForward={canGoForward}
-                    // translateY={translateY}
+                // translateY={translateY}
                 />
             )}
         </>
