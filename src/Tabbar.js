@@ -17,11 +17,13 @@ import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
 import { t } from 'i18next';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tabs = AnimatedTabBarNavigator();
 
 const Tabbar = () => {
     const { theme } = useTheme();
+    const insets = useSafeAreaInsets();
 
     return (
         <Tabs.Navigator
@@ -31,6 +33,9 @@ const Tabbar = () => {
                     ...uiStyle.defaultText,
                     fontSize: scale(10),
                 },
+                tabStyle: {
+                    paddingBottom: Math.max(insets.bottom),
+                }
             }}
             appearance={{
                 activeTabBackgrounds: theme.themeColor,
