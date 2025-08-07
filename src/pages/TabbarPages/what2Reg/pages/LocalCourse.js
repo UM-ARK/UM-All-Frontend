@@ -179,7 +179,7 @@ const LocalCourse = (props) => {
                                 }}
                                 onPress={() => { trigger('rigid'); }}
                             >
-                                <View style={{ flexDirection: 'row', }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', }}>
                                     <Text style={{
                                         ...uiStyle.defaultText, fontSize: scale(12), color: black.third,
                                     }}>{courseInfo.Section + ' - ' + courseInfo['Medium of Instruction']}</Text>
@@ -195,7 +195,7 @@ const LocalCourse = (props) => {
                                 )}
                                 {/* schedulesObj[itm]內都存在Time From字段，才展示Section */}
                                 {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
-                                    <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', }}>
                                         {schedulesObj[itm].map(sameSection => (
                                             <View key={sameSection['Day'] + sameSection['Classroom']}
                                                 style={{
@@ -404,7 +404,7 @@ const LocalCourse = (props) => {
                     <Loading />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={{ marginHorizontal: scale(5), }}>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5), }}>
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>
