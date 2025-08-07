@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios": "react-native run-ios --simulator=\"iPhone 15 Pro\"",
+    "ios": "react-native run-ios --simulator=\"iPhone 16 Pro (18.6)\"",
     "iosNew": "react-native run-ios --simulator=\"iPhone 16 Pro (26.0)\"",
     "iosTrue": "react-native run-ios --device",
     "iosBig": "react-native run-ios --simulator=\"iPad Pro 13-inch (M4)\"",
