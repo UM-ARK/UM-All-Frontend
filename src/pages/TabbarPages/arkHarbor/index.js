@@ -261,7 +261,7 @@ const ARKHarbor = (props) => {
                     </TouchableScale>
 
                     {/* 有保存的設定時才顯示 */}
-                    {harborSetting && harborSetting.tabbarMode && (
+                    {harborSetting && harborSetting.tabbarMode && (<>
                         <TouchableScale style={{ ...s.settingButtonContainer, backgroundColor: black.third }}
                             onPress={() => {
                                 trigger();
@@ -270,7 +270,10 @@ const ARKHarbor = (props) => {
                         >
                             <Text style={{ ...s.settingText, }}>{t("退出設定", { ns: 'harbor' })}</Text>
                         </TouchableScale>
-                    )}
+
+                        <Text style={{ ...s.settingText, color: black.main, }}>{t("您可以隨時通過右下角的按鈕進入設定", { ns: 'harbor' })}</Text>
+                    </>)}
+
                 </View>
             )}
 

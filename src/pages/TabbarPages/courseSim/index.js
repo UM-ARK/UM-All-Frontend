@@ -183,10 +183,16 @@ function CourseSim({ route, navigation }) {
         AsyncStorage.getItem('ARK_Timetable_Storage').then(strCourseCodeList => {
             const list = strCourseCodeList ? JSON.parse(strCourseCodeList) : null;
             if (list && list.length > 0) {
-                handleCourseList(list);
+                setU_codeSectionList(list);
             }
         });
     }, []);
+
+    useEffect(() => {
+        if (u_codeSectionList && u_codeSectionList.length > 0) {
+            handleCourseList(u_codeSectionList);
+        }
+    }, [u_codeSectionList, s_coursePlanTimeFile]);
 
     // 頁面是否聚焦監聽
     useFocusEffect(

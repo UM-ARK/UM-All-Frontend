@@ -56,6 +56,8 @@ const LocalCourse = (props) => {
                 }
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
+            } finally {
+                setIsLoading(false);
             }
         }
 
@@ -73,6 +75,7 @@ const LocalCourse = (props) => {
     }, [coursePlanList, courseCode]);
 
     useEffect(() => {
+        if (isLoading) return;
         // 預選有，但課表時間Excel沒有的課程，直接跳轉選咩課
         if (relateList.length === 0) {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
@@ -88,7 +91,7 @@ const LocalCourse = (props) => {
             setCourseInfo(relateList[0]);
             setIsLoading(false);
         }
-    }, [relateList]);
+    }, [relateList, isLoading]);
 
     // 渲染可選section
     const renderSchedules = (schedulesObj) => {
@@ -176,7 +179,7 @@ const LocalCourse = (props) => {
                                 }}
                                 onPress={() => { trigger('rigid'); }}
                             >
-                                <View style={{ flexDirection: 'row', }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', }}>
                                     <Text style={{
                                         ...uiStyle.defaultText, fontSize: scale(12), color: black.third,
                                     }}>{courseInfo.Section + ' - ' + courseInfo['Medium of Instruction']}</Text>
@@ -192,7 +195,7 @@ const LocalCourse = (props) => {
                                 )}
                                 {/* schedulesObj[itm]內都存在Time From字段，才展示Section */}
                                 {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
-                                    <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', }}>
                                         {schedulesObj[itm].map(sameSection => (
                                             <View key={sameSection['Day'] + sameSection['Classroom']}
                                                 style={{
@@ -401,7 +404,7 @@ const LocalCourse = (props) => {
                     <Loading />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={{ marginHorizontal: scale(5), }}>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5), }}>
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>
