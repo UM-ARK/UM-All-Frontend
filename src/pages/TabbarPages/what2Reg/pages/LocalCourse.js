@@ -56,6 +56,8 @@ const LocalCourse = (props) => {
                 }
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
+            } finally {
+                setIsLoading(false);
             }
         }
 
@@ -73,6 +75,7 @@ const LocalCourse = (props) => {
     }, [coursePlanList, courseCode]);
 
     useEffect(() => {
+        if (isLoading) return;
         // 預選有，但課表時間Excel沒有的課程，直接跳轉選咩課
         if (relateList.length === 0) {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
@@ -88,7 +91,7 @@ const LocalCourse = (props) => {
             setCourseInfo(relateList[0]);
             setIsLoading(false);
         }
-    }, [relateList]);
+    }, [relateList, isLoading]);
 
     // 渲染可選section
     const renderSchedules = (schedulesObj) => {
