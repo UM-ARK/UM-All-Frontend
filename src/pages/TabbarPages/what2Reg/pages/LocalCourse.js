@@ -122,7 +122,7 @@ const LocalCourse = (props) => {
                                         trigger();
                                         const courseCode_ = courseInfo['Course Code'];
                                         const profName = courseInfo['Teacher Information'];
-                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode_) + '/' + encodeURIComponent(profName);
+                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode_) + '/' + encodeURIComponent(lodash.deburr(profName));
                                         logToFirebase('checkCourse', {
                                             courseCode: courseCode_,
                                             profName: profName,

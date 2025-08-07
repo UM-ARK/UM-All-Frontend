@@ -113,7 +113,7 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     };
                                     if (prof_info) {
                                         // 進入搜索特定教授的課程模式，進入評論詳情頁
-                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(prof_info.name)
+                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(prof_info.name))
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {
