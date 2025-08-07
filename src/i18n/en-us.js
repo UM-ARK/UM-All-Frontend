@@ -112,6 +112,8 @@ export default {
         "您可以隨時長按修改": "You can long press to modify at any time",
         "Webview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)": "Webview: In-app Harbor (automatic login not available, Microsoft login may fail)",
         "Browser(Default)：在瀏覽器中打開論壇": "Browser(Default): Open Harbor in the browser",
+
+        "您可以隨時通過右下角的按鈕進入設定": "You can enter settings at any time through the button in the lower right corner"
     },
     catalog: {
         "ARK搵課": "ARK Catalog",
