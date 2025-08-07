@@ -446,7 +446,7 @@ const EventPage = forwardRef((props, ref) => {
                     }}>
                         <Text style={{
                             ...uiStyle.defaultText,
-                            fontSize: scale(7),
+                            fontSize: verticalScale(7),
                             color: themeColor
                         }}>
                             職涯港
@@ -458,7 +458,7 @@ const EventPage = forwardRef((props, ref) => {
                         {item?.like_count > 0 && (
                             <Text style={{
                                 ...uiStyle.defaultText,
-                                fontSize: scale(10),
+                                fontSize: verticalScale(8),
                                 color: themeColor,
                                 marginLeft: scale(5),
                             }}>
@@ -470,7 +470,7 @@ const EventPage = forwardRef((props, ref) => {
                         {item?.reply_count > 0 && (
                             <Text style={{
                                 ...uiStyle.defaultText,
-                                fontSize: scale(10),
+                                fontSize: verticalScale(8),
                                 color: themeColor,
                                 marginLeft: scale(5),
                             }}>
@@ -482,7 +482,7 @@ const EventPage = forwardRef((props, ref) => {
                         {item?.views > 0 && (
                             <Text style={{
                                 ...uiStyle.defaultText,
-                                fontSize: scale(10),
+                                fontSize: verticalScale(8),
                                 color: themeColor,
                                 marginLeft: scale(5),
                             }}>
