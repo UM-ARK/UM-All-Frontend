@@ -2289,7 +2289,7 @@
             "Course Code": "CHLL1000",
             "Course Title": "University Chinese",
             "Section": "005",
-            "Medium of Instruction": "Cantonese",
+            "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "CHEANG WAI LEK",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
@@ -2304,7 +2304,7 @@
             "Course Code": "CHLL1000",
             "Course Title": "University Chinese",
             "Section": "005",
-            "Medium of Instruction": "Cantonese",
+            "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "CHEANG WAI LEK",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
@@ -33644,7 +33644,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1042",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FAH - PTS19-UF2 / PTS19-UF3 / PTS19-UF4\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FAH - PTS19-SECOND YEAR / PTS19-THIRD YEAR / PTS19-FOURTH YEAR\n",
             "Course Title Chi": "葡萄牙語 I - 葡萄牙語入門"
         },
         {
@@ -33661,7 +33661,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1042",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FAH - PTS19-UF2 / PTS19-UF3 / PTS19-UF4\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FAH - PTS19-SECOND YEAR / PTS19-THIRD YEAR / PTS19-FOURTH YEAR\n",
             "Course Title Chi": "葡萄牙語 I - 葡萄牙語入門"
         },
         {
@@ -39873,36 +39873,6 @@
             "Day": "WED",
             "Time From": "15:30",
             "Time To": "16:20",
-            "Classroom": "E3-1042",
-            "Course Title Chi": "大學英文II（輔導版）"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "TELC1012",
-            "Course Title": "University English II (Tutorial)",
-            "Section": "079",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TUTORIAL",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "14:30",
-            "Time To": "15:20",
-            "Classroom": "E3-4033",
-            "Course Title Chi": "大學英文II（輔導版）"
-        },
-        {
-            "Offering Unit": "FAH",
-            "Offering Department": "ELC",
-            "Course Code": "TELC1012",
-            "Course Title": "University English II (Tutorial)",
-            "Section": "080",
-            "Medium of Instruction": "English",
-            "Teacher Information": "TUTORIAL",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "13:00",
-            "Time To": "13:50",
             "Classroom": "E3-1042",
             "Course Title Chi": "大學英文II（輔導版）"
         }
