@@ -3599,6 +3599,17 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "DAMIAN JOHN SHAW",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
             "Course Code": "ENGL4001",
             "Course Title": "Graduation Project",
             "Section": "001",
@@ -5790,7 +5801,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E6-1102D / E6-2095",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Course Title Chi": "使用 C++ 進行電腦程式設計"
         },
         {
@@ -6507,8 +6518,8 @@
             "Teacher Information": "ROSTAM MAG.IUR.DR.IUR.NEUWIRTH",
             "Lecture / Lab": "Lecture",
             "Day": "WED",
-            "Time From": "14:30",
-            "Time To": "17:15",
+            "Time From": "10:00",
+            "Time To": "12:45",
             "Classroom": "E4-1052",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "世界貿易組織（WTO）與區域貿易法"
@@ -8726,7 +8737,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-11",
+    "updateTime": "2025-08-12",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

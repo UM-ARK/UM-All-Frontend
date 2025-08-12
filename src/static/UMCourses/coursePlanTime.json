@@ -18522,6 +18522,39 @@
         {
             "Offering Unit": "FAH",
             "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "001",
+            "Medium of Instruction": "English",
+            "Teacher Information": "DAMIAN JOHN SHAW",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "003",
+            "Medium of Instruction": "English",
+            "Teacher Information": "MATTHEW IAN GIBSON",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
+            "Course Code": "ENGL4000",
+            "Course Title": "Research Report",
+            "Section": "004",
+            "Medium of Instruction": "English",
+            "Teacher Information": "CHIU MAN YIN",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FAH",
+            "Offering Department": "DENG",
             "Course Code": "ENGL4001",
             "Course Title": "Graduation Project",
             "Section": "001",
@@ -27343,7 +27376,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E6-1102D / E6-2095",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Course Title Chi": "使用 C++ 進行電腦程式設計"
         },
         {
@@ -27359,7 +27392,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E6-1102D / E6-2095",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Course Title Chi": "使用 C++ 進行電腦程式設計"
         },
         {
@@ -27375,7 +27408,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E6-1102D / E6-2095",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Course Title Chi": "使用 C++ 進行電腦程式設計"
         },
         {
@@ -27391,7 +27424,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E6-1102D / E6-2095",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Course Title Chi": "使用 C++ 進行電腦程式設計"
         },
         {
@@ -29724,8 +29757,8 @@
             "Teacher Information": "ROSTAM MAG.IUR.DR.IUR.NEUWIRTH",
             "Lecture / Lab": "Lecture",
             "Day": "WED",
-            "Time From": "14:30",
-            "Time To": "17:15",
+            "Time From": "10:00",
+            "Time To": "12:45",
             "Classroom": "E4-1052",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "世界貿易組織（WTO）與區域貿易法"
@@ -32234,7 +32267,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-3007",
             "Course Title Chi": "商業管理原理"
         },
         {
@@ -32249,7 +32282,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-3007",
             "Course Title Chi": "商業管理原理"
         },
         {
@@ -32264,7 +32297,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-3007",
             "Course Title Chi": "商業管理原理"
         },
         {
@@ -32279,7 +32312,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-2013",
+            "Classroom": "E22-3007",
             "Course Title Chi": "商業管理原理"
         },
         {
