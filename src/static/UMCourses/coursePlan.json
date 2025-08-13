@@ -3296,7 +3296,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:45",
-            "Classroom": "E11-1021",
+            "Classroom": "E22-G010",
             "Course Title Chi": "工程材料的力學行為與基本失效分析"
         },
         {
@@ -5656,7 +5656,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2010",
+            "Classroom": "E22-3002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR\n",
             "Course Title Chi": "會議和酒店管理實習"
         },
@@ -6467,7 +6467,7 @@
             "Course Title": "Civil Law II: Contract and Tort",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "DU LI",
+            "Teacher Information": "ZHANG SONGLUN",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "14:30",
@@ -6483,7 +6483,7 @@
             "Course Title": "Criminal Law II: Special Principles",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "ZHANG SONGLUN",
+            "Teacher Information": "LYU HANYUE",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "14:30",
@@ -6499,7 +6499,7 @@
             "Course Title": "Administrative Law and Procedure I",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "ZHOU ZHUOJING",
+            "Teacher Information": "FLL NEW TEACHER",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "14:30",
@@ -7652,7 +7652,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-2002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / MKG22 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22 / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -7668,7 +7668,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
             "Course Title Chi": "研究方法"
         },
         {
@@ -8737,7 +8737,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-12",
+    "updateTime": "2025-08-13",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

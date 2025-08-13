@@ -17634,7 +17634,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:45",
-            "Classroom": "E11-1021",
+            "Classroom": "E22-G010",
             "Course Title Chi": "工程材料的力學行為與基本失效分析"
         },
         {
@@ -17649,7 +17649,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:45",
-            "Classroom": "E11-1021",
+            "Classroom": "E22-G010",
             "Course Title Chi": "工程材料的力學行為與基本失效分析"
         },
         {
@@ -26703,7 +26703,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2010",
+            "Classroom": "E22-3002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR\n",
             "Course Title Chi": "會議和酒店管理實習"
         },
@@ -26719,7 +26719,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-2010",
+            "Classroom": "E22-3002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR20-CHM20-THIRD YEAR / IIR20-CHM20-FOURTH YEAR\n",
             "Course Title Chi": "會議和酒店管理實習"
         },
@@ -29546,7 +29546,7 @@
             "Course Title": "Administrative Law I",
             "Section": "201",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "HUGO EMANUEL DE MIRANDA RODRIGUES DUARTE FONSECA",
+            "Teacher Information": "FLL NEW TEACHER",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "21:00",
@@ -29562,12 +29562,12 @@
             "Course Title": "Administrative Law I",
             "Section": "201",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "HUGO EMANUEL DE MIRANDA RODRIGUES DUARTE FONSECA",
+            "Teacher Information": "FLL NEW TEACHER",
             "Lecture / Lab": "Lecture",
             "Day": "WED",
-            "Time From": "19:00",
-            "Time To": "19:50",
-            "Classroom": "E32-1027",
+            "Time From": "20:00",
+            "Time To": 2050,
+            "Classroom": "E32-G008",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLL18 / BLL25 / WA17 / WA25\n",
             "Course Title Chi": "行政法I"
         },
@@ -29610,11 +29610,11 @@
             "Course Title": "Administrative Law I (Legal Practice)",
             "Section": "201",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "HUGO EMANUEL DE MIRANDA RODRIGUES DUARTE FONSECA",
+            "Teacher Information": "FLL NEW TEACHER",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
-            "Time From": "20:00",
-            "Time To": "20:50",
+            "Time From": "21:00",
+            "Time To": "21:50",
             "Classroom": "E32-G008",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLL18 / BLL25 / WA17 / WA25\n",
             "Course Title Chi": "行政法I（法律實務）"
@@ -29706,7 +29706,7 @@
             "Course Title": "Civil Law II: Contract and Tort",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "DU LI",
+            "Teacher Information": "ZHANG SONGLUN",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "14:30",
@@ -29722,7 +29722,7 @@
             "Course Title": "Criminal Law II: Special Principles",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "ZHANG SONGLUN",
+            "Teacher Information": "LYU HANYUE",
             "Lecture / Lab": "Lecture",
             "Day": "TUE",
             "Time From": "14:30",
@@ -29738,7 +29738,7 @@
             "Course Title": "Administrative Law and Procedure I",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "ZHOU ZHUOJING",
+            "Teacher Information": "FLL NEW TEACHER",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "14:30",
@@ -29848,6 +29848,22 @@
             "Offering Department": "MLS",
             "Course Code": "LAWS3000",
             "Course Title": "Obligation Law I",
+            "Section": "001",
+            "Medium of Instruction": "Cantonese",
+            "Teacher Information": "CHAN IO CHAO",
+            "Lecture / Lab": "Lecture",
+            "Day": "FRI",
+            "Time From": "20:30",
+            "Time To": "23:15",
+            "Classroom": "E32-G007",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Course Title Chi": "債務法第一卷"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS3000",
+            "Course Title": "Obligation Law I",
             "Section": "201",
             "Medium of Instruction": "Portuguese",
             "Teacher Information": "MANUEL MARCELINO ESCOVAR TRIGO",
@@ -29888,6 +29904,22 @@
             "Time From": "20:30",
             "Time To": "22:15",
             "Classroom": "E32-G027",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
+            "Course Title Chi": "債法 I（法律實務）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS3001",
+            "Course Title": "Obligation Law I (Legal Practice)",
+            "Section": "001",
+            "Medium of Instruction": "Cantonese",
+            "Teacher Information": "TEMP TEACHER",
+            "Lecture / Lab": "Lecture",
+            "Day": "THU",
+            "Time From": "20:30",
+            "Time To": "22:15",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "債法 I（法律實務）"
         },
@@ -32828,7 +32860,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-2002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / MKG22 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22 / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32844,7 +32876,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / MKG22 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22 / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32860,7 +32892,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / MKG22 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22 / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32876,7 +32908,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-3009",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / MKG22 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22 / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -32892,7 +32924,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
             "Course Title Chi": "研究方法"
         },
         {
@@ -32908,7 +32940,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
             "Course Title Chi": "研究方法"
         },
         {
@@ -32924,7 +32956,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
             "Course Title Chi": "研究方法"
         },
         {
@@ -32940,7 +32972,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
             "Course Title Chi": "研究方法"
         },
         {
