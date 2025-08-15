@@ -13,7 +13,7 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E22-4004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA25 / GBS22-SECOND YEAR / IIR20-FIRST YEAR / THIRD YEAR / FOURTH YEAR\n - FBA\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / BIA25 / GBS22-SECOND YEAR / IIR20-FIRST YEAR / THIRD YEAR / FOURTH YEAR\n - FBA\n",
             "Course Title Chi": "財務會計原理"
         },
         {
@@ -2008,7 +2008,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:45",
-            "Classroom": "E11-1018",
+            "Classroom": "E12-G003",
             "\"Class For / Class Not For\" Information": "Class not for :\n - FST - FIRST YEAR\n",
             "Course Title Chi": "物聯網基礎知識"
         },
@@ -5689,7 +5689,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-4005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-SECOND YEAR / BIA25 / GBS22 / THIRD YEAR / FOURTH YEAR\n - FBA - BAM22\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / BIA25 / GBS22 / THIRD YEAR / FOURTH YEAR\n - FBA - BAM22\n",
             "Course Title Chi": "商業智慧與資訊簡介"
         },
         {
@@ -5864,8 +5864,8 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E22-2011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC20 / FIC22-THIRD YEAR / FIC22-FOURTH YEAR / GBM20 / GBM22-FOURTH YEAR / GBS20 / GBS22-FOURTH YEAR\n",
+            "Classroom": "E22-1002",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC20 / FIC22-THIRD YEAR / FIC22-FOURTH YEAR / GBM20 / GBM22-FOURTH YEAR / GBS20 / MKG20-FOURTH YEAR\n",
             "Course Title Chi": "專案與品質管理"
         },
         {
@@ -8737,7 +8737,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-13",
+    "updateTime": "2025-08-15",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
