@@ -13,7 +13,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E22-4004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / BIA25 / GBS22-SECOND YEAR / IIR20-FIRST YEAR / THIRD YEAR / FOURTH YEAR\n - FBA\n",
             "Course Title Chi": "財務會計原理"
         },
         {
@@ -29,7 +28,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-4004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21 / THIRD YEAR / FOURTH YEAR\n - FBA\n",
             "Course Title Chi": "管理會計 I"
         },
         {
@@ -92,7 +90,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-G010",
+            "Classroom": "E22-3007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-THIRD YEAR / FOURTH YEAR\n - FBA\n",
             "Course Title Chi": "高級財務會計"
         },
@@ -108,8 +106,8 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E4-1052",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / ACC21-THIRD YEAR / FOURTH YEAR\n",
+            "Classroom": "E22-1002",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / ACC21-THIRD YEAR / FOURTH YEAR\n - FBA\n",
             "Course Title Chi": "會計資訊系統"
         },
         {
@@ -221,7 +219,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-G013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "高等數學 I"
         },
         {
@@ -237,7 +234,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E12-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "大學物理"
         },
         {
@@ -253,7 +249,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E11-1006",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "分析與環境化學"
         },
         {
@@ -284,7 +279,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E11-G012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED\n - FST\n",
             "Course Title Chi": "有機化學：化學反應性和合成的基礎"
         },
         {
@@ -419,7 +413,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-2007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n - FBA - BAM19 / BAM22 / BIM19 / FNM19\n",
             "Course Title Chi": "微觀經濟學原理"
         },
         {
@@ -435,7 +428,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n - FBA - BAM19 / BAM22\n",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -467,7 +459,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20\n - FBA - FNM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FNC17 / FNC20\n - FBA - FNM19\n",
             "Course Title Chi": "計量經濟學 I"
         },
         {
@@ -562,7 +554,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E21-1029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "現代漢語"
         },
         {
@@ -578,7 +569,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-G035",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n - FED - CHN25\n",
             "Course Title Chi": "中國當代文學"
         },
         {
@@ -594,7 +584,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E21-G012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "粵語與文化"
         },
         {
@@ -610,7 +599,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "中國古典小說"
         },
         {
@@ -626,8 +614,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E21-1046",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
-            "Course Title Chi": "文言文 I"
+            "Course Title Chi": "文言文（一）"
         },
         {
             "Offering Unit": "FAH",
@@ -642,7 +629,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-1027",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "中國古典文學：先秦至唐五代"
         },
         {
@@ -658,7 +644,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E4-3052",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "中國現當代作家專題"
         },
         {
@@ -674,7 +659,6 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E21-1046",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "中國古典散文"
         },
         {
@@ -1142,7 +1126,6 @@
             "Time From": "13:00",
             "Time To": "14:45",
             "Classroom": "N21-G013",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FST - CPS19\n",
             "Course Title Chi": "計算機科學"
         },
         {
@@ -1157,7 +1140,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:20",
-            "Classroom": "E11-1006",
+            "Classroom": "E6-1102D",
             "Course Title Chi": "土木工程製圖"
         },
         {
@@ -1304,7 +1287,7 @@
             "Medium of Instruction": "English",
             "Teacher Information": "ZHANG PING / ZHOU WANHUAN",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17-FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17-THIRD YEAR / CVE17-FOURTH YEAR\n",
             "Course Title Chi": "畢業設計I"
         },
         {
@@ -1782,7 +1765,7 @@
             "Notes for Course Enrolment": "Course for students admitted in AY2021/2022 and onwards; Class for (RC=CKLC)",
             "Teacher Information": "TANG ON KEI",
             "Lecture / Lab": "Lecture",
-            "Course Title Chi": "住宿學院社區團隊專案"
+            "Course Title Chi": "住宿學院社區團隊計畫"
         },
         {
             "Offering Unit": "FST",
@@ -1812,7 +1795,6 @@
             "Time From": "10:00",
             "Time To": "11:45",
             "Classroom": "E12-G005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19\n - FST - CVE17 / MTH19 / MTH23\n",
             "Course Title Chi": "物理學 I"
         },
         {
@@ -2036,7 +2018,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "N23-G016",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN19\n - FSS - MEC19\n",
             "Course Title Chi": "基礎微觀經濟學"
         },
         {
@@ -2052,7 +2033,6 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E4-G078",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - ECN19\n - FSS - MEC19\n",
             "Course Title Chi": "數學 I"
         },
         {
@@ -2716,7 +2696,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E33-3037 / E33-3042",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / CHN25 / ENG19 / INS19 / INS23 / MAS19 / PPE19\n",
             "Course Title Chi": "將資訊科技融入教學與學習"
         },
         {
@@ -2731,7 +2710,6 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-1030",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / CHN25 / INS19 / INS23 / MAS19 / PPE19 / PYE22\n",
             "Course Title Chi": "特殊教育導論"
         },
         {
@@ -2746,7 +2724,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-1015",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / CHN25 / ENG19 / INS19 / INS23 / MAS19 / PPE19\n",
             "Course Title Chi": "特殊教育導論"
         },
         {
@@ -2761,7 +2738,6 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3011",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - CHN19 / CHN25 / INS19 / INS23 / MAS19 / PPE19 / PYE22\n",
             "Course Title Chi": "教師道德與教師專業發展"
         },
         {
@@ -2832,7 +2808,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E33-1045",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FED - PPE19-FIRST YEAR / PPE19-SECOND YEAR\n",
             "Course Title Chi": "幼兒健康與照護"
         },
         {
@@ -2959,7 +2934,6 @@
             "Time From": "18:00",
             "Time To": "20:45",
             "Classroom": "E22-3013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - CHN19 / INS19 / INS23-FOURTH YEAR / MAS19\n",
             "Course Title Chi": "學校諮商與指導"
         },
         {
@@ -2970,7 +2944,6 @@
             "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "TBC_2025-1",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - CHN19-FOURTH YEAR\n",
             "Course Title Chi": "指導教學與學校經驗"
         },
         {
@@ -2981,7 +2954,6 @@
             "Medium of Instruction": "English",
             "Teacher Information": "TBC_2025-1",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - ENG19-FOURTH YEAR\n",
             "Course Title Chi": "指導教學與學校經驗"
         },
         {
@@ -2992,7 +2964,6 @@
             "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "TBC_2025-1",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PPE19-FOURTH YEAR\n",
             "Course Title Chi": "指導教學與學校經驗"
         },
         {
@@ -3003,7 +2974,6 @@
             "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "TBC_2025-1",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE22-FOURTH YEAR\n",
             "Course Title Chi": "指導教學與學校經驗"
         },
         {
@@ -3042,7 +3012,6 @@
             "Medium of Instruction": "Cantonese and Mandarin",
             "Teacher Information": "TBC_2025-1",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - INS19-FOURTH YEAR\n",
             "Course Title Chi": "指導教學與學校經驗"
         },
         {
@@ -3053,7 +3022,6 @@
             "Medium of Instruction": "English",
             "Teacher Information": "TBC_2025-1",
             "Lecture / Lab": "Lecture",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - MAS19-FOURTH YEAR\n",
             "Course Title Chi": "指導教學與學校經驗"
         },
         {
@@ -3633,7 +3601,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FBA - FNC17 / FNC20 / GBS22-SECOND YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class not for :\n - FBA - FNC17 / FNC20\n",
             "Course Title Chi": "財務管理"
         },
         {
@@ -4159,7 +4127,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E4-G053",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA\n",
             "Course Title Chi": "商業定量推理"
         },
         {
@@ -4342,7 +4309,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E6-1102D",
+            "Classroom": "E6-1113B",
             "Course Title Chi": "日常生活經濟學"
         },
         {
@@ -4682,7 +4649,7 @@
             "Course Title": "Introduction to Political Science",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "KWONG KAM KWAN (GPAD1000)",
+            "Teacher Information": "KWONG KAM KWAN",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "10:00",
@@ -4950,7 +4917,6 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-4015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "澳門歷史"
         },
         {
@@ -4966,7 +4932,6 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E21-1017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "中國史 I"
         },
         {
@@ -4997,7 +4962,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E3-4043",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "西方文明 II"
         },
         {
@@ -5013,7 +4977,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-1017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - HST20\n - FAH - HIM19\n",
             "Course Title Chi": "葡萄牙及其海上擴張的歷史"
         },
         {
@@ -5623,7 +5586,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-3015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR20-SECOND YEAR / IIR20-THIRD YEAR / IIR20-FOURTH YEAR\n - FBA - IIM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC22 / IIR20\n - FBA - IIM19\n",
             "Course Title Chi": "度假村行銷與推廣"
         },
         {
@@ -5703,7 +5666,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-2013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-SECOND YEAR / BIA19-SECOND YEAR / BIA19 / FNC20 / THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-SECOND YEAR / BIA19 / FNC20 / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "統計與數據分析"
         },
         {
@@ -5719,7 +5682,7 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E22-3009",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA25 / FNC17 / FNC20\n - FBA - FNM19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20\n - FBA - FNM19\n",
             "Course Title Chi": "線性代數"
         },
         {
@@ -5735,7 +5698,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E6-1102D / E6-2092",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19 / BIA25\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19\n",
             "Course Title Chi": "商業分析程式設計"
         },
         {
@@ -5751,7 +5714,7 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / ACC21-THIRD YEAR / BIA19\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC19 / ACC21-THIRD YEAR / BEC22-THIRD YEAR / BIA19\n",
             "Course Title Chi": "資料庫管理"
         },
         {
@@ -5815,7 +5778,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-2013",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / FIC22-THIRD YEAR / GBM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / FIC22-THIRD YEAR / GBM22-THIRD YEAR / GBS17 / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },
         {
@@ -5879,7 +5842,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-2007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n - FSS - ECN19 FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Course Title Chi": "商業智慧的機器學習"
         },
         {
@@ -5895,7 +5858,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-1020",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19 / JAP25\n",
             "Course Title Chi": "實用日文I"
         },
         {
@@ -5911,7 +5873,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-1018",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19 / JAP25\n - FAH - JSM19\n",
             "Course Title Chi": "日文文法I"
         },
         {
@@ -5959,7 +5920,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1016",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "實用日文3"
         },
         {
@@ -5975,7 +5935,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E21-1018",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n - FAH - JSM19\n",
             "Course Title Chi": "綜合日文I"
         },
         {
@@ -5991,7 +5950,6 @@
             "Time From": "10:00",
             "Time To": "11:15",
             "Classroom": "E21-1029",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n - FAH - JSM19\n",
             "Course Title Chi": "日文閱讀I"
         },
         {
@@ -6007,7 +5965,6 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E21-1016",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
             "Course Title Chi": "日語作文I"
         },
         {
@@ -6088,7 +6045,7 @@
             "Time To": "14:15",
             "Classroom": "E21-1029",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - JAP19\n",
-            "Course Title Chi": "日本文學 I"
+            "Course Title Chi": "日本文學I"
         },
         {
             "Offering Unit": "FAH",
@@ -6237,6 +6194,17 @@
         {
             "Offering Unit": "FLL",
             "Offering Department": "MLS",
+            "Course Code": "LAWS1015",
+            "Course Title": "Enhancement Learning Activities",
+            "Section": "001",
+            "Medium of Instruction": "Chinese",
+            "Teacher Information": "HO HENG MAN",
+            "Lecture / Lab": "Lecture",
+            "Course Title Chi": "強化學習活動"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
             "Course Code": "LAWS1020",
             "Course Title": "Registry and Notary Law",
             "Section": "001",
@@ -6360,7 +6328,7 @@
             "Time To": "23:15",
             "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
-            "Course Title Chi": "民法通論I"
+            "Course Title Chi": "民法通論1"
         },
         {
             "Offering Unit": "FLL",
@@ -6408,7 +6376,7 @@
             "Time To": "21:20",
             "Classroom": "E32-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
-            "Course Title Chi": "行政法I（法律實務）"
+            "Course Title Chi": "行政法 I（法律實務）"
         },
         {
             "Offering Unit": "FLL",
@@ -6497,14 +6465,14 @@
             "Course Title": "Administrative Law and Procedure I",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "FLL NEW TEACHER",
+            "Teacher Information": "FLL-NEW TEACHER-3",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E6-1102D",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
-            "Course Title Chi": "行政法與行政程序 I"
+            "Course Title Chi": "行政法和行政程序 I"
         },
         {
             "Offering Unit": "FLL",
@@ -6595,10 +6563,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "CHAN IO CHAO",
             "Lecture / Lab": "Lecture",
-            "Day": "THU",
+            "Day": "FRI",
             "Time From": "20:30",
             "Time To": "23:15",
-            "Classroom": "E32-G007",
+            "Classroom": "E32-G027",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "債務法第一卷"
         },
@@ -6611,10 +6579,10 @@
             "Medium of Instruction": "Cantonese",
             "Teacher Information": "TEMP TEACHER",
             "Lecture / Lab": "Lecture",
-            "Day": "FRI",
+            "Day": "THU",
             "Time From": "20:30",
             "Time To": "22:15",
-            "Classroom": "E32-G027",
+            "Classroom": "E32-G007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "債法 I（法律實務）"
         },
@@ -6902,7 +6870,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E4-1051",
+            "Classroom": "E32-G002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "民法3：財產法"
         },
@@ -7295,7 +7263,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E12-G003",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST - CVE17 / ECE21\n",
             "Course Title Chi": "工程數學 I"
         },
         {
@@ -7463,7 +7430,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E11-1021",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FST - MTH19-MAA19 / MTH23-MAA23\n - FST - AMM19 / AMM23\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FST - MTH19-MAA19 / MTH19-SDS19 / MTH23-MAA23\n - FST - AMM19 / AMM23\n",
             "Course Title Chi": "計算智能簡介"
         },
         {
@@ -7494,7 +7461,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E11-G012",
+            "Classroom": "E11-1026",
             "Course Title Chi": "實分析"
         },
         {
@@ -7570,7 +7537,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E22-3015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FIC22-SECOND YEAR / GBM22-SECOND YEAR / GBS22-FIRST YEAR / GBS22-SECOND YEAR / HRM22-SECOND YEAR / MKG22-SECOND YEAR / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "商業通訊"
         },
         {
@@ -7586,7 +7552,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-2017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBS22-FIRST YEAR / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "組織行為學"
         },
         {
@@ -7602,7 +7567,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4005",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS22-THIRD YEAR / GBS22-FOURTH YEAR / MKG22-SECOND YEAR / MKG22-THIRD YEAR / MKG22-FOURTH YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-SECOND YEAR / GBM22-THIRD YEAR / GBS22-SECOND YEAR / GBS22-THIRD YEAR / GBS22-FOURTH YEAR / MKG22-SECOND YEAR / MKG22-THIRD YEAR / MKG22-FOURTH YEAR / FOURTH YEAR\n",
             "Course Title Chi": "全球商業環境"
         },
         {
@@ -7650,7 +7615,7 @@
             "Time From": "14:30",
             "Time To": "17:15",
             "Classroom": "E22-2002",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22-THIRD YEAR / GBS20 / MKG22 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-FOURTH YEAR / FIC22-THIRD YEAR / FNC20-THIRD YEAR / GBM22 / GBS20 / MKG22 / FOURTH YEAR\n",
             "Course Title Chi": "策略管理"
         },
         {
@@ -7666,7 +7631,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E22-4010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22-THIRD YEAR / GBS20-THIRD YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - GBM22 / GBS20-THIRD YEAR / HRM22-SECOND YEAR / HRM22-THIRD YEAR / MKG20 / FOURTH YEAR\n",
             "Course Title Chi": "研究方法"
         },
         {
@@ -7682,7 +7647,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E22-2011",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - HRM22-SECOND YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "人力資源管理"
         },
         {
@@ -7714,7 +7679,7 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E22-4004",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-THIRD YEAR / BEC22-THIRD YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - ACC21-THIRD YEAR / BEC22-THIRD YEAR / HRM22-SECOND YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "商業道德與企業社會責任"
         },
         {
@@ -7746,7 +7711,7 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-2010",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - HRM22-THIRD YEAR / FOURTH YEAR\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - HRM22-SECOND YEAR / HRM22-THIRD YEAR / FOURTH YEAR\n",
             "Course Title Chi": "培訓與發展"
         },
         {
@@ -7837,7 +7802,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-3009",
+            "Classroom": "E22-4020",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - MKG22-FOURTH YEAR / FOURTH YEAR\n",
             "Course Title Chi": "整合行銷傳播"
         },
@@ -8007,7 +7972,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-3126 / E21-1040",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FAH - PTM19\n",
             "Course Title Chi": "口語理解與表達能力 I"
         },
         {
@@ -8023,7 +7987,6 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E21-G015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FAH - PTM19\n",
             "Course Title Chi": "書面理解與寫作技巧 I"
         },
         {
@@ -8039,7 +8002,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-1055",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FAH - PTM19\n",
             "Course Title Chi": "葡萄牙語言與文化 I"
         },
         {
@@ -8070,7 +8032,6 @@
             "Time From": "13:00",
             "Time To": "14:15",
             "Classroom": "E21-1016 / E21-1038",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FLL - BLL18\n - FAH - PTM19\n",
             "Course Title Chi": "口語理解與表達能力 III"
         },
         {
@@ -8086,7 +8047,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "E21-2003",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n - FLL - BLL18\n - FAH - PTM19\n",
             "Course Title Chi": "書面理解與寫作技巧 III"
         },
         {
@@ -8126,14 +8086,14 @@
             "Offering Department": "DPT",
             "Course Code": "PORT3005",
             "Course Title": "Introduction to Linguistics",
-            "Section": "001",
+            "Section": "002",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "JOÃO MANUEL PIRES DA SILVA EALMEIDA VELOSO",
+            "Teacher Information": "ANTÓNIO JOSÉ RODRIGUES LEAL",
             "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "17:30",
-            "Time To": "18:45",
-            "Classroom": "E21-1020",
+            "Day": "TUE",
+            "Time From": "10:00",
+            "Time To": "11:15",
+            "Classroom": "E21-1011",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
             "Course Title Chi": "語言學導論"
         },
@@ -8419,7 +8379,7 @@
             "Teacher Information": "JIAQING O",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FSS - PSY17 / PSY20\n",
-            "Course Title Chi": "研究項目 I"
+            "Course Title Chi": "研究計畫一"
         },
         {
             "Offering Unit": "FSS",
@@ -8490,7 +8450,6 @@
             "Time From": "13:00",
             "Time To": "15:45",
             "Classroom": "E22-4012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC17 / SOC19 / SOC22\n - FSS - SOM17 / SOM19 / SOM22\n",
             "Course Title Chi": "社會學導論"
         },
         {
@@ -8506,7 +8465,6 @@
             "Time From": "17:30",
             "Time To": "18:45",
             "Classroom": "E22-4015",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC17 / SOC19 / SOC22\n - FSS - SOM17 / SOM19 / SOM22\n",
             "Course Title Chi": "社會學理論"
         },
         {
@@ -8567,7 +8525,6 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E22-4012",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FSS - SOC17 / SOC19 / SOC22\n - FSS - SOM17 / SOM19 / SOM22\n",
             "Course Title Chi": "犯罪學導論"
         },
         {
@@ -8735,7 +8692,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-19",
+    "updateTime": "2025-08-20",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
