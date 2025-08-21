@@ -3883,7 +3883,7 @@
             "Day": "WED",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E11-1021",
+            "Classroom": "N8-3002",
             "Course Title Chi": "測量"
         },
         {
@@ -9909,7 +9909,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "N8-3002 / N8-G028",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE22-FIRST YEAR\n",
             "Course Title Chi": "體育I—兒童遊戲學習與基本動作練習"
         },
         {
@@ -9924,7 +9923,6 @@
             "Time From": "11:30",
             "Time To": "12:45",
             "Classroom": "N8-3002 / N8-G028",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE22-FIRST YEAR\n",
             "Course Title Chi": "體育I—兒童遊戲學習與基本動作練習"
         },
         {
@@ -10023,7 +10021,6 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-1051",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PPE19-FIRST YEAR / PYE22-FIRST YEAR\n",
             "Course Title Chi": "音樂天份 I"
         },
         {
@@ -10080,7 +10077,6 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E33-G031",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE22-FIRST YEAR\n",
             "Course Title Chi": "視覺藝術 I：探索與發現"
         },
         {
@@ -11130,7 +11126,7 @@
             "Day": "THU",
             "Time From": "18:00",
             "Time To": "20:45",
-            "Classroom": "E22-3013",
+            "Classroom": "E22-3002",
             "Course Title Chi": "學校諮商與指導"
         },
         {
