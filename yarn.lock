@@ -3011,7 +3011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-menu/menu@npm:^1.2.3":
+"@react-native-menu/menu@npm:^1.2.4":
   version: 1.2.4
   resolution: "@react-native-menu/menu@npm:1.2.4"
   peerDependencies:
@@ -3674,21 +3674,21 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:*":
-  version: 19.1.10
-  resolution: "@types/react@npm:19.1.10"
+  version: 19.1.11
+  resolution: "@types/react@npm:19.1.11"
   dependencies:
     csstype: ^3.0.2
-  checksum: 1d9c5edb5957e797ad59dc71f92f6faa1f8033007c037f9aeb01161366c92fa257a6ddb267ff33f7787c072c5d568b5f8593868d58f2858f7face6978cd18e00
+  checksum: 21d7b44f8f576ff91e817870ebe25fd936f614a27e373a911577e83b363494cabaa4fce95ed708a7a5f9fe08c34129213733cbaece6c0d700b2f53063c84bef3
   languageName: node
   linkType: hard
 
 "@types/react@npm:^18, @types/react@npm:^18.2.6":
-  version: 18.3.23
-  resolution: "@types/react@npm:18.3.23"
+  version: 18.3.24
+  resolution: "@types/react@npm:18.3.24"
   dependencies:
     "@types/prop-types": "*"
     csstype: ^3.0.2
-  checksum: d781257d42bf3c66f4bcd21e76a86cd9b6e21fbaf377fe0f840f1ff35049efa59491aa6a4dcf2b3db42af4ab085acebe185f0ae28b7c36d60be5e9094c707bdd
+  checksum: 852fd0430d721ceb431662ac90b6b41d6473ea55d29b5d92f7a81f4c6c397eb3b26a904fdd276fb71a5fad318d0d79cc0072867024611716bfb85e6b4907ae68
   languageName: node
   linkType: hard
 
@@ -10167,9 +10167,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:2.24.0":
-  version: 2.24.0
-  resolution: "react-native-gesture-handler@npm:2.24.0"
+"react-native-gesture-handler@npm:2.25.0":
+  version: 2.25.0
+  resolution: "react-native-gesture-handler@npm:2.25.0"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
@@ -10177,7 +10177,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 65abaeef68180fee2811d01d88ff50c231a91faca05279222fcaaa55349e758b68a7d6a9ac3eddfb1887f6b4c4790ac195b99989f1ad8a2a1f3f3bdff3ba0a76
+  checksum: 51b155bcc56043b9e06bf8ded089c44348e8da297b38e73f203f2d6ce8bd51698f85a38dca8eeab3d2ab721aeddefc270acd99e16cf493b20f1f429ad02214b8
   languageName: node
   linkType: hard
 
@@ -10294,6 +10294,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-is-edge-to-edge@npm:1.1.7":
+  version: 1.1.7
+  resolution: "react-native-is-edge-to-edge@npm:1.1.7"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 4cdf2b2fb5b131f2015c26d2cb7688b4a0c5f3c8474b1bf0ddfa9eabb0263df440c87262ae8f812a6ecab0d5310df0373bddad4b51f53dabb2ffee01e9ef0f44
+  languageName: node
+  linkType: hard
+
 "react-native-keyboard-aware-scroll-view@npm:^0.9.5":
   version: 0.9.5
   resolution: "react-native-keyboard-aware-scroll-view@npm:0.9.5"
@@ -10399,9 +10409,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:3.15.5":
-  version: 3.15.5
-  resolution: "react-native-reanimated@npm:3.15.5"
+"react-native-reanimated@npm:3.18.0":
+  version: 3.18.0
+  resolution: "react-native-reanimated@npm:3.18.0"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.0.0-0
     "@babel/plugin-transform-class-properties": ^7.0.0-0
@@ -10414,11 +10424,12 @@ __metadata:
     "@babel/preset-typescript": ^7.16.7
     convert-source-map: ^2.0.0
     invariant: ^2.2.4
+    react-native-is-edge-to-edge: 1.1.7
   peerDependencies:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 0b6cb4e555fd1ac757aecb5484f08fde026fb55c0d42f2f960c62683d1ba5269ce645bf6426d99a8fef84e9bdeed103abe6eed9b3dd439389fd9a7bed384b5ad
+  checksum: d425c0bd2004012330242b6d0abbf32b4f7d4f2090bc4af4b1b156a5edd8a3c6deb1fbf6b1cf5041be8f67615d5853742cef74c5b25d9d00aea4688112d0b1a2
   languageName: node
   linkType: hard
 
@@ -10459,16 +10470,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-screens@npm:^3.3":
-  version: 3.37.0
-  resolution: "react-native-screens@npm:3.37.0"
+"react-native-screens@npm:4.4.0":
+  version: 4.4.0
+  resolution: "react-native-screens@npm:4.4.0"
   dependencies:
     react-freeze: ^1.0.0
     warn-once: ^0.1.0
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 84d1e4697ab7afccf42111d13b7c7e68d382b136f4f4d9cd8fd077b0984ada3114e8c7459a69159983a538fe35db1cf4296075e72fc8cb45341e0feb5080d3dc
+  checksum: 6e90539e8eb79ba4b3fd23f6c27b943e3595c9c275b3002e6b376eb0a1c17521bde9b05d0b2c4c7ab67042f20bdbec87c3d1e3d182a531b7e3115a2dace0e912
   languageName: node
   linkType: hard
 
@@ -12122,7 +12133,7 @@ __metadata:
     "@react-native-cookies/cookies": ^6.2.1
     "@react-native-firebase/analytics": ^22.4.0
     "@react-native-firebase/app": ^22.4.0
-    "@react-native-menu/menu": ^1.2.3
+    "@react-native-menu/menu": ^1.2.4
     "@react-native-vector-icons/material-design-icons": ^12.3.0
     "@react-native/babel-preset": 0.76.0
     "@react-native/eslint-config": 0.76.0
@@ -12168,7 +12179,7 @@ __metadata:
     react-native-easy-toast: ^2.3.0
     react-native-fast-image: ^8.6.3
     react-native-fs: ^2.20.0
-    react-native-gesture-handler: 2.24.0
+    react-native-gesture-handler: 2.25.0
     react-native-haptic-feedback: ^2.3.3
     react-native-html-parser: ^0.1.0
     react-native-htmlview: ^0.17.0
@@ -12185,11 +12196,11 @@ __metadata:
     react-native-pager-view: ^6.8.1
     react-native-permissions: ^5.4.1
     react-native-progress: ^5.0.1
-    react-native-reanimated: 3.15.5
+    react-native-reanimated: 3.18.0
     react-native-reanimated-carousel: ^3.5.1
     react-native-restart: 0.0.24
     react-native-safe-area-context: ^5.6.1
-    react-native-screens: ^3.3
+    react-native-screens: 4.4.0
     react-native-share: ^12.2.0
     react-native-simple-toast: ^3.3.2
     react-native-size-matters: ^0.4.2
