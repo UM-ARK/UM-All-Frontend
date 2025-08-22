@@ -9,7 +9,7 @@
     "iosTrue": "react-native run-ios --device",
     "iosBig": "react-native run-ios --simulator=\"iPad Pro 13-inch (M4)\"",
     "lint": "eslint .",
-    "start": "react-native start --reset-cache --experimental-debugger",
+    "start": "react-native start --reset-cache",
     "test": "jest",
     "postinstall": "patch-package"
   },
@@ -51,7 +51,7 @@
     "react": "18.3.1",
     "react-content-loader": "^6.2.1",
     "react-i18next": "^15.6.0",
-    "react-native": "0.75.5",
+    "react-native": "0.76.0",
     "react-native-animated-nav-tab-bar": "^3.1.13",
     "react-native-animated-splash-screen": "^2.0.5",
     "react-native-blob-util": "^0.19.11",
@@ -97,12 +97,15 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.20.0",
+    "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.6",
-    "@react-native/babel-preset": "0.75.5",
-    "@react-native/eslint-config": "0.75.5",
-    "@react-native/metro-config": "0.75.5",
-    "@react-native/typescript-config": "0.75.5",
+    "@react-native-community/cli": "15.0.0-alpha.2",
+    "@react-native-community/cli-platform-android": "15.0.0-alpha.2",
+    "@react-native-community/cli-platform-ios": "15.0.0-alpha.2",
+    "@react-native/babel-preset": "0.76.0",
+    "@react-native/eslint-config": "0.76.0",
+    "@react-native/metro-config": "0.76.0",
+    "@react-native/typescript-config": "0.76.0",
     "@types/react": "^18.2.6",
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.6.3",
@@ -114,5 +117,6 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "packageManager": "yarn@3.6.4"
 }
