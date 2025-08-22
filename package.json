@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@alessiocancian/react-native-actionsheet": "^3.2.0",
-    "@babel/plugin-proposal-decorators": "^7.24.7",
     "@gorhom/bottom-sheet": "5.1.4",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-camera-roll/camera-roll": "^7.10.1",
