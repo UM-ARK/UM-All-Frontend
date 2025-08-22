@@ -1404,12 +1404,12 @@ PODS:
     - Yoga
   - react-native-restart (0.0.24):
     - React-Core
-  - react-native-safe-area-context (5.5.2):
+  - react-native-safe-area-context (5.6.1):
     - React-Core
   - react-native-simple-toast (3.3.2):
     - React-Core
     - Toast (~> 4)
-  - react-native-vector-icons-material-design-icons (12.2.0)
+  - react-native-vector-icons-material-design-icons (12.3.0)
   - react-native-webview (13.15.0):
     - DoubleConversion
     - glog
@@ -1718,7 +1718,7 @@ PODS:
     - React-Core
   - RNCClipboard (1.16.3):
     - React-Core
-  - RNDateTimePicker (8.4.3):
+  - RNDateTimePicker (8.4.4):
     - React-Core
   - RNFastImage (8.6.3):
     - React-Core
@@ -1866,7 +1866,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNShare (12.1.2):
+  - RNShare (12.2.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2278,9 +2278,9 @@ SPEC CHECKSUMS:
   react-native-menu: 475e400d9b57949c076a0844e130044b45f2aa3d
   react-native-pager-view: 0688f302c6a183c7433fdd2d66d98c78b1160fb6
   react-native-restart: df7caae89026a8ab2ecdd82839978f657701f51d
-  react-native-safe-area-context: 0f7bf11598f9a61b7ceac8dc3f59ef98697e99e1
+  react-native-safe-area-context: 2243039f43d10cb1ea30ec5ac57fc6d1448413f4
   react-native-simple-toast: 4c9cc976cb92b6e5fb555e7c57fce38b90a56d07
-  react-native-vector-icons-material-design-icons: 6220289718af16d5eeaf5deab51f10568bbe4df5
+  react-native-vector-icons-material-design-icons: 6b7b503b1c6deabae8fea584dd4b22311130d564
   react-native-webview: 6f8a8a6eff025113d1c81b8c2bb5481401e5f653
   React-nativeconfig: c7743aabd506fc9756e2bc3225b44f6a6f4490c9
   React-NativeModulesApple: 007ac9ffc5e43040a7e0d70c04ad4a8b845a832c
@@ -2312,7 +2312,7 @@ SPEC CHECKSUMS:
   ReactNativeUiLib: 237cd5430e9569575778f228547d03c485b010de
   RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
   RNCClipboard: f6679d470d0da2bce2a37b0af7b9e0bf369ecda5
-  RNDateTimePicker: 405932b521fab5295a4829ced9eca36c39273a4c
+  RNDateTimePicker: 7d93eacf4bdf56350e4b7efd5cfc47639185e10c
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
   RNFBAnalytics: af5e584d6cf7a22838473185fc6cc32f753a7622
   RNFBApp: 90cf0209fb8f0460ab069a7de857d7ec851c8476
@@ -2323,7 +2323,7 @@ SPEC CHECKSUMS:
   RNReactNativeHapticFeedback: c873497ad3f9fa80447baa18daa9474e671d24bf
   RNReanimated: bd3da720fbd5baafadea9302e898696a76f66ad3
   RNScreens: 929d5858d322a2ae0cb272511f992c0acec69208
-  RNShare: 44662bef256debac3f319580e08fab0b100789d7
+  RNShare: 4a81e399088ed400c3e05c201ee48008d695beb9
   RNSVG: a01c9a4296ee3317b686b0067d7b1c3d854e2080
   RNVectorIcons: d629dbc9c0c9ec0fcb6aea868d4d66c5a34e9312
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
