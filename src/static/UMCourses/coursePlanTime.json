@@ -1797,7 +1797,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E22-G015",
+            "Classroom": "E22-3007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -1812,7 +1812,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E22-G015",
+            "Classroom": "E22-3007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -1827,7 +1827,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G015",
+            "Classroom": "E22-3007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -1842,7 +1842,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E22-G015",
+            "Classroom": "E22-3007",
             "Course Title Chi": "宏觀經濟學原理"
         },
         {
@@ -3569,7 +3569,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "N22-G002",
+            "Classroom": "N6-1102D",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CPS19-THIRD YEAR / CPS19-FOURTH YEAR / MTH19-THIRD YEAR / MTH19-FOURTH YEAR / MTH23-THIRD YEAR / MTH23-FOURTH YEAR\n",
             "Course Title Chi": "模式識別"
         },
@@ -3585,7 +3585,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "N22-G002",
+            "Classroom": "N6-1102D",
             "\"Class For / Class Not For\" Information": "Class for :\n - FST - CPS19-THIRD YEAR / CPS19-FOURTH YEAR / MTH19-THIRD YEAR / MTH19-FOURTH YEAR / MTH23-THIRD YEAR / MTH23-FOURTH YEAR\n",
             "Course Title Chi": "模式識別"
         },
@@ -4152,51 +4152,6 @@
             "Time To": "14:50",
             "Classroom": "E11-1018",
             "Course Title Chi": "高級結構分析"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CEE",
-            "Course Code": "CIVL4007",
-            "Course Title": "Advanced Reinforced Concrete Design",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "QUACH WAI MENG",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "11:00",
-            "Time To": "12:45",
-            "Classroom": "E4-3052",
-            "Course Title Chi": "先進的鋼筋混凝土設計"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CEE",
-            "Course Code": "CIVL4007",
-            "Course Title": "Advanced Reinforced Concrete Design",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "QUACH WAI MENG",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "11:00",
-            "Time To": "11:50",
-            "Classroom": "E4-3052",
-            "Course Title Chi": "先進的鋼筋混凝土設計"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CEE",
-            "Course Code": "CIVL4007",
-            "Course Title": "Advanced Reinforced Concrete Design",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "QUACH WAI MENG",
-            "Lecture / Lab": "Lab",
-            "Day": "FRI",
-            "Time From": "12:00",
-            "Time To": "12:50",
-            "Classroom": "E4-3052",
-            "Course Title Chi": "先進的鋼筋混凝土設計"
         },
         {
             "Offering Unit": "FST",
@@ -23336,7 +23291,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-4032",
+            "Classroom": "E4-1052",
             "Course Title Chi": "現代社會中的多媒體技術"
         },
         {
@@ -23352,7 +23307,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E3-4032",
+            "Classroom": "E4-1052",
             "Course Title Chi": "現代社會中的多媒體技術"
         },
         {
@@ -24018,7 +23973,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-4032",
+            "Classroom": "E4-G053",
             "Course Title Chi": "心理與健康"
         },
         {
@@ -24034,7 +23989,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-4032",
+            "Classroom": "E4-G053",
             "Course Title Chi": "心理與健康"
         },
         {
@@ -24176,7 +24131,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E3-2043",
             "Course Title Chi": "公開演講"
         },
         {
@@ -24192,7 +24147,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-3032",
+            "Classroom": "E3-2043",
             "Course Title Chi": "公開演講"
         },
         {
@@ -31860,7 +31815,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E11-1026",
+            "Classroom": "E11-1015",
             "Course Title Chi": "實分析"
         },
         {
@@ -31875,7 +31830,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E11-1026",
+            "Classroom": "E11-1015",
             "Course Title Chi": "實分析"
         },
         {
@@ -33786,7 +33741,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1040 / E21-1013",
+            "Classroom": "E21-1040 / E21-1055",
             "Course Title Chi": "口語理解與表達能力 I"
         },
         {
@@ -33801,7 +33756,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E21-1040 / E21-1013",
+            "Classroom": "E21-1040 / E21-1055",
             "Course Title Chi": "口語理解與表達能力 I"
         },
         {
@@ -33816,7 +33771,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1040 / E21-1016",
+            "Classroom": "E21-1040 / E21-1055",
             "Course Title Chi": "口語理解與表達能力 I"
         },
         {
@@ -33831,7 +33786,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E21-1040 / E21-1016",
+            "Classroom": "E21-1040 / E21-1055",
             "Course Title Chi": "口語理解與表達能力 I"
         },
         {
@@ -35286,7 +35241,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1039 / E21-1038",
+            "Classroom": "E21-1055 / E21-1038",
             "Course Title Chi": "口語理解與表達能力 III"
         },
         {
@@ -35301,7 +35256,7 @@
             "Day": "THU",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1039 / E21-1038",
+            "Classroom": "E21-1055 / E21-1038",
             "Course Title Chi": "口語理解與表達能力 III"
         },
         {
@@ -35316,7 +35271,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1039 / E21-1038",
+            "Classroom": "E21-1055 / E21-1038",
             "Course Title Chi": "口語理解與表達能力 III"
         },
         {
@@ -35331,7 +35286,7 @@
             "Day": "FRI",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1039 / E21-1038",
+            "Classroom": "E21-1055 / E21-1038",
             "Course Title Chi": "口語理解與表達能力 III"
         },
         {
