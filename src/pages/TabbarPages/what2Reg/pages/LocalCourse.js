@@ -138,9 +138,13 @@ const LocalCourse = (props) => {
                                             {
                                                 text: 'Yes', onPress: () => {
                                                     trigger();
-                                                    navigation.navigate('CourseSimTab', {
-                                                        add: courseInfo
-                                                    });
+                                                    if (navigation.canGoBack()) {
+                                                        navigation.popToTop();
+                                                        navigation.navigate('Tabbar', {
+                                                            screen: 'CourseSimTab',
+                                                            params: { add: courseInfo }
+                                                        });
+                                                    }
                                                 }
                                             },
                                             { text: 'No', },
@@ -272,9 +276,13 @@ const LocalCourse = (props) => {
                                     {
                                         text: 'Yes', onPress: () => {
                                             trigger();
-                                            navigation.navigate('CourseSimTab', {
-                                                add: courseInfo
-                                            });
+                                            if (navigation.canGoBack()) {
+                                                navigation.popToTop();
+                                                navigation.navigate('Tabbar', {
+                                                    screen: 'CourseSimTab',
+                                                    params: { add: courseInfo }
+                                                });
+                                            }
                                         }
                                     },
                                     { text: 'No', },
