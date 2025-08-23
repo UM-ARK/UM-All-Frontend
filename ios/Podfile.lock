@@ -1792,8 +1792,6 @@ PODS:
   - RNFBApp (22.4.0):
     - Firebase/CoreOnly (= 11.15.0)
     - React-Core
-  - RNFS (2.20.0):
-    - React-Core
   - RNGestureHandler (2.25.0):
     - DoubleConversion
     - glog
@@ -1959,7 +1957,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (4.6.0):
+  - RNScreens (4.9.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2122,7 +2120,6 @@ DEPENDENCIES:
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
-  - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNInAppBrowser (from `../node_modules/react-native-inappbrowser-reborn`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
@@ -2321,8 +2318,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/analytics"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
-  RNFS:
-    :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNInAppBrowser:
@@ -2439,13 +2434,12 @@ SPEC CHECKSUMS:
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
   RNFBAnalytics: af5e584d6cf7a22838473185fc6cc32f753a7622
   RNFBApp: 90cf0209fb8f0460ab069a7de857d7ec851c8476
-  RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNGestureHandler: 3c5104089cbd39bc37b009d24bc56cf50da378a2
   RNInAppBrowser: 6d3eb68d471b9834335c664704719b8be1bfdb20
   RNPermissions: 0b0cdb0dfcc2fabc136a3d596220cc3d91977d79
   RNReactNativeHapticFeedback: c512c0c61cb05380234448495154bcc09b2fd8e1
   RNReanimated: 64ca3de71e246c8c22e3f8dc4c02a0824a08128b
-  RNScreens: cc1c9192a1afed7a828346f811833ce6317f4636
+  RNScreens: 56c0cbc0edd56fcdc184c59f1ae191f7704454b4
   RNShare: 8082ab7ebf6aeb6a7f541b650a71c6bce446339b
   RNSVG: 60e4a39ef5382e660cab2dfc90760231ecab7543
   RNVectorIcons: d6f097e05e885c0abc06f328d38b950fb5b29bf2
