@@ -151,6 +151,14 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     navigation.navigate('LocalCourse', courseCode)
                                     break;
 
+                                case 'coursesim':
+                                    trigger();
+                                    navigation.navigate('Tabbar', {
+                                        screen: 'CourseSimTab',
+                                        params: { check: courseCode }
+                                    });
+                                    break;
+
                                 default:
                                     break;
                             }
@@ -174,6 +182,11 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                             {
                                 id: 'section',
                                 title: '查 Section',
+                                titleColor: black.third,
+                            },
+                            {
+                                id: 'coursesim',
+                                title: '查 模擬課表',
                                 titleColor: black.third,
                             },
                         ]}

@@ -205,6 +205,18 @@ function CourseSim({ route, navigation }) {
                 navigation.setParams({ add: undefined });
             }
 
+            // 如果有check傳參
+            if (route.params?.check) {
+                const { check } = route.params;
+                if (check.length > 0) {
+                    setSearchText(check);
+                }
+                setHasOpenCourseSearch(true);
+                // 執行任務後，重置參數
+                navigation.setParams({ check: undefined });
+                bottomSheetRef?.current?.snapToIndex(1);
+            }
+
             // 失焦時自動清理
             return () => {
             };
@@ -997,7 +1009,7 @@ E11-0000
                     {haveSearchResult && filterCourseList.length > 1 && (
                         <BottomSheetFlatList
                             data={filterCourseList}
-                            key={searchText}
+                            key={`${searchText || 'search'}-cols-${filterCourseList.length}`}
                             numColumns={filterCourseList.length}
                             columnWrapperStyle={{ flexWrap: 'wrap' }}
                             style={{ marginTop: scale(5), marginLeft: scale(10) }}
@@ -1097,6 +1109,7 @@ E11-0000
                                     data={Object.keys(sectionObj)}
                                     style={{ marginTop: scale(5), width: '100%' }}
                                     numColumns={Object.keys(sectionObj).length}
+                                    key={`${searchText || 'single'}-sections-${Object.keys(sectionObj).length}`}
                                     columnWrapperStyle={Object.keys(sectionObj).length > 1 ? {
                                         flexWrap: 'wrap',
                                         alignItems: 'center',
