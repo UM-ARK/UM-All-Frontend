@@ -80,8 +80,13 @@ const LocalCourse = (props) => {
         if (relateList.length === 0) {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
             setIsLoading(true);
-            navigation.goBack();
-            navigation.navigate('Wiki', { url: URL });
+            if (navigation.canGoBack()) {
+                navigation.popToTop();
+                navigation.navigate('Tabbar', {
+                    screen: 'Wiki',
+                    params: { url: URL }
+                });
+            }
         } else {
             // 按section分離課程數據
             const relateSectionObj_ = groupBy(relateList, 'Section');
@@ -119,7 +124,13 @@ const LocalCourse = (props) => {
                                             courseCode: courseInfo['Course Code'],
                                             profName: courseInfo['Teacher Information'],
                                         });
-                                        navigation.navigate('Wiki', { url: URL });
+                                        if (navigation.canGoBack()) {
+                                            navigation.popToTop();
+                                            navigation.navigate('Tabbar', {
+                                                screen: 'Wiki',
+                                                params: { url: URL }
+                                            });
+                                        }
                                         break;
                                     case 'what2reg':
                                         trigger();
@@ -257,7 +268,13 @@ const LocalCourse = (props) => {
                                     courseCode: courseInfo['Course Code'],
                                     profName: courseInfo['Teacher Information'],
                                 });
-                                navigation.navigate('Wiki', { url: URL });
+                                if (navigation.canGoBack()) {
+                                    navigation.popToTop();
+                                    navigation.navigate('Tabbar', {
+                                        screen: 'Wiki',
+                                        params: { url: URL }
+                                    });
+                                }
                                 break;
                             case 'what2reg':
                                 trigger();
