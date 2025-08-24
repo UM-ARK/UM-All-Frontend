@@ -1512,10 +1512,10 @@
   resolved "https://registry.yarnpkg.com/@firebase/webchannel-wrapper/-/webchannel-wrapper-1.0.4.tgz#9d5b4b6f23309260a12856cb574c5e64e6c133f7"
   integrity sha512-6m8+P+dE/RPl4OPzjTxcTbQ0rGeRyeTvAi9KwIffBVCiAMKrfXfLZaqD1F+m8t4B5/Q5aHsMozOgirkH1F5oMQ==
 
-"@gorhom/bottom-sheet@5.1.4":
-  version "5.1.4"
-  resolved "https://registry.yarnpkg.com/@gorhom/bottom-sheet/-/bottom-sheet-5.1.4.tgz#37b5693c4f0e7c5c859ed26597e0bf3d73b21b77"
-  integrity sha512-A49fbCLL3wxDhGvEsMzHDpBF+BqVCbXHEhLJo9plPSAxNjjPJFzJ65axj95R38+iqML0gmXyawpZ45PD4EEMAw==
+"@gorhom/bottom-sheet@^5.2.3":
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/@gorhom/bottom-sheet/-/bottom-sheet-5.2.3.tgz#c2b1d750891cf5bd65b7ae9957aafbbb912bcf94"
+  integrity sha512-Ai50qR+KGYP0qFRu14TPdQ1zGGtUKzpKu415u7irB9fhQADppJrFOYJZ0vYAvf+5VtY5FkWnuVm7/56OTqCLkA==
   dependencies:
     "@gorhom/portal" "1.0.14"
     invariant "^2.2.4"
@@ -7018,10 +7018,10 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prettier@2.8.8:
-  version "2.8.8"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
-  integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
+prettier@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.6.2.tgz#ccda02a1003ebbb2bfda6f83a074978f608b9393"
+  integrity sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==
 
 pretty-format@^26.6.2:
   version "26.6.2"
@@ -7208,10 +7208,10 @@ react-native-animated-splash-screen@^2.0.5:
   dependencies:
     prop-types "^15.7.2"
 
-react-native-blob-util@^0.19.11:
-  version "0.19.11"
-  resolved "https://registry.yarnpkg.com/react-native-blob-util/-/react-native-blob-util-0.19.11.tgz#20c0ca589e975fee849cba1cdba712cc6adb4f59"
-  integrity sha512-lxaeDzFLYffR6lbRiOce0oTYO6pE3/PyT8Sa7qiz8B+IT9oe4G85SlVCdl5F9xMJh/Zer2onBLw7u+B1AS+GFA==
+react-native-blob-util@^0.22.2:
+  version "0.22.2"
+  resolved "https://registry.yarnpkg.com/react-native-blob-util/-/react-native-blob-util-0.22.2.tgz#818c4b90a0af37fcc0a659fd63c67ac57e8ea275"
+  integrity sha512-Czx01QMg7aLsm/4F/7+eqoRAi1q/qjLY2Kao16g+n2SRnTH1+qkD8Qhx2q9okB+VNQvZKB1LbiXhktzYQV52xQ==
   dependencies:
     base-64 "0.1.0"
     glob "^10.3.10"
@@ -7354,7 +7354,7 @@ react-native-modal@^13.0.1:
   dependencies:
     react-native-animatable "1.4.0"
 
-react-native-pager-view@^6.8.1:
+react-native-pager-view@^6.9.1:
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/react-native-pager-view/-/react-native-pager-view-6.9.1.tgz#a9e6d9323935cc2ae1d46d7816b66f76dc3eff8e"
   integrity sha512-uUT0MMMbNtoSbxe9pRvdJJKEi9snjuJ3fXlZhG8F2vVMOBJVt/AFtqMPUHu9yMflmqOr08PewKzj9EPl/Yj+Gw==
@@ -7406,10 +7406,10 @@ react-native-redash@^12.0.3:
     parse-svg-path "^0.1.2"
     use-memo-one "^1.1.1"
 
-react-native-restart@0.0.24:
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/react-native-restart/-/react-native-restart-0.0.24.tgz#c7036f25d900d9221b84d3e5129b02d4289d4e94"
-  integrity sha512-pvJNU3NwQk6bCG2gOWcQpZ4IxhtELB0K9gzmtixfsaTFbW1UXXHkJNjk1kHazcbH5hrD7QbUkR63fsAVh8X4VQ==
+react-native-restart@^0.0.27:
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/react-native-restart/-/react-native-restart-0.0.27.tgz#43aa8210312c9dfa5ec7bd4b2f35238ad7972b19"
+  integrity sha512-8KScVICrXwcTSJ1rjWkqVTHyEKQIttm5AIMGSK1QG1+RS5owYlE4z/1DykOTdWfVl9l16FIk0w9Xzk9ZO6jxlA==
 
 react-native-safe-area-context@^5.6.1:
   version "5.6.1"
@@ -7459,13 +7459,6 @@ react-native-svg@^15.11.1:
     css-select "^5.1.0"
     css-tree "^1.1.3"
     warn-once "0.1.1"
-
-react-native-tab-view@^3.5.2:
-  version "3.5.2"
-  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-3.5.2.tgz#2789b8af6148b16835869566bf13dc3b0e6c1b46"
-  integrity sha512-nE5WqjbeEPsWQx4mtz81QGVvgHRhujTNIIZiMCx3Bj6CBFDafbk7XZp9ocmtzXUQaZ4bhtVS43R4FIiR4LboJw==
-  dependencies:
-    use-latest-callback "^0.1.5"
 
 react-native-tab-view@^4.1.3:
   version "4.1.3"
@@ -8643,11 +8636,6 @@ url-parse@^1.2.0:
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
-
-use-latest-callback@^0.1.5:
-  version "0.1.11"
-  resolved "https://registry.yarnpkg.com/use-latest-callback/-/use-latest-callback-0.1.11.tgz#e073fcbba792cc95ac661d96bc13b6041956cfe1"
-  integrity sha512-8nhb73STSD/z3GTHklvNjL8F9wMOo0bj0AFnulpIYuFTm6aQlT3ZcNbXF2YurKImIY8+kpSFSDHZZyQmurGrhw==
 
 use-latest-callback@^0.2.4:
   version "0.2.4"
