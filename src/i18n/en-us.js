@@ -131,6 +131,9 @@ export default {
         "點擊下方按鈕更新！檢查作者是否上傳最新數據~": "Click the button below to update! Check if the author has uploaded the latest data~",
         "或可附件最新的課表Excel，Email提醒作者更新！": "Or you can attach the latest timetable Excel and email the author to remind them to update!",
         "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
+
+        "檢查課表版本!": "Check timetable version!",
+        "以官網課表Excel為準!":"Based on the official timetable Excel!",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",

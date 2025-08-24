@@ -971,6 +971,20 @@ const What2Reg = (props) => {
         openLink(USER_AGREE);
     };
 
+    // 提醒留意公告和課表版本
+    const renderReminder = () => {
+        return (
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: scale(5) }}>
+                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
+                    {t(`檢查課表版本!`, { ns: 'catalog' })}
+                </Text>
+                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
+                    {t(`以官網課表Excel為準!`, { ns: 'catalog' })}
+                </Text>
+            </View>
+        );
+    }
+
     // 搜索候選課程
     const searchFilterCourse = useMemo(() => {
         return hasChinese(inputText)
@@ -1065,8 +1079,9 @@ const What2Reg = (props) => {
 
                 {/* 搜索候選課程 */}
                 {searchFilterCourse && searchFilterCourse.length > 0 ? (<>
+                    {renderReminder()}
                     <View style={{ alignSelf: 'center' }}>
-                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
+                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                     </View>
                     <CourseCard data={searchFilterCourse} mode={'json'}
                         courseMode={s_course_mode} handleSetLetterData={handleSetLetterData} />
@@ -1077,6 +1092,8 @@ const What2Reg = (props) => {
                     {/* 渲染篩選出的課程 */}
                     {filterCourseList && filterCourseList.length > 0 ? (
                         <View style={{ alignItems: 'center' }}>
+                            {/* 提醒留意公告和課表版本 */}
+                            {renderReminder()}
                             <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={handleSetLetterData} />
                         </View>
                     ) : null}
