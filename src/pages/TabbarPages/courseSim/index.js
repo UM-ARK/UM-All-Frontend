@@ -1183,6 +1183,19 @@ E11-0000
         });
     }
 
+    const renderReminder = () => {
+        return (
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: scale(5) }}>
+                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
+                    {t(`檢查課表版本!`, { ns: 'catalog' })}
+                </Text>
+                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
+                    {t(`僅作模擬!`, { ns: 'timetable' })}
+                </Text>
+            </View>
+        );
+    }
+
     const courseTimeList = useMemo(() => {
         return s_coursePlanTimeFile.Courses;
     }, [s_coursePlanTimeFile]);
@@ -1296,11 +1309,12 @@ E11-0000
             <ScrollView ref={verScroll} keyboardDismissMode="on-drag">
                 <View style={{ flex: 1 }}>
                     {/* 渲染課表或首次使用提示 */}
-                    {allCourseAllTime?.length > 0 ? (
+                    {allCourseAllTime?.length > 0 ? (<>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             {dayList.map(day => renderDay(day))}
                         </ScrollView>
-                    ) : renderFirstUse()}
+                        {renderReminder()}
+                    </>) : renderFirstUse()}
                 </View>
             </ScrollView>
 

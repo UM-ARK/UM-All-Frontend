@@ -133,7 +133,7 @@ export default {
         "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
 
         "檢查課表版本!": "Check timetable version!",
-        "以官網課表Excel為準!":"Based on the official timetable Excel!",
+        "以官網課表Excel為準!": "Based on the official timetable Excel!",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
@@ -160,6 +160,7 @@ export default {
         "結束時間不能早於開始時間！": "Cannot end earlier than start time!",
         "下節課：": "Next Class:",
         "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
+        "僅作模擬!": "Only Simulation!",
     },
     features: {
         "服務一覽": "All Services",
