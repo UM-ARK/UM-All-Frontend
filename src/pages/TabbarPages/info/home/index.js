@@ -15,6 +15,7 @@ import {
     TextInput,
     Keyboard,
     FlatList,
+    LayoutAnimation,
 } from 'react-native';
 
 // 本地工具
@@ -97,7 +98,7 @@ const iconTypes = {
 };
 
 let cal = UMCalendar;
-const calItemWidth = verticalScale(36);
+const calItemWidth = verticalScale(45);
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
@@ -378,12 +379,13 @@ const HomeScreen = ({ navigation }) => {
                 style={{ width: calItemWidth, margin: verticalScale(3), }}
                 onPress={() => {
                     trigger();
+                    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                     setSelectDay(index);
                 }}
             >
                 <View style={{
                     backgroundColor,
-                    borderRadius: scale(8),
+                    borderRadius: verticalScale(5),
                     paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -394,20 +396,9 @@ const HomeScreen = ({ navigation }) => {
                             fontSize: verticalScale(8),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
+                            includeFontPadding: false
                         }}>
                             {momentItm.substring(0, 4)}
-                        </Text>
-
-                        {/* 月份 */}
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: theme.trueWhite,
-                                fontSize: verticalScale(15),
-                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                                opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                            }}>
-                            {momentItm.substring(4, 6)}
                         </Text>
 
                         {/* 日期 */}
@@ -415,20 +406,22 @@ const HomeScreen = ({ navigation }) => {
                             style={{
                                 ...uiStyle.defaultText,
                                 color: theme.trueWhite,
-                                fontSize: verticalScale(15),
-                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
+                                fontSize: verticalScale(12),
+                                fontWeight: isThisDateSelected ? '600' : 'normal',
                                 opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
+                                includeFontPadding: false,
                             }}>
-                            {momentItm.substring(6, 8)}
+                            {`${momentItm.substring(4, 6)}.${momentItm.substring(6, 8)}`}
                         </Text>
 
                         {/* 星期幾 */}
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: theme.trueWhite,
-                            fontSize: verticalScale(8),
+                            fontSize: verticalScale(7),
                             fontWeight: isThisDateSelected ? 'bold' : 'normal',
                             opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
+                            includeFontPadding: false
                         }}>
                             {getWeek(item.startDate)}
                         </Text>
@@ -628,34 +621,34 @@ const HomeScreen = ({ navigation }) => {
             <View
                 style={{
                     alignItems: 'center', flexDirection: 'row',
-                    width: '100%', height: verticalScale(33),
+                    width: '100%', height: verticalScale(25),
                     marginTop: verticalScale(10),
-                    paddingHorizontal: scale(10),
+                    paddingHorizontal: verticalScale(10),
                 }}
             >
                 {/* 搜索框 */}
                 <View style={{
-                    backgroundColor: white,
-                    borderRadius: scale(6),
+                    backgroundColor: white, borderRadius: verticalScale(6),
                     flexDirection: 'row', alignItems: 'center',
-                    marginRight: scale(5),
-                    flex: 1, height: '100%',
+                    marginRight: verticalScale(5),
+                    flex: 1, height: '100%', padding: 0,
                 }}>
                     <TextInput
                         style={{
-                            marginLeft: scale(5),
+                            marginLeft: verticalScale(5),
                             ...uiStyle.defaultText,
                             color: black.main,
-                            fontSize: scale(12),
-                            alignItems: 'center', justifyContent: 'center',
+                            fontSize: verticalScale(12),
                             flex: 1,
+                            padding: 0,
                         }}
                         onChangeText={(inputText) => {
                             setInputText(inputText);
                         }}
                         value={inputText}
                         selectTextOnFocus
-                        textAlign='center' verticalAlign='center' textAlignVertical='center'
+                        textAlign='center'
+                        textAlignVertical='center'
                         inputMode='search'
                         placeholder={t("提問：關於澳大的一切...", { ns: 'features' })}
                         placeholderTextColor={black.third}
@@ -693,8 +686,8 @@ const HomeScreen = ({ navigation }) => {
                 <TouchableOpacity
                     style={{
                         backgroundColor: inputText == '' ? theme.disabled : themeColor,
-                        borderRadius: scale(6),
-                        padding: scale(7), paddingHorizontal: scale(8),
+                        borderRadius: verticalScale(6),
+                        padding: verticalScale(5), paddingHorizontal: verticalScale(5),
                         alignItems: 'center', justifyContent: 'center',
                         height: '100%',
                         flexDirection: 'row',
@@ -704,8 +697,8 @@ const HomeScreen = ({ navigation }) => {
                         goToBrowser(inputText);
                     }}
                 >
-                    <Ionicons name={'search'} size={scale(15)} color={white} />
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
+                    <Ionicons name={'search'} size={verticalScale(13)} color={white} />
+                    <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: white, fontWeight: 'bold', includeFontPadding: false }}>{t('搜索')}</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -939,8 +932,10 @@ const HomeScreen = ({ navigation }) => {
                                 width: "100%",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                margintTop: verticalScale(5),
-                                paddingVertical: scale(10),
+                                marginTop: verticalScale(3),
+                                paddingVertical: verticalScale(8),
+                                backgroundColor: theme.disabled,
+                                borderRadius: verticalScale(5),
                             }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
@@ -956,7 +951,7 @@ const HomeScreen = ({ navigation }) => {
                 <View style={{ width: screenWidth * 0.8, marginTop: verticalScale(5), }}>
                     <FlatGrid
                         style={{
-                            backgroundColor: white, borderRadius: scale(10),
+                            backgroundColor: white, borderRadius: verticalScale(5),
                         }}
                         itemContainerStyle={{ alignItems: 'center', justifyContent: 'center', }}
                         maxItemsPerRow={5}
