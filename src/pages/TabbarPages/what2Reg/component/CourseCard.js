@@ -180,13 +180,13 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                 titleColor: black.third,
                             },
                             {
-                                id: 'section',
-                                title: '查 Section',
+                                id: 'coursesim',
+                                title: '查 模擬課表',
                                 titleColor: black.third,
                             },
                             {
-                                id: 'coursesim',
-                                title: '查 模擬課表',
+                                id: 'section',
+                                title: '查 Section',
                                 titleColor: black.third,
                             },
                         ]}

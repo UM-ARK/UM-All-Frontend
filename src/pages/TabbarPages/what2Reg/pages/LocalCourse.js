@@ -161,6 +161,16 @@ const LocalCourse = (props) => {
                                             { text: 'No', },
                                         ]);
                                         break;
+                                    case 'coursesim':
+                                        trigger();
+                                        if (navigation.canGoBack()) {
+                                            navigation.popToTop();
+                                            navigation.navigate('Tabbar', {
+                                                screen: 'CourseSimTab',
+                                                params: { check: courseInfo['Course Code'] }
+                                            });
+                                        }
+                                        break;
                                     default:
                                         break;
                                 }
@@ -174,6 +184,11 @@ const LocalCourse = (props) => {
                                 {
                                     id: 'what2reg',
                                     title: '查 選咩課',
+                                    titleColor: black.third,
+                                },
+                                {
+                                    id: 'coursesim',
+                                    title: '查 模擬課表',
                                     titleColor: black.third,
                                 },
                                 {
@@ -305,6 +320,16 @@ const LocalCourse = (props) => {
                                     { text: 'No', },
                                 ]);
                                 break;
+                            case 'coursesim':
+                                trigger();
+                                if (navigation.canGoBack()) {
+                                    navigation.popToTop();
+                                    navigation.navigate('Tabbar', {
+                                        screen: 'CourseSimTab',
+                                        params: { check: courseInfo['Course Code'] }
+                                    });
+                                }
+                                break;
                             default:
                                 break;
                         }
@@ -318,6 +343,11 @@ const LocalCourse = (props) => {
                         {
                             id: 'what2reg',
                             title: '查 選咩課',
+                            titleColor: black.third,
+                        },
+                        {
+                            id: 'coursesim',
+                            title: '查 模擬課表',
                             titleColor: black.third,
                         },
                         {
