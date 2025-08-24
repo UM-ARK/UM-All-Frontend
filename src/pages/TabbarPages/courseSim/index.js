@@ -198,11 +198,11 @@ function CourseSim({ route, navigation }) {
     useFocusEffect(
         useCallback(() => {
             // 當頁面聚焦時執行，如存在add課傳參
-            if (route.params) {
-                if ('add' in route.params) {
-                    const { add } = route.params;
-                    addCourse(add);
-                }
+            if (route.params?.add) {
+                const { add } = route.params;
+                addCourse(add);
+                // 執行任務後，重置參數
+                navigation.setParams({ add: undefined });
             }
 
             // 失焦時自動清理
