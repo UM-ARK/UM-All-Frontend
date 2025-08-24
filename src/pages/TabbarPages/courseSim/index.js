@@ -738,7 +738,7 @@ E11-0000
                         backgroundColor: white,
                         padding: scale(10),
                         borderRadius: scale(10),
-                        width: '90%',
+                        width: '90%', height: verticalScale(170),
                         color: themeColor,
                     }}
                     returnKeyType={'done'}
