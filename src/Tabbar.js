@@ -1,4 +1,5 @@
 import React from 'react';
+import { Dimensions } from 'react-native';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
@@ -10,7 +11,7 @@ import CourseSim from './pages/TabbarPages/courseSim';
 import { uiStyle, useTheme } from './components/ThemeContext';
 import { trigger } from './utils/trigger';
 
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
@@ -25,13 +26,18 @@ const Tabbar = () => {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
 
+    const isLandscape = () => {
+        const { width, height } = Dimensions.get('window');
+        return width > height;
+    };
+
     return (
         <Tabs.Navigator
             tabBarOptions={{
                 inactiveTintColor: theme.black.main,
                 labelStyle: {  // 這裡設定label的字體大小
                     ...uiStyle.defaultText,
-                    fontSize: scale(10),
+                    fontSize: isLandscape() ? verticalScale(10) : scale(10),
                 },
                 tabStyle: {
                     paddingBottom: insets.bottom,
@@ -53,7 +59,7 @@ const Tabbar = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <Icon
                             name="pie-chart"
-                            size={scale(15)}
+                            size={isLandscape() ? verticalScale(15) : scale(15)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
                         />
@@ -72,7 +78,7 @@ const Tabbar = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
                             name="file-document-edit-outline"
-                            size={scale(18)}
+                            size={isLandscape() ? verticalScale(18) : scale(18)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
                         />
@@ -91,7 +97,7 @@ const Tabbar = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialDesignIcons
                             name="chat-processing-outline"
-                            size={scale(18)}
+                            size={isLandscape() ? verticalScale(18) : scale(18)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
                         />
@@ -110,7 +116,7 @@ const Tabbar = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
                             name="database-search-outline"
-                            size={scale(18)}
+                            size={isLandscape() ? verticalScale(18) : scale(18)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
                         />
@@ -129,7 +135,7 @@ const Tabbar = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
                             name="table-clock"
-                            size={scale(18)}
+                            size={isLandscape() ? verticalScale(18) : scale(18)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
                         />
@@ -148,7 +154,7 @@ const Tabbar = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <Icon
                             name="grid"
-                            size={scale(15)}
+                            size={isLandscape() ? verticalScale(15) : scale(15)}
                             color={focused ? color : theme.black.main}
                             focused={focused}
                         />
