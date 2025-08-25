@@ -29,6 +29,9 @@ export const ARK_HARBOR_LOGIN = ARK_HARBOR + '/login';
 export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
 export const ARK_HARBOR_TOPIC = ARK_HARBOR + '/t/topic/';
+export function ARK_HARBOR_AVATAR(username) {
+    return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
+}
 
 export const ARK_WIKI = 'https://wiki.umall.one';
 

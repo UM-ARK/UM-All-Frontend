@@ -147,7 +147,7 @@ const EventCard = ({ data, RootStore }) => {
             style={{
                 backgroundColor: white,
                 borderRadius: BORDER_RADIUS,
-                margin: scale(5),
+                margin: scale(5), marginBottom: 0,
             }}
             activeOpacity={0.9}
             onPress={handleJumpToDetail}>
