@@ -4386,7 +4386,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-1052",
             "Course Title Chi": "電與生命"
         },
         {
@@ -6644,7 +6644,7 @@
             "Day": "THU",
             "Time From": "19:00",
             "Time To": "21:45",
-            "Classroom": "E32-G029",
+            "Classroom": "E22-2007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "商法 I"
         },
@@ -6660,7 +6660,7 @@
             "Day": "THU",
             "Time From": "22:00",
             "Time To": "22:50",
-            "Classroom": "E32-G029",
+            "Classroom": "E22-2007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
             "Course Title Chi": "商法 I（法律實務）"
         },
@@ -8674,7 +8674,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-22",
+    "updateTime": "2025-08-25",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
