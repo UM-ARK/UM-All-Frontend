@@ -935,6 +935,7 @@ const HomeScreen = ({ navigation }) => {
                                 marginTop: verticalScale(3),
                                 paddingVertical: verticalScale(8),
                                 backgroundColor: theme.disabled,
+                                opacity: 0.7,
                                 borderRadius: verticalScale(5),
                             }}>
                                 <Text style={{
