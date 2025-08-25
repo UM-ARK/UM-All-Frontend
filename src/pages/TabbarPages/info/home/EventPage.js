@@ -453,8 +453,9 @@ const EventPage = forwardRef((props, ref) => {
                 {/* 帖子標題 */}
                 <Text style={{
                     marginTop: verticalScale(5),
-                    ...uiStyle.defaultText, fontWeight: '500', fontSize: verticalScale(11), color: black.second,
-                    textAlign: 'left'
+                    ...uiStyle.defaultText, fontWeight: '500', fontSize: verticalScale(11), color: black.main,
+                    textAlign: 'left',
+                    lineHeight: verticalScale(14),
                 }} numberOfLines={4}>
                     {item.unicode_title ? item.unicode_title : item.title}
                 </Text>
