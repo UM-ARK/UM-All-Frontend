@@ -98,7 +98,7 @@ const iconTypes = {
 };
 
 let cal = UMCalendar;
-const calItemWidth = verticalScale(45);
+const calItemWidth = verticalScale(50);
 
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
@@ -345,7 +345,6 @@ const HomeScreen = ({ navigation }) => {
         }, 100);
     }, []);
 
-
     /**
      * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
      */
@@ -407,7 +406,7 @@ const HomeScreen = ({ navigation }) => {
                                 ...uiStyle.defaultText,
                                 color: theme.trueWhite,
                                 fontSize: verticalScale(12),
-                                fontWeight: isThisDateSelected ? '600' : 'normal',
+                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
                                 opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
                                 includeFontPadding: false,
                             }}>
