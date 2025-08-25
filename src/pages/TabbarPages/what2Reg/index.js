@@ -825,7 +825,7 @@ const What2Reg = (props) => {
                     disabled={!inputOK}
                     onPress={() => trigger()}
                 >
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold' }}>{t('搜索')}</Text>
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(12), color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('搜索')}</Text>
                 </TouchableOpacity>
             </MenuView>
         </View>
@@ -1053,11 +1053,11 @@ const What2Reg = (props) => {
                         }}
                         onPress={handleUpdatePress}
                     >
-                        <Ionicons name={'build'} size={verticalScale(15)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('更新')}</Text>
+                        <Ionicons name={'build'} size={verticalScale(14)} color={white} />
+                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('更新')}</Text>
                     </TouchableOpacity>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                         {/* ARK Logo */}
                         <FastImage
                             source={require('../../../static/img/logo.png')}

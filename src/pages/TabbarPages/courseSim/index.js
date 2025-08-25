@@ -1254,7 +1254,7 @@ E11-0000
                         }}
                         onPress={clearCourse}
                     >
-                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold' }}>
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>
                             {t('清空', { ns: 'timetable' })}
                         </Text>
                     </TouchableOpacity>
@@ -1313,6 +1313,7 @@ E11-0000
                         ...uiStyle.defaultText,
                         color: white,
                         fontWeight: 'bold',
+                        lineHeight: verticalScale(14),
                     }}>
                         {hasOpenCourseSearch ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}
                     </Text>

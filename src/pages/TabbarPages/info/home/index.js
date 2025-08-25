@@ -517,9 +517,8 @@ const HomeScreen = ({ navigation }) => {
                         fontWeight: 'bold',
                         color: theme.themeColor,
                         textAlign: 'center',
-                    }}
-                        numberOfLines={2}
-                    >
+                        lineHeight: verticalScale(10),
+                    }}>
                         {function_name}
                     </Text>
                 </View>)}
@@ -684,20 +683,23 @@ const HomeScreen = ({ navigation }) => {
                 {/* 搜索按鈕 */}
                 <TouchableOpacity
                     style={{
+                        flexDirection: 'row', height: '100%',
                         backgroundColor: inputText == '' ? theme.disabled : themeColor,
                         borderRadius: verticalScale(6),
-                        padding: verticalScale(5), paddingHorizontal: verticalScale(5),
+                        paddingHorizontal: verticalScale(5),
                         alignItems: 'center', justifyContent: 'center',
-                        height: '100%',
-                        flexDirection: 'row',
                     }}
                     disabled={inputText == ''}
                     onPress={() => {
                         goToBrowser(inputText);
                     }}
                 >
-                    <Ionicons name={'search'} size={verticalScale(13)} color={white} />
-                    <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(12), color: white, fontWeight: 'bold', includeFontPadding: false }}>{t('搜索')}</Text>
+                    <Ionicons name={'search'} size={verticalScale(12)} color={white} />
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        fontSize: verticalScale(12), color: white, fontWeight: 'bold',
+                        textAlignVertical: 'center', lineHeight: verticalScale(14),
+                    }}>{t('搜索')}</Text>
                 </TouchableOpacity>
             </View>
         )
