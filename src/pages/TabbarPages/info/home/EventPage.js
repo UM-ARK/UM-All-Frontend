@@ -15,6 +15,7 @@ import { trigger } from '../../../../utils/trigger';
 import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
 import { openLink } from '../../../../utils/browser';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import axios from 'axios';
 import Toast from 'react-native-simple-toast';
@@ -426,7 +427,7 @@ const EventPage = forwardRef((props, ref) => {
                 onPress={async () => {
                     trigger();
                     logToFirebase('clickHarbor', {
-                        title: item.item,
+                        title: item.title,
                     });
                     const settingStr = await getItem();
                     const setting = settingStr ? JSON.parse(settingStr) : null;
