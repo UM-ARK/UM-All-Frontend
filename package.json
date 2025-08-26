@@ -35,7 +35,6 @@
     "@rneui/themed": "^4.0.0-rc.8",
     "@sbaiahmed1/react-native-blur": "^0.1.2",
     "axios": "^1.10.0",
-    "dayjs": "^1.11.13",
     "deprecated-react-native-prop-types": "^5.0.0",
     "i18next": "^23.16.8",
     "intl-pluralrules": "^2.0.1",
