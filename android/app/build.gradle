@@ -82,8 +82,8 @@ android {
         applicationId "one.umall"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 69
-        versionName "4.0.1"
+        versionCode 70
+        versionName "4.1.0"
     }
     signingConfigs {
         debug {
