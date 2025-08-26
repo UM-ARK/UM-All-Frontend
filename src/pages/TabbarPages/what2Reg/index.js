@@ -1204,10 +1204,10 @@ const What2Reg = (props) => {
                         }}
                         onPress={() => {
                             trigger();
-                            logToFirebase('funcUse', { funcName: 'eating_schedule' });
                             if (sheetIndex != -1) {
                                 bottomSheetRef.current?.close();
                             } else {
+                                logToFirebase('funcUse', { funcName: 'eating_schedule' });
                                 bottomSheetRef.current?.expand();
                             }
                         }}
