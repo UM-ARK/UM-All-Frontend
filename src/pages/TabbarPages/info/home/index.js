@@ -35,6 +35,7 @@ import {
     ARK_HARBOR,
     ARK_HARBOR_LOGIN,
     ARK_HARBOR_NEW_TOPIC,
+    ARK_WIKI_DONATE_RANK,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -156,7 +157,11 @@ const HomeScreen = ({ navigation }) => {
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
-                bottomSheetRef.current?.expand();
+                if (sheetIndex != -1) {
+                    bottomSheetRef.current?.close();
+                } else {
+                    bottomSheetRef.current?.expand();
+                }
             },
         },
         {
@@ -179,6 +184,7 @@ const HomeScreen = ({ navigation }) => {
     const [isLoadMore, setIsLoadMore] = useState(false);
     const [inputText, setInputText] = useState('');
     const [upcomingCourse, setUpcomingCourse] = useState(null);
+    const [sheetIndex, setSheetIndex] = useState(-1);
 
     // ref
     const calScrollRef = useRef(null);
@@ -752,6 +758,15 @@ const HomeScreen = ({ navigation }) => {
                             {GITHUB_DONATE}
                         </Text>
                     </HyperlinkText>
+                    <HyperlinkText linkStyle={{ color: themeColor, }} navigation={navigation}>
+                        <Text style={{
+                            ...uiStyle.defaultText, fontWeight: '500',
+                            color: black.main,
+                        }} numberOfLines={1}>
+                            {t(`捐贈榜：`, { ns: 'home' })}
+                            {ARK_WIKI_DONATE_RANK}
+                        </Text>
+                    </HyperlinkText>
 
                     <Text style={{ ...uiStyle.defaultText, color: black.third, }}>
                         {t('您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！', { ns: 'home' })}
@@ -1142,7 +1157,7 @@ const HomeScreen = ({ navigation }) => {
                 </ModalBottom>
             )}
 
-            <CustomBottomSheet ref={bottomSheetRef} page={'home'}>
+            <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}
             </CustomBottomSheet>
         </View>

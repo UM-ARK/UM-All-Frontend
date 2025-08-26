@@ -65,6 +65,7 @@ export default {
         "您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！": "Your valuable sponsorship will be used for the upgrade and maintenance of various applications and services of ARK!",
         "目前每年需要的維護費用約為1.5k RMB(此數字可能更新不及時)，純為愛發電中QAQ": "The annual maintenance cost is about 1.5k RMB (this figure may not be updated in time), purely for love and support QAQ",
         "如您已完成捐贈，可發送成功截圖到 umacark@gmail.com 。我們將展示捐贈榜！": "If you have completed the donation, you can send a successful screenshot to umacark@gmail.com. We will display the donation list!",
+        "捐贈榜：": "Donation List: ",
     },
     // 關於頁
     about: {

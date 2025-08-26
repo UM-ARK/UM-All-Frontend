@@ -46,6 +46,8 @@ export const ARK_WIKI_RANDOM_PAGE = ARK_WIKI + '/wiki/Special:Random';
 
 export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0';
 
+export const ARK_WIKI_DONATE_RANK = ARK_WIKI + '/wiki/ARK%E6%8D%90%E8%B4%88%E6%A6%9C#%E6%8D%90%E8%B4%88%E6%A6%9C';
+
 export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
 
 export function addHost(itm) {
