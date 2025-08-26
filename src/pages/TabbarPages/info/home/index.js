@@ -34,6 +34,7 @@ import {
     ARK_WEB_CLUB_SIGNIN,
     ARK_HARBOR,
     ARK_HARBOR_LOGIN,
+    ARK_HARBOR_NEW_TOPIC,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -95,6 +96,7 @@ const iconTypes = {
     fontAwesome5: 'FontAwesome5',
     materialIcons: 'MaterialIcons',
     img: 'img',
+    view: 'view',
 };
 
 let cal = UMCalendar;
@@ -105,7 +107,7 @@ const HomeScreen = ({ navigation }) => {
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
 
     // 狀態
-    const functionArray = [
+    const functionArray = useMemo(() => [
         {
             icon_name: 'bus',
             icon_type: iconTypes.ionicons,
@@ -125,19 +127,28 @@ const HomeScreen = ({ navigation }) => {
                 openLink(UM_Moodle);
             },
         },
+        // {
+        //     icon_name: require('../../../../static/img/logo.png'),
+        //     icon_type: iconTypes.img,
+        //     function_name: t('ARK', { ns: 'home' }),
+        //     func: () => {
+        //         trigger();
+        //         // onRefresh();
+        //         // getAppData();
+        //         // 刷新重新請求活動頁數據
+        //         // eventPage.current.onRefresh();
+        //         // openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+        //         openLink({ URL: BASE_HOST, mode: 'fullScreen' });
+        //     },
+        // },
         {
             icon_name: require('../../../../static/img/logo.png'),
-            icon_type: iconTypes.img,
-            function_name: t('ARK', { ns: 'home' }),
+            icon_type: iconTypes.view,
+            function_name: t('發表新帖', { ns: 'home' }),
             func: () => {
                 trigger();
-                // onRefresh();
-                // getAppData();
-                // 刷新重新請求活動頁數據
-                // eventPage.current.onRefresh();
-                // openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
-                openLink({ URL: BASE_HOST, mode: 'fullScreen' });
-            },
+                openLink({ URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen' });
+            }
         },
         {
             icon_name: 'volunteer-activism',
@@ -157,7 +168,7 @@ const HomeScreen = ({ navigation }) => {
                 openLink(ARK_HARBOR_LOGIN);
             },
         },
-    ];
+    ]);
     const [selectDay, setSelectDay] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -440,9 +451,9 @@ const HomeScreen = ({ navigation }) => {
     };
 
     // 渲染功能圖標
-    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
+    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func, }) => {
         let icon = null;
-        const imageSize = verticalScale(25);
+        const imageSize = verticalScale(23);
         const iconSize = verticalScale(23);
         const containerSize = verticalScale(40); // 固定容器大小
 
@@ -489,6 +500,21 @@ const HomeScreen = ({ navigation }) => {
                     }}
                 />
             );
+        } else if (icon_type == 'view') {
+            icon = (
+                <View style={{
+                    width: imageSize, height: imageSize,
+                    borderRadius: verticalScale(8),
+                    backgroundColor: themeColor,
+                    alignItems: 'center', justifyContent: 'center',
+                }}>
+                    <FontAwesome5
+                        name={'plus'}
+                        size={imageSize - verticalScale(8)}
+                        color={white}
+                    />
+                </View>
+            )
         }
 
         return (
