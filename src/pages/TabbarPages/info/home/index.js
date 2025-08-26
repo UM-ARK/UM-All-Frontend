@@ -145,7 +145,7 @@ const HomeScreen = ({ navigation }) => {
         {
             icon_name: require('../../../../static/img/logo.png'),
             icon_type: iconTypes.view,
-            function_name: t('發表新帖', { ns: 'home' }),
+            function_name: t('新想法', { ns: 'home' }),
             func: () => {
                 trigger();
                 openLink({ URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen' });

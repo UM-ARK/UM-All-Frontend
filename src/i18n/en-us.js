@@ -46,7 +46,7 @@ export default {
         "方舟百科": "Wiki",
         "組織登入": "Club In",
         "論壇登入": "Forum In",
-        "發表新帖": "New",
+        "新想法": "New",
 
         "周一": "MON",
         "周二": "TUE",
