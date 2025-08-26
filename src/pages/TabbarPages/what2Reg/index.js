@@ -805,17 +805,17 @@ const What2Reg = (props) => {
                 actions={[
                     {
                         id: 'wiki',
-                        title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                        title: `${t("查", { ns: 'catalog' })} ARK Wiki`,
                         titleColor: themeColor,
                     },
                     {
                         id: 'what2reg',
-                        title: '查 選咩課',
+                        title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'official',
-                        title: '查 官方',
+                        title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                 ]}

@@ -488,33 +488,33 @@ function CourseSim({ route, navigation }) {
                 actions={[
                     {
                         id: 'wiki',
-                        title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                        title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
                         titleColor: themeColor,
                     },
                     {
                         id: 'what2reg',
-                        title: '查 選咩課',
+                        title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'official',
-                        title: '查 官方',
+                        title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'section',
-                        title: '查 Section / 老師',
+                        title: `${t("查", { ns: 'catalog' })} ${t("Section / 老師", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     ...(hasDuplicate ? [{
                         id: 'del',
-                        title: `刪除所有 ${course['Course Code']}`,
+                        title: `${t("刪除所有", { ns: 'timetable' })} ${course['Course Code']}`,
                         attributes: { destructive: true },
                         image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
                     }] : []),
                     {
                         id: 'drop',
-                        title: `刪除 ${course['Course Code']}-${course['Section']}`,
+                        title: `${t("刪除", { ns: 'timetable' })} ${course['Course Code']}-${course['Section']}`,
                         attributes: { destructive: true },
                         image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
                     },
@@ -1078,11 +1078,11 @@ E11-0000
                                     }}
                                 >
                                     <Text style={{ ...s.searchResultText, color: trueWhite, fontWeight: 'bold' }}>
-                                        {`刪除所有${i['Course Code']}`}
+                                        {`${t("刪除所有", { ns: 'timetable' })} ${i['Course Code']}`}
                                     </Text>
                                 </TouchableOpacity>
 
-                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 全部放入課表</Text>
+                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t("全部放入課表", { ns: 'timetable' })}`}</Text>
 
                                 <TouchableOpacity
                                     style={s.courseCard}
@@ -1104,7 +1104,7 @@ E11-0000
                                     <Text style={s.searchResultText}>{i['Course Title Chi']}</Text>
                                 </TouchableOpacity>
 
-                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
+                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t("選取單節", { ns: 'timetable' })}`}</Text>
                                 <BottomSheetFlatList
                                     data={Object.keys(sectionObj)}
                                     style={{ marginTop: scale(5), width: '100%' }}

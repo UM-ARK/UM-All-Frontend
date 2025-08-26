@@ -16,6 +16,7 @@ import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
 import groupBy from 'lodash/groupBy';
 import lodash from 'lodash';
+import { t } from "i18next";
 
 const daySorter = {
     'MON': 1,
@@ -178,22 +179,22 @@ const LocalCourse = (props) => {
                             actions={[
                                 {
                                     id: 'wiki',
-                                    title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                                    title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
                                     titleColor: themeColor,
                                 },
                                 {
                                     id: 'what2reg',
-                                    title: '查 選咩課',
+                                    title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                                 {
                                     id: 'coursesim',
-                                    title: '查 模擬課表',
+                                    title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                                 {
                                     id: 'add',
-                                    title: '添加至模擬課表',
+                                    title: `${t("添加至模擬課表", { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                             ]}
@@ -337,22 +338,22 @@ const LocalCourse = (props) => {
                     actions={[
                         {
                             id: 'wiki',
-                            title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                            title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
                             titleColor: themeColor,
                         },
                         {
                             id: 'what2reg',
-                            title: '查 選咩課',
+                            title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                         {
                             id: 'coursesim',
-                            title: '查 模擬課表',
+                            title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                         {
                             id: 'add',
-                            title: '添加至模擬課表',
+                            title: `${t("添加至模擬課表", { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                     ]}

@@ -127,6 +127,13 @@ export default {
         "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
 
+        "查": "Search",
+        "選咩課": "What2Reg",
+        "官方": "Official",
+        "Section / 老師": "Section / Teacher",
+        "模擬課表": "Timetable Simulation",
+        "添加至模擬課表": "Add to Timetable Simulation",
+
         "ARK搵課提示": "What2Reg",
         "現在重啟APP以適配最新課表數據嗎？": "Restart the app now to adapt to the latest timetable data?",
         "已是最新課表數據！": "The timetable data is already up to date!",
@@ -148,6 +155,12 @@ export default {
         "清空": "Clear",
         "晚上": "Evening",
         "下午": "Afternoon",
+
+        "刪除": "Delete",
+        "刪除所有": "Delete All",
+
+        "全部放入課表": "Add All to Timetable",
+        "選取單節": "Select Single Section",
 
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
