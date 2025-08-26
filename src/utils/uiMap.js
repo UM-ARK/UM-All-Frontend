@@ -103,6 +103,7 @@ export const uiStyle = StyleSheet.create({
     defaultText: {
         fontWeight: 'normal',
         fontSize: verticalScale(12),
+        includeFontPadding: false
     },
     toastContainer: {
         backgroundColor: COLOR_DIY.themeColor,

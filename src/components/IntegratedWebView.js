@@ -76,9 +76,9 @@ const IntegratedWebView = ({
     useEffect(() => {
         // Android平台返回按鈕監聽
         if (Platform.OS === 'android') {
-            BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
+            const sub = BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
             return () => {
-                BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
+                sub.remove();
             };
         }
     }, [onAndroidBackPress]);

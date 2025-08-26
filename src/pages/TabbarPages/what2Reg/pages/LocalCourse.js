@@ -16,6 +16,7 @@ import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
 import groupBy from 'lodash/groupBy';
 import lodash from 'lodash';
+import { t } from "i18next";
 
 const daySorter = {
     'MON': 1,
@@ -80,8 +81,13 @@ const LocalCourse = (props) => {
         if (relateList.length === 0) {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
             setIsLoading(true);
-            navigation.goBack();
-            navigation.navigate('Wiki', { url: URL });
+            if (navigation.canGoBack()) {
+                navigation.popToTop();
+                navigation.navigate('Tabbar', {
+                    screen: 'Wiki',
+                    params: { url: URL }
+                });
+            }
         } else {
             // 按section分離課程數據
             const relateSectionObj_ = groupBy(relateList, 'Section');
@@ -119,7 +125,13 @@ const LocalCourse = (props) => {
                                             courseCode: courseInfo['Course Code'],
                                             profName: courseInfo['Teacher Information'],
                                         });
-                                        navigation.navigate('Wiki', { url: URL });
+                                        if (navigation.canGoBack()) {
+                                            navigation.popToTop();
+                                            navigation.navigate('Tabbar', {
+                                                screen: 'Wiki',
+                                                params: { url: URL }
+                                            });
+                                        }
                                         break;
                                     case 'what2reg':
                                         trigger();
@@ -138,13 +150,27 @@ const LocalCourse = (props) => {
                                             {
                                                 text: 'Yes', onPress: () => {
                                                     trigger();
-                                                    navigation.navigate('CourseSimTab', {
-                                                        add: courseInfo
-                                                    });
+                                                    if (navigation.canGoBack()) {
+                                                        navigation.popToTop();
+                                                        navigation.navigate('Tabbar', {
+                                                            screen: 'CourseSimTab',
+                                                            params: { add: courseInfo }
+                                                        });
+                                                    }
                                                 }
                                             },
                                             { text: 'No', },
                                         ]);
+                                        break;
+                                    case 'coursesim':
+                                        trigger();
+                                        if (navigation.canGoBack()) {
+                                            navigation.popToTop();
+                                            navigation.navigate('Tabbar', {
+                                                screen: 'CourseSimTab',
+                                                params: { check: courseInfo['Course Code'] }
+                                            });
+                                        }
                                         break;
                                     default:
                                         break;
@@ -153,17 +179,22 @@ const LocalCourse = (props) => {
                             actions={[
                                 {
                                     id: 'wiki',
-                                    title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                                    title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
                                     titleColor: themeColor,
                                 },
                                 {
                                     id: 'what2reg',
-                                    title: '查 選咩課',
+                                    title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                                    titleColor: black.third,
+                                },
+                                {
+                                    id: 'coursesim',
+                                    title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                                 {
                                     id: 'add',
-                                    title: '添加至模擬課表',
+                                    title: `${t("添加至模擬課表", { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                             ]}
@@ -253,7 +284,13 @@ const LocalCourse = (props) => {
                                     courseCode: courseInfo['Course Code'],
                                     profName: courseInfo['Teacher Information'],
                                 });
-                                navigation.navigate('Wiki', { url: URL });
+                                if (navigation.canGoBack()) {
+                                    navigation.popToTop();
+                                    navigation.navigate('Tabbar', {
+                                        screen: 'Wiki',
+                                        params: { url: URL }
+                                    });
+                                }
                                 break;
                             case 'what2reg':
                                 trigger();
@@ -272,13 +309,27 @@ const LocalCourse = (props) => {
                                     {
                                         text: 'Yes', onPress: () => {
                                             trigger();
-                                            navigation.navigate('CourseSimTab', {
-                                                add: courseInfo
-                                            });
+                                            if (navigation.canGoBack()) {
+                                                navigation.popToTop();
+                                                navigation.navigate('Tabbar', {
+                                                    screen: 'CourseSimTab',
+                                                    params: { add: courseInfo }
+                                                });
+                                            }
                                         }
                                     },
                                     { text: 'No', },
                                 ]);
+                                break;
+                            case 'coursesim':
+                                trigger();
+                                if (navigation.canGoBack()) {
+                                    navigation.popToTop();
+                                    navigation.navigate('Tabbar', {
+                                        screen: 'CourseSimTab',
+                                        params: { check: courseInfo['Course Code'] }
+                                    });
+                                }
                                 break;
                             default:
                                 break;
@@ -287,17 +338,22 @@ const LocalCourse = (props) => {
                     actions={[
                         {
                             id: 'wiki',
-                            title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                            title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
                             titleColor: themeColor,
                         },
                         {
                             id: 'what2reg',
-                            title: '查 選咩課',
+                            title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                            titleColor: black.third,
+                        },
+                        {
+                            id: 'coursesim',
+                            title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                         {
                             id: 'add',
-                            title: '添加至模擬課表',
+                            title: `${t("添加至模擬課表", { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                     ]}

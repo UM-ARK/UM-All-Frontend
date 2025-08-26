@@ -6,10 +6,11 @@ import {
     FlatList,
     TouchableOpacity,
     Dimensions,
+    Image,
 } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
-import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC } from '../../../../utils/pathMap';
+import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC, ARK_HARBOR_AVATAR, } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
@@ -165,7 +166,7 @@ const EventPage = forwardRef((props, ref) => {
                 const data = res.data;
                 const topics = data.topic_list.topics || [];
                 if (topics.length > 0) {
-                    const newTopic = lodash.sampleSize(topics, 10);
+                    const newTopic = lodash.sampleSize(topics, 12);
                     let harborCopy = newTopic.map(item => ({ ...item, type: 'harbor' }));
                     harborCopy = lodash.shuffle(harborCopy);
                     setHarborData(harborCopy);
@@ -391,7 +392,7 @@ const EventPage = forwardRef((props, ref) => {
                     {renderOneList(leftDataList)}
                 </View>
                 {/* 右側的列 放置單數下標的圖片 */}
-                <View >
+                <View>
                     {rightDataList.length > 0 ? (
                         renderOneList(rightDataList)
                     ) : (
@@ -409,15 +410,18 @@ const EventPage = forwardRef((props, ref) => {
         // excerpt          主題內容
         // id               主題ID
         // like_count       點讚數
-        // reply_count      回復數
+        // highest_post_number 回復數
         // views            瀏覽數
         // pinned           是否置頂
+        const pinColor = black.third;
         return (
             <TouchableScale style={{
                 backgroundColor: white, borderRadius: scale(8),
-                margin: scale(5), padding: scale(10),
+                borderLeftColor: themeColor, borderLeftWidth: verticalScale(3),
+                margin: scale(5), marginBottom: 0,
+                padding: verticalScale(10), paddingTop: verticalScale(13), paddingHorizontal: scale(8),
                 width: scale(160),
-                alignItems: 'flex-start'
+                alignItems: 'flex-start', justifyContent: 'center',
             }}
                 onPress={async () => {
                     trigger();
@@ -432,64 +436,95 @@ const EventPage = forwardRef((props, ref) => {
                     }
                 }}
             >
-                <Text style={{ ...uiStyle.defaultText, fontWeight: '500', fontSize: scale(12), color: black.second }} numberOfLines={2}>
-                    {item.unicode_title ? item.unicode_title : item.title}
-                </Text>
-                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, marginTop: verticalScale(4), }} numberOfLines={3}>{item.excerpt}</Text>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                {/* 帖子內容 */}
+                {item.excerpt && (
                     <View style={{
-                        paddingHorizontal: scale(2), paddingVertical: scale(1),
-                        borderColor: themeColor,
-                        borderRadius: scale(20), borderWidth: scale(1),
-                        marginTop: scale(2),
+                        marginTop: verticalScale(4),
+                        paddingHorizontal: verticalScale(10), paddingBottom: verticalScale(5),
                     }}>
                         <Text style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(7),
-                            color: themeColor
-                        }}>
-                            職涯港
+                            ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third,
+                            lineHeight: verticalScale(13),
+                        }} numberOfLines={5}>
+                            {item.excerpt}
+                        </Text>
+                    </View>
+                )}
+                {/* 帖子標題 */}
+                <Text style={{
+                    marginTop: verticalScale(5),
+                    ...uiStyle.defaultText, fontWeight: '500', fontSize: verticalScale(11), color: black.main,
+                    textAlign: 'left',
+                    lineHeight: verticalScale(14),
+                }} numberOfLines={4}>
+                    {item.unicode_title ? item.unicode_title : item.title}
+                </Text>
+
+                {/* 底部Pin */}
+                <View style={{
+                    marginTop: verticalScale(5),
+                    flexDirection: 'row', width: '100%',
+                    alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                    {/* 用戶頭像 */}
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', }}>
+                        <Image
+                            source={{ uri: ARK_HARBOR_AVATAR(item.last_poster_username), }}
+                            style={{
+                                width: verticalScale(14), height: verticalScale(14),
+                                borderRadius: scale(50),
+                                backgroundColor: white,
+                            }}
+                        />
+                        <Text style={{
+                            marginLeft: scale(2), ...uiStyle.defaultText, color: black.third,
+                            fontSize: verticalScale(8), fontStyle: 'italic',
+                            flexShrink: 1, textAlign: 'left',
+                        }} numberOfLines={1}>
+                            {item.last_poster_username}
                         </Text>
                     </View>
 
-                    {/* 點讚數 回復數 瀏覽數 */}
-                    <View style={{ marginTop: scale(2), flexDirection: 'row', alignItems: 'center' }}>
-                        {item?.like_count > 0 && (
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: verticalScale(8),
-                                color: themeColor,
-                                marginLeft: scale(5),
-                            }}>
-                                <MaterialCommunityIcons name="thumb-up" size={scale(10)} />
-                                {item.like_count}
-                            </Text>
-                        )}
+                    {/* 點讚等資訊 */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', }}>
+                        {/* 點讚數 回復數 瀏覽數 */}
+                        <View style={{ flexDirection: 'row', }}>
+                            {item?.like_count > 0 && (
+                                <View style={{
+                                    marginLeft: scale(5),
+                                    alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+                                }}>
+                                    <MaterialCommunityIcons name="thumb-up-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor, }}>
+                                        {item.like_count}
+                                    </Text>
+                                </View>
+                            )}
 
-                        {item?.reply_count > 0 && (
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: verticalScale(8),
-                                color: themeColor,
-                                marginLeft: scale(5),
-                            }}>
-                                <MaterialCommunityIcons name="comment" size={scale(10)} />
-                                {item.reply_count}
-                            </Text>
-                        )}
+                            {item?.highest_post_number > 1 && (
+                                <View style={{
+                                    marginLeft: scale(5),
+                                    alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+                                }}>
+                                    <MaterialCommunityIcons name="comment-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor, }}>
+                                        {item.highest_post_number}
+                                    </Text>
+                                </View>
+                            )}
 
-                        {item?.views > 0 && (
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: verticalScale(8),
-                                color: themeColor,
-                                marginLeft: scale(5),
-                            }}>
-                                <MaterialCommunityIcons name="eye" size={scale(10)} />
-                                {item.views}
-                            </Text>
-                        )}
+                            {item?.views > 0 && (
+                                <View style={{
+                                    marginLeft: scale(5),
+                                    alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+                                }}>
+                                    <MaterialCommunityIcons name="eye-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
+                                    <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor, }}>
+                                        {item.views}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
                     </View>
                 </View>
             </TouchableScale>

@@ -29,6 +29,10 @@ export const ARK_HARBOR_LOGIN = ARK_HARBOR + '/login';
 export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
 export const ARK_HARBOR_TOPIC = ARK_HARBOR + '/t/topic/';
+export const ARK_HARBOR_NEW_TOPIC = ARK_HARBOR + '/new-topic';
+export function ARK_HARBOR_AVATAR(username) {
+    return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
+}
 
 export const ARK_WIKI = 'https://wiki.umall.one';
 
@@ -41,6 +45,8 @@ export const ARK_WIKI_PAGE = ARK_WIKI + '/wiki/';
 export const ARK_WIKI_RANDOM_PAGE = ARK_WIKI + '/wiki/Special:Random';
 
 export const ARK_WIKI_RANDOM_TITLE = ARK_WIKI + '/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0';
+
+export const ARK_WIKI_DONATE_RANK = ARK_WIKI + '/wiki/ARK%E6%8D%90%E8%B4%88%E6%A6%9C#%E6%8D%90%E8%B4%88%E6%A6%9C';
 
 export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
 

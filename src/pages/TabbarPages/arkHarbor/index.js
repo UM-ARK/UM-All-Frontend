@@ -122,11 +122,10 @@ const ARKHarbor = (props) => {
                 return false; // 讓系統處理（如退出頁面）
             };
 
-            BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
+            const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
             // 卸載時移除監聽
             return () => {
-                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+                sub.remove();
             };
         }
     }, [canGoBack]);

@@ -222,7 +222,6 @@ const BusScreen = () => {
     // 點擊刷新
     const onBusIconPress = () => {
         trigger();
-        controller.abort(); // 取消之前的請求
         fetchBusInfo();
     };
 

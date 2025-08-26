@@ -233,7 +233,7 @@ function Index({ navigation }) {
                         }}
                         onPress={() => {
                             trigger();
-                            navigation.navigate('AboutPage');
+                            navigation.navigate('NewsTabbar', { screen: 'AboutPage' });
                         }}
                     >
                         <Ionicons name={'build'} size={verticalScale(15)} color={white} />

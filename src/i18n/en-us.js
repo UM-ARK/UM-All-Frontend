@@ -46,6 +46,7 @@ export default {
         "方舟百科": "Wiki",
         "組織登入": "Club In",
         "論壇登入": "Forum In",
+        "新想法": "New",
 
         "周一": "MON",
         "周二": "TUE",
@@ -64,6 +65,7 @@ export default {
         "您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！": "Your valuable sponsorship will be used for the upgrade and maintenance of various applications and services of ARK!",
         "目前每年需要的維護費用約為1.5k RMB(此數字可能更新不及時)，純為愛發電中QAQ": "The annual maintenance cost is about 1.5k RMB (this figure may not be updated in time), purely for love and support QAQ",
         "如您已完成捐贈，可發送成功截圖到 umacark@gmail.com 。我們將展示捐贈榜！": "If you have completed the donation, you can send a successful screenshot to umacark@gmail.com. We will display the donation list!",
+        "捐贈榜：": "Donation List: ",
     },
     // 關於頁
     about: {
@@ -125,12 +127,26 @@ export default {
         "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
 
+        "查": "Search",
+        "選咩課": "What2Reg",
+        "官方": "Official",
+        "Section / 老師": "Section / Teacher",
+        "模擬課表": "Timetable Simulation",
+        "添加至模擬課表": "Add to Timetable Simulation",
+
         "ARK搵課提示": "What2Reg",
         "現在重啟APP以適配最新課表數據嗎？": "Restart the app now to adapt to the latest timetable data?",
         "已是最新課表數據！": "The timetable data is already up to date!",
         "點擊下方按鈕更新！檢查作者是否上傳最新數據~": "Click the button below to update! Check if the author has uploaded the latest data~",
         "或可附件最新的課表Excel，Email提醒作者更新！": "Or you can attach the latest timetable Excel and email the author to remind them to update!",
         "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
+
+        "檢查課表版本!": "Check timetable version!",
+        "以官網課表Excel為準!": "Based on the official timetable Excel!",
+
+        "幹飯": "Eating",
+        "幹飯時間表": "Eating Schedule",
+        "下課Section數": "Number of Sections After Class",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
@@ -139,6 +155,12 @@ export default {
         "清空": "Clear",
         "晚上": "Evening",
         "下午": "Afternoon",
+
+        "刪除": "Delete",
+        "刪除所有": "Delete All",
+
+        "全部放入課表": "Add All to Timetable",
+        "選取單節": "Select Single Section",
 
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
@@ -157,6 +179,7 @@ export default {
         "結束時間不能早於開始時間！": "Cannot end earlier than start time!",
         "下節課：": "Next Class:",
         "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
+        "僅作模擬!": "Only Simulation!",
     },
     features: {
         "服務一覽": "All Services",

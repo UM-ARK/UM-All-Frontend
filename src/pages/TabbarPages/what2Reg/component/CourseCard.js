@@ -12,6 +12,7 @@ import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
 import TouchableScale from "react-native-touchable-scale";
 import lodash from 'lodash';
+import { t } from "i18next";
 
 const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMode = 'ad' }) => {
     // const { data, mode, prof_info, handleSetLetterData, courseMode = 'ad' } = props;
@@ -151,6 +152,14 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     navigation.navigate('LocalCourse', courseCode)
                                     break;
 
+                                case 'coursesim':
+                                    trigger();
+                                    navigation.navigate('Tabbar', {
+                                        screen: 'CourseSimTab',
+                                        params: { check: courseCode }
+                                    });
+                                    break;
+
                                 default:
                                     break;
                             }
@@ -158,22 +167,27 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                         actions={[
                             {
                                 id: 'wiki',
-                                title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                                title: `${t("查", { ns: 'catalog' })} ARK Wiki`,
                                 titleColor: themeColor,
                             },
                             {
                                 id: 'what2reg',
-                                title: '查 選咩課',
+                                title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
                                 titleColor: black.third,
                             },
                             {
                                 id: 'official',
-                                title: '查 官方',
+                                title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
+                                titleColor: black.third,
+                            },
+                            {
+                                id: 'coursesim',
+                                title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
                                 titleColor: black.third,
                             },
                             {
                                 id: 'section',
-                                title: '查 Section',
+                                title: `${t("查", { ns: 'catalog' })} Section`,
                                 titleColor: black.third,
                             },
                         ]}

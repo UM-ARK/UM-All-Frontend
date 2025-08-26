@@ -51,7 +51,12 @@ const CustomBottomSheet = forwardRef((props, ref) => {
                 borderTopLeftRadius: scale(50),
                 borderTopRightRadius: scale(50),
             }}
-            onChange={setIdx}
+            onChange={(idx) => {
+                setIdx(idx);
+                if (props.onSheetIndexChange) {
+                    props.onSheetIndexChange(idx);
+                }
+            }}
         // 可以通過react-native-gesture-handler的ScrollView替代react native ScrollView
         // enableContentPanningGesture={false}
         >

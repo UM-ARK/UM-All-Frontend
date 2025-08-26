@@ -198,11 +198,23 @@ function CourseSim({ route, navigation }) {
     useFocusEffect(
         useCallback(() => {
             // 當頁面聚焦時執行，如存在add課傳參
-            if (route.params) {
-                if ('add' in route.params) {
-                    const { add } = route.params;
-                    addCourse(add);
+            if (route.params?.add) {
+                const { add } = route.params;
+                addCourse(add);
+                // 執行任務後，重置參數
+                navigation.setParams({ add: undefined });
+            }
+
+            // 如果有check傳參
+            if (route.params?.check) {
+                const { check } = route.params;
+                if (check.length > 0) {
+                    setSearchText(check);
                 }
+                setHasOpenCourseSearch(true);
+                // 執行任務後，重置參數
+                navigation.setParams({ check: undefined });
+                bottomSheetRef?.current?.snapToIndex(1);
             }
 
             // 失焦時自動清理
@@ -476,33 +488,33 @@ function CourseSim({ route, navigation }) {
                 actions={[
                     {
                         id: 'wiki',
-                        title: '查 ARK Wiki !!!  ε٩(๑> ₃ <)۶з',
+                        title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
                         titleColor: themeColor,
                     },
                     {
                         id: 'what2reg',
-                        title: '查 選咩課',
+                        title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'official',
-                        title: '查 官方',
+                        title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'section',
-                        title: '查 Section / 老師',
+                        title: `${t("查", { ns: 'catalog' })} ${t("Section / 老師", { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     ...(hasDuplicate ? [{
                         id: 'del',
-                        title: `刪除所有 ${course['Course Code']}`,
+                        title: `${t("刪除所有", { ns: 'timetable' })} ${course['Course Code']}`,
                         attributes: { destructive: true },
                         image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
                     }] : []),
                     {
                         id: 'drop',
-                        title: `刪除 ${course['Course Code']}-${course['Section']}`,
+                        title: `${t("刪除", { ns: 'timetable' })} ${course['Course Code']}-${course['Section']}`,
                         attributes: { destructive: true },
                         image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
                     },
@@ -726,7 +738,7 @@ E11-0000
                         backgroundColor: white,
                         padding: scale(10),
                         borderRadius: scale(10),
-                        width: '90%',
+                        width: '90%', height: verticalScale(170),
                         color: themeColor,
                     }}
                     returnKeyType={'done'}
@@ -997,7 +1009,7 @@ E11-0000
                     {haveSearchResult && filterCourseList.length > 1 && (
                         <BottomSheetFlatList
                             data={filterCourseList}
-                            key={searchText}
+                            key={`${searchText || 'search'}-cols-${filterCourseList.length}`}
                             numColumns={filterCourseList.length}
                             columnWrapperStyle={{ flexWrap: 'wrap' }}
                             style={{ marginTop: scale(5), marginLeft: scale(10) }}
@@ -1066,11 +1078,11 @@ E11-0000
                                     }}
                                 >
                                     <Text style={{ ...s.searchResultText, color: trueWhite, fontWeight: 'bold' }}>
-                                        {`刪除所有${i['Course Code']}`}
+                                        {`${t("刪除所有", { ns: 'timetable' })} ${i['Course Code']}`}
                                     </Text>
                                 </TouchableOpacity>
 
-                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 全部放入課表</Text>
+                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t("全部放入課表", { ns: 'timetable' })}`}</Text>
 
                                 <TouchableOpacity
                                     style={s.courseCard}
@@ -1092,11 +1104,12 @@ E11-0000
                                     <Text style={s.searchResultText}>{i['Course Title Chi']}</Text>
                                 </TouchableOpacity>
 
-                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>↓ 選取單節</Text>
+                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t("選取單節", { ns: 'timetable' })}`}</Text>
                                 <BottomSheetFlatList
                                     data={Object.keys(sectionObj)}
                                     style={{ marginTop: scale(5), width: '100%' }}
                                     numColumns={Object.keys(sectionObj).length}
+                                    key={`${searchText || 'single'}-sections-${Object.keys(sectionObj).length}`}
                                     columnWrapperStyle={Object.keys(sectionObj).length > 1 ? {
                                         flexWrap: 'wrap',
                                         alignItems: 'center',
@@ -1183,6 +1196,19 @@ E11-0000
         });
     }
 
+    const renderReminder = () => {
+        return (
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: scale(5) }}>
+                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
+                    {t(`檢查課表版本!`, { ns: 'catalog' })}
+                </Text>
+                <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
+                    {t(`僅作模擬!`, { ns: 'timetable' })}
+                </Text>
+            </View>
+        );
+    }
+
     const courseTimeList = useMemo(() => {
         return s_coursePlanTimeFile.Courses;
     }, [s_coursePlanTimeFile]);
@@ -1228,7 +1254,7 @@ E11-0000
                         }}
                         onPress={clearCourse}
                     >
-                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold' }}>
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>
                             {t('清空', { ns: 'timetable' })}
                         </Text>
                     </TouchableOpacity>
@@ -1287,6 +1313,7 @@ E11-0000
                         ...uiStyle.defaultText,
                         color: white,
                         fontWeight: 'bold',
+                        lineHeight: verticalScale(14),
                     }}>
                         {hasOpenCourseSearch ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}
                     </Text>
@@ -1296,11 +1323,12 @@ E11-0000
             <ScrollView ref={verScroll} keyboardDismissMode="on-drag">
                 <View style={{ flex: 1 }}>
                     {/* 渲染課表或首次使用提示 */}
-                    {allCourseAllTime?.length > 0 ? (
+                    {allCourseAllTime?.length > 0 ? (<>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             {dayList.map(day => renderDay(day))}
                         </ScrollView>
-                    ) : renderFirstUse()}
+                        {renderReminder()}
+                    </>) : renderFirstUse()}
                 </View>
             </ScrollView>
 
