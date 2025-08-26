@@ -23,6 +23,7 @@ import Loading from '../../../components/Loading';
 import CourseCard from './component/CourseCard';
 import { openLink } from '../../../utils/browser';
 import { getLocalStorage, setLocalStorage, logAllStorage } from '../../../utils/storageKits';
+import CustomBottomSheet from '../courseSim/BottomSheet';
 
 import axios from "axios";
 import { scale, verticalScale } from "react-native-size-matters";
@@ -40,6 +41,7 @@ import { t } from "i18next";
 import ActionSheet from '@alessiocancian/react-native-actionsheet';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
+import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -137,6 +139,8 @@ const defaultFilterOptions = {
 }
 const CMGEList = ['CMRE', 'GE'];
 
+const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
 // 判斷字符串是否包含中文
 function hasChinese(str) {
     return /[\u4E00-\u9FA5]+/g.test(str)
@@ -156,7 +160,7 @@ async function setLocalOptions(filterOptions) {
 const What2Reg = (props) => {
     const { theme } = useTheme();
     const { themeColor, themeColorUltraLight,
-        black, white, viewShadow, disabled,
+        black, white, viewShadow, disabled, warning, unread,
         secondThemeColor, what2reg_color, bg_color, barStyle } = theme;
 
     const s = StyleSheet.create({
@@ -187,10 +191,12 @@ const What2Reg = (props) => {
     const [s_coursePlanTime, setS_coursePlanTime] = useState(coursePlanTime);
 
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [sheetIndex, setSheetIndex] = useState(-1);
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
     const actionSheetRef = useRef(null);
+    const bottomSheetRef = useRef(null);
 
     const insets = useContext(SafeAreaInsetsContext);
 
@@ -985,6 +991,121 @@ const What2Reg = (props) => {
         );
     }
 
+    const renderBottomSheet = () => {
+        const now = moment();
+
+        // 判斷是否在 ±30分鐘內
+        const isWithin30Min = (timeStr) => {
+            // 用今日日期拼接時間
+            const t = moment(now.format('YYYY-MM-DD') + ' ' + timeStr, 'YYYY-MM-DD HH:mm');
+            return Math.abs(now.diff(t, 'minutes')) <= 30;
+        };
+
+        return (
+            <BottomSheetScrollView >
+                <Text style={{ alignSelf: 'center', ...uiStyle.defaultText, color: black.main, fontSize: verticalScale(15), textAlign: 'center' }}>
+                    {t('幹飯時間表', { ns: 'catalog' })}🍱
+                    {'\n'}
+                    ({t('下課Section數', { ns: 'catalog' })})
+                </Text>
+                <BottomSheetScrollView
+                    horizontal showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                        paddingHorizontal: scale(10),
+                    }}
+                >
+                    {dayList.map((day, idx) => {
+                        const groupByDay = lodash.filter(s_coursePlanTime.Courses, { 'Day': day });
+                        if (groupByDay.length === 0) { return null; }
+                        const groupedResult = lodash.groupBy(groupByDay, 'Time To');
+
+                        // 下課數量
+                        const finalResult = Object.fromEntries(
+                            Object.entries(groupedResult)
+                                .filter(([key]) => key !== 'undefined')
+                                .map(([key, arr]) => [key, arr.length])
+                        );
+
+                        const isToday = moment().isoWeekday() === dayList.indexOf(day) + 1;
+
+                        const sortedTimes = lodash.sortBy(Object.keys(finalResult), time => moment(time, "HH:mm").toDate());
+                        const sortedResult = sortedTimes.map(time => ({ time, num: finalResult[time] }));
+                        console.log(day, 'sortedResult', sortedResult);
+
+                        return (<View style={{
+                            marginRight: scale(20), width: scale(85),
+                            borderRadius: verticalScale(8), padding: verticalScale(3),
+                        }}>
+                            {/* 星期幾 */}
+                            <View style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', }}>
+                                <View style={{
+                                    alignSelf: 'flex-start',
+                                    borderBottomColor: isToday ? themeColor : black.second,
+                                    borderBottomWidth: verticalScale(2),
+                                }}>
+                                    <Text style={{
+                                        alignSelf: 'center',
+                                        ...uiStyle.defaultText, fontSize: verticalScale(15),
+                                        fontWeight: isToday ? 'bold' : 'normal',
+                                        color: isToday ? themeColor : black.main,
+                                    }}>{day}</Text>
+                                </View>
+                            </View>
+
+                            <View style={{
+                                marginTop: verticalScale(3),
+                                padding: verticalScale(3),
+                                borderColor: isToday ? themeColor : black.third,
+                                borderWidth: verticalScale(2),
+                                borderRadius: verticalScale(8),
+                            }}>
+                                {sortedResult.map(item => {
+                                    let isWithinPeriod = false;
+                                    let textColor = black.third;
+                                    // 是否在前後半小時內
+                                    if (isToday) {
+                                        if (isWithin30Min(item.time)) { isWithinPeriod = true; }
+                                        if (item.num > 50) {
+                                            textColor = unread;
+                                        }
+                                        else if (item.num > 30) {
+                                            textColor = warning;
+                                        }
+                                        else {
+                                            textColor = isWithinPeriod ? themeColor : black.main;
+                                        }
+                                    }
+                                    return (
+                                        <View key={item.time}
+                                            style={{
+                                                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                                                marginTop: verticalScale(2),
+                                                backgroundColor: isWithinPeriod ? themeColorUltraLight : 'transparent',
+                                                borderRadius: verticalScale(3),
+                                            }}
+                                        >
+                                            <Text style={{
+                                                ...uiStyle.defaultText, fontSize: verticalScale(12),
+                                                fontWeight: isWithinPeriod ? 'bold' : 'normal',
+                                                color: textColor,
+                                                fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
+                                            }}>{item.time}</Text>
+                                            <Text style={{
+                                                ...uiStyle.defaultText, fontSize: verticalScale(12),
+                                                fontWeight: isWithinPeriod ? 'bold' : 'normal',
+                                                color: textColor,
+                                            }}>{item.num}</Text>
+                                        </View>
+                                    )
+                                })}
+                            </View>
+                        </View>)
+                    })}
+                </BottomSheetScrollView>
+            </BottomSheetScrollView>
+        )
+    }
+
     // 搜索候選課程
     const searchFilterCourse = useMemo(() => {
         return hasChinese(inputText)
@@ -1070,6 +1191,29 @@ const What2Reg = (props) => {
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>{t('ARK搵課', { ns: 'catalog' })}</Text>
                         </View>
                     </View>
+
+                    {/* 下課統計 */}
+                    <TouchableOpacity
+                        style={{
+                            position: 'absolute',
+                            left: scale(10),
+                            flexDirection: 'row', alignItems: 'center',
+                            backgroundColor: themeColor,
+                            borderRadius: scale(5),
+                            padding: scale(5),
+                        }}
+                        onPress={() => {
+                            trigger();
+                            if (sheetIndex != -1) {
+                                bottomSheetRef.current?.close();
+                            } else {
+                                bottomSheetRef.current?.expand();
+                            }
+                        }}
+                    >
+                        <Ionicons name={'alarm'} size={verticalScale(14)} color={white} />
+                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('幹飯', { ns: 'catalog' })}</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* 搜索框 */}
@@ -1140,6 +1284,10 @@ const What2Reg = (props) => {
                 filterCourseList && filterCourseList.length > 0 ?
                     renderFirstLetterNav(filterCourseList) : null
             )}
+
+            <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
+                {sheetIndex != -1 && renderBottomSheet()}
+            </CustomBottomSheet>
 
         </View>
     )

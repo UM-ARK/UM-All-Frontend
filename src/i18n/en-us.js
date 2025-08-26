@@ -136,6 +136,10 @@ export default {
 
         "檢查課表版本!": "Check timetable version!",
         "以官網課表Excel為準!": "Based on the official timetable Excel!",
+
+        "幹飯": "Eating",
+        "幹飯時間表": "Eating Schedule",
+        "下課Section數": "Number of Sections After Class",
     },
     timetable: {
         "課表模擬": "Timetable Simulation",
