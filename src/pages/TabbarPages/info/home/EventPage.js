@@ -425,6 +425,9 @@ const EventPage = forwardRef((props, ref) => {
             }}
                 onPress={async () => {
                     trigger();
+                    logToFirebase('clickHarbor', {
+                        title: item.item,
+                    });
                     const settingStr = await getItem();
                     const setting = settingStr ? JSON.parse(settingStr) : null;
                     // 用戶偏好是Webview則導航到Tabbar
