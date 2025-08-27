@@ -148,6 +148,7 @@ const HomeScreen = ({ navigation }) => {
             function_name: t('新想法', { ns: 'home' }),
             func: () => {
                 trigger();
+                logToFirebase('funcUse', { funcName: 'harbor_new' });
                 openLink({ URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen' });
             }
         },
@@ -158,6 +159,7 @@ const HomeScreen = ({ navigation }) => {
             func: () => {
                 trigger();
                 if (sheetIndex != -1) {
+                    logToFirebase('funcUse', { funcName: 'donate' });
                     bottomSheetRef.current?.close();
                 } else {
                     bottomSheetRef.current?.expand();
@@ -170,6 +172,7 @@ const HomeScreen = ({ navigation }) => {
             function_name: t('論壇登入', { ns: 'home' }),
             func: () => {
                 trigger();
+                logToFirebase('funcUse', { funcName: 'harbor_login' });
                 openLink(ARK_HARBOR_LOGIN);
             },
         },
