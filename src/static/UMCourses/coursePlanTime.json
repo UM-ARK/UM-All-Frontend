@@ -3500,36 +3500,6 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "CIS",
-            "Course Code": "CISC3021",
-            "Course Title": "Multimedia Forensics and Security",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "PUN CHI MAN",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E12-G021",
-            "Course Title Chi": "多媒體取證與安全"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CIS",
-            "Course Code": "CISC3021",
-            "Course Title": "Multimedia Forensics and Security",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "PUN CHI MAN",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E12-G021",
-            "Course Title Chi": "多媒體取證與安全"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CIS",
             "Course Code": "CISC3023",
             "Course Title": "Machine Learning",
             "Section": "001",
@@ -10464,7 +10434,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-1052",
             "Course Title Chi": "英語文法"
         },
         {
@@ -10478,7 +10448,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-1052",
             "Course Title Chi": "英語文法"
         },
         {
@@ -27252,7 +27222,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-2011",
+            "Classroom": "E22-G010",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / FIC22-THIRD YEAR / GBM22-THIRD YEAR / GBS17 / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },
@@ -27268,7 +27238,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-2011",
+            "Classroom": "E22-G010",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BIA19-THIRD YEAR / FIC22-THIRD YEAR / GBM22-THIRD YEAR / GBS17 / FOURTH YEAR\n",
             "Course Title Chi": "定量決策分析"
         },

@@ -1013,21 +1013,6 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "CIS",
-            "Course Code": "CISC3021",
-            "Course Title": "Multimedia Forensics and Security",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "PUN CHI MAN",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "10:00",
-            "Time To": "11:15",
-            "Classroom": "E12-G021",
-            "Course Title Chi": "多媒體取證與安全"
-        },
-        {
-            "Offering Unit": "FST",
-            "Offering Department": "CIS",
             "Course Code": "CISC3023",
             "Course Title": "Machine Learning",
             "Section": "001",
@@ -2620,7 +2605,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-4042",
+            "Classroom": "E4-1052",
             "Course Title Chi": "英語文法"
         },
         {
@@ -8674,7 +8659,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-25",
+    "updateTime": "2025-08-26",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
