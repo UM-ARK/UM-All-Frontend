@@ -22,7 +22,8 @@
   - [⛵ 啟動流程](#-啟動流程)
     - [🤖 Android 運行](#-android-運行)
     - [🍎 iOS 運行](#-ios-運行)
-  - [🐛 使用 Debugger （Web Console 工具）](#-使用-debugger-web-console-工具)
+  - [🐛 如何 Debug?](#-如何-debug)
+    - [Google Firebase Analytics](#google-firebase-analytics)
 - [📦 打包方式](#-打包方式)
   - [🍎 iOS 打包](#-ios-打包)
   - [🤖 Android 打包](#-android-打包)
@@ -133,14 +134,26 @@ yarn ios --simulator="iPhone 15"
 
 ---
 
-### 🐛 使用 Debugger （Web Console 工具）
+### 🐛 如何 Debug?
 
 -   當需要 log 出對象或者數組時，有 Chrome 的 Web Debugger 肯定更好用。
 -   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
-    react-native@0.73+更新：
--   iOS 模擬器`Open Debugger`可能無法正確跳轉到瀏覽器，
+<br>
+
+**react-native@0.73+更新：**
+- iOS 模擬器`Open Debugger`可能無法正確跳轉到瀏覽器，
     -   方法1：Chrome 可前往`chrome://inspect`，在`Remote Target`中找到`React Native Experimental (Improved Chrome Reloads)`下的 inspect 按鈕打開DevTools。
     -   方法2：使用`sh debug.sh`，其實是運行`npx react-devtools`，然後再在模擬器中`Open Debugger`，即會使用該插件打開Console查看log。
+
+<br>
+
+**react-native@0.77+更新：**
+- 在`Metro`中直接使用`j`調出React DevTools。
+
+#### Google Firebase Analytics
+
+iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/analytics/debugview)
+隨後可以在Firebase控制台`Debug View`中看到近乎實時(可能有1min延遲)的logEvent反饋，用於測試Analytics是否正常。
 
 ---
 
@@ -148,7 +161,7 @@ yarn ios --simulator="iPhone 15"
 
 ### 🍎 iOS 打包
 
-1. 找到 `./ios/UMALL.xcworkspace`，點擊打開 Xcode。
+1. Xcode中找到 `./ios/UMALL.xcworkspace`（Pods鏈接的項目使用workspace，其他使用proj），點擊使用Xcode打開。
 2. Build。
 
 -   點擊左側欄目找到`UMALL`項目，然後再中間的面板中輸入新的版本號（Version 和 Build 通常一樣）。
