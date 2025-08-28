@@ -511,22 +511,6 @@
             "Course Title Chi": "經濟思想史"
         },
         {
-            "Offering Unit": "FBA",
-            "Offering Department": "FBE",
-            "Course Code": "BECO4015",
-            "Course Title": "Managerial Economics for Small and Medium-Sized Retailing Enterprises",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "LI GUOQIANG",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E22-2017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC20 / BEC22 / FOURTH YEAR\n",
-            "Course Title Chi": "中小型零售企業管理經濟學"
-        },
-        {
             "Offering Unit": "FAH",
             "Offering Department": "DCH",
             "Course Code": "CHLL1000",
@@ -1068,7 +1052,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E11-1015",
+            "Classroom": "E12-G003",
             "Course Title Chi": "計算機科學中的創業精神"
         },
         {
@@ -2858,7 +2842,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3013",
+            "Classroom": "E33-2037",
             "Course Title Chi": "小學英語教學I"
         },
         {
@@ -5488,7 +5472,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-2017",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR20-CHM20 / IIR20-GMM20\n",
             "Course Title Chi": "食品飲料管理"
         },
@@ -8551,7 +8535,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E22-4012",
+            "Classroom": "E6-1113A",
             "Course Title Chi": "宗教與社會"
         },
         {
@@ -8659,7 +8643,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-26",
+    "updateTime": "2025-08-28",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

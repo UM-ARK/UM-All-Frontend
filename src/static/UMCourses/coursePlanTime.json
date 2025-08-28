@@ -2070,38 +2070,6 @@
             "Course Title Chi": "經濟思想史"
         },
         {
-            "Offering Unit": "FBA",
-            "Offering Department": "FBE",
-            "Course Code": "BECO4015",
-            "Course Title": "Managerial Economics for Small and Medium-Sized Retailing Enterprises",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "LI GUOQIANG",
-            "Lecture / Lab": "Lecture",
-            "Day": "MON",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E22-2017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC20 / BEC22 / FOURTH YEAR\n",
-            "Course Title Chi": "中小型零售企業管理經濟學"
-        },
-        {
-            "Offering Unit": "FBA",
-            "Offering Department": "FBE",
-            "Course Code": "BECO4015",
-            "Course Title": "Managerial Economics for Small and Medium-Sized Retailing Enterprises",
-            "Section": "001",
-            "Medium of Instruction": "English",
-            "Teacher Information": "LI GUOQIANG",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "14:30",
-            "Time To": "15:45",
-            "Classroom": "E22-2017",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FBA - BEC20 / BEC22 / FOURTH YEAR\n",
-            "Course Title Chi": "中小型零售企業管理經濟學"
-        },
-        {
             "Offering Unit": "FAH",
             "Offering Department": "DCH",
             "Course Code": "CHLL1000",
@@ -3601,7 +3569,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E11-1015",
+            "Classroom": "E12-G003",
             "Course Title Chi": "計算機科學中的創業精神"
         },
         {
@@ -3616,7 +3584,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E11-1015",
+            "Classroom": "E12-G003",
             "Course Title Chi": "計算機科學中的創業精神"
         },
         {
@@ -7153,21 +7121,6 @@
         {
             "Offering Unit": "FED",
             "Course Code": "CPED1001",
-            "Course Title": "Physical Education I - Kinball",
-            "Section": "032",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "CHONG CHI SEAK",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "17:30",
-            "Time To": "19:15",
-            "Classroom": "N8-G028",
-            "Course Title Chi": "體育 I - Kinball"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1001",
             "Course Title": "Physical Education I - Basketball",
             "Section": "033",
             "Medium of Instruction": "English",
@@ -7252,36 +7205,6 @@
         {
             "Offering Unit": "FED",
             "Course Code": "CPED1001",
-            "Course Title": "Physical Education I - Volleyball",
-            "Section": "039",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "TANG LAI SEONG",
-            "Lecture / Lab": "Lecture",
-            "Day": "THU",
-            "Time From": "19:30",
-            "Time To": "21:15",
-            "Classroom": "N8-G028",
-            "Course Title Chi": "體育I-排球"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1001",
-            "Course Title": "Physical Education I - Volleyball",
-            "Section": "040",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "LAM KOON SHING",
-            "Lecture / Lab": "Lecture",
-            "Day": "WED",
-            "Time From": "19:30",
-            "Time To": "21:15",
-            "Classroom": "N8-G028",
-            "Course Title Chi": "體育I-排球"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1001",
             "Course Title": "Physical Education I - Soccer",
             "Section": "041",
             "Medium of Instruction": "English",
@@ -7291,7 +7214,7 @@
             "Time From": "15:30",
             "Time To": "17:15",
             "Classroom": "W34-MINISOCGRD",
-            "Course Title Chi": "體育 I - 足球"
+            "Course Title Chi": "體育I-足球"
         },
         {
             "Offering Unit": "FED",
@@ -7548,36 +7471,6 @@
         {
             "Offering Unit": "FED",
             "Course Code": "CPED1002",
-            "Course Title": "Physical Education II - Table Tennis",
-            "Section": "019",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "CHONG CHI SEAK",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "17:30",
-            "Time To": "19:15",
-            "Classroom": "N8-3010",
-            "Course Title Chi": "體育二-乒乓球"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1002",
-            "Course Title": "Physical Education II - Table Tennis",
-            "Section": "020",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "CHONG CHI SEAK",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "19:30",
-            "Time To": "21:15",
-            "Classroom": "N8-3010",
-            "Course Title Chi": "體育二-乒乓球"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1002",
             "Course Title": "Physical Education II - Rock Climbing",
             "Section": "021",
             "Medium of Instruction": "English",
@@ -7784,66 +7677,6 @@
             "Time To": "21:15",
             "Classroom": "N8-3008",
             "Course Title Chi": "體育II-武術"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1002",
-            "Course Title": "Physical Education II - Rope Skipping",
-            "Section": "036",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "TANG LAI SEONG",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "17:30",
-            "Time To": "19:15",
-            "Classroom": "N8-G016",
-            "Course Title Chi": "體育二－跳繩"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1002",
-            "Course Title": "Physical Education II - Rope Skipping",
-            "Section": "037",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "TANG LAI SEONG",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "19:30",
-            "Time To": "21:15",
-            "Classroom": "N8-G016",
-            "Course Title Chi": "體育二－跳繩"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1002",
-            "Course Title": "Physical Education II - Badminton",
-            "Section": "038",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "LAM KOON SHING",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "17:30",
-            "Time To": "19:15",
-            "Classroom": "N8-4008A",
-            "Course Title Chi": "體育二-羽球"
-        },
-        {
-            "Offering Unit": "FED",
-            "Course Code": "CPED1002",
-            "Course Title": "Physical Education II - Badminton",
-            "Section": "039",
-            "Medium of Instruction": "English",
-            "Notes for Course Enrolment": "This section will be canceled.",
-            "Teacher Information": "LAM KOON SHING",
-            "Lecture / Lab": "Lecture",
-            "Day": "TUE",
-            "Time From": "19:30",
-            "Time To": "21:15",
-            "Classroom": "N8-4008A",
-            "Course Title Chi": "體育二-羽球"
         },
         {
             "Offering Unit": "FED",
@@ -10981,7 +10814,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3013",
+            "Classroom": "E33-2037",
             "Course Title Chi": "小學英語教學I"
         },
         {
@@ -10995,7 +10828,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E22-3013",
+            "Classroom": "E33-2037",
             "Course Title Chi": "小學英語教學I"
         },
         {
@@ -26278,7 +26111,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-2017",
+            "Classroom": "E22-2002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - IIR20-CHM20 / IIR20-GMM20\n",
             "Course Title Chi": "食品飲料管理"
         },
@@ -37376,7 +37209,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E22-4012",
+            "Classroom": "E6-1113A",
             "Course Title Chi": "宗教與社會"
         },
         {
