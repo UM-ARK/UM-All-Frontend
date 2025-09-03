@@ -737,7 +737,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-4011",
+            "Classroom": "E21-1057",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "語言分析與研究"
         },
@@ -2489,7 +2489,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-1035",
             "Course Title Chi": "聽力與口說教學"
         },
         {
@@ -2545,7 +2545,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E33-G021",
+            "Classroom": "E33-2034",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
             "Course Title Chi": "小學數學興趣、概念和關鍵思想的發展"
         },
@@ -2952,7 +2952,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "20:15",
-            "Classroom": "E3-4042",
+            "Classroom": "E33-1035",
             "Course Title Chi": "實用課堂英語"
         },
         {
@@ -3033,7 +3033,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -3285,7 +3285,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-1033",
             "Course Title Chi": "描述英語的聲音"
         },
         {
@@ -6469,7 +6469,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-G010",
+            "Classroom": "E32-G002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "全球衛生治理與法律"
         },
@@ -6485,7 +6485,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "N22-G002",
+            "Classroom": "E32-G002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "國際航空與太空法"
         },
@@ -8643,7 +8643,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-08-29",
+    "updateTime": "2025-09-03",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"

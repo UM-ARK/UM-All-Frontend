@@ -2768,7 +2768,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-4011",
+            "Classroom": "E21-1057",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "語言分析與研究"
         },
@@ -2784,7 +2784,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E22-4011",
+            "Classroom": "E21-1057",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - CLL19\n",
             "Course Title Chi": "語言分析與研究"
         },
@@ -10065,7 +10065,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-1035",
             "Course Title Chi": "聽力與口說教學"
         },
         {
@@ -10149,7 +10149,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E33-G021",
+            "Classroom": "E33-2034",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
             "Course Title Chi": "小學數學興趣、概念和關鍵思想的發展"
         },
@@ -10164,7 +10164,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E33-G021",
+            "Classroom": "E33-2034",
             "\"Class For / Class Not For\" Information": "Class for :\n - FED - PYE19 / PYE22\n",
             "Course Title Chi": "小學數學興趣、概念和關鍵思想的發展"
         },
@@ -12176,7 +12176,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "20:15",
-            "Classroom": "E3-4042",
+            "Classroom": "E33-1035",
             "Course Title Chi": "實用課堂英語"
         },
         {
@@ -12780,7 +12780,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12796,7 +12796,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12812,7 +12812,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12828,7 +12828,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12908,7 +12908,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3041",
+            "Classroom": "E3-3034",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12924,7 +12924,7 @@
             "Day": "TUE",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3041",
+            "Classroom": "E3-3034",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12940,7 +12940,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3041",
+            "Classroom": "E3-3034",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -12956,7 +12956,7 @@
             "Day": "FRI",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E3-3041",
+            "Classroom": "E3-3034",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13164,7 +13164,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13180,7 +13180,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13196,7 +13196,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13212,7 +13212,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13228,7 +13228,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13244,7 +13244,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13260,7 +13260,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13276,7 +13276,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E3-3042",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13676,7 +13676,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-4033",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13692,7 +13692,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-4033",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13708,7 +13708,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-4033",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -13724,7 +13724,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-4033",
+            "Classroom": "E3-4035",
             "Course Title Chi": "大學英語I"
         },
         {
@@ -16087,7 +16087,7 @@
             "Day": "MON",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16102,7 +16102,7 @@
             "Day": "THU",
             "Time From": "08:30",
             "Time To": "09:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-3042",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16207,7 +16207,7 @@
             "Day": "MON",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16222,7 +16222,7 @@
             "Day": "THU",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16267,7 +16267,7 @@
             "Day": "MON",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16282,7 +16282,7 @@
             "Day": "THU",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16357,7 +16357,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16372,7 +16372,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16417,7 +16417,7 @@
             "Day": "MON",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16432,7 +16432,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16657,7 +16657,7 @@
             "Day": "TUE",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16672,7 +16672,7 @@
             "Day": "FRI",
             "Time From": "11:30",
             "Time To": "12:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16717,7 +16717,7 @@
             "Day": "TUE",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16732,7 +16732,7 @@
             "Day": "FRI",
             "Time From": "13:00",
             "Time To": "14:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4043",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16807,7 +16807,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16822,7 +16822,7 @@
             "Day": "FRI",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16837,7 +16837,7 @@
             "Day": "TUE",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -16852,7 +16852,7 @@
             "Day": "FRI",
             "Time From": "16:00",
             "Time To": "17:15",
-            "Classroom": "E4-3056",
+            "Classroom": "E3-4033",
             "Course Title Chi": "大學英語3"
         },
         {
@@ -17404,7 +17404,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-1033",
             "Course Title Chi": "描述英語的聲音"
         },
         {
@@ -17419,7 +17419,7 @@
             "Day": "FRI",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-2003",
+            "Classroom": "E21-1033",
             "Course Title Chi": "描述英語的聲音"
         },
         {
@@ -29388,7 +29388,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "E22-G010",
+            "Classroom": "E32-G002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "全球衛生治理與法律"
         },
@@ -29404,7 +29404,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "N22-G002",
+            "Classroom": "E32-G002",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "國際航空與太空法"
         },
