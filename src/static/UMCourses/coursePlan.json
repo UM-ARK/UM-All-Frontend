@@ -2475,7 +2475,7 @@
             "Day": "THU",
             "Time From": "16:00",
             "Time To": "18:45",
-            "Classroom": "E3-3045",
+            "Classroom": "E33-1038",
             "Course Title Chi": "閱讀與寫作教學"
         },
         {
@@ -2938,7 +2938,7 @@
             "Day": "WED",
             "Time From": "18:00",
             "Time To": "20:45",
-            "Classroom": "E22-3011",
+            "Classroom": "E33-3036",
             "Course Title Chi": "中學寫作組織教學"
         },
         {
@@ -3435,7 +3435,7 @@
             "Day": "TUE",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E22-2018",
+            "Classroom": "E3-3033",
             "Course Title Chi": "世界英語"
         },
         {
@@ -4339,7 +4339,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E6-1113A",
+            "Classroom": "E4-1052",
             "Course Title Chi": "當代社會的關鍵問題"
         },
         {
@@ -4957,7 +4957,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "11:15",
-            "Classroom": "E21-1017",
+            "Classroom": "E21-1019 ",
             "Course Title Chi": "大英帝國與世界"
         },
         {
@@ -5006,9 +5006,9 @@
             "Offering Department": "DHIST",
             "Course Code": "HIST4003",
             "Course Title": "Research Project",
-            "Section": "001",
+            "Section": "002",
             "Medium of Instruction": "English",
-            "Teacher Information": "KWAN CHING-YIN NATHAN",
+            "Teacher Information": "LIAO BOLUN, EDGAR",
             "Lecture / Lab": "Lecture",
             "Course Title Chi": "研究計畫"
         },
@@ -6421,7 +6421,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "E6-1102D",
+            "Classroom": "E33-G021",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "行政法和行政程序 I"
         },
@@ -8124,7 +8124,7 @@
             "Day": "MON",
             "Time From": "17:30",
             "Time To": "18:45",
-            "Classroom": "E21-1018",
+            "Classroom": "E21-1056",
             "\"Class For / Class Not For\" Information": "Class for :\n - FAH - PTS19\n",
             "Course Title Chi": "葡萄牙語作為外語教學 I"
         },
@@ -8643,7 +8643,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-09-03",
+    "updateTime": "2025-09-11",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
