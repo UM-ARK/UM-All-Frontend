@@ -5103,7 +5103,7 @@
             "Course Title": "Cell and Molecular Biology Lab",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "SUN HENG / WANG LI",
+            "Teacher Information": "WANG LI",
             "Lecture / Lab": "Lab",
             "Day": "WED",
             "Time From": "14:30",
@@ -5302,7 +5302,7 @@
             "Course Title": "Pharmaceutical Analysis Lab",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "LI PENG / WAN JIANBO",
+            "Teacher Information": "WAN JIANBO / LI GUODONG",
             "Lecture / Lab": "Lab",
             "Day": "THU",
             "Time From": "10:00",
@@ -5347,7 +5347,7 @@
             "Course Title": "Graduation Project I",
             "Section": "001",
             "Medium of Instruction": "English",
-            "Teacher Information": "CHUXIA DENG / DI LIJUN / EDWIN CHONG WING CHEUNG / GYEONG HUN BAEG / HANMING SHEN / HOI PUI MAN / JIANGUANG JI / JOONG SUP SHIM / JUNG WOO PARK / KWOK HANG FAI / LEE TSZ ON / LEUNG CHUNG HANG / LEUNG LAI HAN / LIN LIGEN / MAO XIAOWEN / MIAO KAI / WONG KOON HO / XU REN HE / YUAN ZHEN / ZHAO QI",
+            "Teacher Information": "CHUXIA DENG / DI LIJUN / EDWIN CHONG WING CHEUNG / GYEONG HUN BAEG / HANMING SHEN / HOI PUI MAN / JIANGUANG JI / JOONG SUP SHIM / JUNG WOO PARK / KWOK HANG FAI / LEE TSZ ON / LEUNG CHUNG HANG / LEUNG LAI HAN / LIN LIGEN / MAO XIAOWEN / MIAO KAI / WONG KOON HO / XU REN HE / YUAN ZHEN / ZHAO QI / ZHANG XUANJUN",
             "Lecture / Lab": "Lecture",
             "\"Class For / Class Not For\" Information": "Class for :\n - FHS - BIO19 / BIO22\n",
             "Course Title Chi": "畢業設計I"
@@ -8643,7 +8643,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-09-11",
+    "updateTime": "2025-09-22",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
