@@ -3727,7 +3727,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "E4-1052",
+            "Classroom": "E22-3001",
             "\"Class For / Class Not For\" Information": "Class for :\n - FBA - FNC17 / FNC20\n - FBA - FNM19\n",
             "Course Title Chi": "奇異選擇權和結構性產品"
         },
@@ -7947,7 +7947,7 @@
             "Course Title": "Portuguese Language and Culture I",
             "Section": "001",
             "Medium of Instruction": "Portuguese",
-            "Teacher Information": "JOSÉ FERNANDO LINO PASCOAL",
+            "Teacher Information": "VÍTOR MIGUEL DUARTE SILVA",
             "Lecture / Lab": "Lecture",
             "Day": "MON",
             "Time From": "13:00",
@@ -8643,7 +8643,7 @@
             "Course Title Chi": "大學英文II（輔導版）"
         }
     ],
-    "updateTime": "2025-09-30",
+    "updateTime": "2025-10-21",
     "academicYear": "25/26",
     "sem": "1",
     "remark": "用於Add Drop期間的數據，帶課表時間"
