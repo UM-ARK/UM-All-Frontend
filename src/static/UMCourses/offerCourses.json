@@ -1255,7 +1255,7 @@
             "Course Title": "Management Accounting I",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FBA\n - FBA - ACC21 / FIC20 / GBS20-SECOND YEAR / GBS22-SECOND YEAR / IIR20-SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA\n - FBA - ACC21 / FIC20 / GBS20-SECOND YEAR / GBS22-SECOND YEAR / IIR20-SECOND YEAR / THIRD YEAR / FOURTH YEAR / BEC22-SECOND YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "管理會計 I"
         },
@@ -1286,7 +1286,7 @@
             "Course Code": "ACCT3002",
             "Course Title": "Management Accounting II",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA\n - FBA - ACC19 / ACC21\n",
+            "Course For Info": "Course for :\n - FBA\n - FBA - ACC19 / ACC21 / FIC20-THIRD YEAR / FIC20-FOURTH YEAR / FIC22-THIRD YEAR / FIC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "管理會計II"
         },
@@ -1406,7 +1406,7 @@
             "Course Code": "ISOM1001",
             "Course Title": "Contemporary Information Systems for Organizations",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - GBS22\n",
+            "Course For Info": "Course for :\n - FBA - GBS22 / SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "當代組織資訊系統"
         },
@@ -1426,7 +1426,7 @@
             "Course Code": "ISOM1005",
             "Course Title": "Introduction to Business Intelligence and Information",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BAM22\n - FBA - BIA19 / BIA25 / GBS22-SECOND YEAR / GBS22-THIRD YEAR / GBS22-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BAM22\n - FBA - BIA19 / BIA25 / GBS22-SECOND YEAR / GBS22-THIRD YEAR / GBS22-FOURTH YEAR /  SECOND YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "商業智慧與資訊簡介"
         },
@@ -1506,7 +1506,7 @@
             "Course Code": "ISOM3033",
             "Course Title": "Advanced Calculus",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC20-THIRD YEAR\n",
+            "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "高等微積分"
         },
@@ -1516,7 +1516,7 @@
             "Course Code": "ISOM3035",
             "Course Title": "Operations Management",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
+            "Course For Info": "Course for :\n - FBA - BIA19-THIRD YEAR / BIA19-FOURTH YEAR / FIC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "營運管理"
         },
@@ -1546,7 +1546,7 @@
             "Course Code": "ISOM3038",
             "Course Title": "Financial Technology",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - ACM21\n - FBA - ACC21\n",
+            "Course For Info": "Course for :\n - FBA - ACM21\n - FBA - ACC21 / FIC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 3,
             "Course Title Chi": "金融科技"
         },
@@ -1666,6 +1666,7 @@
             "Course Code": "IRTM3008",
             "Course Title": "Travel and Tourism Management",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "旅遊與旅遊管理"
@@ -1866,6 +1867,7 @@
             "Course Code": "FINC2000",
             "Course Title": "Financial Management",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course not for :\n - FSS\n - FED\n - FHS\n - FBA - FNC17 / FNC20 / FIRST YEAR\n - FST\n - FAH\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "財務管理"
@@ -1979,6 +1981,16 @@
             "Course Type": "GE Course",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "全球商業與文化"
+        },
+        {
+            "Offering Unit": "FBA",
+            "Offering Department": "MMI",
+            "Course Code": "GESB2002",
+            "Course Title": "Business, Society and Entrepreneurship",
+            "Credit Units": 3,
+            "Course Type": "GE Course",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "商業、社會與創業"
         },
         {
             "Offering Unit": "FBA",
@@ -3130,6 +3142,16 @@
         {
             "Offering Unit": "FLL",
             "Offering Department": "GLS",
+            "Course Code": "LAWS3035",
+            "Course Title": "Mooting, Mock Trials and Advocacy Skills",
+            "Credit Units": 3,
+            "Course For Info": "Course for :\n - FLL - BLC23\n",
+            "Enrolled Year Level (on or above)": 3,
+            "Course Title Chi": "模擬法庭、模擬審判和辯護技巧"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "GLS",
             "Course Code": "LAWS3038",
             "Course Title": "Law of Evidence",
             "Credit Units": 3,
@@ -3186,16 +3208,6 @@
             "Course Type": "GE Course",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "法律與社會"
-        },
-        {
-            "Offering Unit": "FLL",
-            "Offering Department": "MLS",
-            "Course Code": "GESB1018",
-            "Course Title": "Law and Society (for International Students)",
-            "Credit Units": 3,
-            "Course Type": "GE Course",
-            "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "法律與社會（針對國際學生） "
         },
         {
             "Offering Unit": "FLL",
@@ -3846,6 +3858,26 @@
             "Course For Info": "Course for :\n - FLL - BLL18 / WA17\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "民事訴訟法 II（法律實務）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "TLL4013C",
+            "Course Title": "CIVIL PROCEDURAL LAW III",
+            "Credit Units": 3,
+            "Course For Info": "Course for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "民事訴訟法III"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "TLL4014C",
+            "Course Title": "CIVIL PROCEDURAL LAW III (LEGAL PRACTICE)",
+            "Credit Units": 1,
+            "Course For Info": "Course for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "民事訴訟法 III（法律實務）"
         },
         {
             "Offering Unit": "FSS",
@@ -5088,7 +5120,7 @@
             "Course Title": "Probability and Statistics",
             "Credit Units": 3,
             "For Incoming Exchange Students": "Y",
-            "Course For Info": "Course for :\n - FST\n",
+            "Course For Info": "Course for :\n - FHS - BIF22\n - FST\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "機率論與數理統計"
         },
@@ -5492,6 +5524,28 @@
         {
             "Offering Unit": "FST",
             "Offering Department": "ECE",
+            "Course Code": "ECEN1003",
+            "Course Title": "Information Technology Revolution and Electronics",
+            "Credit Units": 1,
+            "For Incoming Exchange Students": "Y",
+            "Course For Info": "Course for :\n - FST\n",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "資訊科技革命與電子學"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
+            "Course Code": "ECEN1004",
+            "Course Title": "Embedded Systems",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Course For Info": "Course for :\n - FST\n",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "嵌入式系統"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
             "Course Code": "ECEN1005",
             "Course Title": "Circuit Analysis",
             "Credit Units": 4,
@@ -5499,6 +5553,17 @@
             "Course For Info": "Course for :\n - FST\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "電路分析"
+        },
+        {
+            "Offering Unit": "FST",
+            "Offering Department": "ECE",
+            "Course Code": "ECEN1008",
+            "Course Title": "Physics I",
+            "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
+            "Course For Info": "Course for :\n - FED - MAS19\n - FST\n",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "物理學 I"
         },
         {
             "Offering Unit": "FST",
@@ -6193,15 +6258,6 @@
         },
         {
             "Offering Unit": "IAPME",
-            "Course Code": "GEST1014",
-            "Course Title": "Mysteries of the Universe",
-            "Credit Units": 3,
-            "Course Type": "GE Course",
-            "Enrolled Year Level (on or above)": 1,
-            "Course Title Chi": "宇宙的奧秘"
-        },
-        {
-            "Offering Unit": "IAPME",
             "Course Code": "GEST1015",
             "Course Title": "Physics and Modern Society",
             "Credit Units": 3,
@@ -6228,7 +6284,7 @@
             "Course Title Chi": "微電子晶片技術在日常生活中的作用"
         }
     ],
-    "updateTime": "2025-10-21",
+    "updateTime": "2025-10-28",
     "academicYear": "25/26",
     "sem": "2",
     "remark": "用於Pre Enrollment期間的數據",
