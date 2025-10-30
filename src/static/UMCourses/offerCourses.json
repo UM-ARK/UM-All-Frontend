@@ -1276,6 +1276,7 @@
             "Course Code": "ACCT2004",
             "Course Title": "Intermediate Accounting",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA\n - FBA - ACC21 / FIC22-THIRD YEAR / FIC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 2,
             "Course Title Chi": "中級會計"
@@ -1286,6 +1287,7 @@
             "Course Code": "ACCT3002",
             "Course Title": "Management Accounting II",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA\n - FBA - ACC19 / ACC21 / FIC20-THIRD YEAR / FIC20-FOURTH YEAR / FIC22-THIRD YEAR / FIC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "管理會計II"
@@ -1316,6 +1318,7 @@
             "Course Code": "ACCT3009",
             "Course Title": "Financial Statement Analysis",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 3,
             "Course Title Chi": "財務報表分析"
@@ -1326,6 +1329,7 @@
             "Course Code": "ACCT4001",
             "Course Title": "Accounting Theory",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA\n - FBA - ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "會計理論"
@@ -1336,6 +1340,7 @@
             "Course Code": "ACCT4004",
             "Course Title": "Financial Accounting in Hospitality and Gaming",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - ACC19 / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / IIR20-THIRD YEAR / IIR20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "酒店和博彩業的財務會計"
@@ -1346,6 +1351,7 @@
             "Course Code": "ACCT4006",
             "Course Title": "Auditing II",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - ACC21\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "審計II"
@@ -1356,6 +1362,7 @@
             "Course Code": "ACCT4008",
             "Course Title": "Management Control Systems",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA\n - FBA - ACC19 / ACC21\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "管理控制系統"
@@ -1366,6 +1373,7 @@
             "Course Code": "ACCT4011",
             "Course Title": "International Taxation",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - ACC19 / ACC21\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "國際稅收"
@@ -1446,6 +1454,7 @@
             "Course Code": "ISOM3002",
             "Course Title": "Analysis and Design of Information Systems",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BIA19-SECOND YEAR / BIA19-THIRD YEAR / BIA19-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "資訊系統分析與設計"
@@ -1536,6 +1545,7 @@
             "Course Code": "ISOM3037",
             "Course Title": "Internet of Things and Cloud Computing with Business Applications",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BIA19\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "物聯網和雲端運算與商業應用"
@@ -1656,6 +1666,7 @@
             "Course Code": "IRTM3007",
             "Course Title": "Technology and Innovation in the Resort and Gaming Industries",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - IIM19\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "度假村和博彩業的技術與創新"
@@ -1677,6 +1688,7 @@
             "Course Code": "IRTM3012",
             "Course Title": "Gaming Law",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - IIM19\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "博彩法"
@@ -1687,6 +1699,7 @@
             "Course Code": "IRTM3015",
             "Course Title": "Revenue Management",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - IIM19\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "收益管理"
@@ -1697,6 +1710,7 @@
             "Course Code": "IRTM3018",
             "Course Title": "Casino Mathematics",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - IIM19\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "賭場數學"
@@ -1747,6 +1761,7 @@
             "Course Code": "BECO1000",
             "Course Title": "Principles of Microeconomics",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BAM19 / BAM22 / BIM19 / FNM19\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "微觀經濟學原理"
@@ -1757,6 +1772,7 @@
             "Course Code": "BECO1001",
             "Course Title": "Principles of Macroeconomics",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BAM22\n - FBA\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "宏觀經濟學原理"
@@ -1767,7 +1783,8 @@
             "Course Code": "BECO3001",
             "Course Title": "Public Economics and Finance",
             "Credit Units": 3,
-            "Course For Info": "Course for :\n - FBA - BEC20 / BEC22-FOURTH YEAR / FOURTH YEAR\n",
+            "For Incoming Exchange Students": "Y",
+            "Course For Info": "Course for :\n - FBA - BEC20 / BEC22-FOURTH YEAR / THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "公共經濟與財政"
         },
@@ -1807,6 +1824,7 @@
             "Course Code": "BECO3011",
             "Course Title": "Financial Econometrics",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNC17 / FNC20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "金融計量經濟學"
@@ -1827,6 +1845,7 @@
             "Course Code": "BECO4004",
             "Course Title": "Applied Econometrics",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BEC17 / BEC20 / BEC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "應用計量經濟學"
@@ -1837,6 +1856,7 @@
             "Course Code": "BECO4005",
             "Course Title": "Applied Economics for Leisure Industries",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - THIRD YEAR / FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "休閒產業應用經濟學"
@@ -1847,6 +1867,7 @@
             "Course Code": "BECO4006",
             "Course Title": "The Economics of Development",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BEC17 / BEC20 / BEC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "發展經濟學"
@@ -1857,6 +1878,7 @@
             "Course Code": "BECO4018",
             "Course Title": "Economic Analysis of Investment Projects",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - BEC17 / BEC20 / BEC22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "投資項目經濟分析"
@@ -1878,6 +1900,7 @@
             "Course Code": "FINC2001",
             "Course Title": "Advanced Financial Management",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - ACC21-SECOND YEAR / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC20 / FIC22\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "高階財務管理"
@@ -1898,6 +1921,7 @@
             "Course Code": "FINC3001",
             "Course Title": "Financial Statement Analysis and Valuation",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC17 / FNC20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "財務報表分析與估值"
@@ -1908,6 +1932,7 @@
             "Course Code": "FINC3002",
             "Course Title": "Theory of Finance",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FIC20 / FIC22 / FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "金融理論"
@@ -1918,6 +1943,7 @@
             "Course Code": "FINC3003",
             "Course Title": "Financial Markets and Institutions",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - ACC21-SECOND YEAR / ACC21-THIRD YEAR / ACC21-FOURTH YEAR / FIC22-FOURTH YEAR / FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "金融市場與機構"
@@ -1928,6 +1954,7 @@
             "Course Code": "FINC3004",
             "Course Title": "Portfolio Management",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC17 / FNC20\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "投資組合管理"
@@ -1938,6 +1965,7 @@
             "Course Code": "FINC4004",
             "Course Title": "Mergers and Acquisitions",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC17 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR / GBS20-FOURTH YEAR / GBS22-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "併購"
@@ -1948,6 +1976,7 @@
             "Course Code": "FINC4005",
             "Course Title": "Fixed Income Securities",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC17 / FNC20-FNE20 / FNC20-THIRD YEAR / FNC20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "固定收益證券"
@@ -1958,6 +1987,7 @@
             "Course Code": "FINC4009",
             "Course Title": "Financial Modeling",
             "Credit Units": 3,
+            "For Incoming Exchange Students": "Y",
             "Course For Info": "Course for :\n - FBA - FNM19\n - FBA - FNC17 / FNC20-FOURTH YEAR\n",
             "Enrolled Year Level (on or above)": 1,
             "Course Title Chi": "財務建模"
@@ -2733,6 +2763,15 @@
             "Enrolled Year Level (on or above)": 4,
             "Remarks": "Evening Course",
             "Course Title Chi": "論語孟子"
+        },
+        {
+            "Offering Unit": "FED",
+            "Course Code": "GELH2004",
+            "Course Title": "Visual and Performing Arts - Music",
+            "Credit Units": 3,
+            "Course Type": "GE Course",
+            "Enrolled Year Level (on or above)": 1,
+            "Course Title Chi": "視覺和表演藝術 - 音樂"
         },
         {
             "Offering Unit": "FHS",
@@ -6284,7 +6323,7 @@
             "Course Title Chi": "微電子晶片技術在日常生活中的作用"
         }
     ],
-    "updateTime": "2025-10-28",
+    "updateTime": "2025-10-30",
     "academicYear": "25/26",
     "sem": "2",
     "remark": "用於Pre Enrollment期間的數據",
