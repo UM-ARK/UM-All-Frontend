@@ -734,7 +734,7 @@ const HomeScreen = ({ navigation }) => {
     ], [t]);
     const renderBottomSheet = () => {
         return (
-            <BottomSheetScrollView contentContainerStyle={{ paddingBottom: verticalScale(30) }}>
+            <BottomSheetScrollView>
                 <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(10), }}>
                     <HyperlinkText linkStyle={{ color: themeColor }} navigation={navigation}>
                         <Text style={{
@@ -769,7 +769,7 @@ const HomeScreen = ({ navigation }) => {
                         </Text>
                     </HyperlinkText>
 
-                    <FlatList
+                    <BottomSheetFlatList
                         data={paymentArr}
                         renderItem={({ item, index }) => {
                             return <View style={{
@@ -791,6 +791,8 @@ const HomeScreen = ({ navigation }) => {
                                 />
                             </View>
                         }}
+                        ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
+                        scrollEnabled={false}
                     />
                 </View>
             </BottomSheetScrollView>

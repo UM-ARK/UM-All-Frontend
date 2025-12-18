@@ -12,8 +12,8 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     const { white, black, } = theme;
     const styles = StyleSheet.create({
         contentContainer: {
-            flex: 1,
             backgroundColor: white,
+            height: '100%',
         },
     });
 
