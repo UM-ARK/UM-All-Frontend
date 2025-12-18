@@ -734,7 +734,7 @@ const HomeScreen = ({ navigation }) => {
     ], [t]);
     const renderBottomSheet = () => {
         return (
-            <BottomSheetScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <BottomSheetScrollView contentContainerStyle={{ paddingBottom: verticalScale(30) }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(10), }}>
                     <HyperlinkText linkStyle={{ color: themeColor }} navigation={navigation}>
                         <Text style={{
