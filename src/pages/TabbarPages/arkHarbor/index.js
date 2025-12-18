@@ -278,6 +278,27 @@ const ARKHarbor = (props) => {
 
             {/* Browser/Webview/回主頁 導航按鈕 */}
             <View style={[s.navContainer,]}>
+                {/* 主頁按鈕 */}
+                <TouchableOpacity
+                    style={s.button}
+                    onPress={() => {
+                        trigger();
+                        // 跳轉到Harbor主頁
+                        setCurrentURL(ARK_HARBOR);
+                        // 让WebView跳转到Harbor主页
+                        if (webviewRef.current) {
+                            webviewRef.current.stopLoading?.();
+                            webviewRef.current.injectJavaScript?.(`window.location.href = '${ARK_HARBOR}'; true;`);
+                        }
+                    }}
+                    disabled={openSetting}
+                >
+                    <MaterialDesignIcons
+                        name={'home-circle'}
+                        size={iconSize}
+                        color={black.main}
+                    />
+                </TouchableOpacity>
                 {/* 刷新按鈕 */}
                 <TouchableOpacity
                     style={s.button}
@@ -347,7 +368,7 @@ const ARKHarbor = (props) => {
                     }}
                 >
                     <MaterialDesignIcons
-                        name={'open-in-app'}
+                        name={'web'}
                         size={iconSize}
                         color={black.main}
                     />
