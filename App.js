@@ -23,6 +23,30 @@ import { t } from 'i18next';
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
 
+// Workers API 分時請求
+const LAST_CHECK_KEY = 'last_version_check_timestamp';
+const CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 小時
+// 檢查時間間隔，是否需要檢查Version
+const performCheck = async () => {
+    try {
+        const lastCheckTimestamp = await AsyncStorage.getItem(LAST_CHECK_KEY);
+        const now = Date.now();
+
+        if (lastCheckTimestamp && (now - parseInt(lastCheckTimestamp, 10)) < CHECK_INTERVAL) {
+            // console.log('仍在 6 小時冷卻時間內，跳過版本檢查。');
+            return;
+        }
+
+        // 執行檢查並更新時間戳
+        // console.log('檢查雲端課程數據');
+        await checkCloudCourseVersion();
+        await AsyncStorage.setItem(LAST_CHECK_KEY, now.toString());
+
+    } catch (error) {
+        console.error('版本檢查失敗:', error);
+    }
+};
+
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [languageOK, setLanguageOK] = useState(false);
@@ -64,8 +88,8 @@ const App = () => {
                     saveCourseDataToStorage('pre', 'source');
                 }
 
-                // TODO: 6小時檢查一次
-                await checkCloudCourseVersion();
+                // 在時間差內檢查雲端數據更新
+                performCheck();
             } catch (e) {
                 Alert.alert('', `App initialization error!\nPlease contact developer.`, null, { cancelable: true })
             }

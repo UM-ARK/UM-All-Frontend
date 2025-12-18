@@ -16,7 +16,6 @@ import Toast from 'react-native-simple-toast';
  */
 export async function checkCloudCourseVersion() {
     try {
-        console.log('檢查雲端版本');
         const res = await axios.get(`${COURSE_API_CF_WORKERS}/version`);
         if (res.status === 200) {
             const { data } = res;
