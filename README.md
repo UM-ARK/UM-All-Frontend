@@ -1,4 +1,14 @@
 ## **🎉ARK ALL 是一個免費的開源 APP🎉**
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/UM-ARK/UM-All-Frontend?style=for-the-badge&label=Github%20Release)](https://github.com/UM-ARK/UM-All-Frontend/releases/latest)
+
+<div align="center">
+<a href="https://apps.apple.com/app/id1636670554" style="display:inline-block;">
+  <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" width="250" height="83" alt="Download on the App Store"/>
+</a>
+<a href="https://play.google.com/store/apps/details?id=one.umall" style="display:inline-block;">
+  <img src="https://raw.githubusercontent.com/pioug/google-play-badges/refs/heads/main/svg/English.svg" width="250" height="83" alt="Get it on Google Play"/>
+</a>
+</div>
 
 -   感興趣的話可以來 Wiki 看看更多[關於 ARK 的故事](https://wiki.umall.one/wiki/ARK_ALL)~
 -   如果 ARK ALL 有幫助到您，可以請我們[喝杯咖啡](https://github.com/UM-ARK/Donate)！
@@ -22,6 +32,7 @@
   - [⛵ 啟動流程](#-啟動流程)
     - [🤖 Android 運行](#-android-運行)
     - [🍎 iOS 運行](#-ios-運行)
+    - [配置Firebase](#配置firebase)
   - [🐛 如何 Debug?](#-如何-debug)
     - [Google Firebase Analytics](#google-firebase-analytics)
 - [📦 打包方式](#-打包方式)
@@ -97,6 +108,13 @@ git clone https://github.com/UM-ARK/UM-All-Frontend.git
 npm i --legacy-peer-deps
 ```
 
+3. 需要在項目根目錄放`umAPIToken.json`文件，內容格式為：
+```
+{
+    "token":"YOURE_UM_API_TOKEN"
+}
+```
+
 #### 🤖 Android 運行
 
 1. 在 Android 上運行 App
@@ -131,6 +149,9 @@ yarn ios
 or
 yarn ios --simulator="iPhone 15"
 ```
+
+#### 配置Firebase
+從Firebase控制台導出配置文件放入`android/app/google-services.json`和`ios/GoogleService-Info.plist`。
 
 ---
 
