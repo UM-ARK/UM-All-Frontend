@@ -8,7 +8,7 @@ import Loading from '../../../../components/Loading';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from "../../../../utils/pathMap";
 import { openLink } from "../../../../utils/browser";
 import { logToFirebase } from "../../../../utils/firebaseAnalytics";
-import { getLocalStorage } from "../../../../utils/storageKits";
+import { getCourseData } from "../../../../utils/checkCoursesKits";
 import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
@@ -51,9 +51,9 @@ const LocalCourse = (props) => {
     useEffect(() => {
         const init = async () => {
             try {
-                const storageCoursePlanList = await getLocalStorage('course_plan_time');
-                if (storageCoursePlanList) {
-                    setSCoursePlanTime(storageCoursePlanList);
+                const storageCoursePlanList = await getCourseData('adddrop');
+                if (storageCoursePlanList && storageCoursePlanList.timetable) {
+                    setSCoursePlanTime(storageCoursePlanList.timetable);
                 }
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
