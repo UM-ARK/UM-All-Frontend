@@ -2,13 +2,11 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
     View,
     Text,
-    // ScrollView,
     TouchableOpacity,
     Alert,
     StyleSheet,
     TextInput,
     Keyboard,
-    FlatList,
     Platform,
 } from 'react-native';
 
@@ -25,17 +23,14 @@ import Toast from 'react-native-simple-toast';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from "react-native-safe-area-context";
 import { t } from "i18next";
 import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import {
-    ScrollView,
-    // TouchableOpacity,
-} from "react-native-gesture-handler";
+import { ScrollView, } from "react-native-gesture-handler";
 import uniq from 'lodash/uniq';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect, } from '@react-navigation/native';
 
-import { getLocalStorage } from '../../../utils/storageKits';
+import { setLocalStorage } from '../../../utils/storageKits';
 import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
@@ -44,7 +39,7 @@ import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "..
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from './BottomSheet';
-import { setLocalStorage } from '../../../utils/storageKits';
+import { getCourseData } from '../../../utils/checkCoursesKits';
 
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
@@ -53,8 +48,6 @@ const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
-
-// TODO: 選課頁更新數據，現在不會重載APP，別的頁面聚焦到這個頁面時，待添加重新讀取緩存數據
 
 function parseImportData(inputText) {
     let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
@@ -228,13 +221,10 @@ function CourseSim({ route, navigation }) {
      * 存入state的s_coursePlanFile, s_coursePlanTimeFile中
      */
     async function readLocalCourseData() {
-        // TODO: 少了判斷time version的邏輯，可能會導致課程時間不對
         // TODO: 考慮在頁面聚焦時讀取緩存數據，這樣可以在頁面聚焦時更新課程數據
-        const storageCoursePlan = await getLocalStorage('course_plan');
-        if (storageCoursePlan) setSCoursePlanFile(storageCoursePlan);
-
-        const storageCoursePlanList = await getLocalStorage('course_plan_time');
-        if (storageCoursePlanList) setSCoursePlanTimeFile(storageCoursePlanList);
+        const addDropStorageData = await getCourseData('adddrop');
+        setSCoursePlanFile(addDropStorageData.adddrop);
+        setSCoursePlanTimeFile(addDropStorageData.timetable);
     }
 
     /**

@@ -214,10 +214,8 @@ const What2Reg = (props) => {
 
             // Add Drop課程，唯一的course code數據
             const addDropStorageData = await getCourseData('adddrop');
-            const storageCoursePlan = addDropStorageData.adddrop;
-            const storageCoursePlanTime = addDropStorageData.timetable;
-            setS_coursePlan(storageCoursePlan);
-            setS_coursePlanTime(storageCoursePlanTime);
+            setS_coursePlan(addDropStorageData.adddrop);
+            setS_coursePlanTime(addDropStorageData.timetable);
 
             // 課程版本
             const localCourseVersion = await getCourseData('version');
