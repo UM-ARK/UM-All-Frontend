@@ -1019,7 +1019,7 @@ const What2Reg = (props) => {
 
             <ActionSheet
                 ref={actionSheetRef}
-                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_courseVersion.adddrop.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_courseVersion.pre.updateTime}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
+                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_courseVersion.adddrop.updateTime}\n${s_courseVersion.adddrop.academicYear} - Sem ${s_courseVersion.adddrop.sem}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_courseVersion.pre.updateTime}\n${s_courseVersion.pre.academicYear} - Sem ${s_courseVersion.pre.sem}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
                 options={actionSheetOptions}
                 cancelButtonIndex={1}
                 statusBarTranslucent={true}
