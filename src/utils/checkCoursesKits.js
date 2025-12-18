@@ -1,39 +1,137 @@
 import moment from 'moment';
+import axios from "axios";
+import { Alert } from 'react-native';
+
 import { getLocalStorage, setLocalStorage, logAllStorage } from './storageKits';
+import { COURSE_API_CF_WORKERS } from "./pathMap";
 import offerCourses from '../static/UMCourses/offerCourses';
 import coursePlan from '../static/UMCourses/coursePlan';
 import coursePlanTime from '../static/UMCourses/coursePlanTime';
+import sourceCourseVersion from '../static/UMCourses/courseVersion';
 
 
-// TODO: 只有App.js調用該函數
-// 檢查本地課程版本，若有更新則覆蓋本地緩存
-// APP包更新時，會覆蓋本地緩存
-// 其餘更新從服務器獲取，選課頁手動更新
-export async function checkLocalCourseVersion() {
-    const storageOfferCourses = await getLocalStorage('offer_courses');
-    if (storageOfferCourses) {
-        if (moment(storageOfferCourses.updateTime).isBefore(moment(offerCourses.updateTime))) {
-            // 新APP需覆蓋舊版APP的本地緩存
-            const saveResult = await setLocalStorage('offer_courses', offerCourses);
-            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+/**
+ * 檢查Cloudflare Workers的version API
+ */
+export async function checkCloudCourseVersion() {
+    try {
+        console.log('檢查雲端版本');
+        const res = await axios.get(`${COURSE_API_CF_WORKERS}/version`);
+        if (res.status === 200) {
+            const { data } = res;
+            /* Example Data Return: 
+                {
+                    "pre": { "updateTime": "2025-10-21", "academicYear": "25/26", "sem": "1" },
+                    "adddrop": { "updateTime": "2025-10-21", "academicYear": "25/26", "sem": "1" }
+                }
+            */
+            await compareLocalCourseVersion(data);
         }
-    } else {
-        const saveResult = await setLocalStorage('offer_courses', offerCourses);
-        if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+    } catch (error) {
+        Alert.alert('', `Check course version error!\nPlease check your network!\nOr it's caused by the developer...`, null, { cancelable: true })
+    }
+}
+
+/**
+ * 對比本地課程版本，若有更新則覆蓋本地緩存
+ * 
+ * @param {Object} versionInfo -  Version API返回的雲端版本對象
+ */
+export async function compareLocalCourseVersion(versionInfo) {
+    let localCourseVersion = await getLocalStorage('course_version');
+    // 如果本地沒有緩存則用source替代
+    if (!localCourseVersion) { localCourseVersion = sourceCourseVersion; }
+
+    let needSave = false;
+    let newVersion = { ...localCourseVersion };
+
+    if (needUpdate(localCourseVersion.pre, versionInfo.pre)) {
+        needSave = true;
+        newVersion.pre = versionInfo.pre;
+        const courseData = await requestCourseData('pre');
+        await saveCourseDataToStorage('pre', courseData);
+    }
+    if (needUpdate(localCourseVersion.adddrop, versionInfo.adddrop)) {
+        needSave = true;
+        newVersion.adddrop = versionInfo.adddrop;
+        const courseData = await requestCourseData('adddrop');
+        await saveCourseDataToStorage('adddrop', courseData);
     }
 
-    const storageCoursePlan = await getLocalStorage('course_plan');
-    if (storageCoursePlan) {
-        if (moment(storageCoursePlan.updateTime).isBefore(moment(coursePlan.updateTime))) {
-            // 新APP需覆蓋舊版APP的本地緩存
-            // console.log('修改本地緩存日期為', coursePlan.updateTime);
-            let saveResult = await setLocalStorage('course_plan', coursePlan);
-            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-            saveResult = await setLocalStorage('course_plan_time', coursePlanTime);
+    if (needSave) {
+        const saveResult = await setLocalStorage('course_version', newVersion);
+        if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+    }
+}
+
+/**
+ * 比較target Object的updateTime是否比origin更新
+ * 
+ * @param {Object} origin - 現有課表版本對象，需有updateTime屬性
+ * @param {Object} target - 待判斷的新課表版本對象，需有updateTime屬性
+ * @returns 
+ */
+export function needUpdate(origin, target) {
+    try {
+        return moment(origin.updateTime).isBefore(moment(target.updateTime));
+    } catch (error) {
+        Alert.alert('', `needUpdate Function Error`, null, { cancelable: true })
+    }
+}
+
+/**
+ * 根據類型從 Cloudflare Workers 請求課程數據並返回
+ * 
+ * - 當 type 為 'pre' 時，僅請求一次 /pre 接口並保存課程數據。
+ * - 當 type 為 'adddrop' 時，分別請求 /adddrop 和 /timetable 兩個接口，並將結果組合後保存。
+ * 
+ * @param {('pre'|'adddrop')} type - 請求的課程數據類型。
+ * @returns {Object} - 需要返回的課程數據
+ */
+async function requestCourseData(type) {
+    try {
+        console.log('請求', type, '的CF數據');
+        // type是pre只請求一次，是adddrop要請求兩次
+        if (type === 'pre') {
+            const res = await axios.get(COURSE_API_CF_WORKERS + '/pre');
+            if (res.status === 200 && res.data) { return res.data; }
+        } else if (type === 'adddrop') {
+            const adddropRes = await axios.get(COURSE_API_CF_WORKERS + '/adddrop');
+            const timetableRes = await axios.get(COURSE_API_CF_WORKERS + '/timetable');
+            if (adddropRes.status === 200 && timetableRes.status === 200 && adddropRes.data && timetableRes.data) {
+                return { adddrop: adddropRes.data, timetable: timetableRes.data };
+            }
+        }
+    } catch (error) {
+        Alert.alert('', `Request course data error!\nPlease check your network!\nOr it's caused by the developer...`, null, { cancelable: true })
+        return null;
+    }
+}
+
+/**
+ * 保存課程數據到本地儲存
+ * 
+ * @param {('pre'|'adddrop')} type - 覆蓋 預選 或 adddrop數據 到緩存。
+ * @param {('source'|Object)} courseData - 課程數據。'source' 表示用源文件覆蓋本地緩存；
+ *   當 type 為 'pre' 時，courseData 應為課程對象；
+ *   當 type 為 'adddrop' 時，courseData 應為 { adddrop: Object, timetable: Object } 結構。
+ * @param {Object} [courseData.adddrop] - 僅當 type 為 'adddrop' 時，adddrop 課程對象。
+ * @param {Object} [courseData.timetable] - 僅當 type 為 'adddrop' 時，課表對象。
+ */
+export async function saveCourseDataToStorage(type, courseData) {
+    try {
+        if (type === 'pre') {
+            const saveResult = await setLocalStorage('offer_courses', courseData === 'source' ? offerCourses : courseData);
             if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
         }
-    } else {
-        const saveResult = await setLocalStorage('course_plan', coursePlan);
-        if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+        if (type === 'adddrop') {
+            // 新APP需覆蓋舊版APP的本地緩存
+            let saveResult = await setLocalStorage('course_plan', courseData === 'source' ? coursePlan : courseData.adddrop);
+            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+            saveResult = await setLocalStorage('course_plan_time', courseData === 'source' ? coursePlanTime : courseData.timetable);
+            if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+        }
+    } catch (error) {
+        Alert.alert('', `Saving course data error...\nPlease contact developer.`, null, { cancelable: true })
     }
 }

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, Dimensions, Alert, Linking, Appearance, AppState, useColorScheme } from 'react-native';
+import { Image, Dimensions, Alert, Appearance, AppState, useColorScheme } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import { uiStyle } from './src/utils/uiMap';
-import { BASE_HOST } from './src/utils/pathMap';
-import { setLanguage, setLocalStorage } from './src/i18n/i18n';
-import { checkLocalCourseVersion } from './src/utils/checkCoursesKits';
+import { setLanguage, setLocalStorage as setI18nLocalStorage } from './src/i18n/i18n';
+import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
+import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
 import { ThemeProvider, themes } from "./src/components/ThemeContext";
+import sourceCourseVersion from './src/static/UMCourses/courseVersion';
 
 import { Provider } from 'mobx-react';
 import AnimatedSplash from 'react-native-animated-splash-screen';
@@ -44,33 +45,33 @@ const App = () => {
             try {
                 const strUserInfo = await AsyncStorage.getItem('userInfo');
                 const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
-                if (userInfo.stdData || userInfo.clubData) {
-                    RootStore.setUserInfo(userInfo);
-                }
+                if (userInfo.stdData || userInfo.clubData) { RootStore.setUserInfo(userInfo); }
+
                 await checkLanguage();
-                checkLocalCourseVersion();
+
+                let localCourseVersion = await getLocalStorage('course_version');
+                // 首次啟動，優先用本地打包的 sourceCourseVersion
+                if (!localCourseVersion) {
+                    const saveResult = await setLocalStorage('course_version', sourceCourseVersion);
+                    if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+                    localCourseVersion = sourceCourseVersion;
+                }
+                // 新APP將先覆蓋舊版APP的本地緩存
+                if (needUpdate(localCourseVersion.adddrop, sourceCourseVersion.adddrop)) {
+                    saveCourseDataToStorage('adddrop', 'source');
+                }
+                if (needUpdate(localCourseVersion.pre, sourceCourseVersion.pre)) {
+                    saveCourseDataToStorage('pre', 'source');
+                }
+
+                // TODO: 6小時檢查一次
+                await checkCloudCourseVersion();
             } catch (e) {
-                console.error('App error', e);
+                Alert.alert('', `App initialization error!\nPlease contact developer.`, null, { cancelable: true })
             }
         };
 
         init();
-
-        // Appearance 監聽器
-        // const appearanceListener = Appearance.addChangeListener(({ colorScheme }) => {
-        //     setScheme(colorScheme);
-        //     schemeChange(colorScheme);
-        // });
-
-        // AppState 監聽器，後台返回ARK時觸發
-        // const appStateListener = AppState.addEventListener('change', (nextAppState) => {
-        //     schemeChange(scheme);
-        // });
-
-        return () => {
-            // appearanceListener.remove();
-            // appStateListener.remove();
-        };
     }, [scheme]);
 
     // 自定義Toast外觀
@@ -155,7 +156,7 @@ const App = () => {
                         {
                             text: '繁體中文',
                             onPress: () => {
-                                setLocalStorage('tc');
+                                setI18nLocalStorage('tc');
                                 setLanguageOK(true);
                             },
                         },
