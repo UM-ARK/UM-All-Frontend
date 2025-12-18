@@ -128,20 +128,6 @@ const HomeScreen = ({ navigation }) => {
                 openLink(UM_Moodle);
             },
         },
-        // {
-        //     icon_name: require('../../../../static/img/logo.png'),
-        //     icon_type: iconTypes.img,
-        //     function_name: t('ARK', { ns: 'home' }),
-        //     func: () => {
-        //         trigger();
-        //         // onRefresh();
-        //         // getAppData();
-        //         // 刷新重新請求活動頁數據
-        //         // eventPage.current.onRefresh();
-        //         // openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
-        //         openLink({ URL: BASE_HOST, mode: 'fullScreen' });
-        //     },
-        // },
         {
             icon_name: require('../../../../static/img/logo.png'),
             icon_type: iconTypes.view,
