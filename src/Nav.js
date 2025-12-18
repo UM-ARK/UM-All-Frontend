@@ -8,13 +8,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
 
-import ClubSetting from './pages/ClubSystem/CLubSetting';
-import ClubInfoEdit from './pages/ClubSystem/ClubInfoEdit';
-import EventSetting from './pages/ClubSystem/EventSetting';
-
-import ClubLogin from './pages/ClubSystem/login/ClubLogin';
-import LoginIndex from './pages/ClubSystem/login/index';
-
 import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
 import EventDetail from './pages/TabbarPages/info/club/EventDetail';
 import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
@@ -91,15 +84,6 @@ const Nav = () => {
                 {/* 普通左右壓動畫組 */}
                 <Stack.Group>
                     <Stack.Screen name="Webviewer" component={Webviewer} />
-
-                    {/* 我的頁 */}
-                    <Stack.Screen name="LoginIndex" component={LoginIndex} />
-                    <Stack.Screen name="ClubLogin" component={ClubLogin} />
-
-                    {/* 社團系統 */}
-                    <Stack.Screen name="ClubSetting" component={ClubSetting} />
-                    <Stack.Screen name="ClubInfoEdit" component={ClubInfoEdit} />
-                    <Stack.Screen name="EventSetting" component={EventSetting} />
                 </Stack.Group>
 
                 {/* 測試頁 */}
