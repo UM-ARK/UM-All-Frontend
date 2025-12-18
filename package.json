@@ -7,7 +7,7 @@
     "ios": "react-native run-ios --simulator=\"iPhone 16 Pro (18.6)\"",
     "iosNew": "react-native run-ios --simulator=\"iPhone 17 Pro (26.2)\"",
     "iosTrue": "react-native run-ios --device",
-    "iosBig": "react-native run-ios --simulator=\"iPad Pro 13-inch (M4)\"",
+    "iosBig": "react-native run-ios --simulator=\"iPad Pro 13-inch (M5)\"",
     "lint": "eslint .",
     "start": "react-native start --reset-cache",
     "test": "jest",

@@ -28,12 +28,13 @@ import uniq from 'lodash/uniq';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect, } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 import { setLocalStorage } from '../../../utils/storageKits';
 import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
+import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
@@ -120,8 +121,10 @@ function CourseSim({ route, navigation }) {
     // 這兩個是緩存的該學期所有課程
     const [s_coursePlanFile, setSCoursePlanFile] = useState(coursePlanFile);
     const [s_coursePlanTimeFile, setSCoursePlanTimeFile] = useState(coursePlanTimeFile);
+    const [s_courseVersion, setS_courseVersion] = useState(sourceCourseVersion);
 
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
+    const isFocused = useIsFocused();
 
     // ref
     const verScroll = useRef();
@@ -167,10 +170,9 @@ function CourseSim({ route, navigation }) {
 
     const { i18n } = useTranslation();
 
-    // componentDidMount
     useEffect(() => {
         logToFirebase('openPage', { page: 'courseSim' });
-        readLocalCourseData();
+        refresh();
 
         // 自己選的課
         AsyncStorage.getItem('ARK_Timetable_Storage').then(strCourseCodeList => {
@@ -216,15 +218,19 @@ function CourseSim({ route, navigation }) {
         }, [route, navigation])
     );
 
-    /**
-     * 讀取本地緩存的課表數據。
-     * 存入state的s_coursePlanFile, s_coursePlanTimeFile中
-     */
-    async function readLocalCourseData() {
-        // TODO: 考慮在頁面聚焦時讀取緩存數據，這樣可以在頁面聚焦時更新課程數據
-        const addDropStorageData = await getCourseData('adddrop');
-        setSCoursePlanFile(addDropStorageData.adddrop);
-        setSCoursePlanTimeFile(addDropStorageData.timetable);
+    // 在頁面聚焦時讀取緩存數據，用於同步課程數據
+    useEffect(() => {
+        if (isFocused) { refresh() }
+    }, [isFocused]);
+
+    async function refresh() {
+        getCourseData('adddrop').then(addDropStorageData => {
+            setSCoursePlanFile(addDropStorageData.adddrop);
+            setSCoursePlanTimeFile(addDropStorageData.timetable);
+        })
+
+        // 課程版本
+        getCourseData('version').then(localCourseVersion => { setS_courseVersion(localCourseVersion) });
     }
 
     /**
@@ -1337,8 +1343,10 @@ E11-0000
                         ...uiStyle.defaultText,
                         fontSize: scale(9),
                         color: black.third,
+                        textAlign: 'center',
                     }}>
-                        Timetable Version: {s_coursePlanFile?.updateTime}
+                        Timetable Version: {s_courseVersion.adddrop.updateTime + '\n'}
+                        {t('重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新', { ns: 'timetable' })}
                     </Text>
                 )}
 

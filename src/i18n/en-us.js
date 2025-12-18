@@ -181,6 +181,8 @@ export default {
         "下節課：": "Next Class:",
         "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
         "僅作模擬!": "Only Simulation!",
+
+        "重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新": "Restart the APP or manually update the version on the course page, depending on whether the developer uploads the update.",
     },
     features: {
         "服務一覽": "All Services",
