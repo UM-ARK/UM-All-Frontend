@@ -52,9 +52,7 @@ const LocalCourse = (props) => {
         const init = async () => {
             try {
                 const storageCoursePlanList = await getCourseData('adddrop');
-                if (storageCoursePlanList && storageCoursePlanList.timetable) {
-                    setSCoursePlanTime(storageCoursePlanList.timetable);
-                }
+                setSCoursePlanTime(storageCoursePlanList.timetable);
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
             } finally {

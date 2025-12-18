@@ -8,6 +8,7 @@ import offerCourses from '../static/UMCourses/offerCourses';
 import coursePlan from '../static/UMCourses/coursePlan';
 import coursePlanTime from '../static/UMCourses/coursePlanTime';
 import sourceCourseVersion from '../static/UMCourses/courseVersion';
+import Toast from 'react-native-simple-toast';
 
 
 /**
@@ -61,6 +62,7 @@ export async function compareLocalCourseVersion(versionInfo) {
     if (needSave) {
         const saveResult = await setLocalStorage('course_version', newVersion);
         if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
+        Toast.show(`Course Data Updated.`);
     }
 }
 
@@ -143,10 +145,11 @@ export async function saveCourseDataToStorage(type, courseData) {
  * - 若本地有緩存則優先返回緩存數據；
  * - 若無緩存則返回本地源文件數據。
  * 
- * @param {'pre'|'adddrop'} type - 課程數據類型，'pre' 為預選，'adddrop' 為加退選+課表。
+ * @param {'pre'|'adddrop'|'version'} type - 課程數據類型，'pre' 為預選，'adddrop' 為加退選+課表。
  * @returns {Promise<Object>} 
  *   - 當 type 為 'pre' 時，返回預選課數據對象；
  *   - 當 type 為 'adddrop' 時，返回 { adddrop: Object, timetable: Object } 結構。
+ *   - 當 type 為 'version' 時，返回 { pre: Object, adddrop: Object } 結構。
  */
 export async function getCourseData(type) {
     try {
@@ -169,6 +172,13 @@ export async function getCourseData(type) {
                 // 有一個沒緩存則用本地源文件
                 return { adddrop: coursePlan, timetable: coursePlanTime };
             }
+        } else if (type === 'version') {
+            const localCourseVersion = await getLocalStorage('course_version');
+            if (localCourseVersion) {
+                return localCourseVersion;
+            } else {
+                return sourceCourseVersion;
+            }
         } else {
             throw new Error('Unknown type for getCourseData');
         }
@@ -179,6 +189,8 @@ export async function getCourseData(type) {
             return offerCourses;
         } else if (type === 'adddrop') {
             return { adddrop: coursePlan, timetable: coursePlanTime };
+        } else if (type === 'version') {
+            return sourceCourseVersion;
         }
     }
 }

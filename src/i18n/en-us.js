@@ -126,6 +126,7 @@ export default {
 
         "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
+        "手動檢查課表數據更新": "Check Course Data Update",
 
         "查": "Search",
         "選咩課": "What2Reg",

@@ -12,20 +12,20 @@ import {
     Alert,
 } from "react-native";
 
-import { UMEH_URI, UMEH_API, WHAT_2_REG, USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH, } from "../../../utils/pathMap";
+import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH, } from "../../../utils/pathMap";
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import offerCourses from '../../../static/UMCourses/offerCourses';
 import coursePlan from '../../../static/UMCourses/coursePlan';
 import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
-import Loading from '../../../components/Loading';
+import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
 import CourseCard from './component/CourseCard';
 import { openLink } from '../../../utils/browser';
-import { getLocalStorage, setLocalStorage, logAllStorage } from '../../../utils/storageKits';
+import { getLocalStorage, } from '../../../utils/storageKits';
+import { getCourseData, checkCloudCourseVersion } from '../../../utils/checkCoursesKits';
 import CustomBottomSheet from '../courseSim/BottomSheet';
 
-import axios from "axios";
 import { scale, verticalScale } from "react-native-size-matters";
 import { Header, Dialog } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -35,13 +35,12 @@ import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
-import Toast from 'react-native-simple-toast';
-import RNRestart from 'react-native-restart';
 import { t } from "i18next";
 import ActionSheet from '@alessiocancian/react-native-actionsheet';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
+import Toast from 'react-native-simple-toast';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -189,6 +188,7 @@ const What2Reg = (props) => {
     const [s_offerCourses, setS_offerCourses] = useState(offerCourses);
     const [s_coursePlan, setS_coursePlan] = useState(coursePlan);
     const [s_coursePlanTime, setS_coursePlanTime] = useState(coursePlanTime);
+    const [s_courseVersion, setS_courseVersion] = useState(sourceCourseVersion);
 
     const [dialogVisible, setDialogVisible] = useState(false);
     const [sheetIndex, setSheetIndex] = useState(-1);
@@ -200,147 +200,41 @@ const What2Reg = (props) => {
 
     const insets = useContext(SafeAreaInsetsContext);
 
-    // 3.0開始，優先使用本地緩存的offerCourses數據展示，後台對比雲端數據版本，提示更新
+    // 3.0開始，優先使用本地緩存的offerCourses數據展示
     useEffect(() => {
-        const init = async () => {
-            logToFirebase('openPage', { page: 'chooseCourses' });
-            // logAllStorage();
-            // await AsyncStorage.removeItem('course_file_check_date');
-
-            try {
-                // 可供預選課程
-                const storageOfferCourses = await getLocalStorage('offer_courses');
-                if (storageOfferCourses) {
-                    setS_offerCourses(storageOfferCourses);
-                } else {
-                    const saveResult = await setLocalStorage('offer_courses', offerCourses);
-                    if (saveResult !== 'ok') Alert.alert('Error', JSON.stringify(saveResult));
-                }
-
-                // Add Drop課程，唯一的course code數據
-                const storageCoursePlan = await getLocalStorage('course_plan');
-                if (storageCoursePlan) {
-                    setS_coursePlan(storageCoursePlan);
-                } else {
-                    const saveResult = await setLocalStorage('course_plan', coursePlan);
-                    if (saveResult !== 'ok') Alert.alert('Error', JSON.stringify(saveResult));
-                }
-
-                // Add Drop課程時間數據，同course code，多section
-                const storageCoursePlanTime = await getLocalStorage('course_plan_time');
-                if (storageCoursePlanTime) {
-                    setS_coursePlanTime(storageCoursePlanTime);
-                } else {
-                    const saveResult = await setLocalStorage('course_plan_time', coursePlanTime);
-                    if (saveResult !== 'ok') Alert.alert('Error', JSON.stringify(saveResult));
-                }
-
-                // 讀取課程類別選擇器的本地緩存
-                const strFilterOptions = await AsyncStorage.getItem('ARK_Courses_filterOptions');
-                const localFilterOptions = strFilterOptions ? JSON.parse(strFilterOptions) : undefined;
-
-                const nextFilterOptions = localFilterOptions ? localFilterOptions : defaultFilterOptions;
-                setCourse_mode(prev => {
-                    if (prev !== nextFilterOptions.mode) {
-                        return nextFilterOptions.mode;
-                    }
-                    return prev;
-                })
-                updateFilterOptions(nextFilterOptions);
-            } catch (e) {
-                Alert.alert('ARK Courses error, 請聯繫開發者！', e);
-            }
-        };
+        logToFirebase('openPage', { page: 'chooseCourses' });
         init();
     }, []);
 
-    // 更新Add Drop課表的數據
-    const updateLocalCourseData = async (type, callback) => {
-        const storageMap = {
-            coursePlan: 'course_plan',
-            coursePlanTime: 'course_plan_time',
-            offerCourses: 'offer_courses',
-        };
-        const fileNameMap = {
-            coursePlan: 'coursePlan',
-            coursePlanTime: 'coursePlanTime',
-            offerCourses: 'offerCourses',
-        };
-        const stateMap = {
-            coursePlan: setS_coursePlan,
-            coursePlanTime: setS_coursePlanTime,
-            offerCourses: setS_offerCourses,
-        };
-        // 儲存對應資料到localStorage中
-        const coverStorage = async (type, data) => {
-            try {
-                stateMap[type](data);
-                const saveResult = await setLocalStorage(storageMap[type], data);
-                if (saveResult !== 'ok') Alert.alert('Error', JSON.stringify(saveResult));
-            } catch (error) {
-                Alert.alert('', '儲存課表數據失敗', null, { cancelable: true });
-            }
-        };
-
+    const init = async () => {
         try {
-            const res = await axios.get(
-                `https://raw.githubusercontent.com/UM-ARK/UM-All-Frontend/master/src/static/UMCourses/${fileNameMap[type]}.json`
-            );
-            if (res.status === 200) {
-                const { data } = res;
-                let toastMes = '已拉取更新！';
+            // 預選課程數據
+            const storageOfferCourses = await getCourseData('pre');
+            setS_offerCourses(storageOfferCourses);
 
-                // type為coursePlan、offerCourses時檢查updateTime
-                if (type === 'coursePlan' || type === 'offerCourses') {
-                    const currentState =
-                        type === 'coursePlan' ? s_coursePlan : s_offerCourses;
-                    if (currentState.updateTime !== data.updateTime) {
-                        if (type === 'coursePlan') {
-                            await updateLocalCourseData('coursePlanTime', () => {
-                                Alert.alert(
-                                    t(`ARK搵課提示`, { ns: 'catalog' }),
-                                    t(`現在重啟APP以適配最新課表數據嗎？`, { ns: 'catalog' }),
-                                    [
-                                        {
-                                            text: 'Yes',
-                                            onPress: () => RNRestart.Restart(),
-                                        },
-                                        {
-                                            text: 'No',
-                                            style: 'cancel',
-                                        },
-                                    ]
-                                );
-                            });
-                        }
-                    } else {
-                        toastMes = t('已是最新課表數據！', { ns: 'catalog' });
-                    }
+            // Add Drop課程，唯一的course code數據
+            const addDropStorageData = await getCourseData('adddrop');
+            const storageCoursePlan = addDropStorageData.adddrop;
+            const storageCoursePlanTime = addDropStorageData.timetable;
+            setS_coursePlan(storageCoursePlan);
+            setS_coursePlanTime(storageCoursePlanTime);
+
+            // 課程版本
+            const localCourseVersion = await getCourseData('version');
+            setS_courseVersion(localCourseVersion);
+
+            // 讀取課程類別選擇器的本地緩存
+            const localFilterOptions = await getLocalStorage('ARK_Courses_filterOptions');
+            const nextFilterOptions = localFilterOptions ? localFilterOptions : defaultFilterOptions;
+            setCourse_mode(prev => {
+                if (prev !== nextFilterOptions.mode) {
+                    return nextFilterOptions.mode;
                 }
-
-                // 存入緩存
-                await coverStorage(type, data);
-
-                // 最後一個拉取的數據完成，觸發提示
-                Toast.show(toastMes);
-
-                if (callback && typeof callback === 'function') {
-                    callback();
-                }
-            }
-        } catch (error) {
-            Alert.alert(
-                '',
-                `自動連線至Github更新課程數據失敗，\n請檢查網絡再試！\n如果你正連接中國內地網絡，\n你可能需要一個梯子，\n請等待軟件更新數據或與作者反饋\nQAQ...`,
-                null,
-                { cancelable: true }
-            );
-        } finally {
-            // TODO: 每日更新任務的最後寫入更新日期到緩存
-            // const strToday = moment().format("YYYY-MM-DD");
-            // const saveResult = await setLocalStorage('course_file_check_date', strToday);
-            // if (saveResult != 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
-            updateFilterOptions(defaultFilterOptions);
+                return prev;
+            })
+            updateFilterOptions(nextFilterOptions);
+        } catch (e) {
+            Alert.alert('ARK Courses error, 請聯繫開發者！', e);
         }
     };
 
@@ -935,8 +829,7 @@ const What2Reg = (props) => {
 
     // ActionSheet options
     const actionSheetOptions = [
-        t("更新Pre Enroll數據", { ns: 'catalog' }),
-        t("更新Add Drop/Timetable數據", { ns: 'catalog' }),
+        t("手動檢查課表數據更新", { ns: 'catalog' }),
         'Cancel'
     ];
 
@@ -945,18 +838,10 @@ const What2Reg = (props) => {
         switch (index) {
             case 0:
                 setDialogVisible(true);
-                await updateLocalCourseData('offerCourses');
-                setDialogVisible(false);
-                break;
-            case 1:
-                try {
-                    setDialogVisible(true);
-                    await updateLocalCourseData('coursePlan');
-                } catch (error) {
-                    alert(JSON.stringify(error));
-                } finally {
-                    setDialogVisible(false);
-                }
+                await checkCloudCourseVersion();
+                init();
+                handleDialogClose();
+                Toast.show(`Request completed.`);
                 break;
             default:
                 break;
@@ -1136,9 +1021,9 @@ const What2Reg = (props) => {
 
             <ActionSheet
                 ref={actionSheetRef}
-                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_coursePlan.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_offerCourses.updateTime}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
+                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_courseVersion.adddrop.updateTime}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_courseVersion.pre.updateTime}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
                 options={actionSheetOptions}
-                cancelButtonIndex={2}
+                cancelButtonIndex={1}
                 statusBarTranslucent={true}
                 theme='ios'
                 onPress={handleActionSheet}
@@ -1250,7 +1135,7 @@ const What2Reg = (props) => {
                         {`${s_course_mode == 'ad' ? '開設' : '預選'}課程:`}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: black.third }}>
-                        數據日期版本: {s_course_mode == 'ad' ? s_coursePlan.updateTime : s_offerCourses.updateTime}
+                        數據日期版本: {s_course_mode == 'ad' ? s_courseVersion.adddrop.updateTime : s_courseVersion.pre.updateTime}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
                         記得更新APP或右上角手動更新以獲得最新數據~
