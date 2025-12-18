@@ -135,3 +135,50 @@ export async function saveCourseDataToStorage(type, courseData) {
         Alert.alert('', `Saving course data error...\nPlease contact developer.`, null, { cancelable: true })
     }
 }
+
+
+/**
+ * 根據 type 返回對應的課程數據（預選或加退選+課表）。
+ * 
+ * - 若本地有緩存則優先返回緩存數據；
+ * - 若無緩存則返回本地源文件數據。
+ * 
+ * @param {'pre'|'adddrop'} type - 課程數據類型，'pre' 為預選，'adddrop' 為加退選+課表。
+ * @returns {Promise<Object>} 
+ *   - 當 type 為 'pre' 時，返回預選課數據對象；
+ *   - 當 type 為 'adddrop' 時，返回 { adddrop: Object, timetable: Object } 結構。
+ */
+export async function getCourseData(type) {
+    try {
+        if (type === 'pre') {
+            // 先查本地緩存
+            const localData = await getLocalStorage('offer_courses');
+            if (localData) {
+                return localData;
+            } else {
+                // 無緩存則用本地源文件
+                return offerCourses;
+            }
+        } else if (type === 'adddrop') {
+            // 查兩個緩存
+            const adddropData = await getLocalStorage('course_plan');
+            const timetableData = await getLocalStorage('course_plan_time');
+            if (adddropData && timetableData) {
+                return { adddrop: adddropData, timetable: timetableData };
+            } else {
+                // 有一個沒緩存則用本地源文件
+                return { adddrop: coursePlan, timetable: coursePlanTime };
+            }
+        } else {
+            throw new Error('Unknown type for getCourseData');
+        }
+    } catch (error) {
+        Alert.alert('', `Get course data error...\nPlease contact developer.`, null, { cancelable: true });
+        // fallback
+        if (type === 'pre') {
+            return offerCourses;
+        } else if (type === 'adddrop') {
+            return { adddrop: coursePlan, timetable: coursePlanTime };
+        }
+    }
+}
