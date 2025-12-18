@@ -91,7 +91,7 @@ export function needUpdate(origin, target) {
  */
 async function requestCourseData(type) {
     try {
-        console.log('請求', type, '的CF數據');
+        // console.log('請求', type, '的CF數據');
         // type是pre只請求一次，是adddrop要請求兩次
         if (type === 'pre') {
             const res = await axios.get(COURSE_API_CF_WORKERS + '/pre');
