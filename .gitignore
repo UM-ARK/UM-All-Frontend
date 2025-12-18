@@ -86,7 +86,8 @@ ios/UMAllWhite.xcodeproj/project.pbxproj
 ios/UMAllWhite.xcodeproj/project.pbxproj
 
 # Google Firebase
-# google-services.json
+android/app/google-services.json
+ios/GoogleService-Info.plist
 
 # UM API Token
 umAPIToken.json

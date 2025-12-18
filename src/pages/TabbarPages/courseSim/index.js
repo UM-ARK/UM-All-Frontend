@@ -2,13 +2,11 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
     View,
     Text,
-    // ScrollView,
     TouchableOpacity,
     Alert,
     StyleSheet,
     TextInput,
     Keyboard,
-    FlatList,
     Platform,
 } from 'react-native';
 
@@ -25,26 +23,24 @@ import Toast from 'react-native-simple-toast';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from "react-native-safe-area-context";
 import { t } from "i18next";
 import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import {
-    ScrollView,
-    // TouchableOpacity,
-} from "react-native-gesture-handler";
+import { ScrollView, } from "react-native-gesture-handler";
 import uniq from 'lodash/uniq';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
-import { getLocalStorage } from '../../../utils/storageKits';
+import { setLocalStorage } from '../../../utils/storageKits';
 import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
+import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
 import { openLink } from "../../../utils/browser";
 import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from './BottomSheet';
-import { setLocalStorage } from '../../../utils/storageKits';
+import { getCourseData } from '../../../utils/checkCoursesKits';
 
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
@@ -53,8 +49,6 @@ const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
-
-// TODO: 選課頁更新數據，現在不會重載APP，別的頁面聚焦到這個頁面時，待添加重新讀取緩存數據
 
 function parseImportData(inputText) {
     let matchRes = inputText.match(/[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g);
@@ -127,8 +121,10 @@ function CourseSim({ route, navigation }) {
     // 這兩個是緩存的該學期所有課程
     const [s_coursePlanFile, setSCoursePlanFile] = useState(coursePlanFile);
     const [s_coursePlanTimeFile, setSCoursePlanTimeFile] = useState(coursePlanTimeFile);
+    const [s_courseVersion, setS_courseVersion] = useState(sourceCourseVersion);
 
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
+    const isFocused = useIsFocused();
 
     // ref
     const verScroll = useRef();
@@ -174,10 +170,9 @@ function CourseSim({ route, navigation }) {
 
     const { i18n } = useTranslation();
 
-    // componentDidMount
     useEffect(() => {
         logToFirebase('openPage', { page: 'courseSim' });
-        readLocalCourseData();
+        refresh();
 
         // 自己選的課
         AsyncStorage.getItem('ARK_Timetable_Storage').then(strCourseCodeList => {
@@ -223,18 +218,19 @@ function CourseSim({ route, navigation }) {
         }, [route, navigation])
     );
 
-    /**
-     * 讀取本地緩存的課表數據。
-     * 存入state的s_coursePlanFile, s_coursePlanTimeFile中
-     */
-    async function readLocalCourseData() {
-        // TODO: 少了判斷time version的邏輯，可能會導致課程時間不對
-        // TODO: 考慮在頁面聚焦時讀取緩存數據，這樣可以在頁面聚焦時更新課程數據
-        const storageCoursePlan = await getLocalStorage('course_plan');
-        if (storageCoursePlan) setSCoursePlanFile(storageCoursePlan);
+    // 在頁面聚焦時讀取緩存數據，用於同步課程數據
+    useEffect(() => {
+        if (isFocused) { refresh() }
+    }, [isFocused]);
 
-        const storageCoursePlanList = await getLocalStorage('course_plan_time');
-        if (storageCoursePlanList) setSCoursePlanTimeFile(storageCoursePlanList);
+    async function refresh() {
+        getCourseData('adddrop').then(addDropStorageData => {
+            setSCoursePlanFile(addDropStorageData.adddrop);
+            setSCoursePlanTimeFile(addDropStorageData.timetable);
+        })
+
+        // 課程版本
+        getCourseData('version').then(localCourseVersion => { setS_courseVersion(localCourseVersion) });
     }
 
     /**
@@ -1347,8 +1343,10 @@ E11-0000
                         ...uiStyle.defaultText,
                         fontSize: scale(9),
                         color: black.third,
+                        textAlign: 'center',
                     }}>
-                        Timetable Version: {s_coursePlanFile?.updateTime}
+                        Timetable Version: {s_courseVersion.adddrop.updateTime + '\n'}
+                        {t('重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新', { ns: 'timetable' })}
                     </Text>
                 )}
 

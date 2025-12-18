@@ -180,59 +180,38 @@ const EventPage = forwardRef((props, ref) => {
 
     const insertToList = (list, harborArr) => {
         let listCopy = lodash.cloneDeep(list);
-        const now = moment();
 
-        // 隨機決定是否要將 harbor 插到最頂部 (40% 機率)
+        // 随机决定是否将 harbor 插到最顶部 (40% 概率)
         const insertOnTop = Math.random() < 0.4;
-
         if (insertOnTop && harborArr.length > 0) {
-            // 隨機挑一個 harbor 插到頂部
             const randomIdx = Math.floor(Math.random() * harborArr.length);
             const [harborToTop] = harborArr.splice(randomIdx, 1);
-
-            listCopy.unshift(harborToTop);  // 只放一個到頂
+            listCopy.unshift(harborToTop); // 顶部插入一个
         }
 
-        // 找到所有未過期活動的插入點（只插入到後方）
-        const validIndexes = listCopy
-            .map((item, idx) => (item.enddatetime && now.isBefore(moment(item.enddatetime)) ? idx : -1))
-            .filter(idx => idx !== -1);
+        // 所有活动后面都可以插入 harbor，不管结束没结束
+        let insertPositions = Array.from({ length: listCopy.length + 1 }, (_, i) => i);
 
-        // 插入點只選擇在未過期活動之後
-        let insertPositions = Array.from(new Set(
-            validIndexes.map(idx => idx + 1)   // ✅ 只取 idx+1
-        )).filter(pos => pos >= 0 && pos <= listCopy.length);
-
-        // 隨機打亂插入點
+        // 随机打乱插入点
         for (let i = insertPositions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [insertPositions[i], insertPositions[j]] = [insertPositions[j], insertPositions[i]];
         }
 
-        // 插入 harborItem (只在後方)
         let used = 0;
         harborArr.forEach((harborItem, i) => {
             if (insertPositions.length > 0 && i < insertPositions.length) {
                 listCopy.splice(insertPositions[i], 0, harborItem);
-                // 插入後，所有後面的插入點都要 +1
+                // 插入后，所有后面的插入点都要 +1
                 insertPositions = insertPositions.map(pos => pos > insertPositions[i] ? pos + 1 : pos);
                 used++;
             }
         });
 
-        // 剩下的 harbor 插入到最後一個未過期活動後，或末尾
+        // 如果还有剩余 harbor，全部插到末尾
         if (harborArr.length > used) {
-            let lastValidIdx = -1;
-            for (let i = listCopy.length - 1; i >= 0; i--) {
-                if (listCopy[i].enddatetime && now.isBefore(moment(listCopy[i].enddatetime))) {
-                    lastValidIdx = i;
-                    break;
-                }
-            }
-            const insertIdx = lastValidIdx >= 0 ? lastValidIdx + 1 : listCopy.length;
-            listCopy.splice(insertIdx, 0, ...harborArr.slice(used));
+            listCopy.push(...harborArr.slice(used));
         }
-
 
         return listCopy;
     };

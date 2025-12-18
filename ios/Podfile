@@ -17,6 +17,9 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+# 修復iOS無法統計設型號問題
+$RNFirebaseAnalyticsEnab備leAdSupport = true
+
 target 'UMALL' do
   config = use_native_modules!
   # project './UMALL.xcodeproj'
@@ -29,7 +32,7 @@ target 'UMALL' do
   # 使用靜態框架，from Firebase/app安裝說明
   $RNFirebaseAsStaticFramework = true
   # 不需要廣告支持
-  $RNFirebaseAnalyticsWithoutAdIdSupport=true
+  # $RNFirebaseAnalyticsWithoutAdIdSupport=true
 
   # 嘗試使用bridge模式
   flags = get_default_flags()

@@ -82,8 +82,8 @@ android {
         applicationId "one.umall"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 70
-        versionName "4.1.0"
+        versionCode 71
+        versionName "4.2.0"
     }
     signingConfigs {
         debug {
@@ -129,8 +129,6 @@ dependencies {
     // implementation project(':@react-native-camera-roll_camera-roll')    // https://github.com/react-native-cameraroll/react-native-cameraroll
 
     // implementation project(':react-native-haptic-feedback')
-
-    implementation project(':react-native-compressor')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

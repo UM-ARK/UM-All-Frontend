@@ -126,6 +126,7 @@ export default {
 
         "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
+        "手動檢查課表數據更新": "Check Course Data Update",
 
         "查": "Search",
         "選咩課": "What2Reg",
@@ -180,6 +181,8 @@ export default {
         "下節課：": "Next Class:",
         "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
         "僅作模擬!": "Only Simulation!",
+
+        "重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新": "Restart the APP or manually update the version on the course page, depending on whether the developer uploads the update.",
     },
     features: {
         "服務一覽": "All Services",

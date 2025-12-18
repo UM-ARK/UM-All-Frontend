@@ -17,10 +17,7 @@ import {
     GITHUB_ACTIVITY,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
-import { getLocalStorage } from '../../../utils/storageKits';
 import packageInfo from '../../../../package.json';
-import coursePlanFile from "../../../static/UMCourses/coursePlan";
-import offerCourseFile from "../../../static/UMCourses/offerCourses";
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
@@ -57,25 +54,7 @@ const AboutPage = () => {
         },
     });
 
-    const [s_offerCourses, setSOfferCourses] = useState(offerCourseFile);
-    const [s_coursePlan, setSCoursePlan] = useState(coursePlanFile);
-
     const { i18n } = useTranslation();
-
-    useEffect(() => {
-        async function fetchStorage() {
-            const storageOfferCourses = await getLocalStorage('offer_courses');
-            if (storageOfferCourses) {
-                setSOfferCourses(storageOfferCourses);
-            }
-
-            const storageCoursePlan = await getLocalStorage('course_plan');
-            if (storageCoursePlan) {
-                setSCoursePlan(storageCoursePlan);
-            }
-        }
-        fetchStorage();
-    }, []);
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center' }}>
@@ -110,16 +89,6 @@ const AboutPage = () => {
                     <Text style={{ ...s.bodyText }}>
                         {t("APP Version", { ns: 'about' })}
                         <Text style={{ ...s.highlightText }}>{packageInfo.version}</Text>
-                    </Text>
-
-                    {/* 課表數據版本號 */}
-                    <Text style={{ ...s.bodyText }}>
-                        {t('Add Drop Data Version', { ns: 'about' })}
-                        <Text style={{ ...s.highlightText }}>{s_coursePlan.updateTime}</Text>
-                    </Text>
-                    <Text style={{ ...s.bodyText }}>
-                        {t('PreEnroll Data Version', { ns: 'about' })}
-                        <Text style={{ ...s.highlightText }}>{s_offerCourses.updateTime}</Text>
                     </Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>

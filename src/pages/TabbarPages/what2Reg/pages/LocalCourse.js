@@ -8,7 +8,7 @@ import Loading from '../../../../components/Loading';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from "../../../../utils/pathMap";
 import { openLink } from "../../../../utils/browser";
 import { logToFirebase } from "../../../../utils/firebaseAnalytics";
-import { getLocalStorage } from "../../../../utils/storageKits";
+import { getCourseData } from "../../../../utils/checkCoursesKits";
 import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
 
 import { scale } from "react-native-size-matters";
@@ -37,7 +37,8 @@ const LocalCourse = (props) => {
     const { theme } = useTheme();
     const { themeColor, secondThemeColor, black, white, viewShadow, bg_color } = theme;
 
-    const navigation = useContext(NavigationContext);
+    // const navigation = useContext(NavigationContext);
+    const { navigation } = props;
 
     // 狀態管理
     const [courseCode] = useState(props.route.params);
@@ -51,10 +52,8 @@ const LocalCourse = (props) => {
     useEffect(() => {
         const init = async () => {
             try {
-                const storageCoursePlanList = await getLocalStorage('course_plan_time');
-                if (storageCoursePlanList) {
-                    setSCoursePlanTime(storageCoursePlanList);
-                }
+                const storageCoursePlanList = await getCourseData('adddrop');
+                setSCoursePlanTime(storageCoursePlanList.timetable);
             } catch (error) {
                 Alert.alert(JSON.stringify(error));
             } finally {
@@ -82,7 +81,7 @@ const LocalCourse = (props) => {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
             setIsLoading(true);
             if (navigation.canGoBack()) {
-                navigation.popToTop();
+                navigation.goBack();
                 navigation.navigate('Tabbar', {
                     screen: 'Wiki',
                     params: { url: URL }
@@ -126,7 +125,7 @@ const LocalCourse = (props) => {
                                             profName: courseInfo['Teacher Information'],
                                         });
                                         if (navigation.canGoBack()) {
-                                            navigation.popToTop();
+                                            navigation.goBack();
                                             navigation.navigate('Tabbar', {
                                                 screen: 'Wiki',
                                                 params: { url: URL }
@@ -151,7 +150,7 @@ const LocalCourse = (props) => {
                                                 text: 'Yes', onPress: () => {
                                                     trigger();
                                                     if (navigation.canGoBack()) {
-                                                        navigation.popToTop();
+                                                        navigation.goBack();
                                                         navigation.navigate('Tabbar', {
                                                             screen: 'CourseSimTab',
                                                             params: { add: courseInfo }
@@ -165,7 +164,7 @@ const LocalCourse = (props) => {
                                     case 'coursesim':
                                         trigger();
                                         if (navigation.canGoBack()) {
-                                            navigation.popToTop();
+                                            navigation.goBack();
                                             navigation.navigate('Tabbar', {
                                                 screen: 'CourseSimTab',
                                                 params: { check: courseInfo['Course Code'] }
@@ -285,7 +284,7 @@ const LocalCourse = (props) => {
                                     profName: courseInfo['Teacher Information'],
                                 });
                                 if (navigation.canGoBack()) {
-                                    navigation.popToTop();
+                                    navigation.goBack();
                                     navigation.navigate('Tabbar', {
                                         screen: 'Wiki',
                                         params: { url: URL }
@@ -310,7 +309,7 @@ const LocalCourse = (props) => {
                                         text: 'Yes', onPress: () => {
                                             trigger();
                                             if (navigation.canGoBack()) {
-                                                navigation.popToTop();
+                                                navigation.goBack();
                                                 navigation.navigate('Tabbar', {
                                                     screen: 'CourseSimTab',
                                                     params: { add: courseInfo }
@@ -324,7 +323,7 @@ const LocalCourse = (props) => {
                             case 'coursesim':
                                 trigger();
                                 if (navigation.canGoBack()) {
-                                    navigation.popToTop();
+                                    navigation.goBack();
                                     navigation.navigate('Tabbar', {
                                         screen: 'CourseSimTab',
                                         params: { check: courseInfo['Course Code'] }

@@ -15,7 +15,6 @@ import com.facebook.soloader.SoLoader
 import android.webkit.WebView
 import com.reactnativerestart.RestartPackage
 import com.reactnativecommunity.cameraroll.CameraRollPackage // 圖片保存需要
-import com.reactnativecompressor.CompressorPackage
 // import com.BV.LinearGradient.LinearGradientPackage // 漸變庫需要
 // import com.mkuczera.RNReactNativeHapticFeedbackPackage; // 震動包
 

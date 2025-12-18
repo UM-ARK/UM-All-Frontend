@@ -20,10 +20,6 @@ includeBuild('../node_modules/@react-native/gradle-plugin')
 // include ':react-native-haptic-feedback'
 // project(':react-native-haptic-feedback').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-haptic-feedback/android')
 
-// https://github.com/Shobbak/react-native-compressor
-include ':react-native-compressor'
-project(':react-native-compressor').projectDir = new File(rootProject.projectDir,'../node_modules/react-native-compressor/android')
-
 // 更新gradle時，https://reactnative.dev/docs/new-architecture-app-intro
 // includeBuild('../node_modules/react-native-gradle-plugin')
 // include(":ReactAndroid")
