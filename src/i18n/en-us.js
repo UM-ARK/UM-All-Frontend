@@ -89,7 +89,7 @@ export default {
         "Common Issues": "Common Issues",
         "Privacy Policy & User Agreement": "Privacy Policy & User Agreement",
 
-        "圖片更新不及時？網站響應出錯？": "Pictures not updated in time? Website response error?",
+        "圖片更新不及時？網站響應出錯？課表同步問題？": "Error Pictures? Website response error? Error Timetable?",
         "清除APP內所有緩存（包括課表模擬與時間版本）": "Clear all the cache in the APP(Including Catalog & Timetable)",
         "清除APP內Cookies": "Clear all the Cookies in the APP",
 
