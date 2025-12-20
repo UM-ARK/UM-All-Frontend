@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
-import { MAIL, } from '../../../utils/pathMap';
+import { ARK_HARBOR_FEEDBACK, MAIL, } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
 import { trigger } from "../../../utils/trigger";
@@ -156,20 +156,25 @@ function Index({ navigation }) {
     const handleFeedbackPress = () => {
         trigger();
         const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
-        if (Platform.OS === 'android') {
-            Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
-                {
-                    text: '複製Email', onPress: () => {
-                        Clipboard.setString(MAIL);
-                        Toast.show(t('已複製Mail到剪貼板！'));
-                        Linking.openURL(mailMes);
-                    }
-                },
-                { text: 'No', },
-            ]);
-        } else {
-            Linking.openURL(mailMes);
-        }
+        // if (Platform.OS === 'android') {
+        // } else {
+        //     Linking.openURL(mailMes);
+        // }
+        Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
+            {
+                text: 'Harbor⭐️', onPress: () => {
+                    openLink(ARK_HARBOR_FEEDBACK);
+                }
+            },
+            {
+                text: 'Email', onPress: () => {
+                    Clipboard.setString(MAIL);
+                    Toast.show(t('已複製Mail到剪貼板！'));
+                    Linking.openURL(mailMes);
+                }
+            },
+            { text: 'No', },
+        ]);
     }
 
     const handleSettingsPress = () => {
