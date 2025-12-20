@@ -436,13 +436,14 @@ const HomeScreen = ({ navigation }) => {
         const imageSize = verticalScale(23);
         const iconSize = verticalScale(23);
         const containerSize = verticalScale(40); // 固定容器大小
+        const iconColor = theme.themeColor;
 
         if (icon_type == 'ionicons') {
             icon = (
                 <Ionicons
                     name={icon_name}
                     size={iconSize}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             );
         } else if (icon_type == 'MaterialCommunityIcons') {
@@ -450,7 +451,7 @@ const HomeScreen = ({ navigation }) => {
                 <MaterialCommunityIcons
                     name={icon_name}
                     size={iconSize + scale(3)}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             );
         } else if (icon_type == 'FontAwesome5') {
@@ -458,7 +459,7 @@ const HomeScreen = ({ navigation }) => {
                 <FontAwesome5
                     name={icon_name}
                     size={iconSize - verticalScale(3)}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             );
         } else if (icon_type == 'MaterialIcons') {
@@ -466,7 +467,7 @@ const HomeScreen = ({ navigation }) => {
                 <MaterialIcons
                     name={icon_name}
                     size={iconSize - verticalScale(3)}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             )
         } else if (icon_type == 'img') {
