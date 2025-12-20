@@ -398,6 +398,7 @@ const HomeScreen = ({ navigation }) => {
                 <View style={{
                     backgroundColor, borderRadius: verticalScale(5),
                     paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
+                    borderWidth: isThisDateSelected ? 1 : null, borderColor: themeColorUltraLight, // 描邊增加精緻感
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
@@ -867,10 +868,12 @@ const HomeScreen = ({ navigation }) => {
 
                                 {/* 校曆內容描述 */}
                                 <View style={{
-                                    backgroundColor: `${themeColor}15`,
                                     borderRadius: scale(5),
                                     paddingVertical: verticalScale(2), paddingHorizontal: scale(5),
                                     width: screenWidth * 0.8,
+                                    backgroundColor: `${themeColor}15`, // 極淺的藍色
+                                    borderRadius: scale(10),
+                                    borderWidth: 1, borderColor: themeColorUltraLight, // 描邊增加精緻感
                                 }}>
                                     <Text
                                         selectable
@@ -914,35 +917,30 @@ const HomeScreen = ({ navigation }) => {
                 {/** 即將到來的課程 */}
                 <View style={{
                     flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    alignItems: "center", justifyContent: "center",
                     alignSelf: "center",
                     width: screenWidth * 0.8,
+                    marginTop: verticalScale(3),
                 }}>
                     <TouchableScale
-                        style={{
-                            width: "100%",
-                        }}
+                        style={{ width: "100%", }}
                         onPress={() => {
                             trigger();
                             navigation.navigate("CourseSimTab");
                         }}>
                         {upcomingCourse ? (
-                            <View
-                                style={{
-                                    flexDirection: 'row', flex: 1,
-                                    alignItems: "center", justifyContent: "center",
-                                    gap: scale(3),
-                                    backgroundColor: `${themeColor}15`,
-                                    paddingHorizontal: scale(20), paddingVertical: scale(10),
-                                    marginTop: verticalScale(5),
-                                    borderRadius: scale(5),
-                                }}>
+                            <View style={{
+                                flexDirection: 'row', flex: 1,
+                                alignItems: "center", justifyContent: "center",
+                                gap: scale(3),
+                                backgroundColor: `${themeColor}15`,
+                                paddingHorizontal: scale(20), paddingVertical: scale(10),
+                                borderRadius: scale(5),
+                            }}>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Course Code"]}</Text>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Time From"]}</Text>
                             </View>
-
                         ) : (
                             <View style={{
                                 display: "flex",
@@ -950,7 +948,6 @@ const HomeScreen = ({ navigation }) => {
                                 width: "100%",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                marginTop: verticalScale(3),
                                 paddingVertical: verticalScale(8),
                                 backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
