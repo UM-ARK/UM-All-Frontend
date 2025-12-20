@@ -1041,7 +1041,7 @@ const HomeScreen = ({ navigation }) => {
                                 style={{
                                     alignSelf: 'center',
                                     marginTop: scale(5),
-                                    backgroundColor: themeColor,
+                                    backgroundColor: `${themeColor}15`,
                                     borderRadius: scale(10),
                                     paddingVertical: scale(5), paddingHorizontal: scale(8),
                                 }}
@@ -1054,10 +1054,10 @@ const HomeScreen = ({ navigation }) => {
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
-                                        color: white,
+                                        color: themeColor,
                                         fontWeight: 'bold',
                                     }}>
-                                    {`點我更新 😉~`}
+                                    {`${t('點我更新', { ns: 'home' })}` + '😉~'}
                                 </Text>
                             </TouchableOpacity>
                         </View>

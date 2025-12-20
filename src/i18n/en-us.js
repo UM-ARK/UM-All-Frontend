@@ -47,6 +47,8 @@ export default {
         "組織登入": "Club In",
         "論壇登入": "Forum In",
         "新想法": "New",
+        
+        "點我更新": "Click me update",
 
         "周一": "MON",
         "周二": "TUE",
