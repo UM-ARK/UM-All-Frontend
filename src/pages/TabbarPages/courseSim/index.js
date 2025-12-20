@@ -225,13 +225,16 @@ function CourseSim({ route, navigation }) {
     }, [isFocused]);
 
     async function refresh() {
-        getCourseData('adddrop').then(addDropStorageData => {
-            setSCoursePlanFile(addDropStorageData.adddrop);
-            setSCoursePlanTimeFile(addDropStorageData.timetable);
-        })
-
         // 課程版本
-        getCourseData('version').then(localCourseVersion => { setS_courseVersion(localCourseVersion) });
+        getCourseData('version').then(localCourseVersion => {
+            if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
+                setS_courseVersion(localCourseVersion)
+                getCourseData('adddrop').then(addDropStorageData => {
+                    setSCoursePlanFile(addDropStorageData.adddrop);
+                    setSCoursePlanTimeFile(addDropStorageData.timetable);
+                })
+            }
+        });
     }
 
     /**

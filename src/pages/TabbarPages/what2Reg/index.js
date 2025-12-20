@@ -42,6 +42,7 @@ import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
 import Toast from 'react-native-simple-toast';
+import { useIsFocused } from '@react-navigation/native';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -199,6 +200,8 @@ const What2Reg = (props) => {
     const actionSheetRef = useRef(null);
     const bottomSheetRef = useRef(null);
 
+    const isFocused = useIsFocused();
+
     const insets = useContext(SafeAreaInsetsContext);
 
     // 3.0開始，優先使用本地緩存的offerCourses數據展示
@@ -237,6 +240,24 @@ const What2Reg = (props) => {
         }
     };
 
+    // 在頁面聚焦時讀取緩存數據，用於同步課程數據
+    useEffect(() => {
+        if (isFocused) { refresh() }
+    }, [isFocused]);
+
+    async function refresh() {
+        // 課程版本
+        getCourseData('version').then(localCourseVersion => {
+            if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
+                setS_courseVersion(localCourseVersion)
+                getCourseData('adddrop').then(addDropStorageData => {
+                    setS_coursePlan(addDropStorageData.adddrop);
+                    setS_coursePlanTime(addDropStorageData.timetable);
+                })
+            }
+        });
+    }
+
     const updateFilterOptions = async (nextOptions) => {
         try {
             if (lodash.isEqual(nextOptions, filterOptions)) { return }
@@ -245,7 +266,7 @@ const What2Reg = (props) => {
         } catch (error) {
             Alert.alert('Error', JSON.stringify(error));
         }
-    }
+    };
 
     /**
      * 開設課程列表，根據當前課程模式（Add Drop 或 Pre Enroll）選擇對應的課程數據
@@ -842,7 +863,6 @@ const What2Reg = (props) => {
                 await checkCloudCourseVersion();
                 init();
                 handleDialogClose();
-                Toast.show(`Request completed.`);
                 break;
             default:
                 break;
