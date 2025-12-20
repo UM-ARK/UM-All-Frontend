@@ -164,7 +164,8 @@ function CourseSim({ route, navigation }) {
             margin: scale(3),
             padding: scale(5),
             borderRadius: scale(6),
-            backgroundColor: themeColorUltraLight,
+            backgroundColor: `${themeColor}15`,
+            borderWidth: 1, borderColor: themeColorUltraLight,
         },
     });
 
@@ -1062,7 +1063,7 @@ E11-0000
                                 <TouchableOpacity
                                     style={{
                                         ...s.buttonContainer,
-                                        backgroundColor: unread,
+                                        backgroundColor: `${unread}30`,
                                         borderRadius: scale(5),
                                         padding: scale(3),
                                     }}
@@ -1073,7 +1074,7 @@ E11-0000
                                         verScroll.current?.scrollTo({ y: 0 });
                                     }}
                                 >
-                                    <Text style={{ ...s.searchResultText, color: trueWhite, fontWeight: 'bold' }}>
+                                    <Text style={{ ...s.searchResultText, color: unread, fontWeight: 'bold' }}>
                                         {`${t("刪除所有", { ns: 'timetable' })} ${i['Course Code']}`}
                                     </Text>
                                 </TouchableOpacity>
@@ -1244,7 +1245,7 @@ E11-0000
                         style={{
                             position: 'absolute',
                             left: scale(10),
-                            backgroundColor: themeColorUltraLight,
+                            backgroundColor: `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
@@ -1283,7 +1284,7 @@ E11-0000
                     style={{
                         position: 'absolute',
                         right: scale(10),
-                        backgroundColor: hasOpenCourseSearch ? secondThemeColor : themeColor,
+                        backgroundColor: hasOpenCourseSearch ? `${secondThemeColor}15` : `${themeColor}15`,
                         borderRadius: scale(5),
                         padding: scale(5),
                     }}
@@ -1307,7 +1308,7 @@ E11-0000
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: white,
+                        color: hasOpenCourseSearch ? secondThemeColor : themeColor,
                         fontWeight: 'bold',
                         lineHeight: verticalScale(14),
                     }}>
