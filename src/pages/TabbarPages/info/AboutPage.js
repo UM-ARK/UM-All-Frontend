@@ -32,7 +32,7 @@ const iconSize = verticalScale(25);
 
 const AboutPage = () => {
     const { theme } = useTheme();
-    const { black, themeColor, white, bg_color, } = theme;
+    const { black, themeColor, white, bg_color, themeColorUltraLight } = theme;
     const s = StyleSheet.create({
         highlightText: {
             fontSize: verticalScale(12),
@@ -98,9 +98,9 @@ const AboutPage = () => {
                         <TouchableOpacity
                             style={{
                                 ...s.buttonContainer,
-                                backgroundColor: i18n.language === 'tc' ? themeColor : null,
+                                backgroundColor: i18n.language === 'tc' ? `${themeColor}15` : null,
                                 borderWidth: verticalScale(1),
-                                borderColor: i18n.language === 'tc' ? 'transparent' : themeColor,
+                                borderColor: themeColorUltraLight,
                             }}
                             onPress={() => {
                                 trigger();
@@ -117,15 +117,16 @@ const AboutPage = () => {
                                     }
                                 ]);
                             }}
+                            disabled={i18n.language === 'tc'}
                         >
-                            <Text style={{ ...s.highlightText, color: i18n.language === 'tc' ? white : themeColor }}>中</Text>
+                            <Text style={{ ...s.highlightText, color: i18n.language === 'tc' ? themeColor : black.third }}>中</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{
                                 ...s.buttonContainer,
-                                backgroundColor: i18n.language === 'en' ? themeColor : null,
+                                backgroundColor: i18n.language === 'en' ? `${themeColor}15` : null,
                                 borderWidth: verticalScale(1),
-                                borderColor: i18n.language === 'en' ? 'transparent' : themeColor,
+                                borderColor: themeColorUltraLight,
                             }}
                             onPress={() => {
                                 trigger();
@@ -142,8 +143,9 @@ const AboutPage = () => {
                                     }
                                 ]);
                             }}
+                            disabled={i18n.language === 'en'}
                         >
-                            <Text style={{ ...s.highlightText, color: i18n.language === 'en' ? white : themeColor }}>EN</Text>
+                            <Text style={{ ...s.highlightText, color: i18n.language === 'en' ? themeColor : black.third }}>EN</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -152,7 +154,7 @@ const AboutPage = () => {
                     </Text>
                     <TouchableOpacity
                         style={{
-                            backgroundColor: themeColor, borderRadius: scale(10),
+                            backgroundColor: `${themeColor}15`, borderRadius: scale(10),
                             padding: scale(5), marginTop: scale(5),
                         }}
                         activeOpacity={0.8}
@@ -185,13 +187,13 @@ const AboutPage = () => {
                             );
 
                         }}>
-                        <Text style={{ ...s.highlightText, color: white }}>
+                        <Text style={{ ...s.highlightText, color: themeColor }}>
                             {`${t('清除APP內所有緩存（包括課表模擬與時間版本）', { ns: 'about' })}`}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{
-                            backgroundColor: themeColor, borderRadius: scale(10),
+                            backgroundColor: `${themeColor}15`, borderRadius: scale(10),
                             padding: scale(5), marginTop: scale(5),
                         }}
                         activeOpacity={0.8}
@@ -200,7 +202,7 @@ const AboutPage = () => {
                             await CookieManager.clearAll();
                             Alert.alert('已清除Cookies');
                         }}>
-                        <Text style={{ ...s.highlightText, color: white }}>
+                        <Text style={{ ...s.highlightText, color: themeColor }}>
                             {`${t('清除APP內Cookies', { ns: 'about' })}`}
                         </Text>
                     </TouchableOpacity>
