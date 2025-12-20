@@ -37,40 +37,32 @@ function Index({ navigation }) {
     const bottomSheetRef = useRef(null);
     const insets = useContext(SafeAreaInsetsContext);
 
-    // 登錄檢查
-    // useEffect(() => {
-    //     console.log('RootStore:', RootStore);
-    //     if (RootStore?.userInfo?.stdData) {
-    //         setIsLogin(true);
-    //     } 
-    // }, [RootStore]);
-
     // 功能卡片渲染，useCallback避免不必要的重渲染
     const GetFunctionCard = useCallback((title, fn_list) => (
         <View key={title}
             style={{
-                flex: 1, backgroundColor: white,
-                borderRadius: scale(10),
-                marginHorizontal: scale(10),
-                marginTop: verticalScale(10),
+                backgroundColor: white, borderRadius: scale(10),
+                marginHorizontal: scale(10), marginTop: verticalScale(10),
             }}
         >
             <View style={{
                 flexDirection: 'row',
-                justifyContent: 'space-between',
                 alignItems: 'center',
                 paddingHorizontal: scale(12),
-                paddingTop: verticalScale(12),
+                paddingTop: verticalScale(16), paddingBottom: verticalScale(12),
+                borderBottomWidth: verticalScale(2),
+                borderBottomColor: bg_color,
             }}>
                 <Text style={{
                     ...uiStyle.defaultText,
-                    fontSize: verticalScale(12),
+                    fontSize: verticalScale(15),
                     color: black.main,
-                    fontWeight: 'bold',
+                    fontWeight: '500',
                 }}>
                     {title}
                 </Text>
             </View>
+
             <FlatGrid
                 maxItemsPerRow={5}
                 itemDimension={scale(50)}
