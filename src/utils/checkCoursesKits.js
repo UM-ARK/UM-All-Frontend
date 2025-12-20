@@ -45,6 +45,18 @@ export async function compareLocalCourseVersion(versionInfo) {
     let needSave = false;
     let newVersion = { ...localCourseVersion };
 
+    // 判断本地source是否更新
+    if (needUpdate(localCourseVersion.pre, sourceCourseVersion.pre)) {
+        needSave = true;
+        newVersion.pre = sourceCourseVersion.pre;
+        await saveCourseDataToStorage('pre', 'source');
+    }
+    if (needUpdate(localCourseVersion.adddrop, sourceCourseVersion.adddrop)) {
+        needSave = true;
+        newVersion.adddrop = sourceCourseVersion.adddrop;
+        await saveCourseDataToStorage('adddrop', 'source');
+    }
+
     if (needUpdate(localCourseVersion.pre, versionInfo.pre)) {
         needSave = true;
         newVersion.pre = versionInfo.pre;
@@ -62,6 +74,8 @@ export async function compareLocalCourseVersion(versionInfo) {
         const saveResult = await setLocalStorage('course_version', newVersion);
         if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
         Toast.show(`Course Data Updated.`);
+    } else {
+        Toast.show(`Your data is up to date.`);
     }
 }
 

@@ -81,11 +81,21 @@ const App = () => {
                     localCourseVersion = sourceCourseVersion;
                 }
                 // 新APP將先覆蓋舊版APP的本地緩存
+                let needSave = false;
+                let newVersion = { ...localCourseVersion };
                 if (needUpdate(localCourseVersion.adddrop, sourceCourseVersion.adddrop)) {
+                    needSave = true;
+                    newVersion.adddrop = sourceCourseVersion.adddrop;
                     saveCourseDataToStorage('adddrop', 'source');
                 }
                 if (needUpdate(localCourseVersion.pre, sourceCourseVersion.pre)) {
+                    needSave = true;
+                    newVersion.pre = sourceCourseVersion.pre;
                     saveCourseDataToStorage('pre', 'source');
+                }
+                if (needSave) {
+                    const saveResult = await setLocalStorage('course_version', newVersion);
+                    if (saveResult !== 'ok') { Alert.alert('Error', JSON.stringify(saveResult)); }
                 }
 
                 // 在時間差內檢查雲端數據更新
