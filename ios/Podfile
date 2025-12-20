@@ -1,4 +1,3 @@
-# TODO: 開關新架構，關閉則註釋掉
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 
 # Resolve react_native_pods.rb with node to allow for hoisting
@@ -11,32 +10,20 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+# 2. Firebase 需要靜態庫 (Static Frameworks)
+# RN 0.76+ 對 use_frameworks! :linkage => :static 的支持已大幅改善
+use_frameworks! :linkage => :static
+
+# Firebase 靜態設置
+$RNFirebaseAsStaticFramework = true
 
 # 修復iOS無法統計設型號問題
 $RNFirebaseAnalyticsEnableAdSupport = true
 
 target 'UMALL' do
   config = use_native_modules!
-  # project './UMALL.xcodeproj'
 
-  # ******** DIY Code Begin ********
-  # 因為react-native-compressor的RCT-Folly問題，和Firebase問題，全局啟用
-  # use_modular_headers!
-  # 使用pod install --repo-update
-  use_frameworks! :linkage => :static
-  # 使用靜態框架，from Firebase/app安裝說明
-  $RNFirebaseAsStaticFramework = true
-  # 不需要廣告支持
-  # $RNFirebaseAnalyticsWithoutAdIdSupport=true
-
-  # 嘗試使用bridge模式
   flags = get_default_flags()
-  # ******** DIY Code End ********
 
   use_react_native!(
     :path => config[:reactNativePath],
@@ -55,29 +42,6 @@ target 'UMALL' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
-
-    # ******** DIY Code Begin ********
-    # Xcode16 bitcode問題導致 Archive 後無法發佈，方案：https://stackoverflow.com/questions/79022303/asset-validation-failed-nslocalizedrecoverysuggestion-invalid-executable-the-e/79022687#:~:text=In%20case%20you%20have%20already%20post_install%20has%20been%20used%20then%20copy%20and%20past%20the%20below%20script%20inside%20that.
-    # bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
-    # def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-    #   framework_path = File.join(Dir.pwd, framework_relative_path)
-    #   command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
-    #   puts "Stripping bitcode: #{command}"
-    #   system(command)
-    # end
-
-    # framework_paths = [
-    #   "Pods/LogRocket/LogRocket.xcframework/ios-arm64/LogRocket.framework/LogRocket",
-    #   "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/hermes",
-    #   "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/Versions/Current/hermes",
-    #   "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64/hermes.framework/hermes",
-    #   "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64_x86_64-maccatalyst/hermes.framework/hermes"
-    # ]
-
-    # framework_paths.each do |framework_relative_path|
-    #   strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-    # end
-    # ******** DIY Code End ********
 
   end
 end
