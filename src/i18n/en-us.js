@@ -165,6 +165,7 @@ export default {
 
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
+        "方法": "Method",
         "右上角按鈕手動“Add”！": "Manual add button in the upper right corner!",
         "全選、複製Timetable，": "Select all, copy Timetable,",
         "粘貼到下方輸入框，": "Paste it into the input box below,",

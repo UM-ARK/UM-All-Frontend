@@ -692,12 +692,12 @@ function CourseSim({ route, navigation }) {
 
                 {/* Add課按鈕提示 */}
                 <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t("選項", { ns: 'timetable' })} 1：`}</Text>
+                    <Text style={{ color: themeColor }}>{`${t("方法", { ns: 'timetable' })} 1：`}</Text>
                     {`${t("右上角按鈕手動“Add”！", { ns: 'timetable' })}\n`}
                 </Text>
 
                 <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t("選項", { ns: 'timetable' })} 2：`}</Text>
+                    <Text style={{ color: themeColor }}>{`${t("方法", { ns: 'timetable' })} 2：`}</Text>
                     {`${t("全選、複製Timetable，", { ns: 'timetable' })}\n${t("粘貼到下方輸入框，", { ns: 'timetable' })}\n${t("一鍵導入！", { ns: 'timetable' })}`}
                 </Text>
 
