@@ -378,7 +378,14 @@ const HomeScreen = ({ navigation }) => {
         let isEssencial = item.summary.toUpperCase().indexOf('EXAM') != -1 ||
             item.summary.toUpperCase().indexOf('SEMESTER') != -1 &&
             item.summary.toUpperCase().indexOf('BREAK') == -1;
-        let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
+        const backgroundColor = isThisDateSelected ? `${themeColor}15` : 'transparent';
+        const textStyle = {
+            ...uiStyle.defaultText,
+            color: isThisDateSelected ? themeColor : black.third,
+            fontWeight: isThisDateSelected ? 'bold' : 'normal',
+            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
+            includeFontPadding: false
+        };
         return (
             <TouchableScale
                 style={{ width: calItemWidth, margin: verticalScale(3), }}
@@ -389,45 +396,23 @@ const HomeScreen = ({ navigation }) => {
                 }}
             >
                 <View style={{
-                    backgroundColor,
-                    borderRadius: verticalScale(5),
+                    backgroundColor, borderRadius: verticalScale(5),
                     paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: theme.trueWhite,
-                            fontSize: verticalScale(8),
-                            fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                            includeFontPadding: false
-                        }}>
+                        <Text style={{ ...textStyle, fontSize: verticalScale(8), }}>
                             {momentItm.substring(0, 4)}
                         </Text>
 
                         {/* 日期 */}
                         <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: theme.trueWhite,
-                                fontSize: verticalScale(12),
-                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                                opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                                includeFontPadding: false,
-                            }}>
+                            style={{ ...textStyle, fontSize: verticalScale(12), }}>
                             {`${momentItm.substring(4, 6)}.${momentItm.substring(6, 8)}`}
                         </Text>
 
                         {/* 星期幾 */}
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: theme.trueWhite,
-                            fontSize: verticalScale(7),
-                            fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                            includeFontPadding: false
-                        }}>
+                        <Text style={{ ...textStyle, fontSize: verticalScale(7), }}>
                             {getWeek(item.startDate)}
                         </Text>
                     </View>
@@ -881,7 +866,7 @@ const HomeScreen = ({ navigation }) => {
 
                                 {/* 校曆內容描述 */}
                                 <View style={{
-                                    backgroundColor: themeColorUltraLight,
+                                    backgroundColor: `${themeColor}15`,
                                     borderRadius: scale(5),
                                     paddingVertical: verticalScale(2), paddingHorizontal: scale(5),
                                     width: screenWidth * 0.8,
@@ -947,8 +932,7 @@ const HomeScreen = ({ navigation }) => {
                                     flexDirection: 'row', flex: 1,
                                     alignItems: "center", justifyContent: "center",
                                     gap: scale(3),
-                                    // backgroundColor: TIME_TABLE_COLOR[lodash.random(0, TIME_TABLE_COLOR.length - 1)],
-                                    backgroundColor: themeColorUltraLight,
+                                    backgroundColor: `${themeColor}15`,
                                     paddingHorizontal: scale(20), paddingVertical: scale(10),
                                     marginTop: verticalScale(5),
                                     borderRadius: scale(5),
@@ -967,7 +951,7 @@ const HomeScreen = ({ navigation }) => {
                                 justifyContent: "center",
                                 marginTop: verticalScale(3),
                                 paddingVertical: verticalScale(8),
-                                backgroundColor: theme.disabled,
+                                backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
                                 borderRadius: verticalScale(5),
                             }}>
