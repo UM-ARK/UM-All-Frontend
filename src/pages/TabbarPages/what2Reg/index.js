@@ -471,7 +471,6 @@ const What2Reg = (props) => {
                                 const depaName = offerFacultyDepaListObj[facultyName][0];
                                 nextFilterOptions.depaName = depaName;
                             }
-                            LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                             updateFilterOptions(nextFilterOptions);
                         }}
                         key={itm.toString()}
@@ -512,7 +511,6 @@ const What2Reg = (props) => {
                 }}
                     onPress={() => {
                         trigger();
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                         updateFilterOptions({ ...filterOptions, depaName: itm });
                     }}
                 >
