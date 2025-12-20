@@ -231,11 +231,12 @@
             "Section": "001",
             "Medium of Instruction": "English",
             "Teacher Information": "IP WENG FAI",
-            "Lecture / Lab": "Lecture",
+            "Lecture / Lab": "Lab",
+            "Lab Information": "LAB-L02",
             "Day": "MON",
-            "Time From": "11:30",
-            "Time To": "12:45",
-            "Classroom": "E11-1027",
+            "Time From": "10:00",
+            "Time To": "11:15",
+            "Classroom": "E11-1021",
             "Course Title Chi": "大學化學簡介"
         },
         {
@@ -339,10 +340,11 @@
             "Section": "001",
             "Medium of Instruction": "English",
             "Teacher Information": "NG KAR WEI",
-            "Lecture / Lab": "Lecture",
+            "Lecture / Lab": "Lab",
+            "Lab Information": "LAB-L02",
             "Day": "TUE",
-            "Time From": "11:30",
-            "Time To": "12:45",
+            "Time From": "10:30",
+            "Time To": "11:20",
             "Classroom": "E11-1021",
             "Course Title Chi": "材料表徵"
         },
@@ -2223,9 +2225,10 @@
             "Section": "001",
             "Medium of Instruction": "English",
             "Teacher Information": "MAK PENG UN",
-            "Lecture / Lab": "Lecture",
-            "Day": "FRI",
-            "Time From": "10:00",
+            "Lecture / Lab": "Lab",
+            "Lab Information": "LAB-L02",
+            "Day": "TUE",
+            "Time From": "11:00",
             "Time To": "12:45",
             "Classroom": "E6-1113A",
             "Course Title Chi": "電磁"
@@ -3516,7 +3519,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E3-3033",
-            "Course Title Chi": "學術英語：基於項目的學習"
+            "Course Title Chi": "學術英語：專題學習"
         },
         {
             "Offering Unit": "FAH",
@@ -4525,7 +4528,7 @@
             "Time From": "08:30",
             "Time To": "09:45",
             "Classroom": "E4-1061",
-            "Course Title Chi": "通俗文學與生活"
+            "Course Title Chi": "大眾文學與生活"
         },
         {
             "Offering Unit": "FAH",
@@ -4651,7 +4654,7 @@
             "Time From": "14:30",
             "Time To": "15:45",
             "Classroom": "E3-2033",
-            "Course Title Chi": "與過去的對話：藝術、文學、電影和物質文化中的人類記憶"
+            "Course Title Chi": "與過去對話：藝術、文學、電影和物質文化中的人類記憶"
         },
         {
             "Offering Unit": "FAH",
@@ -4683,7 +4686,7 @@
             "Time From": "16:00",
             "Time To": "17:15",
             "Classroom": "E4-1061",
-            "Course Title Chi": "亞洲價值觀和道德描述"
+            "Course Title Chi": "亞洲價值觀和道德觀念"
         },
         {
             "Offering Unit": "FAH",
@@ -6758,6 +6761,38 @@
         {
             "Offering Unit": "FLL",
             "Offering Department": "MLS",
+            "Course Code": "LAWS1000",
+            "Course Title": "Introduction to Law",
+            "Section": "101",
+            "Medium of Instruction": "Cantonese",
+            "Teacher Information": "FAN XIAODING",
+            "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "18:00",
+            "Time To": "20:45",
+            "Classroom": "E32-G007",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLD25 / BLL18 / BLL25\n",
+            "Course Title Chi": "法律入門"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS1001",
+            "Course Title": "Introduction to Law (Legal Practice)",
+            "Section": "101",
+            "Medium of Instruction": "Cantonese",
+            "Teacher Information": "FAN XIAODING",
+            "Lecture / Lab": "Lecture",
+            "Day": "SAT",
+            "Time From": "21:00",
+            "Time To": "21:50",
+            "Classroom": "E32-G007",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLD25 / BLL18 / BLL25\n",
+            "Course Title Chi": "法律入門（法律實踐）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
             "Course Code": "LAWS1002",
             "Course Title": "Legal History",
             "Section": "001",
@@ -6767,8 +6802,8 @@
             "Day": "SAT",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "E32-G013",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FLL - BLC23 / WA25\n",
+            "Classroom": "E32-G029",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18 / BLE25\n",
             "Course Title Chi": "法律史"
         },
         {
@@ -6834,6 +6869,22 @@
             "Classroom": "E22-2007",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLD25 / BLL18 / BLL25\n",
             "Course Title Chi": "國際公共法（法律實踐）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS1010",
+            "Course Title": "Economics II",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "ISAAC SOARES DUARTE JOSE EDUARDO",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "20:45",
+            "Classroom": "E32-1025",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17 / WA25\n",
+            "Course Title Chi": "經濟學II"
         },
         {
             "Offering Unit": "FLL",
@@ -7008,7 +7059,7 @@
             "Time From": "20:30",
             "Time To": "23:15",
             "Classroom": "E32-G027",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FLL - BLC23 / WA25\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "民法通則II"
         },
         {
@@ -7024,7 +7075,7 @@
             "Time From": "21:30",
             "Time To": "23:15",
             "Classroom": "E32-G029",
-            "\"Class For / Class Not For\" Information": "Class not for :\n - FLL - BLC23 / WA25\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "民法通則II（法律實踐）"
         },
         {
@@ -7040,7 +7091,7 @@
             "Time From": "09:30",
             "Time To": "12:15",
             "Classroom": "E32-G020",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "行政法II"
         },
         {
@@ -7055,9 +7106,25 @@
             "Day": "MON",
             "Time From": "20:30",
             "Time To": "21:20",
-            "Classroom": "TBA",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "Classroom": "E21-G009",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "行政法II（法律實務）"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS2009",
+            "Course Title": "Chinese Language IV",
+            "Section": "201",
+            "Medium of Instruction": "Chinese supplemented with English",
+            "Teacher Information": "LAO KENG CHONG",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "21:00",
+            "Time To": "22:45",
+            "Classroom": "E32-G028",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "中文四"
         },
         {
             "Offering Unit": "FLL",
@@ -7072,7 +7139,7 @@
             "Time From": "19:00",
             "Time To": "21:45",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
             "Course Title Chi": "經濟學"
         },
         {
@@ -7162,7 +7229,7 @@
             "Course Title": "Law of the European Union",
             "Section": "401",
             "Medium of Instruction": "English",
-            "Teacher Information": "CÉLIA FILIPA FERREIRA MATIAS",
+            "Teacher Information": "CELIA FILIPA FERREIRA MATIAS",
             "Lecture / Lab": "Lecture",
             "Day": "SAT",
             "Time From": "09:00",
@@ -7345,7 +7412,7 @@
             "Time To": "22:50",
             "Classroom": "E32-G013",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLE18\n",
-            "Course Title Chi": "商法II（法律實踐）"
+            "Course Title Chi": "商業法II（法律實務）"
         },
         {
             "Offering Unit": "FLL",
@@ -7477,6 +7544,22 @@
         },
         {
             "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS3023",
+            "Course Title": "Legal English II",
+            "Section": "201",
+            "Medium of Instruction": "English supplemented with Portuguese",
+            "Teacher Information": "DOS ANJOS JULIO MIGUEL",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "21:00",
+            "Time To": "22:45",
+            "Classroom": "E32-1026",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "法律英語II"
+        },
+        {
+            "Offering Unit": "FLL",
             "Offering Department": "GLS",
             "Course Code": "LAWS3035",
             "Course Title": "Family Law and Succession Law",
@@ -7487,7 +7570,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "家庭法和繼承法"
         },
@@ -7503,7 +7586,7 @@
             "Day": "WED",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "辯論、模擬審判和宣傳技能"
         },
@@ -7519,7 +7602,7 @@
             "Day": "THU",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "證據法"
         },
@@ -7535,7 +7618,7 @@
             "Day": "THU",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "國際私法"
         },
@@ -7551,7 +7634,7 @@
             "Day": "MON",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "法律、科學與技術"
         },
@@ -7567,7 +7650,7 @@
             "Day": "TUE",
             "Time From": "10:00",
             "Time To": "12:45",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "法律研究與起草"
         },
@@ -7583,7 +7666,7 @@
             "Day": "TUE",
             "Time From": "14:30",
             "Time To": "17:15",
-            "Classroom": "TBA",
+            "Classroom": "E32-G004",
             "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLC23\n",
             "Course Title Chi": "法律實踐和專業實習"
         },
@@ -7754,7 +7837,7 @@
             "Course Title": "Civil Procedural Law III",
             "Section": "001",
             "Medium of Instruction": "Cantonese",
-            "Teacher Information": "SILVESTRE MÁRIO AUGUSTO",
+            "Teacher Information": "SILVESTRE MARIO AUGUSTO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "19:00",
@@ -7770,7 +7853,7 @@
             "Course Title": "Civil Procedural Law III (Legal Practice)",
             "Section": "001",
             "Medium of Instruction": "Cantonese",
-            "Teacher Information": "SILVESTRE MÁRIO AUGUSTO",
+            "Teacher Information": "SILVESTRE MARIO AUGUSTO",
             "Lecture / Lab": "Lecture",
             "Day": "THU",
             "Time From": "22:00",
@@ -7792,8 +7875,52 @@
             "Time From": "10:00",
             "Time To": "12:45",
             "Classroom": "E32-G007",
-            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLE18 / BLL18\n",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - BLD18 / BLL18\n",
             "Course Title Chi": "研究和實習"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5001",
+            "Course Title": "General Theory of Law",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "CELIA FILIPA FERREIRA MATIAS",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "19:00",
+            "Time To": "20:45",
+            "Classroom": "E32-1026",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "法學通論"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5003",
+            "Course Title": "Research Report",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "TERESA LANCRY DE GOUVEIA DE ALBUQUERQUE E SOUSA ROBALO",
+            "Lecture / Lab": "Lecture",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "研究報告"
+        },
+        {
+            "Offering Unit": "FLL",
+            "Offering Department": "MLS",
+            "Course Code": "LAWS5004",
+            "Course Title": "Research and Communication Skills",
+            "Section": "201",
+            "Medium of Instruction": "Portuguese",
+            "Teacher Information": "FAN XIAODING",
+            "Lecture / Lab": "Lecture",
+            "Day": "MON",
+            "Time From": "18:00",
+            "Time To": "18:50",
+            "Classroom": "E32-1026",
+            "\"Class For / Class Not For\" Information": "Class for :\n - FLL - WA17\n",
+            "Course Title Chi": "研究和溝通技能"
         },
         {
             "Offering Unit": "FST",
