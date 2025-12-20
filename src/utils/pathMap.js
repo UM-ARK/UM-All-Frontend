@@ -50,7 +50,7 @@ export const ARK_WIKI_DONATE_RANK = ARK_WIKI + '/wiki/ARK%E6%8D%90%E8%B4%88%E6%A
 
 export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseDetailUG?courseCode=';
 
-export const COURSE_API_CF_WORKERS = 'https://course-version-check-api.boxmars.workers.dev';
+export const COURSE_API_CF_WORKERS = 'https://course-api.umall.one';
 
 export function addHost(itm) {
     if (itm.length > 0) {
