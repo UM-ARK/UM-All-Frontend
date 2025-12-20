@@ -10,6 +10,7 @@ import {
     FlatList,
     Keyboard,
     Alert,
+    LayoutAnimation,
 } from "react-native";
 
 import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH, } from "../../../utils/pathMap";
@@ -364,12 +365,13 @@ const What2Reg = (props) => {
                             style={{
                                 ...s.classItm,
                                 paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
-                                backgroundColor: s_course_mode === itm ? (s_course_mode === 'ad' ? themeColor : secondThemeColor) : null,
+                                backgroundColor: s_course_mode === itm ? (s_course_mode === 'ad' ? `${themeColor}15` : `${secondThemeColor}15`) : null,
                             }}
                             onPress={async () => {
                                 trigger();
                                 try {
                                     setCourse_mode(itm);
+                                    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                                     await updateFilterOptions({ ...filterOptions, mode: itm });
                                 } catch (error) {
                                     Alert.alert(JSON.stringify(error));
@@ -378,7 +380,7 @@ const What2Reg = (props) => {
                         >
                             <Text style={{
                                 ...uiStyle.defaultText,
-                                color: s_course_mode === itm ? white : black.third,
+                                color: s_course_mode === itm ? (s_course_mode === 'ad' ? themeColor : secondThemeColor) : black.third,
                                 fontWeight: s_course_mode === itm ? '900' : 'normal',
                                 fontSize: scale(12),
                             }}>{modeENStr[itm]}</Text>
@@ -408,11 +410,12 @@ const What2Reg = (props) => {
                         style={{
                             ...s.classItm,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
-                            backgroundColor: filterOptions.option === itm ? themeColor : null,
+                            backgroundColor: filterOptions.option === itm ? `${themeColor}15` : null,
                         }}
                         onPress={() => {
                             trigger();
                             try {
+                                LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                                 updateFilterOptions({ ...filterOptions, option: itm });
                             } catch (error) {
                                 Alert.alert(JSON.stringify(error));
@@ -422,7 +425,7 @@ const What2Reg = (props) => {
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: filterOptions.option === itm ? white : black.third,
+                            color: filterOptions.option === itm ? themeColor : black.third,
                             fontWeight: filterOptions.option === itm ? '900' : 'normal',
                             fontSize: scale(12),
                         }}>{itm}</Text>
@@ -456,7 +459,7 @@ const What2Reg = (props) => {
                     <TouchableScale
                         style={{
                             ...s.classItm,
-                            backgroundColor: itm === filterOptions.facultyName ? themeColor : null,
+                            backgroundColor: itm === filterOptions.facultyName ? `${themeColor}15` : null,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
                         }}
                         onPress={() => {
@@ -468,13 +471,14 @@ const What2Reg = (props) => {
                                 const depaName = offerFacultyDepaListObj[facultyName][0];
                                 nextFilterOptions.depaName = depaName;
                             }
+                            LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                             updateFilterOptions(nextFilterOptions);
                         }}
                         key={itm.toString()}
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: itm === filterOptions.facultyName ? white : black.third,
+                            color: itm === filterOptions.facultyName ? themeColor : black.third,
                             fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                             fontSize: scale(12)
                         }}>{itm}</Text>
@@ -504,17 +508,18 @@ const What2Reg = (props) => {
                 <TouchableScale style={{
                     ...s.classItm,
                     paddingHorizontal: scale(5), paddingVertical: scale(2),
-                    backgroundColor: filterOptions.depaName === itm ? themeColor : null,
+                    backgroundColor: filterOptions.depaName === itm ? `${themeColor}15` : null,
                 }}
                     onPress={() => {
                         trigger();
+                        LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                         updateFilterOptions({ ...filterOptions, depaName: itm });
                     }}
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
                         alignSelf: 'center',
-                        color: filterOptions.depaName === itm ? white : black.third,
+                        color: filterOptions.depaName === itm ? themeColor : black.third,
                         fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
                         fontSize: scale(12)
                     }}>{itm}</Text>
@@ -1051,14 +1056,14 @@ const What2Reg = (props) => {
                             position: 'absolute',
                             right: scale(10),
                             flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: themeColor,
+                            backgroundColor: `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
                         onPress={handleUpdatePress}
                     >
-                        <Ionicons name={'build'} size={verticalScale(14)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('更新')}</Text>
+                        <Ionicons name={'build'} size={verticalScale(14)} color={themeColor} />
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('更新')}</Text>
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
@@ -1075,13 +1080,13 @@ const What2Reg = (props) => {
                         </View>
                     </View>
 
-                    {/* 下課統計 */}
+                    {/* 下課統計 - 乾飯 */}
                     <TouchableOpacity
                         style={{
                             position: 'absolute',
                             left: scale(10),
                             flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: themeColor,
+                            backgroundColor: `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
@@ -1095,8 +1100,8 @@ const What2Reg = (props) => {
                             }
                         }}
                     >
-                        <Ionicons name={'alarm'} size={verticalScale(14)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('幹飯', { ns: 'catalog' })}</Text>
+                        <Ionicons name={'alarm'} size={verticalScale(14)} color={themeColor} />
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('幹飯', { ns: 'catalog' })}</Text>
                     </TouchableOpacity>
                 </View>
 
