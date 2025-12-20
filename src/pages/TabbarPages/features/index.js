@@ -31,7 +31,7 @@ const iconSize = scale(25);
 
 function Index({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, barStyle } = theme;
+    const { themeColor, white, black, trueWhite, bg_color, barStyle, viewShadow } = theme;
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
@@ -43,6 +43,7 @@ function Index({ navigation }) {
             style={{
                 backgroundColor: white, borderRadius: scale(10),
                 marginHorizontal: scale(10), marginTop: verticalScale(10),
+                ...viewShadow,
             }}
         >
             <View style={{
@@ -118,7 +119,7 @@ function Index({ navigation }) {
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={false}
             />
-        </View>
+        </View >
     ), [white]);  // useCallback依賴於此
 
     // BottomSheet內容渲染
