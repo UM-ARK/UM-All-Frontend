@@ -36,7 +36,7 @@ import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import { t } from "i18next";
-import ActionSheet from '@alessiocancian/react-native-actionsheet';
+import { ActionSheetCustom as ActionSheet } from '@alessiocancian/react-native-actionsheet';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
