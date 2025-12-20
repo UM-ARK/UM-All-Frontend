@@ -710,7 +710,7 @@ function CourseSim({ route, navigation }) {
                             openLink(UM_ISW);
                         }}
                     >
-                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t("進入ISW複製", { ns: 'timetable' })}`}</Text>
+                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t("進入舊ISW複製", { ns: 'timetable' })}`}</Text>
                     </TouchableOpacity>
                 )}
 
