@@ -44,8 +44,8 @@ const Tabbar = () => {
                 }
             }}
             appearance={{
-                activeTabBackgrounds: theme.themeColor,
-                activeColors: theme.white,
+                activeTabBackgrounds: `${theme.themeColor}15`,
+                activeColors: theme.themeColor,
                 tabBarBackground: theme.bg_color,
                 whenInactiveShow: 'both',
                 tabButtonLayout: 'vertical',
