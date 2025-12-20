@@ -12,12 +12,10 @@ import { uiStyle, useTheme } from './components/ThemeContext';
 import { trigger } from './utils/trigger';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
 import { t } from 'i18next';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tabs = AnimatedTabBarNavigator();
@@ -31,21 +29,25 @@ const Tabbar = () => {
         return width > height;
     };
 
+    // 統一圖標大小，方便維護
+    const iconSize = isLandscape() ? verticalScale(18) : scale(18);
+
     return (
         <Tabs.Navigator
             tabBarOptions={{
                 inactiveTintColor: theme.black.main,
-                labelStyle: {  // 這裡設定label的字體大小
+                labelStyle: {
                     ...uiStyle.defaultText,
                     fontSize: isLandscape() ? verticalScale(10) : scale(10),
+                    fontWeight: '600',
                 },
                 tabStyle: {
                     paddingBottom: insets.bottom,
                 }
             }}
             appearance={{
-                activeTabBackgrounds: theme.themeColor,
-                activeColors: theme.white,
+                activeTabBackgrounds: `${theme.themeColor}15`,
+                activeColors: theme.themeColor,
                 tabBarBackground: theme.bg_color,
                 whenInactiveShow: 'both',
                 tabButtonLayout: 'vertical',
@@ -57,11 +59,10 @@ const Tabbar = () => {
                 component={NewsScreen}
                 options={{
                     tabBarIcon: ({ focused, color }) => (
-                        <Icon
-                            name="pie-chart"
-                            size={isLandscape() ? verticalScale(15) : scale(15)}
+                        <MaterialCommunityIcons
+                            name={focused ? "newspaper-variant" : "newspaper-variant-outline"}
+                            size={iconSize}
                             color={focused ? color : theme.black.main}
-                            focused={focused}
                         />
                     ),
                     title: t('資訊'),
@@ -77,10 +78,9 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name="file-document-edit-outline"
-                            size={isLandscape() ? verticalScale(18) : scale(18)}
+                            name={focused ? "file-document" : "file-document-outline"}
+                            size={iconSize}
                             color={focused ? color : theme.black.main}
-                            focused={focused}
                         />
                     ),
                     title: t('百科'),
@@ -95,11 +95,10 @@ const Tabbar = () => {
                 component={ARKHarbor}
                 options={{
                     tabBarIcon: ({ focused, color }) => (
-                        <MaterialDesignIcons
-                            name="chat-processing-outline"
-                            size={isLandscape() ? verticalScale(18) : scale(18)}
+                        <MaterialCommunityIcons
+                            name={focused ? "chat-processing" : "chat-processing-outline"}
+                            size={iconSize}
                             color={focused ? color : theme.black.main}
-                            focused={focused}
                         />
                     ),
                     title: t('職涯港'),
@@ -115,10 +114,9 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name="database-search-outline"
-                            size={isLandscape() ? verticalScale(18) : scale(18)}
+                            name={focused ? "database-search" : "database-search-outline"}
+                            size={iconSize}
                             color={focused ? color : theme.black.main}
-                            focused={focused}
                         />
                     ),
                     title: t('搵課'),
@@ -134,10 +132,9 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name="table-clock"
-                            size={isLandscape() ? verticalScale(18) : scale(18)}
+                            name={focused ? "calendar-clock" : "calendar-clock-outline"}
+                            size={iconSize}
                             color={focused ? color : theme.black.main}
-                            focused={focused}
                         />
                     ),
                     title: t('課表'),
@@ -152,11 +149,10 @@ const Tabbar = () => {
                 component={FeaturesScreen}
                 options={{
                     tabBarIcon: ({ focused, color }) => (
-                        <Icon
-                            name="grid"
-                            size={isLandscape() ? verticalScale(15) : scale(15)}
+                        <MaterialCommunityIcons
+                            name={focused ? "view-grid" : "view-grid-outline"}
+                            size={iconSize}
                             color={focused ? color : theme.black.main}
-                            focused={focused}
                         />
                     ),
                     title: t('服務'),

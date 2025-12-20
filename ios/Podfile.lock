@@ -1303,6 +1303,27 @@ PODS:
     - ReactCommon/turbomodule/core
   - react-native-blob-util (0.22.2):
     - React-Core
+  - react-native-blur (4.4.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-cameraroll (7.10.2):
     - DoubleConversion
     - glog
@@ -1372,12 +1393,12 @@ PODS:
     - Yoga
   - react-native-restart (0.0.27):
     - React-Core
-  - react-native-safe-area-context (5.6.1):
+  - react-native-safe-area-context (5.6.2):
     - React-Core
   - react-native-simple-toast (3.3.2):
     - React-Core
     - Toast (~> 4)
-  - react-native-vector-icons-material-design-icons (12.3.0)
+  - react-native-vector-icons-material-design-icons (12.4.0)
   - react-native-webview (13.15.0):
     - DoubleConversion
     - glog
@@ -1715,7 +1736,7 @@ PODS:
     - React-Core
   - RNCClipboard (1.16.3):
     - React-Core
-  - RNDateTimePicker (8.4.4):
+  - RNDateTimePicker (8.5.1):
     - React-Core
   - RNFastImage (8.6.3):
     - React-Core
@@ -1752,7 +1773,7 @@ PODS:
     - Yoga
   - RNInAppBrowser (3.7.0):
     - React-Core
-  - RNPermissions (5.4.2):
+  - RNPermissions (5.4.4):
     - React-Core
   - RNReactNativeHapticFeedback (2.3.3):
     - DoubleConversion
@@ -1916,7 +1937,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNShare (12.2.0):
+  - RNShare (12.2.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2011,6 +2032,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-blob-util (from `../node_modules/react-native-blob-util`)
+  - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
@@ -2164,6 +2186,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-blob-util:
     :path: "../node_modules/react-native-blob-util"
+  react-native-blur:
+    :path: "../node_modules/@react-native-community/blur"
   react-native-cameraroll:
     :path: "../node_modules/@react-native-camera-roll/camera-roll"
   react-native-cookies:
@@ -2328,15 +2352,16 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 90572a8bf2b34fce61c3a8839f14339259649190
   React-microtasksnativemodule: 5a6ce850fb68e542a7b312f396d88aff0d978f67
   react-native-blob-util: 55bf7c1c4c90d138e45ddfeddbec0ec91d8df8c8
+  react-native-blur: 83afb101cb91da465c4ae996b283904ed0683aec
   react-native-cameraroll: 491f9a4d1a5c504cb690939fee8940ec2bc82e71
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
   react-native-image-picker: fbf48a88c16c4e4fa625a4171ad935bbec97dd30
   react-native-menu: 475e400d9b57949c076a0844e130044b45f2aa3d
   react-native-pager-view: c24e4b57aeefa30c0fa1f2717da671d30d1d47a5
   react-native-restart: 0bc732f4461709022a742bb29bcccf6bbc5b4863
-  react-native-safe-area-context: 2243039f43d10cb1ea30ec5ac57fc6d1448413f4
+  react-native-safe-area-context: 6c8805194166a9d6b3e53ba69ca76756c9bfb052
   react-native-simple-toast: 4c9cc976cb92b6e5fb555e7c57fce38b90a56d07
-  react-native-vector-icons-material-design-icons: c502df5b988ce85d6c7d2b7ee909818315760b82
+  react-native-vector-icons-material-design-icons: 76cd460b3540b80527b4a80fb7f867f7deedb498
   react-native-webview: f8005c1be708f31ca813ce4699b13508db123b54
   React-nativeconfig: 29f53f7caa03e1d3f49396320f4f055ae42ab8db
   React-NativeModulesApple: 1fe64d61396453d56ee3965c0adf2f3284c92a8b
@@ -2371,17 +2396,17 @@ SPEC CHECKSUMS:
   ReactNativeUiLib: 237cd5430e9569575778f228547d03c485b010de
   RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
   RNCClipboard: f6679d470d0da2bce2a37b0af7b9e0bf369ecda5
-  RNDateTimePicker: 7d93eacf4bdf56350e4b7efd5cfc47639185e10c
+  RNDateTimePicker: 1644c91bdbee110de801cf41c7c660c00366e174
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
-  RNFBAnalytics: d52d2ca1a43e3b9641c33f194d8d4c91565d92df
+  RNFBAnalytics: 350a677f022e33961b9d23b6f98dcfcc58928b02
   RNFBApp: 6e0c3ee6cfbc76b5d1237ebf37240cd48a55c6e2
   RNGestureHandler: d167eaaa871650f856883d2e7841607e4873a124
   RNInAppBrowser: 6d3eb68d471b9834335c664704719b8be1bfdb20
-  RNPermissions: 0b0cdb0dfcc2fabc136a3d596220cc3d91977d79
+  RNPermissions: 15f0316617e4a61c6f9b64174081837e674075ee
   RNReactNativeHapticFeedback: 92bb48cffe0a8738a109d66cdb5984732b9cb496
   RNReanimated: e2ba5e1849070a61a693d883f4a50c251aa9b8c5
   RNScreens: 9737aef02155432b3656400ed38e1e14c733829d
-  RNShare: a83e617f2a1151bdd4ee124130392b95e38b8c0d
+  RNShare: 0862cb4b7d540661d8af1daa6f14ba4436bb3ad5
   RNSVG: 2e59e14c2723a1967cd1bba71038a59142cbc616
   RNVectorIcons: 9220340395b3a94edad59be7d507ca0aa443e6fb
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
@@ -2390,6 +2415,6 @@ SPEC CHECKSUMS:
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   Yoga: 2b02f3f767761bb4ffd25b1bb56fd264be57bd6b
 
-PODFILE CHECKSUM: 067bd0268feee936304f38a637471ce6cc85d6a5
+PODFILE CHECKSUM: 4be076a3a38899c5d47cf21be9af70c607b9c6b2
 
 COCOAPODS: 1.16.2

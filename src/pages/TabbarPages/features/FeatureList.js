@@ -55,7 +55,7 @@ const iconTypes = {
 
 export const functionArr = [
     {
-        title: '🌟 ' + t('校園資訊', { ns: 'features' }),
+        title: t('校園資訊', { ns: 'features' }),
         fn: [
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -299,7 +299,7 @@ export const functionArr = [
         ],
     },
     {
-        title: '🗓️ ' + t('預約服務', { ns: 'features' }),
+        title: t('預約服務', { ns: 'features' }),
         fn: [
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -467,7 +467,7 @@ export const functionArr = [
         ],
     },
     {
-        title: '🎓 ' + t('課業發展', { ns: 'features' }),
+        title: t('課業發展', { ns: 'features' }),
         fn: [
             {
                 icon_type: iconTypes.materialCommunityIcons,
@@ -665,7 +665,7 @@ export const functionArr = [
         ],
     },
     {
-        title: '😎 ' + t('新生推薦', { ns: 'features' }),
+        title: t('新生推薦', { ns: 'features' }),
         fn: [
             {
                 icon_type: iconTypes.materialCommunityIcons,

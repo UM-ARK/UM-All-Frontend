@@ -64,14 +64,13 @@ const getColorDiy = (isLight) => ({
 
     // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
     viewShadow: {
-        // shadowColor: '#000',
-        // shadowOffset: { width: 1, height: 1 },
-        // shadowOpacity: 0.2,
-        // shadowRadius: 3,
-        // // 適用於Android
-        // elevation: 4,
-        // RN 0.76 後加入的css屬性
-        boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.2)',
+        shadowColor: isLight ? '#000' : '#fff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 3,
+        // RN 0.76 後加入的css屬性，但需要新架構支持，新架構目前仍未在項目中啟用
+        // boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.2)',
     },
 
     barStyle: isLight ? 'dark-content' : 'light-content',

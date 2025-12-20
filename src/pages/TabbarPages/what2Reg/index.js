@@ -10,6 +10,7 @@ import {
     FlatList,
     Keyboard,
     Alert,
+    LayoutAnimation,
 } from "react-native";
 
 import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH, } from "../../../utils/pathMap";
@@ -36,11 +37,12 @@ import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import { t } from "i18next";
-import ActionSheet from '@alessiocancian/react-native-actionsheet';
+import { ActionSheetCustom as ActionSheet } from '@alessiocancian/react-native-actionsheet';
 import lodash from 'lodash';
 import OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
 import Toast from 'react-native-simple-toast';
+import { useIsFocused } from '@react-navigation/native';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -198,6 +200,8 @@ const What2Reg = (props) => {
     const actionSheetRef = useRef(null);
     const bottomSheetRef = useRef(null);
 
+    const isFocused = useIsFocused();
+
     const insets = useContext(SafeAreaInsetsContext);
 
     // 3.0開始，優先使用本地緩存的offerCourses數據展示
@@ -236,6 +240,24 @@ const What2Reg = (props) => {
         }
     };
 
+    // 在頁面聚焦時讀取緩存數據，用於同步課程數據
+    useEffect(() => {
+        if (isFocused) { refresh() }
+    }, [isFocused]);
+
+    async function refresh() {
+        // 課程版本
+        getCourseData('version').then(localCourseVersion => {
+            if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
+                setS_courseVersion(localCourseVersion)
+                getCourseData('adddrop').then(addDropStorageData => {
+                    setS_coursePlan(addDropStorageData.adddrop);
+                    setS_coursePlanTime(addDropStorageData.timetable);
+                })
+            }
+        });
+    }
+
     const updateFilterOptions = async (nextOptions) => {
         try {
             if (lodash.isEqual(nextOptions, filterOptions)) { return }
@@ -244,7 +266,7 @@ const What2Reg = (props) => {
         } catch (error) {
             Alert.alert('Error', JSON.stringify(error));
         }
-    }
+    };
 
     /**
      * 開設課程列表，根據當前課程模式（Add Drop 或 Pre Enroll）選擇對應的課程數據
@@ -364,12 +386,13 @@ const What2Reg = (props) => {
                             style={{
                                 ...s.classItm,
                                 paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
-                                backgroundColor: s_course_mode === itm ? (s_course_mode === 'ad' ? themeColor : secondThemeColor) : null,
+                                backgroundColor: s_course_mode === itm ? (s_course_mode === 'ad' ? `${themeColor}15` : `${secondThemeColor}15`) : null,
                             }}
                             onPress={async () => {
                                 trigger();
                                 try {
                                     setCourse_mode(itm);
+                                    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                                     await updateFilterOptions({ ...filterOptions, mode: itm });
                                 } catch (error) {
                                     Alert.alert(JSON.stringify(error));
@@ -378,7 +401,7 @@ const What2Reg = (props) => {
                         >
                             <Text style={{
                                 ...uiStyle.defaultText,
-                                color: s_course_mode === itm ? white : black.third,
+                                color: s_course_mode === itm ? (s_course_mode === 'ad' ? themeColor : secondThemeColor) : black.third,
                                 fontWeight: s_course_mode === itm ? '900' : 'normal',
                                 fontSize: scale(12),
                             }}>{modeENStr[itm]}</Text>
@@ -408,11 +431,12 @@ const What2Reg = (props) => {
                         style={{
                             ...s.classItm,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
-                            backgroundColor: filterOptions.option === itm ? themeColor : null,
+                            backgroundColor: filterOptions.option === itm ? `${themeColor}15` : null,
                         }}
                         onPress={() => {
                             trigger();
                             try {
+                                LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                                 updateFilterOptions({ ...filterOptions, option: itm });
                             } catch (error) {
                                 Alert.alert(JSON.stringify(error));
@@ -422,7 +446,7 @@ const What2Reg = (props) => {
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: filterOptions.option === itm ? white : black.third,
+                            color: filterOptions.option === itm ? themeColor : black.third,
                             fontWeight: filterOptions.option === itm ? '900' : 'normal',
                             fontSize: scale(12),
                         }}>{itm}</Text>
@@ -456,7 +480,7 @@ const What2Reg = (props) => {
                     <TouchableScale
                         style={{
                             ...s.classItm,
-                            backgroundColor: itm === filterOptions.facultyName ? themeColor : null,
+                            backgroundColor: itm === filterOptions.facultyName ? `${themeColor}15` : null,
                             paddingHorizontal: scale(5), paddingVertical: scale(2),
                         }}
                         onPress={() => {
@@ -474,7 +498,7 @@ const What2Reg = (props) => {
                     >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            color: itm === filterOptions.facultyName ? white : black.third,
+                            color: itm === filterOptions.facultyName ? themeColor : black.third,
                             fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
                             fontSize: scale(12)
                         }}>{itm}</Text>
@@ -504,7 +528,7 @@ const What2Reg = (props) => {
                 <TouchableScale style={{
                     ...s.classItm,
                     paddingHorizontal: scale(5), paddingVertical: scale(2),
-                    backgroundColor: filterOptions.depaName === itm ? themeColor : null,
+                    backgroundColor: filterOptions.depaName === itm ? `${themeColor}15` : null,
                 }}
                     onPress={() => {
                         trigger();
@@ -514,7 +538,7 @@ const What2Reg = (props) => {
                     <Text style={{
                         ...uiStyle.defaultText,
                         alignSelf: 'center',
-                        color: filterOptions.depaName === itm ? white : black.third,
+                        color: filterOptions.depaName === itm ? themeColor : black.third,
                         fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
                         fontSize: scale(12)
                     }}>{itm}</Text>
@@ -839,7 +863,6 @@ const What2Reg = (props) => {
                 await checkCloudCourseVersion();
                 init();
                 handleDialogClose();
-                Toast.show(`Request completed.`);
                 break;
             default:
                 break;
@@ -1051,14 +1074,14 @@ const What2Reg = (props) => {
                             position: 'absolute',
                             right: scale(10),
                             flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: themeColor,
+                            backgroundColor: `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
                         onPress={handleUpdatePress}
                     >
-                        <Ionicons name={'build'} size={verticalScale(14)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('更新')}</Text>
+                        <Ionicons name={'build'} size={verticalScale(14)} color={themeColor} />
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('更新')}</Text>
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
@@ -1075,13 +1098,13 @@ const What2Reg = (props) => {
                         </View>
                     </View>
 
-                    {/* 下課統計 */}
+                    {/* 下課統計 - 乾飯 */}
                     <TouchableOpacity
                         style={{
                             position: 'absolute',
                             left: scale(10),
                             flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: themeColor,
+                            backgroundColor: `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
@@ -1095,8 +1118,8 @@ const What2Reg = (props) => {
                             }
                         }}
                     >
-                        <Ionicons name={'alarm'} size={verticalScale(14)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('幹飯', { ns: 'catalog' })}</Text>
+                        <Ionicons name={'alarm'} size={verticalScale(14)} color={themeColor} />
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('幹飯', { ns: 'catalog' })}</Text>
                     </TouchableOpacity>
                 </View>
 

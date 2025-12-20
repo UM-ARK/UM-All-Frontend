@@ -164,7 +164,8 @@ function CourseSim({ route, navigation }) {
             margin: scale(3),
             padding: scale(5),
             borderRadius: scale(6),
-            backgroundColor: themeColorUltraLight,
+            backgroundColor: `${themeColor}15`,
+            borderWidth: 1, borderColor: themeColorUltraLight,
         },
     });
 
@@ -224,13 +225,16 @@ function CourseSim({ route, navigation }) {
     }, [isFocused]);
 
     async function refresh() {
-        getCourseData('adddrop').then(addDropStorageData => {
-            setSCoursePlanFile(addDropStorageData.adddrop);
-            setSCoursePlanTimeFile(addDropStorageData.timetable);
-        })
-
         // 課程版本
-        getCourseData('version').then(localCourseVersion => { setS_courseVersion(localCourseVersion) });
+        getCourseData('version').then(localCourseVersion => {
+            if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
+                setS_courseVersion(localCourseVersion)
+                getCourseData('adddrop').then(addDropStorageData => {
+                    setSCoursePlanFile(addDropStorageData.adddrop);
+                    setSCoursePlanTimeFile(addDropStorageData.timetable);
+                })
+            }
+        });
     }
 
     /**
@@ -691,12 +695,12 @@ function CourseSim({ route, navigation }) {
 
                 {/* Add課按鈕提示 */}
                 <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t("選項", { ns: 'timetable' })} 1：`}</Text>
+                    <Text style={{ color: themeColor }}>{`${t("方法", { ns: 'timetable' })} 1：`}</Text>
                     {`${t("右上角按鈕手動“Add”！", { ns: 'timetable' })}\n`}
                 </Text>
 
                 <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t("選項", { ns: 'timetable' })} 2：`}</Text>
+                    <Text style={{ color: themeColor }}>{`${t("方法", { ns: 'timetable' })} 2：`}</Text>
                     {`${t("全選、複製Timetable，", { ns: 'timetable' })}\n${t("粘貼到下方輸入框，", { ns: 'timetable' })}\n${t("一鍵導入！", { ns: 'timetable' })}`}
                 </Text>
 
@@ -709,7 +713,7 @@ function CourseSim({ route, navigation }) {
                             openLink(UM_ISW);
                         }}
                     >
-                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t("進入ISW複製", { ns: 'timetable' })}`}</Text>
+                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t("進入舊ISW複製", { ns: 'timetable' })}`}</Text>
                     </TouchableOpacity>
                 )}
 
@@ -1062,7 +1066,7 @@ E11-0000
                                 <TouchableOpacity
                                     style={{
                                         ...s.buttonContainer,
-                                        backgroundColor: unread,
+                                        backgroundColor: `${unread}30`,
                                         borderRadius: scale(5),
                                         padding: scale(3),
                                     }}
@@ -1073,7 +1077,7 @@ E11-0000
                                         verScroll.current?.scrollTo({ y: 0 });
                                     }}
                                 >
-                                    <Text style={{ ...s.searchResultText, color: trueWhite, fontWeight: 'bold' }}>
+                                    <Text style={{ ...s.searchResultText, color: unread, fontWeight: 'bold' }}>
                                         {`${t("刪除所有", { ns: 'timetable' })} ${i['Course Code']}`}
                                     </Text>
                                 </TouchableOpacity>
@@ -1244,7 +1248,7 @@ E11-0000
                         style={{
                             position: 'absolute',
                             left: scale(10),
-                            backgroundColor: themeColorUltraLight,
+                            backgroundColor: `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
@@ -1283,7 +1287,7 @@ E11-0000
                     style={{
                         position: 'absolute',
                         right: scale(10),
-                        backgroundColor: hasOpenCourseSearch ? secondThemeColor : themeColor,
+                        backgroundColor: hasOpenCourseSearch ? `${secondThemeColor}15` : `${themeColor}15`,
                         borderRadius: scale(5),
                         padding: scale(5),
                     }}
@@ -1307,7 +1311,7 @@ E11-0000
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: white,
+                        color: hasOpenCourseSearch ? secondThemeColor : themeColor,
                         fontWeight: 'bold',
                         lineHeight: verticalScale(14),
                     }}>

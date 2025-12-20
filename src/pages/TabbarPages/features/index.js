@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
-import { MAIL, } from '../../../utils/pathMap';
+import { ARK_HARBOR_FEEDBACK, MAIL, } from '../../../utils/pathMap';
 import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
 import { trigger } from "../../../utils/trigger";
@@ -31,46 +31,39 @@ const iconSize = scale(25);
 
 function Index({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, barStyle } = theme;
+    const { themeColor, white, black, trueWhite, bg_color, barStyle, viewShadow } = theme;
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
     const insets = useContext(SafeAreaInsetsContext);
 
-    // 登錄檢查
-    // useEffect(() => {
-    //     console.log('RootStore:', RootStore);
-    //     if (RootStore?.userInfo?.stdData) {
-    //         setIsLogin(true);
-    //     } 
-    // }, [RootStore]);
-
     // 功能卡片渲染，useCallback避免不必要的重渲染
     const GetFunctionCard = useCallback((title, fn_list) => (
         <View key={title}
             style={{
-                flex: 1, backgroundColor: white,
-                borderRadius: scale(10),
-                marginHorizontal: scale(10),
-                marginTop: verticalScale(10),
+                backgroundColor: white, borderRadius: scale(10),
+                marginHorizontal: scale(10), marginTop: verticalScale(10),
+                ...viewShadow,
             }}
         >
             <View style={{
                 flexDirection: 'row',
-                justifyContent: 'space-between',
                 alignItems: 'center',
                 paddingHorizontal: scale(12),
-                paddingTop: verticalScale(12),
+                paddingTop: verticalScale(16), paddingBottom: verticalScale(12),
+                borderBottomWidth: verticalScale(2),
+                borderBottomColor: bg_color,
             }}>
                 <Text style={{
                     ...uiStyle.defaultText,
-                    fontSize: verticalScale(12),
+                    fontSize: verticalScale(15),
                     color: black.main,
-                    fontWeight: 'bold',
+                    fontWeight: '500',
                 }}>
                     {title}
                 </Text>
             </View>
+
             <FlatGrid
                 maxItemsPerRow={5}
                 itemDimension={scale(50)}
@@ -126,7 +119,7 @@ function Index({ navigation }) {
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={false}
             />
-        </View>
+        </View >
     ), [white]);  // useCallback依賴於此
 
     // BottomSheet內容渲染
@@ -160,6 +153,35 @@ function Index({ navigation }) {
         );
     };
 
+    const handleFeedbackPress = () => {
+        trigger();
+        const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
+        // if (Platform.OS === 'android') {
+        // } else {
+        //     Linking.openURL(mailMes);
+        // }
+        Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
+            {
+                text: 'Harbor⭐️', onPress: () => {
+                    openLink(ARK_HARBOR_FEEDBACK);
+                }
+            },
+            {
+                text: 'Email', onPress: () => {
+                    Clipboard.setString(MAIL);
+                    Toast.show(t('已複製Mail到剪貼板！'));
+                    Linking.openURL(mailMes);
+                }
+            },
+            { text: 'No', },
+        ]);
+    }
+
+    const handleSettingsPress = () => {
+        trigger();
+        navigation.navigate('NewsTabbar', { screen: 'AboutPage' });
+    }
+
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             <Header
@@ -178,68 +200,67 @@ function Index({ navigation }) {
                 }}
             />
             <ScrollView showsVerticalScrollIndicator={true}>
+                {/* 標題與個功能按鍵 */}
                 <View style={{
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                    paddingTop: verticalScale(3), paddingHorizontal: scale(10),
+                    paddingVertical: verticalScale(10), // 增加頂部呼吸感
+                    paddingHorizontal: scale(16), // 兩側留白增加至 16
                 }}>
-                    {/* 反饋按鈕 */}
+                    {/* 左側：反饋 (使用淺色背景膠囊樣式) */}
                     <TouchableOpacity
                         style={{
                             flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: themeColor,
-                            borderRadius: scale(5),
-                            padding: scale(5),
+                            backgroundColor: `${themeColor}15`, // 15 是 10% 透明度，讓顏色更柔和
+                            borderRadius: scale(20), // 完全圓角更現代
+                            paddingVertical: scale(6),
+                            paddingHorizontal: scale(10),
                         }}
-                        onPress={() => {
-                            trigger();
-                            const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
-                            if (Platform.OS === 'android') {
-                                Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
-                                    {
-                                        text: '複製Email', onPress: () => {
-                                            Clipboard.setString(MAIL);
-                                            Toast.show(t('已複製Mail到剪貼板！'));
-                                            Linking.openURL(mailMes);
-                                        }
-                                    },
-                                    { text: 'No', },
-                                ]);
-                            } else {
-                                Linking.openURL(mailMes);
-                            }
-                        }}
+                        onPress={handleFeedbackPress} // 邏輯抽離
                     >
-                        <MaterialIcons name={'feedback'} size={verticalScale(15)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('反饋')}</Text>
-                    </TouchableOpacity>
-                    {/* 標題 */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <FastImage
-                            source={require('../../../static/img/logo.png')}
-                            style={{ height: iconSize, width: iconSize, borderRadius: scale(5) }}
-                        />
+                        <MaterialIcons name={'feedback'} size={verticalScale(14)} color={themeColor} />
                         <Text style={{
-                            marginLeft: scale(5), ...uiStyle.defaultText, fontSize: scale(18),
-                            color: themeColor, fontWeight: '600'
+                            marginLeft: scale(4),
+                            fontSize: verticalScale(12),
+                            color: themeColor,
+                            fontWeight: '600'
+                        }}>
+                            {t('反饋')}
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* 中間：標題 */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{
+                            fontSize: verticalScale(18),
+                            color: black.main,
+                            fontWeight: '700'
                         }}>{t('服務一覽', { ns: 'features' })}</Text>
                     </View>
-                    {/* 設置按鈕 */}
+
+                    {/* 右側：設置 (與左側對稱) */}
                     <TouchableOpacity
                         style={{
                             flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: themeColor,
-                            borderRadius: scale(5),
-                            padding: scale(5),
+                            backgroundColor: `${themeColor}15`,
+                            borderRadius: scale(20),
+                            paddingVertical: scale(6),
+                            paddingHorizontal: scale(10),
                         }}
-                        onPress={() => {
-                            trigger();
-                            navigation.navigate('NewsTabbar', { screen: 'AboutPage' });
-                        }}
+                        onPress={handleSettingsPress}
                     >
-                        <Ionicons name={'build'} size={verticalScale(15)} color={white} />
-                        <Text style={{ ...uiStyle.defaultText, color: white, fontWeight: 'bold' }}>{t('設置')}</Text>
+                        <Ionicons name={'settings-sharp'} size={verticalScale(14)} color={themeColor} />
+                        {/* 甚至可以不顯示文字，只顯示圖標以簡化 */}
+                        <Text style={{
+                            marginLeft: scale(4),
+                            fontSize: verticalScale(12),
+                            color: themeColor,
+                            fontWeight: '600'
+                        }}>
+                            {t('設置')}
+                        </Text>
                     </TouchableOpacity>
                 </View>
+
                 {functionArr.map(fn_card => GetFunctionCard(fn_card.title, fn_card.fn))}
                 <View style={{ marginHorizontal: scale(20), marginVertical: scale(10) }} />
             </ScrollView>

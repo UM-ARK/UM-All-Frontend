@@ -378,7 +378,14 @@ const HomeScreen = ({ navigation }) => {
         let isEssencial = item.summary.toUpperCase().indexOf('EXAM') != -1 ||
             item.summary.toUpperCase().indexOf('SEMESTER') != -1 &&
             item.summary.toUpperCase().indexOf('BREAK') == -1;
-        let backgroundColor = isThisDateSelected ? themeColor : themeColorLight;
+        const backgroundColor = isThisDateSelected ? `${themeColor}15` : 'transparent';
+        const textStyle = {
+            ...uiStyle.defaultText,
+            color: isThisDateSelected ? themeColor : black.third,
+            fontWeight: isThisDateSelected ? 'bold' : 'normal',
+            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
+            includeFontPadding: false
+        };
         return (
             <TouchableScale
                 style={{ width: calItemWidth, margin: verticalScale(3), }}
@@ -389,45 +396,24 @@ const HomeScreen = ({ navigation }) => {
                 }}
             >
                 <View style={{
-                    backgroundColor,
-                    borderRadius: verticalScale(5),
+                    backgroundColor, borderRadius: verticalScale(5),
                     paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
+                    borderWidth: isThisDateSelected ? 1 : null, borderColor: themeColorUltraLight, // 描邊增加精緻感
                 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                         {/* 年份 */}
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: theme.trueWhite,
-                            fontSize: verticalScale(8),
-                            fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                            includeFontPadding: false
-                        }}>
+                        <Text style={{ ...textStyle, fontSize: verticalScale(8), }}>
                             {momentItm.substring(0, 4)}
                         </Text>
 
                         {/* 日期 */}
                         <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: theme.trueWhite,
-                                fontSize: verticalScale(12),
-                                fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                                opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                                includeFontPadding: false,
-                            }}>
+                            style={{ ...textStyle, fontSize: verticalScale(12), }}>
                             {`${momentItm.substring(4, 6)}.${momentItm.substring(6, 8)}`}
                         </Text>
 
                         {/* 星期幾 */}
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: theme.trueWhite,
-                            fontSize: verticalScale(7),
-                            fontWeight: isThisDateSelected ? 'bold' : 'normal',
-                            opacity: !isThisDateSelected && !theme.isLight ? 0.5 : 1,
-                            includeFontPadding: false
-                        }}>
+                        <Text style={{ ...textStyle, fontSize: verticalScale(7), }}>
                             {getWeek(item.startDate)}
                         </Text>
                     </View>
@@ -451,13 +437,14 @@ const HomeScreen = ({ navigation }) => {
         const imageSize = verticalScale(23);
         const iconSize = verticalScale(23);
         const containerSize = verticalScale(40); // 固定容器大小
+        const iconColor = theme.themeColor;
 
         if (icon_type == 'ionicons') {
             icon = (
                 <Ionicons
                     name={icon_name}
                     size={iconSize}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             );
         } else if (icon_type == 'MaterialCommunityIcons') {
@@ -465,7 +452,7 @@ const HomeScreen = ({ navigation }) => {
                 <MaterialCommunityIcons
                     name={icon_name}
                     size={iconSize + scale(3)}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             );
         } else if (icon_type == 'FontAwesome5') {
@@ -473,7 +460,7 @@ const HomeScreen = ({ navigation }) => {
                 <FontAwesome5
                     name={icon_name}
                     size={iconSize - verticalScale(3)}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             );
         } else if (icon_type == 'MaterialIcons') {
@@ -481,7 +468,7 @@ const HomeScreen = ({ navigation }) => {
                 <MaterialIcons
                     name={icon_name}
                     size={iconSize - verticalScale(3)}
-                    color={theme.themeColor}
+                    color={iconColor}
                 />
             )
         } else if (icon_type == 'img') {
@@ -881,10 +868,12 @@ const HomeScreen = ({ navigation }) => {
 
                                 {/* 校曆內容描述 */}
                                 <View style={{
-                                    backgroundColor: themeColorUltraLight,
                                     borderRadius: scale(5),
                                     paddingVertical: verticalScale(2), paddingHorizontal: scale(5),
                                     width: screenWidth * 0.8,
+                                    backgroundColor: `${themeColor}15`, // 極淺的藍色
+                                    borderRadius: scale(10),
+                                    borderWidth: 1, borderColor: themeColorUltraLight, // 描邊增加精緻感
                                 }}>
                                     <Text
                                         selectable
@@ -928,36 +917,30 @@ const HomeScreen = ({ navigation }) => {
                 {/** 即將到來的課程 */}
                 <View style={{
                     flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    alignItems: "center", justifyContent: "center",
                     alignSelf: "center",
                     width: screenWidth * 0.8,
+                    marginTop: verticalScale(3),
                 }}>
                     <TouchableScale
-                        style={{
-                            width: "100%",
-                        }}
+                        style={{ width: "100%", }}
                         onPress={() => {
                             trigger();
                             navigation.navigate("CourseSimTab");
                         }}>
                         {upcomingCourse ? (
-                            <View
-                                style={{
-                                    flexDirection: 'row', flex: 1,
-                                    alignItems: "center", justifyContent: "center",
-                                    gap: scale(3),
-                                    // backgroundColor: TIME_TABLE_COLOR[lodash.random(0, TIME_TABLE_COLOR.length - 1)],
-                                    backgroundColor: themeColorUltraLight,
-                                    paddingHorizontal: scale(20), paddingVertical: scale(10),
-                                    marginTop: verticalScale(5),
-                                    borderRadius: scale(5),
-                                }}>
+                            <View style={{
+                                flexDirection: 'row', flex: 1,
+                                alignItems: "center", justifyContent: "center",
+                                gap: scale(3),
+                                backgroundColor: `${themeColor}15`,
+                                paddingHorizontal: scale(20), paddingVertical: scale(10),
+                                borderRadius: scale(5),
+                            }}>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Course Code"]}</Text>
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Time From"]}</Text>
                             </View>
-
                         ) : (
                             <View style={{
                                 display: "flex",
@@ -965,9 +948,8 @@ const HomeScreen = ({ navigation }) => {
                                 width: "100%",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                marginTop: verticalScale(3),
                                 paddingVertical: verticalScale(8),
-                                backgroundColor: theme.disabled,
+                                backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
                                 borderRadius: verticalScale(5),
                             }}>
@@ -1059,7 +1041,7 @@ const HomeScreen = ({ navigation }) => {
                                 style={{
                                     alignSelf: 'center',
                                     marginTop: scale(5),
-                                    backgroundColor: themeColor,
+                                    backgroundColor: `${themeColor}15`,
                                     borderRadius: scale(10),
                                     paddingVertical: scale(5), paddingHorizontal: scale(8),
                                 }}
@@ -1072,10 +1054,10 @@ const HomeScreen = ({ navigation }) => {
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
-                                        color: white,
+                                        color: themeColor,
                                         fontWeight: 'bold',
                                     }}>
-                                    {`點我更新 😉~`}
+                                    {`${t('點我更新', { ns: 'home' })}` + '😉~'}
                                 </Text>
                             </TouchableOpacity>
                         </View>

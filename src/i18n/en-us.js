@@ -47,6 +47,8 @@ export default {
         "組織登入": "Club In",
         "論壇登入": "Forum In",
         "新想法": "New",
+        
+        "點我更新": "Click me update",
 
         "周一": "MON",
         "周二": "TUE",
@@ -89,7 +91,7 @@ export default {
         "Common Issues": "Common Issues",
         "Privacy Policy & User Agreement": "Privacy Policy & User Agreement",
 
-        "圖片更新不及時？網站響應出錯？": "Pictures not updated in time? Website response error?",
+        "圖片更新不及時？網站響應出錯？課表同步問題？": "Error Pictures? Website response error? Error Timetable?",
         "清除APP內所有緩存（包括課表模擬與時間版本）": "Clear all the cache in the APP(Including Catalog & Timetable)",
         "清除APP內Cookies": "Clear all the Cookies in the APP",
 
@@ -165,12 +167,13 @@ export default {
 
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
+        "方法": "Method",
         "右上角按鈕手動“Add”！": "Manual add button in the upper right corner!",
         "全選、複製Timetable，": "Select all, copy Timetable,",
         "粘貼到下方輸入框，": "Paste it into the input box below,",
         "一鍵導入！": "One-click import!",
 
-        "進入ISW複製": "Enter ISW to Copy",
+        "進入舊ISW複製": "Enter ISW to Copy",
         "↑記得先粘貼課表數據，再點擊導入哦": "↑Remember to paste the class schedule data first and then click Import",
         "一鍵導入到模擬課表": "Import to simulated timetable",
 
