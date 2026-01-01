@@ -159,8 +159,8 @@ const EventPage = forwardRef((props, ref) => {
                     noMore = false;
                 }
 
-                // 交給分割兩列的函數處理合併
-                setEventRawList(newDataArr);
+                // 累積所有頁的活動，再統一分配到列，避免新頁集中到第一列（關鍵修正）
+                setEventRawList(prev => page === 1 ? newDataArr : prev.concat(newDataArr));
             } else if (json.code === '2') {
                 alert('已無更多數據');
                 noMore = true;
@@ -245,7 +245,10 @@ const EventPage = forwardRef((props, ref) => {
         // 依列數動態分流 event 與 harbor，模擬小紅書瀑布
         let columns = Array.from({ length: numColumns }, () => []);
 
-        const harborChunks = lodash.chunk(harborData, Math.ceil(harborData.length / numColumns));
+        // 先準備可用的 harbor 資料：若已有列中的 harbor，優先保留，否則使用最新 harborData（關鍵修正：翻頁後不丟失 harbor 卡片）
+        const existingHarbor = columnsData.flat().filter(itm => itm?.type === 'harbor');
+        const harborSource = existingHarbor.length > 0 ? existingHarbor : harborData;
+        const harborChunks = lodash.chunk(harborSource, Math.ceil(harborSource.length / numColumns));
         // eventList 為空時，僅渲染 harbor 分段
         if (!eventList || eventList.length === 0) {
             if (harborData.length === 0) {
@@ -266,22 +269,36 @@ const EventPage = forwardRef((props, ref) => {
             }
         });
 
-        // 依 index % numColumns 均勻分佈活動卡片
-        eventList.forEach((itm, idx) => {
-            const targetIdx = idx % numColumns;
-            columns[targetIdx].push(itm);
-        });
+        // 翻頁場景：保持已分配順序，僅將「新增活動」追加，計算時排除 harbor 數量（關鍵修正）
+        if (dataPage > 1 && !skipAppend && columnsData.length === numColumns && eventDataList.length > 0) {
+            columns = columnsData.map(col => [...col]);
+            const existingEventLen = eventDataList.filter(itm => itm?.type !== 'harbor').length;
+            const newEvents = eventList.slice(existingEventLen);
 
-        // 翻頁時與舊資料合併，保持瀑布累積
-        if (dataPage > 1 && !skipAppend && columnsData.length === numColumns) {
-            columns = columns.map((col, idx) => columnsData[idx].concat(col));
+            if (newEvents.length === 0) {
+                // 無新增時保持原分佈
+                setColumnsData(columns);
+                setEventDataList(eventDataList);
+                return;
+            }
+
+            newEvents.forEach((itm, idx) => {
+                const targetIdx = (existingEventLen + idx) % numColumns;
+                columns[targetIdx].push(itm);
+            });
+        } else {
+            // 首頁或重算：依 index % numColumns 均勻分佈活動卡片
+            eventList.forEach((itm, idx) => {
+                const targetIdx = idx % numColumns;
+                columns[targetIdx].push(itm);
+            });
         }
 
         // 去重，避免重複卡片
         columns = columns.map(col => lodash.uniqBy(col, item => item._id || item.id));
 
-        // 首頁將 harbor 隨機插入各列
-        if (harborData.length > 0 && dataPage === 1) {
+        // 首頁將 harbor 隨機插入各列；翻頁時保留既有 harbor 位置不動
+        if (harborSource.length > 0 && (dataPage === 1 || skipAppend)) {
             columns = columns.map((col, idx) => insertToList(col, lodash.cloneDeep(harborChunks[idx] || [])));
         }
 
