@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Dimensions,
     Image,
+    useWindowDimensions,
 } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
@@ -37,6 +38,8 @@ const EventPage = forwardRef((props, ref) => {
             flexDirection: 'row',
             width: '100%',
             backgroundColor: bg_color,
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
         },
         loadMore: {
             alignItems: 'center',
@@ -52,12 +55,14 @@ const EventPage = forwardRef((props, ref) => {
 
     const [dataPage, setDataPage] = useState(1);
     const [eventDataList, setEventDataList] = useState([]);
-    const [leftDataList, setLeftDataList] = useState([]);
-    const [rightDataList, setRightDataList] = useState([]);
+    const [columnsData, setColumnsData] = useState([]); // 動態列數據
     const [isLoading, setIsLoading] = useState(true);
     const [noMoreData, setNoMoreData] = useState(false);
     const [harborData, setHarborData] = useState([]);
     const [eventRawList, setEventRawList] = useState([]);  // 把活動原始數據也存 state
+    const [numColumns, setNumColumns] = useState(2); // 橫豎屏動態列數
+    const [cardWidth, setCardWidth] = useState(scale(160)); // 卡片寬度隨列數更新
+    const windowLayout = useWindowDimensions();
 
     const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
 
@@ -73,6 +78,18 @@ const EventPage = forwardRef((props, ref) => {
         getAPIData();
     }, []);
 
+    // 監聽螢幕尺寸，依據橫豎屏調整瀑布列數與卡片寬度
+    useEffect(() => {
+        const isLandscape = windowLayout.width > windowLayout.height;
+        const targetColumns = isLandscape ? 3 : 2; // 橫屏擴充三列，豎屏維持兩列
+        const gap = scale(10); // 欄間距，留白避免擁擠
+        const safeWidth = Math.max(windowLayout.width, 320);
+        const computedWidth = (safeWidth - gap * (targetColumns + 1)) / targetColumns;
+        setNumColumns(targetColumns);
+        // 卡片寬度加上上下限，避免極端螢幕尺寸過窄/過寬
+        setCardWidth(Math.min(Math.max(computedWidth, scale(140)), scale(220)));
+    }, [windowLayout.height, windowLayout.width]);
+
     useEffect(() => {
         const filteredData = getNotFinishEvent(eventRawList, noMoreData);
         separateData(filteredData);
@@ -84,6 +101,13 @@ const EventPage = forwardRef((props, ref) => {
             separateData(eventDataList);
         }
     }, [harborData]);
+
+    // 橫豎屏切換時重新分配瀑布列，保留已拉取的活動
+    useEffect(() => {
+        if (columnsData.length > 0 || eventDataList.length > 0) {
+            separateData(eventDataList.length > 0 ? eventDataList : eventRawList, { skipAppend: true });
+        }
+    }, [numColumns]);
 
     // 監聽dataPage變化，重新獲取數據
     useEffect(() => {
@@ -216,55 +240,54 @@ const EventPage = forwardRef((props, ref) => {
         return listCopy;
     };
 
-    const separateData = (eventList) => {
-        // 將dataList的數據分成單數和偶數列，用於模擬瀑布屏展示佈局
-        let leftList = [];
-        let rightList = [];
+    const separateData = (eventList, options = {}) => {
+        const { skipAppend = false } = options; // skipAppend 用於橫豎屏重排，避免重複拼接
+        // 依列數動態分流 event 與 harbor，模擬小紅書瀑布
+        let columns = Array.from({ length: numColumns }, () => []);
 
-        const [leftHarbor, rightHarbor] = lodash.chunk(harborData, Math.ceil(harborData.length / 2));
-        // eventList为空时，直接将harbor随机均分到两列
+        const harborChunks = lodash.chunk(harborData, Math.ceil(harborData.length / numColumns));
+        // eventList 為空時，僅渲染 harbor 分段
         if (!eventList || eventList.length === 0) {
             if (harborData.length === 0) {
                 return;
             }
-            setLeftDataList(leftHarbor);
-            setRightDataList(rightHarbor);
+            const filledHarbor = Array.from({ length: numColumns }, (_, idx) => harborChunks[idx] || []);
+            setColumnsData(filledHarbor);
             return;
         }
 
-        // 將圖片類型的服務器返回的相對路徑加上域名
-        eventList.forEach((itm, idx) => {
-            // 圖片類型服務器返回相對路徑，請記住加上域名
+        // 將圖片類型的服務器返回的相對路徑加上域名，缺字段時安全跳過（橫屏重排可能遇到空值）
+        eventList.forEach((itm) => {
+            if (!itm || !itm.cover_image_url || typeof itm.cover_image_url !== 'string') {
+                return;
+            }
             if (itm.cover_image_url.indexOf(BASE_HOST) === -1) {
                 itm.cover_image_url = BASE_HOST + itm.cover_image_url;
             }
         });
-        // lodash 分割 eventList 為左右兩列
-        [leftList, rightList] = [
-            lodash.filter(eventList, (_, idx) => idx % 2 === 0),
-            lodash.filter(eventList, (_, idx) => idx % 2 === 1)
-        ];
 
-        // 併入渲染的left和rightlist
-        if (dataPage > 1 && !lodash.isEqual(leftList, leftDataList)) {
-            leftList = leftDataList.concat(leftList);
-        }
-        if (dataPage > 1 && !lodash.isEqual(rightList, rightDataList)) {
-            rightList = rightDataList.concat(rightList);
+        // 依 index % numColumns 均勻分佈活動卡片
+        eventList.forEach((itm, idx) => {
+            const targetIdx = idx % numColumns;
+            columns[targetIdx].push(itm);
+        });
+
+        // 翻頁時與舊資料合併，保持瀑布累積
+        if (dataPage > 1 && !skipAppend && columnsData.length === numColumns) {
+            columns = columns.map((col, idx) => columnsData[idx].concat(col));
         }
 
-        // lodash對leftList和rightList進行去重
-        leftList = lodash.uniqBy(leftList, item => item._id || item.id);
-        rightList = lodash.uniqBy(rightList, item => item._id || item.id);
+        // 去重，避免重複卡片
+        columns = columns.map(col => lodash.uniqBy(col, item => item._id || item.id));
 
+        // 首頁將 harbor 隨機插入各列
         if (harborData.length > 0 && dataPage === 1) {
-            leftList = insertToList(leftList, leftHarbor);
-            rightList = insertToList(rightList, rightHarbor);
+            columns = columns.map((col, idx) => insertToList(col, lodash.cloneDeep(harborChunks[idx] || [])));
         }
 
-        setLeftDataList(leftList);
-        setRightDataList(rightList);
-        setEventDataList(eventList);
+        const mergedEvents = columns.flat();
+        setColumnsData(columns);
+        setEventDataList(mergedEvents);
     };
 
     // 篩選尚未結束的活動，並隨機亂序，最後與原數組合併去重
@@ -311,8 +334,7 @@ const EventPage = forwardRef((props, ref) => {
         trigger();
         setDataPage(1);
         setTimeout(() => {
-            setLeftDataList([]);
-            setRightDataList([]);
+            setColumnsData([]);
         }, 300);
 
         setTimeout(() => {
@@ -331,10 +353,8 @@ const EventPage = forwardRef((props, ref) => {
         return (
             <View
                 style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginTop: scale(10),
-                    marginBottom: scale(20),
+                    justifyContent: 'center', alignItems: 'center',
+                    marginTop: scale(10), marginBottom: scale(20),
                 }}>
                 {noMoreData ? (
                     <View style={{ alignItems: 'center' }}>
@@ -367,7 +387,7 @@ const EventPage = forwardRef((props, ref) => {
                             return renderHarborMessage(item);
                         }
                     } else {
-                        return <EventCard data={item} />
+                        return <EventCard data={item} cardWidth={cardWidth} />
                     }
                 }}
                 scrollEnabled={false}
@@ -378,20 +398,18 @@ const EventPage = forwardRef((props, ref) => {
 
     // 渲染主要內容
     const renderPage = () => {
+        const columnsToRender = columnsData.length > 0 ? columnsData : Array.from({ length: numColumns }, () => []);
         return (
             <View style={s.waterFlowContainer}>
-                {/* 左側的列 放置雙數下標的圖片 從0開始 */}
-                <View>
-                    {renderOneList(leftDataList)}
-                </View>
-                {/* 右側的列 放置單數下標的圖片 */}
-                <View>
-                    {rightDataList.length > 0 ? (
-                        renderOneList(rightDataList)
-                    ) : (
-                        <Text style={{ ...uiStyle.defaultText }}>No more data</Text>
-                    )}
-                </View>
+                {columnsToRender.map((col, idx) => (
+                    <View key={`water-col-${idx}`} style={{ flex: 1, alignItems: 'center' }}>
+                        {col.length > 0 ? (
+                            renderOneList(col)
+                        ) : (
+                            <Text style={{ ...uiStyle.defaultText }}>No more data</Text>
+                        )}
+                    </View>
+                ))}
             </View>
         );
     };
@@ -408,13 +426,17 @@ const EventPage = forwardRef((props, ref) => {
         // pinned           是否置頂
         const pinColor = black.third;
         const cleanExcerpt = item.excerpt ? item.excerpt.replace(/:[a-zA-Z0-9_+-]+:/g, '') : '';
+        const borderRadius = scale(8);
+        const borderTopRadiusStyle = item.excerpt ? null : {
+            borderTopStartRadius: borderRadius, borderTopEndRadius: borderRadius,
+        }
 
         return (
             <TouchableScale style={{
                 backgroundColor: `${themeColor}15`,
-                borderRadius: scale(8),
-                margin: scale(5), marginBottom: 0,
-                width: scale(160),
+                borderRadius,
+                margin: scale(5),
+                width: cardWidth,
                 alignItems: 'flex-start', justifyContent: 'center',
             }}
                 onPress={async () => {
@@ -449,11 +471,12 @@ const EventPage = forwardRef((props, ref) => {
                 )}
 
                 <View style={{
-                    marginTop: verticalScale(5),
+                    marginTop: item.excerpt ? verticalScale(5) : null,
                     paddingTop: verticalScale(5),
                     backgroundColor: white,
                     paddingBottom: verticalScale(10), paddingHorizontal: scale(8),
-                    borderBottomEndRadius: scale(10), borderBottomStartRadius: scale(10),
+                    borderBottomEndRadius: borderRadius, borderBottomStartRadius: borderRadius,
+                    ...borderTopRadiusStyle,
                 }}>
                     {/* 帖子標題 */}
                     <Text style={{
@@ -538,11 +561,7 @@ const EventPage = forwardRef((props, ref) => {
     };
 
     return (
-        <View style={{
-            flex: 1, backgroundColor: bg_color,
-            alignItems: 'center', justifyContent: 'center',
-            ...props.style,
-        }}>
+        <View style={{ ...props.style, }}>
             {isLoading ? (
                 <View style={{
                     flex: 1,
@@ -550,7 +569,7 @@ const EventPage = forwardRef((props, ref) => {
                 }}>
                     <Loading />
                 </View>
-            ) : (leftDataList.length > 0 || rightDataList.length > 0 ? (
+            ) : (columnsData.some(col => col.length > 0) ? (
                 <View>
                     {renderPage()}
                     {renderLoadMoreView()}

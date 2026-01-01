@@ -14,16 +14,18 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import TouchableScale from "react-native-touchable-scale";
 import { inject } from 'mobx-react';
 
-const IMAGE_SIZE = scale(160);
+const DEFAULT_IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
 
-const EventCard = ({ data, RootStore }) => {
+const EventCard = ({ data, cardWidth, RootStore }) => {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
     const navigation = useContext(NavigationContext);
 
     const { theme } = useTheme();
     const { white, black, viewShadow, bg_color } = theme;
+
+    const imageSize = cardWidth || DEFAULT_IMAGE_SIZE;
 
     const styles = StyleSheet.create({
         // 右上角紅點提示位置
@@ -48,7 +50,7 @@ const EventCard = ({ data, RootStore }) => {
         title: {
             container: {
                 backgroundColor: white,
-                width: IMAGE_SIZE,
+                width: imageSize,
                 padding: scale(8),
             },
             text: {
@@ -147,7 +149,7 @@ const EventCard = ({ data, RootStore }) => {
             style={{
                 backgroundColor: white,
                 borderRadius: BORDER_RADIUS,
-                margin: scale(5), marginBottom: 0,
+                margin: scale(5), 
             }}
             activeOpacity={0.9}
             onPress={handleJumpToDetail}>
@@ -162,8 +164,8 @@ const EventCard = ({ data, RootStore }) => {
                             uri: coverImgUrl,
                         }}
                         style={{
-                            width: IMAGE_SIZE,
-                            height: IMAGE_SIZE,
+                            width: imageSize,
+                            height: imageSize,
                             backgroundColor: white,
                             opacity: isFinish ? 0.5 : 1,
                         }}

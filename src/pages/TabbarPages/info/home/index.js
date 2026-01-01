@@ -951,7 +951,7 @@ const HomeScreen = ({ navigation }) => {
                                 paddingVertical: verticalScale(8),
                                 backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
-                                borderRadius: verticalScale(5),
+                                borderRadius: scale(5),
                             }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
@@ -1068,7 +1068,8 @@ const HomeScreen = ({ navigation }) => {
                 {networkError ? (
                     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
                 ) : null}
-                <EventPage ref={eventPage} />
+                {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
+                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3), }}/>
             </ScrollView>
             {/* Modal */}
             {isShowModal && (
