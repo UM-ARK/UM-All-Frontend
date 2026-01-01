@@ -303,15 +303,15 @@ const HomeScreen = ({ navigation }) => {
     // 刷新主頁時展示隨機Toast
     const onRefresh = useCallback(() => {
         getCal();
-        const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
-        const toastKaoIdx = Math.round(Math.random() * (toastKaomojiArr.length - 1));
-        Toast.show({
-            type: 'arkToast',
-            text1: toastKaomojiArr[toastKaoIdx],
-            text2: toastTextArr[toastTextIdx],
-            topOffset: verticalScale(120),
-            onPress: () => Toast.hide(),
-        });
+        // const toastTextIdx = Math.round(Math.random() * (toastTextArr.length - 1));
+        // const toastKaoIdx = Math.round(Math.random() * (toastKaomojiArr.length - 1));
+        // Toast.show({
+        //     type: 'arkToast',
+        //     text1: toastKaomojiArr[toastKaoIdx],
+        //     text2: toastTextArr[toastTextIdx],
+        //     topOffset: verticalScale(120),
+        //     onPress: () => Toast.hide(),
+        // });
 
         getUpcomingCourse();
     }, []);
