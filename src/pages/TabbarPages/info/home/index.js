@@ -36,6 +36,7 @@ import {
     ARK_HARBOR_LOGIN,
     ARK_HARBOR_NEW_TOPIC,
     ARK_WIKI_DONATE_RANK,
+    AFD_UMACARK,
 } from '../../../../utils/pathMap.js';
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
@@ -144,12 +145,14 @@ const HomeScreen = ({ navigation }) => {
             function_name: t('支持我們', { ns: 'home' }),
             func: () => {
                 trigger();
-                if (sheetIndex != -1) {
-                    logToFirebase('funcUse', { funcName: 'donate' });
-                    bottomSheetRef.current?.close();
-                } else {
-                    bottomSheetRef.current?.expand();
-                }
+                logToFirebase('funcUse', { funcName: 'donate' });
+                openLink({ URL: AFD_UMACARK, mode: 'fullScreen' });
+                // if (sheetIndex != -1) {
+                //     logToFirebase('funcUse', { funcName: 'donate' });
+                //     bottomSheetRef.current?.close();
+                // } else {
+                //     bottomSheetRef.current?.expand();
+                // }
             },
         },
         {
@@ -1069,7 +1072,7 @@ const HomeScreen = ({ navigation }) => {
                     <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
                 ) : null}
                 {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
-                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3), }}/>
+                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3), }} />
             </ScrollView>
             {/* Modal */}
             {isShowModal && (
