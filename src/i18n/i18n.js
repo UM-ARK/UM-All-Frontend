@@ -32,7 +32,7 @@ if (systemLanguageCode === 'zh') {
     // 所以無論是用戶是簡體還是繁體，如果想默認顯示中文，就設為 'tc'
     // (如果未來加了簡體 'sc'，可以在這裡細分)
     defaultLanguage = 'tc';
-} 
+}
 
 
 // 語言檢測插件，用於存入緩存
@@ -68,6 +68,8 @@ i18n
         react: {
             useSuspense: false, // 避免在加載時白屏
         },
+        defaultNS: 'common',
+        fallbackNS: ['home', 'about', 'wiki', 'harbor', 'catalog', 'timetable', 'features', 'club'],
     });
 
 // 用法：
