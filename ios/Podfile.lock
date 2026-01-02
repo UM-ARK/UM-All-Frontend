@@ -1399,7 +1399,7 @@ PODS:
     - React-Core
     - Toast (~> 4)
   - react-native-vector-icons-material-design-icons (12.4.0)
-  - react-native-webview (13.15.0):
+  - react-native-webview (13.16.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1773,6 +1773,8 @@ PODS:
     - Yoga
   - RNInAppBrowser (3.7.0):
     - React-Core
+  - RNLocalize (3.6.1):
+    - React-Core
   - RNPermissions (5.4.4):
     - React-Core
   - RNReactNativeHapticFeedback (2.3.3):
@@ -2082,6 +2084,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNInAppBrowser (from `../node_modules/react-native-inappbrowser-reborn`)
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -2286,6 +2289,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNInAppBrowser:
     :path: "../node_modules/react-native-inappbrowser-reborn"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNReactNativeHapticFeedback:
@@ -2362,7 +2367,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: 6c8805194166a9d6b3e53ba69ca76756c9bfb052
   react-native-simple-toast: 4c9cc976cb92b6e5fb555e7c57fce38b90a56d07
   react-native-vector-icons-material-design-icons: 76cd460b3540b80527b4a80fb7f867f7deedb498
-  react-native-webview: f8005c1be708f31ca813ce4699b13508db123b54
+  react-native-webview: 0ab8d5073e09a9d0977323a83521535b91c87e31
   React-nativeconfig: 29f53f7caa03e1d3f49396320f4f055ae42ab8db
   React-NativeModulesApple: 1fe64d61396453d56ee3965c0adf2f3284c92a8b
   React-perflogger: 1f83401f01544142b32151ef6c66870455c64994
@@ -2402,6 +2407,7 @@ SPEC CHECKSUMS:
   RNFBApp: 6e0c3ee6cfbc76b5d1237ebf37240cd48a55c6e2
   RNGestureHandler: d167eaaa871650f856883d2e7841607e4873a124
   RNInAppBrowser: 6d3eb68d471b9834335c664704719b8be1bfdb20
+  RNLocalize: 0a9ffe84f0d25cf2fb0abacd4d7491a06e78ced2
   RNPermissions: 15f0316617e4a61c6f9b64174081837e674075ee
   RNReactNativeHapticFeedback: 92bb48cffe0a8738a109d66cdb5984732b9cb496
   RNReanimated: e2ba5e1849070a61a693d883f4a50c251aa9b8c5

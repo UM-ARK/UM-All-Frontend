@@ -5,7 +5,6 @@ import { Image, Dimensions, Alert, Appearance, AppState, useColorScheme } from '
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import { uiStyle } from './src/utils/uiMap';
-import { setLanguage, setLocalStorage as setI18nLocalStorage } from './src/i18n/i18n';
 import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
 import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
 import { ThemeProvider, themes } from "./src/components/ThemeContext";
@@ -70,8 +69,6 @@ const App = () => {
                 const strUserInfo = await AsyncStorage.getItem('userInfo');
                 const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
                 if (userInfo.stdData || userInfo.clubData) { RootStore.setUserInfo(userInfo); }
-
-                await checkLanguage();
 
                 let localCourseVersion = await getLocalStorage('course_version');
                 // 首次啟動，優先用本地打包的 sourceCourseVersion
@@ -177,37 +174,6 @@ const App = () => {
         ),
     };
 
-    // 檢查語言設定
-    const checkLanguage = async () => {
-        try {
-            const res = await AsyncStorage.getItem('language');
-            const lng = res ? JSON.parse(res) : null;
-            if (!lng) {
-                Alert.alert(
-                    '語言設定 / Language Setting',
-                    '挑選您的首選語言\nPick your preferred languaeg(English version not fully translated)\n您稍後可以在關於頁再修改！\nYou can modify it later on the About page!',
-                    [
-                        {
-                            text: '繁體中文',
-                            onPress: () => {
-                                setI18nLocalStorage('tc');
-                                setLanguageOK(true);
-                            },
-                        },
-                        {
-                            text: 'English',
-                            onPress: () => setLanguage('en'),
-                        },
-                    ]
-                );
-            } else {
-                setLanguageOK(true);
-            }
-        } catch (error) {
-            console.error('checkLanguage error:', error);
-        }
-    };
-
     return (
         <AnimatedSplash
             translucent={true}
@@ -225,14 +191,12 @@ const App = () => {
             backgroundColor={theme.bg_color}
         >
             <SafeAreaProvider>
-                {languageOK ? (
-                    <Provider RootStore={RootStore}>
-                        <ThemeProvider>
-                            <Nav />
-                        </ThemeProvider>
-                        <Toast config={toastConfig} />
-                    </Provider>
-                ) : null}
+                <Provider RootStore={RootStore}>
+                    <ThemeProvider>
+                        <Nav />
+                    </ThemeProvider>
+                    <Toast config={toastConfig} />
+                </Provider>
             </SafeAreaProvider>
         </AnimatedSplash>
     );

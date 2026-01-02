@@ -67,6 +67,7 @@
     "react-native-inappbrowser-reborn": "^3.7.0",
     "react-native-interactable": "^2.0.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-localize": "^3.6.1",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-modal-dropdown": "^1.0.2",

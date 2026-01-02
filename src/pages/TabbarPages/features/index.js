@@ -9,6 +9,7 @@ import { logToFirebase } from "../../../utils/firebaseAnalytics";
 import { openLink } from "../../../utils/browser";
 import { trigger } from "../../../utils/trigger";
 import CustomBottomSheet from "../courseSim/BottomSheet";
+import { getFunctionArr } from './FeatureList';
 
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -21,17 +22,14 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
-import { t } from "i18next";
-import { functionArr } from './FeatureList';
-
-// 定義可使用icon，注意大小寫
-
-
-const iconSize = scale(25);
+import { useTranslation } from 'react-i18next';
 
 function Index({ navigation }) {
     const { theme } = useTheme();
     const { themeColor, white, black, trueWhite, bg_color, barStyle, viewShadow } = theme;
+    const { t, i18n } = useTranslation(['common', 'home', 'features']);
+    const functionArr = getFunctionArr(t);
+    const fontSize = i18n.language === 'tc' ? verticalScale(10) : verticalScale(8);
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
@@ -107,7 +105,7 @@ function Index({ navigation }) {
                             {icon}
                             <Text style={{
                                 ...uiStyle.defaultText,
-                                fontSize: verticalScale(10),
+                                fontSize: fontSize,
                                 color: black.second,
                                 textAlign: 'center',
                             }}>
@@ -120,7 +118,7 @@ function Index({ navigation }) {
                 scrollEnabled={false}
             />
         </View >
-    ), [white]);  // useCallback依賴於此
+    ), [white, fontSize]);  // useCallback依賴於此
 
     // BottomSheet內容渲染
     const renderBottomSheet = () => {

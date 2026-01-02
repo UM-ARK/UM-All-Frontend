@@ -9,7 +9,6 @@
 - Storage conventions: [storageKits.js](../src/utils/storageKits.js) wraps AsyncStorage; `handleLogin`/`handleLogout` restart the app. Reuse `setLocalStorage`/`getLocalStorage` to keep formats consistent.
 - Theming: [components/ThemeContext.js](../src/components/ThemeContext.js) provides `useTheme()` and `theme` colors keyed by Appearance; older color constants remain in [utils/uiMap.js](../src/utils/uiMap.js) but new UI should source colors from ThemeContext.
 - Typography: `uiStyle.defaultText` (ThemeContext/uiMap) is the shared text style; tabs use it with size scaling. Avoid inline font tweaks unless necessary.
-- i18n: [i18n/i18n.js](../src/i18n/i18n.js) uses i18next with `tc` (Traditional Chinese) default; `setLanguage()` persists and triggers RNRestart. Always wrap strings with `t()`.
 - Tabs: Each tab screen (e.g., [pages/TabbarPages/info](../src/pages/TabbarPages/info)) is a folder with its own sub-navigation. Call `trigger()` (from utils/trigger) on tabPress for analytics/side-effects when adding tabs.
 - Deprecated: Club system native screens are deprecated in favor of the web flow (see [pages/ClubSystem/README.md](../src/pages/ClubSystem/README.md)). Avoid extending old club-native flows.
 - Static content maintenance: Calendar JSON lives at [static/UMCalendar/UMCalendar.json](../src/static/UMCalendar/UMCalendar.json); follow steps in README "維護須知" for calendar and course updates. Course JSON formats are described in [static/UMCourses/README.md](../src/static/UMCourses/README.md).

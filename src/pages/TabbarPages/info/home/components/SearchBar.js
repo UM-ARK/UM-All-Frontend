@@ -16,12 +16,12 @@ import {
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
-import { functionArr } from '../../../features/FeatureList';
+import { getFunctionArr } from '../../../features/FeatureList';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { debounce } from 'lodash';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { t } from "i18next";
+import { useTranslation } from 'react-i18next';
 import OpenCC from 'opencc-js';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
@@ -44,6 +44,8 @@ const PLACEHOLDER_TEXTS = [
 const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow, secondThemeColor, themeColor, bg_color, } = theme;
+    const { t } = useTranslation(['common', 'home', 'features']);
+    const functionArr = getFunctionArr(t);
     const styles = StyleSheet.create({
         container: {
             flexDirection: 'row',

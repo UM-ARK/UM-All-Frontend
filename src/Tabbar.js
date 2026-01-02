@@ -15,7 +15,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
 import { inject } from 'mobx-react';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tabs = AnimatedTabBarNavigator();
@@ -23,6 +23,7 @@ const Tabs = AnimatedTabBarNavigator();
 const Tabbar = () => {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation(['common', 'home',]);
 
     const isLandscape = () => {
         const { width, height } = Dimensions.get('window');

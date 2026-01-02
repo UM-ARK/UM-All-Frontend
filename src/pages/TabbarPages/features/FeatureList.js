@@ -53,7 +53,7 @@ const iconTypes = {
     img: 'img',
 };
 
-export const functionArr = [
+export const getFunctionArr = (t) => [
     {
         title: t('校園資訊', { ns: 'features' }),
         fn: [

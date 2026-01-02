@@ -70,7 +70,6 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import FastImage from 'react-native-fast-image';
 import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
-import { t } from "i18next";
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -108,6 +107,7 @@ const calItemWidth = verticalScale(50);
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
+    const { t } = useTranslation(['common', 'home',]);
 
     // 狀態
     const functionArray = useMemo(() => [

@@ -3,12 +3,14 @@ import { View, Text, } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { t } from "i18next";
 import { LinearProgress } from '@rneui/themed';
+import { useTranslation } from 'react-i18next';
 
 export default function Loading({ progress = 0.5 }) {
     const { theme } = useTheme();
     const { black, white, themeColor, bg_color } = theme;
+    const { t } = useTranslation(['common', 'home']);
+
     return (
         <View style={{
             paddingHorizontal: scale(20),
