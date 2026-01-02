@@ -1,6 +1,5 @@
-// namespaces詳解：https://www.i18next.com/principles/namespaces
-export default {
-    common: {
+{
+    "common": {
         "ABOUT": "About",
         "是": "YES",
         "否": "NO",
@@ -36,9 +35,9 @@ export default {
         "複製Email": "Copy Email",
         "已複製Mail到剪貼板！": "Mail copied to clipboard!",
         "已複製Link到剪貼板！": "Link copied to clipboard!",
-        "這個功能沒有可複製的Link！": "There is no copyable Link for this function!",
+        "這個功能沒有可複製的Link！": "There is no copyable Link for this function!"
     },
-    home: {
+    "home": {
         "校園巴士": "Bus",
         "支持我們": "Donate",
         "澳大方舟": "ARK",
@@ -67,10 +66,9 @@ export default {
         "您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！": "Your valuable sponsorship will be used for the upgrade and maintenance of various applications and services of ARK!",
         "目前每年需要的維護費用約為1.5k RMB(此數字可能更新不及時)，純為愛發電中QAQ": "The annual maintenance cost is about 1.5k RMB (this figure may not be updated in time), purely for love and support QAQ",
         "如您已完成捐贈，可發送成功截圖到 umacark@gmail.com 。我們將展示捐贈榜！": "If you have completed the donation, you can send a successful screenshot to umacark@gmail.com. We will display the donation list!",
-        "捐贈榜：": "Donation List: ",
+        "捐贈榜：": "Donation List: "
     },
-    // 關於頁
-    about: {
+    "about": {
         "APP Version": "APP Version: ",
         "Add Drop Data Version": "Add Drop Data Version: ",
         "PreEnroll Data Version": "PreEnroll Data Version: ",
@@ -100,12 +98,12 @@ export default {
         "課表數據和版本將被還原，你需要再進行手動更新！": "The catalog data and version will be restored, and you need to manually update again!",
         "將清除所有緩存並重啟，您確定繼續嗎？": "All caches will be cleared and restarted. Are you sure you want to continue?",
 
-        "已清除Cookies": "Cookies cleared",
+        "已清除Cookies": "Cookies cleared"
     },
-    wiki: {
+    "wiki": {
 
     },
-    harbor: {
+    "harbor": {
         "長按底部論壇Tabbar打開偏好設置": "Long press the bottom Harbor Tabbar to open preference settings",
         "Webview版概率出現登錄錯誤，建議使用Browser版": "Webview version may encounter login errors, it is recommended to use the Browser version",
         "進入Browser版": "Enter Browser version",
@@ -119,7 +117,7 @@ export default {
 
         "您可以隨時通過右下角的按鈕進入設定": "You can enter settings at any time through the button in the lower right corner"
     },
-    catalog: {
+    "catalog": {
         "ARK搵課": "ARK Catalog",
         "試試ECE or Electrical or 電氣": "Try ECE or Electrical or 電氣",
 
@@ -149,9 +147,9 @@ export default {
 
         "幹飯": "Eating",
         "幹飯時間表": "Eating Schedule",
-        "下課Section數": "Number of Sections After Class",
+        "下課Section數": "Number of Sections After Class"
     },
-    timetable: {
+    "timetable": {
         "課表模擬": "Timetable Simulation",
         "關閉": "Close",
         "搵課/加課": "Add",
@@ -185,9 +183,9 @@ export default {
         "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
         "僅作模擬!": "Only Simulation!",
 
-        "重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新": "Restart the APP or manually update the version on the course page, depending on whether the developer uploads the update.",
+        "重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新": "Restart the APP or manually update the version on the course page, depending on whether the developer uploads the update."
     },
-    features: {
+    "features": {
         "服務一覽": "All Services",
 
         "校園資訊": "Campus Services",
@@ -247,9 +245,9 @@ export default {
 
 
         "提問：關於澳大的一切...": "Ask: Anything about UM...",
+        "關於澳大的一切...": "Anything about UM...",
 
 
-        // 功能說明
         "複製功能Link": "Copy this function link",
 
         "查看校巴到站情況": "Check the bus arrival status",
@@ -300,9 +298,9 @@ export default {
         "防詐騙圖文包，外地同學初次到達澳門要注意！": "Anti-fraud graphic package, students from other places should pay attention when they first arrive in Macau!",
         "書院大全，快捷找到對應書院主頁": "A list of colleges, quickly find the homepage of the corresponding college",
         "UM校友會，也可以找到其他校友相關資訊的網站": "UM Alumni Association, where you can also find other alumni-related information",
-        "UM部門，提供各種校內部門的資訊": "UM Departments, providing information on various campus departments",
+        "UM部門，提供各種校內部門的資訊": "UM Departments, providing information on various campus departments"
     },
-    club: {
-        "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
-    },
+    "club": {
+        "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS"
+    }
 }
