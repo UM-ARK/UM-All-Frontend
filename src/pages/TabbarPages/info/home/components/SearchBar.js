@@ -64,7 +64,7 @@ const SearchBar = ({ navigation }) => {
             height: '100%',
             borderWidth: 1,
             borderColor: 'transparent',
-            ...viewShadow,
+            // ...viewShadow,
         },
         inputWrapperFocused: {
             borderColor: themeColor,
@@ -340,9 +340,11 @@ const SearchBar = ({ navigation }) => {
                                 setLocalResults([]);
                                 textInputRef.current.focus();
                             }}
-                            style={{ padding: scale(8) }}
+                            style={{
+                                paddingHorizontal: scale(5),
+                            }}
                         >
-                            <Ionicons name="close-circle" size={16} color="#ccc" />
+                            <Ionicons name="close-circle" size={scale(10)} color="#ccc" />
                         </TouchableOpacity>
                     )}
                 </View>
