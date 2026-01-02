@@ -208,23 +208,6 @@ const App = () => {
         }
     };
 
-    // 主題模式切換提示
-    const schemeChange = (currentScheme) => {
-        if (AppState.currentState === 'active' && isLight !== (currentScheme === 'light')) {
-            Alert.alert(
-                `ARK ALL`,
-                `${t('現在重啟APP切換到')} ${currentScheme === 'light' ? t('淺色模式') : t('深色模式')} ?`,
-                [
-                    {
-                        text: 'Yes',
-                        onPress: () => { RNRestart.Restart(); },
-                    },
-                    { text: 'No' },
-                ]
-            );
-        }
-    };
-
     return (
         <AnimatedSplash
             translucent={true}
