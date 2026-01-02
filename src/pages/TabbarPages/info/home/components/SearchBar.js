@@ -44,7 +44,7 @@ const PLACEHOLDER_TEXTS = [
 const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow, secondThemeColor, themeColor, bg_color, } = theme;
-    const { t } = useTranslation(['common', 'home', 'features']);
+    const { t } = useTranslation();
     const functionArr = getFunctionArr(t);
     const styles = StyleSheet.create({
         container: {
@@ -282,9 +282,8 @@ const SearchBar = ({ navigation }) => {
                     <View style={styles.iconContainer}>
                         <Ionicons name="search" size={16} color={white} />
                     </View>
-                    {/* TODO: 英文翻譯 */}
                     <Text style={styles.googleText}>
-                        在澳大網頁搜索 "{inputText}"
+                        {t('在澳大網頁搜索')} "{inputText}"
                     </Text>
                     <Ionicons name="open-outline" size={16} color={white} />
                 </TouchableOpacity>
@@ -299,7 +298,7 @@ const SearchBar = ({ navigation }) => {
                     styles.inputWrapper,
                     isFocused && styles.inputWrapperFocused // 聚焦時的視覺反饋
                 ]}>
-                    <Ionicons name="search" size={18} color={isFocused ? themeColor : `${black.third}70`} style={{ marginLeft: scale(8) }} />
+                    <Ionicons name="search" size={scale(15)} color={isFocused ? themeColor : `${black.third}70`} style={{ marginLeft: scale(8) }} />
 
                     <View style={{ flex: 1, justifyContent: 'center' }}>
                         <TextInput
@@ -327,7 +326,7 @@ const SearchBar = ({ navigation }) => {
                         {inputText === '' && (
                             <Animated.View style={[styles.placeholderContainer, { opacity: fadeAnim }]} pointerEvents="none">
                                 <Text style={styles.placeholderText}>
-                                    {isFocused ? '輸入關鍵詞...' : `提問：${t(PLACEHOLDER_TEXTS[placeholderIndex], { ns: 'features' })}`}
+                                    {isFocused ? `${t('輸入關鍵詞')}...` : `${t('搜索')}: ${t(PLACEHOLDER_TEXTS[placeholderIndex], { ns: 'features' })}`}
                                 </Text>
                             </Animated.View>
                         )}
@@ -358,7 +357,7 @@ const SearchBar = ({ navigation }) => {
                         }}
                         style={styles.cancelButton}
                     >
-                        <Text style={styles.cancelText}>{t('取消', { ns: 'home' })}</Text>
+                        <Text style={styles.cancelText}>{t('取消')}</Text>
                     </TouchableOpacity>
                 )}
             </View>
