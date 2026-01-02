@@ -344,7 +344,7 @@ const SearchBar = ({ navigation }) => {
                                 paddingHorizontal: scale(5),
                             }}
                         >
-                            <Ionicons name="close-circle" size={scale(10)} color="#ccc" />
+                            <Ionicons name="close-circle" size={verticalScale(12)} color="#ccc" />
                         </TouchableOpacity>
                     )}
                 </View>
