@@ -40,14 +40,14 @@ const PLACEHOLDER_TEXTS = [
 
 const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
-    const { white, black, viewShadow, secondThemeColor, themeColor } = theme;
+    const { white, black, viewShadow, secondThemeColor, themeColor, bg_color,  } = theme;
     const styles = StyleSheet.create({
         container: {
             flexDirection: 'row',
             alignItems: 'center',
             paddingHorizontal: verticalScale(10),
             marginTop: verticalScale(10),
-            height: verticalScale(35),
+            height: verticalScale(30),
             zIndex: 101, // 確保在下拉層之上
         },
         inputWrapper: {
@@ -59,40 +59,35 @@ const SearchBar = ({ navigation }) => {
             height: '100%',
             borderWidth: 1,
             borderColor: 'transparent',
-            // 陰影
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.1,
-            shadowRadius: 2,
-            elevation: 2,
+            ...viewShadow,
         },
         inputWrapperFocused: {
             borderColor: themeColor,
-            backgroundColor: '#fff',
+            backgroundColor: white,
             elevation: 4,
         },
         textInput: {
             flex: 1,
             height: '100%',
-            paddingHorizontal: 8,
+            paddingHorizontal: scale(8),
             fontSize: verticalScale(13),
             color: black.main,
             paddingVertical: 0, // Android 修正
         },
         placeholderContainer: {
             position: 'absolute',
-            left: 8,
+            left: scale(8),
             right: 0,
             justifyContent: 'center',
             height: '100%',
         },
         placeholderText: {
-            color: '#999',
+            color: `${black.third}70`,
             fontSize: verticalScale(13),
         },
         cancelButton: {
-            marginLeft: 10,
-            paddingVertical: 5,
+            marginLeft: scale(5),
+            paddingVertical: verticalScale(5),
         },
         cancelText: {
             color: themeColor,
@@ -102,58 +97,53 @@ const SearchBar = ({ navigation }) => {
         // 下拉菜單樣式
         dropdownContainer: {
             position: 'absolute',
-            top: verticalScale(50), // 根據 SearchBar 高度調整
+            top: verticalScale(45), // 根據 SearchBar 高度調整
             left: verticalScale(10),
             right: verticalScale(10),
             backgroundColor: white,
-            borderRadius: 8,
-            paddingVertical: 5,
-            // 強烈陰影確保覆蓋下方內容
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.2,
-            shadowRadius: 8,
-            elevation: 10,
+            borderRadius: verticalScale(8),
+            paddingVertical: verticalScale(5),
+            ...viewShadow,
             zIndex: 100,
         },
         resultItem: {
             flexDirection: 'row',
             alignItems: 'center',
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderBottomWidth: 0.5,
-            borderBottomColor: '#f0f0f0',
+            paddingVertical: scale(10),
+            paddingHorizontal: scale(12),
+            borderBottomWidth: verticalScale(1),
+            borderBottomColor: bg_color,
         },
         resultTitle: {
-            fontSize: 14,
+            fontSize: verticalScale(12),
             color: black.main,
             fontWeight: '500',
         },
         resultSub: {
-            fontSize: 11,
-            color: '#888',
-            marginTop: 2,
+            fontSize: verticalScale(11),
+            color: `${black.third}90`,
+            marginTop: verticalScale(2),
         },
         googleItem: {
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: themeColor,
-            marginHorizontal: 12,
-            marginTop: 8,
-            marginBottom: 5,
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderRadius: 6,
+            marginHorizontal: scale(12),
+            marginTop: verticalScale(8),
+            marginBottom: verticalScale(5),
+            paddingVertical: verticalScale(10),
+            paddingHorizontal: verticalScale(12),
+            borderRadius: verticalScale(6),
         },
         googleText: {
             color: white,
             flex: 1,
-            fontSize: 13,
+            fontSize: verticalScale(13),
             fontWeight: '600',
         },
         iconContainer: {
-            marginRight: 10,
-            width: 24,
+            marginRight: scale(8),
+            width: scale(15),
             alignItems: 'center',
         }
     });
@@ -294,13 +284,13 @@ const SearchBar = ({ navigation }) => {
     };
 
     return (
-        <View style={{ zIndex: 100, width: scale(300) }}>
+        <View style={{ zIndex: 100, width: scale(310) }}>
             <View style={styles.container}>
                 <View style={[
                     styles.inputWrapper,
                     isFocused && styles.inputWrapperFocused // 聚焦時的視覺反饋
                 ]}>
-                    <Ionicons name="search" size={18} color={isFocused ? themeColor : '#999'} style={{ marginLeft: 10 }} />
+                    <Ionicons name="search" size={18} color={isFocused ? themeColor : `${black.third}70`} style={{ marginLeft: scale(8) }} />
 
                     <View style={{ flex: 1, justifyContent: 'center' }}>
                         <TextInput
@@ -342,8 +332,8 @@ const SearchBar = ({ navigation }) => {
                                 setLocalResults([]);
                                 textInputRef.current.focus();
                             }}
-                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            style={{ padding: 8 }}
+                            // hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            style={{ padding: scale(8) }}
                         >
                             <Ionicons name="close-circle" size={16} color="#ccc" />
                         </TouchableOpacity>
@@ -360,7 +350,7 @@ const SearchBar = ({ navigation }) => {
                         }}
                         style={styles.cancelButton}
                     >
-                        <Text style={styles.cancelText}>{t('取消')}</Text>
+                        <Text style={styles.cancelText}>{t('取消', { ns: 'home' })}</Text>
                     </TouchableOpacity>
                 )}
             </View>
