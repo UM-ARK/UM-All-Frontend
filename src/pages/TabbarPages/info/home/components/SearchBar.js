@@ -13,15 +13,18 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
+
+import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../../components/ThemeContext';
+import { openLink } from '../../../../../utils/browser';
+import { functionArr } from '../../../features/FeatureList';
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { debounce } from 'lodash';
-
-// 假設你的工具函數和常量路徑
 import { scale, verticalScale } from 'react-native-size-matters';
-import { functionArr } from '../../../features/FeatureList';
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../../components/ThemeContext';
 import { t } from "i18next";
-import { openLink } from '../../../../../utils/browser';
+import OpenCC from 'opencc-js';
+
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 // 開啟 LayoutAnimation (Android 需要)
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -40,7 +43,7 @@ const PLACEHOLDER_TEXTS = [
 
 const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
-    const { white, black, viewShadow, secondThemeColor, themeColor, bg_color,  } = theme;
+    const { white, black, viewShadow, secondThemeColor, themeColor, bg_color, } = theme;
     const styles = StyleSheet.create({
         container: {
             flexDirection: 'row',
@@ -210,8 +213,8 @@ const SearchBar = ({ navigation }) => {
 
         // 本地搜索過濾
         const results = flattenFeatures.filter(item => {
-            const nameMatch = item.fn_name && item.fn_name.toLowerCase().includes(text.toLowerCase());
-            const descMatch = item.describe && item.describe.toLowerCase().includes(text.toLowerCase());
+            const nameMatch = item.fn_name && item.fn_name.toLowerCase().includes(converter(text.toLowerCase()));
+            const descMatch = item.describe && item.describe.toLowerCase().includes(converter(text.toLowerCase()));
             return nameMatch || descMatch;
         });
 
