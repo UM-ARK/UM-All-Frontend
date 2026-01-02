@@ -17,6 +17,7 @@ import {
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
 import { getFunctionArr } from '../../../features/FeatureList';
+import { logToFirebase } from '../../../../../utils/firebaseAnalytics.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { debounce } from 'lodash';
@@ -31,7 +32,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// TODO: 翻譯
 const PLACEHOLDER_TEXTS = [
     '關於澳大的一切...',
     '校曆',
@@ -206,6 +206,7 @@ const SearchBar = ({ navigation }) => {
     }, [isFocused, inputText]);
 
     // 3. 混合搜索邏輯 (Hybrid Search)
+    // TODO: 增加func的中英文關鍵字
     const handleSearch = (text) => {
         setInputText(text);
         if (text.trim() === '') {
@@ -230,8 +231,11 @@ const SearchBar = ({ navigation }) => {
     // 4. 執行跳轉邏輯
     const executeNavigation = (item) => {
         Keyboard.dismiss();
-        // TODO: 記錄日誌
-        console.log('Navigating to:', item.fn_name, item);
+        // 記錄日誌 Firebase
+        logToFirebase('funcUse', {
+            funcName: 'searchBar_features',
+            searchBarDetail: inputText,
+        });
 
         // 根據 FeatureList 的定義進行跳轉
         if (item.go_where === 'Webview' || item.go_where === 'Linking') {
@@ -337,7 +341,6 @@ const SearchBar = ({ navigation }) => {
                                 setLocalResults([]);
                                 textInputRef.current.focus();
                             }}
-                            // hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             style={{ padding: scale(8) }}
                         >
                             <Ionicons name="close-circle" size={16} color="#ccc" />
