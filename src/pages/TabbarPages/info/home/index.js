@@ -54,6 +54,7 @@ import { getLocalStorage } from '../../../../utils/storageKits.js';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../courseSim/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
+import SearchBar from './components/SearchBar.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -813,9 +814,11 @@ const HomeScreen = ({ navigation }) => {
                 onScroll={handleScroll}
                 scrollEventThrottle={400}
                 keyboardDismissMode={'on-drag'}
+                keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ width: '100%', alignItems: 'center', }}
             >
-                {renderSearch()}
+
+                <SearchBar navigation={navigation} />
 
                 {/* 校曆列表 */}
                 {cal && cal.length > 0 ? (
@@ -1074,6 +1077,7 @@ const HomeScreen = ({ navigation }) => {
                 {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
                 <EventPage ref={eventPage} style={{ marginTop: verticalScale(3), }} />
             </ScrollView>
+
             {/* Modal */}
             {isShowModal && (
                 <ModalBottom cancel={tiggerModalBottom}>
