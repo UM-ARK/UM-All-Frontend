@@ -44,7 +44,7 @@ const PLACEHOLDER_TEXTS = [
 const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow, secondThemeColor, themeColor, bg_color, } = theme;
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const functionArr = getFunctionArr(t);
     const styles = StyleSheet.create({
         container: {
@@ -178,7 +178,7 @@ const SearchBar = ({ navigation }) => {
             });
         }
         return features;
-    }, []);
+    }, [i18n.language]);
 
     // 2. Placeholder 輪播邏輯
     useEffect(() => {
