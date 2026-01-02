@@ -206,7 +206,6 @@ const SearchBar = ({ navigation }) => {
     }, [isFocused, inputText]);
 
     // 3. 混合搜索邏輯 (Hybrid Search)
-    // TODO: 增加func的中英文關鍵字
     const handleSearch = (text) => {
         setInputText(text);
         if (text.trim() === '') {
@@ -218,7 +217,9 @@ const SearchBar = ({ navigation }) => {
         const results = flattenFeatures.filter(item => {
             const nameMatch = item.fn_name && item.fn_name.toLowerCase().includes(converter(text.toLowerCase()));
             const descMatch = item.describe && item.describe.toLowerCase().includes(converter(text.toLowerCase()));
-            return nameMatch || descMatch;
+            const keywordMatch = item.keywords && item.keywords.toLowerCase().includes(text.toLowerCase());
+            const keyMatch = item.key_name && item.key_name.toLowerCase().includes(converter(text));
+            return nameMatch || descMatch || keywordMatch || keyMatch;
         });
 
         // 限制顯示前 3 個本地結果，避免列表過長
