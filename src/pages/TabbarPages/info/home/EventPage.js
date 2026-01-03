@@ -461,14 +461,14 @@ const EventPage = forwardRef((props, ref) => {
                     logToFirebase('clickHarbor', {
                         title: item.title,
                     });
+                    const URL = ARK_HARBOR_TOPIC + item.id;
                     const settingStr = await getItem();
                     const setting = settingStr ? JSON.parse(settingStr) : null;
                     // 用戶偏好是Webview則導航到Tabbar
                     if (setting && setting.tabbarMode == 'webview') {
-                        const URL = ARK_HARBOR_TOPIC + item.id;
                         navigation.navigate('Harbor', { url: URL });
                     } else {
-                        openLink({ URL: ARK_HARBOR_TOPIC + item.id, mode: 'fullScreen' });
+                        openLink({ URL: URL, mode: 'fullScreen' });
                     }
                 }}
             >
