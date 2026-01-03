@@ -91,3 +91,7 @@ ios/GoogleService-Info.plist
 
 # UM API Token
 umAPIToken.json
+# Expo
+.expo
+dist/
+web-build/
