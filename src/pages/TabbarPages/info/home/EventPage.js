@@ -75,7 +75,9 @@ const EventPage = forwardRef((props, ref) => {
 
     // 首次加載時，獲取數據
     useEffect(() => {
-        getAPIData();
+        // Fast Refresh 會保留 state，顯式重置回第一頁避免重複拼接
+        setDataPage(1);
+        getAPIData(1);
     }, []);
 
     // 監聽螢幕尺寸，依據橫豎屏調整瀑布列數與卡片寬度
@@ -130,6 +132,14 @@ const EventPage = forwardRef((props, ref) => {
      * @returns {void}
      */
     const getAPIData = (page = dataPage) => {
+        if (page === 1) {
+            setIsLoading(true);
+            setNoMoreData(false);
+            setColumnsData([]);
+            setEventDataList([]);
+            setEventRawList([]);
+            setHarborData([]);
+        }
         getHarborData();
         getEventData(page);
     }
@@ -193,7 +203,7 @@ const EventPage = forwardRef((props, ref) => {
                 if (topics.length > 0) {
                     const newTopic = lodash.sampleSize(topics, 12);
                     let harborCopy = newTopic.map(item => ({ ...item, type: 'harbor' }));
-                    harborCopy = lodash.shuffle(harborCopy);
+                    harborCopy = lodash.uniqBy(lodash.shuffle(harborCopy), 'id');
                     setHarborData(harborCopy);
                 }
             }
@@ -408,7 +418,10 @@ const EventPage = forwardRef((props, ref) => {
                     }
                 }}
                 scrollEnabled={false}
-                keyExtractor={item => item._id ? String(item._id) : String(item.id)}
+                keyExtractor={(item, index) => {
+                    const prefix = item.type === 'harbor' ? 'harbor' : 'event';
+                    return `${prefix}-${item.id || item._id || index}-${index}`;
+                }}
             />
         </View>)
     };
