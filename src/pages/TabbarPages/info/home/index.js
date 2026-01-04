@@ -5,14 +5,11 @@ import {
     Text,
     TouchableOpacity,
     RefreshControl,
-    VirtualizedList,
     TouchableWithoutFeedback,
     Platform,
     Linking,
     Alert,
     AppState,
-    KeyboardAvoidingView,
-    TextInput,
     Keyboard,
     FlatList,
 } from 'react-native';
@@ -28,9 +25,7 @@ import {
     APPSTORE_URL,
     MAIL,
     ARK_WIKI,
-    ARK_WIKI_RANDOM_TITLE,
     UM_Moodle,
-    ARK_WEB_CLUB_SIGNIN,
     ARK_HARBOR,
     ARK_HARBOR_LOGIN,
     ARK_HARBOR_NEW_TOPIC,
@@ -54,13 +49,9 @@ import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { FontAwesome, FontAwesome5, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
-import { inject } from 'mobx-react';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -70,7 +61,7 @@ import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
@@ -78,16 +69,6 @@ const paymentArr = [
     require('../../../../static/img/donate/wechat.jpg'),
     require('../../../../static/img/donate/alipay.jpg'),
 ]
-
-const getItem = (data, index) => {
-    // data為VirtualizedList設置的data，index為當前渲染到的下標
-    return data[index];
-};
-
-// 返回數據數組的長度
-const getItemCount = data => {
-    return data.length;
-};
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -126,7 +107,7 @@ const HomeScreen = ({ navigation }) => {
             },
         },
         {
-            icon_name: require('../../../../static/img/logo.png'),
+            icon_name: 'plus',
             icon_type: iconTypes.view,
             function_name: t('新想法', { ns: 'home' }),
             func: () => {
@@ -142,7 +123,9 @@ const HomeScreen = ({ navigation }) => {
             func: () => {
                 trigger();
                 logToFirebase('funcUse', { funcName: 'donate' });
+                // 新版導航至愛發電主頁
                 openLink({ URL: AFD_UMACARK, mode: 'fullScreen' });
+                // 舊版打開BottomSheet展示收款碼
                 // if (sheetIndex != -1) {
                 //     logToFirebase('funcUse', { funcName: 'donate' });
                 //     bottomSheetRef.current?.close();
@@ -390,7 +373,7 @@ const HomeScreen = ({ navigation }) => {
                     backgroundColor: themeColor,
                     alignItems: 'center', justifyContent: 'center',
                 }}>
-                    <FontAwesome5
+                    <FontAwesome
                         name={'plus'}
                         size={imageSize - verticalScale(8)}
                         color={white}

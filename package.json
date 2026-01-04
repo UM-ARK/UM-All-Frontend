@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@alessiocancian/react-native-actionsheet": "^3.2.0",
+    "@expo/vector-icons": "~14.0.4",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-camera-roll/camera-roll": "^7.10.1",
