@@ -472,7 +472,7 @@ const LocalCourse = (props) => {
                             {"\"Class For / Class Not For\" Information" in courseInfo && courseInfo["\"Class For / Class Not For\" Information"].length > 0 && (
                                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, textAlign: 'center', }}>{courseInfo["\"Class For / Class Not For\" Information"]}</Text>
                             )}
-                            {'Course Type' in courseInfo && (
+                            {'Course Type' in courseInfo && courseInfo['Course Type'].length > 0 && (
                                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Course Type']}</Text>
                             )}
                         </View>
