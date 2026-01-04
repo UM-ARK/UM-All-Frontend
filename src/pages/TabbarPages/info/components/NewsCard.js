@@ -1,11 +1,11 @@
 import React, { useContext, useState, memo, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import { Image } from 'expo-image';
+// import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
@@ -173,14 +173,14 @@ const NewsCard = ({ data, type = 'news' }) => {
                             backgroundColor: white,
                         }}>
                             <Image
-                                source={imageUrls}
+                                source={{ uri: imageUrls }}
+                                // source={imageUrls}
                                 style={styles.newsCardImg}
-                                contentFit="cover"
-                                cachePolicy="memory-disk"
-                                recyclingKey={data._id}
-                                transition={0}
-                                // onLoadEnd={() => setImgLoading(false)}
-                                // onError={() => setImgLoading(true)}
+                                resizeMode='cover'
+                            // contentFit="cover"
+                            // cachePolicy="memory-disk"
+                            // recyclingKey={data._id}
+                            // transition={0}
                             />
                             {/* {imgLoading && (
                                 <View style={{

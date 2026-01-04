@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
@@ -18,7 +19,7 @@ import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 
-import { Image } from 'expo-image';
+// import { Image } from 'expo-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -41,7 +42,7 @@ const getItemCount = data => {
 const NewsPage = () => {
     const { theme } = useContext(ThemeContext);
     const { white, black, viewShadow, bg_color, themeColor, trueWhite, } = theme;
-    const styles = useMemo(() => StyleSheet.create({
+    const styles = StyleSheet.create({
         topNewsContainer: {
             borderRadius: scale(10),
             overflow: 'hidden',
@@ -72,7 +73,7 @@ const NewsPage = () => {
             fontWeight: 'bold',
             fontSize: verticalScale(20),
         },
-    }), [white, viewShadow, trueWhite]);
+    });
 
     const navigation = useContext(NavigationContext);
     const virtualizedList = useRef(null);
@@ -178,13 +179,15 @@ const NewsPage = () => {
                             navigation.navigate('NewsDetail', { data: topNews, });
                         }}>
                         <Image
-                            source={imageUrls[0].replace('http:', 'https:')}
+                            source={{ uri: imageUrls[0].replace('http:', 'https:') }}
                             style={{ width: '100%', height: '100%' }}
-                            contentFit="cover"
-                            cachePolicy="memory-disk"
-                            recyclingKey={topNews?._id || 'top-news'}
-                            transition={0}
-                            onLoadEnd={() => setImgLoading(false)}
+                            // source={imageUrls[0].replace('http:', 'https:')}
+                            // contentFit="cover"
+                            // cachePolicy="memory-disk"
+                            // recyclingKey={topNews?._id || 'top-news'}
+                            // transition={0}
+                            // onLoadEnd={() => setImgLoading(false)}
+                            resizeMode='cover'
                         />
                         {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                         <View style={styles.topNewsOverlay}>
@@ -221,7 +224,7 @@ const NewsPage = () => {
                             </View>
                         </View>
 
-                        {imgLoading ? (<View style={{
+                        {/* {imgLoading ? (<View style={{
                             width: '100%',
                             height: '100%',
                             alignItems: 'center',
@@ -232,12 +235,12 @@ const NewsPage = () => {
                                 size={'large'}
                                 color={white}
                             />
-                        </View>) : null}
+                        </View>) : null} */}
                     </TouchableOpacity>
                 </View>
             </View >
         );
-    }, [topNewsContent, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, black.third, white, trueWhite, bg_color, imgLoading]);
+    }, [white]);
 
     // 渲染懸浮可拖動按鈕
     const renderGoTopButton = useCallback(() => (
@@ -308,7 +311,7 @@ const NewsPage = () => {
                             refreshing={isScrollViewLoading}
                             onRefresh={() => {
                                 setIsScrollViewLoading(true);
-                                setImgLoading(true);
+                                // setImgLoading(true);
                                 setIsLoading(true);
                                 getData();
                             }}
@@ -349,7 +352,7 @@ const NewsPage = () => {
                             onRefresh={() => {
                                 // 展示Loading標識
                                 setIsLoading(true);
-                                setImgLoading(true);
+                                // setImgLoading(true);
                                 getData();
                             }}
                         />

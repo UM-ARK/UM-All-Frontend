@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Image } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import { Image } from 'expo-image';
+// import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
@@ -42,14 +42,16 @@ const ClubCard = ({ data }) => {
             onPress={handleJumpToDetail}>
             {/* 社团 / 组织 Logo */}
             <Image
-                source={logo_url}
+                // source={logo_url}
+                source={{ uri: logo_url }}
                 style={{
                     backgroundColor: trueWhite,
                     width: IMG_SIZE,
                     height: IMG_SIZE,
                     borderRadius: scale(50),
                 }}
-                contentFit='contain'
+                // contentFit='contain'
+                resizeMode='contain'
             />
 
             {/* 组织名 */}
