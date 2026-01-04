@@ -85,7 +85,7 @@ const NewsPage = () => {
     // 請求澳大新聞API
     useEffect(() => {
         getData();
-        return () => FastImage.clearMemoryCache();
+        // return () => FastImage.clearMemoryCache();
     }, []);
 
     // 請求澳大api返回新聞數據

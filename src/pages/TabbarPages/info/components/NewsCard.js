@@ -142,14 +142,18 @@ const NewsCard = ({ data, type = 'news' }) => {
                     )}
 
                     {/* 活动类型展示日期 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: verticalScale(12),
-                        fontWeight: 'bold',
-                        position: 'absolute',
-                        bottom: 0,
-                        color: dateColor,
-                    }}>
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            fontSize: verticalScale(12),
+                            fontWeight: 'bold',
+                            color: dateColor,
+                            ...(haveImage
+                                ? { position: 'absolute', bottom: 0 }
+                                : { marginTop: scale(6) } // 沒有圖片時正常流式顯示，並加點間距
+                            ),
+                        }}
+                    >
                         @ {moment(beginDate).format('MM-DD')}
                     </Text>
                 </View>
