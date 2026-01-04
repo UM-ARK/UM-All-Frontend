@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Dimensions, Alert, Appearance, AppState, useColorScheme } from 'react-native';
+import { Image, Dimensions, Alert, useColorScheme } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -9,6 +9,7 @@ import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './
 import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
 import { ThemeProvider, themes } from "./src/components/ThemeContext";
 import sourceCourseVersion from './src/static/UMCourses/courseVersion';
+import { getPreciseDeviceName } from './src/utils/iosModel';
 
 import { Provider } from 'mobx-react';
 import AnimatedSplash from 'react-native-animated-splash-screen';
@@ -16,8 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
-import RNRestart from 'react-native-restart';
-import { t } from 'i18next';
+import analytics from '@react-native-firebase/analytics';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -48,7 +48,6 @@ const performCheck = async () => {
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [scheme, setScheme] = useState(Appearance.getColorScheme());
     const isLight = useColorScheme() === 'light';
     const theme = themes[isLight ? 'light' : 'dark'];
 
@@ -98,11 +97,16 @@ const App = () => {
                 performCheck();
             } catch (e) {
                 Alert.alert('', `App initialization error!\nPlease contact developer.`, null, { cancelable: true })
+            } finally {
+                // 報告Firebase準確的iPhone型號
+                // TODO: Android測試
+                const modelName = getPreciseDeviceName();
+                await analytics().setUserProperty('device_market_name', modelName);
             }
         };
 
         init();
-    }, [scheme]);
+    }, []);
 
     // 自定義Toast外觀
     const toastConfig = {

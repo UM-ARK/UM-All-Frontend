@@ -38,6 +38,7 @@
     "axios": "^1.13.2",
     "deprecated-react-native-prop-types": "^5.0.0",
     "expo": "~52.0.0",
+    "expo-device": "~7.0.3",
     "expo-image": "~2.0.7",
     "expo-web-browser": "~14.0.2",
     "i18next": "^23.16.8",
