@@ -265,6 +265,12 @@ const ARKHarbor = (props) => {
                             onPress={() => {
                                 trigger();
                                 setOpenSetting(false);
+                                // 如果set了tabbarMode: 'browser'，則導航回主頁
+                                if (harborSetting && harborSetting.tabbarMode === 'browser') {
+                                    if (props.navigation && props.navigation.navigate) {
+                                        props.navigation.navigate('Tabbar', { screen: 'NewsTabbar' });
+                                    }
+                                }
                             }}
                         >
                             <Text style={{ ...s.settingText, }}>{t("退出設定", { ns: 'harbor' })}</Text>
