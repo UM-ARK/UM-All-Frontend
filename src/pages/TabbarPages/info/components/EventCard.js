@@ -149,7 +149,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
             style={{
                 backgroundColor: white,
                 borderRadius: BORDER_RADIUS,
-                margin: scale(5), 
+                margin: scale(5),
             }}
             activeOpacity={0.9}
             onPress={handleJumpToDetail}>
@@ -159,17 +159,19 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                         borderRadius: BORDER_RADIUS,
                         overflow: 'hidden',
                     }}>
-                    <Image
-                        source={coverImgUrl}
-                        style={{
-                            width: imageSize,
-                            height: imageSize,
-                            backgroundColor: white,
-                            opacity: isFinish ? 0.5 : 1,
-                        }}
-                        contentFit='cover'
-                        onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
-                        onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}>
+                    <View>
+                        <Image
+                            source={coverImgUrl}
+                            style={{
+                                width: imageSize,
+                                height: imageSize,
+                                backgroundColor: white,
+                                opacity: isFinish ? 0.5 : 1,
+                            }}
+                            contentFit='cover'
+                            onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
+                            onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}
+                        />
                         {imgLoading && (
                             <View
                                 style={{
@@ -178,6 +180,9 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    zIndex: 10
                                 }}>
                                 <ActivityIndicator
                                     size={'large'}
@@ -185,7 +190,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                 />
                             </View>
                         )}
-                    </Image>
+                    </View>
 
                     {/* website類型活動展示link圖標 */}
                     {type === 'WEBSITE' && (

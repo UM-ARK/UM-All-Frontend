@@ -52,9 +52,12 @@ const NewsPage = () => {
             ...viewShadow,
         },
         topNewsOverlay: {
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            position: 'absolute', // 【核心】脫離文檔流，覆蓋在 Image 上
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', // 50% 透明度的黑
             padding: verticalScale(15),
             justifyContent: 'flex-end',
         },
@@ -169,68 +172,66 @@ const NewsPage = () => {
                     Data From: data.um.edu.mo
                 </Text>
                 <View style={styles.topNewsContainer}>
-                    <View style={{ width: '100%' }}>
-                        {/* 圖片背景 */}
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                trigger();
-                                navigation.navigate('NewsDetail', { data: topNews, });
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{ width: '100%', height: '100%' }}
+                        onPress={() => {
+                            trigger();
+                            navigation.navigate('NewsDetail', { data: topNews, });
+                        }}>
+                        <Image
+                            source={imageUrls[0].replace('http:', 'https:')}
+                            style={{ width: '100%', height: '100%' }}
+                            onLoadEnd={() => setImgLoading(false)}
+                        />
+                        {/* 塗上50%透明度的黑，讓白色字體能看清 */}
+                        <View style={styles.topNewsOverlay}>
+                            {/* Top Story字樣 */}
+                            <View style={styles.topNewsPosition}>
+                                <Text style={styles.topNewsText}>
+                                    Top Story @ UM
+                                </Text>
+                            </View>
+
+                            {/* 標題 */}
+                            <View style={{
+                                alignSelf: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
                             }}>
-                            <Image
-                                source={imageUrls[0].replace('http:', 'https:')}
-                                style={{ width: '100%', height: '100%' }}
-                                onLoadEnd={() => setImgLoading(false)}>
-                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                                <View style={styles.topNewsOverlay}>
-                                    {/* Top Story字樣 */}
-                                    <View style={styles.topNewsPosition}>
-                                        <Text style={styles.topNewsText}>
-                                            Top Story @ UM
-                                        </Text>
-                                    </View>
-
-                                    {/* 標題 */}
-                                    <View style={{
-                                        alignSelf: 'center',
-                                        justifyContent: 'center',
-                                        width: '100%',
-                                    }}>
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: trueWhite,
-                                            fontWeight: 'bold',
-                                            fontSize: verticalScale(18),
-                                        }}
-                                            numberOfLines={3}>
-                                            {title_en}
-                                        </Text>
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: trueWhite,
-                                            fontWeight: 'bold',
-                                            fontSize: verticalScale(13),
-                                        }}>
-                                            {title_cn}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {imgLoading ? (<View style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    position: 'absolute',
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: trueWhite,
+                                    fontWeight: 'bold',
+                                    fontSize: verticalScale(18),
+                                }}
+                                    numberOfLines={3}>
+                                    {title_en}
+                                </Text>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: trueWhite,
+                                    fontWeight: 'bold',
+                                    fontSize: verticalScale(13),
                                 }}>
-                                    <ActivityIndicator
-                                        size={'large'}
-                                        color={white}
-                                    />
-                                </View>) : null}
-                            </Image>
-                        </TouchableOpacity>
-                    </View>
+                                    {title_cn}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {imgLoading ? (<View style={{
+                            width: '100%',
+                            height: '100%',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute',
+                        }}>
+                            <ActivityIndicator
+                                size={'large'}
+                                color={white}
+                            />
+                        </View>) : null}
+                    </TouchableOpacity>
                 </View>
             </View >
         );

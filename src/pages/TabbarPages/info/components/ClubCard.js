@@ -43,17 +43,18 @@ const ClubCard = ({ data }) => {
             activeOpacity={0.8}
             onPress={handleJumpToDetail}>
             {/* 社团 / 组织 Logo */}
-            <Image
-                source={logo_url}
-                style={{
-                    backgroundColor: trueWhite,
-                    width: IMG_SIZE,
-                    height: IMG_SIZE,
-                    borderRadius: scale(50),
-                }}
-                contentFit='contain'
-                onLoadStart={() => setImgLoading(true)}
-                onLoad={() => setImgLoading(false)}>
+            <View>
+                <Image
+                    source={logo_url}
+                    style={{
+                        backgroundColor: trueWhite,
+                        width: IMG_SIZE,
+                        height: IMG_SIZE,
+                        borderRadius: scale(50),
+                    }}
+                    contentFit='contain'
+                    onLoadStart={() => setImgLoading(true)}
+                    onLoad={() => setImgLoading(false)} />
                 {imgLoading && (
                     <View
                         style={{
@@ -69,7 +70,7 @@ const ClubCard = ({ data }) => {
                         />
                     </View>
                 )}
-            </Image>
+            </View>
 
             {/* 组织名 */}
             <View
