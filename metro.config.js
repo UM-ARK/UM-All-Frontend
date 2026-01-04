@@ -1,4 +1,5 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
+const { mergeConfig } = require('@react-native/metro-config');
 const { wrapWithReanimatedMetroConfig } = require('react-native-reanimated/metro-config');
 
 /**
@@ -9,8 +10,11 @@ const { wrapWithReanimatedMetroConfig } = require('react-native-reanimated/metro
  */
 const config = {};
 
-// First merge the default config with any custom config
-const mergedConfig = mergeConfig(getDefaultConfig(__dirname), config);
+// 1. 獲取 Expo 的默認配置（這很重要，包含了 Expo 模塊的解析規則）
+const expoConfig = getDefaultConfig(__dirname);
 
-// Then wrap the merged config with Reanimated's metro config so both take effect
+// 2. 合併您的自定義配置（如果有）
+const mergedConfig = mergeConfig(expoConfig, config);
+
+// 3. 最後用 Reanimated 包裹配置
 module.exports = wrapWithReanimatedMetroConfig(mergedConfig);

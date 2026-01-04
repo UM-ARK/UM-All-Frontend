@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Dimensions, Alert, Appearance, AppState, useColorScheme } from 'react-native';
+import { Image, Dimensions, Alert, useColorScheme } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
 import { uiStyle } from './src/utils/uiMap';
-import { setLanguage, setLocalStorage as setI18nLocalStorage } from './src/i18n/i18n';
 import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
 import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
 import { ThemeProvider, themes } from "./src/components/ThemeContext";
 import sourceCourseVersion from './src/static/UMCourses/courseVersion';
+import { getPreciseDeviceName } from './src/utils/iosModel';
 
 import { Provider } from 'mobx-react';
 import AnimatedSplash from 'react-native-animated-splash-screen';
@@ -17,8 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
-import RNRestart from 'react-native-restart';
-import { t } from 'i18next';
+import { getApp } from '@react-native-firebase/app';
+import { getAnalytics, setUserProperty } from '@react-native-firebase/analytics';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -49,8 +49,6 @@ const performCheck = async () => {
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [languageOK, setLanguageOK] = useState(false);
-    const [scheme, setScheme] = useState(Appearance.getColorScheme());
     const isLight = useColorScheme() === 'light';
     const theme = themes[isLight ? 'light' : 'dark'];
 
@@ -70,8 +68,6 @@ const App = () => {
                 const strUserInfo = await AsyncStorage.getItem('userInfo');
                 const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
                 if (userInfo.stdData || userInfo.clubData) { RootStore.setUserInfo(userInfo); }
-
-                await checkLanguage();
 
                 let localCourseVersion = await getLocalStorage('course_version');
                 // 首次啟動，優先用本地打包的 sourceCourseVersion
@@ -102,11 +98,16 @@ const App = () => {
                 performCheck();
             } catch (e) {
                 Alert.alert('', `App initialization error!\nPlease contact developer.`, null, { cancelable: true })
+            } finally {
+                // 報告Firebase準確的iPhone型號
+                const modelName = getPreciseDeviceName();
+                const analyticsInstance = getAnalytics(getApp());
+                await setUserProperty(analyticsInstance, 'device_market_name', modelName);
             }
         };
 
         init();
-    }, [scheme]);
+    }, []);
 
     // 自定義Toast外觀
     const toastConfig = {
@@ -177,54 +178,6 @@ const App = () => {
         ),
     };
 
-    // 檢查語言設定
-    const checkLanguage = async () => {
-        try {
-            const res = await AsyncStorage.getItem('language');
-            const lng = res ? JSON.parse(res) : null;
-            if (!lng) {
-                Alert.alert(
-                    '語言設定 / Language Setting',
-                    '挑選您的首選語言\nPick your preferred languaeg(English version not fully translated)\n您稍後可以在關於頁再修改！\nYou can modify it later on the About page!',
-                    [
-                        {
-                            text: '繁體中文',
-                            onPress: () => {
-                                setI18nLocalStorage('tc');
-                                setLanguageOK(true);
-                            },
-                        },
-                        {
-                            text: 'English',
-                            onPress: () => setLanguage('en'),
-                        },
-                    ]
-                );
-            } else {
-                setLanguageOK(true);
-            }
-        } catch (error) {
-            console.error('checkLanguage error:', error);
-        }
-    };
-
-    // 主題模式切換提示
-    const schemeChange = (currentScheme) => {
-        if (AppState.currentState === 'active' && isLight !== (currentScheme === 'light')) {
-            Alert.alert(
-                `ARK ALL`,
-                `${t('現在重啟APP切換到')} ${currentScheme === 'light' ? t('淺色模式') : t('深色模式')} ?`,
-                [
-                    {
-                        text: 'Yes',
-                        onPress: () => { RNRestart.Restart(); },
-                    },
-                    { text: 'No' },
-                ]
-            );
-        }
-    };
-
     return (
         <AnimatedSplash
             translucent={true}
@@ -242,14 +195,12 @@ const App = () => {
             backgroundColor={theme.bg_color}
         >
             <SafeAreaProvider>
-                {languageOK ? (
-                    <Provider RootStore={RootStore}>
-                        <ThemeProvider>
-                            <Nav />
-                        </ThemeProvider>
-                        <Toast config={toastConfig} />
-                    </Provider>
-                ) : null}
+                <Provider RootStore={RootStore}>
+                    <ThemeProvider>
+                        <Nav />
+                    </ThemeProvider>
+                    <Toast config={toastConfig} />
+                </Provider>
             </SafeAreaProvider>
         </AnimatedSplash>
     );

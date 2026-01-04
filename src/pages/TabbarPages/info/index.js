@@ -13,7 +13,7 @@ import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -24,6 +24,7 @@ export default function NewsScreen() {
     const insets = useContext(SafeAreaInsetsContext);
     const { theme } = useTheme();
     const { bg_color, black, themeColor } = theme;
+    const { t } = useTranslation(['common', 'home']);
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>

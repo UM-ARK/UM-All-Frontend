@@ -30,7 +30,7 @@ import CustomBottomSheet from '../courseSim/BottomSheet';
 import { scale, verticalScale } from "react-native-size-matters";
 import { Header, Dialog } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
@@ -1086,7 +1086,7 @@ const What2Reg = (props) => {
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                         {/* ARK Logo */}
-                        <FastImage
+                        <Image
                             source={require('../../../static/img/logo.png')}
                             style={{
                                 height: iconSize, width: iconSize,

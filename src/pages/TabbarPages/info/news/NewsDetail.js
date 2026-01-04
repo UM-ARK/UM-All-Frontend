@@ -6,14 +6,14 @@ import ImageScrollViewer from '../../../../components/ImageScrollViewer';
 import Header from '../../../../components/Header';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
+import { trigger } from '../../../../utils/trigger';
 
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
-import { trigger } from '../../../../utils/trigger';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -117,7 +117,9 @@ const NewsDetail = ({ route, navigation }) => {
         }
     });
 
-    let imageUrls = newsData.common.imageUrls.map(item => item.replace('http:', 'https:'));
+    let imageUrls = newsData.common.imageUrls ?
+        newsData.common.imageUrls.map(item => item.replace('http:', 'https:'))
+        : [];
 
     // 自適應圖片寬度
     let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
@@ -165,9 +167,6 @@ const NewsDetail = ({ route, navigation }) => {
     // 登錄頁面打開事件
     useEffect(() => {
         logToFirebase('openPage', { page: 'UMNews' });
-        return () => {
-            FastImage.clearMemoryCache();
-        };
     }, []);
 
     // 初始化图片加载状态
@@ -275,8 +274,8 @@ const NewsDetail = ({ route, navigation }) => {
                                 trigger();
                                 imageScrollViewer.current.handleOpenImage(index);
                             }}>
-                            <FastImage
-                                source={{ uri: item }}
+                            <Image
+                                source={item}
                                 style={{ width: '100%', height: '100%' }}
                                 onLoadStart={() => {
                                     const newLoadingState = [...imgLoading];

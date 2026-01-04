@@ -12,6 +12,7 @@ import { t } from "i18next";
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import Share from 'react-native-share';
 import { useFocusEffect } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { ARK_HARBOR } from '../../../utils/pathMap';
@@ -157,7 +158,6 @@ const ARKHarbor = (props) => {
         }, [])
     );
 
-
     return (
         <View style={{ flex: 1 }}>
             <Header
@@ -219,60 +219,123 @@ const ARKHarbor = (props) => {
                     onLoadEnd={() => setIsLoaded(true)}
                 />
             ) : (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bg_color, paddingHorizontal: scale(10), }}>
-                    {/* {renderFloatButton()} */}
-                    <Text style={{ ...s.settingText, color: black.main, }}>{t("默認打開方式", { ns: 'harbor' })}</Text>
-                    <Text style={{ ...s.settingText, color: black.main, textAlign: 'center', marginVertical: verticalScale(5), }}>{t("Webview版概率出現登錄錯誤，建議使用Browser版", { ns: 'harbor' })}</Text>
+                <View style={{ flex: 1, backgroundColor: bg_color, paddingHorizontal: scale(20), justifyContent: 'center' }}>
 
-                    <TouchableScale style={{ ...s.settingButtonContainer, }}
+                    {/* 標題區域 */}
+                    <View style={{ marginBottom: verticalScale(30), alignItems: 'center' }}>
+                        <Text style={{ fontSize: scale(20), fontWeight: 'bold', color: black.main, marginBottom: verticalScale(8) }}>
+                            {t("瀏覽方式偏好", { ns: 'harbor' })}
+                        </Text>
+                        <Text style={{ fontSize: scale(13), color: black.third, textAlign: 'center', lineHeight: scale(20) }}>
+                            {t("選擇最適合您的 Harbor 論壇瀏覽體驗", { ns: 'harbor' })}
+                        </Text>
+                    </View>
+
+                    {/* 選項 A: Browser (推薦) */}
+                    <TouchableScale
+                        activeScale={0.98}
+                        style={{
+                            backgroundColor: white, // 或適配深色模式的顏色
+                            borderRadius: scale(16),
+                            padding: scale(20),
+                            marginBottom: verticalScale(15),
+                            borderWidth: 1,
+                            borderColor: harborSetting?.tabbarMode === 'browser' ? themeColor : 'transparent', // 選中高亮
+                            ...viewShadow,
+                        }}
                         onPress={() => {
                             trigger();
+                            logToFirebase('clickHarbor', {
+                                mode: "browser"
+                            });
                             setHarborSetting({ tabbarMode: 'browser' });
                             setItem(JSON.stringify({ tabbarMode: 'browser' }));
                             openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
-                            Toast.show({
-                                type: 'arkToast',
-                                text1: 'Set browser mode',
-                                topOffset: scale(100),
-                                onPress: () => Toast.hide(),
-                            });
+                            Toast.show({ type: 'success', text1: '已切換至瀏覽器模式' });
                         }}
                     >
-                        <Text style={{ ...s.settingText, }}>{t("進入Browser版", { ns: 'harbor' })}{'👍🏻'}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(8) }}>
+                            <Ionicons name="globe-outline" size={scale(16)} color={themeColor} />
+                            <Text
+                                style={{
+                                    fontSize: scale(16),
+                                    fontWeight: '600',
+                                    color: black.main,
+                                    marginLeft: scale(8),
+                                    flexShrink: 1,
+                                    flexGrow: 1,
+                                    minWidth: 0,
+                                }}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {t("系統瀏覽器 (推薦)", { ns: 'harbor' })}
+                            </Text>
+                            <View style={{ backgroundColor: bg_color, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: scale(8) }}>
+                                <Text style={{ color: themeColor, fontSize: scale(8), fontWeight: 'bold' }}>STABLE</Text>
+                            </View>
+                        </View>
+                        <Text style={{ fontSize: scale(13), color: black.second, lineHeight: scale(18) }}>
+                            ✅ {t("支援自動填充密碼", { ns: 'harbor' })}{'\n'}
+                            ✅ {t("兼容性最佳，解決舊設備錯誤", { ns: 'harbor' })}
+                        </Text>
                     </TouchableScale>
 
-                    <TouchableScale style={{ ...s.settingButtonContainer, opacity: 0.75 }}
+                    {/* 選項 B: Webview */}
+                    <TouchableScale
+                        activeScale={0.98}
+                        style={{
+                            backgroundColor: '#fff',
+                            borderRadius: scale(16),
+                            padding: scale(20),
+                            marginBottom: verticalScale(15),
+                            borderWidth: 1,
+                            borderColor: harborSetting?.tabbarMode === 'webview' ? themeColor : 'transparent',
+                            opacity: 0.9,
+                        }}
                         onPress={() => {
                             trigger();
+                            logToFirebase('clickHarbor', {
+                                mode: "webview"
+                            });
                             setHarborSetting({ tabbarMode: 'webview' });
                             setItem(JSON.stringify({ tabbarMode: 'webview' }));
                             setCurrentURL(ARK_HARBOR);
                             setOpenSetting(false);
-                            Toast.show({
-                                type: 'arkToast',
-                                text1: 'Set webview mode',
-                                topOffset: scale(100),
-                                onPress: () => Toast.hide(),
-                            });
+                            Toast.show({ type: 'info', text1: '已切換至嵌入模式' });
                         }}
                     >
-                        <Text style={{ ...s.settingText, }}>{t("進入Webview版", { ns: 'harbor' })}{'(BUG)🤷🏻'}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(8) }}>
+                            <Ionicons name="phone-portrait-outline" size={scale(16)} color={black.main} />
+                            <Text style={{ fontSize: scale(16), fontWeight: '600', color: black.main, marginLeft: scale(8) }}>
+                                {t("APP 內嵌入瀏覽", { ns: 'harbor' })}
+                            </Text>
+                        </View>
+                        <Text style={{ fontSize: scale(13), color: black.second, lineHeight: scale(18) }}>
+                            ⚡️ {t("頁面切換更流暢", { ns: 'harbor' })}{'\n'}
+                            ⚠️ {t("需手動輸入密碼，舊版 Android 可能報錯", { ns: 'harbor' })}{'\n'}
+                            ⚠️ {t("報錯需要自行前往應用商店更新Webview組件", { ns: 'harbor' })}
+                        </Text>
                     </TouchableScale>
 
-                    {/* 有保存的設定時才顯示 */}
-                    {harborSetting && harborSetting.tabbarMode && (<>
-                        <TouchableScale style={{ ...s.settingButtonContainer, backgroundColor: black.third }}
-                            onPress={() => {
-                                trigger();
-                                setOpenSetting(false);
-                            }}
-                        >
-                            <Text style={{ ...s.settingText, }}>{t("退出設定", { ns: 'harbor' })}</Text>
-                        </TouchableScale>
-
-                        <Text style={{ ...s.settingText, color: black.main, }}>{t("您可以隨時通過右下角的按鈕進入設定", { ns: 'harbor' })}</Text>
-                    </>)}
-
+                    {/* 退出按鈕 */}
+                    <TouchableScale
+                        style={{ padding: scale(15), alignItems: 'center', marginTop: verticalScale(10) }}
+                        onPress={() => {
+                            trigger();
+                            setOpenSetting(false);
+                            if (harborSetting?.tabbarMode === 'browser') {
+                                props.navigation?.navigate('Tabbar', { screen: 'NewsTabbar' });
+                            }
+                        }}
+                    >
+                        <Text style={{ fontSize: scale(14), color: black.third, }}>
+                            {t("隨時通過本頁面右下角設置按鈕修改偏好", { ns: 'harbor' })}
+                        </Text>
+                        <Text style={{ fontSize: scale(15), color: black.third, textDecorationLine: 'underline' }}>
+                            {t("暫不修改，返回", { ns: 'harbor' })}
+                        </Text>
+                    </TouchableScale>
                 </View>
             )}
 
@@ -283,6 +346,7 @@ const ARKHarbor = (props) => {
                     style={s.button}
                     onPress={() => {
                         trigger();
+                        setOpenSetting(false);
                         // 跳轉到Harbor主頁
                         setCurrentURL(ARK_HARBOR);
                         // 让WebView跳转到Harbor主页
@@ -291,7 +355,6 @@ const ARKHarbor = (props) => {
                             webviewRef.current.injectJavaScript?.(`window.location.href = '${ARK_HARBOR}'; true;`);
                         }
                     }}
-                    disabled={openSetting}
                 >
                     <MaterialDesignIcons
                         name={'home-circle'}

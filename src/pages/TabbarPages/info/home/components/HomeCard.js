@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, } from 'react-native';
 
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from "i18next";
 
@@ -144,15 +144,12 @@ const HomeCard = (props) => {
                                     backgroundColor: white,
                                 }}
                             >
-                                <FastImage
-                                    source={{
-                                        uri: imageUrls[0].replace('http:', 'https:'),
-                                        // cache: FastImage.cacheControl.web,
-                                    }}
+                                <Image
+                                    source={imageUrls[0].replace('http:', 'https:')}
                                     onLoadStart={() => setImgLoading(true)}
                                     onLoad={() => setImgLoading(false)}
                                     style={styles.newsCardImg}
-                                    resizeMode={FastImage.resizeMode.cover}
+                                    contentFit='cover'
                                 />
                                 {imgLoading && (
                                     <View

@@ -4,6 +4,7 @@ import i18n, { changeLanguage } from "i18next";
 import { initReactI18next } from "react-i18next";
 import RNRestart from 'react-native-restart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as RNLocalize from "react-native-localize";
 
 import EN_US from './en-us';
 import ZH_HK from './zh-hk';
@@ -16,69 +17,68 @@ const resources = {
     tc: ZH_HK
 };
 
-// 讀取緩存中的語言設定
-initLanguage();
-async function initLanguage() {
-    try {
-        await AsyncStorage.getItem('language').then(res => {
-            let lng = JSON.parse(res);
-            i18n.use(initReactI18next).init({
-                resources,
-                // 讀取本地緩存中的語言設置，默認 英文 en
-                lng: lng ? lng : 'tc',
-                interpolation: { escapeValue: false },
-                defaultNS: 'common',
-            });
-        })
-    } catch (error) {
-        Alert.alert('', 'i18n error, Please contact developer');
-        // 如果出錯，直接使用 en 作為默認語言
-        i18n.use(initReactI18next).init({
-            resources,
-            lng: 'tc',
-            interpolation: {
-                escapeValue: false
-            }
-        });
-    }
+
+// 簡單的語言映射邏輯
+// 1. 獲取手機系統語言
+const locales = RNLocalize.getLocales();
+const systemLanguageCode = locales[0]?.languageCode; // e.g., 'en', 'zh', 'ja', 'pt'
+
+// 2. 定義默認語言邏輯
+let defaultLanguage = 'en'; // 默認兜底為英文
+
+if (systemLanguageCode === 'zh') {
+    // 只有當系統語言是中文時，才進一步判斷
+    // 您目前的 resources 只有 'tc' (繁體) 和 'en'，
+    // 所以無論是用戶是簡體還是繁體，如果想默認顯示中文，就設為 'tc'
+    // (如果未來加了簡體 'sc'，可以在這裡細分)
+    defaultLanguage = 'tc';
 }
 
-// 設置語言，並重啟
-export async function setLanguage(lng) {
-    try {
-        // 設置i18n的語言
-        await changeLanguage(lng).then(e => {
-            // 把語言設置放入本地緩存中
-            setLocalStorage(lng);
-            // 重啟
-            RNRestart.Restart();
-        }).catch(err => {
-            alert(JSON.stringify(err));
-        })
-    } catch (error) {
-        alert(JSON.stringify(error));
-    }
 
-}
+// 語言檢測插件，用於存入緩存
+const languageDetector = {
+    type: 'languageDetector',
+    async: true,
+    detect: async (callback) => {
+        try {
+            const storedLanguage = await AsyncStorage.getItem('language');
+            // 如果有用戶設置，用設置的；否則用系統的
+            const selectLanguage = storedLanguage ? JSON.parse(storedLanguage) : defaultLanguage;
+            callback(selectLanguage);
+        } catch (error) {
+            console.log('Error reading language', error);
+            callback(defaultLanguage);
+        }
+    },
+    init: () => { },
+    cacheUserLanguage: (language) => {
+        AsyncStorage.setItem('language', JSON.stringify(language));
+    },
+};
 
-// 設置本地緩存
-export async function setLocalStorage(lng) {
-    try {
-        const strCourseCodeList = JSON.stringify(lng);
-        await AsyncStorage.setItem('language', strCourseCodeList)
-            .catch(e => console.log('AsyncStorage Language Error', e));
-    } catch (e) {
-        alert(e);
-    }
-}
+i18n
+    .use(languageDetector) // 使用自定義的檢測器
+    .use(initReactI18next)
+    .init({
+        resources,
+        fallbackLng: 'tc',
+        interpolation: {
+            escapeValue: false, // React 已經默認防 XSS
+        },
+        react: {
+            useSuspense: false, // 避免在加載時白屏
+        },
+        defaultNS: 'common',
+        fallbackNS: ['home', 'about', 'wiki', 'harbor', 'catalog', 'timetable', 'features', 'club'],
+    });
 
 // 用法：
-// import { t } from 'i18next';
+// import { useTranslation } from 'react-i18next';
+// 組件內 const { t, i18n } = useTranslation(['common', 'about']);  // 注意namespace，順序搜索
 // 需要翻譯的地方使用 t('key')
 // 這裡的 key 需要對應 resources 內多語言的 key，t函數會返回該key的value
 
 // 修改語言
-// import { setLanguage } from '../xxxxxxxxx/i18n.js';
-// setLanguage('en');
+// i18n.changeLanguage('tc');
 
 export default i18n;

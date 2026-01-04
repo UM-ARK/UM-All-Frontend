@@ -8,7 +8,7 @@ import ModalBottom from './ModalSave';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('screen');
@@ -23,10 +23,6 @@ class ImageScrollViewer extends Component {
         isModalBottomVisible: true,
         isLoading: true,
     };
-
-    componentWillUnmount() {
-        FastImage.clearMemoryCache();
-    }
 
     // 打開和關閉顯示照片的彈出層
     tiggerModal = () => {
@@ -77,10 +73,8 @@ class ImageScrollViewer extends Component {
                     useNativeDriver={true}
                     imageUrls={imageUrlsObjArr}
                     renderImage={props => (
-                        <FastImage
-                            source={{
-                                uri: props.source.uri,
-                            }}
+                        <Image
+                            source={props.source.uri}
                             style={{ backgroundColor: COLOR_DIY.trueWhite, ...props.style }}
                             onLoadStart={() => {
                                 this.setState({ isLoading: true });

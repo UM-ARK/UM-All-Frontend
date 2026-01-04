@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Image } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+// import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
@@ -16,8 +16,6 @@ const ClubCard = ({ data }) => {
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
     const { themeColor, black, white, trueWhite } = theme;
-
-    const [imgLoading, setImgLoading] = useState(true);
     const { logo_url, name } = data;
 
     // 处理点击跳转逻辑
@@ -43,7 +41,8 @@ const ClubCard = ({ data }) => {
             activeOpacity={0.8}
             onPress={handleJumpToDetail}>
             {/* 社团 / 组织 Logo */}
-            <FastImage
+            <Image
+                // source={logo_url}
                 source={{ uri: logo_url }}
                 style={{
                     backgroundColor: trueWhite,
@@ -51,25 +50,9 @@ const ClubCard = ({ data }) => {
                     height: IMG_SIZE,
                     borderRadius: scale(50),
                 }}
-                resizeMode={FastImage.resizeMode.contain}
-                onLoadStart={() => setImgLoading(true)}
-                onLoad={() => setImgLoading(false)}>
-                {imgLoading && (
-                    <View
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'absolute',
-                        }}>
-                        <ActivityIndicator
-                            size={'large'}
-                            color={themeColor}
-                        />
-                    </View>
-                )}
-            </FastImage>
+                // contentFit='contain'
+                resizeMode='contain'
+            />
 
             {/* 组织名 */}
             <View

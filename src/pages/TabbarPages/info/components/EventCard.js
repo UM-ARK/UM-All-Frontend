@@ -7,23 +7,25 @@ import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import TouchableScale from "react-native-touchable-scale";
 import { inject } from 'mobx-react';
 
-const IMAGE_SIZE = scale(160);
+const DEFAULT_IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
 
-const EventCard = ({ data, RootStore }) => {
+const EventCard = ({ data, cardWidth, RootStore }) => {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
     const navigation = useContext(NavigationContext);
 
     const { theme } = useTheme();
     const { white, black, viewShadow, bg_color } = theme;
+
+    const imageSize = cardWidth || DEFAULT_IMAGE_SIZE;
 
     const styles = StyleSheet.create({
         // 右上角紅點提示位置
@@ -48,7 +50,7 @@ const EventCard = ({ data, RootStore }) => {
         title: {
             container: {
                 backgroundColor: white,
-                width: IMAGE_SIZE,
+                width: imageSize,
                 padding: scale(8),
             },
             text: {
@@ -147,7 +149,7 @@ const EventCard = ({ data, RootStore }) => {
             style={{
                 backgroundColor: white,
                 borderRadius: BORDER_RADIUS,
-                margin: scale(5), marginBottom: 0,
+                margin: scale(5),
             }}
             activeOpacity={0.9}
             onPress={handleJumpToDetail}>
@@ -157,19 +159,19 @@ const EventCard = ({ data, RootStore }) => {
                         borderRadius: BORDER_RADIUS,
                         overflow: 'hidden',
                     }}>
-                    <FastImage
-                        source={{
-                            uri: coverImgUrl,
-                        }}
-                        style={{
-                            width: IMAGE_SIZE,
-                            height: IMAGE_SIZE,
-                            backgroundColor: white,
-                            opacity: isFinish ? 0.5 : 1,
-                        }}
-                        resizeMode={FastImage.resizeMode.cover}
-                        onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
-                        onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}>
+                    <View>
+                        <Image
+                            source={coverImgUrl}
+                            style={{
+                                width: imageSize,
+                                height: imageSize,
+                                backgroundColor: white,
+                                opacity: isFinish ? 0.5 : 1,
+                            }}
+                            contentFit='cover'
+                            onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
+                            onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}
+                        />
                         {imgLoading && (
                             <View
                                 style={{
@@ -178,6 +180,9 @@ const EventCard = ({ data, RootStore }) => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    zIndex: 10
                                 }}>
                                 <ActivityIndicator
                                     size={'large'}
@@ -185,7 +190,7 @@ const EventCard = ({ data, RootStore }) => {
                                 />
                             </View>
                         )}
-                    </FastImage>
+                    </View>
 
                     {/* website類型活動展示link圖標 */}
                     {type === 'WEBSITE' && (

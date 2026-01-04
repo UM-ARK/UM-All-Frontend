@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent, memo } from 'react';
 import { Text, View, RefreshControl, TouchableOpacity, ScrollView, Alert, } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
@@ -18,23 +18,51 @@ const COMPONENT_WIDTH = scale(90);
 // 65 寬度，一行3個
 let originClubDataList = [];
 
-clubFilter = (clubDataList, tag) => {
-    let filter = [tag];
-    let result = clubDataList.filter(a => {
-        return filter.some(f => f === a.tag);
-    });
-    return result
+const clubFilter = (clubDataList, tag) => {
+    return clubDataList.filter(a => a.tag === tag);
 };
 
-class ClubPage extends Component {
+const ClubGridSection = memo(function ClubGridSection({ data, tag, theme, onLayout }) {
+    const { themeColor, black } = theme;
+    return (
+        <FlatGrid
+            itemDimension={COMPONENT_WIDTH}
+            data={data}
+            renderItem={({ item }) => <ClubCard data={item} />}
+            key={tag}
+            keyExtractor={item => item._id}
+            directionalLockEnabled
+            alwaysBounceHorizontal={false}
+            ListHeaderComponent={
+                <View style={{
+                    marginLeft: scale(12),
+                    marginBottom: scale(5)
+                }}>
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: black.main,
+                        fontSize: verticalScale(15)
+                    }}>
+                        {clubTagMap(tag)}
+                    </Text>
+                </View>
+            }
+            onLayout={event => onLayout(tag, event.nativeEvent.layout.y)}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
+        />
+    );
+});
+
+class ClubPage extends PureComponent {
     scrollViewRef = React.createRef(null);
     static contextType = ThemeContext;
+    clubClassLayout = {};
 
     state = {
         clubDataList: undefined,
         isLoading: true,
         scrollPosition: 0,
-        clubClassLayout: {},
         isOtherViewVisible: true,
     }
 
@@ -76,48 +104,10 @@ class ClubPage extends Component {
         }
     }
 
-    renderClub = (clubDataList, tag) => {
-        const { theme } = this.context;
-        const { themeColor, black, white } = theme;
-        return (
-            <FlatGrid
-                // 每个项目的最小宽度或高度（像素）
-                itemDimension={COMPONENT_WIDTH}
-                data={clubDataList}
-                // 每個項目的間距
-                // spacing={scale(12)}
-                renderItem={({ item }) => <ClubCard data={item} />}
-                key={tag}
-                keyExtractor={item => item._id}
-                directionalLockEnabled
-                alwaysBounceHorizontal={false}
-                ListHeaderComponent={
-                    <View style={{
-                        marginLeft: scale(12),
-                        marginBottom: scale(5)
-                    }}>
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            fontSize: verticalScale(15)
-                        }}>
-                            {clubTagMap(tag)}
-                        </Text>
-                    </View>
-                }
-                // 獲取當前距離屏幕頂端的高度
-                onLayout={event => {
-                    const { layout } = event.nativeEvent;
-                    // console.log('height:', layout.height);
-                    // console.log('y:', layout.y);
-                    let clubClassLayout = this.state.clubClassLayout;
-                    clubClassLayout[tag] = layout.y;
-                    this.setState({ clubClassLayout })
-                }}
-                showsVerticalScrollIndicator={false}
-                scrollEnabled={false}
-            />
-        );
+    storeSectionLayout = (tag, y) => {
+        if (this.clubClassLayout[tag] !== y) {
+            this.clubClassLayout[tag] = y;
+        }
     };
 
     separateDataList = (clubDataList) => {
@@ -243,7 +233,7 @@ class ClubPage extends Component {
                                             // 點擊自動滑動到對應分類的社團
                                             const tag = itm.item;
                                             this.scrollViewRef.current.scrollTo({
-                                                y: this.state.clubClassLayout[tag]
+                                                y: this.clubClassLayout[tag]
                                             })
                                         }}
                                         style={{
@@ -291,10 +281,23 @@ class ClubPage extends Component {
                     {isLoading ? <Loading /> : (
                         clubDataList != undefined && 'ARK' in clubDataList ? <>
                             <View>
-                                {this.renderClub(clubDataList.ARK, 'ARK')}
+                                <ClubGridSection
+                                    data={clubDataList.ARK}
+                                    tag="ARK"
+                                    theme={theme}
+                                    onLayout={this.storeSectionLayout}
+                                />
                                 {clubTagList.map((tag) => {
                                     if (tag in clubDataList && clubDataList[tag].length > 0) {
-                                        return this.renderClub(clubDataList[tag], tag)
+                                        return (
+                                            <ClubGridSection
+                                                key={tag}
+                                                data={clubDataList[tag]}
+                                                tag={tag}
+                                                theme={theme}
+                                                onLayout={this.storeSectionLayout}
+                                            />
+                                        );
                                     }
                                 })}
                             </View>

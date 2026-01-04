@@ -1,13 +1,21 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex ->
+  def command = [
+    'node',
+    '--no-warnings',
+    '--eval',
+    'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
+    'react-native-config',
+    '--json',
+    '--platform',
+    'android'
+  ].toList()
+  ex.autolinkLibrariesFromCommand(command)
+}
 rootProject.name = 'UMALL'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
-
-// 漸變庫安裝需要
-// include ':react-native-linear-gradient'
-// project(':react-native-linear-gradient').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-linear-gradient/android')
 
 // 舊：https://www.npmjs.com/package/@react-native-community/cameraroll
 // include ':@react-native-community_cameraroll'
@@ -26,3 +34,5 @@ includeBuild('../node_modules/@react-native/gradle-plugin')
 // project(":ReactAndroid").projectDir = file('../node_modules/react-native/ReactAndroid')
 // include(":ReactAndroid:hermes-engine")
 // project(":ReactAndroid:hermes-engine").projectDir = file('../node_modules/react-native/ReactAndroid/hermes-engine')
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
+useExpoModules()

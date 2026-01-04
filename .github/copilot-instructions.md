@@ -1,0 +1,26 @@
+# Copilot Instructions for UM-All-Frontend
+
+- Stack: React Native 0.77 with react-navigation stack + animated tab bar; state via MobX RootStore.userInfo, persistence in AsyncStorage; theming/i18n handled at app root.
+- Entry: App bootstraps through [App.js](../App.js) with AnimatedSplash, ThemeProvider, i18n init, AsyncStorage hydrate of userInfo, language prompt, and course version checks before rendering Nav.
+- Navigation: [src/Nav.js](../src/Nav.js) wires stack navigation; [src/Tabbar.js](../src/Tabbar.js) defines the main tabs (News, Wiki, Harbor, What2Reg, CourseSim, Features) using AnimatedTabBarNavigator. New screens should be added to the stack/tabs here.
+- API endpoints & constants: [src/utils/pathMap.js](../src/utils/pathMap.js) centralizes URLs (UM APIs, Harbor, Wiki, course workers). Requires a root-level `umAPIToken.json` with `{ "token": "..." }` for UM API calls.
+- Course data flow: Static course JSON ships in [src/static/UMCourses](../src/static/UMCourses). Version info is cached under `course_version` and checked every 6h against Cloudflare Workers via [checkCoursesKits.js](../src/utils/checkCoursesKits.js); updates pull `/pre`, `/adddrop`, `/timetable` and rewrite AsyncStorage (`offer_courses`, `course_plan`, `course_plan_time`). Use `needUpdate` + `saveCourseDataToStorage` helpers instead of ad-hoc storage writes.
+- Course versions: On first launch App seeds `course_version` from packaged `courseVersion` and forces newer bundled data over legacy caches before hitting the workers.
+- Storage conventions: [storageKits.js](../src/utils/storageKits.js) wraps AsyncStorage; `handleLogin`/`handleLogout` restart the app. Reuse `setLocalStorage`/`getLocalStorage` to keep formats consistent.
+- Theming: [components/ThemeContext.js](../src/components/ThemeContext.js) provides `useTheme()` and `theme` colors keyed by Appearance; older color constants remain in [utils/uiMap.js](../src/utils/uiMap.js) but new UI should source colors from ThemeContext.
+- Typography: `uiStyle.defaultText` (ThemeContext/uiMap) is the shared text style; tabs use it with size scaling. Avoid inline font tweaks unless necessary.
+- Tabs: Each tab screen (e.g., [pages/TabbarPages/info](../src/pages/TabbarPages/info)) is a folder with its own sub-navigation. Call `trigger()` (from utils/trigger) on tabPress for analytics/side-effects when adding tabs.
+- Deprecated: Club system native screens are deprecated in favor of the web flow (see [pages/ClubSystem/README.md](../src/pages/ClubSystem/README.md)). Avoid extending old club-native flows.
+- Static content maintenance: Calendar JSON lives at [static/UMCalendar/UMCalendar.json](../src/static/UMCalendar/UMCalendar.json); follow steps in README "維護須知" for calendar and course updates. Course JSON formats are described in [static/UMCourses/README.md](../src/static/UMCourses/README.md).
+- Build/run: Node >= 18. Install with `npm i --legacy-peer-deps` (or `yarn install` on RN 0.73+). Postinstall runs patch-package (see patches/). Start Metro with `npm run start`; run `npm run android` or `npm run ios` (simulator targets provided). iOS requires `cd ios && pod install --repo-update` before `yarn ios`.
+- Debugging: For RN >=0.73 use Chrome `chrome://inspect` or `npx react-devtools`; Metro hotkey `j` opens DevTools. Firebase Analytics debug view is enabled via platform-specific debug toggles noted in README.
+- Testing: `npm test` runs Jest; minimal coverage exists, so prefer adding targeted tests for new logic.
+- Crash-safe patterns: Any storage/network error surfaces via `Alert` and toasts; preserve these user-facing cues when refactoring error paths.
+- Networking: axios is used for HTTP; API base paths expect trailing slashes defined in GET/POST maps. Reuse `COURSE_API_CF_WORKERS` and helpers instead of hardcoding URLs.
+- Visuals: Use `ThemeContext.theme` colors and `scale/verticalScale` for sizing; tab icons come from MaterialCommunityIcons with focused/blur variants.
+- Do not remove bundled course/calendar JSON—they are required offline fallbacks even when worker APIs exist.
+- When adding screens that need user data, consume `RootStore` (MobX) via injection or props and persist through `handleLogin`/`updateUserInfo` to keep restart behavior consistent.
+- Keep translations updated in [i18n/en-us.js](../src/i18n/en-us.js) and [i18n/zh-hk.js](../src/i18n/zh-hk.js) when adding new copy.
+- If you touch navigation visuals, test both portrait/landscape; tab icon sizes depend on `Dimensions` checks in Tabbar.
+- For assets, prefer placing under [src/static](../src/static) (icons/img) and reference relative paths; iOS/Android native assets live under platform folders.
+- Packaging: Android expects keystore in `android/app`; iOS build via Xcode workspace `ios/UMALL.xcworkspace` (version/build bumped in Xcode). Follow README packing steps for store uploads.

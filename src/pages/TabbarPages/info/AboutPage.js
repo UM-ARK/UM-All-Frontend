@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Image, Alert, StyleSheet, } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, StyleSheet, } from 'react-native';
 
-import { setLanguage } from '../../../i18n/i18n';
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import HomeCard from './home/components/HomeCard';
@@ -20,11 +19,10 @@ import { trigger } from '../../../utils/trigger';
 import packageInfo from '../../../../package.json';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
-import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 const IMG_WIDTH = scale(160);
@@ -53,8 +51,7 @@ const AboutPage = () => {
             borderRadius: scale(10),
         },
     });
-
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation(['common', 'about']);
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center' }}>
@@ -66,7 +63,7 @@ const AboutPage = () => {
                     marginTop: verticalScale(10),
                 }}>
                     {/* ARK Logo */}
-                    <FastImage
+                    <Image
                         source={require('../../../static/img/logo.png')}
                         style={{
                             height: iconSize, width: iconSize,
@@ -104,18 +101,7 @@ const AboutPage = () => {
                             }}
                             onPress={() => {
                                 trigger();
-                                Alert.alert('確定切換到繁體中文版嗎？', '將重啟APP。', [
-                                    {
-                                        text: 'Yes',
-                                        onPress: () => {
-                                            trigger();
-                                            setLanguage('tc');
-                                        }
-                                    },
-                                    {
-                                        text: 'No',
-                                    }
-                                ]);
+                                i18n.changeLanguage('tc');
                             }}
                             disabled={i18n.language === 'tc'}
                         >
@@ -130,18 +116,7 @@ const AboutPage = () => {
                             }}
                             onPress={() => {
                                 trigger();
-                                Alert.alert('Are you sure to switch to the English version?', 'The APP will be restarted.', [
-                                    {
-                                        text: 'Yes',
-                                        onPress: () => {
-                                            trigger();
-                                            setLanguage('en');
-                                        }
-                                    },
-                                    {
-                                        text: 'No',
-                                    }
-                                ]);
+                                i18n.changeLanguage('en');
                             }}
                             disabled={i18n.language === 'en'}
                         >
@@ -168,8 +143,7 @@ const AboutPage = () => {
                                         text: "Yes",
                                         onPress: async () => {
                                             trigger();
-                                            await FastImage.clearDiskCache();
-                                            await FastImage.clearMemoryCache();
+                                            // TODO: 清除緩存
                                             await CookieManager.clearAll();
                                             await AsyncStorage.clear();
                                             RNRestart.Restart();

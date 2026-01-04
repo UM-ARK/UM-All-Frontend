@@ -53,6 +53,9 @@ export const OFFICIAL_COURSE_SEARCH = 'https://isw.um.edu.mo/siwci/faces/courseD
 
 export const COURSE_API_CF_WORKERS = 'https://course-api.umall.one';
 
+// 愛發電主頁
+export const AFD_UMACARK = 'https://afdian.com/a/umacark';
+
 export function addHost(itm) {
     if (itm.length > 0) {
         return BASE_HOST + itm;

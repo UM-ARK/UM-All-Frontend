@@ -6285,7 +6285,7 @@
             "Day": "MON",
             "Time From": "14:30",
             "Time To": "15:45",
-            "Classroom": "E3-2033",
+            "Classroom": "E22-G013",
             "\"Class For / Class Not For\" Information": "",
             "Course Title Chi": "心理學與智能技術"
         },
@@ -7305,7 +7305,7 @@
             "Course Type": "",
             "Medium of Instruction": "English",
             "Notes for Course Enrolment": "",
-            "Teacher Information": "GYEONG HUN BAEG / MAO XIAOWEN",
+            "Teacher Information": "SU HUANXING / GYEONG HUN BAEG / MAO XIAOWEN",
             "Lecture / Lab": "Lecture",
             "Lab Information": "",
             "Day": "TUE",
@@ -9916,7 +9916,7 @@
             "Time To": "18:20",
             "Classroom": "E12-G005",
             "\"Class For / Class Not For\" Information": "Class for :\n - FHS\n",
-            "Course Title Chi": "Introduction to Probability"
+            "Course Title Chi": "概率論導論"
         },
         {
             "Offering Unit": "FST",

@@ -1,4 +1,13 @@
 {
   "name": "UMALL",
-  "displayName": "UMALL"
+  "displayName": "UMALL",
+  "expo": {
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "userInterfaceStyle": "automatic"
+    },
+    "android": {
+      "userInterfaceStyle": "automatic"
+    }
+  }
 }

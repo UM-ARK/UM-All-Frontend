@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
@@ -18,12 +19,13 @@ import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 
-import FastImage from 'react-native-fast-image';
+// import { Image } from 'expo-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
+import lodash from "lodash";
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -52,9 +54,12 @@ const NewsPage = () => {
             ...viewShadow,
         },
         topNewsOverlay: {
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            position: 'absolute', // 【核心】脫離文檔流，覆蓋在 Image 上
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', // 50% 透明度的黑
             padding: verticalScale(15),
             justifyContent: 'flex-end',
         },
@@ -78,14 +83,14 @@ const NewsPage = () => {
     const [isScrollViewLoading, setIsScrollViewLoading] = useState(false);
     const [newsList, setNewsList] = useState([]);
     const [topNews, setTopNews] = useState({});
-    const [imgLoading, setImgLoading] = useState(true);
+    // const [imgLoading, setImgLoading] = useState(true);
 
     const progressRef = useRef(0);
+    const renderNewsItem = useCallback(({ item }) => <NewsCard data={item} />, []);
 
     // 請求澳大新聞API
     useEffect(() => {
         getData();
-        return () => FastImage.clearMemoryCache();
     }, []);
 
     // 請求澳大api返回新聞數據
@@ -125,8 +130,6 @@ const NewsPage = () => {
 
             // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
             const filteredNewsList = result.filter(item => item.details.length > 0);
-            // TODO: 每次返回2.5MB，需要優化。
-            // 3.x版本返回的是25個新聞，現在返回100條新聞，嘗試採取UM API的分頁加載方式
 
             setTopNews(topNewsData);
             setNewsList(filteredNewsList);
@@ -142,26 +145,25 @@ const NewsPage = () => {
         }
     };
 
-    // 頭條新聞的渲染
-    const renderTopNews = useCallback(() => {
-        const imageUrls = topNews.common.imageUrls || [];
-        // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
-        // 中文標題
-        let title_cn = '';
-        // 英文標題
-        let title_en = '';
-        // 葡文標題
-        let title_pt = '';
-
-        topNews.details.forEach(item => {
+    const topNewsContent = useMemo(() => {
+        const imageUrls = topNews.common?.imageUrls || [];
+        const titleState = { title_cn: '', title_en: '', title_pt: '' };
+        topNews.details?.forEach(item => {
             if (item.locale == 'en_US') {
-                title_en = item.title;
+                titleState.title_en = item.title;
             } else if (item.locale == 'pt_PT') {
-                title_pt = item.title;
+                titleState.title_pt = item.title;
             } else if (item.locale == 'zh_TW') {
-                title_cn = item.title;
+                titleState.title_cn = item.title;
             }
         });
+        return { imageUrls, ...titleState };
+    }, [topNews]);
+
+    // 頭條新聞的渲染
+    const renderTopNews = useMemo(() => {
+        const { imageUrls, title_en, title_cn } = topNewsContent;
+        const topNewsImage = imageUrls.length > 1 ? lodash.sample(imageUrls) : imageUrls[0];
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
@@ -169,84 +171,71 @@ const NewsPage = () => {
                     Data From: data.um.edu.mo
                 </Text>
                 <View style={styles.topNewsContainer}>
-                    <View style={{ width: '100%' }}>
-                        {/* 圖片背景 */}
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                trigger();
-                                navigation.navigate('NewsDetail', { data: topNews, });
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{ width: '100%', height: '100%' }}
+                        onPress={() => {
+                            trigger();
+                            navigation.navigate('NewsDetail', { data: topNews, });
+                        }}>
+                        <Image
+                            source={{ uri: topNewsImage }}
+                            style={{ width: '100%', height: '100%' }}
+                            // source={imageUrls[0].replace('http:', 'https:')}
+                            // contentFit="cover"
+                            // cachePolicy="memory-disk"
+                            // recyclingKey={topNews?._id || 'top-news'}
+                            // transition={0}
+                            // onLoadEnd={() => setImgLoading(false)}
+                            resizeMode='cover'
+                        />
+                        {/* 塗上50%透明度的黑，讓白色字體能看清 */}
+                        <View style={styles.topNewsOverlay}>
+                            {/* Top Story字樣 */}
+                            <View style={styles.topNewsPosition}>
+                                <Text style={styles.topNewsText}>
+                                    Top Story @ UM
+                                </Text>
+                            </View>
+
+                            {/* 標題 */}
+                            <View style={{
+                                alignSelf: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
                             }}>
-                            <FastImage
-                                source={{
-                                    uri: imageUrls[0].replace('http:', 'https:'),
-                                    // cache: FastImage.cacheControl.web,
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: trueWhite,
+                                    fontWeight: 'bold',
+                                    fontSize: verticalScale(18),
                                 }}
-                                style={{ width: '100%', height: '100%' }}
-                                onLoadEnd={() => setImgLoading(false)}>
-                                {/* 塗上50%透明度的黑，讓白色字體能看清 */}
-                                <View style={styles.topNewsOverlay}>
-                                    {/* Top Story字樣 */}
-                                    <View style={styles.topNewsPosition}>
-                                        <Text style={styles.topNewsText}>
-                                            Top Story @ UM
-                                        </Text>
-                                    </View>
-
-                                    {/* 標題 */}
-                                    <View style={{
-                                        alignSelf: 'center',
-                                        justifyContent: 'center',
-                                        width: '100%',
-                                    }}>
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: trueWhite,
-                                            fontWeight: 'bold',
-                                            fontSize: verticalScale(18),
-                                        }}
-                                            numberOfLines={3}>
-                                            {title_en}
-                                        </Text>
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: trueWhite,
-                                            fontWeight: 'bold',
-                                            fontSize: verticalScale(13),
-                                        }}>
-                                            {title_cn}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {imgLoading ? (<View style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    position: 'absolute',
+                                    numberOfLines={3}>
+                                    {title_en}
+                                </Text>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: trueWhite,
+                                    fontWeight: 'bold',
+                                    fontSize: verticalScale(13),
                                 }}>
-                                    <ActivityIndicator
-                                        size={'large'}
-                                        color={white}
-                                    />
-                                </View>) : null}
-                            </FastImage>
-                        </TouchableOpacity>
-                    </View>
+                                    {title_cn}
+                                </Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </View >
         );
-    }, [topNews, bg_color, imgLoading]);
+    }, [topNews]);
 
     // 渲染懸浮可拖動按鈕
-    const renderGoTopButton = () => (
+    const renderGoTopButton = useCallback(() => (
         <Interactable.View
             style={{
                 zIndex: 999,
                 position: 'absolute',
             }}
-            // 設定所有可吸附的屏幕位置 0,0為屏幕中心
             snapPoints={[
                 { x: -scale(140), y: -verticalScale(220) },
                 { x: scale(140), y: -verticalScale(220) },
@@ -259,13 +248,11 @@ const NewsPage = () => {
                 { x: -scale(140), y: verticalScale(220) },
                 { x: scale(140), y: verticalScale(220) },
             ]}
-            // 設定初始吸附位置
             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-            {/* 懸浮吸附按鈕，回頂箭頭 */}
             <TouchableWithoutFeedback
                 onPress={() => {
                     trigger();
-                    virtualizedList.current.scrollToOffset({
+                    virtualizedList.current?.scrollToOffset({
                         x: 0,
                         y: 0,
                     });
@@ -289,7 +276,7 @@ const NewsPage = () => {
                 </View>
             </TouchableWithoutFeedback>
         </Interactable.View>
-    );
+    ), [white]);
 
     return (
         <View style={{
@@ -311,7 +298,7 @@ const NewsPage = () => {
                             refreshing={isScrollViewLoading}
                             onRefresh={() => {
                                 setIsScrollViewLoading(true);
-                                setImgLoading(true);
+                                // setImgLoading(true);
                                 setIsLoading(true);
                                 getData();
                             }}
@@ -330,7 +317,8 @@ const NewsPage = () => {
                     initialNumToRender={4}
                     windowSize={8}
                     maxToRenderPerBatch={8}
-                    renderItem={({ item }) => <NewsCard data={item} />}
+                    updateCellsBatchingPeriod={50}
+                    renderItem={renderNewsItem}
                     contentContainerStyle={{ width: '100%' }}
                     keyExtractor={item => item._id}
                     // 整理item數據
@@ -351,13 +339,14 @@ const NewsPage = () => {
                             onRefresh={() => {
                                 // 展示Loading標識
                                 setIsLoading(true);
-                                setImgLoading(true);
+                                // setImgLoading(true);
                                 getData();
                             }}
                         />
                     }
                     directionalLockEnabled
                     alwaysBounceHorizontal={false}
+                    removeClippedSubviews
                 /></View>)}
         </View>
     );

@@ -26,7 +26,7 @@ import HyperlinkText from '../../../../components/HyperlinkText';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { inject } from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -118,11 +118,6 @@ const EventDetail = (props) => {
         }
 
         getAllThings();
-
-        // 清理函數相當於 componentWillUnmount
-        return () => {
-            FastImage.clearMemoryCache();
-        };
     }, []);
 
     // 監聽 route.params 變化，類似 componentDidUpdate(prevProps)
@@ -409,12 +404,10 @@ const EventDetail = (props) => {
                             </Text>
                         </View>
                         {/* 社團Logo */}
-                        <FastImage
-                            source={{
-                                uri: clubData == undefined ? '' : clubData.logo_url,
-                            }}
+                        <Image
+                            source={clubData == undefined ? '' : clubData.logo_url}
                             style={{ ...styles.clubLogoContainer, backgroundColor: trueWhite }}
-                            resizeMode={FastImage.resizeMode.contain}
+                            contentFit='contain'
                         />
                     </View>
                 </TouchableWithoutFeedback>
@@ -630,8 +623,8 @@ const EventDetail = (props) => {
                                         imageScrollViewer.current.handleOpenImage(index);
                                     }}
                                 >
-                                    <FastImage
-                                        source={{ uri: item }}
+                                    <Image
+                                        source={item}
                                         style={{
                                             backgroundColor: trueWhite,
                                             width: CLUB_IMAGE_WIDTH,
@@ -757,8 +750,8 @@ const EventDetail = (props) => {
                     minHeight={verticalScale(150)}
                     maxHeight={verticalScale(350)}
                     renderHeader={() => (
-                        <FastImage
-                            source={{ uri: coverImgUrl.replace('http:', 'https:') }}
+                        <Image
+                            source={coverImgUrl.replace('http:', 'https:')}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                         />
                     )}
