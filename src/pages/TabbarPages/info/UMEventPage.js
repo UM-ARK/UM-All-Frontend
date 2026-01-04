@@ -165,6 +165,8 @@ class UMEventPage extends Component {
         );
     };
 
+    renderEventItem = ({ item }) => <NewsCard data={item} type={'event'} />;
+
     // 渲染主要內容
     renderPage = () => {
         const { theme } = this.context;
@@ -177,7 +179,8 @@ class UMEventPage extends Component {
                 // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
                 windowSize={3}
-                renderItem={({ item }) => <NewsCard data={item} type={'event'} />}
+                renderItem={this.renderEventItem}
+                updateCellsBatchingPeriod={50}
                 contentContainerStyle={{ width: '100%' }}
                 keyExtractor={itm => itm._id}
                 // 整理item數據
@@ -217,6 +220,7 @@ class UMEventPage extends Component {
                 }
                 directionalLockEnabled
                 alwaysBounceHorizontal={false}
+                removeClippedSubviews
             />
         );
     };

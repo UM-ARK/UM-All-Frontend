@@ -240,6 +240,7 @@ class LostAndFound extends Component {
                         renderItem={({ item }) => {
                             return this.renderContent(item);
                         }}
+                        keyExtractor={(item, index) => item.ref || `${item.title}-${item.date}-${index}`}
                         // 整理item數據
                         getItem={getItem}
                         // 渲染項目數量

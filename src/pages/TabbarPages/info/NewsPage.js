@@ -81,6 +81,7 @@ const NewsPage = () => {
     const [imgLoading, setImgLoading] = useState(true);
 
     const progressRef = useRef(0);
+    const renderNewsItem = useCallback(({ item }) => <NewsCard data={item} />, []);
 
     // 請求澳大新聞API
     useEffect(() => {
@@ -326,7 +327,8 @@ const NewsPage = () => {
                     initialNumToRender={4}
                     windowSize={8}
                     maxToRenderPerBatch={8}
-                    renderItem={({ item }) => <NewsCard data={item} />}
+                    updateCellsBatchingPeriod={50}
+                    renderItem={renderNewsItem}
                     contentContainerStyle={{ width: '100%' }}
                     keyExtractor={item => item._id}
                     // 整理item數據
@@ -354,6 +356,7 @@ const NewsPage = () => {
                     }
                     directionalLockEnabled
                     alwaysBounceHorizontal={false}
+                    removeClippedSubviews
                 /></View>)}
         </View>
     );

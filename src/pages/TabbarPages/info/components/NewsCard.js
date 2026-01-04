@@ -195,4 +195,4 @@ const NewsCard = ({ data, type = 'news' }) => {
     );
 };
 
-export default NewsCard;
+export default memo(NewsCard);
