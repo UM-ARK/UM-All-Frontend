@@ -481,7 +481,9 @@ const EventPage = forwardRef((props, ref) => {
                     if (setting && setting.tabbarMode == 'webview') {
                         navigation.navigate('Harbor', { url: URL });
                     } else {
-                        openLink({ URL: URL, mode: 'fullScreen' });
+                        // openLink({ URL: URL, mode: 'fullScreen' });
+                        // iOS默認使用modal來打開卡片，除非設置了用Webview
+                        openLink(URL);
                     }
                 }}
             >
