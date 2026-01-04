@@ -235,7 +235,7 @@ const SearchBar = ({ navigation }) => {
         // 記錄日誌 Firebase
         logToFirebase('funcUse', {
             funcName: 'searchBar_features',
-            searchBarDetail: inputText,
+            searchBarDetail: inputText + '-' + item.fn_name,
         });
 
         // 根據 FeatureList 的定義進行跳轉
