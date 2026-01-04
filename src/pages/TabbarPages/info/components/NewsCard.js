@@ -1,7 +1,7 @@
-import React, { Component, useContext, useState, memo, useCallback, } from 'react';
+import React, { useContext, useState, memo, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
@@ -28,9 +28,9 @@ const NewsCard = ({ data, type = 'news' }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow, themeColor, secondThemeColor } = theme;
 
-    const [imgLoading, setImgLoading] = useState(true);
+    // const [imgLoading, setImgLoading] = useState(true);
 
-    const styles = StyleSheet.create({
+    const styles = useMemo(() => StyleSheet.create({
         newsCardContainer: {
             backgroundColor: white,
             marginVertical: verticalScale(5),
@@ -47,39 +47,44 @@ const NewsCard = ({ data, type = 'news' }) => {
             width: verticalScale(80),
             height: verticalScale(112),
         },
-    });
+    }), [white]);
 
-    // 开始日期
     const beginDate = type === 'event' ? data.common.dateFrom : data.common.publishDate;
-    const beginMomentDate = moment(beginDate);
-    const nowMomentDate = moment(new Date());
-    // 活动类型日期颜色
-    const dateColor = getDateColor(type, beginMomentDate, nowMomentDate, themeColor, secondThemeColor, black);
+    const beginMomentDate = useMemo(() => moment(beginDate), [beginDate]);
+    const nowMomentDate = useMemo(() => moment(new Date()), []);
+    const dateColor = useMemo(
+        () => getDateColor(type, beginMomentDate, nowMomentDate, themeColor, secondThemeColor, black),
+        [type, beginMomentDate, nowMomentDate, themeColor, secondThemeColor, black],
+    );
 
-    // 匹配对应语言的标题
-    let title_cn = '';
-    let title_en = '';
-    let title_pt = '';
-    data.details.forEach(item => {
-        if (item.locale === 'en_US') {
-            title_en = item.title;
-        } else if (item.locale === 'pt_PT') {
-            title_pt = item.title;
-        } else if (item.locale === 'zh_TW') {
-            title_cn = item.title;
+    const { title_en, title_cn, title_pt } = useMemo(() => {
+        const titleState = { title_en: '', title_cn: '', title_pt: '' };
+        data.details.forEach(item => {
+            if (item.locale === 'en_US') {
+                titleState.title_en = item.title;
+            } else if (item.locale === 'pt_PT') {
+                titleState.title_pt = item.title;
+            } else if (item.locale === 'zh_TW') {
+                titleState.title_cn = item.title;
+            }
+        });
+        return titleState;
+    }, [data.details]);
+
+    const { haveImage, imageUrls } = useMemo(() => {
+        if (type === 'event') {
+            const available = 'posterUrl' in data.common;
+            return {
+                haveImage: available,
+                imageUrls: available ? data.common.posterUrl.replace('http:', 'https:') : '',
+            };
         }
-    });
-
-    // 图片处理
-    let haveImage = undefined;
-    let imageUrls = undefined;
-    if (type === 'event') {
-        haveImage = 'posterUrl' in data.common;
-        imageUrls = haveImage ? data.common.posterUrl.replace('http:', 'https:') : '';
-    } else {
-        haveImage = 'imageUrls' in data.common;
-        imageUrls = haveImage ? data.common.imageUrls[0].replace('http:', 'https:') : '';
-    }
+        const available = 'imageUrls' in data.common;
+        return {
+            haveImage: available,
+            imageUrls: available ? data.common.imageUrls[0].replace('http:', 'https:') : '',
+        };
+    }, [data.common, type]);
 
     // 点击跳转逻辑
     const handlePress = useCallback(() => {
@@ -171,10 +176,13 @@ const NewsCard = ({ data, type = 'news' }) => {
                                 source={imageUrls}
                                 style={styles.newsCardImg}
                                 contentFit="cover"
-                                onLoadEnd={() => setImgLoading(false)}
-                                onError={() => setImgLoading(true)}
+                                cachePolicy="memory-disk"
+                                recyclingKey={data._id}
+                                transition={0}
+                                // onLoadEnd={() => setImgLoading(false)}
+                                // onError={() => setImgLoading(true)}
                             />
-                            {imgLoading && (
+                            {/* {imgLoading && (
                                 <View style={{
                                     ...styles.newsCardImg,
                                     alignItems: 'center',
@@ -186,7 +194,7 @@ const NewsCard = ({ data, type = 'news' }) => {
                                         color={themeColor}
                                     />
                                 </View>
-                            )}
+                            )} */}
                         </View>
                     </View>
                 )}

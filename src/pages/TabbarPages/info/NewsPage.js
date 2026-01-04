@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -41,7 +41,7 @@ const getItemCount = data => {
 const NewsPage = () => {
     const { theme } = useContext(ThemeContext);
     const { white, black, viewShadow, bg_color, themeColor, trueWhite, } = theme;
-    const styles = StyleSheet.create({
+    const styles = useMemo(() => StyleSheet.create({
         topNewsContainer: {
             borderRadius: scale(10),
             overflow: 'hidden',
@@ -72,7 +72,7 @@ const NewsPage = () => {
             fontWeight: 'bold',
             fontSize: verticalScale(20),
         },
-    });
+    }), [white, viewShadow, trueWhite]);
 
     const navigation = useContext(NavigationContext);
     const virtualizedList = useRef(null);
@@ -145,26 +145,24 @@ const NewsPage = () => {
         }
     };
 
-    // 頭條新聞的渲染
-    const renderTopNews = useCallback(() => {
-        const imageUrls = topNews.common.imageUrls || [];
-        // 匹配對應語言的標題，經測試：有時只有1 or 2 or 3種文字的標題
-        // 中文標題
-        let title_cn = '';
-        // 英文標題
-        let title_en = '';
-        // 葡文標題
-        let title_pt = '';
-
-        topNews.details.forEach(item => {
+    const topNewsContent = useMemo(() => {
+        const imageUrls = topNews.common?.imageUrls || [];
+        const titleState = { title_cn: '', title_en: '', title_pt: '' };
+        topNews.details?.forEach(item => {
             if (item.locale == 'en_US') {
-                title_en = item.title;
+                titleState.title_en = item.title;
             } else if (item.locale == 'pt_PT') {
-                title_pt = item.title;
+                titleState.title_pt = item.title;
             } else if (item.locale == 'zh_TW') {
-                title_cn = item.title;
+                titleState.title_cn = item.title;
             }
         });
+        return { imageUrls, ...titleState };
+    }, [topNews]);
+
+    // 頭條新聞的渲染
+    const renderTopNews = useCallback(() => {
+        const { imageUrls, title_en, title_cn } = topNewsContent;
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
@@ -182,6 +180,10 @@ const NewsPage = () => {
                         <Image
                             source={imageUrls[0].replace('http:', 'https:')}
                             style={{ width: '100%', height: '100%' }}
+                            contentFit="cover"
+                            cachePolicy="memory-disk"
+                            recyclingKey={topNews?._id || 'top-news'}
+                            transition={0}
                             onLoadEnd={() => setImgLoading(false)}
                         />
                         {/* 塗上50%透明度的黑，讓白色字體能看清 */}
@@ -235,16 +237,15 @@ const NewsPage = () => {
                 </View>
             </View >
         );
-    }, [topNews, bg_color, imgLoading]);
+    }, [topNewsContent, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, black.third, white, trueWhite, bg_color, imgLoading]);
 
     // 渲染懸浮可拖動按鈕
-    const renderGoTopButton = () => (
+    const renderGoTopButton = useCallback(() => (
         <Interactable.View
             style={{
                 zIndex: 999,
                 position: 'absolute',
             }}
-            // 設定所有可吸附的屏幕位置 0,0為屏幕中心
             snapPoints={[
                 { x: -scale(140), y: -verticalScale(220) },
                 { x: scale(140), y: -verticalScale(220) },
@@ -257,13 +258,11 @@ const NewsPage = () => {
                 { x: -scale(140), y: verticalScale(220) },
                 { x: scale(140), y: verticalScale(220) },
             ]}
-            // 設定初始吸附位置
             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-            {/* 懸浮吸附按鈕，回頂箭頭 */}
             <TouchableWithoutFeedback
                 onPress={() => {
                     trigger();
-                    virtualizedList.current.scrollToOffset({
+                    virtualizedList.current?.scrollToOffset({
                         x: 0,
                         y: 0,
                     });
@@ -287,7 +286,7 @@ const NewsPage = () => {
                 </View>
             </TouchableWithoutFeedback>
         </Interactable.View>
-    );
+    ), [themeColor, viewShadow, white]);
 
     return (
         <View style={{

@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React from 'react';
 import {
     Text,
     View,
@@ -8,7 +8,7 @@ import {
     VirtualizedList,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 
@@ -30,10 +30,10 @@ const getItemCount = data => {
     return data.length;
 };
 
-class UMEventPage extends Component {
+class UMEventPage extends React.PureComponent {
     virtualizedList = React.createRef(null);
     static contextType = ThemeContext;
-    progressRef = React.createRef(0);
+    progressRef = React.createRef();
 
     state = {
         data: undefined,
@@ -165,53 +165,51 @@ class UMEventPage extends Component {
         );
     };
 
-    renderEventItem = ({ item }) => <NewsCard data={item} type={'event'} />;
+    renderEventItem = ({ item }) => (
+        <NewsCard data={item} type={'event'} />
+    );
 
     // 渲染主要內容
     renderPage = () => {
         const { theme } = this.context;
         const { black, white, themeColor } = theme;
         const { data, isLoading } = this.state;
+        const listFooter = <View style={{ marginBottom: scale(50) }} />;
+        const listHeader = (
+            <View>
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.third,
+                        alignSelf: 'center',
+                        marginTop: scale(5),
+                    }}>
+                    Data From: data.um.edu.mo
+                </Text>
+            </View>
+        );
+
         return (
             <VirtualizedList
                 ref={this.virtualizedList}
                 data={data}
-                // 初始渲染的元素，設置為剛好覆蓋屏幕
                 initialNumToRender={6}
-                windowSize={3}
+                windowSize={8}
+                maxToRenderPerBatch={8}
                 renderItem={this.renderEventItem}
                 updateCellsBatchingPeriod={50}
                 contentContainerStyle={{ width: '100%' }}
                 keyExtractor={itm => itm._id}
-                // 整理item數據
                 getItem={getItem}
-                // 渲染項目數量
                 getItemCount={getItemCount}
-                // 列表頭部渲染的組件 - Data From說明
-                ListHeaderComponent={() => (
-                    <View>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.third,
-                                alignSelf: 'center',
-                                marginTop: scale(5),
-                            }}>
-                            Data From: data.um.edu.mo
-                        </Text>
-                    </View>
-                )}
-                // 列表底部渲染，防止Tabbar遮擋
-                ListFooterComponent={() => (
-                    <View style={{ marginBottom: scale(50) }}></View>
-                )}
+                ListHeaderComponent={listHeader}
+                ListFooterComponent={listFooter}
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
                         refreshing={isLoading}
                         onRefresh={() => {
-                            // 展示Loading標識
                             this.setState({ isLoading: true }, () => {
                                 this.getData();
                             });
