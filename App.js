@@ -17,7 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
-import analytics from '@react-native-firebase/analytics';
+import { getApp } from '@react-native-firebase/app';
+import { getAnalytics, setUserProperty } from '@react-native-firebase/analytics';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -101,7 +102,9 @@ const App = () => {
                 // 報告Firebase準確的iPhone型號
                 // TODO: Android測試
                 const modelName = getPreciseDeviceName();
-                await analytics().setUserProperty('device_market_name', modelName);
+                console.log('modelName', modelName);
+                const analyticsInstance = getAnalytics(getApp());
+                await setUserProperty(analyticsInstance, 'device_market_name', modelName);
             }
         };
 
