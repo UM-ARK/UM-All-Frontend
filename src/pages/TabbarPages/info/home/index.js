@@ -67,7 +67,7 @@ import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import moment from 'moment';
 import TouchableScale from "react-native-touchable-scale";
 import lodash from 'lodash';
@@ -477,7 +477,7 @@ const HomeScreen = ({ navigation }) => {
             )
         } else if (icon_type == 'img') {
             icon = (
-                <FastImage
+                <Image
                     source={icon_name}
                     style={{
                         backgroundColor: theme.trueWhite,
@@ -775,10 +775,10 @@ const HomeScreen = ({ navigation }) => {
                                 }}>
                                     {paymentTextArr[index]}
                                 </Text>
-                                <FastImage
+                                <Image
                                     source={item}
                                     style={{ width: '100%', height: '100%', }}
-                                    resizeMode={FastImage.resizeMode.contain}
+                                    contentFit='contain'
                                 />
                             </View>
                         }}

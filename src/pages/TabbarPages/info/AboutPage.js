@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Image, Alert, StyleSheet, } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, StyleSheet, } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
@@ -19,7 +19,7 @@ import { trigger } from '../../../utils/trigger';
 import packageInfo from '../../../../package.json';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNRestart from 'react-native-restart';
@@ -63,7 +63,7 @@ const AboutPage = () => {
                     marginTop: verticalScale(10),
                 }}>
                     {/* ARK Logo */}
-                    <FastImage
+                    <Image
                         source={require('../../../static/img/logo.png')}
                         style={{
                             height: iconSize, width: iconSize,
@@ -143,8 +143,7 @@ const AboutPage = () => {
                                         text: "Yes",
                                         onPress: async () => {
                                             trigger();
-                                            await FastImage.clearDiskCache();
-                                            await FastImage.clearMemoryCache();
+                                            // TODO: 清除緩存
                                             await CookieManager.clearAll();
                                             await AsyncStorage.clear();
                                             RNRestart.Restart();

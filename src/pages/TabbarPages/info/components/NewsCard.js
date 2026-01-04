@@ -5,7 +5,7 @@ import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
@@ -167,12 +167,12 @@ const NewsCard = ({ data, type = 'news' }) => {
                             ...viewShadow,
                             backgroundColor: white,
                         }}>
-                            <FastImage
-                                source={{ uri: imageUrls }}
+                            <Image
+                                source={imageUrls}
+                                style={styles.newsCardImg}
+                                contentFit="cover"
                                 onLoadEnd={() => setImgLoading(false)}
                                 onError={() => setImgLoading(true)}
-                                style={styles.newsCardImg}
-                                resizeMode={FastImage.resizeMode.cover}
                             />
                             {imgLoading && (
                                 <View style={{

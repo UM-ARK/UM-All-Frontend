@@ -16,7 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FlatGrid } from 'react-native-super-grid';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
@@ -75,7 +75,7 @@ function Index({ navigation }) {
                     } else if (item.icon_type === 'MaterialCommunityIcons') {
                         icon = <MaterialCommunityIcons name={item.icon_name} size={verticalScale(30)} color={themeColor} />;
                     } else if (item.icon_type === 'img') {
-                        icon = <FastImage source={{ uri: item.icon_name }} style={{ backgroundColor: trueWhite, height: scale(60), width: scale(60) }} />;
+                        icon = <Image source={item.icon_name} style={{ backgroundColor: trueWhite, height: scale(60), width: scale(60) }} />;
                     }
                     const { go_where, webview_param, needLogin } = item;
                     return (

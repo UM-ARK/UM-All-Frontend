@@ -5,7 +5,7 @@ import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from "react-native-touchable-scale";
 
@@ -43,15 +43,15 @@ const ClubCard = ({ data }) => {
             activeOpacity={0.8}
             onPress={handleJumpToDetail}>
             {/* 社团 / 组织 Logo */}
-            <FastImage
-                source={{ uri: logo_url }}
+            <Image
+                source={logo_url}
                 style={{
                     backgroundColor: trueWhite,
                     width: IMG_SIZE,
                     height: IMG_SIZE,
                     borderRadius: scale(50),
                 }}
-                resizeMode={FastImage.resizeMode.contain}
+                contentFit='contain'
                 onLoadStart={() => setImgLoading(true)}
                 onLoad={() => setImgLoading(false)}>
                 {imgLoading && (
@@ -69,7 +69,7 @@ const ClubCard = ({ data }) => {
                         />
                     </View>
                 )}
-            </FastImage>
+            </Image>
 
             {/* 组织名 */}
             <View

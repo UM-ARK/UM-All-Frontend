@@ -37,7 +37,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { inject } from 'mobx-react';
 import axios from 'axios';
 import Toast from 'react-native-easy-toast';
@@ -159,9 +159,6 @@ const ClubDetail = (props) => {
         // if (globalData.userInfo && globalData.userInfo.stdData) {
         //     setIsLogin(true);
         // }
-        return () => {
-            FastImage.clearMemoryCache();
-        };
     }, []);
 
     // 獲取指定id的社團信息
@@ -405,10 +402,10 @@ const ClubDetail = (props) => {
                         }}
                     >
                         <View style={styles.clubLogoContainer}>
-                            <FastImage
-                                source={{ uri: clubData?.logo_url }}
+                            <Image
+                                source={clubData?.logo_url}
                                 style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
-                                resizeMode={FastImage.resizeMode.contain}
+                                contentFit='contain'
                             />
                         </View>
                     </TouchableWithoutFeedback>
@@ -466,8 +463,8 @@ const ClubDetail = (props) => {
                                                 imageScrollViewer.current.handleOpenImage(index);
                                             }}
                                         >
-                                            <FastImage
-                                                source={{ uri: item }}
+                                            <Image
+                                                source={item}
                                                 style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                                             />
                                         </TouchableOpacity>
@@ -596,8 +593,8 @@ const ClubDetail = (props) => {
                     minHeight={verticalScale(150)}
                     maxHeight={verticalScale(300)}
                     renderHeader={() => (
-                        <FastImage
-                            source={{ uri: clubData?.club_photos_list?.[0] || ARK_LETTER_IMG }}
+                        <Image
+                            source={clubData?.club_photos_list?.[0] || ARK_LETTER_IMG}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                         />
                     )}

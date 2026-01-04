@@ -7,7 +7,7 @@ import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -159,17 +159,15 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                         borderRadius: BORDER_RADIUS,
                         overflow: 'hidden',
                     }}>
-                    <FastImage
-                        source={{
-                            uri: coverImgUrl,
-                        }}
+                    <Image
+                        source={coverImgUrl}
                         style={{
                             width: imageSize,
                             height: imageSize,
                             backgroundColor: white,
                             opacity: isFinish ? 0.5 : 1,
                         }}
-                        resizeMode={FastImage.resizeMode.cover}
+                        contentFit='cover'
                         onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
                         onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}>
                         {imgLoading && (
@@ -187,7 +185,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                 />
                             </View>
                         )}
-                    </FastImage>
+                    </Image>
 
                     {/* website類型活動展示link圖標 */}
                     {type === 'WEBSITE' && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, } from 'react-native';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import TouchableScale from "react-native-touchable-scale";
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
@@ -191,10 +191,6 @@ const UMEventDetail = ({ route, navigation }) => {
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'UMEvent' });
-
-        return () => {
-            FastImage.clearMemoryCache();
-        };
     }, []);
 
     const renderModeChoice = () => {
@@ -436,8 +432,8 @@ const UMEventDetail = ({ route, navigation }) => {
                         trigger();
                         imageScrollViewer.current.handleOpenImage(0);
                     }}>
-                    <FastImage
-                        source={{ uri: state.data.imageUrls }}
+                    <Image
+                        source={state.data.imageUrls}
                         style={{ width: '100%', height: '100%' }}
                         onLoadStart={() => setState(prev => ({ ...prev, imgLoading: true }))}
                         onLoad={() => setState(prev => ({ ...prev, imgLoading: false }))}>
@@ -452,7 +448,7 @@ const UMEventDetail = ({ route, navigation }) => {
                                 <ActivityIndicator size={'large'} color={themeColor} />
                             </View>
                         )}
-                    </FastImage>
+                    </Image>
                 </TouchableScale>
 
                 {/* 詳情資訊 */}

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -1262,7 +1262,7 @@ E11-0000
 
                 {/* 標題 + Logo */}
                 <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
-                    <FastImage
+                    <Image
                         source={require('../../../static/img/logo.png')}
                         style={{
                             height: iconSize,

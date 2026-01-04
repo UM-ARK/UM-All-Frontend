@@ -28,7 +28,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
 import moment from 'moment-timezone';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ImgComp from 'react-native-compressor';
 
@@ -150,7 +150,6 @@ class EventSetting extends Component {
         add_relate_image = [];
         del_relate_image = [];
         pressDelete = false;
-        FastImage.clearMemoryCache();
     }
 
     // 切換類型時要還原部分輸入，避免數據混亂
@@ -294,11 +293,8 @@ class EventSetting extends Component {
 
                 {/* 未選擇圖片則顯示圖標，選中/已有圖片則顯示圖片 */}
                 {imageUrlArr[index].length > 0 ? (
-                    <FastImage
-                        source={{
-                            uri: imageUrlArr[index],
-                            // cache: FastImage.cacheControl.web,
-                        }}
+                    <Image
+                        source={imageUrlArr[index]}
                         style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                         onLoadStart={() => {
                             this.setState({ imgLoading: true });
@@ -321,7 +317,7 @@ class EventSetting extends Component {
                                 />
                             </View>
                         ) : null}
-                    </FastImage>
+                    </Image>
                 ) : (
                     <Ionicons
                         name="camera-outline"

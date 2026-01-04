@@ -23,7 +23,7 @@ import { Incubator, ExpandableSection } from 'react-native-ui-lib';
 const { TextField } = Incubator;
 import { inject } from 'mobx-react';
 import axios from 'axios';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import ImgComp from 'react-native-compressor';
@@ -71,7 +71,6 @@ class ClubInfoEdit extends Component {
     componentWillUnmount() {
         add_club_photos = [];
         del_club_photos = [];
-        FastImage.clearMemoryCache();
     }
 
     getData = async clubID => {
@@ -296,11 +295,8 @@ class ClubInfoEdit extends Component {
 
                 {/* 未選擇圖片則顯示圖標，選中/已有圖片則顯示圖片 */}
                 {imageUrlArr[index].length > 0 ? (
-                    <FastImage
-                        source={{
-                            uri: imageUrlArr[index],
-                            // cache: FastImage.cacheControl.web,
-                        }}
+                    <Image
+                        source={imageUrlArr[index]}
                         style={{ backgroundColor: COLOR_DIY.trueWhite, width: '100%', height: '100%' }}
                         onLoadStart={() => {
                             this.setState({ imgLoading: true });
@@ -323,7 +319,7 @@ class ClubInfoEdit extends Component {
                                 />
                             </View>
                         ) : null}
-                    </FastImage>
+                    </Image>
                 ) : (
                     <Ionicons
                         name="camera-outline"

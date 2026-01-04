@@ -4,7 +4,7 @@ import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler, } from
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
 import { scale } from 'react-native-size-matters';
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -200,7 +200,7 @@ const ARKWiki = (props) => {
                     style={{ flexDirection: 'row' }}
                     onPress={goRandomPage}
                 >
-                    <FastImage
+                    <Image
                         source={require('../../../static/img/logo.png')}
                         style={{
                             height: iconSize,

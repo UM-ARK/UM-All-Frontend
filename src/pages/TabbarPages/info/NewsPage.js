@@ -18,7 +18,7 @@ import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 
-import FastImage from 'react-native-fast-image';
+import { Image } from 'expo-image';
 import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
@@ -85,7 +85,6 @@ const NewsPage = () => {
     // 請求澳大新聞API
     useEffect(() => {
         getData();
-        // return () => FastImage.clearMemoryCache();
     }, []);
 
     // 請求澳大api返回新聞數據
@@ -177,11 +176,8 @@ const NewsPage = () => {
                                 trigger();
                                 navigation.navigate('NewsDetail', { data: topNews, });
                             }}>
-                            <FastImage
-                                source={{
-                                    uri: imageUrls[0].replace('http:', 'https:'),
-                                    // cache: FastImage.cacheControl.web,
-                                }}
+                            <Image
+                                source={imageUrls[0].replace('http:', 'https:')}
                                 style={{ width: '100%', height: '100%' }}
                                 onLoadEnd={() => setImgLoading(false)}>
                                 {/* 塗上50%透明度的黑，讓白色字體能看清 */}
@@ -231,7 +227,7 @@ const NewsPage = () => {
                                         color={white}
                                     />
                                 </View>) : null}
-                            </FastImage>
+                            </Image>
                         </TouchableOpacity>
                     </View>
                 </View>
