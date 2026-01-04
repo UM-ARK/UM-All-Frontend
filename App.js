@@ -48,7 +48,6 @@ const performCheck = async () => {
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [languageOK, setLanguageOK] = useState(false);
     const [scheme, setScheme] = useState(Appearance.getColorScheme());
     const isLight = useColorScheme() === 'light';
     const theme = themes[isLight ? 'light' : 'dark'];

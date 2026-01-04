@@ -103,6 +103,8 @@ export const openLink = async (input) => {
 
         // 3. 調用 WebBrowser
         await WebBrowser.openBrowserAsync(url, {
+            toolbarColor: white,
+
             // --- iOS 配置 ---
             // 使用卡片式彈窗，體驗更接近原生 Modal
             // presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
