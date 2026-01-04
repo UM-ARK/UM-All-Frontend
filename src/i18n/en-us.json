@@ -4,7 +4,6 @@
         "是": "YES",
         "否": "NO",
         "開發者": "Developer",
-
         "資訊": "Info",
         "搵課": "Catalog",
         "百科": "Wiki",
@@ -12,21 +11,17 @@
         "課表": "Table",
         "服務": "Service",
         "組織": "Club",
-
         "TOPTAB_MAIN": "Main",
         "TOPTAB_CLUB": "Club",
         "TOPTAB_EVENT": "Event",
         "TOPTAB_NEWS": "News",
         "TOPTAB_ABOUT": "About",
-
         "ARK ALL瘋狂加載中": "ARK ALL is loading like crazy",
         "確保網絡正常": "Make sure network is good",
         "可以刷新或重啟APP再試": "Refresh or restart the APP and try again",
-
         "現在重啟APP切換到": "Restart the app now to switch to",
         "深色模式": "Dark Mode",
         "淺色模式": "Light Mode",
-
         "更新": "Update",
         "搜索": "Search",
         "設置": "Setting",
@@ -46,13 +41,10 @@
         "組織登入": "Club In",
         "論壇登入": "Forum In",
         "新想法": "New",
-
         "輸入關鍵詞": "Enter keywords",
         "在澳大網頁搜索": "Search from UM website",
         "取消": "Cancel",
-
         "點我更新": "Click me update",
-
         "周一": "MON",
         "周二": "TUE",
         "周三": "WED",
@@ -60,11 +52,9 @@
         "周五": "FRI",
         "周六": "SAT",
         "周日": "SUN",
-
         "中國銀行澳門↓": "BOC Macau ↓",
         "微信↓": "WeChat Pay ↓",
         "支付寶↓": "Alipay ↓",
-
         "捐贈UM ARK，Push開發者，讓ARK ALL更健康發展！": "Donate to UM ARK, push developers, and make ARK ALL greater!",
         "原文Link：": "Original Link: ",
         "您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！": "Your valuable sponsorship will be used for the upgrade and maintenance of various applications and services of ARK!",
@@ -77,78 +67,62 @@
         "Add Drop Data Version": "Add Drop Data Version: ",
         "PreEnroll Data Version": "PreEnroll Data Version: ",
         "Language Setting": "Language Setting: ",
-
         "ARK Describe 1": "ARK ALL was developed by UM students for love and is not an official app!",
         "ARK Describe 2": "ARK ALL is not an official app of UM‼",
         "ARK Describe 4_1": "This software is open source on ",
         "ARK Describe 4_2": " , Welcome to give a Star!!✨✨",
         "ARK Describe 5": "Thank you for your recognition and use ♪(･ω･)ﾉ",
-
         "Official Website": "Official Website: ",
-
         "Donate": "💰Donate/Support Us",
         "Issues": "Update Plans, Problem Discussions",
         "Activity": "Development News",
-
         "Common Issues": "Common Issues",
         "Privacy Policy & User Agreement": "Privacy Policy & User Agreement",
-
         "圖片更新不及時？網站響應出錯？課表同步問題？": "Error Pictures? Website response error? Error Timetable?",
         "清除APP內所有緩存（包括課表模擬與時間版本）": "Clear all the cache in the APP(Including Catalog & Timetable)",
         "清除APP內Cookies": "Clear all the Cookies in the APP",
-
         "重要提示": "Important Hints",
         "您可能需要重新加載圖片，會消耗流量！": "You may need to reload the image, which will consume traffic!",
         "課表數據和版本將被還原，你需要再進行手動更新！": "The catalog data and version will be restored, and you need to manually update again!",
         "將清除所有緩存並重啟，您確定繼續嗎？": "All caches will be cleared and restarted. Are you sure you want to continue?",
-
         "已清除Cookies": "Cookies cleared"
     },
-    "wiki": {
-
-    },
+    "wiki": {},
     "harbor": {
-        "長按底部論壇Tabbar打開偏好設置": "Long press the bottom Harbor Tabbar to open preference settings",
-        "Webview版概率出現登錄錯誤，建議使用Browser版": "Webview version may encounter login errors, it is recommended to use the Browser version",
-        "進入Browser版": "Enter Browser version",
-        "進入Webview版": "Enter Webview version",
-        "退出設定": "Exit Settings",
-
-        "默認打開方式": "Default Opening Method",
-        "您可以隨時長按修改": "You can long press to modify at any time",
-        "Webview：APP內嵌論壇(無法自動登錄、微軟登錄可能失效)": "Webview: In-app Harbor (automatic login not available, Microsoft login may fail)",
-        "Browser(Default)：在瀏覽器中打開論壇": "Browser(Default): Open Harbor in the browser",
-
-        "您可以隨時通過右下角的按鈕進入設定": "You can enter settings at any time through the button in the lower right corner"
+        "瀏覽方式偏好": "Browsing Preference",
+        "選擇最適合您的 Harbor 論壇瀏覽體驗": "Choose the best Harbor forum browsing experience for you",
+        "系統瀏覽器 (推薦)": "System Browser (Recommended)",
+        "支援自動填充密碼": "Supports autofill password",
+        "兼容性最佳，解決舊設備錯誤": "Best compatibility, solves errors on old devices",
+        "APP 內嵌入瀏覽": "In-app Webview Browser",
+        "頁面切換更流暢": "Smoother page switching",
+        "需手動輸入密碼，舊版 Android 可能報錯": "Manual password input required, old Android may report errors",
+        "報錯需要自行前往應用商店更新Webview組件": "If errors occur, please update the WebView component in the app store yourself",
+        "隨時通過本頁面右下角設置按鈕修改偏好": "You can change your preference anytime via the settings button at the bottom right of this page",
+        "暫不修改，返回": "Not now, go back"
     },
     "catalog": {
         "ARK搵課": "ARK Catalog",
         "試試ECE or Electrical or 電氣": "Try ECE or Electrical or 電氣",
-
         "必修課 與 選修課": "Compulsory and Required Elective ",
         "通識課": "General Education",
-
         "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
         "手動檢查課表數據更新": "Check Course Data Update",
-
         "查": "Search",
         "選咩課": "What2Reg",
         "官方": "Official",
         "Section / 老師": "Section / Teacher",
         "模擬課表": "Timetable Simulation",
         "添加至模擬課表": "Add to Timetable Simulation",
-
         "ARK搵課提示": "What2Reg",
         "現在重啟APP以適配最新課表數據嗎？": "Restart the app now to adapt to the latest timetable data?",
         "已是最新課表數據！": "The timetable data is already up to date!",
         "點擊下方按鈕更新！檢查作者是否上傳最新數據~": "Click the button below to update! Check if the author has uploaded the latest data~",
         "或可附件最新的課表Excel，Email提醒作者更新！": "Or you can attach the latest timetable Excel and email the author to remind them to update!",
         "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
-
         "檢查課表版本!": "Check timetable version!",
         "以官網課表Excel為準!": "Based on the official timetable Excel!",
-
         "幹飯": "Eating",
         "幹飯時間表": "Eating Schedule",
         "下課Section數": "Number of Sections After Class"
@@ -160,13 +134,10 @@
         "清空": "Clear",
         "晚上": "Evening",
         "下午": "Afternoon",
-
         "刪除": "Delete",
         "刪除所有": "Delete All",
-
         "全部放入課表": "Add All to Timetable",
         "選取單節": "Select Single Section",
-
         "如何開始使用模擬課表？": "How to start using the timetable simulation?",
         "選項": "Choice",
         "方法": "Method",
@@ -174,24 +145,19 @@
         "全選、複製Timetable，": "Select all, copy Timetable,",
         "粘貼到下方輸入框，": "Paste it into the input box below,",
         "一鍵導入！": "One-click import!",
-
         "進入舊ISW複製": "Enter ISW to Copy",
         "↑記得先粘貼課表數據，再點擊導入哦": "↑Remember to paste the class schedule data first and then click Import",
         "一鍵導入到模擬課表": "Import to simulated timetable",
-
         "搜索課程：ECE, 電氣, AIM...": "Search: ECE, Electrical, AIM...",
-
         "開始時間不能晚於結束時間！": "Cannot start later than end time!",
         "結束時間不能早於開始時間！": "Cannot end earlier than start time!",
         "下節課：": "Next Class:",
         "接下來無課程~ 點我看課表！": "No more classes~ Click me to view timetable.",
         "僅作模擬!": "Only Simulation!",
-
         "重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新": "Restart the APP or manually update the version on the course page, depending on whether the developer uploads the update."
     },
     "features": {
         "服務一覽": "All Services",
-
         "校園資訊": "Campus Services",
         "校園巴士": "Bus",
         "校曆": "Calendar",
@@ -212,9 +178,7 @@
         "打印餘額": "Balance",
         "學生會": "Student Union",
         "更多服務": "More",
-
         "預約服務": "Reservation Services",
-
         "課業發展": "Coursework & Development",
         "課表模擬": "Timetable",
         "選咩課": "What2Reg",
@@ -227,15 +191,11 @@
         "證明文件": "Certificate",
         "資源搜索": "Resource Finder",
         "論文計劃": "Essay Plan",
-
-
         "生活服務": "Domestic Services",
         "失物認領": "Lost",
         "泊車月票": "Park",
         "職位空缺": "Vacancies",
         "書院餐單": "Menu",
-
-
         "新生推薦": "Recommended for Freshmen",
         "職涯港": "Harbor",
         "生存指南": "Survival",
@@ -246,14 +206,9 @@
         "書院": "RC",
         "校友會": "Alumni",
         "澳大部門": "Organization",
-
-
         "提問：關於澳大的一切...": "Ask: Anything about UM...",
         "關於澳大的一切...": "Anything about UM...",
-
-
         "複製功能Link": "Copy this function link",
-
         "查看校巴到站情況": "Check the bus arrival status",
         "查看澳大校曆發佈頁": "Check the UM calendar release page",
         "查看澳大校園地圖": "Check the UM campus map",
