@@ -220,7 +220,8 @@ function Index({ navigation }) {
                             marginLeft: scale(4),
                             fontSize: verticalScale(12),
                             color: themeColor,
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            lineHeight: verticalScale(14),
                         }}>
                             {t('反饋')}
                         </Text>
@@ -252,7 +253,8 @@ function Index({ navigation }) {
                             marginLeft: scale(4),
                             fontSize: verticalScale(12),
                             color: themeColor,
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            lineHeight: verticalScale(14),
                         }}>
                             {t('設置')}
                         </Text>
