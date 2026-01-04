@@ -8,6 +8,9 @@
     },
     "android": {
       "userInterfaceStyle": "automatic"
-    }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }
