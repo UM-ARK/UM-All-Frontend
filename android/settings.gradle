@@ -17,10 +17,6 @@ rootProject.name = 'UMALL'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
 
-// 漸變庫安裝需要
-// include ':react-native-linear-gradient'
-// project(':react-native-linear-gradient').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-linear-gradient/android')
-
 // 舊：https://www.npmjs.com/package/@react-native-community/cameraroll
 // include ':@react-native-community_cameraroll'
 // project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/cameraroll/android')
