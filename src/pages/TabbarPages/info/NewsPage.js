@@ -25,6 +25,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
+import lodash from "lodash";
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -82,7 +83,7 @@ const NewsPage = () => {
     const [isScrollViewLoading, setIsScrollViewLoading] = useState(false);
     const [newsList, setNewsList] = useState([]);
     const [topNews, setTopNews] = useState({});
-    const [imgLoading, setImgLoading] = useState(true);
+    // const [imgLoading, setImgLoading] = useState(true);
 
     const progressRef = useRef(0);
     const renderNewsItem = useCallback(({ item }) => <NewsCard data={item} />, []);
@@ -129,8 +130,6 @@ const NewsPage = () => {
 
             // 非頭條的新聞渲染進新聞列表，過濾某些沒有detail的數據
             const filteredNewsList = result.filter(item => item.details.length > 0);
-            // TODO: 每次返回2.5MB，需要優化。
-            // 3.x版本返回的是25個新聞，現在返回100條新聞，嘗試採取UM API的分頁加載方式
 
             setTopNews(topNewsData);
             setNewsList(filteredNewsList);
@@ -162,8 +161,9 @@ const NewsPage = () => {
     }, [topNews]);
 
     // 頭條新聞的渲染
-    const renderTopNews = useCallback(() => {
+    const renderTopNews = useMemo(() => {
         const { imageUrls, title_en, title_cn } = topNewsContent;
+        const topNewsImage = imageUrls.length > 1 ? lodash.sample(imageUrls) : imageUrls[0];
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
@@ -179,7 +179,7 @@ const NewsPage = () => {
                             navigation.navigate('NewsDetail', { data: topNews, });
                         }}>
                         <Image
-                            source={{ uri: imageUrls[0].replace('http:', 'https:') }}
+                            source={{ uri: topNewsImage }}
                             style={{ width: '100%', height: '100%' }}
                             // source={imageUrls[0].replace('http:', 'https:')}
                             // contentFit="cover"
@@ -223,24 +223,11 @@ const NewsPage = () => {
                                 </Text>
                             </View>
                         </View>
-
-                        {/* {imgLoading ? (<View style={{
-                            width: '100%',
-                            height: '100%',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'absolute',
-                        }}>
-                            <ActivityIndicator
-                                size={'large'}
-                                color={white}
-                            />
-                        </View>) : null} */}
                     </TouchableOpacity>
                 </View>
             </View >
         );
-    }, [white]);
+    }, [topNews]);
 
     // 渲染懸浮可拖動按鈕
     const renderGoTopButton = useCallback(() => (
@@ -289,7 +276,7 @@ const NewsPage = () => {
                 </View>
             </TouchableWithoutFeedback>
         </Interactable.View>
-    ), [themeColor, viewShadow, white]);
+    ), [white]);
 
     return (
         <View style={{
@@ -322,7 +309,7 @@ const NewsPage = () => {
             ) : null}
 
             {/* 渲染新聞列表 */}
-            {isLoading ? null : (
+            {isLoading && !newsList ? null : (
                 <View style={{ flex: 1, }}><VirtualizedList
                     data={newsList}
                     ref={virtualizedList}
