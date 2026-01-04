@@ -9,6 +9,7 @@ import { uiStyle, VERSION_EMOJI } from '../../../../../utils/uiMap';
 import { screenWidth } from '../../../../../utils/stylesKits';
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
+import { trigger } from '../../../../../utils/trigger';
 
 const calItemWidth = verticalScale(50);
 
@@ -73,6 +74,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                 style={{ width: calItemWidth, margin: verticalScale(3) }}
                 onPress={() => {
                     LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+                    trigger();
                     setSelectDay(index);
                 }}
             >
