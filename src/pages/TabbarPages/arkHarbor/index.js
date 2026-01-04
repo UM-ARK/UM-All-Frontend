@@ -245,6 +245,9 @@ const ARKHarbor = (props) => {
                         }}
                         onPress={() => {
                             trigger();
+                            logToFirebase('clickHarbor', {
+                                mode: "browser"
+                            });
                             setHarborSetting({ tabbarMode: 'browser' });
                             setItem(JSON.stringify({ tabbarMode: 'browser' }));
                             openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
@@ -292,6 +295,9 @@ const ARKHarbor = (props) => {
                         }}
                         onPress={() => {
                             trigger();
+                            logToFirebase('clickHarbor', {
+                                mode: "webview"
+                            });
                             setHarborSetting({ tabbarMode: 'webview' });
                             setItem(JSON.stringify({ tabbarMode: 'webview' }));
                             setCurrentURL(ARK_HARBOR);

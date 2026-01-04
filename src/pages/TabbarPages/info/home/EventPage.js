@@ -471,12 +471,13 @@ const EventPage = forwardRef((props, ref) => {
             }}
                 onPress={async () => {
                     trigger();
-                    logToFirebase('clickHarbor', {
-                        title: item.title,
-                    });
                     const URL = ARK_HARBOR_TOPIC + item.id;
                     const settingStr = await getItem();
                     const setting = settingStr ? JSON.parse(settingStr) : null;
+                    logToFirebase('clickHarbor', {
+                        title: item.title,
+                        mode: setting ? setting.tabbarMode : "browser"
+                    });
                     // 用戶偏好是Webview則導航到Tabbar
                     if (setting && setting.tabbarMode == 'webview') {
                         navigation.navigate('Harbor', { url: URL });
