@@ -23,7 +23,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { debounce } from 'lodash';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
-import OpenCC from 'opencc-js';
+import * as OpenCC from 'opencc-js';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
