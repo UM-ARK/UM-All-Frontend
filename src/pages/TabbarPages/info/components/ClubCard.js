@@ -16,8 +16,6 @@ const ClubCard = ({ data }) => {
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
     const { themeColor, black, white, trueWhite } = theme;
-
-    const [imgLoading, setImgLoading] = useState(true);
     const { logo_url, name } = data;
 
     // 处理点击跳转逻辑
@@ -43,34 +41,16 @@ const ClubCard = ({ data }) => {
             activeOpacity={0.8}
             onPress={handleJumpToDetail}>
             {/* 社团 / 组织 Logo */}
-            <View>
-                <Image
-                    source={logo_url}
-                    style={{
-                        backgroundColor: trueWhite,
-                        width: IMG_SIZE,
-                        height: IMG_SIZE,
-                        borderRadius: scale(50),
-                    }}
-                    contentFit='contain'
-                    onLoadStart={() => setImgLoading(true)}
-                    onLoad={() => setImgLoading(false)} />
-                {imgLoading && (
-                    <View
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'absolute',
-                        }}>
-                        <ActivityIndicator
-                            size={'large'}
-                            color={themeColor}
-                        />
-                    </View>
-                )}
-            </View>
+            <Image
+                source={logo_url}
+                style={{
+                    backgroundColor: trueWhite,
+                    width: IMG_SIZE,
+                    height: IMG_SIZE,
+                    borderRadius: scale(50),
+                }}
+                contentFit='contain'
+            />
 
             {/* 组织名 */}
             <View
