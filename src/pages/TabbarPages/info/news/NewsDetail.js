@@ -117,7 +117,9 @@ const NewsDetail = ({ route, navigation }) => {
         }
     });
 
-    let imageUrls = newsData.common.imageUrls.map(item => item.replace('http:', 'https:'));
+    let imageUrls = newsData.common.imageUrls ?
+        newsData.common.imageUrls.map(item => item.replace('http:', 'https:'))
+        : [];
 
     // 自適應圖片寬度
     let COMPONENT_WIDTH = PAGE_WIDTH * 0.25;
