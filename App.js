@@ -100,9 +100,7 @@ const App = () => {
                 Alert.alert('', `App initialization error!\nPlease contact developer.`, null, { cancelable: true })
             } finally {
                 // 報告Firebase準確的iPhone型號
-                // TODO: Android測試
                 const modelName = getPreciseDeviceName();
-                console.log('modelName', modelName);
                 const analyticsInstance = getAnalytics(getApp());
                 await setUserProperty(analyticsInstance, 'device_market_name', modelName);
             }
