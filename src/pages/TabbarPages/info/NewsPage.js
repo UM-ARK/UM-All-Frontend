@@ -309,7 +309,7 @@ const NewsPage = () => {
             ) : null}
 
             {/* 渲染新聞列表 */}
-            {isLoading && !newsList ? null : (
+            {isLoading ? null : (
                 <View style={{ flex: 1, }}><VirtualizedList
                     data={newsList}
                     ref={virtualizedList}
