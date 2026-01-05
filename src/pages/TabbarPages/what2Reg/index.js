@@ -39,7 +39,7 @@ import moment from 'moment';
 import { t } from "i18next";
 import { ActionSheetCustom as ActionSheet } from '@alessiocancian/react-native-actionsheet';
 import lodash from 'lodash';
-import OpenCC from 'opencc-js';
+import * as OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
 import Toast from 'react-native-simple-toast';
 import { useIsFocused } from '@react-navigation/native';

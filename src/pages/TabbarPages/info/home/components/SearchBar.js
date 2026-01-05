@@ -23,7 +23,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { debounce } from 'lodash';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
-import OpenCC from 'opencc-js';
+import * as OpenCC from 'opencc-js';
+import { useIsFocused } from '@react-navigation/native';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -45,6 +46,8 @@ const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow, secondThemeColor, themeColor, bg_color, } = theme;
     const { t, i18n } = useTranslation();
+    const screenIsFocused = useIsFocused();
+
     const functionArr = getFunctionArr(t);
     const styles = StyleSheet.create({
         container: {
@@ -205,6 +208,17 @@ const SearchBar = ({ navigation }) => {
         return () => clearInterval(interval);
     }, [isFocused, inputText]);
 
+    useEffect(() => {
+        if (!screenIsFocused) {
+            // 页面失焦时清理所有状态
+            textInputRef.current?.blur();
+            setIsFocused(false);
+            // setInputText('');
+            // setLocalResults([]);
+            Keyboard.dismiss();
+        }
+    }, [screenIsFocused]);
+
     // 3. 混合搜索邏輯 (Hybrid Search)
     const handleSearch = (text) => {
         setInputText(text);
@@ -231,27 +245,42 @@ const SearchBar = ({ navigation }) => {
 
     // 4. 執行跳轉邏輯
     const executeNavigation = (item) => {
-        Keyboard.dismiss();
-        // 記錄日誌 Firebase
-        logToFirebase('funcUse', {
-            funcName: 'searchBar_features',
-            searchBarDetail: inputText + '-' + item.fn_name,
-        });
+        textInputRef.current?.blur();  // ✅ 清除输入框焦点
+        setIsFocused(false);            // ✅ 更新状态
+        // setInputText('');               // ✅ 清空输入文本
+        // setLocalResults([]);            // ✅ 清空结果列表
+        Keyboard.dismiss();             // ✅ 关闭键盘
 
-        // 根據 FeatureList 的定義進行跳轉
-        if (item.go_where === 'Webview' || item.go_where === 'Linking') {
-            openLink(item.webview_param.url);
-        } else if (item.go_where) {
-            // 跳轉到 App 內原生頁面 (需確保 navigation stack 中有這些路由)
-            navigation.navigate(item.go_where);
-        }
+        setTimeout(() => {
+            // 記錄日誌 Firebase
+            logToFirebase('funcUse', {
+                funcName: 'searchBar_features',
+                searchBarDetail: inputText + '-' + item.fn_name,
+            });
+
+            // 根據 FeatureList 的定義進行跳轉
+            if (item.go_where === 'Webview' || item.go_where === 'Linking') {
+                openLink(item.webview_param.url);
+            } else if (item.go_where) {
+                // 跳轉到 App 內原生頁面 (需確保 navigation stack 中有這些路由)
+                navigation.navigate(item.go_where);
+            }
+        }, 50);
     };
 
     const goToGoogle = () => {
+        // 清除所有状态
+        textInputRef.current?.blur();
+        setIsFocused(false);
+        setInputText('');
+        setLocalResults([]);
         Keyboard.dismiss();
-        const query = encodeURIComponent(`site:umall.one OR site:um.edu.mo ${inputText}`);
-        const url = `https://www.google.com/search?q=${query}`;
-        openLink({ URL: url, mode: 'fullScreen' });
+
+        setTimeout(() => {
+            const query = encodeURIComponent(`site:umall.one OR site:um.edu.mo ${inputText}`);
+            const url = `https://www.google.com/search?q=${query}`;
+            openLink({ URL: url, mode: 'fullScreen' });
+        }, 50)
     };
 
     // 5. 渲染搜索結果下拉 (Overlay)

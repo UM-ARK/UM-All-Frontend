@@ -17,7 +17,7 @@ import axios from 'axios';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
 import lodash from 'lodash';
-import OpenCC from 'opencc-js';
+import * as OpenCC from 'opencc-js';
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 
@@ -35,6 +35,7 @@ const OrgInfo = (props) => {
     };
 
     const openGoogleSearch = useCallback((query) => {
+        trigger();
         const searchUrl = `https://www.google.com/search?q=${encodeURIComponent('site:umall.one OR site:um.edu.mo ' + query)}`;
         openLink(searchUrl);
     }, [orgData]);
@@ -53,6 +54,7 @@ const OrgInfo = (props) => {
                 <TouchableOpacity style={{ width: '90%', }}
                     activeOpacity={0.8}
                     onPress={() => {
+                        trigger();
                         if (orgData.subUnit && orgData.subUnit.length > 1) {
                             toggleExpand();
                         } else {

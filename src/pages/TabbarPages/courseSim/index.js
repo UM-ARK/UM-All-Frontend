@@ -26,7 +26,7 @@ import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from
 import { ScrollView, } from "react-native-gesture-handler";
 import uniq from 'lodash/uniq';
 import lodash from 'lodash';
-import OpenCC from 'opencc-js';
+import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
