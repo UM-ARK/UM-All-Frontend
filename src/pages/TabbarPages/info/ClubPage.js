@@ -1,68 +1,38 @@
-import React, { PureComponent, memo } from 'react';
-import { Text, View, RefreshControl, TouchableOpacity, ScrollView, Alert, } from 'react-native';
+import React, { PureComponent } from 'react';
+import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
-
-import { FlatGrid } from 'react-native-super-grid';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { FlatList } from 'react-native';
 
 const COMPONENT_WIDTH = scale(90);
-// 65 寬度，一行3個
+const ITEMS_PER_ROW = 3;
 let originClubDataList = [];
 
-const clubFilter = (clubDataList, tag) => {
-    return clubDataList.filter(a => a.tag === tag);
+const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
+
+const chunkIntoRows = (list, size) => {
+    const rows = [];
+    for (let i = 0; i < list.length; i += size) {
+        rows.push(list.slice(i, i + size));
+    }
+    return rows;
 };
 
-const ClubGridSection = memo(function ClubGridSection({ data, tag, theme, onLayout }) {
-    const { themeColor, black } = theme;
-    return (
-        <FlatGrid
-            itemDimension={COMPONENT_WIDTH}
-            data={data}
-            renderItem={({ item }) => <ClubCard data={item} />}
-            key={tag}
-            keyExtractor={item => item._id}
-            directionalLockEnabled
-            alwaysBounceHorizontal={false}
-            ListHeaderComponent={
-                <View style={{
-                    marginLeft: scale(12),
-                    marginBottom: scale(5)
-                }}>
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        fontSize: verticalScale(15)
-                    }}>
-                        {clubTagMap(tag)}
-                    </Text>
-                </View>
-            }
-            onLayout={event => onLayout(tag, event.nativeEvent.layout.y)}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
-        />
-    );
-});
-
 class ClubPage extends PureComponent {
-    scrollViewRef = React.createRef(null);
+    sectionListRef = React.createRef(null);
     static contextType = ThemeContext;
-    clubClassLayout = {};
 
     state = {
-        clubDataList: undefined,
+        sections: [],
         isLoading: true,
-        scrollPosition: 0,
         isOtherViewVisible: true,
     }
 
@@ -86,7 +56,7 @@ class ClubPage extends PureComponent {
                     });
                     originClubDataList = clubDataList;
                     this.setState({
-                        clubDataList: this.separateDataList(clubDataList),
+                        sections: this.buildSections(clubDataList),
                         isLoading: false
                     });
                     this.handleScrollEnd();
@@ -104,23 +74,29 @@ class ClubPage extends PureComponent {
         }
     }
 
-    storeSectionLayout = (tag, y) => {
-        if (this.clubClassLayout[tag] !== y) {
-            this.clubClassLayout[tag] = y;
+    buildSections = (clubDataList) => {
+        if (!clubDataList || clubDataList.length === 0) { return []; }
+        const sections = [];
+        // 先放 ARK 組織
+        const arkList = clubFilter(clubDataList, 'ARK');
+        if (arkList.length) {
+            sections.push({
+                title: 'ARK',
+                data: chunkIntoRows(arkList, ITEMS_PER_ROW),
+            });
         }
-    };
 
-    separateDataList = (clubDataList) => {
-        let newClubData = {};
-        if (clubDataList && clubDataList.length > 0) {
-            clubTagList.forEach((itm) => {
-                // console.log('過濾' + itm, clubFilter(clubDataList, itm));
-                newClubData[itm] = clubFilter(clubDataList, itm);
-            })
-        }
-        newClubData.ARK = clubFilter(clubDataList, 'ARK');
-        return newClubData
-        // console.log('newClubData', newClubData);
+        clubTagList.forEach((tag) => {
+            const list = clubFilter(clubDataList, tag);
+            if (list.length) {
+                sections.push({
+                    title: tag,
+                    data: chunkIntoRows(list, ITEMS_PER_ROW),
+                });
+            }
+        });
+
+        return sections;
     }
 
     renderBottomInfo = () => {
@@ -182,11 +158,11 @@ class ClubPage extends PureComponent {
     render() {
         const { theme } = this.context;
         const { themeColor, black, white } = theme;
-        const { clubDataList, isLoading, isOtherViewVisible } = this.state;
+        const { sections, isLoading, isOtherViewVisible } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: theme.bg_color, alignItems: 'center', justifyContent: 'center' }}>
                 {/* 側邊分類導航 */}
-                {clubDataList != undefined && 'ARK' in clubDataList && isOtherViewVisible && !isLoading ? (
+                {sections.length > 0 && isOtherViewVisible && !isLoading ? (
                     <View style={{
                         position: 'absolute',
                         zIndex: 2,
@@ -198,43 +174,19 @@ class ClubPage extends PureComponent {
                         ...theme.viewShadow,
                     }}>
                         <FlatList
-                            data={clubTagList}
+                            data={sections.map(sec => sec.title)}
                             contentContainerStyle={{
                                 paddingHorizontal: scale(3),
-                            }}
-                            ListHeaderComponent={() => {
-                                return (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            trigger();
-                                            this.scrollViewRef.current.scrollTo({ y: 0 });
-                                        }}
-                                        style={{
-                                            padding: scale(5),
-                                            width: '100%'
-                                        }}
-                                    >
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: black.third,
-                                            fontSize: verticalScale(11),
-                                            fontWeight: 'bold'
-                                        }}>
-                                            ARK
-                                        </Text>
-                                    </TouchableOpacity>
-                                )
                             }}
                             renderItem={(itm) => {
                                 return (
                                     <TouchableOpacity
                                         onPress={() => {
                                             trigger();
-                                            // 點擊自動滑動到對應分類的社團
-                                            const tag = itm.item;
-                                            this.scrollViewRef.current.scrollTo({
-                                                y: this.clubClassLayout[tag]
-                                            })
+                                            const sectionIndex = sections.findIndex(sec => sec.title === itm.item);
+                                            if (sectionIndex !== -1) {
+                                                this.sectionListRef.current?.scrollToLocation({ sectionIndex, itemIndex: 0, viewOffset: 0, animated: true });
+                                            }
                                         }}
                                         style={{
                                             padding: scale(5),
@@ -260,9 +212,42 @@ class ClubPage extends PureComponent {
                     </View>
                 ) : null}
 
-                {/* 組織展示 */}
-                <ScrollView
-                    // showsVerticalScrollIndicator={false}
+                {/* 組織展示：使用 SectionList 做虛擬化，避免一次渲染全部卡片 */}
+                <SectionList
+                    ref={this.sectionListRef}
+                    sections={sections}
+                    keyExtractor={(item, index) => {
+                        const firstId = item[0]?._id;
+                        return firstId ? `${firstId}-row-${index}` : `row-${index}`;
+                    }}
+                    renderSectionHeader={({ section }) => (
+                        <View style={{
+                            marginLeft: scale(12),
+                            marginBottom: scale(5),
+                            marginTop: scale(8),
+                        }}>
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                color: theme.black.main,
+                                fontSize: verticalScale(15)
+                            }}>
+                                {clubTagMap(section.title) || section.title}
+                            </Text>
+                        </View>
+                    )}
+                    renderItem={({ item }) => (
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            // paddingHorizontal: scale(6),
+                        }}>
+                            {item.map((club) => (
+                                <View key={club._id} style={{ width: COMPONENT_WIDTH + scale(6) }}>
+                                    <ClubCard data={club} />
+                                </View>
+                            ))}
+                        </View>
+                    )}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -274,37 +259,17 @@ class ClubPage extends PureComponent {
                             }}
                         />
                     }
-                    ref={this.scrollViewRef}
                     onScrollBeginDrag={this.handleScrollStart}
                     onMomentumScrollEnd={this.handleScrollEnd}
-                >
-                    {isLoading ? <Loading /> : (
-                        clubDataList != undefined && 'ARK' in clubDataList ? <>
-                            <View>
-                                <ClubGridSection
-                                    data={clubDataList.ARK}
-                                    tag="ARK"
-                                    theme={theme}
-                                    onLayout={this.storeSectionLayout}
-                                />
-                                {clubTagList.map((tag) => {
-                                    if (tag in clubDataList && clubDataList[tag].length > 0) {
-                                        return (
-                                            <ClubGridSection
-                                                key={tag}
-                                                data={clubDataList[tag]}
-                                                tag={tag}
-                                                theme={theme}
-                                                onLayout={this.storeSectionLayout}
-                                            />
-                                        );
-                                    }
-                                })}
-                            </View>
-                            {this.renderBottomInfo()}
-                        </> : <Loading />
-                    )}
-                </ScrollView>
+                    ListEmptyComponent={isLoading ? <Loading /> : null}
+                    ListFooterComponent={!isLoading ? this.renderBottomInfo() : null}
+                    showsVerticalScrollIndicator={false}
+                    stickySectionHeadersEnabled={false}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={10}
+                    windowSize={7}
+                    removeClippedSubviews
+                />
             </View>
         );
     }
