@@ -2610,14 +2610,14 @@
 
 "@react-native-firebase/analytics@^23.7.0":
   version "23.7.0"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/@react-native-firebase/analytics/-/analytics-23.7.0.tgz#c7b024d5545f12faace0cebdf518cc6c900a6ae5"
+  resolved "https://registry.npmmirror.com/@react-native-firebase/analytics/-/analytics-23.7.0.tgz#c7b024d5545f12faace0cebdf518cc6c900a6ae5"
   integrity sha512-5oEWNN7WLj2WHjG4wnwSda4GMM0gVfsKGbbUEX3vl4B4hxy/OEHDNWWVGj93qShHWlj8NApsIc6TzrVLhJbCGQ==
   dependencies:
     superstruct "^2.0.2"
 
 "@react-native-firebase/app@^23.7.0":
   version "23.7.0"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/@react-native-firebase/app/-/app-23.7.0.tgz#48faec190c8e70d684953a5bd28286b6e8e4729d"
+  resolved "https://registry.npmmirror.com/@react-native-firebase/app/-/app-23.7.0.tgz#48faec190c8e70d684953a5bd28286b6e8e4729d"
   integrity sha512-sYVDkDxlOyQaDO/A0yVqbTha32dVapHlzS054RPY+RM5m0vARMsevJ9d543kH+Cdbp1RKMHIgDjhlB+APaNdhw==
   dependencies:
     firebase "12.6.0"
@@ -3406,6 +3406,16 @@ ajv@^6.12.4:
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
+
+ajv@^8.11.0:
+  version "8.17.1"
+  resolved "https://registry.npmmirror.com/ajv/-/ajv-8.17.1.tgz#37d9a5c776af6bc92d7f4f9510eba4c0a60d11a6"
+  integrity sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==
+  dependencies:
+    fast-deep-equal "^3.1.3"
+    fast-uri "^3.0.1"
+    json-schema-traverse "^1.0.0"
+    require-from-string "^2.0.2"
 
 anser@^1.4.9:
   version "1.4.10"
@@ -5116,6 +5126,14 @@ expo-asset@~11.1.7:
     "@expo/image-utils" "^0.7.6"
     expo-constants "~17.1.7"
 
+expo-build-properties@~0.14.8:
+  version "0.14.8"
+  resolved "https://registry.npmmirror.com/expo-build-properties/-/expo-build-properties-0.14.8.tgz#03aac5eb297c1f4ad3c5b95d8bf897340104d041"
+  integrity sha512-GTFNZc5HaCS9RmCi6HspCe2+isleuOWt2jh7UEKHTDQ9tdvzkIoWc7U6bQO9lH3Mefk4/BcCUZD/utl7b1wdqw==
+  dependencies:
+    ajv "^8.11.0"
+    semver "^7.6.0"
+
 expo-constants@~17.1.7, expo-constants@~17.1.8:
   version "17.1.8"
   resolved "https://registry.npmmirror.com/expo-constants/-/expo-constants-17.1.8.tgz#6a59142b9967350bdded3f44859886ec34961aa4"
@@ -5231,6 +5249,11 @@ fast-levenshtein@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==
+
+fast-uri@^3.0.1:
+  version "3.1.0"
+  resolved "https://registry.npmmirror.com/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
+  integrity sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==
 
 fast-xml-parser@^4.4.1:
   version "4.5.3"
@@ -6633,6 +6656,11 @@ json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
   integrity sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==
+
+json-schema-traverse@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
+  integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
 
 json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"

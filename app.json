@@ -2,15 +2,37 @@
   "name": "UMALL",
   "displayName": "UMALL",
   "expo": {
+    "name": "UMALL",
+    "displayName": "UMALL",
+    "slug": "umall",
+    "version": "26.1.1",
+    "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "userInterfaceStyle": "automatic"
+      "userInterfaceStyle": "automatic",
+      "icon": "./src/static/img/logo.png"
     },
     "android": {
-      "userInterfaceStyle": "automatic"
+      "userInterfaceStyle": "automatic",
+      "googleServicesFile": "./google-services.json",
+      "package": "one.umall",
+      "versionCode": 73,
+      "adaptiveIcon": {
+        "foregroundImage": "./src/static/img/logo.png",
+        "backgroundColor": "#E6AB52"
+      }
     },
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ]
   }
 }

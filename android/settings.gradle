@@ -1,4 +1,12 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") 
+pluginManagement {
+  def reactNativeGradlePlugin = new File(
+    providers.exec {
+      workingDir(rootDir)
+      commandLine("node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })")
+    }.standardOutput.asText.get().trim()
+  ).getParentFile().absolutePath
+  includeBuild(reactNativeGradlePlugin)
+  
   def expoPluginsPath = new File(
     providers.exec {
       workingDir(rootDir)
@@ -8,44 +16,24 @@ pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin")
   ).absolutePath
   includeBuild(expoPluginsPath)
 }
-plugins { id("com.facebook.react.settings") 
-id("expo-autolinking-settings")
+
+plugins {
+  id("com.facebook.react.settings")
+  id("expo-autolinking-settings")
 }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex ->
-  def command = [
-    'node',
-    '--no-warnings',
-    '--eval',
-    'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
-    'react-native-config',
-    '--json',
-    '--platform',
-    'android'
-  ].toList()
-  ex.autolinkLibrariesFromCommand(command)
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+  if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
+    ex.autolinkLibrariesFromCommand()
+  } else {
+    ex.autolinkLibrariesFromCommand(expoAutolinking.rnConfigCommand)
+  }
 }
+expoAutolinking.useExpoModules()
+
 rootProject.name = 'UMALL'
-include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
 
-// 舊：https://www.npmjs.com/package/@react-native-community/cameraroll
-// include ':@react-native-community_cameraroll'
-// project(':@react-native-community_cameraroll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/cameraroll/android')
-// 新；https://github.com/react-native-cameraroll/react-native-cameraroll
-// include ':@react-native-camera-roll_camera-roll'
-// project(':@react-native-camera-roll_camera-roll').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-camera-roll/camera-roll/android')
-
-// https://github.com/junina-de/react-native-haptic-feedback
-// include ':react-native-haptic-feedback'
-// project(':react-native-haptic-feedback').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-haptic-feedback/android')
-
-// 更新gradle時，https://reactnative.dev/docs/new-architecture-app-intro
-// includeBuild('../node_modules/react-native-gradle-plugin')
-// include(":ReactAndroid")
-// project(":ReactAndroid").projectDir = file('../node_modules/react-native/ReactAndroid')
-// include(":ReactAndroid:hermes-engine")
-// project(":ReactAndroid:hermes-engine").projectDir = file('../node_modules/react-native/ReactAndroid/hermes-engine')
-apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
-useExpoModules()expoAutolinking.useExpoModules()
 expoAutolinking.useExpoVersionCatalog()
+
+include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
