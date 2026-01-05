@@ -88,10 +88,12 @@ ios/UMAllWhite.xcodeproj/project.pbxproj
 
 # Google Firebase
 android/app/google-services.json
+google-services.json
 ios/GoogleService-Info.plist
 
 # UM API Token
 umAPIToken.json
+
 # Expo
 .expo
 dist/
