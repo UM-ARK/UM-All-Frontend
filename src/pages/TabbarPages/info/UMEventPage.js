@@ -15,7 +15,7 @@ import { trigger } from '../../../utils/trigger';
 import NewsCard from './components/NewsCard';
 import Loading from '../../../components/Loading';
 
-import Interactable from 'react-native-interactable';
+// import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -113,57 +113,57 @@ class UMEventPage extends React.PureComponent {
     }
 
     // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
-        const { theme } = this.context;
-        const { white, themeColor, black, viewShadow } = theme;
-        return (
-            <Interactable.View
-                style={{
-                    zIndex: 999,
-                    position: 'absolute',
-                }}
-                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-                snapPoints={[
-                    { x: -scale(140), y: -verticalScale(220) },
-                    { x: scale(140), y: -verticalScale(220) },
-                    { x: -scale(140), y: -verticalScale(120) },
-                    { x: scale(140), y: -verticalScale(120) },
-                    { x: -scale(140), y: verticalScale(0) },
-                    { x: scale(140), y: verticalScale(0) },
-                    { x: -scale(140), y: verticalScale(120) },
-                    { x: scale(140), y: verticalScale(120) },
-                    { x: -scale(140), y: verticalScale(220) },
-                    { x: scale(140), y: verticalScale(220) },
-                ]}
-                // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-                {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        trigger();
-                        this.virtualizedList?.current?.scrollToIndex({ index: 0 });
-                    }}>
-                    <View
-                        style={{
-                            width: scale(50),
-                            height: scale(50),
-                            backgroundColor: white,
-                            borderRadius: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...viewShadow,
-                            margin: scale(5),
-                        }}>
-                        <Ionicons
-                            name={'chevron-up'}
-                            size={scale(40)}
-                            color={themeColor}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-            </Interactable.View>
-        );
-    };
+    // renderGoTopButton = () => {
+    //     const { theme } = this.context;
+    //     const { white, themeColor, black, viewShadow } = theme;
+    //     return (
+    //         <Interactable.View
+    //             style={{
+    //                 zIndex: 999,
+    //                 position: 'absolute',
+    //             }}
+    //             // 設定所有可吸附的屏幕位置 0,0為屏幕中心
+    //             snapPoints={[
+    //                 { x: -scale(140), y: -verticalScale(220) },
+    //                 { x: scale(140), y: -verticalScale(220) },
+    //                 { x: -scale(140), y: -verticalScale(120) },
+    //                 { x: scale(140), y: -verticalScale(120) },
+    //                 { x: -scale(140), y: verticalScale(0) },
+    //                 { x: scale(140), y: verticalScale(0) },
+    //                 { x: -scale(140), y: verticalScale(120) },
+    //                 { x: scale(140), y: verticalScale(120) },
+    //                 { x: -scale(140), y: verticalScale(220) },
+    //                 { x: scale(140), y: verticalScale(220) },
+    //             ]}
+    //             // 設定初始吸附位置
+    //             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
+    //             {/* 懸浮吸附按鈕，回頂箭頭 */}
+    //             <TouchableWithoutFeedback
+    //                 onPress={() => {
+    //                     trigger();
+    //                     this.virtualizedList?.current?.scrollToIndex({ index: 0 });
+    //                 }}>
+    //                 <View
+    //                     style={{
+    //                         width: scale(50),
+    //                         height: scale(50),
+    //                         backgroundColor: white,
+    //                         borderRadius: scale(50),
+    //                         justifyContent: 'center',
+    //                         alignItems: 'center',
+    //                         ...viewShadow,
+    //                         margin: scale(5),
+    //                     }}>
+    //                     <Ionicons
+    //                         name={'chevron-up'}
+    //                         size={scale(40)}
+    //                         color={themeColor}
+    //                     />
+    //                 </View>
+    //             </TouchableWithoutFeedback>
+    //         </Interactable.View>
+    //     );
+    // };
 
     renderEventItem = ({ item }) => (
         <NewsCard data={item} type={'event'} />
@@ -234,7 +234,7 @@ class UMEventPage extends React.PureComponent {
                 backgroundColor: bg_color,
             }}>
                 {/* 懸浮可拖動按鈕 */}
-                {isLoading ? null : this.renderGoTopButton()}
+                {/* {isLoading ? null : this.renderGoTopButton()} */}
 
                 {isLoading ? (<ScrollView
                     showsVerticalScrollIndicator={true}

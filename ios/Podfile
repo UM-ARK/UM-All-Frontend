@@ -1,3 +1,4 @@
+source 'https://mirrors.bfsu.edu.cn/git/CocoaPods/Specs.git'
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 

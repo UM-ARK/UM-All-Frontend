@@ -16,7 +16,7 @@ import Loading from '../../../../components/Loading';
 
 import axios from "axios";
 import { scale, verticalScale } from 'react-native-size-matters';
-import Interactable from 'react-native-interactable';
+// import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AirbnbRating } from '@rneui/themed';
 
@@ -254,58 +254,58 @@ export default class Comment extends Component {
     }
 
     // 渲染懸浮可拖動按鈕
-    renderGoTopButton = () => {
-        const buttonSize = scale(50);
-        return (
-            <Interactable.View
-                style={{
-                    zIndex: 999,
-                    position: 'absolute',
-                }}
-                // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-                snapPoints={[
-                    { x: -scale(140), y: -verticalScale(220) },
-                    { x: scale(140), y: -verticalScale(220) },
-                    { x: -scale(140), y: -verticalScale(120) },
-                    { x: scale(140), y: -verticalScale(120) },
-                    { x: -scale(140), y: verticalScale(0) },
-                    { x: scale(140), y: verticalScale(0) },
-                    { x: -scale(140), y: verticalScale(120) },
-                    { x: scale(140), y: verticalScale(120) },
-                    { x: -scale(140), y: verticalScale(220) },
-                    { x: scale(140), y: verticalScale(220) },
-                ]}
-                // 設定初始吸附位置
-                initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-                {/* 懸浮吸附按鈕，回頂箭頭 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        trigger();
-                        this.scrollViewRef.current.scrollTo({
-                            x: 0,
-                            y: 0,
-                            duration: 500, // 回頂時間
-                        });
-                    }}>
-                    <View
-                        style={{
-                            width: buttonSize, height: buttonSize,
-                            backgroundColor: white,
-                            borderRadius: scale(50),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...viewShadow,
-                        }}>
-                        <Ionicons
-                            name={'chevron-up'}
-                            size={scale(40)}
-                            color={themeColor}
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
-            </Interactable.View>
-        );
-    };
+    // renderGoTopButton = () => {
+    //     const buttonSize = scale(50);
+    //     return (
+    //         <Interactable.View
+    //             style={{
+    //                 zIndex: 999,
+    //                 position: 'absolute',
+    //             }}
+    //             // 設定所有可吸附的屏幕位置 0,0為屏幕中心
+    //             snapPoints={[
+    //                 { x: -scale(140), y: -verticalScale(220) },
+    //                 { x: scale(140), y: -verticalScale(220) },
+    //                 { x: -scale(140), y: -verticalScale(120) },
+    //                 { x: scale(140), y: -verticalScale(120) },
+    //                 { x: -scale(140), y: verticalScale(0) },
+    //                 { x: scale(140), y: verticalScale(0) },
+    //                 { x: -scale(140), y: verticalScale(120) },
+    //                 { x: scale(140), y: verticalScale(120) },
+    //                 { x: -scale(140), y: verticalScale(220) },
+    //                 { x: scale(140), y: verticalScale(220) },
+    //             ]}
+    //             // 設定初始吸附位置
+    //             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
+    //             {/* 懸浮吸附按鈕，回頂箭頭 */}
+    //             <TouchableWithoutFeedback
+    //                 onPress={() => {
+    //                     trigger();
+    //                     this.scrollViewRef.current.scrollTo({
+    //                         x: 0,
+    //                         y: 0,
+    //                         duration: 500, // 回頂時間
+    //                     });
+    //                 }}>
+    //                 <View
+    //                     style={{
+    //                         width: buttonSize, height: buttonSize,
+    //                         backgroundColor: white,
+    //                         borderRadius: scale(50),
+    //                         justifyContent: 'center',
+    //                         alignItems: 'center',
+    //                         ...viewShadow,
+    //                     }}>
+    //                     <Ionicons
+    //                         name={'chevron-up'}
+    //                         size={scale(40)}
+    //                         color={themeColor}
+    //                     />
+    //                 </View>
+    //             </TouchableWithoutFeedback>
+    //         </Interactable.View>
+    //     );
+    // };
 
     render() {
         const { res, isLoading } = this.state;
@@ -326,7 +326,7 @@ export default class Comment extends Component {
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color, alignItems: 'center', justifyContent: 'center' }}>
                 <Header title={'評論詳情'} />
 
-                {isLoading ? null : this.renderGoTopButton()}
+                {/* {isLoading ? null : this.renderGoTopButton()} */}
 
                 {isLoading ? (
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
