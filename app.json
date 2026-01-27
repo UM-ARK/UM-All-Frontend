@@ -9,8 +9,11 @@
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "supportsTablet": true,
       "userInterfaceStyle": "automatic",
-      "icon": "./src/static/img/logo.png"
+      "icon": "./src/static/img/logo.png",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "one.umall"
     },
     "android": {
       "userInterfaceStyle": "automatic",
