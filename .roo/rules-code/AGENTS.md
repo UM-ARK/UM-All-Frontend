@@ -29,3 +29,14 @@
 - iOS requires CocoaPods installation: `cd ios && pod install --repo-update`
 - Android requires API 31 or 33 emulator for development
 - First run may require clearing Metro cache: `npm start -- --reset-cache`
+
+## 搜索最佳實踐
+當你需要搜索代碼內容時，**絕對禁止**使用 `grep` 或 `find` 等 Shell 命令。
+**必須優先使用 `search_files` 工具**。
+
+原因：
+1. `search_files` 基於 ripgrep，速度更快。
+2. 它會自動忽略 .git 和 node_modules，避免無效輸出。
+3. 它能提供更好的上下文格式供你閱讀。
+
+僅當 `search_files` 無法滿足特殊正則需求時，才允許降級使用 `execute_command`。
