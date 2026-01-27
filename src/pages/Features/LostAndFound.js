@@ -246,7 +246,7 @@ class LostAndFound extends Component {
                         // 渲染項目數量
                         getItemCount={getItemCount}
                         ListHeaderComponent={() => (
-                            <>
+                            <View>
                                 <Text
                                     style={{
                                         ...uiStyle.defaultText,
@@ -270,7 +270,7 @@ class LostAndFound extends Component {
                                         Check all
                                     </Text>
                                 </TouchableOpacity>
-                            </>
+                            </View>
                         )}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (

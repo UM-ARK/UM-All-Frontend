@@ -1124,19 +1124,19 @@ const What2Reg = (props) => {
                 </View>
 
                 {/* 搜索框 */}
-                <>
+                <View>
                     {renderSearch()}
-                </>
+                </View>
 
                 {/* 搜索候選課程 */}
-                {searchFilterCourse && searchFilterCourse.length > 0 ? (<>
+                {searchFilterCourse && searchFilterCourse.length > 0 ? (<View>
                     {renderReminder()}
                     <View style={{ alignSelf: 'center' }}>
                         <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                     </View>
                     <CourseCard data={searchFilterCourse} mode={'json'}
                         courseMode={s_course_mode} handleSetLetterData={handleSetLetterData} />
-                </>) : (<>
+                </View>) : (<View>
                     {/* 篩選列表 */}
                     {renderFilterView()}
 
@@ -1148,7 +1148,7 @@ const What2Reg = (props) => {
                             <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={handleSetLetterData} />
                         </View>
                     ) : null}
-                </>)}
+                </View>)}
 
                 {/* 篩選課程功能 更新時間 */}
                 <View style={{ marginTop: scale(10), alignItems: 'center' }}>
