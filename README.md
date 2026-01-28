@@ -45,7 +45,7 @@
 
 ## 🎉 首次運行該項目
 
-在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
+在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)，現在可以參考`./AGENTS.md`文件看項目說明了~~AI萬歲~~。
 
 ### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
