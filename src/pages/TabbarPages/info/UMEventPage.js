@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
     Text,
     View,
@@ -8,14 +8,13 @@ import {
     VirtualizedList,
 } from 'react-native';
 
-import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 
 import NewsCard from './components/NewsCard';
 import Loading from '../../../components/Loading';
 
-// import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -30,23 +29,17 @@ const getItemCount = data => {
     return data.length;
 };
 
-class UMEventPage extends React.PureComponent {
-    virtualizedList = React.createRef(null);
-    static contextType = ThemeContext;
-    progressRef = React.createRef();
+const UMEventPage = () => {
+    const virtualizedList = useRef(null);
+    const progressRef = useRef();
+    const { theme } = useContext(ThemeContext);
 
-    state = {
-        data: undefined,
-        isLoading: true,
-        isLogin: false,
-    };
-
-    componentDidMount() {
-        this.getData();
-    }
+    const [data, setData] = useState(undefined);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLogin, setIsLogin] = useState(false);
 
     // 獲取澳大舉辦活動的資訊
-    async getData() {
+    const getData = async () => {
         try {
             axios.get(UM_API_EVENT, {
                 headers: {
@@ -57,7 +50,7 @@ class UMEventPage extends React.PureComponent {
                     const loadedMB = progressEvent.loaded / 1024 / 1024;
                     let progress = loadedMB / 0.1; // 假設API返回數據大小約為2MB
                     if (progress > 1) progress = 0.95; // 確保進度不超過1
-                    this.progressRef.current = progress; // 更新進度條
+                    progressRef.current = progress; // 更新進度條
                 }
             }).then(res => {
                 let result = res.data._embedded;
@@ -101,79 +94,30 @@ class UMEventPage extends React.PureComponent {
                 });
 
                 resultList = resultList.concat(outdatedList);
-                this.setState({ data: resultList, isLoading: false });
+                setData(resultList);
+                setIsLoading(false);
             })
         } catch (error) {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                this.setState({ data: undefined, isLoading: false });
+                setData(undefined);
+                setIsLoading(false);
             } else {
                 alert('澳大活動頁，未知錯誤，請聯繫開發者！')
             }
         }
-    }
+    };
 
-    // 渲染懸浮可拖動按鈕
-    // renderGoTopButton = () => {
-    //     const { theme } = this.context;
-    //     const { white, themeColor, black, viewShadow } = theme;
-    //     return (
-    //         <Interactable.View
-    //             style={{
-    //                 zIndex: 999,
-    //                 position: 'absolute',
-    //             }}
-    //             // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-    //             snapPoints={[
-    //                 { x: -scale(140), y: -verticalScale(220) },
-    //                 { x: scale(140), y: -verticalScale(220) },
-    //                 { x: -scale(140), y: -verticalScale(120) },
-    //                 { x: scale(140), y: -verticalScale(120) },
-    //                 { x: -scale(140), y: verticalScale(0) },
-    //                 { x: scale(140), y: verticalScale(0) },
-    //                 { x: -scale(140), y: verticalScale(120) },
-    //                 { x: scale(140), y: verticalScale(120) },
-    //                 { x: -scale(140), y: verticalScale(220) },
-    //                 { x: scale(140), y: verticalScale(220) },
-    //             ]}
-    //             // 設定初始吸附位置
-    //             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-    //             {/* 懸浮吸附按鈕，回頂箭頭 */}
-    //             <TouchableWithoutFeedback
-    //                 onPress={() => {
-    //                     trigger();
-    //                     this.virtualizedList?.current?.scrollToIndex({ index: 0 });
-    //                 }}>
-    //                 <View
-    //                     style={{
-    //                         width: scale(50),
-    //                         height: scale(50),
-    //                         backgroundColor: white,
-    //                         borderRadius: scale(50),
-    //                         justifyContent: 'center',
-    //                         alignItems: 'center',
-    //                         ...viewShadow,
-    //                         margin: scale(5),
-    //                     }}>
-    //                     <Ionicons
-    //                         name={'chevron-up'}
-    //                         size={scale(40)}
-    //                         color={themeColor}
-    //                     />
-    //                 </View>
-    //             </TouchableWithoutFeedback>
-    //         </Interactable.View>
-    //     );
-    // };
+    useEffect(() => {
+        getData();
+    }, []);
 
-    renderEventItem = ({ item }) => (
+    const renderEventItem = ({ item }) => (
         <NewsCard data={item} type={'event'} />
     );
 
     // 渲染主要內容
-    renderPage = () => {
-        const { theme } = this.context;
+    const renderPage = () => {
         const { black, white, themeColor } = theme;
-        const { data, isLoading } = this.state;
         const listFooter = <View style={{ marginBottom: scale(50) }} />;
         const listHeader = (
             <View>
@@ -191,12 +135,12 @@ class UMEventPage extends React.PureComponent {
 
         return (
             <VirtualizedList
-                ref={this.virtualizedList}
+                ref={virtualizedList}
                 data={data}
                 initialNumToRender={6}
                 windowSize={8}
                 maxToRenderPerBatch={8}
-                renderItem={this.renderEventItem}
+                renderItem={renderEventItem}
                 updateCellsBatchingPeriod={50}
                 contentContainerStyle={{ width: '100%' }}
                 keyExtractor={itm => itm._id}
@@ -210,9 +154,8 @@ class UMEventPage extends React.PureComponent {
                         tintColor={themeColor}
                         refreshing={isLoading}
                         onRefresh={() => {
-                            this.setState({ isLoading: true }, () => {
-                                this.getData();
-                            });
+                            setIsLoading(true);
+                            getData();
                         }}
                     />
                 }
@@ -223,40 +166,36 @@ class UMEventPage extends React.PureComponent {
         );
     };
 
-    render() {
-        const { isLoading } = this.state;
-        const { theme } = this.context;
-        const { black, white, themeColor, bg_color, } = theme;
+    const { black, white, themeColor, bg_color } = theme;
 
-        return (
-            <View style={{
-                flex: 1, alignItems: 'center', justifyContent: 'center',
-                backgroundColor: bg_color,
-            }}>
-                {/* 懸浮可拖動按鈕 */}
-                {/* {isLoading ? null : this.renderGoTopButton()} */}
-
-                {isLoading ? (<ScrollView
+    return (
+        <View style={{
+            flex: 1, alignItems: 'center', justifyContent: 'center',
+            backgroundColor: bg_color,
+        }}>
+            {isLoading ? (
+                <ScrollView
                     showsVerticalScrollIndicator={true}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
                             tintColor={themeColor}
-                            refreshing={this.state.isLoading}
+                            refreshing={isLoading}
                             onRefresh={() => {
                                 // 展示Loading標識
-                                this.setState({ isLoading: true }, () => {
-                                    this.getData();
-                                });
+                                setIsLoading(true);
+                                getData();
                             }}
                         />
                     }
                 >
-                    <Loading progress={this.progressRef.current} />
-                </ScrollView>) : (this.state.data != undefined && this.renderPage())}
-            </View>
-        );
-    }
-}
+                    <Loading progress={progressRef.current} />
+                </ScrollView>
+            ) : (
+                data != undefined && renderPage()
+            )}
+        </View>
+    );
+};
 
 export default UMEventPage;
