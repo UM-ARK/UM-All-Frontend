@@ -2190,11 +2190,33 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNFBAnalytics (23.7.0):
+  - RNFBAnalytics (23.8.4):
+    - DoubleConversion
     - FirebaseAnalytics/Core (= 12.6.0)
     - FirebaseAnalytics/IdentitySupport (= 12.6.0)
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
     - RNFBApp
+    - Yoga
   - RNFBApp (23.7.0):
     - Firebase/CoreOnly (= 12.6.0)
     - React-Core
@@ -2470,7 +2492,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNShare (12.2.1):
+  - RNShare (12.2.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3039,7 +3061,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 646c1bf2ebfc78d6632a3b0399f471fba8101e73
   RNCClipboard: 45b13251c8938aabfc25b9ecc35b5d42ab4eb0b0
   RNDateTimePicker: cbba58b7fde72d73362a8896b9815498c8e014b2
-  RNFBAnalytics: c25dd1e37568affe67bf265bb18038f7af9711ba
+  RNFBAnalytics: 1d5fe904fcc15f67d640facb36c2ff5617070ff4
   RNFBApp: 0c4cadae3900893d4631ea9a9effd14f853cd8e0
   RNGestureHandler: 8ff2b1434b0ff8bab28c8242a656fb842990bbc8
   RNLocalize: 96be44cef67cf436fc6cb5972560f655187da533
@@ -3047,7 +3069,7 @@ SPEC CHECKSUMS:
   RNReactNativeHapticFeedback: 1597ab4e15cabb38f0f0c62faa17a5e295430170
   RNReanimated: a3f55346df73f35c38bf0b446294d3d0b1ac8cf9
   RNScreens: 90b905d545a5ebbe976985702b8a39e3475727b2
-  RNShare: 1012edc984c2c4123041012fcb94e9e0a1df46d5
+  RNShare: d6a38e1622fe1988f3133d66179725413d92ab6d
   RNSVG: 4470464e129f6bc58b78b961850b054dbbea8ef7
   RNVectorIcons: d7d40d54aa3281f36b840bc1caaefa163166af34
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
