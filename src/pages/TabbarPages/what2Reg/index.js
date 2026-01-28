@@ -37,7 +37,7 @@ import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import { t } from "i18next";
-import { ActionSheetCustom as ActionSheet } from '@alessiocancian/react-native-actionsheet';
+import ActionSheet from 'react-native-actions-sheet';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
@@ -875,7 +875,7 @@ const What2Reg = (props) => {
     // 更新按鈕
     const handleUpdatePress = () => {
         trigger();
-        actionSheetRef.current && actionSheetRef.current.show();
+        actionSheetRef.current?.show();
     };
 
     // 隱私政策
@@ -1042,13 +1042,72 @@ const What2Reg = (props) => {
 
             <ActionSheet
                 ref={actionSheetRef}
-                title={`${t('Add Drop Data Version', { ns: 'about' }) + s_courseVersion.adddrop.updateTime}\n${s_courseVersion.adddrop.academicYear} - Sem ${s_courseVersion.adddrop.sem}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_courseVersion.pre.updateTime}\n${s_courseVersion.pre.academicYear} - Sem ${s_courseVersion.pre.sem}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
-                options={actionSheetOptions}
-                cancelButtonIndex={1}
-                statusBarTranslucent={true}
-                theme='ios'
-                onPress={handleActionSheet}
-            />
+                containerStyle={{
+                    borderRadius: scale(10),
+                    padding: scale(10),
+                    backgroundColor: bg_color,
+                }}
+            >
+                <View style={{ padding: scale(10) }}>
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        fontSize: scale(14),
+                        color: black.main,
+                        textAlign: 'center',
+                        marginBottom: scale(15),
+                    }}>
+                        {`${t('Add Drop Data Version', { ns: 'about' }) + s_courseVersion.adddrop.updateTime}\n${s_courseVersion.adddrop.academicYear} - Sem ${s_courseVersion.adddrop.sem}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + s_courseVersion.pre.updateTime}\n${s_courseVersion.pre.academicYear} - Sem ${s_courseVersion.pre.sem}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
+                    </Text>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: themeColor,
+                            borderRadius: scale(8),
+                            paddingVertical: verticalScale(10),
+                            alignItems: 'center',
+                            marginBottom: scale(10),
+                        }}
+                        onPress={() => {
+                            trigger();
+                            actionSheetRef.current?.hide();
+                            setDialogVisible(true);
+                            checkCloudCourseVersion().then(() => {
+                                init();
+                                handleDialogClose();
+                            });
+                        }}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: white,
+                            fontWeight: 'bold',
+                            fontSize: scale(16),
+                        }}>
+                            {t("手動檢查課表數據更新", { ns: 'catalog' })}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: black.third,
+                            borderRadius: scale(8),
+                            paddingVertical: verticalScale(10),
+                            alignItems: 'center',
+                        }}
+                        onPress={() => {
+                            trigger();
+                            actionSheetRef.current?.hide();
+                        }}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: white,
+                            fontWeight: 'bold',
+                            fontSize: scale(16),
+                        }}>
+                            {t('Cancel')}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </ActionSheet>
 
             <Dialog isVisible={dialogVisible}
                 onBackdropPress={handleDialogClose}
