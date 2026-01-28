@@ -13,7 +13,7 @@ This file provides guidance to agents when working with code in this repository.
 ## Build/Lint/Test Commands
 
 - Install dependencies: `npm i --legacy-peer-deps` (Node ≥18 required, peer dependency conflicts)
-- iOS simulator: `npm run ios` (iPhone 16 Pro), `npm run iosNew` (iPhone 17 Pro), `npm run iosBig` (iPad Pro)
+- iOS simulator: `npm run ios` (iPhone 16 Pro), `npm run iosNew` (iPhone 17 Pro), `npm run iosBig` (iPad Pro), `npm run iosTrue` (physical device)
 - Android: `npm run android` (requires API 31 or 33 emulator)
 - Lint: `npm run lint` (ESLint extends @react-native config)
 - Run all tests: `npm test`

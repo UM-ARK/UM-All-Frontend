@@ -2935,15 +2935,6 @@
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/elements@^2.9.3":
-  version "2.9.3"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/@react-navigation/elements/-/elements-2.9.3.tgz#505ae38af347a0bc5326155318a3d9a54e2071e3"
-  integrity sha512-3+eyvWiVPIEf6tN9UdduhOEHcTuNe3R5WovgiVkfH9+jApHMTZDc2loePTpY/i2HDJhObhhChpJzO6BVjrpdYQ==
-  dependencies:
-    color "^4.2.3"
-    use-latest-callback "^0.2.4"
-    use-sync-external-store "^1.5.0"
-
 "@react-navigation/elements@^2.9.5":
   version "2.9.5"
   resolved "https://registry.npmmirror.com/@react-navigation/elements/-/elements-2.9.5.tgz#29f68c4975351724dcfe1d3bdc76c4d6dc65fc33"
@@ -2953,12 +2944,12 @@
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/material-top-tabs@^7.4.11":
-  version "7.4.11"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/@react-navigation/material-top-tabs/-/material-top-tabs-7.4.11.tgz#f47d6ddac98d50d88eee4e61c2793966e538f4d1"
-  integrity sha512-RSC/f1bSpodnx1oSXw7jNrwe83JddRhb12ehCY8oZZDtrNhm3atSHzlfvHN37i3E8cln7Tmc1ieLxjWrU65n/Q==
+"@react-navigation/material-top-tabs@^7.4.13":
+  version "7.4.13"
+  resolved "https://registry.npmmirror.com/@react-navigation/material-top-tabs/-/material-top-tabs-7.4.13.tgz#6a2ccb1bc7b044e11716d5ec9f74deff8c619e36"
+  integrity sha512-evQPmk8bDdY4yksV2Onko+g5z9BwuBdjZEtypuEeshXXTcj+G4Vw6zDIHaeY8jg1JMEFp1I4fPaAeEzSms5tBw==
   dependencies:
-    "@react-navigation/elements" "^2.9.3"
+    "@react-navigation/elements" "^2.9.5"
     color "^4.2.3"
     react-native-tab-view "^4.2.2"
 

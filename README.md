@@ -145,9 +145,10 @@ pod install
 3. 命令行編譯/運行 App
 
 ```console
-yarn ios
-or
-yarn ios --simulator="iPhone 15"
+yarn ios          # 運行 iPhone 16 Pro 模擬器
+yarn iosNew       # 運行 iPhone 17 Pro 模擬器
+yarn iosTrue      # 運行到真實設備
+yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
 #### 配置Firebase
