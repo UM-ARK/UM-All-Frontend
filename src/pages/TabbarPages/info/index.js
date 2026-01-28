@@ -65,7 +65,7 @@ export default function NewsScreen() {
                     tabBarIndicatorStyle: {
                         backgroundColor: themeColor,
                         width: tabWidth,
-                        left: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2,
+                        marginLeft: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2,
                     },
                     lazy: true,
                 }}
