@@ -5,7 +5,7 @@ import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
-import * as Progress from 'react-native-progress';
+import SimpleProgressBar from '../../../components/SimpleProgressBar';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { t } from "i18next";
@@ -180,14 +180,12 @@ const ARKHarbor = (props) => {
             />
 
             {!isLoaded ? (
-                <Progress.Bar
-                    progress={progress}
-                    borderWidth={0}
-                    borderRadius={0}
-                    width={null} // null -> 寬度為全屏
-                    height={2}
-                    color={themeColor}
-                />
+                <SimpleProgressBar
+                        progress={progress}
+                        width={null} // null -> 寬度為全屏
+                        height={2}
+                        color={themeColor}
+                    />
             ) : null}
 
             {/* 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}

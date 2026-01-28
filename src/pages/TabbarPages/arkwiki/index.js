@@ -9,7 +9,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
-import * as Progress from 'react-native-progress';
+import SimpleProgressBar from '../../../components/SimpleProgressBar';
 import TouchableScale from "react-native-touchable-scale";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
@@ -281,14 +281,12 @@ const ARKWiki = (props) => {
             </View>
 
             {!isLoaded ? (
-                <Progress.Bar
-                    progress={progress}
-                    borderWidth={0}
-                    borderRadius={0}
-                    width={null} // null -> 寬度為全屏
-                    height={2}
-                    color={themeColor}
-                />
+                <SimpleProgressBar
+                        progress={progress}
+                        width={null} // null -> 寬度為全屏
+                        height={2}
+                        color={themeColor}
+                    />
             ) : null}
 
             <WebView

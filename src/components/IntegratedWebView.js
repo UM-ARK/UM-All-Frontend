@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { WebView } from 'react-native-webview';
-import * as Progress from 'react-native-progress';
+import SimpleProgressBar from './SimpleProgressBar';
 import Icon from 'react-native-vector-icons/AntDesign';
 import CookieManager from '@react-native-cookies/cookies';
 import { NavigationContext } from '@react-navigation/native';
@@ -97,10 +97,8 @@ const IntegratedWebView = ({
         <>
             {/* 判斷: 網站加載完成則隱藏進度條 */}
             {!isLoaded ? (
-                <Progress.Bar
+                <SimpleProgressBar
                     progress={progress}
-                    borderWidth={0}
-                    borderRadius={0}
                     width={null} // null -> 寬度為全屏
                     height={2}
                     color={COLOR_DIY.themeColor}

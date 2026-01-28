@@ -8113,13 +8113,6 @@ react-native-permissions@^5.4.4:
   resolved "https://mirrors.huaweicloud.com/repository/npm/react-native-permissions/-/react-native-permissions-5.4.4.tgz#8a63b001fc0f9e88426c36b21a6fe379c4533b04"
   integrity sha512-WB5lRCBGXETfuaUhem2vgOceb9+URCeyfKpLGFSwoOffLuyJCA6+NTR3l1KLkrK4Ykxsig37z16/shUVufmt7A==
 
-react-native-progress@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/react-native-progress/-/react-native-progress-5.0.1.tgz#4e15258b5661c49bad74554352326ca540bb7c58"
-  integrity sha512-TYfJ4auAe5vubDma2yfFvt7ktSI+UCfysqJnkdHEcLXqAitRFOozgF/cLgN5VNi/iLdaf3ga1ETi2RF4jVZ/+g==
-  dependencies:
-    prop-types "^15.7.2"
-
 react-native-ratings@^8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/react-native-ratings/-/react-native-ratings-8.1.0.tgz#3fa9ad29128dc3a88e59518ba151e61c59dd0647"
