@@ -1,6 +1,4 @@
 {
-  "name": "UMALL",
-  "displayName": "UMALL",
   "expo": {
     "name": "UMALL",
     "displayName": "UMALL",
@@ -13,7 +11,9 @@
       "userInterfaceStyle": "automatic",
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "one.umall"
+      "bundleIdentifier": "one.umall",
+      "buildNumber": "26.1.1",
+      "deploymentTarget": "15.1"
     },
     "android": {
       "userInterfaceStyle": "automatic",
