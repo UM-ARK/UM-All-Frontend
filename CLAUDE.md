@@ -243,6 +243,60 @@ const response = await axios.get(BASE_URI + GET.CLUB_INFO_ALL);
 // Note: BASE_URI includes trailing slash
 ```
 
+### Utility Libraries
+
+#### Lodash (^4.17.21)
+
+Lodash is a utility library providing helper functions for common data manipulation tasks. **Always import as `lodash` (full import):**
+
+```javascript
+import lodash from 'lodash';
+```
+
+**Common Use Cases:**
+
+| Method | Description | Example Usage |
+|--------|-------------|---------------|
+| `lodash.isEqual()` | Deep comparison of objects | `lodash.isEqual(obj1, obj2)` |
+| `lodash.uniq()` | Array deduplication | `lodash.uniq(array)` |
+| `lodash.groupBy()` | Group array by property | `lodash.groupBy(array, 'property')` |
+| `lodash.chain()` | Chain operations | `lodash.chain(array).filter().map().value()` |
+| `lodash.cloneDeep()` | Deep clone object | `lodash.cloneDeep(object)` |
+| `lodash.uniqBy()` | Deduplicate by property | `lodash.uniqBy(array, 'id')` |
+| `lodash.sortBy()` | Sort array by property | `lodash.sortBy(array, 'name')` |
+| `lodash.filter()` | Filter array | `lodash.filter(array, condition)` |
+| `lodash.get()` | Safe property access | `lodash.get(object, 'path.to.property', defaultValue)` |
+
+**Key Files Using Lodash:**
+- `src/pages/TabbarPages/what2Reg/index.js` - Course data processing
+- `src/pages/TabbarPages/info/home/index.js` - Home screen data handling
+
+#### Moment.js (^2.30.1) and Moment-Timezone (^0.5.48)
+
+Moment.js is used for date and time manipulation. For timezone support, use `moment-timezone`:
+
+```javascript
+import moment from 'moment';        // Basic import
+import moment from 'moment-timezone'; // With timezone support
+```
+
+**Common Use Cases:**
+
+| Method | Description | Example Usage |
+|--------|-------------|---------------|
+| `moment()` | Initialize time | `const now = moment()` |
+| `moment().format()` | Format date/time | `moment().format('MM-DD HH:mm')` |
+| `moment().isBefore()` | Time comparison | `moment(date1).isBefore(date2)` |
+| `moment().isAfter()` | Time comparison | `moment(date1).isAfter(date2)` |
+| `moment().isSame()` | Date comparison | `moment(date1).isSame(date2, 'day')` |
+| `moment().diff()` | Time difference | `moment(date1).diff(date2, 'minutes')` |
+
+**Key Files Using Moment.js:**
+- `src/utils/checkCoursesKits.js` - Course version comparison
+- `src/pages/TabbarPages/info/UMEventPage.js` - Event date handling
+- `src/pages/TabbarPages/info/news/UMEventDetail.js` - Event detail formatting
+- `src/pages/TabbarPages/what2Reg/index.js` - Course schedule time calculations
+
 ### Error Handling
 
 **User-facing errors MUST show Alert or Toast**:
