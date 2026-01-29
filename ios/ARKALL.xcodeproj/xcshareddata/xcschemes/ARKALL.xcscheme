@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "UMALL.app"
-               BlueprintName = "UMALL"
-               ReferencedContainer = "container:UMALL.xcodeproj">
+               BuildableName = "ARKALL.app"
+               BlueprintName = "ARKALL"
+               ReferencedContainer = "container:ARKALL.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "UMALLTests.xctest"
-               BlueprintName = "UMALLTests"
-               ReferencedContainer = "container:UMALL.xcodeproj">
+               BuildableName = "ARKALLTests.xctest"
+               BlueprintName = "ARKALLTests"
+               ReferencedContainer = "container:ARKALL.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,17 +55,11 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "UMALL.app"
-            BlueprintName = "UMALL"
-            ReferencedContainer = "container:UMALL.xcodeproj">
+            BuildableName = "ARKALL.app"
+            BlueprintName = "ARKALL"
+            ReferencedContainer = "container:ARKALL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "-FIRDebugEnabled"
-            isEnabled = "YES">
-         </CommandLineArgument>
-      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -78,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "UMALL.app"
-            BlueprintName = "UMALL"
-            ReferencedContainer = "container:UMALL.xcodeproj">
+            BuildableName = "ARKALL.app"
+            BlueprintName = "ARKALL"
+            ReferencedContainer = "container:ARKALL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
