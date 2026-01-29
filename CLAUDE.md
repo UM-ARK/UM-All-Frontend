@@ -4,6 +4,68 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 ```
 
+## Available Skills and MCP Tools
+
+### Recommended Skills for This Project
+
+#### React Native / Expo Development
+- **react-native-expert**: Building cross-platform mobile applications with React Native/Expo, navigation patterns, platform-specific code
+- **expo-app-design:building-native-ui**: Building beautiful apps with Expo Router, styling, components, navigation, animations
+- **expo-app-design:native-data-fetching**: Implementing/debugging network requests, API calls, data fetching with fetch API, axios, etc.
+- **upgrading-expo:upgrading-expo**: Upgrading Expo SDK versions and fixing dependency issues
+- **expo-deployment:expo-deployment**: Deploying to iOS App Store, Android Play Store, web hosting, and API routes
+- **react-native-best-practices**: React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations
+
+#### General Development Skills
+- **fullstack-dev-skills:react-expert**: React 18+ component architecture, hooks patterns, and state management
+- **fullstack-dev-skills:javascript-pro**: Modern JavaScript (ES2023+) async patterns and Node.js development
+- **fullstack-dev-skills:code-reviewer**: Code review, quality audits, and security vulnerability identification
+- **fullstack-dev-skills:debugging-wizard**: Error investigation, stack trace analysis, and root cause location
+- **fullstack-dev-skills:test-master**: Writing tests, creating test strategies, and building automation frameworks
+
+#### Project-Specific Skills
+- **fullstack-dev-skills:feature-forge**: Defining new features, gathering requirements, and writing specifications
+- **fullstack-dev-skills:architecture-designer**: Designing system architecture and reviewing existing designs
+- **fullstack-dev-skills:legacy-modernizer**: Modernizing legacy systems and implementing incremental migration strategies
+- **fullstack-dev-skills:spec-miner**: Understanding legacy/undocumented systems and creating documentation
+
+### Available MCP Tools
+
+#### Code Operations
+- **mcp__filesystem__read_text_file**: Read code file contents
+- **mcp__filesystem__read_multiple_files**: Read multiple files simultaneously
+- **mcp__filesystem__edit_file**: Edit file contents with precise changes
+- **mcp__filesystem__write_file**: Create or overwrite files (use with caution)
+- **mcp__filesystem__list_directory**: List directory contents
+- **mcp__filesystem__search_files**: Recursively search for files
+
+#### Knowledge Management
+- **mcp__memory__create_entities**: Create entities in knowledge graph
+- **mcp__memory__create_relations**: Create relations between entities
+- **mcp__memory__add_observations**: Add observations to existing entities
+- **mcp__memory__search_nodes**: Search for nodes in knowledge graph
+- **mcp__memory__read_graph**: Read the entire knowledge graph
+
+#### Documentation Query
+- **mcp__plugin_context7_context7__resolve-library-id**: Resolve library name to Context7-compatible library ID
+- **mcp__plugin_context7_context7__query-docs**: Query library documentation and code examples
+
+#### Web Operations
+- **mcp__fetch__fetch**: Fetch URL content from internet and extract as Markdown
+
+### Usage Recommendations
+
+1. **Development Tasks**: Prioritize `react-native-expert` and `expo-app-design` series skills for UI development and navigation
+2. **Data Handling**: Use `expo-app-design:native-data-fetching` for API calls and data management
+3. **Debugging**: Use `fullstack-dev-skills:debugging-wizard` to locate and fix issues
+4. **Testing**: Use `fullstack-dev-skills:test-master` to write and run tests
+5. **Code Quality**: Use `fullstack-dev-skills:code-reviewer` to ensure code quality
+
+### File Operation Best Practices
+- Use `mcp__filesystem__read_text_file` to read source files
+- Use `mcp__filesystem__edit_file` for precise modifications
+- Avoid directly using `Write` tool to overwrite existing files unless absolutely necessary
+
 ## Project Overview
 
 - **Type**: React Native 0.79.6 mobile application for University of Macau students using Expo CNG (Continuous Native Generation)
@@ -21,6 +83,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Run all tests: `yarn test`
 - Run single test: `yarn test -- --testPathPattern=App.test.tsx` or `yarn test -- <test-file-path>`
 - Start Metro: `yarn start` (with --reset-cache flag: `react-native start --reset-cache`)
+
+## Development Workflow
+
+**Important**: The project is already running in development mode. For JavaScript/React Native code changes:
+
+- ✅ **No need to re-run `yarn ios`** - Metro will hot reload changes automatically
+- ✅ **Only restart Metro** if you see "Metro has encountered an error" or need to clear cache
+- ✅ **Only re-run `yarn ios`** if:
+  - You added/removed native dependencies
+  - You modified `app.json` or native configuration files
+  - You changed `package.json` dependencies
+
+**Hot Reload Tips**:
+- Press `R` in Metro terminal to reload the app
+- Press `D` to open developer menu on simulator
+- Enable "Fast Refresh" in developer menu for instant updates
 
 ## Expo CNG (Continuous Native Generation)
 
