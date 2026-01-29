@@ -2,6 +2,9 @@
   "enabledPlugins": {
     "expo-app-design@expo-plugins": true,
     "upgrading-expo@expo-plugins": true,
-    "expo-deployment@expo-plugins": true
+    "expo-deployment@expo-plugins": true,
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "fullstack-dev-skills@fullstack-dev-skills": true
   }
 }
