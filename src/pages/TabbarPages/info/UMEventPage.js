@@ -3,19 +3,17 @@ import {
     Text,
     View,
     ScrollView,
-    TouchableWithoutFeedback,
     RefreshControl,
     VirtualizedList,
 } from 'react-native';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
-import { trigger } from '../../../utils/trigger';
 
 import NewsCard from './components/NewsCard';
 import Loading from '../../../components/Loading';
+import ScrollToTopButton from '../../../components/ScrollToTopButton';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -134,35 +132,40 @@ const UMEventPage = () => {
         );
 
         return (
-            <VirtualizedList
-                ref={virtualizedList}
-                data={data}
-                initialNumToRender={6}
-                windowSize={8}
-                maxToRenderPerBatch={8}
-                renderItem={renderEventItem}
-                updateCellsBatchingPeriod={50}
-                contentContainerStyle={{ width: '100%' }}
-                keyExtractor={itm => itm._id}
-                getItem={getItem}
-                getItemCount={getItemCount}
-                ListHeaderComponent={listHeader}
-                ListFooterComponent={listFooter}
-                refreshControl={
-                    <RefreshControl
-                        colors={[themeColor]}
-                        tintColor={themeColor}
-                        refreshing={isLoading}
-                        onRefresh={() => {
-                            setIsLoading(true);
-                            getData();
-                        }}
-                    />
-                }
-                directionalLockEnabled
-                alwaysBounceHorizontal={false}
-                removeClippedSubviews
-            />
+            <View style={{ flex: 1 }}>
+                <VirtualizedList
+                    ref={virtualizedList}
+                    data={data}
+                    initialNumToRender={6}
+                    windowSize={8}
+                    maxToRenderPerBatch={8}
+                    renderItem={renderEventItem}
+                    updateCellsBatchingPeriod={50}
+                    contentContainerStyle={{ width: '100%' }}
+                    keyExtractor={itm => itm._id}
+                    getItem={getItem}
+                    getItemCount={getItemCount}
+                    ListHeaderComponent={listHeader}
+                    ListFooterComponent={listFooter}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[themeColor]}
+                            tintColor={themeColor}
+                            refreshing={isLoading}
+                            onRefresh={() => {
+                                setIsLoading(true);
+                                getData();
+                            }}
+                        />
+                    }
+                    directionalLockEnabled
+                    alwaysBounceHorizontal={false}
+                    removeClippedSubviews
+                />
+                <ScrollToTopButton
+                    virtualizedListRef={virtualizedList}
+                />
+            </View>
         );
     };
 
