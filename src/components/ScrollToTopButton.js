@@ -72,7 +72,13 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
     // 回頂功能
     const handleScrollToTop = () => {
         trigger(); // 觸覺反饋
-        virtualizedListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        if (virtualizedListRef?.current?.scrollToOffset) {
+            // VirtualizedList
+            virtualizedListRef.current.scrollToOffset({ offset: 0, animated: true });
+        } else if (virtualizedListRef?.current?.scrollTo) {
+            // ScrollView
+            virtualizedListRef.current.scrollTo({ x: 0, y: 0, animated: true });
+        }
         if (onScrollToTop) {
             onScrollToTop();
         }

@@ -50,7 +50,6 @@ import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
 
 import { FontAwesome, FontAwesome5, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-// import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -62,6 +61,7 @@ import TouchableScale from "react-native-touchable-scale";
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
@@ -420,59 +420,6 @@ const HomeScreen = ({ navigation }) => {
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
 
-    // 懸浮按鈕
-    // const renderGoTopButton = () => {
-    //     const { viewShadow } = theme;
-    //     return (
-    //         <Interactable.View
-    //             style={{
-    //                 zIndex: 999,
-    //                 position: 'absolute',
-    //             }}
-    //             // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-    //             snapPoints={[
-    //                 { x: -scale(140), y: -verticalScale(220) },
-    //                 { x: scale(140), y: -verticalScale(220) },
-    //                 { x: -scale(140), y: -verticalScale(120) },
-    //                 { x: scale(140), y: -verticalScale(120) },
-    //                 { x: -scale(140), y: verticalScale(0) },
-    //                 { x: scale(140), y: verticalScale(0) },
-    //                 { x: -scale(140), y: verticalScale(120) },
-    //                 { x: scale(140), y: verticalScale(120) },
-    //                 { x: -scale(140), y: verticalScale(220) },
-    //                 { x: scale(140), y: verticalScale(220) },
-    //             ]}
-    //             // 設定初始吸附位置
-    //             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-    //             {/* 懸浮吸附按鈕，回頂箭頭 */}
-    //             <TouchableWithoutFeedback
-    //                 onPress={() => {
-    //                     trigger();
-    //                     // 回頂
-    //                     scrollView.current.scrollTo({ x: 0, y: 0, duration: 500 });
-    //                 }}>
-    //                 <View
-    //                     style={{
-    //                         width: scale(50),
-    //                         height: scale(50),
-    //                         backgroundColor: theme.white,
-    //                         borderRadius: scale(50),
-    //                         justifyContent: 'center',
-    //                         alignItems: 'center',
-    //                         ...viewShadow,
-    //                         margin: scale(5),
-    //                     }}>
-    //                     <Ionicons
-    //                         name={'chevron-up'}
-    //                         size={scale(40)}
-    //                         color={theme.themeColor}
-    //                     />
-    //                 </View>
-    //             </TouchableWithoutFeedback>
-    //         </Interactable.View>
-    //     );
-    // };
-
     // 處理 Scroll
     const handleScroll = (event) => {
         if (isLoading || isLoadMore) return;
@@ -570,7 +517,6 @@ const HomeScreen = ({ navigation }) => {
     // 主渲染
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
-            {/* {isLoading ? null : renderGoTopButton()} */}
             <ScrollView
                 refreshControl={
                     <RefreshControl
@@ -817,6 +763,8 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 </ModalBottom>
             )}
+
+            <ScrollToTopButton virtualizedListRef={scrollView} />
 
             <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}

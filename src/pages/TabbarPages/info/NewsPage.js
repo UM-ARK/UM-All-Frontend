@@ -18,6 +18,7 @@ import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/Th
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
+import ScrollToTopButton from '../../../components/ScrollToTopButton';
 
 // import { Image } from 'expo-image';
 // import Interactable from 'react-native-interactable';
@@ -229,55 +230,6 @@ const NewsPage = () => {
         );
     }, [topNews]);
 
-    // 渲染懸浮可拖動按鈕
-    // const renderGoTopButton = useCallback(() => (
-    //     <Interactable.View
-    //         style={{
-    //             zIndex: 999,
-    //             position: 'absolute',
-    //         }}
-    //         snapPoints={[
-    //             { x: -scale(140), y: -verticalScale(220) },
-    //             { x: scale(140), y: -verticalScale(220) },
-    //             { x: -scale(140), y: -verticalScale(120) },
-    //             { x: scale(140), y: -verticalScale(120) },
-    //             { x: -scale(140), y: verticalScale(0) },
-    //             { x: scale(140), y: verticalScale(0) },
-    //             { x: -scale(140), y: verticalScale(120) },
-    //             { x: scale(140), y: verticalScale(120) },
-    //             { x: -scale(140), y: verticalScale(220) },
-    //             { x: scale(140), y: verticalScale(220) },
-    //         ]}
-    //         initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-    //         <TouchableWithoutFeedback
-    //             onPress={() => {
-    //                 trigger();
-    //                 virtualizedList.current?.scrollToOffset({
-    //                     x: 0,
-    //                     y: 0,
-    //                 });
-    //             }}>
-    //             <View
-    //                 style={{
-    //                     width: scale(50),
-    //                     height: scale(50),
-    //                     backgroundColor: white,
-    //                     borderRadius: scale(50),
-    //                     justifyContent: 'center',
-    //                     alignItems: 'center',
-    //                     ...viewShadow,
-    //                     margin: scale(5),
-    //                 }}>
-    //                 <Ionicons
-    //                     name={'chevron-up'}
-    //                     size={scale(40)}
-    //                     color={themeColor}
-    //                 />
-    //             </View>
-    //         </TouchableWithoutFeedback>
-    //     </Interactable.View>
-    // ), [white]);
-
     return (
         <View style={{
             flex: 1, justifyContent: 'center', alignItems: 'center',
@@ -310,7 +262,8 @@ const NewsPage = () => {
 
             {/* 渲染新聞列表 */}
             {isLoading ? null : (
-                <View style={{ flex: 1, }}><VirtualizedList
+                <View style={{ flex: 1, }}>
+                    <VirtualizedList
                     data={newsList}
                     ref={virtualizedList}
                     // 初始渲染的元素，設置為剛好覆蓋屏幕
@@ -347,7 +300,11 @@ const NewsPage = () => {
                     directionalLockEnabled
                     alwaysBounceHorizontal={false}
                     removeClippedSubviews
-                /></View>)}
+                />
+                    <ScrollToTopButton
+                        virtualizedListRef={virtualizedList}
+                    />
+                </View>)}
         </View>
     );
 };
