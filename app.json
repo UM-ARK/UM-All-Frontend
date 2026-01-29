@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "UMALL",
-    "displayName": "UMALL",
-    "slug": "umall",
+    "name": "ARK ALL",
+    "displayName": "ARK ALL",
+    "slug": "arkall",
     "version": "26.1.1",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
@@ -23,7 +23,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/logo.png",
         "backgroundColor": "#E6AB52"
-      }
+      },
+      "icon": "./src/static/img/logo.png",
+      "edgeToEdgeEnabled": true
     },
     "plugins": [
       "expo-web-browser",
@@ -35,7 +37,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "expo-system-ui"
     ]
   }
 }

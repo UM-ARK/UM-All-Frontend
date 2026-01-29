@@ -5253,6 +5253,14 @@ expo-modules-core@2.5.0:
   dependencies:
     invariant "^2.2.4"
 
+expo-system-ui@~5.0.11:
+  version "5.0.11"
+  resolved "https://registry.npmmirror.com/expo-system-ui/-/expo-system-ui-5.0.11.tgz#2bb70b2dd9f3f5137df85e43aa5d2d557432ad49"
+  integrity sha512-PG5VdaG5cwBe1Rj02mJdnsihKl9Iw/w/a6+qh2mH3f2K/IvQ+Hf7aG2kavSADtkGNCNj7CEIg7Rn4DQz/SE5rQ==
+  dependencies:
+    "@react-native/normalize-colors" "0.79.6"
+    debug "^4.3.2"
+
 expo-web-browser@~14.2.0:
   version "14.2.0"
   resolved "https://registry.npmmirror.com/expo-web-browser/-/expo-web-browser-14.2.0.tgz#d8fb521ae349aebbf5c0ca32448877480124c06c"

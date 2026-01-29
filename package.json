@@ -40,6 +40,7 @@
     "expo-build-properties": "~0.14.8",
     "expo-device": "~7.1.4",
     "expo-image": "~2.4.1",
+    "expo-system-ui": "~5.0.11",
     "expo-web-browser": "~14.2.0",
     "i18next": "^23.16.8",
     "intl-pluralrules": "^2.0.1",
