@@ -38,6 +38,18 @@
           }
         }
       ],
+      [
+        "expo-splash-screen",
+        {
+          "android": {
+            "image": "./src/static/img/transparent.png",
+            "dark": {
+              "image": "./src/static/img/transparent.png",
+              "backgroundColor": "#000000"
+            }
+          }
+        }
+      ],
       "expo-system-ui"
     ]
   }
