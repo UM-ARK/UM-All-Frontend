@@ -1,11 +1,12 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { handleImageDownload } from '../utils/fileKits';
 import { trigger } from '../utils/trigger';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
  * ARKImageView - 全局圖片查看器組件
@@ -23,13 +24,16 @@ import { trigger } from '../utils/trigger';
 const ARKImageView = forwardRef((props, ref) => {
     const { imageUrls } = props;
     const { theme } = useTheme();
-    const { white, themeColor, trueBlack } = theme;
+    const { white, themeColor, glass } = theme;
 
     const [visible, setVisible] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
 
     // 保存原始圖片列表（用於長按保存）
     const [originalImages, setOriginalImages] = useState([]);
+
+    // 使用 SafeArea insets - 必須在組件頂部調用，遵循 React Hooks 規則
+    const insets = useSafeAreaInsets();
 
     // 處理圖片 URL 格式轉換
     const processedImages = React.useMemo(() => {
@@ -125,6 +129,32 @@ const ARKImageView = forwardRef((props, ref) => {
         );
     }, [processedImages.length, white, themeColor, handleSaveImage]);
 
+    // Header 組件 - 包含關閉按鈕（右上角，避免與狀態欄重疊）
+    const HeaderComponent = useCallback(() => {
+        // Android 狀態欄高度備選方案
+        const statusBarHeight = StatusBar.currentHeight || 0;
+        // 使用 insets.top 或狀態欄高度的較大值，確保足夠的間距
+        const topPadding = Math.max(insets.top, statusBarHeight, Platform.OS === 'android' ? scale(8) : 0);
+
+        return (
+            <View style={[styles.headerContainer, { paddingTop: topPadding }]}>
+                <TouchableOpacity
+                    style={[styles.closeButton, { backgroundColor: glass }]}
+                    onPress={() => {
+                        trigger();
+                        handleClose();
+                    }}
+                >
+                    <Ionicons
+                        name="close"
+                        color={white}
+                        size={scale(24)}
+                    />
+                </TouchableOpacity>
+            </View>
+        );
+    }, [white, glass, handleClose, insets]);
+
     if (processedImages.length === 0) return null;
 
     return (
@@ -137,12 +167,27 @@ const ARKImageView = forwardRef((props, ref) => {
             animationType="fade"
             doubleTapToZoomEnabled={true}
             swipeToCloseEnabled={true}
+            HeaderComponent={HeaderComponent}
             FooterComponent={FooterComponent}
         />
     );
 });
 
 const styles = StyleSheet.create({
+    headerContainer: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingHorizontal: scale(16),
+    },
+    closeButton: {
+        width: scale(40),
+        height: scale(40),
+        borderRadius: scale(20),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     footerContainer: {
         width: '100%',
         paddingVertical: scale(20),

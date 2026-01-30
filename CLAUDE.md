@@ -348,6 +348,7 @@ console.log(t('namespace:key'));
 - ❌ **NEVER** use `COLOR_DIY` from `uiMap.js` - use `useTheme()` for dark mode support
 - ❌ **NEVER** forget `trigger()` on interactive elements
 - ❌ **NEVER** suppress type errors with `as any`, `@ts-ignore`, `@ts-except-error`
+- ❌ **NEVER** use hardcoded color values (e.g., `'rgba(255,255,255,0.2)'`) - always use ThemeContext colors
 
 ### Setup Requirements
 
