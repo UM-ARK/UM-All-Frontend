@@ -31,6 +31,20 @@
       "expo-web-browser",
       "@react-native-firebase/app",
       [
+        "expo-media-library",
+        {
+          "photosPermission": "允許 ARK ALL 訪問您的照片以保存圖片。",
+          "savePhotosPermission": "允許 ARK ALL 保存照片到相冊。",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "允許 ARK ALL 訪問您的照片以選擇圖片。"
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {
