@@ -1,7 +1,6 @@
 {
   "expo": {
     "name": "ARK ALL",
-    "displayName": "ARK ALL",
     "slug": "arkall",
     "version": "26.1.1",
     "icon": "./src/static/img/logo.png",
@@ -12,8 +11,7 @@
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
-      "buildNumber": "26.1.1",
-      "deploymentTarget": "15.1"
+      "buildNumber": "26.1.1"
     },
     "android": {
       "userInterfaceStyle": "automatic",
@@ -48,7 +46,8 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "forceStaticLinking": ["RNFBApp", "RNFBAnalytics"]
           }
         }
       ],
@@ -64,7 +63,9 @@
           }
         }
       ],
-      "expo-system-ui"
+      "expo-system-ui",
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ]
   }
 }
