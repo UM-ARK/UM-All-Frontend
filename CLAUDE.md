@@ -59,9 +59,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-- **Type**: React Native 0.79.6 mobile application for University of Macau students using Expo CNG (Continuous Native Generation)
+- **Type**: React Native 0.81.5 mobile application for University of Macau students using Expo SDK 54
 - **Name**: ARK ALL
-- **Version**: 26.1.0
+- **Version**: 26.1.1
 - **Target Platforms**: iOS, Android
 - **Architecture**: Offline-first with Cloudflare Workers API, 6h auto-update cycle
 
@@ -73,7 +73,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Lint: `yarn lint` (ESLint extends @react-native config)
 - Run all tests: `yarn test`
 - Run single test: `yarn test -- --testPathPattern=App.test.tsx` or `yarn test -- <test-file-path>`
-- Start Metro: `yarn start` (with --reset-cache flag: `react-native start --reset-cache`)
+- Start Metro: `yarn start` (with --reset-cache flag: `expo start --reset-cache`)
 
 ## Development Workflow
 
@@ -91,9 +91,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Press `D` to open developer menu on simulator
 - Enable "Fast Refresh" in developer menu for instant updates
 
-## Expo CNG (Continuous Native Generation)
+## Expo SDK 54 (Continuous Native Generation)
 
-This project uses Expo's Continuous Native Generation (CNG) workflow. Key points:
+This project uses Expo SDK 54 with Continuous Native Generation (CNG) workflow. Key points:
 
 1. **No manual pod install needed**: Expo CNG manages iOS dependencies automatically
 2. **Native files are generated**: iOS and Android native project files are generated from app config
@@ -136,7 +136,10 @@ This project uses Expo's Continuous Native Generation (CNG) workflow. Key points
 import {useTheme} from '../../components/ThemeContext';
 
 const {theme} = useTheme();
-// Access: theme.themeColor, theme.black.main, theme.bg_color, theme.viewShadow, etc.
+// 推薦：解構取出常用顏色
+const {white, black, bg_color, themeColor} = theme;
+
+// 使用: white, black.main, bg_color, themeColor, etc.
 ```
 
 **AVOID**: `COLOR_DIY` from `uiMap.js` (legacy, breaks dark mode)

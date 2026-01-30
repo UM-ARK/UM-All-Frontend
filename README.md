@@ -37,7 +37,11 @@
     - [Google Firebase Analytics](#google-firebase-analytics)
 - [📦 打包方式](#-打包方式)
   - [🍎 iOS 打包](#-ios-打包)
+    - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦)
+    - [方式二：本地 Xcode 構建（傳統方式）](#方式二本地-xcode-構建傳統方式)
   - [🤖 Android 打包](#-android-打包)
+    - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦-1)
+    - [方式二：本地 Gradle 構建](#方式二本地-gradle-構建)
   - [🐛 故障排除](#-故障排除)
 - [⛵ 維護須知](#-維護須知)
 
@@ -58,36 +62,28 @@
 
 ### 🍎 iOS 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
-> 基於 React Native CLI 下的安裝流程，iOS APP 目前只能在 Mac 開發調試
+> 基於 Expo SDK 54，iOS APP 目前只能在 Mac 開發調試
 
-1. 先安裝`node`包，方便之後使用指令`npm`和`npx`
+1. 先安裝`node`包（Node ≥18），方便之後使用指令`npm`和`npx`
 
 ```console
 brew install node
 brew install watchman
 ```
 
-2. 確保安裝了 `Xcode` (版本 10 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
-3. 安裝`CocoaPods`去管理 ios 系統相關的包
+2. 確保安裝了 `Xcode` (版本 15 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
+3. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+
+4. 使用 Expo 運行 iOS（**不需要手動管理 CocoaPods**）
 
 ```console
-brew install cocoapods
+yarn ios          # 運行 iPhone 16 Pro 模擬器
+yarn iosNew       # 運行 iPhone 17 Pro 模擬器
+yarn iosTrue      # 運行到真實設備
+yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
-4. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `npm i --legacy-peer-deps` 安裝 npm 依賴
-   2024 年更新：在react-native@0.73+，使用`yarn install`安裝依賴。
-5. Pod 自動鏈接好 iOS 的包
-
-```console
-cd ios
-pod install --repo-update
-```
-
-如有衝突可先刪除`./ios/Podfile.lock`文件再運行上述命令。
-
-6. 啟動 `Xcode` ，打開項目 `./ios/UMALL.xcworkspace`
-7. `Command + R` 運行項目，先除錯，沒有問題再回 VSCode 的命令行使用 `yarn ios` 啟動
-   react-native@0.73+更新：需要在`Xcode -> Product -> Scheme -> Edit Scheme`，設置為 Debug 模式，Metro 才能接收控制台命令進行調試和 log。
+Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install`。
 
 ---
 
@@ -131,18 +127,15 @@ npm run android
 
 #### 🍎 iOS 運行
 
-1. 在 ios 上自動鏈接 Pod
+> 項目使用 Expo SDK 54 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
+
+1. 確保已安裝依賴
 
 ```console
-cd ios
-pod install
+yarn install
 ```
 
-完成此步驟後，`./ios`的代碼將更新
-
-2. 打開`Xcode`，使用`Command + R`編譯運行 APP，先 Debug，再回 VSCode 開發調試
-
-3. 命令行編譯/運行 App
+2. 使用 Expo 運行 iOS
 
 ```console
 yarn ios          # 運行 iPhone 16 Pro 模擬器
@@ -150,6 +143,12 @@ yarn iosNew       # 運行 iPhone 17 Pro 模擬器
 yarn iosTrue      # 運行到真實設備
 yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
+
+**說明：**
+- Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴
+- **無需手動運行 `pod install`**
+- **無需手動打開 Xcode** 進行編譯
+- 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `yarn ios` 後會生成）
 
 #### 配置Firebase
 從Firebase控制台導出配置文件放入`android/app/google-services.json`和`ios/GoogleService-Info.plist`。
@@ -162,15 +161,9 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 -   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
 <br>
 
-**react-native@0.73+更新：**
-- iOS 模擬器`Open Debugger`可能無法正確跳轉到瀏覽器，
-    -   方法1：Chrome 可前往`chrome://inspect`，在`Remote Target`中找到`React Native Experimental (Improved Chrome Reloads)`下的 inspect 按鈕打開DevTools。
-    -   方法2：使用`sh debug.sh`，其實是運行`npx react-devtools`，然後再在模擬器中`Open Debugger`，即會使用該插件打開Console查看log。
-
-<br>
-
-**react-native@0.77+更新：**
+**react-native@0.81+更新：**
 - 在`Metro`中直接使用`j`調出React DevTools。
+- iOS 模擬器支持最新的 Debugging 方案。
 
 #### Google Firebase Analytics
 
@@ -183,34 +176,78 @@ iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/ana
 
 ### 🍎 iOS 打包
 
-1. Xcode中找到 `./ios/UMALL.xcworkspace`（Pods鏈接的項目使用workspace，其他使用proj），點擊使用Xcode打開。
-2. Build。
+> 項目使用 Expo SDK 54 與 CNG，推薦使用 Expo 進行打包
 
--   點擊左側欄目找到`UMALL`項目，然後再中間的面板中輸入新的版本號（Version 和 Build 通常一樣）。
--   將設備設為"Any iOS Device"，並`command+B`來 Build，並進行實機測試。
+#### 方式一：使用 Expo 構建（推薦）
 
-3. 歸檔並發佈。
+1. 確保已安裝 EAS CLI
 
--   Build 成功後，點擊頂欄 Product->Archive 歸檔，隨後在彈出的頁面中一直點擊確認。
--   最後點擊 Distribute App 按鈕發佈。
+```console
+npm install -g eas-cli
+```
 
-4. 到[Appstore Connect 頁面](https://appstoreconnect.apple.com)查看並提交審核。
-5. 注意：
+2. 登錄 Expo 賬號
 
--   一個 Build 號只能用一次。如果 build 失敗則更換 build 號，通常加一個小版本即可（如 2.2.0->2.2.1）。
--   檢查`Info.plist`的`App Uses Non-Exempt Encription`選項，必須設置為 No，否則會被 Apple 禁止上傳。
+```console
+eas login
+```
 
-6. 發佈注意：
+3. 構建 iOS 應用
 
--   切換 Any iOS Device arm64 進行 Build
--   使用 Product - Archive 進行封包，如提示`React-Core.common`字樣的問題，在 Pods 中刪除非`React-Core.common-CoreModulesHeaders`的相似文件，再進行 Build 與 Archive
+```console
+eas build --platform ios
+```
+
+4. 按照提示選擇構建類型（內部分發或 App Store 提交）
+
+#### 方式二：本地 Xcode 構建（傳統方式）
+
+如需在 Xcode 中手動構建：
+
+1. 確保已運行過 `yarn ios` 生成 iOS 項目文件
+2. 打開 `./ios/UMALL.xcworkspace`
+3. 在 Xcode 中配置簽名和版本號
+4. 使用 `Product -> Archive` 進行歸檔和發佈
+
+**注意事項：**
+- 版本號在 `app.json` 中統一管理，構建時會自動同步到原生項目
+- 使用 EAS 構建時，不需要手動管理簽名證書
+- 提交 App Store 前確保已在 [App Store Connect](https://appstoreconnect.apple.com) 創建應用記錄
+
+---
 
 ### 🤖 Android 打包
 
-1. Android 端需保存好`.keystore`或`.jks`文件。編譯出包時，將該文件放置在`android/app`目錄下，以作 App 密鑰。
-2. Android 打包，需要保證 jdk 版本為`18.0.2.1`
-3. 在 `./android` 目錄下，使用 `gradlew assembleRelease` 打包 APK 文件，但似乎會出現密鑰不正確的問題無法繼承安裝。
-4. 在 `./android` 目錄下，使用 `gradlew bundleRelease` 打包 Google Play Store 所需的 `.adb` 文件。
+#### 方式一：使用 Expo 構建（推薦）
+
+```console
+eas build --platform android
+```
+
+選擇構建類型：
+- **APK**：內部分發測試
+- **AAB (Android App Bundle)**：Google Play Store 提交
+
+#### 方式二：本地 Gradle 構建
+
+1. 確保密鑰文件配置正確
+2. 在 `android/app` 目錄下放置簽名密鑰（`.keystore` 或 `.jks`）
+3. 運行構建命令：
+
+```console
+cd android
+./gradlew assembleRelease  # 構建 APK
+# 或
+./gradlew bundleRelease    # 構建 AAB (Google Play)
+```
+
+**注意事項：**
+- 確保 JDK 版本為 18 或以上
+- 版本號在 `app.json` 中統一管理
+- 首次發布到 Play Store 需要使用 AAB 格式
+- 內部測試可使用 APK 格式直接安裝
+
+---
 
 ### 🐛 故障排除
 
