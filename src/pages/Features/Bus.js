@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions } from 'react-native';
 
 // 引入本地工具
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
+import ARKImageView from '../../components/ARKImageView';
 import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP, } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
@@ -10,11 +11,9 @@ import Header from '../../components/Header';
 import { trigger } from '../../utils/trigger';
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Modal from 'react-native-modal';
 import { DOMParser } from "react-native-html-parser";
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
-// import Toast from 'react-native-toast-message';
 import TouchableScale from "react-native-touchable-scale";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
@@ -129,12 +128,22 @@ const BusScreen = () => {
 
     const [busPositionArr, setBusPositionArr] = useState([]);
     const [busInfoArr, setBusInfoArr] = useState([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [modalContent] = useState(['text', 'stopImage', 'busName']); // 目前未見修改需求，保持不變
     const [clickStopIndex, setClickStopIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [toastColor, setToastColor] = useState(themeColor);
     const [busUrl, setBusUrl] = useState(BUS_URL_DEFAULT);
+    const imageViewerRef = useRef(null);
+
+    // 將 stopImgArr 轉換為 ARKImageView 可用的格式
+    const processedStopImages = useMemo(() => {
+        return stopImgArr.map(img => {
+            if (typeof img === 'number') {
+                // 本地 require 的圖片
+                return { uri: Image.resolveAssetSource(img).uri };
+            }
+            return { uri: img };
+        });
+    }, []);
 
     const controller = new AbortController();
 
@@ -216,7 +225,8 @@ const BusScreen = () => {
     const toggleModal = (index) => {
         trigger();
         setClickStopIndex(index);
-        setIsModalVisible(prev => !prev);
+        // 使用 ARKImageView 打開圖片
+        imageViewerRef.current?.handleOpenImage(index);
     };
 
     // 點擊刷新
@@ -378,31 +388,11 @@ const BusScreen = () => {
                 </ScrollView>
             </ScrollView>
 
-            {/* 彈出層 - 展示站點圖片 */}
-            <Modal
-                isVisible={isModalVisible}
-                onBackdropPress={() => toggleModal(clickStopIndex)}
-                animationIn="zoomIn"
-                animationOut="zoomOut"
-                animationInTiming={500}
-                animationOutTiming={500}
-                backdropOpacity={0.4}
-                backdropTransitionOutTiming={500}
-                style={{
-                    margin: 0, // 去除默认的边距
-                    justifyContent: 'center', // 垂直居中
-                    alignItems: 'center',    // 水平居中
-                }}
-            >
-                <TouchableWithoutFeedback
-                    onPress={() => toggleModal(clickStopIndex)}>
-                    <Image
-                        source={stopImgArr[clickStopIndex]}
-                        style={{ width: '100%', height: '50%', }}
-                        resizeMode="contain"
-                    />
-                </TouchableWithoutFeedback>
-            </Modal>
+            {/* ARKImageView 圖片查看器 */}
+            <ARKImageView
+                ref={imageViewerRef}
+                imageUrls={processedStopImages}
+            />
         </View>
     );
 };
