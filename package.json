@@ -68,6 +68,7 @@
     "react-native-hyperlink": "^0.0.22",
     "react-native-image-header-scroll-view": "^1.0.0",
     "react-native-image-picker": "^7.1.2",
+    "react-native-image-viewing": "^0.2.2",
     "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-localize": "^3.6.1",

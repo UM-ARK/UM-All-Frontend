@@ -17,7 +17,7 @@ import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components
 import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ARKImageView from '../../../../components/ARKImageView';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
 import Header from '../../../../components/Header';
@@ -707,7 +707,7 @@ const EventDetail = (props) => {
             )}
 
             {/* 彈出層展示圖片查看器 */}
-            <ImageScrollViewer ref={imageScrollViewer} imageUrls={imageUrls} />
+            <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
 
             {/* Dialog提示登錄 */}
             <DialogDIY

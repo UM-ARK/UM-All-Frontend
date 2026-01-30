@@ -24,7 +24,7 @@ import { handleLogout } from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ARKImageView from '../../../../components/ARKImageView';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
@@ -620,7 +620,7 @@ const ClubDetail = (props) => {
                 </View>
             )}
 
-            <ImageScrollViewer ref={imageScrollViewer} imageUrls={imageUrls} />
+            <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
 
             <DialogDIY
                 showDialog={showDialog}

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator, } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ARKImageView from '../../../../components/ARKImageView';
 import Header from '../../../../components/Header';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
@@ -322,7 +322,7 @@ const NewsDetail = ({ route, navigation }) => {
                 </View>
 
                 {/* 彈出層展示圖片查看器 */}
-                <ImageScrollViewer
+                <ARKImageView
                     ref={imageScrollViewer}
                     imageUrls={data.imageUrls}
                 />

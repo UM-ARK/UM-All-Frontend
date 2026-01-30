@@ -7,7 +7,7 @@ import { scale } from 'react-native-size-matters';
 import { trigger } from '../../../../utils/trigger';
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ARKImageView from '../../../../components/ARKImageView';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -396,7 +396,7 @@ const UMEventDetail = ({ route, navigation }) => {
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
             <Header title={'活動詳情'} iOSDIY={true} />
             {/* 彈出層展示圖片查看器 */}
-            <ImageScrollViewer
+            <ARKImageView
                 ref={imageScrollViewer}
                 imageUrls={state.data.imageUrls}
             // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
@@ -436,19 +436,21 @@ const UMEventDetail = ({ route, navigation }) => {
                         source={state.data.imageUrls}
                         style={{ width: '100%', height: '100%' }}
                         onLoadStart={() => setState(prev => ({ ...prev, imgLoading: true }))}
-                        onLoad={() => setState(prev => ({ ...prev, imgLoading: false }))}>
-                        {state.imgLoading && (
-                            <View style={{
-                                width: '100%',
-                                height: '100%',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                position: 'absolute',
-                            }}>
-                                <ActivityIndicator size={'large'} color={themeColor} />
-                            </View>
-                        )}
-                    </Image>
+                        onLoad={() => setState(prev => ({ ...prev, imgLoading: false }))}
+                    />
+                    {state.imgLoading && (
+                        <View style={{
+                            width: '100%',
+                            height: '100%',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                        }}>
+                            <ActivityIndicator size={'large'} color={themeColor} />
+                        </View>
+                    )}
                 </TouchableScale>
 
                 {/* 詳情資訊 */}
