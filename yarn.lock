@@ -2723,10 +2723,10 @@
   dependencies:
     firebase "12.8.0"
 
-"@react-native-menu/menu@^1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@react-native-menu/menu/-/menu-1.2.4.tgz#73330bb5f580be0361d14a51e56873c4fb574724"
-  integrity sha512-63NU9NHd/KcBa7lhhV69xQmY3ORUxjMRmlzTY/qrY56GHnuKX+16dvUpKAuRSPK5kebBuRw5X4MFe2L9JHUlWA==
+"@react-native-menu/menu@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmmirror.com/@react-native-menu/menu/-/menu-2.0.0.tgz#21d3fcb15687df86386fee7815cc5ff79d26bc9e"
+  integrity sha512-hb8Mirw6aKPGONhgo52IiNpwHtISVrgCT3rMdFX1qS7eOFNzOcQh8d2UDnaH5zVpxN+QuvWtaaiRMGFpIjzdtA==
 
 "@react-native-vector-icons/common@^12.4.0":
   version "12.4.0"
