@@ -1,8 +1,11 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { handleImageDownload } from '../utils/fileKits';
+import { trigger } from '../utils/trigger';
 
 /**
  * ARKImageView - 全局圖片查看器組件
@@ -20,16 +23,23 @@ import { scale } from 'react-native-size-matters';
 const ARKImageView = forwardRef((props, ref) => {
     const { imageUrls } = props;
     const { theme } = useTheme();
-    const { white } = theme;
+    const { white, themeColor, trueBlack } = theme;
 
     const [visible, setVisible] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
+
+    // 保存原始圖片列表（用於長按保存）
+    const [originalImages, setOriginalImages] = useState([]);
 
     // 處理圖片 URL 格式轉換
     const processedImages = React.useMemo(() => {
         if (!imageUrls) return [];
 
         const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+
+        // 保存原始圖片列表
+        setOriginalImages(urls);
+
         return urls.map(url => {
             if (typeof url === 'string') {
                 return { uri: url };
@@ -58,6 +68,31 @@ const ARKImageView = forwardRef((props, ref) => {
         setVisible(false);
     }, []);
 
+    // 處理保存圖片
+    const handleSaveImage = useCallback((imageIndex) => {
+        const imageUrl = originalImages[imageIndex];
+        if (!imageUrl) return;
+
+        // 解析各種格式的圖片 URL
+        let actualUrl = null;
+
+        if (typeof imageUrl === 'string') {
+            actualUrl = imageUrl;
+        } else if (typeof imageUrl === 'number') {
+            // require 的本地圖片
+            const assetSource = Image.resolveAssetSource(imageUrl);
+            actualUrl = assetSource?.uri || null;
+        } else if (typeof imageUrl === 'object') {
+            if (imageUrl.url) actualUrl = imageUrl.url;
+            else if (imageUrl.uri) actualUrl = imageUrl.uri;
+        }
+
+        if (actualUrl) {
+            trigger();
+            handleImageDownload(actualUrl);
+        }
+    }, [originalImages]);
+
     // 暴露方法給父組件
     useImperativeHandle(ref, () => ({
         handleOpenImage,
@@ -65,18 +100,30 @@ const ARKImageView = forwardRef((props, ref) => {
         close: handleClose,
     }), [handleOpenImage, tiggerModal, handleClose]);
 
-    // 圖片計數器 Footer 組件
+    // Footer 組件 - 包含圖片計數器和保存按鈕
     const FooterComponent = useCallback(({ imageIndex }) => {
-        if (processedImages.length <= 1) return null;
-
         return (
             <View style={styles.footerContainer}>
-                <Text style={[styles.footerText, { color: white }]}>
-                    {imageIndex + 1} / {processedImages.length}
-                </Text>
+                {processedImages.length > 1 && (
+                    <Text style={[styles.footerText, { color: white }]}>
+                        {imageIndex + 1} / {processedImages.length}
+                    </Text>
+                )}
+
+                {/* 保存按鈕 */}
+                <TouchableOpacity
+                    style={[styles.saveButton, { backgroundColor: white }]}
+                    onPress={() => handleSaveImage(imageIndex)}
+                >
+                    <Ionicons
+                        name="download-outline"
+                        color={themeColor}
+                        size={scale(24)}
+                    />
+                </TouchableOpacity>
             </View>
         );
-    }, [processedImages.length, white]);
+    }, [processedImages.length, white, themeColor, handleSaveImage]);
 
     if (processedImages.length === 0) return null;
 
@@ -106,6 +153,19 @@ const styles = StyleSheet.create({
     footerText: {
         fontSize: scale(16),
         fontWeight: '500',
+        marginBottom: scale(12),
+    },
+    saveButton: {
+        width: scale(50),
+        height: scale(50),
+        borderRadius: scale(25),
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });
 
