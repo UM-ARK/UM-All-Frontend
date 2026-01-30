@@ -1,7 +1,7 @@
 // 文件操作相關
 import { Platform, Alert, Linking } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-import * as FileSystem from 'expo-file-system';
+import { File, Directory, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import Toast from "react-native-simple-toast";
 
@@ -56,21 +56,24 @@ export async function handleImageDownload(IMAGE_URL) {
     try {
         // 下載文件到緩存目錄
         const fileName = `temp_image_${Date.now()}.png`;
-        const fileUri = FileSystem.cacheDirectory + fileName;
+        const cacheDir = new Directory(Paths.cache);
 
-        const downloadResult = await FileSystem.downloadAsync(IMAGE_URL, fileUri);
+        // 使用新的 File API 下載文件
+        const downloadedFile = await File.downloadFileAsync(IMAGE_URL, cacheDir);
 
-        if (downloadResult.status !== 200) {
-            throw new Error(`Download failed with status ${downloadResult.status}`);
-        }
+        // 重命名文件為我們想要的文件名
+        const targetFile = new File(Paths.cache, fileName);
+        await downloadedFile.move(targetFile);
 
         // 保存到相冊
-        await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
+        await MediaLibrary.saveToLibraryAsync(targetFile.uri);
         Toast.show('保存成功 😊 ~');
 
         // 清理緩存文件
         try {
-            await FileSystem.deleteAsync(fileUri, { idempotent: true });
+            if (targetFile.exists) {
+                await targetFile.delete();
+            }
         } catch (cleanupError) {
             // 忽略清理錯誤
             console.log('Cache cleanup error (non-critical):', cleanupError.message);
@@ -126,4 +129,4 @@ export async function handleImageSelect() {
 }
 
 // 導出兼容層函數（如果需要與舊代碼兼容）
-export { MediaLibrary, FileSystem, ImagePicker };
+export { MediaLibrary, File, Directory, Paths, ImagePicker };
