@@ -19,7 +19,7 @@
       "package": "one.umall",
       "versionCode": 74,
       "adaptiveIcon": {
-        "foregroundImage": "./src/static/img/logo.png",
+        "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
       },
       "icon": "./src/static/img/logo.png",
