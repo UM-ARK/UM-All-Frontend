@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     ScrollView, Text, View, TouchableOpacity, Linking, Platform, Alert,
 } from 'react-native';
@@ -21,7 +21,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from "react-native-simple-toast";
 import TouchableScale from "react-native-touchable-scale";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from 'react-i18next';
 
 function Index({ navigation }) {
@@ -33,7 +33,7 @@ function Index({ navigation }) {
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
-    const insets = useContext(SafeAreaInsetsContext);
+    const insets = useSafeAreaInsets();
 
     // 功能卡片渲染，useCallback避免不必要的重渲染
     const GetFunctionCard = useCallback((title, fn_list) => (

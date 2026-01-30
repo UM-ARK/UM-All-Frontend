@@ -1,4 +1,4 @@
-import React, { Component, memo, useState, useCallback, useRef, useEffect, useMemo, useContext } from 'react';
+import React, { Component, memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
     StyleSheet,
     Text,
@@ -33,7 +33,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TouchableScale from "react-native-touchable-scale";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
 import { t } from "i18next";
@@ -202,7 +202,7 @@ const What2Reg = (props) => {
 
     const isFocused = useIsFocused();
 
-    const insets = useContext(SafeAreaInsetsContext);
+    const insets = useSafeAreaInsets();
 
     // 3.0開始，優先使用本地緩存的offerCourses數據展示
     useEffect(() => {

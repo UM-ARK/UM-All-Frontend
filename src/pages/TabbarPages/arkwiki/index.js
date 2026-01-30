@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
@@ -11,7 +11,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
 import TouchableScale from "react-native-touchable-scale";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
@@ -32,7 +32,7 @@ const ARKWiki = (props) => {
         }
     })
 
-    const insets = useContext(SafeAreaInsetsContext);
+    const insets = useSafeAreaInsets();
 
     // 初始狀態
     const [currentURL, setCurrentURL] = useState(

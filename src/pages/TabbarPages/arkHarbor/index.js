@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, useContext, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, Platform, StyleSheet, BackHandler, TouchableOpacity, Alert, } from 'react-native';
 
 import { WebView } from 'react-native-webview';
@@ -7,7 +7,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
 import TouchableScale from "react-native-touchable-scale";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { t } from "i18next";
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import Share from 'react-native-share';
@@ -25,6 +25,8 @@ import { openLink } from '../../../utils/browser';
 const ARKHarbor = (props) => {
     const { theme } = useTheme();
     const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color, viewShadow, } = theme;
+    const insets = useSafeAreaInsets();
+
     const s = StyleSheet.create({
         titleText: {
             ...uiStyle.defaultText,
@@ -62,8 +64,6 @@ const ARKHarbor = (props) => {
         },
     });
     const iconSize = useMemo(() => verticalScale(20), []);
-
-    const insets = useContext(SafeAreaInsetsContext);
 
     // 初始狀態
     const [currentURL, setCurrentURL] = useState(ARK_HARBOR);

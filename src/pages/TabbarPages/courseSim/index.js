@@ -20,7 +20,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import TouchableScale from "react-native-touchable-scale";
 import { MenuView } from '@react-native-menu/menu';
 import Toast from 'react-native-simple-toast';
-import { SafeAreaInsetsContext, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { t } from "i18next";
 import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { ScrollView, } from "react-native-gesture-handler";
