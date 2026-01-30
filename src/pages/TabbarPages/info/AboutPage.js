@@ -20,9 +20,8 @@ import packageInfo from '../../../../package.json';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
-import CookieManager from '@react-native-cookies/cookies';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNRestart from 'react-native-restart';
+import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
 
 const IMG_WIDTH = scale(160);
@@ -143,10 +142,8 @@ const AboutPage = () => {
                                         text: "Yes",
                                         onPress: async () => {
                                             trigger();
-                                            // TODO: 清除緩存
-                                            await CookieManager.clearAll();
                                             await AsyncStorage.clear();
-                                            RNRestart.Restart();
+                                            reloadAppAsync();
                                             Alert.alert('已清除所有緩存');
                                         },
                                         style: 'destructive',
@@ -163,21 +160,6 @@ const AboutPage = () => {
                         }}>
                         <Text style={{ ...s.highlightText, color: themeColor }}>
                             {`${t('清除APP內所有緩存（包括課表模擬與時間版本）', { ns: 'about' })}`}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: `${themeColor}15`, borderRadius: scale(10),
-                            padding: scale(5), marginTop: scale(5),
-                        }}
-                        activeOpacity={0.8}
-                        onPress={async () => {
-                            trigger();
-                            await CookieManager.clearAll();
-                            Alert.alert('已清除Cookies');
-                        }}>
-                        <Text style={{ ...s.highlightText, color: themeColor }}>
-                            {`${t('清除APP內Cookies', { ns: 'about' })}`}
                         </Text>
                     </TouchableOpacity>
                 </HomeCard>

@@ -13,7 +13,6 @@ import {
 import { WebView } from 'react-native-webview';
 import SimpleProgressBar from './SimpleProgressBar';
 import Icon from 'react-native-vector-icons/AntDesign';
-import CookieManager from '@react-native-cookies/cookies';
 import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
 import { COLOR_DIY } from '../utils/uiMap';

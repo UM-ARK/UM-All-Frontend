@@ -57,7 +57,7 @@ style={{ ...uiStyle.defaultText, fontSize: scale(14), color: theme.black.main }}
 
 **Storage**: NEVER use AsyncStorage directly. Use [storageKits.js](../src/utils/storageKits.js):
 - `setLocalStorage(key, obj)` / `getLocalStorage(key)` for data persistence
-- `handleLogin(userInfo)` / `handleLogout()` both restart the app via `RNRestart`
+- `handleLogin(userInfo)` / `handleLogout()` both restart the app via `reloadAppAsync`
 - `updateUserInfo(userInfo)` for live updates without restart
 
 **Error Handling**: User-facing errors MUST show via `Alert.alert()` or `Toast.show()`. Example pattern from checkCoursesKits:

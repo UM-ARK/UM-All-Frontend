@@ -180,7 +180,7 @@ import {
 await setLocalStorage('key', object);
 const data = await getLocalStorage('key');
 
-// Auth (restarts app via RNRestart)
+// Auth (restarts app via reloadAppAsync)
 await handleLogin(userInfo);
 await handleLogout();
 
