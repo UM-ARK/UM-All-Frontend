@@ -4,38 +4,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 ```
 
-## Available Skills and MCP Tools
-
-### Recommended Skills for This Project
-
-#### React Native / Expo Development
-- **react-native-expert**: Building cross-platform mobile applications with React Native/Expo, navigation patterns, platform-specific code
-- **expo-app-design:building-native-ui**: Building beautiful apps with Expo Router, styling, components, navigation, animations
-- **expo-app-design:native-data-fetching**: Implementing/debugging network requests, API calls, data fetching with fetch API, axios, etc.
-- **upgrading-expo:upgrading-expo**: Upgrading Expo SDK versions and fixing dependency issues
-- **expo-deployment:expo-deployment**: Deploying to iOS App Store, Android Play Store, web hosting, and API routes
-- **react-native-best-practices**: React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations
-
-#### General Development Skills
-- **fullstack-dev-skills:react-expert**: React 18+ component architecture, hooks patterns, and state management
-- **fullstack-dev-skills:javascript-pro**: Modern JavaScript (ES2023+) async patterns and Node.js development
-- **fullstack-dev-skills:code-reviewer**: Code review, quality audits, and security vulnerability identification
-- **fullstack-dev-skills:debugging-wizard**: Error investigation, stack trace analysis, and root cause location
-- **fullstack-dev-skills:test-master**: Writing tests, creating test strategies, and building automation frameworks
-
-#### Project-Specific Skills
-- **fullstack-dev-skills:feature-forge**: Defining new features, gathering requirements, and writing specifications
-- **fullstack-dev-skills:architecture-designer**: Designing system architecture and reviewing existing designs
-- **fullstack-dev-skills:legacy-modernizer**: Modernizing legacy systems and implementing incremental migration strategies
-- **fullstack-dev-skills:spec-miner**: Understanding legacy/undocumented systems and creating documentation
-
-### Usage Recommendations
-
-1. **Development Tasks**: Prioritize `react-native-expert` and `expo-app-design` series skills for UI development and navigation
-2. **Data Handling**: Use `expo-app-design:native-data-fetching` for API calls and data management
-3. **Debugging**: Use `fullstack-dev-skills:debugging-wizard` to locate and fix issues
-4. **Testing**: Use `fullstack-dev-skills:test-master` to write and run tests
-5. **Code Quality**: Use `fullstack-dev-skills:code-reviewer` to ensure code quality
+## MCP Tools
 
 ### MCP Web Search & AI Search
 
