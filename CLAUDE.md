@@ -4,28 +4,6 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 ```
 
-## MCP Tools
-
-### MCP Web Search & AI Search
-
-使用 MCP OmniSearch 工具進行網路搜索時，遵循以下優先順序策略：
-
-| 工具 | 使用場景 | 優先級 |
-|------|----------|--------|
-| **Web Search (brave/tavily)** | 一般性搜索、技術文檔、API 參考、常見問題 | ⭐ 優先使用 |
-| **AI Search (perplexity)** | 複雜問題、前次嘗試失敗、答案可信度低、需要深入推理的問題 | 備用選擇 |
-
-**具體建議：**
-- **先用 `brave` 或 `tavily`**：適合搜索最新文檔、技術規範、範例代碼、社區討論
-- **再用 `perplexity`**：當遇到以下情況時切換到 AI Search：
-  - 普通搜索返回結果不足或質量差
-  - 問題複雜需要多步推理
-  - 需要驗證多個信息源的可信度
-
-### File Operation Best Practices
-- **Always use `mcp__filesystem__read_text_file` to read source files** before making any modifications
-- **Only use `Write` tool for creating brand new files** that don't exist yet
-
 ## Project Overview
 
 - **Type**: React Native 0.81.5 mobile application for University of Macau students using Expo SDK 54
