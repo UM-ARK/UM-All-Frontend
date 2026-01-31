@@ -1,4 +1,4 @@
-import React, { Component, memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
     StyleSheet,
     Text,
@@ -41,7 +41,6 @@ import ActionSheet from 'react-native-actions-sheet';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
-import Toast from 'react-native-simple-toast';
 import { useIsFocused } from '@react-navigation/native';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
@@ -847,26 +846,6 @@ const What2Reg = (props) => {
         filterCourseList = lodash.sortBy(filterCourseList, ['Course Code']);
 
         return filterCourseList;
-    };
-
-    // ActionSheet options
-    const actionSheetOptions = [
-        t("手動檢查課表數據更新", { ns: 'catalog' }),
-        'Cancel'
-    ];
-
-    // ActionSheet onPress
-    const handleActionSheet = async (index) => {
-        switch (index) {
-            case 0:
-                setDialogVisible(true);
-                await checkCloudCourseVersion();
-                init();
-                handleDialogClose();
-                break;
-            default:
-                break;
-        }
     };
 
     // Dialog 關閉
