@@ -112,19 +112,68 @@ Alert.alert('確認刪除', '您確定要刪除這個項目嗎？', [
 
 ### Theming & Styling
 
-**MUST use ThemeContext for light/dark mode support**:
+**⚠️ 強制規定：所有顏色必須使用 ThemeContext 定義的顏色，禁止任何形式的硬編碼顏色**
+
+#### 正確使用方式
 
 ```javascript
 import {useTheme} from '../../components/ThemeContext';
 
 const {theme} = useTheme();
 // 推薦：解構取出常用顏色
-const {white, black, bg_color, themeColor} = theme;
+const {white, black, bg_color, themeColor, glass} = theme;
 
-// 使用: white, black.main, bg_color, themeColor, etc.
+// 使用 theme 定義的顏色
+// white, black.main, bg_color, themeColor, glass 等
 ```
 
-**AVOID**: `COLOR_DIY` from `uiMap.js` (legacy, breaks dark mode)
+#### 需要新增顏色時的處理流程
+
+如果需要使用 ThemeContext 中不存在的顏色：**禁止在組件中硬編碼**，必須按以下流程處理：
+
+1. **在 ThemeContext.js 中添加新顏色定義**：
+   ```javascript
+   // 在 getColorDiy 函數中添加新顏色
+   const getColorDiy = (isLight) => ({
+       // ... 現有顏色 ...
+
+       // 新增顏色（必須同時定義亮色和暗色版本）
+       newCustomColor: isLight ? '#xxxxxx' : '#xxxxxx',
+       newCustomBg: isLight ? '#xxxxxx' : '#xxxxxx',
+   });
+   ```
+
+2. **在組件中使用新定義的顏色**：
+   ```javascript
+   const {theme} = useTheme();
+   const {newCustomColor, newCustomBg} = theme;
+   ```
+
+#### 禁止行為（絕對不允許）
+
+| 禁止的寫法 | 原因 |
+|-----------|------|
+| `'#fff'` 或 `'#ffffff'` | 硬編碼白色，不支援暗色模式 |
+| `'#000'` 或 `'#000000'` | 硬編碼黑色，不支援暗色模式 |
+| `'rgba(255,255,255,0.2)'` | 硬編碼半透明色，不支援暗色模式 |
+| `'rgba(0,0,0,0.5)'` | 硬編碼半透明色，不支援暗色模式 |
+| `COLOR_DIY` from `uiMap.js` | 遺留代碼，無法響應主題切換 |
+| 任何非 `theme` 對象提供的顏色 | 無法保證亮色/暗色一致性 |
+
+#### 半透明/玻璃態效果處理
+
+對於需要半透明或玻璃態效果的情況，**禁止**使用硬編碼的 `rgba` 值：
+
+```javascript
+// ❌ 錯誤：硬編碼 rgba
+backgroundColor: 'rgba(255, 255, 255, 0.2)'
+
+// ✅ 正確：使用 ThemeContext 定義的 glass 顏色
+const {glass} = theme;
+backgroundColor: glass  // 定義為 'rgba(255, 255, 255, 0.2)'
+```
+
+如需不同透明度的玻璃效果，應在 ThemeContext.js 中定義多個層級（如 `glassLight`, `glassMedium`, `glassHeavy`）。
 
 ### Typography
 
