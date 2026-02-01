@@ -8,7 +8,7 @@ import { NavigationContext } from '@react-navigation/native';
 // import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from 'react-native-touchable-scale';
 
 const getDateColor = (type, beginMomentDate, nowMomentDate, themeColor, secondThemeColor, black) => {
     if (type === 'event') {
@@ -176,7 +176,7 @@ const NewsCard = ({ data, type = 'news' }) => {
                                 source={{ uri: imageUrls }}
                                 // source={imageUrls}
                                 style={styles.newsCardImg}
-                                resizeMode='cover'
+                                resizeMode="cover"
                             // contentFit="cover"
                             // cachePolicy="memory-disk"
                             // recyclingKey={data._id}

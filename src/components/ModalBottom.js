@@ -4,7 +4,7 @@ import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
 
 import Modal from 'react-native-modal';
 
-import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../utils/uiMap';
 import { scale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');

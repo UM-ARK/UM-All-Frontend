@@ -1,9 +1,9 @@
 // 封裝：不用太多自定義的Webview，僅使用navigate跳轉
 // 網址可以參考pathMap.js
 import React, { Component } from 'react';
-import { Text, View, TouchableOpacity, Linking, StyleSheet, Appearance, } from 'react-native';
+import { Text, View, TouchableOpacity, Linking, StyleSheet, Appearance } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../utils/uiMap';
 import IntegratedWebView from './IntegratedWebView';
 import { ARK_WIKI } from '../utils/pathMap';
 import { trigger } from '../utils/trigger';
@@ -71,7 +71,7 @@ class WebViewer extends Component {
     // 設定當前URL
     setOutsideCurrentURL = (currentURL) => {
         this.setState({ url: currentURL });
-    }
+    };
 
     // 打開/關閉底部Modal
     tiggerModalBottom = () => {
@@ -156,7 +156,7 @@ class WebViewer extends Component {
                                         style={{ ...s.iconContainer }}
                                         onPress={() => {
                                             trigger();
-                                            Linking.openURL(url)
+                                            Linking.openURL(url);
                                         }}>
                                         <Ionicons
                                             name="navigate-outline"

@@ -1,21 +1,21 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
     Text,
     View,
     TouchableOpacity,
     TextInput,
     ScrollView,
-    StyleSheet
-} from 'react-native'
+    StyleSheet,
+} from 'react-native';
 
-import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
+import { UMEH_URI, UMEH_API } from '../../../../utils/pathMap';
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import Header from '../../../../components/Header';
 
-import axios from "axios";
+import axios from 'axios';
 import { scale } from 'react-native-size-matters';
 import { AirbnbRating } from '@rneui/themed';
-import qs from "qs";
+import qs from 'qs';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
 
@@ -88,10 +88,10 @@ export default class NewComment extends Component {
         },
 
         isLoading: false,
-    }
+    };
 
     postData = async () => {
-        this.setState({ isLoading: true })
+        this.setState({ isLoading: true });
         const { New_code, prof_name, contentInput, scoreInput } = this.state;
         let data = {};
         let URI = UMEH_URI + UMEH_API.POST.SUBMIT_COMMENT;
@@ -105,14 +105,14 @@ export default class NewComment extends Component {
             try {
                 let res = await axios.post(URI, data,
                     {
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                     }
-                )
+                );
                 if ('data' in res && res.data.code == '1') {
-                    alert('新增評論成功！')
+                    alert('新增評論成功！');
                     this.props.navigation.goBack();
                 } else {
-                    alert('評論失敗！發生未知錯誤！')
+                    alert('評論失敗！發生未知錯誤！');
                 }
             }
             catch (error) {
@@ -121,16 +121,16 @@ export default class NewComment extends Component {
                     this.props.navigation.goBack();
                 } else {
                     console.log(error);
-                    alert('新增評論失敗，請聯繫開發者')
+                    alert('新增評論失敗，請聯繫開發者');
                 }
             }
             finally {
-                this.setState({ isLoading: false })
+                this.setState({ isLoading: false });
             }
         }
-        this.setState({ isLoading: false })
+        this.setState({ isLoading: false });
 
-    }
+    };
 
     renderScoreStar = (score) => {
         let color = themeColor;
@@ -147,8 +147,8 @@ export default class NewComment extends Component {
                 selectedColor={color}
                 showRating={false}
             />
-        )
-    }
+        );
+    };
 
     renderScore = () => {
         return (
@@ -183,8 +183,8 @@ export default class NewComment extends Component {
                     <Text style={s.scoreTitle}>收穫很多</Text>
                 </View>
             </>
-        )
-    }
+        );
+    };
 
     render() {
         const { New_code, prof_name, scoreInput, scoreDescribe, isLoading, contentInput } = this.state;
@@ -219,7 +219,7 @@ export default class NewComment extends Component {
                                 reviews={scoreDescribe[itm]}
                                 onFinishRating={(e) => {
                                     scoreInput[itm] = e;
-                                    this.setState({ scoreInput })
+                                    this.setState({ scoreInput });
                                 }}
                                 ratingContainerStyle={{
                                     marginBottom: scale(15),
@@ -227,10 +227,10 @@ export default class NewComment extends Component {
                                 }}
                                 starContainerStyle={{
                                     // backgroundColor: 'blue',
-                                    marginTop: scale(-10)
+                                    marginTop: scale(-10),
                                 }}
                             />
-                        )
+                        );
                     })}
 
                     {/* 長文本評論 */}
@@ -242,11 +242,11 @@ export default class NewComment extends Component {
                                 borderWidth: scale(1), borderRadius: scale(10),
                                 borderColor: themeColor,
                             }}
-                            placeholder='留下您的評價：e.g. 非常不錯强烈推薦！'
+                            placeholder="留下您的評價：e.g. 非常不錯强烈推薦！"
                             placeholderTextColor={COLOR_DIY.unread}
                             value={this.state.contentInput}
                             onChangeText={text => {
-                                this.setState({ contentInput: text })
+                                this.setState({ contentInput: text });
                             }}
                         />
                     </View>
@@ -268,7 +268,7 @@ export default class NewComment extends Component {
                     <View style={{ marginBottom: scale(50) }} />
                 </ScrollView>
             </View>
-        )
+        );
     }
 }
 
@@ -276,11 +276,11 @@ const s = StyleSheet.create({
     scoreTitle: {
         fontSize: scale(15),
         color: black.third,
-        marginHorizontal: scale(3)
+        marginHorizontal: scale(3),
     },
     scoreContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: scale(5)
-    }
-})
+        marginTop: scale(5),
+    },
+});

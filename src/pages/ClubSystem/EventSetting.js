@@ -8,7 +8,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../utils/uiMap';
 import { BASE_URI, BASE_HOST, POST, GET } from '../../utils/pathMap';
 import Header from '../../components/Header';
 import DialogDIY from '../../components/DialogDIY';
@@ -137,11 +137,11 @@ class EventSetting extends Component {
                             type: eventData.type.toLowerCase(),
                         });
                     }
-                })
+                });
         } catch (err) {
             console.error(err);
         } finally {
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false });
         }
     }
 
@@ -532,7 +532,7 @@ class EventSetting extends Component {
         await axios
             .post(URL, data, {
                 headers: {
-                    'Content-Type': `multipart/form-data`,
+                    'Content-Type': 'multipart/form-data',
                 },
             })
             .then(res => {
@@ -569,7 +569,7 @@ class EventSetting extends Component {
         await axios
             .post(URL, data, {
                 headers: {
-                    'Content-Type': `multipart/form-data`,
+                    'Content-Type': 'multipart/form-data',
                 },
             })
             .then(res => {
@@ -647,7 +647,7 @@ class EventSetting extends Component {
                                             color: black.third,
                                             alignSelf: 'flex-start',
                                         }}>
-                                        {`* 發佈模式說明：`}
+                                        {'* 發佈模式說明：'}
                                     </Text>
                                     {type == 'activity' ? (<>
                                         <Text
@@ -656,7 +656,7 @@ class EventSetting extends Component {
                                                 color: black.third,
                                                 alignSelf: 'flex-start',
                                             }}>
-                                            {`* 點擊活動卡片會進入活動詳情頁，在活動詳情處填入問卷/報名Link，讓同學一鍵直達！`}
+                                            {'* 點擊活動卡片會進入活動詳情頁，在活動詳情處填入問卷/報名Link，讓同學一鍵直達！'}
                                         </Text>
                                         <Text
                                             style={{
@@ -664,7 +664,7 @@ class EventSetting extends Component {
                                                 color: COLOR_DIY.secondThemeColor,
                                                 alignSelf: 'flex-start',
                                             }}>
-                                            {`* 如希望轉載貼文，可在上方選擇“Link跳轉”模式發佈`}
+                                            {'* 如希望轉載貼文，可在上方選擇“Link跳轉”模式發佈'}
                                         </Text>
                                     </>
                                     ) : (
@@ -674,7 +674,7 @@ class EventSetting extends Component {
                                                 color: black.third,
                                                 alignSelf: 'flex-start',
                                             }}>
-                                            {`* 點擊活動卡片會跳轉到您填寫的網址，適合公眾號推文、IG Post`}
+                                            {'* 點擊活動卡片會跳轉到您填寫的網址，適合公眾號推文、IG Post'}
                                         </Text>
                                     )}
                                 </View>
@@ -862,7 +862,7 @@ class EventSetting extends Component {
 
                         {/* 活動詳情說明 */}
                         {type == 'activity' && (
-                            <View style={{ marginTop: scale(20), }}>
+                            <View style={{ marginTop: scale(20) }}>
                                 {this.renderExpandSection1()}
                             </View>
                         )}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from 'react-native-touchable-scale';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
 import { trigger } from '../../../../utils/trigger';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
 import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';

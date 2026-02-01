@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 // 引入本地工具
-import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../utils/uiMap';
 import { UM_LOST_FOUND } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import Header from '../../components/Header';
@@ -37,7 +37,7 @@ function LaF_to_Json(html_source_data) {
     var replace3 = /<font size="2">/g;
     var replace4 = /拾獲地點 : /g;
     var replace5 = /<br>/g;
-    var replace6 = /現時位置 :  /g;
+    var replace6 = /現時位置 : {2}/g;
 
     data = html_source_data.match(patt); // 先將數據分割成塊
     // console.log(data);
@@ -55,29 +55,29 @@ function LaF_to_Json(html_source_data) {
         temp_data = data1[3];
         temp_data = temp_data.replace(replace1, '');
         temp_data = temp_data.replace(replace2, '');
-        js_piece['title'] = temp_data;
+        js_piece.title = temp_data;
 
         temp_data = data1[1];
         temp_data = temp_data.replace(replace2, '');
         temp_data = temp_data.replace(replace3, '');
-        js_piece['date'] = temp_data;
+        js_piece.date = temp_data;
 
         temp_data = data1[2];
         temp_data = temp_data.replace(replace2, '');
         temp_data = temp_data.replace(replace3, '');
-        js_piece['ref'] = temp_data;
+        js_piece.ref = temp_data;
 
         data2 = data[i].match(patt2);
         temp_data = data2[0];
         temp_data = temp_data.replace(replace4, '');
         temp_data = temp_data.replace(replace5, '');
-        js_piece['pick_up'] = temp_data;
+        js_piece.pick_up = temp_data;
 
         data3 = data[i].match(patt3);
         temp_data = data3[0];
         temp_data = temp_data.replace(replace6, '');
         temp_data = temp_data.replace(replace2, '');
-        js_piece['current'] = temp_data;
+        js_piece.current = temp_data;
 
         return_js[i] = js_piece;
     }
@@ -161,7 +161,7 @@ class LostAndFound extends Component {
                             color: secondThemeColor,
                             fontSize: scale(23),
                             fontWeight: 'bold',
-                            marginLeft: scale(9)
+                            marginLeft: scale(9),
                         }}>
                         {item.title}
                     </Text>
@@ -274,7 +274,7 @@ class LostAndFound extends Component {
                         )}
                         // 列表底部渲染，防止Tabbar遮擋
                         ListFooterComponent={() => (
-                            <View style={{ marginBottom: scale(50) }}></View>
+                            <View style={{ marginBottom: scale(50) }} />
                         )}
                         refreshControl={
                             <RefreshControl

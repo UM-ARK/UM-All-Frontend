@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../utils/uiMap';
 
 import { Dialog } from '@rneui/themed';
 

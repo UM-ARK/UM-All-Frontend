@@ -1,16 +1,16 @@
 import React from 'react';
 import { Text, Linking } from 'react-native';
 
-import { useTheme } from "../components/ThemeContext";
+import { useTheme } from '../components/ThemeContext';
 import { trigger } from '../utils/trigger';
 import { openLink } from '../utils/browser';
 
 import Hyperlink from 'react-native-hyperlink';
 import Clipboard from '@react-native-clipboard/clipboard';
-import Toast from "react-native-toast-message";
+import Toast from 'react-native-toast-message';
 import { scale } from 'react-native-size-matters';
 
-const HyperlinkText = ({ children, title, linkStyle, style, navigation, beforeJump, }) => {
+const HyperlinkText = ({ children, title, linkStyle, style, navigation, beforeJump }) => {
     const { theme } = useTheme();
     const { themeColor } = theme;
     // 定義默認參數

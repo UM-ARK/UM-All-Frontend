@@ -21,10 +21,10 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             // handleIndicatorStyle={{ backgroundColor: '#fff' }}
             // DIY頂部抓手項目
             handleComponent={() => {
-                return (<View style={{ flexDirection: 'row', }}>
+                return (<View style={{ flexDirection: 'row' }}>
                     <Text style={styles.containerHeadline}>{props.title}</Text>
                     <Text style={styles.containerHeadline}>Close</Text>
-                </View>)
+                </View>);
             }}
             backgroundStyle={{ backgroundColor: 'gray' }}
         // 設置是否是否手勢拖動上下，會影響BottomSheet內的橫向滑動
@@ -41,14 +41,14 @@ const CustomBottomSheet = forwardRef((props, ref) => {
 const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     containerHeadline: {
         fontSize: 24,
         fontWeight: '600',
         padding: 20,
-        color: '#fff'
-    }
+        color: '#fff',
+    },
 });
 
 export default CustomBottomSheet;

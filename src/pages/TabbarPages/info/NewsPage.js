@@ -14,7 +14,7 @@ import {
 
 import NewsCard from './components/NewsCard';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
@@ -26,7 +26,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
-import lodash from "lodash";
+import lodash from 'lodash';
 
 // 整理需要返回的數據給renderItem
 // 此處返回的數據會成為renderItem({item})獲取到的數據。。。
@@ -43,7 +43,7 @@ const getItemCount = data => {
 
 const NewsPage = () => {
     const { theme } = useContext(ThemeContext);
-    const { white, black, viewShadow, bg_color, themeColor, trueWhite, } = theme;
+    const { white, black, viewShadow, bg_color, themeColor, trueWhite } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
             borderRadius: scale(10),
@@ -107,7 +107,7 @@ const NewsPage = () => {
                 onDownloadProgress: progressEvent => {
                     const loadedMB = progressEvent.loaded / 1024 / 1024;
                     let progress = loadedMB / totalMB;
-                    if (progress > 1) progress = 0.95; // 確保進度不超過1
+                    if (progress > 1) {progress = 0.95;} // 確保進度不超過1
                     progressRef.current = progress;
                 },
             });
@@ -141,7 +141,7 @@ const NewsPage = () => {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 setIsLoading(true);
             } else {
-                alert('澳大新聞頁，未知錯誤，請聯繫開發者！')
+                alert('澳大新聞頁，未知錯誤，請聯繫開發者！');
             }
         }
     };
@@ -177,7 +177,7 @@ const NewsPage = () => {
                         style={{ width: '100%', height: '100%' }}
                         onPress={() => {
                             trigger();
-                            navigation.navigate('NewsDetail', { data: topNews, });
+                            navigation.navigate('NewsDetail', { data: topNews });
                         }}>
                         <Image
                             source={{ uri: topNewsImage }}
@@ -188,7 +188,7 @@ const NewsPage = () => {
                             // recyclingKey={topNews?._id || 'top-news'}
                             // transition={0}
                             // onLoadEnd={() => setImgLoading(false)}
-                            resizeMode='cover'
+                            resizeMode="cover"
                         />
                         {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                         <View style={styles.topNewsOverlay}>
@@ -262,7 +262,7 @@ const NewsPage = () => {
 
             {/* 渲染新聞列表 */}
             {isLoading ? null : (
-                <View style={{ flex: 1, }}>
+                <View style={{ flex: 1 }}>
                     <VirtualizedList
                     data={newsList}
                     ref={virtualizedList}
@@ -282,7 +282,7 @@ const NewsPage = () => {
                     ListHeaderComponent={renderTopNews}
                     // 列表底部渲染，防止Tabbar遮擋
                     ListFooterComponent={() => (
-                        <View style={{ marginTop: scale(100) }}></View>
+                        <View style={{ marginTop: scale(100) }} />
                     )}
                     refreshControl={
                         <RefreshControl

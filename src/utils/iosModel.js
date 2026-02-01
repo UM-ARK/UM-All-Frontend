@@ -30,14 +30,14 @@ export const getPreciseDeviceName = () => {
         // 2. 針對未來機型的回退處理 (Fallback)
         // 如果出現 iPhone17,9 或 iPhone18,5 等未知型號
         if (modelId.startsWith('iPhone17,'))
-            return `iPhone 16 Series (${modelId})`;
+            {return `iPhone 16 Series (${modelId})`;}
         if (modelId.startsWith('iPhone18,'))
-            return `iPhone 17 Series (${modelId})`;
+            {return `iPhone 17 Series (${modelId})`;}
         if (modelId.startsWith('iPhone19,'))
-            return `iPhone 18 Series (${modelId})`;
+            {return `iPhone 18 Series (${modelId})`;}
 
         // 3. 模擬器處理
-        if (modelId === 'x86_64' || modelId === 'arm64') return 'iOS Simulator';
+        if (modelId === 'x86_64' || modelId === 'arm64') {return 'iOS Simulator';}
     }
 
     return Device.modelName || modelId || 'Unknown Device';

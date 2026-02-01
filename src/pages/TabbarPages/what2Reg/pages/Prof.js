@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
     Text,
     View,
     ScrollView,
     TouchableOpacity,
     FlatList,
-} from 'react-native'
+} from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
-import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
-import CourseCard from "../component/CourseCard";
+import { UMEH_URI, UMEH_API } from '../../../../utils/pathMap';
+import CourseCard from '../component/CourseCard';
 
-import { scale } from "react-native-size-matters";
+import { scale } from 'react-native-size-matters';
 import axios from 'axios';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
@@ -39,19 +39,19 @@ export default class Prof extends Component {
         try {
             const { data: res } = await axios.get(GET_URI);
             // 返回該講師負責的課程
-            let course_info = res.course.map((itm) => itm.course_info)
+            let course_info = res.course.map((itm) => itm.course_info);
             // 排序，開課的在前
             course_info = course_info.sort((a, b) => b.is_offered - a.is_offered);
-            this.setState({ course_info, prof_info: res.course[0].prof_info })
+            this.setState({ course_info, prof_info: res.course[0].prof_info });
         } catch (error) {
             if (error.code == 'ERR_NETWORK') {
                 alert('請檢查您當前的網絡環境是否正確');
                 this.props.navigation.goBack();
             }
         } finally {
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false });
         }
-    }
+    };
 
     render() {
         const { isLoading, prof_name, course_info } = this.state;

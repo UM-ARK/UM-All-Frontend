@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator, } from 'react-native';
+import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
 import Header from '../../../../components/Header';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -13,7 +13,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from 'react-native-touchable-scale';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -85,7 +85,7 @@ const NewsDetail = ({ route, navigation }) => {
         a: {
             ...uiStyle.defaultText,
             color: themeColor,
-        }
+        },
     });
 
     const imageScrollViewer = useRef(null);
@@ -184,7 +184,7 @@ const NewsDetail = ({ route, navigation }) => {
             // 如果當前選擇的語言不可用，切換到第一個可用語言
             if (newModes[chooseMode].available === 0) {
                 const firstAvailableIndex = newModes.findIndex(m => m.available === 1);
-                if (firstAvailableIndex !== -1) setChooseMode(firstAvailableIndex);
+                if (firstAvailableIndex !== -1) {setChooseMode(firstAvailableIndex);}
             }
             return newModes;
         });

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { pxToDp } from '../../utils/stylesKits';
-import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../utils/uiMap';
 import { handleImageSelect } from '../../utils/fileKits';
 import Header from '../../components/Header';
 import { BASE_URI, BASE_HOST, POST, GET, addHost } from '../../utils/pathMap';
@@ -228,7 +228,7 @@ class ClubInfoEdit extends Component {
         await axios
             .post(BASE_URI + POST.CLUB_EDIT_INFO, data, {
                 headers: {
-                    'Content-Type': `multipart/form-data`,
+                    'Content-Type': 'multipart/form-data',
                 },
             })
             .then(res => {

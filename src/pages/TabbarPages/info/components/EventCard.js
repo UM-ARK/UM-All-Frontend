@@ -10,8 +10,8 @@ import { NavigationContext } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Ionicons from "react-native-vector-icons/Ionicons";
-import TouchableScale from "react-native-touchable-scale";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import TouchableScale from 'react-native-touchable-scale';
 import { inject } from 'mobx-react';
 
 const DEFAULT_IMAGE_SIZE = scale(160);
@@ -64,7 +64,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                 color: black.third,
                 fontWeight: '500',
                 fontSize: verticalScale(11),
-            }
+            },
         },
     });
 
@@ -168,7 +168,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                 backgroundColor: white,
                                 opacity: isFinish ? 0.5 : 1,
                             }}
-                            contentFit='cover'
+                            contentFit="cover"
                             onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
                             onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}
                         />
@@ -182,7 +182,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                     position: 'absolute',
                                     top: 0,
                                     left: 0,
-                                    zIndex: 10
+                                    zIndex: 10,
                                 }}>
                                 <ActivityIndicator
                                     size={'large'}
@@ -222,7 +222,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                 marginTop: scale(5),
                                 flexDirection: 'row',
                                 alignItems: 'center',
-                                width: '100%'
+                                width: '100%',
                             }}>
                                 {/* 即將結束標識 */}
                                 {isAlmost ? (
@@ -233,7 +233,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                         }}>
                                         <Text style={{
                                             ...styles.stateNoticeText,
-                                            color: theme.unread
+                                            color: theme.unread,
                                         }}>
                                             將結束
                                         </Text>
@@ -242,11 +242,11 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                     isFinish ? (
                                         <View style={{
                                             paddingHorizontal: scale(1),
-                                            borderColor: black.third, borderWidth: scale(1), borderRadius: scale(4)
+                                            borderColor: black.third, borderWidth: scale(1), borderRadius: scale(4),
                                         }}>
                                             <Text style={{
                                                 ...styles.stateNoticeText,
-                                                color: black.third
+                                                color: black.third,
                                             }}>
                                                 UP
                                             </Text>
@@ -255,7 +255,7 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
                                         <View style={{ ...styles.unFinish }}>
                                             <Text style={{
                                                 ...styles.stateNoticeText,
-                                                color: theme.secondThemeColor
+                                                color: theme.secondThemeColor,
                                             }}>
                                                 進行中
                                             </Text>

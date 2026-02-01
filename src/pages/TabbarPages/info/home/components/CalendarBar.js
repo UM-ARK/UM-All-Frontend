@@ -119,7 +119,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         );
     };
 
-    if (!cal || cal.length === 0) return null;
+    if (!cal || cal.length === 0) {return null;}
 
     return (
         <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center' }}>

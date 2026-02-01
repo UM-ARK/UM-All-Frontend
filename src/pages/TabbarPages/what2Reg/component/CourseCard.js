@@ -7,18 +7,18 @@ import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
 
-import { scale } from "react-native-size-matters";
+import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from 'react-native-touchable-scale';
 import lodash from 'lodash';
-import { t } from "i18next";
+import { t } from 'i18next';
 
 const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMode = 'ad' }) => {
     // const { data, mode, prof_info, handleSetLetterData, courseMode = 'ad' } = props;
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
-    const { themeColor, black, secondThemeColor, white, what2reg_color, } = theme;
+    const { themeColor, black, secondThemeColor, white, what2reg_color } = theme;
 
     // 渲染課程代號
     const renderCourseCode = (code) => {
@@ -30,11 +30,11 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                     ...uiStyle.defaultText,
                     color: themeColor,
                     fontWeight: '700',
-                    fontSize: scale(16)
+                    fontSize: scale(16),
                 }}>
                     {code.substring(4, 8)}
                 </Text>
-            </>
+            </>;
         }
         // FLL MLS的課程代號有TLL123-A的格式
         else if (code.length === 8 && code.indexOf('-') !== -1) {
@@ -44,11 +44,11 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                     ...uiStyle.defaultText,
                     color: themeColor,
                     fontWeight: '700',
-                    fontSize: scale(16)
+                    fontSize: scale(16),
                 }}>
                     {code.substring(3, 8)}
                 </Text>
-            </>
+            </>;
         }
         else {
             renderItm = code;
@@ -63,8 +63,8 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
             }}>
                 {renderItm}
             </Text>
-        )
-    }
+        );
+    };
 
     return (
         <FlatList
@@ -73,11 +73,11 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
             columnWrapperStyle={data.length > 1 ? { flexWrap: 'wrap' } : null}
             style={{ marginHorizontal: scale(5) }}
             renderItem={({ item }) => {
-                const courseCode = item[mode === "what2Reg" ? 'New_code' : 'Course Code'];
-                const title = item[mode === "what2Reg" ? 'courseTitleEng' : 'Course Title'];
-                const offerUnit = item[mode === "what2Reg" ? 'Offering_Unit' : 'Offering Unit'];
-                const offerDepa = item[mode === "what2Reg" ? 'Offering_Department' : 'Offering Department'];
-                const credit = item[mode === "what2Reg" ? 'Credits' : 'Credit Units']
+                const courseCode = item[mode === 'what2Reg' ? 'New_code' : 'Course Code'];
+                const title = item[mode === 'what2Reg' ? 'courseTitleEng' : 'Course Title'];
+                const offerUnit = item[mode === 'what2Reg' ? 'Offering_Unit' : 'Offering Unit'];
+                const offerDepa = item[mode === 'what2Reg' ? 'Offering_Department' : 'Offering Department'];
+                const credit = item[mode === 'what2Reg' ? 'Credits' : 'Credit Units'];
 
                 return (
                     <MenuView
@@ -114,7 +114,7 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     };
                                     if (prof_info) {
                                         // 進入搜索特定教授的課程模式，進入評論詳情頁
-                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(prof_info.name))
+                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(prof_info.name));
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {
@@ -124,7 +124,7 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     }
                                     else {
                                         // 進入搜索課程代號模式
-                                        const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`
+                                        const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`;
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {
@@ -149,14 +149,14 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     logToFirebase('checkCourse', {
                                         courseCode: courseCode,
                                     });
-                                    navigation.navigate('LocalCourse', courseCode)
+                                    navigation.navigate('LocalCourse', courseCode);
                                     break;
 
                                 case 'coursesim':
                                     trigger();
                                     navigation.navigate('Tabbar', {
                                         screen: 'CourseSimTab',
-                                        params: { check: courseCode }
+                                        params: { check: courseCode },
                                     });
                                     break;
 
@@ -167,27 +167,27 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                         actions={[
                             {
                                 id: 'wiki',
-                                title: `${t("查", { ns: 'catalog' })} ARK Wiki`,
+                                title: `${t('查', { ns: 'catalog' })} ARK Wiki`,
                                 titleColor: themeColor,
                             },
                             {
                                 id: 'what2reg',
-                                title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                                title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
                                 titleColor: black.third,
                             },
                             {
                                 id: 'official',
-                                title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
+                                title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
                                 titleColor: black.third,
                             },
                             {
                                 id: 'coursesim',
-                                title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
+                                title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
                                 titleColor: black.third,
                             },
                             {
                                 id: 'section',
-                                title: `${t("查", { ns: 'catalog' })} Section`,
+                                title: `${t('查', { ns: 'catalog' })} Section`,
                                 titleColor: black.third,
                             },
                         ]}
@@ -215,7 +215,7 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     courseCode: courseCode,
                                     onLongPress: 1,
                                 });
-                                navigation.navigate('LocalCourse', courseCode)
+                                navigation.navigate('LocalCourse', courseCode);
                             }}
                             // BUG: 此處小於300ms的長按事件容易被Menu誤認為點擊事件
                             delayLongPress={300}
@@ -270,7 +270,7 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                             ) : null}
                         </TouchableScale>
                     </MenuView>
-                )
+                );
             }}
             key={data.length}
             scrollEnabled={false}
@@ -281,7 +281,7 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
     );
 }, (prevProps, nextProps) => {
     // 比較props，避免不必要的重渲染
-    return lodash.isEqual(prevProps, nextProps)
+    return lodash.isEqual(prevProps, nextProps);
 });
 
 export default CourseCard;

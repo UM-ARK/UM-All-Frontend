@@ -575,7 +575,7 @@ export const getFunctionArr = (t) => [
                     isBarStyleBlack: false,
                 },
                 describe: t('選咩課，UM Helper開發的課程評論網站', { ns: 'features' }),                key_name: '選咀課',
-                keywords: 'What2Reg, Course Review, Course Rating, UM Helper, 課程評論, 評分, 教授評價, 選課',            },
+                keywords: 'What2Reg, Course Review, Course Rating, UM Helper, 課程評論, 評分, 教授評價, 選課'            },
             {
                 icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'ab-testing',
@@ -882,4 +882,4 @@ export const getFunctionArr = (t) => [
             },
         ],
     },
-]
+];

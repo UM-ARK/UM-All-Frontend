@@ -1,4 +1,4 @@
-import UMAPITOKEN from "../../umAPIToken.json";
+import UMAPITOKEN from '../../umAPIToken.json';
 
 // 網站地址映射
 
@@ -138,26 +138,26 @@ export const WHAT_2_REG_SEARCH = 'https://www.umeh.top/search/course/';
 export const UM_WHOLE = 'https://umbbs.xyz';
 
 // 選咩課API
-export const UMEH_URI = "https://mpserver.umeh.top/";
+export const UMEH_URI = 'https://mpserver.umeh.top/';
 export const UMEH_API = {
     GET: {
         // 根據課程編號返回信息
-        COURSE_INFO: "course_info?New_code=",
+        COURSE_INFO: 'course_info?New_code=',
         COURSE_COMMENT: {
-            CODE: "comment_info/?New_code=",
-            PROF: "&prof_name="
+            CODE: 'comment_info/?New_code=',
+            PROF: '&prof_name=',
         },
         // 字母全大寫
-        PROF: "prof_info?name=",
+        PROF: 'prof_info?name=',
         // 模糊搜索
         // FUZZY: "fuzzy_search?text=Test&type=course/prof/title",
-        FUZZY: "fuzzy_search?text=",
+        FUZZY: 'fuzzy_search?text=',
         // 返回統計數據
-        STAT: "get_stat"
+        STAT: 'get_stat',
     },
     POST: {
-        SUBMIT_COMMENT: "submit_comment/"
-    }
+        SUBMIT_COMMENT: 'submit_comment/',
+    },
 };
 
 // 澳大 - API 車位

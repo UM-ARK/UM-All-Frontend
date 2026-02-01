@@ -7,13 +7,13 @@ import What2RegTabIndex from '../pages/TabbarPages/what2Reg';
 import ARKWiki from '../pages/TabbarPages/arkwiki';
 import CourseSim from '../pages/TabbarPages/courseSim';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../components/ThemeContext';
 import { trigger } from '../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { t } from "i18next";
+import { t } from 'i18next';
 import { BlurView } from '@sbaiahmed1/react-native-blur';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -75,7 +75,7 @@ export default function MyTabs() {
                     title: t('資訊'),
                 }}
                 listeners={() => ({
-                    tabPress: () => trigger()
+                    tabPress: () => trigger(),
                 })} />
 
 
@@ -96,7 +96,7 @@ export default function MyTabs() {
                     title: t('百科'),
                 }}
                 listeners={() => ({
-                    tabPress: () => trigger()
+                    tabPress: () => trigger(),
                 })}
             />
 
@@ -117,7 +117,7 @@ export default function MyTabs() {
                     title: t('搵課'),
                 }}
                 listeners={() => ({
-                    tabPress: () => trigger()
+                    tabPress: () => trigger(),
                 })}
             />
 
@@ -138,7 +138,7 @@ export default function MyTabs() {
                     title: t('課表'),
                 }}
                 listeners={() => ({
-                    tabPress: () => trigger()
+                    tabPress: () => trigger(),
                 })}
             />
 
@@ -158,7 +158,7 @@ export default function MyTabs() {
                     title: t('服務'),
                 }}
                 listeners={() => ({
-                    tabPress: () => trigger()
+                    tabPress: () => trigger(),
                 })} />
         </Tab.Navigator>
     );

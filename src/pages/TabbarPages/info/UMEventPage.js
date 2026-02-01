@@ -47,9 +47,9 @@ const UMEventPage = () => {
                 onDownloadProgress: progressEvent => {
                     const loadedMB = progressEvent.loaded / 1024 / 1024;
                     let progress = loadedMB / 0.1; // 假設API返回數據大小約為2MB
-                    if (progress > 1) progress = 0.95; // 確保進度不超過1
+                    if (progress > 1) {progress = 0.95;} // 確保進度不超過1
                     progressRef.current = progress; // 更新進度條
-                }
+                },
             }).then(res => {
                 let result = res.data._embedded;
                 let nowTimeStamp = new Date().getTime();
@@ -66,7 +66,7 @@ const UMEventPage = () => {
                     else {
                         outdatedList.push(itm);
                     }
-                })
+                });
                 // 排序：距離今天最近
                 resultList.sort((a, b) => {
                     return Math.abs(
@@ -94,13 +94,13 @@ const UMEventPage = () => {
                 resultList = resultList.concat(outdatedList);
                 setData(resultList);
                 setIsLoading(false);
-            })
+            });
         } catch (error) {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 setData(undefined);
                 setIsLoading(false);
             } else {
-                alert('澳大活動頁，未知錯誤，請聯繫開發者！')
+                alert('澳大活動頁，未知錯誤，請聯繫開發者！');
             }
         }
     };

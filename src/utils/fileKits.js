@@ -3,7 +3,7 @@ import { Platform, Alert, Linking } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { File, Directory, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import Toast from "react-native-simple-toast";
+import Toast from 'react-native-simple-toast';
 
 /**
  * 檢查並請求相冊權限
@@ -33,7 +33,7 @@ function showPermissionDeniedAlert(title, message) {
         [{
             text: 'GO NOW', onPress: () => {
                 Linking.openSettings();
-            }
+            },
         },
         { text: 'NO' }],
         { cancelable: false },
@@ -121,7 +121,7 @@ export async function handleImageSelect() {
                 width: asset.width,
                 height: asset.height,
                 fileSize: asset.fileSize,
-            }))
+            })),
         };
     }
 

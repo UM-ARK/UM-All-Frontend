@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Appearance, StatusBar, StyleSheet } from 'react-native';
-import { COLOR_DIY, isLight, } from "../utils/uiMap";
+import { COLOR_DIY, isLight } from '../utils/uiMap';
 import { verticalScale } from 'react-native-size-matters';
 
 export const ThemeContext = createContext();
@@ -99,7 +99,7 @@ const getColorDiy = (isLight) => ({
             '#6e5766',
             '#5e5743',
             '#30444a',
-            '#4c6160'
+            '#4c6160',
         ],
 });
 // 导出主题常量，用于不需要响应式的地方
@@ -154,11 +154,11 @@ export const useTheme = () => {
 export const VERSION_EMOJI = {
     ve_Left: '⛱️',
     ve_Right: '🕶️',
-}
+};
 
 export const uiStyle = StyleSheet.create({
     defaultText: {
         fontWeight: 'normal',
         fontSize: verticalScale(12),
-    }
+    },
 });

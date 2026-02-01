@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import { handleLogin } from '../../../utils/storageKits';
 import {
     BASE_URI,
@@ -19,7 +19,7 @@ import {
     USER_AGREE,
     USUAL_Q,
 } from '../../../utils/pathMap';
-import { UM_Moodle, APPSTORE_URL, BASE_HOST, } from '../../../utils/pathMap';
+import { UM_Moodle, APPSTORE_URL, BASE_HOST } from '../../../utils/pathMap';
 import { openLink } from '../../../utils/browser';
 import { versionStringCompare } from '../../../utils/versionKits';
 import { trigger } from '../../../utils/trigger';
@@ -78,7 +78,7 @@ class LoginChoose extends Component {
         await axios
             .post(URL, data, {
                 headers: {
-                    'Content-Type': `multipart/form-data`,
+                    'Content-Type': 'multipart/form-data',
                 },
             })
             .then(res => {
@@ -132,7 +132,7 @@ class LoginChoose extends Component {
                                         // );
                                         if ('MoodleSession' in cookies) {
                                             alert(
-                                                `Moodle登錄成功，正在登錄ARK ALL...\n先不要進行其他操作...\n等待重新出現ARK ALL主頁則登錄成功！`,
+                                                'Moodle登錄成功，正在登錄ARK ALL...\n先不要進行其他操作...\n等待重新出現ARK ALL主頁則登錄成功！',
                                             );
                                             // console.log(
                                             //     'MoodleSession =>',
@@ -207,10 +207,10 @@ class LoginChoose extends Component {
                                         const shouldUpdate = versionStringCompare(packageInfo.version, serverVersion) == -1;
                                         if (shouldUpdate) {
                                             Alert.alert(`ARK ${serverVersion} 現可更新！！`,
-                                                `請先更新再使用組織賬號功能，不然可能觸發意外的BUG！\n現在前往更新嗎？`,
+                                                '請先更新再使用組織賬號功能，不然可能觸發意外的BUG！\n現在前往更新嗎？',
                                                 [
                                                     {
-                                                        text: "Yes",
+                                                        text: 'Yes',
                                                         onPress: () => {
                                                             trigger();
                                                             const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
@@ -218,9 +218,9 @@ class LoginChoose extends Component {
                                                         },
                                                     },
                                                     {
-                                                        text: "No",
+                                                        text: 'No',
                                                     },
-                                                ])
+                                                ]);
                                         }
                                         else {
                                             // 版本通過，允許登錄
@@ -228,12 +228,12 @@ class LoginChoose extends Component {
                                         }
                                     }
                                     else {
-                                        Alert.alert(`APP錯誤`, `沒有獲取到服務器版本信息，\n請檢查網絡再試，\n也可能是程序錯誤，\n嘗試聯繫開發者！`);
+                                        Alert.alert('APP錯誤', '沒有獲取到服務器版本信息，\n請檢查網絡再試，\n也可能是程序錯誤，\n嘗試聯繫開發者！');
                                     }
                                 }}
                                 disabled={!this.state.ruleChoice}>
                                 <Text style={{ ...s.roleCardText, textAlign: 'center' }}>
-                                    {`社團 / 組織賬號\n點我登錄`}
+                                    {'社團 / 組織賬號\n點我登錄'}
                                 </Text>
                             </TouchableOpacity>
 
@@ -347,7 +347,7 @@ class LoginChoose extends Component {
                 {/* 學生首次登錄提示 */}
                 <DialogDIY
                     showDialog={this.state.showDialog}
-                    text={`將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！\n請確定您已閱讀用戶條款`}
+                    text={'將跳轉Moodle登錄頁，成功登錄進入Moodle後，會自動完成註冊！\n請確定您已閱讀用戶條款'}
                     handleConfirm={() => {
                         this.getUmPass();
                         this.setState({ showDialog: false, showMoodle: true });

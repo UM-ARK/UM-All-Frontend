@@ -13,7 +13,7 @@ import {
     Platform,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
@@ -41,7 +41,7 @@ const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 const EventDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
 
     const styles = StyleSheet.create({
         // 展示 from to，在哪裡舉辦的文字的樣式
@@ -209,18 +209,18 @@ const EventDetail = (props) => {
         data.append('activity_id', eventID);
         try {
             const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': `multipart/form-data` },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             let json = res.data;
             if (json.message === 'success') {
                 // 關注成功
                 setToastColor(success);
                 setIsFollow(true);
-                toast.current?.show(`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`, 2000);
+                toast.current?.show('感謝 Follow ！❥(^_-)\n有最新動態會提醒您！', 2000);
             } else if (json.code === '400') {
                 // 已經關注
                 setToastColor(warning);
-                toast.current?.show(`您已經關注過了~`, 2000);
+                toast.current?.show('您已經關注過了~', 2000);
             }
         } catch (err) {
             console.log('err', err);
@@ -234,14 +234,14 @@ const EventDetail = (props) => {
         data.append('activity_id', eventID);
         try {
             const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': `multipart/form-data` },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             let json = res.data;
             if (json.message === 'success') {
                 // del follow成功
                 setToastColor(themeColor);
                 setIsFollow(false);
-                toast.current?.show(`有緣再見！o(╥﹏╥)o`, 2000);
+                toast.current?.show('有緣再見！o(╥﹏╥)o', 2000);
             }
         } catch (err) {
             console.log('err', err);
@@ -407,7 +407,7 @@ const EventDetail = (props) => {
                         <Image
                             source={clubData == undefined ? '' : clubData.logo_url}
                             style={{ ...styles.clubLogoContainer, backgroundColor: trueWhite }}
-                            contentFit='contain'
+                            contentFit="contain"
                         />
                     </View>
                 </TouchableWithoutFeedback>

@@ -2,19 +2,19 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions } from 'react-native';
 
 // 引入本地工具
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
-import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP, } from '../../utils/pathMap';
+import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
 import { trigger } from '../../utils/trigger';
-import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
+import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { DOMParser } from "react-native-html-parser";
+import { DOMParser } from 'react-native-html-parser';
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from 'react-native-touchable-scale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
@@ -378,7 +378,7 @@ const BusScreen = () => {
                                 colorsTime={[7, 5, 2, 0]}
                                 size={scale(35)}
                                 onComplete={() => {
-                                    return { shouldRepeat: true }
+                                    return { shouldRepeat: true };
                                 }}
                             >
                                 {({ remainingTime }) => <Text style={{ ...uiStyle.defaultText, color: black.third }}>{remainingTime}</Text>}

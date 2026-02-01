@@ -1,8 +1,8 @@
 // 車位訊息
 import React, { useState, useEffect, useCallback } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView, RefreshControl, } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
 import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 import { UM_API_CAR_PARK, UM_API_TOKEN } from '../../utils/pathMap';
@@ -88,7 +88,7 @@ const CarPark = () => {
                 {!isLoading ? (
                     <View>
                         {/* Data From */}
-                        <Text style={{ ...s.UMText, }}>Data from: data.um.edu.mo</Text>
+                        <Text style={{ ...s.UMText }}>Data from: data.um.edu.mo</Text>
 
                         {/* 渲染車位數據 */}
                         {data.length > 0 && (
@@ -246,7 +246,7 @@ const CarPark = () => {
                                                 var rest = itm.noOfAvailableSpace;
                                                 if (Sort === 'All' || people === Sort) {
                                                     if (Type === 'All' || cartype === Type)
-                                                        return (
+                                                        {return (
                                                             <View key={people + cartype + i}>
                                                                 <Text
                                                                     style={{
@@ -281,7 +281,7 @@ const CarPark = () => {
                                                                     剩餘車位：{rest} {rest <= 10 ? '  餘位緊張' : null}
                                                                 </Text>
                                                             </View>
-                                                        )
+                                                        );}
                                                 }
                                                 return null;
                                             })}
@@ -302,7 +302,7 @@ const CarPark = () => {
                         <Loading />
                     </View>
                 )}
-                <View style={{ marginBottom: scale(50) }}></View>
+                <View style={{ marginBottom: scale(50) }} />
             </ScrollView>
         </View>
     );

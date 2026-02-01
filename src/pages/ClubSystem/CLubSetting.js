@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import { pxToDp } from '../../utils/stylesKits';
-import { COLOR_DIY, uiStyle, } from '../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../utils/uiMap';
 import { handleLogout } from '../../utils/storageKits';
 import { MAIL } from '../../utils/pathMap';
 import Header from '../../components/Header';
@@ -40,7 +40,7 @@ class ClubSetting extends Component {
     }
 
     render() {
-        const { fromEvent, eventID, } = this.state;
+        const { fromEvent, eventID } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: COLOR_DIY.bg_color }}>
                 <Header title={fromEvent ? '活動設置' : '組織賬號設置'} />
@@ -151,7 +151,7 @@ class ClubSetting extends Component {
                                     );
                                 }}>
                                 {/* 選項標題 */}
-                                <View style={{ flexDirection: 'row', }}>
+                                <View style={{ flexDirection: 'row' }}>
                                     <Ionicons
                                         name="add-circle-outline"
                                         color={black.main}
@@ -186,7 +186,7 @@ class ClubSetting extends Component {
                                     );
                                 }}>
                                 {/* 選項標題 */}
-                                <View style={{ flexDirection: 'row', }}>
+                                <View style={{ flexDirection: 'row' }}>
                                     <Ionicons
                                         name="settings-outline"
                                         color={black.main}
@@ -264,10 +264,10 @@ class ClubSetting extends Component {
                                 style={{ ...styles.optionContainer }}
                                 activeOpacity={0.8}
                                 onPress={() => {
-                                    Alert.alert(`即將跳轉email界面`, `您需要向管理員提出刪除該組織賬號。\n該組織賬號所有內容，包括發佈的活動，都將被刪除。`,
+                                    Alert.alert('即將跳轉email界面', '您需要向管理員提出刪除該組織賬號。\n該組織賬號所有內容，包括發佈的活動，都將被刪除。',
                                         [
                                             {
-                                                text: "確定",
+                                                text: '確定',
                                                 onPress: () => {
                                                     trigger();
                                                     Linking.openURL('mailto:' + MAIL);
@@ -275,13 +275,13 @@ class ClubSetting extends Component {
                                                 style: 'destructive',
                                             },
                                             {
-                                                text: "取消",
+                                                text: '取消',
                                             },
                                         ]
                                     );
                                 }}>
                                 {/* 選項標題 */}
-                                <View style={{ flexDirection: 'row', }}>
+                                <View style={{ flexDirection: 'row' }}>
                                     <Ionicons
                                         name="trash-outline"
                                         color={black.third}
@@ -305,16 +305,16 @@ class ClubSetting extends Component {
                                 ...uiStyle.defaultText,
                                 fontSize: verticalScale(12), fontWeight: 'bold',
                                 color: COLOR_DIY.secondThemeColor,
-                                alignSelf: 'center', textAlign: 'center', marginTop: scale(10)
+                                alignSelf: 'center', textAlign: 'center', marginTop: scale(10),
                             }}>修改活動資料可進入具體活動頁面內操作！</Text>
 
                             {/* 登出賬號 */}
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={() => {
-                                    Alert.alert(`組織賬號提示`, `確定登出賬號嗎？`, [
+                                    Alert.alert('組織賬號提示', '確定登出賬號嗎？', [
                                         {
-                                            text: "確定",
+                                            text: '確定',
                                             onPress: () => {
                                                 trigger();
                                                 handleLogout();
@@ -322,13 +322,13 @@ class ClubSetting extends Component {
                                             style: 'destructive',
                                         },
                                         {
-                                            text: "取消",
+                                            text: '取消',
                                         },
                                     ]);
                                 }}
                                 style={{
                                     ...styles.logoutButton,
-                                    marginTop: scale(300), marginBottom: scale(20)
+                                    marginTop: scale(300), marginBottom: scale(20),
                                 }}>
                                 <Text style={{ ...styles.submitButtonText }}>
                                     登出賬號

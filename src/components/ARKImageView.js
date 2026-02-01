@@ -37,7 +37,7 @@ const ARKImageView = forwardRef((props, ref) => {
 
     // 處理圖片 URL 格式轉換
     const processedImages = React.useMemo(() => {
-        if (!imageUrls) return [];
+        if (!imageUrls) {return [];}
 
         const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
 
@@ -48,8 +48,8 @@ const ARKImageView = forwardRef((props, ref) => {
             if (typeof url === 'string') {
                 return { uri: url };
             } else if (url && typeof url === 'object') {
-                if (url.url) return { uri: url.url };
-                if (url.uri) return { uri: url.uri };
+                if (url.url) {return { uri: url.url };}
+                if (url.uri) {return { uri: url.uri };}
             }
             return { uri: '' };
         }).filter(item => item.uri);
@@ -75,7 +75,7 @@ const ARKImageView = forwardRef((props, ref) => {
     // 處理保存圖片
     const handleSaveImage = useCallback((imageIndex) => {
         const imageUrl = originalImages[imageIndex];
-        if (!imageUrl) return;
+        if (!imageUrl) {return;}
 
         // 解析各種格式的圖片 URL
         let actualUrl = null;
@@ -87,8 +87,8 @@ const ARKImageView = forwardRef((props, ref) => {
             const assetSource = Image.resolveAssetSource(imageUrl);
             actualUrl = assetSource?.uri || null;
         } else if (typeof imageUrl === 'object') {
-            if (imageUrl.url) actualUrl = imageUrl.url;
-            else if (imageUrl.uri) actualUrl = imageUrl.uri;
+            if (imageUrl.url) {actualUrl = imageUrl.url;}
+            else if (imageUrl.uri) {actualUrl = imageUrl.uri;}
         }
 
         if (actualUrl) {
@@ -155,7 +155,7 @@ const ARKImageView = forwardRef((props, ref) => {
         );
     }, [white, glass, handleClose, insets]);
 
-    if (processedImages.length === 0) return null;
+    if (processedImages.length === 0) {return null;}
 
     return (
         <ImageView

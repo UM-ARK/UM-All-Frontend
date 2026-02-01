@@ -23,7 +23,7 @@ const Tabs = AnimatedTabBarNavigator();
 const Tabbar = () => {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
-    const { t } = useTranslation(['common', 'home',]);
+    const { t } = useTranslation(['common', 'home']);
 
     const isLandscape = () => {
         const { width, height } = Dimensions.get('window');
@@ -44,7 +44,7 @@ const Tabbar = () => {
                 },
                 tabStyle: {
                     paddingBottom: insets.bottom,
-                }
+                },
             }}
             appearance={{
                 activeTabBackgrounds: `${theme.themeColor}15`,
@@ -61,7 +61,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "newspaper-variant" : "newspaper-variant-outline"}
+                            name={focused ? 'newspaper-variant' : 'newspaper-variant-outline'}
                             size={iconSize}
                             color={focused ? color : theme.black.main}
                         />
@@ -79,7 +79,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "file-document" : "file-document-outline"}
+                            name={focused ? 'file-document' : 'file-document-outline'}
                             size={iconSize}
                             color={focused ? color : theme.black.main}
                         />
@@ -97,7 +97,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "chat-processing" : "chat-processing-outline"}
+                            name={focused ? 'chat-processing' : 'chat-processing-outline'}
                             size={iconSize}
                             color={focused ? color : theme.black.main}
                         />
@@ -115,7 +115,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "database-search" : "database-search-outline"}
+                            name={focused ? 'database-search' : 'database-search-outline'}
                             size={iconSize}
                             color={focused ? color : theme.black.main}
                         />
@@ -133,7 +133,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "calendar-clock" : "calendar-clock-outline"}
+                            name={focused ? 'calendar-clock' : 'calendar-clock-outline'}
                             size={iconSize}
                             color={focused ? color : theme.black.main}
                         />
@@ -151,7 +151,7 @@ const Tabbar = () => {
                 options={{
                     tabBarIcon: ({ focused, color }) => (
                         <MaterialCommunityIcons
-                            name={focused ? "view-grid" : "view-grid-outline"}
+                            name={focused ? 'view-grid' : 'view-grid-outline'}
                             size={iconSize}
                             color={focused ? color : theme.black.main}
                         />

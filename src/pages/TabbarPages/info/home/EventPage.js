@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
-import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC, ARK_HARBOR_AVATAR, } from '../../../../utils/pathMap';
+import { BASE_URI, BASE_HOST, GET, ARK_HARBOR_TOP, ARK_HARBOR_LATEST, ARK_HARBOR_TOPIC, ARK_HARBOR_AVATAR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
@@ -23,7 +23,7 @@ import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from 'react-native-touchable-scale';
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { NavigationContext } from '@react-navigation/native';
 import lodash from 'lodash';
@@ -114,9 +114,9 @@ const EventPage = forwardRef((props, ref) => {
     // 監聽dataPage變化，重新獲取數據
     useEffect(() => {
         // dataPage控制頁碼，頁碼變化時，會重新獲取數據，實現瀑布流的加載更多功能
-        if (dataPage === 1) return;
-        if (isLoading) return;
-        if (noMoreData) return;
+        if (dataPage === 1) {return;}
+        if (isLoading) {return;}
+        if (noMoreData) {return;}
         // 當dataPage變化時，重新獲取數據
         Toast.show('數據加載中...');
         if (!harborData || harborData.length === 0) {
@@ -142,11 +142,11 @@ const EventPage = forwardRef((props, ref) => {
         }
         getHarborData();
         getEventData(page);
-    }
+    };
 
     /**
      * 獲取ARK Event數據
-     * @param {boolean} loadMore 
+     * @param {boolean} loadMore
      */
     const getEventData = async (page = dataPage) => {
         let URL = BASE_URI + GET.EVENT_INFO_ALL;
@@ -210,7 +210,7 @@ const EventPage = forwardRef((props, ref) => {
         } catch (error) {
             console.log('Error fetching topic data:', error);
         }
-    }
+    };
 
     const insertToList = (list, harborArr) => {
         let listCopy = lodash.cloneDeep(list);
@@ -352,8 +352,8 @@ const EventPage = forwardRef((props, ref) => {
 
     const loadMoreData = () => {
         trigger();
-        if (isLoading) return;
-        if (noMoreData) return;
+        if (isLoading) {return;}
+        if (noMoreData) {return;}
         setDataPage(prev => prev + 1);
     };
 
@@ -414,7 +414,7 @@ const EventPage = forwardRef((props, ref) => {
                             return renderHarborMessage(item);
                         }
                     } else {
-                        return <EventCard data={item} cardWidth={cardWidth} />
+                        return <EventCard data={item} cardWidth={cardWidth} />;
                     }
                 }}
                 scrollEnabled={false}
@@ -423,7 +423,7 @@ const EventPage = forwardRef((props, ref) => {
                     return `${prefix}-${item.id || item._id || index}-${index}`;
                 }}
             />
-        </View>)
+        </View>);
     };
 
     // 渲染主要內容
@@ -459,7 +459,7 @@ const EventPage = forwardRef((props, ref) => {
         const borderRadius = scale(8);
         const borderTopRadiusStyle = item.excerpt ? null : {
             borderTopStartRadius: borderRadius, borderTopEndRadius: borderRadius,
-        }
+        };
 
         return (
             <TouchableScale style={{
@@ -476,7 +476,7 @@ const EventPage = forwardRef((props, ref) => {
                     const setting = settingStr ? JSON.parse(settingStr) : null;
                     logToFirebase('clickHarbor', {
                         title: item.title,
-                        mode: setting ? setting.tabbarMode : "browser"
+                        mode: setting ? setting.tabbarMode : 'browser',
                     });
                     // 用戶偏好是Webview則導航到Tabbar
                     if (setting && setting.tabbarMode == 'webview') {
@@ -527,9 +527,9 @@ const EventPage = forwardRef((props, ref) => {
                         alignItems: 'center', justifyContent: 'space-between',
                     }}>
                         {/* 用戶頭像 */}
-                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', }}>
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Image
-                                source={{ uri: ARK_HARBOR_AVATAR(item.last_poster_username), }}
+                                source={{ uri: ARK_HARBOR_AVATAR(item.last_poster_username) }}
                                 style={{
                                     width: verticalScale(12), height: verticalScale(12),
                                     borderRadius: scale(50),
@@ -546,16 +546,16 @@ const EventPage = forwardRef((props, ref) => {
                         </View>
 
                         {/* 點讚等資訊 */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {/* 點讚數 回復數 瀏覽數 */}
-                            <View style={{ flexDirection: 'row', }}>
+                            <View style={{ flexDirection: 'row' }}>
                                 {item?.like_count > 0 && (
                                     <View style={{
                                         marginLeft: scale(5),
-                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
                                     }}>
                                         <MaterialCommunityIcons name="thumb-up-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor, }}>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
                                             {item.like_count}
                                         </Text>
                                     </View>
@@ -564,10 +564,10 @@ const EventPage = forwardRef((props, ref) => {
                                 {item?.highest_post_number > 1 && (
                                     <View style={{
                                         marginLeft: scale(5),
-                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
                                     }}>
                                         <MaterialCommunityIcons name="comment-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor, }}>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
                                             {item.highest_post_number}
                                         </Text>
                                     </View>
@@ -576,10 +576,10 @@ const EventPage = forwardRef((props, ref) => {
                                 {item?.views > 0 && (
                                     <View style={{
                                         marginLeft: scale(5),
-                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+                                        alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
                                     }}>
                                         <MaterialCommunityIcons name="eye-outline" size={verticalScale(10)} color={pinColor} style={{ marginRight: scale(1) }} />
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor, }}>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(8), color: pinColor }}>
                                             {item.views}
                                         </Text>
                                     </View>
@@ -594,11 +594,11 @@ const EventPage = forwardRef((props, ref) => {
     };
 
     return (
-        <View style={{ ...props.style, }}>
+        <View style={{ ...props.style }}>
             {isLoading ? (
                 <View style={{
                     flex: 1,
-                    marginBottom: Dimensions.get('window').height
+                    marginBottom: Dimensions.get('window').height,
                 }}>
                     <Loading />
                 </View>

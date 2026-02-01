@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
-import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, } from 'react-native';
+import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList } from 'react-native';
 
-import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
@@ -34,7 +34,7 @@ class ClubPage extends PureComponent {
         sections: [],
         isLoading: true,
         isOtherViewVisible: true,
-    }
+    };
 
     componentDidMount() {
         // 獲取所有社團信息
@@ -57,22 +57,22 @@ class ClubPage extends PureComponent {
                     originClubDataList = clubDataList;
                     this.setState({
                         sections: this.buildSections(clubDataList),
-                        isLoading: false
+                        isLoading: false,
                     });
                     this.handleScrollEnd();
                 } else {
                     Alert.alert('Warning:', message);
                 }
-            })
+            });
         } catch (error) {
             if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
                 // 網絡錯誤
-                this.setState({ isLoading: false, clubDataList: undefined, });
+                this.setState({ isLoading: false, clubDataList: undefined });
             } else {
-                Alert.alert('組織頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！')
+                Alert.alert('組織頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
             }
         }
-    }
+    };
 
     buildSections = (clubDataList) => {
         if (!clubDataList || clubDataList.length === 0) { return []; }
@@ -97,7 +97,7 @@ class ClubPage extends PureComponent {
         });
 
         return sections;
-    }
+    };
 
     renderBottomInfo = () => {
         const { theme } = this.context;
@@ -137,15 +137,15 @@ class ClubPage extends PureComponent {
                             ...uiStyle.defaultText,
                             color: themeColor,
                             fontSize: scale(12),
-                            marginBottom: 10
+                            marginBottom: 10,
                         }}
                     >
                         {'沒有賬號? 進駐ARK ALL!\n'}
                     </Text>
                 </TouchableOpacity>
             </View>
-        )
-    }
+        );
+    };
 
     handleScrollStart = () => {
         this.setState({ isOtherViewVisible: false });
@@ -197,12 +197,12 @@ class ClubPage extends PureComponent {
                                             ...uiStyle.defaultText,
                                             color: black.third,
                                             fontSize: verticalScale(11),
-                                            fontWeight: 'bold'
+                                            fontWeight: 'bold',
                                         }}>
                                             {clubTagMap(itm.item)}
                                         </Text>
                                     </TouchableOpacity>
-                                )
+                                );
                             }}
                             keyExtractor={item => item}
                             showsHorizontalScrollIndicator={false}
@@ -229,7 +229,7 @@ class ClubPage extends PureComponent {
                             <Text style={{
                                 ...uiStyle.defaultText,
                                 color: theme.black.main,
-                                fontSize: verticalScale(15)
+                                fontSize: verticalScale(15),
                             }}>
                                 {clubTagMap(section.title) || section.title}
                             </Text>

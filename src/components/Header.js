@@ -10,7 +10,7 @@ import {
     Text,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from './ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from './ThemeContext';
 import { trigger } from '../utils/trigger';
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -24,7 +24,7 @@ const HeaderDIY = (props) => {
     // this.context === this.props.navigation 等同效果
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
-    const { barStyle, black, bg_color, } = theme;
+    const { barStyle, black, bg_color } = theme;
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

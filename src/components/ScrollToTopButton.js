@@ -18,7 +18,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
  * 懸浮可拖動回頂按鈕組件
  * 功能：顯示/隱藏控制、回頂功能、拖動功能、吸附功能
  * 吸附點：左上、左中、左下、右上、右中、右下
- * 
+ *
  * @param {Object} props - 組件屬性
  * @param {boolean} [props.visible=true] - 控制組件顯示/隱藏
  * @param {Function} [props.onScrollToTop] - 回頂後的回調函數
@@ -175,7 +175,7 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
         };
     });
 
-    if (!visible) return null;
+    if (!visible) {return null;}
 
     return (
         <GestureDetector gesture={panGesture}>

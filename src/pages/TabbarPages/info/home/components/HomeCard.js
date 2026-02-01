@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { t } from "i18next";
+import { t } from 'i18next';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../../components/ThemeContext';
-import { screenWidth } from "../../../../../utils/stylesKits";
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../../components/ThemeContext';
+import { screenWidth } from '../../../../../utils/stylesKits';
 
 const HomeCard = (props) => {
     const { theme } = useTheme();
@@ -149,7 +149,7 @@ const HomeCard = (props) => {
                                     onLoadStart={() => setImgLoading(true)}
                                     onLoad={() => setImgLoading(false)}
                                     style={styles.newsCardImg}
-                                    contentFit='cover'
+                                    contentFit="cover"
                                 />
                                 {imgLoading && (
                                     <View

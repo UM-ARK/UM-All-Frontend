@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { COLOR_DIY, uiStyle, } from '../../../utils/uiMap';
+import { COLOR_DIY, uiStyle } from '../../../utils/uiMap';
 import Header from '../../../components/Header';
 import { handleLogin } from '../../../utils/storageKits';
-import { BASE_URI, GET, USER_AGREE, USUAL_Q, } from '../../../utils/pathMap';
+import { BASE_URI, GET, USER_AGREE, USUAL_Q } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import { openLink } from '../../../utils/browser';
 
@@ -19,11 +19,11 @@ import { Input } from '@rneui/themed';
 import axios from 'axios';
 import qs from 'qs';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Toast from "react-native-toast-message";
+import Toast from 'react-native-toast-message';
 import { CheckBox } from '@rneui/themed';
 import { t } from 'i18next';
 
-const { white, black, themeColor, } = COLOR_DIY;
+const { white, black, themeColor } = COLOR_DIY;
 
 // 存入臨時變量，準備提交後端驗證
 let accountPassword = {
@@ -67,7 +67,7 @@ class ClubLogin extends Component {
             password: accountPassword.password + '',
         };
         await axios({
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             method: 'post',
             url: BASE_URI + GET.CLUB_SIGN_IN,
             data: qs.stringify(data),
@@ -81,7 +81,7 @@ class ClubLogin extends Component {
                     topOffset: scale(100),
                     onPress: () => Toast.hide(),
                 });
-                handleLogin({ isClub: true, clubData: json.content, });
+                handleLogin({ isClub: true, clubData: json.content });
             }
             // 登錄失敗
             else {
@@ -102,7 +102,7 @@ class ClubLogin extends Component {
                 onPress: () => Toast.hide(),
             });
         });
-    }
+    };
 
     render() {
         return (
@@ -116,28 +116,28 @@ class ClubLogin extends Component {
                         color: COLOR_DIY.black.third,
                         fontSize: scale(13),
                         alignSelf: 'center',
-                    }}>{t("社團/組織賬號登錄入口，請勿使用UMPASS", { ns: 'club' })}</Text>
+                    }}>{t('社團/組織賬號登錄入口，請勿使用UMPASS', { ns: 'club' })}</Text>
 
                     {/* 賬號 */}
                     <Input
-                        placeholder='賬號 | Account'
+                        placeholder="賬號 | Account"
                         placeholderTextColor={black.third}
                         leftIcon={{ type: 'material-community', name: 'account-box', color: black.third }}
                         onChangeText={account => (accountPassword.account = account)}
-                        style={{ color: themeColor, }}
+                        style={{ color: themeColor }}
                     />
                     {/* 密碼 */}
                     <Input
-                        placeholder='密碼 | Password'
+                        placeholder="密碼 | Password"
                         placeholderTextColor={black.third}
                         leftIcon={{ type: 'material-community', name: 'shield-sword', color: black.third }}
                         onChangeText={password => (accountPassword.password = password)}
-                        style={{ color: themeColor, }}
+                        style={{ color: themeColor }}
                     />
 
                     {/* 登錄提示 */}
-                    <View style={{ alignSelf: 'center', }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                    <View style={{ alignSelf: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             {/* 選中圖標 */}
                             <CheckBox
                                 containerStyle={{

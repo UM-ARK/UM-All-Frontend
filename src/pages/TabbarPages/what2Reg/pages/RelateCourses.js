@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
     Text,
     View,
     ScrollView,
     TouchableOpacity,
     FlatList,
-} from 'react-native'
+} from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
-import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
-import CourseCard from "../component/CourseCard";
+import { UMEH_URI, UMEH_API } from '../../../../utils/pathMap';
+import CourseCard from '../component/CourseCard';
 
-import { scale } from "react-native-size-matters";
+import { scale } from 'react-native-size-matters';
 import axios from 'axios';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
@@ -27,7 +27,7 @@ export default class RelateCourses extends Component {
             course_info: undefined,
             prof_info: undefined,
             isLoading: true,
-        }
+        };
     }
 
     componentDidMount() {
@@ -43,15 +43,15 @@ export default class RelateCourses extends Component {
             // 返回存在的課程
             if (type == 'course'
                 && 'course_info' in res
-                && typeof res.course_info == 'object'
+                && typeof res.course_info === 'object'
             ) {
-                this.setState({ course_info: res.course_info })
+                this.setState({ course_info: res.course_info });
             }
             else if (type == 'prof'
                 && 'prof_info' in res
-                && typeof res.prof_info == 'object'
+                && typeof res.prof_info === 'object'
             ) {
-                this.setState({ prof_info: res.prof_info })
+                this.setState({ prof_info: res.prof_info });
             }
         } catch (error) {
             if (error.code == 'ERR_NETWORK') {
@@ -59,9 +59,9 @@ export default class RelateCourses extends Component {
                 this.props.navigation.goBack();
             }
         } finally {
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false });
         }
-    }
+    };
 
     renderProfCard = (prof_info) => {
         return <FlatList
@@ -96,10 +96,10 @@ export default class RelateCourses extends Component {
                             </View>
                         )}
                     </TouchableOpacity>
-                )
+                );
             }}
-        />
-    }
+        />;
+    };
 
     renderContent = () => {
         const { course_info, prof_info } = this.state;
@@ -110,7 +110,7 @@ export default class RelateCourses extends Component {
                 let data = course_info;
                 // 排序，開課的在前
                 data = data.sort((a, b) => b.is_offered - a.is_offered);
-                renderItem = <CourseCard data={data} mode={'what2Reg'} />
+                renderItem = <CourseCard data={data} mode={'what2Reg'} />;
             } else {
                 alert('找不到相關內容！換個關鍵字再試試吧~');
                 this.props.navigation.goBack();
@@ -129,7 +129,7 @@ export default class RelateCourses extends Component {
         }
 
         return renderItem;
-    }
+    };
 
     render() {
         const { isLoading } = this.state;

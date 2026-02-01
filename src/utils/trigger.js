@@ -7,5 +7,5 @@ export function trigger(method) {
             enableVibrateFallback: true,
             ignoreAndroidSystemSettings: true,
         }
-    )
+    );
 }

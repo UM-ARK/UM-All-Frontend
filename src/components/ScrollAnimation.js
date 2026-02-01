@@ -121,7 +121,7 @@ const ScrollAnimation = ({translateX}) => {
                         translateX,
                     },
                 ],
-            }}></Animated.View>
+            }} />
     );
 };
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, } from 'react-native';
+import { View, Text } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -50,5 +50,5 @@ export default function Loading({ progress = 0.5 }) {
                 {`${t('確保網絡正常')}\n${t('可以刷新或重啟APP再試')}`}
             </Text>
         </View>
-    )
+    );
 }

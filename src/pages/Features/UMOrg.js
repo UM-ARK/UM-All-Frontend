@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation, } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation } from 'react-native';
 import { Input } from '@rneui/themed';
 
 // 引入本地工具
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
-import { UM_API_TOKEN, UM_ORG, } from '../../utils/pathMap';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
+import { UM_API_TOKEN, UM_ORG } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import Header from '../../components/Header';
@@ -51,7 +51,7 @@ const OrgInfo = (props) => {
                 paddingBottom: verticalScale(10),
             }}>
                 {/* 點擊主部門標題可觸發折疊 */}
-                <TouchableOpacity style={{ width: '90%', }}
+                <TouchableOpacity style={{ width: '90%' }}
                     activeOpacity={0.8}
                     onPress={() => {
                         trigger();
@@ -61,11 +61,11 @@ const OrgInfo = (props) => {
                             openGoogleSearch(orgData.unitName);
                         }
                     }}>
-                    <Text style={{ ...uiStyle, fontWeight: 'bold', color: black.main, fontSize: verticalScale(16), }}>
+                    <Text style={{ ...uiStyle, fontWeight: 'bold', color: black.main, fontSize: verticalScale(16) }}>
                         {orgData.chinUnitName}
-                        <Text style={{ color: isExpanded ? black.third : themeColor, fontSize: verticalScale(12), }}>{orgData.unitCode}</Text>
+                        <Text style={{ color: isExpanded ? black.third : themeColor, fontSize: verticalScale(12) }}>{orgData.unitCode}</Text>
                         {orgData.subUnit && orgData.subUnit.length > 1 && (
-                            <Ionicons name={isExpanded ? "chevron-down-outline" : "chevron-up-outline"}
+                            <Ionicons name={isExpanded ? 'chevron-down-outline' : 'chevron-up-outline'}
                                 size={scale(14)}
                                 color={isExpanded ? black.second : themeColor} />
                         )}
@@ -79,7 +79,7 @@ const OrgInfo = (props) => {
                     style={{
                         backgroundColor: eventColor.imageCard,
                         padding: scale(9), borderRadius: scale(50),
-                        alignSelf: 'flex-start'
+                        alignSelf: 'flex-start',
                     }}
                     onPress={() => openGoogleSearch(orgData.unitName)}>
                     <Ionicons
@@ -90,7 +90,7 @@ const OrgInfo = (props) => {
             </View>
 
             {/* 子部門 */}
-            <ScrollView style={{ height: isExpanded ? 'auto' : 0, }}>
+            <ScrollView style={{ height: isExpanded ? 'auto' : 0 }}>
                 {orgData.subUnit && orgData.subUnit.map((subUnit, unit_key) => {
                     return subUnit && (
                         <TouchableOpacity
@@ -101,23 +101,23 @@ const OrgInfo = (props) => {
                                 padding: scale(5), borderRadius: scale(5),
                                 alignSelf: 'flex-start',
                             }} onPress={() => openGoogleSearch(subUnit.subUnitName)}>
-                            <Text style={{ ...uiStyle, color: black.second, }}>
+                            <Text style={{ ...uiStyle, color: black.second }}>
                                 {subUnit.chinSubUnitName}
-                                <Text style={{ color: black.third, }}>{subUnit.subUnitCode}</Text>
+                                <Text style={{ color: black.third }}>{subUnit.subUnitCode}</Text>
                             </Text>
                             <Text style={{ ...uiStyle, color: black.second, fontSize: verticalScale(10) }}>{lodash.startCase(lodash.toLower(subUnit.subUnitName))}</Text>
                         </TouchableOpacity>
-                    )
+                    );
                 })}
 
             </ScrollView>
         </View>
     );
-}
+};
 
 const UMOrg = () => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, } = theme;
+    const { bg_color, white, black, themeColor } = theme;
 
     const [orgData, setOrgData] = useState([]);
     const [displayOrgData, setDisplayOrgData] = useState([]);
@@ -134,7 +134,7 @@ const UMOrg = () => {
                     Authorization: UM_API_TOKEN,
                 },
                 signal: controller.signal,
-            })
+            });
 
             const data = res.data;
             setOrgData(data._embedded);
@@ -156,11 +156,11 @@ const UMOrg = () => {
 
         return () => {
             controller.abort();
-        }
+        };
     }, []);
 
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color, }}>
+        <View style={{ flex: 1, backgroundColor: bg_color }}>
             <Header title={t('澳大部門', { ns: 'features' })} iOSDIY={true} />
 
             {/* 搜索框 */}
@@ -187,7 +187,7 @@ const UMOrg = () => {
 
                     return matchesMainOrg || matchesSubUnit;
                 }));
-            }} ref={searchTextRef} clearButtonMode='always' />
+            }} ref={searchTextRef} clearButtonMode="always" />
 
             {/* TODO: 增加下滑刷新 */}
             {displayOrgData && displayOrgData.length > 0 ? (

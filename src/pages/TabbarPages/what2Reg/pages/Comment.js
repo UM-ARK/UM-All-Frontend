@@ -1,4 +1,4 @@
-import React, { Component, createRef } from 'react'
+import React, { Component, createRef } from 'react';
 import {
     Text, View,
     StyleSheet,
@@ -6,15 +6,15 @@ import {
     TouchableOpacity,
     FlatList,
     TouchableWithoutFeedback,
-} from 'react-native'
+} from 'react-native';
 
-import { UMEH_URI, UMEH_API } from "../../../../utils/pathMap";
+import { UMEH_URI, UMEH_API } from '../../../../utils/pathMap';
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 
-import axios from "axios";
+import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 // import Interactable from 'react-native-interactable';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -27,8 +27,8 @@ export default class Comment extends Component {
         super(props);
         this.state = {
             res: this.props.route.params,
-            isLoading: true
-        }
+            isLoading: true,
+        };
 
         this.scrollViewRef = createRef(null);
     }
@@ -49,16 +49,16 @@ export default class Comment extends Component {
     }
 
     getData = async (data) => {
-        this.setState({ isLoading: true })
+        this.setState({ isLoading: true });
         const URI = UMEH_API.GET.COURSE_COMMENT;
         const GET_URI = UMEH_URI + URI.CODE + data.New_code + URI.PROF + data.prof_name;
         try {
             const { data: res } = await axios.get(GET_URI);
             // 返回存在的課程
-            if ('course_info' in res && typeof res.course_info == 'object') {
-                this.setState({ res })
+            if ('course_info' in res && typeof res.course_info === 'object') {
+                this.setState({ res });
             } else {
-                alert('頁面不存在或出現錯誤')
+                alert('頁面不存在或出現錯誤');
             }
         } catch (error) {
             if (error.code == 'ERR_NETWORK') {
@@ -66,14 +66,14 @@ export default class Comment extends Component {
                 this.props.navigation.goBack();
             }
         } finally {
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false });
         }
-    }
+    };
 
     jumpToSearchProf = async (name) => {
         trigger();
         this.props.navigation.navigate('What2RegRelateCourses', { inputText: name, type: 'prof' });
-    }
+    };
 
     renderSchedules = (schedulesArr) => {
         return (
@@ -89,12 +89,12 @@ export default class Comment extends Component {
                             backgroundColor: white,
                             borderRadius: scale(10),
                             margin: scale(5),
-                            padding: scale(5)
+                            padding: scale(5),
                         }}>
                             <Text style={{
                                 alignSelf: 'center',
                                 fontSize: scale(11),
-                                color: black.third
+                                color: black.third,
                             }}>
                                 {itm.section}
                             </Text>
@@ -104,21 +104,21 @@ export default class Comment extends Component {
                                         <Text style={{
                                             marginRight: scale(3),
                                             fontSize: scale(10),
-                                            color: black.third
+                                            color: black.third,
                                         }}>{sectionInfo.date}</Text>
                                         <Text style={{
                                             fontSize: scale(10),
-                                            color: black.third
+                                            color: black.third,
                                         }}>{sectionInfo.time}</Text>
-                                    </View>
+                                    </View>;
                                 }
                             })}
                         </View>
-                    )
+                    );
                 }}
             />
-        )
-    }
+        );
+    };
 
     renderComments = (commentsArr) => {
         return (
@@ -161,7 +161,7 @@ export default class Comment extends Component {
                                 {content.length > 0 ? (
                                     <Text style={{
                                         fontSize: scale(12),
-                                        color: black.second
+                                        color: black.second,
                                     }}>{content}</Text>
                                 ) : (
                                     <Text style={{ color: COLOR_DIY.unread, fontSize: scale(12) }}>沒有評價</Text>
@@ -171,16 +171,16 @@ export default class Comment extends Component {
                                 <View style={{ alignSelf: 'flex-end' }}>
                                     <Text style={{
                                         fontSize: scale(10),
-                                        color: black.third
+                                        color: black.third,
                                     }}>{pub_time}</Text>
                                 </View>
                             </View>
-                        )
+                        );
                     }
                 }}
             />
-        )
-    }
+        );
+    };
 
     renderScoreStar = (score) => {
         let color = themeColor;
@@ -199,8 +199,8 @@ export default class Comment extends Component {
                 selectedColor={color}
                 showRating={false}
             />
-        )
-    }
+        );
+    };
 
     renderScore = () => {
         const {
@@ -211,7 +211,7 @@ export default class Comment extends Component {
             hard,
             reward,
             num,
-            offer_info
+            offer_info,
         } = this.state.res.prof_info;
         return (
             <>
@@ -247,11 +247,11 @@ export default class Comment extends Component {
 
                 <Text style={{
                     fontSize: scale(10),
-                    color: black.third
+                    color: black.third,
                 }}>評價總數: {num}</Text>
             </>
-        )
-    }
+        );
+    };
 
     // 渲染懸浮可拖動按鈕
     // renderGoTopButton = () => {
@@ -312,7 +312,7 @@ export default class Comment extends Component {
         const {
             name,
             num,
-            offer_info
+            offer_info,
         } = res.prof_info;
 
         let comments = [];
@@ -338,7 +338,7 @@ export default class Comment extends Component {
                         <View style={{
                             marginHorizontal: scale(5),
                             borderRadius: scale(10),
-                            alignItems: 'center'
+                            alignItems: 'center',
                         }}>
                             <Text style={{
                                 fontSize: scale(15),
@@ -387,14 +387,14 @@ export default class Comment extends Component {
                                 backgroundColor: themeColor,
                                 borderRadius: scale(10),
                                 padding: scale(10),
-                                alignItems: 'center'
+                                alignItems: 'center',
                             }}
                             onPress={() => {
                                 let data = {
                                     New_code: 'course_info' in res ? res.course_info.New_code : res.New_code,
                                     prof_name: res.prof_info.name,
-                                }
-                                this.props.navigation.navigate('What2RegNewComment', data)
+                                };
+                                this.props.navigation.navigate('What2RegNewComment', data);
                                 trigger();
                             }}
                         >
@@ -404,7 +404,7 @@ export default class Comment extends Component {
                         {/* 評論列表 */}
                         <View style={{
                             marginTop: scale(5),
-                            marginHorizontal: scale(5)
+                            marginHorizontal: scale(5),
                         }}>
                             {comments.length > 0 ?
                                 (this.renderComments(comments)) :
@@ -419,17 +419,17 @@ export default class Comment extends Component {
                     </ScrollView>
                 )}
             </View>
-        )
+        );
     }
 }
 
 const s = StyleSheet.create({
     scoreTitle: {
         fontSize: scale(10),
-        color: black.third
+        color: black.third,
     },
     scoreContainer: {
         flexDirection: 'row',
-        alignItems: 'center'
-    }
-})
+        alignItems: 'center',
+    },
+});

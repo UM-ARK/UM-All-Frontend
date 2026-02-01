@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl } fr
 
 import Header from '../../../../components/Header';
 import EventCard from '../components/EventCard';
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';
 
 import Toast from 'react-native-easy-toast';
@@ -51,9 +51,9 @@ const AllEvents = (props) => {
     }, []);
 
     useEffect(() => {
-        if (dataPage === 1) return;
-        if (isLoading) return;
-        if (noMoreData) return;
+        if (dataPage === 1) {return;}
+        if (isLoading) {return;}
+        if (noMoreData) {return;}
         getEventData(clubNum);
     }, [dataPage]);
 
@@ -99,7 +99,7 @@ const AllEvents = (props) => {
 
     // 載入更多
     const loadMoreData = () => {
-        toastRef.current && toastRef.current.show(`Data is Loading...`, 2000);
+        toastRef.current && toastRef.current.show('Data is Loading...', 2000);
         setDataPage(prev => prev + 1);
     };
 
@@ -116,7 +116,7 @@ const AllEvents = (props) => {
                     <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                         沒有更多活動了，過一段時間再來吧~
                     </Text>
-                    <Text style={{ ...uiStyle.defaultText, }}>[]~(￣▽￣)~*</Text>
+                    <Text style={{ ...uiStyle.defaultText }}>[]~(￣▽￣)~*</Text>
                 </View>
             ) : (
                 <TouchableOpacity
@@ -155,9 +155,9 @@ const AllEvents = (props) => {
                         tintColor={themeColor}
                         refreshing={isLoading}
                         onRefresh={() => {
-                            toastRef.current && toastRef.current.show(`Data is Loading...`, 2000);
+                            toastRef.current && toastRef.current.show('Data is Loading...', 2000);
                             setIsLoading(true);
-                            if (dataPage > 1) setDataPage(1);
+                            if (dataPage > 1) {setDataPage(1);}
                             setTimeout(() => {
                                 getEventData(clubNum);
                             }, 100);

@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
-import { Text, View, ScrollView, TouchableOpacity, FlatList, Alert, StyleSheet, } from 'react-native'
+import { Text, View, ScrollView, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
-import { WHAT_2_REG, ARK_WIKI_SEARCH } from "../../../../utils/pathMap";
-import { openLink } from "../../../../utils/browser";
-import { logToFirebase } from "../../../../utils/firebaseAnalytics";
-import { getCourseData } from "../../../../utils/checkCoursesKits";
-import coursePlanTime from "../../../../static/UMCourses/coursePlanTime";
+import { WHAT_2_REG, ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
+import { openLink } from '../../../../utils/browser';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import { getCourseData } from '../../../../utils/checkCoursesKits';
+import coursePlanTime from '../../../../static/UMCourses/coursePlanTime';
 
-import { scale } from "react-native-size-matters";
+import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
 import { MenuView } from '@react-native-menu/menu';
 import groupBy from 'lodash/groupBy';
 import lodash from 'lodash';
-import { t } from "i18next";
+import { t } from 'i18next';
 
 const daySorter = {
     'MON': 1,
@@ -26,7 +26,7 @@ const daySorter = {
     'FRI': 5,
     'SAT': 6,
     'SUN': 7,
-}
+};
 
 // 按星期一到星期天排序
 const daySort = (objArr) => {
@@ -59,7 +59,7 @@ const LocalCourse = (props) => {
             } finally {
                 setIsLoading(false);
             }
-        }
+        };
 
         init();
     }, []);
@@ -75,7 +75,7 @@ const LocalCourse = (props) => {
     }, [coursePlanList, courseCode]);
 
     useEffect(() => {
-        if (isLoading) return;
+        if (isLoading) {return;}
         // 預選有，但課表時間Excel沒有的課程，直接跳轉選咩課
         if (relateList.length === 0) {
             let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
@@ -84,7 +84,7 @@ const LocalCourse = (props) => {
                 navigation.goBack();
                 navigation.navigate('Tabbar', {
                     screen: 'Wiki',
-                    params: { url: URL }
+                    params: { url: URL },
                 });
             }
         } else {
@@ -128,7 +128,7 @@ const LocalCourse = (props) => {
                                             navigation.goBack();
                                             navigation.navigate('Tabbar', {
                                                 screen: 'Wiki',
-                                                params: { url: URL }
+                                                params: { url: URL },
                                             });
                                         }
                                         break;
@@ -145,7 +145,7 @@ const LocalCourse = (props) => {
                                         break;
                                     case 'add':
                                         trigger();
-                                        Alert.alert(`ARK搵課提示`, `確定添加此課程到模擬課表嗎？`, [
+                                        Alert.alert('ARK搵課提示', '確定添加此課程到模擬課表嗎？', [
                                             {
                                                 text: 'Yes', onPress: () => {
                                                     trigger();
@@ -153,12 +153,12 @@ const LocalCourse = (props) => {
                                                         navigation.goBack();
                                                         navigation.navigate('Tabbar', {
                                                             screen: 'CourseSimTab',
-                                                            params: { add: courseInfo }
+                                                            params: { add: courseInfo },
                                                         });
                                                     }
-                                                }
+                                                },
                                             },
-                                            { text: 'No', },
+                                            { text: 'No' },
                                         ]);
                                         break;
                                     case 'coursesim':
@@ -167,7 +167,7 @@ const LocalCourse = (props) => {
                                             navigation.goBack();
                                             navigation.navigate('Tabbar', {
                                                 screen: 'CourseSimTab',
-                                                params: { check: courseInfo['Course Code'] }
+                                                params: { check: courseInfo['Course Code'] },
                                             });
                                         }
                                         break;
@@ -178,22 +178,22 @@ const LocalCourse = (props) => {
                             actions={[
                                 {
                                     id: 'wiki',
-                                    title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
+                                    title: `${t('查', { ns: 'catalog' })} ARK Wiki !!!`,
                                     titleColor: themeColor,
                                 },
                                 {
                                     id: 'what2reg',
-                                    title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                                    title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                                 {
                                     id: 'coursesim',
-                                    title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
+                                    title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                                 {
                                     id: 'add',
-                                    title: `${t("添加至模擬課表", { ns: 'catalog' })}`,
+                                    title: `${t('添加至模擬課表', { ns: 'catalog' })}`,
                                     titleColor: black.third,
                                 },
                             ]}
@@ -209,12 +209,12 @@ const LocalCourse = (props) => {
                                 }}
                                 onPress={() => { trigger('rigid'); }}
                             >
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                                     <Text style={{
                                         ...uiStyle.defaultText, fontSize: scale(12), color: black.third,
                                     }}>{courseInfo.Section + ' - ' + courseInfo['Medium of Instruction']}</Text>
                                 </View>
-                                {isPE && (<View style={{ alignItems: 'center', }}>
+                                {isPE && (<View style={{ alignItems: 'center' }}>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title']}</Text>
                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title Chi']}</Text>
                                 </View>)}
@@ -225,16 +225,16 @@ const LocalCourse = (props) => {
                                 )}
                                 {/* schedulesObj[itm]內都存在Time From字段，才展示Section */}
                                 {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', }}>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                                         {schedulesObj[itm].map(sameSection => (
-                                            <View key={sameSection['Day'] + sameSection['Classroom']}
+                                            <View key={sameSection.Day + sameSection.Classroom}
                                                 style={{
                                                     margin: scale(5),
                                                     alignItems: 'center',
                                                 }}>
-                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
-                                                {'Classroom' in sameSection && sameSection['Classroom'] ? (
-                                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection.Day}</Text>
+                                                {'Classroom' in sameSection && sameSection.Classroom ? (
+                                                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection.Classroom}</Text>
                                                 ) : null}
                                                 {'Time From' in sameSection && sameSection['Time From'] ? (
                                                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
@@ -245,7 +245,7 @@ const LocalCourse = (props) => {
                                 )}
                             </TouchableOpacity>
                         </MenuView>
-                    )
+                    );
                 }}
                 ListFooterComponent={() => <View style={{ marginBottom: scale(50) }} />}
                 scrollEnabled={false}
@@ -255,7 +255,7 @@ const LocalCourse = (props) => {
 
     // 按老師分組
     const renderTeacherSchedules = (schedulesObj) => {
-        if (!relateTeacherObj) return null;
+        if (!relateTeacherObj) {return null;}
         const teacherArr = lodash.keys(relateTeacherObj);
 
         // 按老師分組的section, WANG DAWEN: ['001', '002', '003']
@@ -287,7 +287,7 @@ const LocalCourse = (props) => {
                                     navigation.goBack();
                                     navigation.navigate('Tabbar', {
                                         screen: 'Wiki',
-                                        params: { url: URL }
+                                        params: { url: URL },
                                     });
                                 }
                                 break;
@@ -304,7 +304,7 @@ const LocalCourse = (props) => {
                                 break;
                             case 'add':
                                 trigger();
-                                Alert.alert(`ARK搵課提示`, `確定添加此課程到模擬課表嗎？`, [
+                                Alert.alert('ARK搵課提示', '確定添加此課程到模擬課表嗎？', [
                                     {
                                         text: 'Yes', onPress: () => {
                                             trigger();
@@ -312,12 +312,12 @@ const LocalCourse = (props) => {
                                                 navigation.goBack();
                                                 navigation.navigate('Tabbar', {
                                                     screen: 'CourseSimTab',
-                                                    params: { add: courseInfo }
+                                                    params: { add: courseInfo },
                                                 });
                                             }
-                                        }
+                                        },
                                     },
-                                    { text: 'No', },
+                                    { text: 'No' },
                                 ]);
                                 break;
                             case 'coursesim':
@@ -326,7 +326,7 @@ const LocalCourse = (props) => {
                                     navigation.goBack();
                                     navigation.navigate('Tabbar', {
                                         screen: 'CourseSimTab',
-                                        params: { check: courseInfo['Course Code'] }
+                                        params: { check: courseInfo['Course Code'] },
                                     });
                                 }
                                 break;
@@ -337,22 +337,22 @@ const LocalCourse = (props) => {
                     actions={[
                         {
                             id: 'wiki',
-                            title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
+                            title: `${t('查', { ns: 'catalog' })} ARK Wiki !!!`,
                             titleColor: themeColor,
                         },
                         {
                             id: 'what2reg',
-                            title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                            title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                         {
                             id: 'coursesim',
-                            title: `${t("查", { ns: 'catalog' })} ${t("模擬課表", { ns: 'catalog' })}`,
+                            title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                         {
                             id: 'add',
-                            title: `${t("添加至模擬課表", { ns: 'catalog' })}`,
+                            title: `${t('添加至模擬課表', { ns: 'catalog' })}`,
                             titleColor: black.third,
                         },
                     ]}
@@ -368,26 +368,26 @@ const LocalCourse = (props) => {
                         }}
                         onPress={() => { trigger('rigid'); }}
                     >
-                        <View style={{ flexDirection: 'row', }}>
+                        <View style={{ flexDirection: 'row' }}>
                             <Text style={{
                                 ...uiStyle.defaultText, fontSize: scale(12), color: black.third,
                             }}>{courseInfo.Section + ' - ' + courseInfo['Medium of Instruction']}</Text>
                         </View>
-                        {isPE && (<View style={{ alignItems: 'center', }}>
+                        {isPE && (<View style={{ alignItems: 'center' }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title']}</Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseInfo['Course Title Chi']}</Text>
                         </View>)}
                         {schedulesObj[itm].length >= 1 && schedulesObj[itm].every(item => 'Time From' in item && item['Time From']) && (
                             <View style={{ flexDirection: 'row' }}>
                                 {schedulesObj[itm].map((sameSection, idx) => (
-                                    <View key={sameSection['Day'] + sameSection['Classroom'] + idx}
+                                    <View key={sameSection.Day + sameSection.Classroom + idx}
                                         style={{
                                             margin: scale(5),
                                             alignItems: 'center',
                                         }}>
-                                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Day']}</Text>
-                                        {'Classroom' in sameSection && sameSection['Classroom'] ? (
-                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Classroom']}</Text>
+                                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection.Day}</Text>
+                                        {'Classroom' in sameSection && sameSection.Classroom ? (
+                                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection.Classroom}</Text>
                                         ) : null}
                                         {'Time From' in sameSection && sameSection['Time From'] ? (
                                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{sameSection['Time From']} ~ {sameSection['Time To']}</Text>
@@ -402,7 +402,7 @@ const LocalCourse = (props) => {
         };
 
         return teacherArr.length > 0 && teacherArr.map(teacherName => (
-            <View style={{ margin: scale(5), }} key={teacherName}>
+            <View style={{ margin: scale(5) }} key={teacherName}>
                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(15), color: themeColor, marginLeft: scale(5) }}>{teacherName}</Text>
                 {uniqSecByTeachObj[teacherName] && uniqSecByTeachObj[teacherName].length > 0 ? (
                     <FlatList
@@ -412,7 +412,7 @@ const LocalCourse = (props) => {
                         keyExtractor={(item, idx) => teacherName + item + idx}
                     />
                 ) : (
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center', }}>
+                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>
                         No section
                     </Text>
                 )}
@@ -428,7 +428,7 @@ const LocalCourse = (props) => {
                 padding: scale(3),
                 borderRadius: scale(5),
                 marginLeft: scale(10),
-            }
+            },
         });
         return (
             <View style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center' }}>
@@ -459,18 +459,18 @@ const LocalCourse = (props) => {
                     <Loading />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5), }}>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5) }}>
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.main, textAlign: 'center', }}>{courseInfo['Course Title']}</Text>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center', }}>{courseInfo['Course Title Chi']}</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.main, textAlign: 'center' }}>{courseInfo['Course Title']}</Text>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>{courseInfo['Course Title Chi']}</Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
                                 {courseInfo['Offering Unit']}
                                 {courseInfo['Offering Department'] ? <Text>{' - ' + courseInfo['Offering Department']}</Text> : null}
                             </Text>
-                            {"\"Class For / Class Not For\" Information" in courseInfo && courseInfo["\"Class For / Class Not For\" Information"].length > 0 && (
-                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, textAlign: 'center', }}>{courseInfo["\"Class For / Class Not For\" Information"]}</Text>
+                            {'"Class For / Class Not For" Information' in courseInfo && courseInfo['"Class For / Class Not For" Information'].length > 0 && (
+                                <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third, textAlign: 'center' }}>{courseInfo['"Class For / Class Not For" Information']}</Text>
                             )}
                             {'Course Type' in courseInfo && courseInfo['Course Type'].length > 0 && (
                                 <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>{courseInfo['Course Type']}</Text>

@@ -7,7 +7,7 @@ import RootStore from './src/mobx';
 import { uiStyle } from './src/utils/uiMap';
 import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
 import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
-import { ThemeProvider, themes } from "./src/components/ThemeContext";
+import { ThemeProvider, themes } from './src/components/ThemeContext';
 import sourceCourseVersion from './src/static/UMCourses/courseVersion';
 import { getPreciseDeviceName } from './src/utils/iosModel';
 
@@ -97,7 +97,7 @@ const App = () => {
                 // 在時間差內檢查雲端數據更新
                 performCheck();
             } catch (e) {
-                Alert.alert('', `App initialization error!\nPlease contact developer.`, null, { cancelable: true })
+                Alert.alert('', 'App initialization error!\nPlease contact developer.', null, { cancelable: true });
             } finally {
                 // 報告Firebase準確的iPhone型號
                 const modelName = getPreciseDeviceName();

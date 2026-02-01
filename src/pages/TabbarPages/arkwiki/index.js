@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler, } from 'react-native';
+import { View, Text, Platform, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
 
 import { WebView } from 'react-native-webview';
 import { Header } from '@rneui/themed';
@@ -10,13 +10,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
-import TouchableScale from "react-native-touchable-scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import TouchableScale from 'react-native-touchable-scale';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { ARK_WIKI, ARK_WIKI_SEARCH, ARK_WIKI_RANDOM_PAGE } from '../../../utils/pathMap';
-import { logToFirebase } from "../../../utils/firebaseAnalytics";
-import { trigger } from "../../../utils/trigger";
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { trigger } from '../../../utils/trigger';
 
 const iconSize = scale(25);
 
@@ -28,9 +28,9 @@ const ARKWiki = (props) => {
             ...uiStyle.defaultText,
             fontSize: scale(18),
             color: themeColor,
-            fontWeight: '600'
-        }
-    })
+            fontWeight: '600',
+        },
+    });
 
     const insets = useSafeAreaInsets();
 

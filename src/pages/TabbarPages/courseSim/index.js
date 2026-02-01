@@ -17,13 +17,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from 'react-native-touchable-scale';
 import { MenuView } from '@react-native-menu/menu';
 import Toast from 'react-native-simple-toast';
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { t } from "i18next";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { t } from 'i18next';
 import { BottomSheetTextInput, BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { ScrollView, } from "react-native-gesture-handler";
+import { ScrollView } from 'react-native-gesture-handler';
 import uniq from 'lodash/uniq';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
@@ -35,10 +35,10 @@ import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
 import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
-import { openLink } from "../../../utils/browser";
-import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH, } from "../../../utils/pathMap";
-import { logToFirebase } from "../../../utils/firebaseAnalytics";
-import { trigger } from "../../../utils/trigger";
+import { openLink } from '../../../utils/browser';
+import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { trigger } from '../../../utils/trigger';
 import CustomBottomSheet from './BottomSheet';
 import { getCourseData } from '../../../utils/checkCoursesKits';
 
@@ -59,10 +59,10 @@ function parseImportData(inputText) {
 
         return matchRes.map(text => {
             // Section部份左右括號的index
-            const lbIdx = text.indexOf("(");
-            const rbIdx = text.indexOf(")");
+            const lbIdx = text.indexOf('(');
+            const rbIdx = text.indexOf(')');
             // 對於特殊的 GESB1001/1002/1003，記錄 / 從左到右第一次出現的index，不存在 / 時返回 -1
-            const slashIdx = text.indexOf("/");
+            const slashIdx = text.indexOf('/');
 
             // 定位至CourseCode後一位的index
             // 例：GESB1001/1002，courseCodeBound = 8
@@ -75,12 +75,12 @@ function parseImportData(inputText) {
 
             return {
                 'Course Code': courseCode,
-                'Section': section
+                'Section': section,
             };
         });
     }
     else {
-        return null
+        return null;
     }
 }
 
@@ -88,7 +88,7 @@ function parseImportData(inputText) {
 function toDateTime(time) {
     var [hours, minutes] = time.split(':');
     return new Date(0, 0, 0, hours, minutes); // 使用一个固定的日期
-};
+}
 
 const daySorter = {
     'MON': 1,
@@ -98,7 +98,7 @@ const daySorter = {
     'FRI': 5,
     'SAT': 6,
     'SUN': 7,
-}
+};
 // 按星期一到星期天排序
 const daySort = (objArr) => {
     return lodash.sortBy(objArr, item => daySorter[item.Day]);
@@ -221,41 +221,41 @@ function CourseSim({ route, navigation }) {
 
     // 在頁面聚焦時讀取緩存數據，用於同步課程數據
     useEffect(() => {
-        if (isFocused) { refresh() }
+        if (isFocused) { refresh(); }
     }, [isFocused]);
 
     async function refresh() {
         // 課程版本
         getCourseData('version').then(localCourseVersion => {
             if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
-                setS_courseVersion(localCourseVersion)
+                setS_courseVersion(localCourseVersion);
                 getCourseData('adddrop').then(addDropStorageData => {
                     setSCoursePlanFile(addDropStorageData.adddrop);
                     setSCoursePlanTimeFile(addDropStorageData.timetable);
-                })
+                });
             }
         });
     }
 
     /**
      * 輸入用戶選擇課程的列表，輸出用戶所有的課程課表。
-     * 
+     *
      * 輸入：課程列表，唯一性定義：Code, section. 不包含時間。
-     * 
+     *
      * 輸出：課程列表，唯一性定義：Code, section, time。
-     * 
+     *
      * @param {*} u_codeSectionList 用戶選擇課程。單個課程{"Course Code": string, "Section": string}
      */
     function handleCourseList(tempCourseSecList) {
         // Key: course code; value: List, 這周內不同時間所有的該Course Code-section的課程。
         const allCourseAllTime = lodash.chain(tempCourseSecList).map((codeSection, i) => {
             const this_courseCode = codeSection['Course Code'];
-            const this_section = codeSection['Section'];
+            const this_section = codeSection.Section;
 
             return lodash.chain(courseTimeList)
                 .filter(courseTime =>
                     courseTime['Course Code'] === this_courseCode &&
-                    courseTime['Section'] === this_section
+                    courseTime.Section === this_section
                 )
                 .value();
         }).flatten().value();
@@ -265,25 +265,25 @@ function CourseSim({ route, navigation }) {
             .mapValues(courses =>
                 lodash.chain(courses)
                     .map(courseTime => ({
-                        "Course Code": courseTime["Course Code"],
-                        "Section": courseTime["Section"],
-                        "Time From": courseTime["Time From"],
-                        "color": courseTime["color"],
+                        'Course Code': courseTime['Course Code'],
+                        'Section': courseTime.Section,
+                        'Time From': courseTime['Time From'],
+                        'color': courseTime.color,
                     }))
-                    .sortBy(course => moment(course["Time From"], "HH:mm"))
+                    .sortBy(course => moment(course['Time From'], 'HH:mm'))
                     .value()
             ).value();
-        setLocalStorage("ARK_WeekTimetable_Storage", s_allCourseAllTime); // key為 Day，value為該天的所有完整課程數組
+        setLocalStorage('ARK_WeekTimetable_Storage', s_allCourseAllTime); // key為 Day，value為該天的所有完整課程數組
 
         setAllCourseAllTime(allCourseAllTime);
         setU_codeSectionList(tempCourseSecList);
-        setLocalStorage("ARK_Timetable_Storage", tempCourseSecList); // 數組，僅包含courseCode和Section
+        setLocalStorage('ARK_Timetable_Storage', tempCourseSecList); // 數組，僅包含courseCode和Section
     }
 
     // 渲染一列（一天）的課表
     const renderDay = (day) => {
         // 獲取該天所有的課程數據
-        let dayCourseList = allCourseAllTime.filter(course => course['Day'] === day);
+        let dayCourseList = allCourseAllTime.filter(course => course.Day === day);
 
         if (dayCourseList.length > 0) {
             // 按上課時間Time From排序
@@ -322,11 +322,11 @@ function CourseSim({ route, navigation }) {
 
     /**
      * 渲染單個課表卡片
-     * 
+     *
      * @param {Object} course 單個課程對象，包含Course Code, Section, Time From, Time To等信息
-     * 
+     *
      * @param {Array} dayCourseList 當天的所有課程列表，用於計算時間差和提醒
-     * 
+     *
      * @param {number} idx 當天課程列表中的索引，用於計算時間差
      */
     const renderCourse = (course, dayCourseList, idx,) => {
@@ -335,8 +335,8 @@ function CourseSim({ route, navigation }) {
         let timeWarning = false;
 
         if (idx > 0) {
-            let lastEnd = moment(dayCourseList[idx - 1]['Time To'], "HH:mm:ss");
-            let courseBegin = moment(course['Time From'], "HH:mm:ss");
+            let lastEnd = moment(dayCourseList[idx - 1]['Time To'], 'HH:mm:ss');
+            let courseBegin = moment(course['Time From'], 'HH:mm:ss');
             let secDiff = courseBegin.diff(lastEnd, 'seconds');
             let minuteDiff = secDiff / 60;
             let hourDiff = (minuteDiff / 60).toFixed(2);
@@ -360,7 +360,7 @@ function CourseSim({ route, navigation }) {
                         <Text style={{ fontWeight: 'bold', color: timeWarning ? unread : themeColor }}>
                             {hourDiff >= 1 ? `${hourDiff}` : `${minuteDiff}`}
                         </Text>
-                        {hourDiff >= 1 ? `小時` : `分鐘`}後
+                        {hourDiff >= 1 ? '小時' : '分鐘'}後
                         {timeWarning ? <Text>{'\n🆘課程衝突🆘'}</Text> : null}
                     </Text>
                 );
@@ -368,8 +368,8 @@ function CourseSim({ route, navigation }) {
         }
 
         if (idx === 0 && dayCourseList.length > 1) {
-            let firstEnd = moment(course['Time To'], "HH:mm:ss");
-            let secondBegin = moment(dayCourseList[idx + 1]['Time From'], "HH:mm:ss");
+            let firstEnd = moment(course['Time To'], 'HH:mm:ss');
+            let secondBegin = moment(dayCourseList[idx + 1]['Time From'], 'HH:mm:ss');
             let secDiff = secondBegin.diff(firstEnd, 'seconds');
             if (secDiff < 0) {
                 timeWarning = true;
@@ -377,14 +377,14 @@ function CourseSim({ route, navigation }) {
         }
 
         // 判斷是否下午
-        let timeHH = moment(course['Time From'], "HH").format("HH");
+        let timeHH = moment(course['Time From'], 'HH').format('HH');
         let timeReminderText = null;
         timeReminderText = timeHH > 12 ? (timeHH >= 18 ?
             `🌜${t('晚上', { ns: 'timetable' })}🌛`
             : `☕️${t('下午', { ns: 'timetable' })}☕️`) : null;
 
         if (timeHH > 12 && dayCourseList.length > 1 && idx > 0) {
-            let preTimeHH = moment(dayCourseList[idx - 1]['Time From'], "HH").format("HH");
+            let preTimeHH = moment(dayCourseList[idx - 1]['Time From'], 'HH').format('HH');
             if (preTimeHH >= 18 && timeHH >= 18) {
                 timeReminderText = null;
             }
@@ -439,10 +439,10 @@ function CourseSim({ route, navigation }) {
 
                         case 'del':
                             trigger();
-                            Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}的所有Section嗎？`,
+                            Alert.alert('', `要在模擬課表中刪除${course['Course Code']}的所有Section嗎？`,
                                 [
                                     {
-                                        text: "Yes",
+                                        text: 'Yes',
                                         onPress: () => {
                                             trigger();
                                             const tempList = lodash.filter(u_codeSectionList,
@@ -454,19 +454,19 @@ function CourseSim({ route, navigation }) {
                                         style: 'destructive',
                                     },
                                     {
-                                        text: "No",
+                                        text: 'No',
                                     },
                                 ],
-                                { cancelable: true, }
+                                { cancelable: true }
                             );
                             break;
 
                         case 'drop':
                             trigger();
-                            Alert.alert(``, `要在模擬課表中刪除${course['Course Code']}-${course['Section']}嗎？`,
+                            Alert.alert('', `要在模擬課表中刪除${course['Course Code']}-${course.Section}嗎？`,
                                 [
                                     {
-                                        text: "Drop",
+                                        text: 'Drop',
                                         onPress: () => {
                                             trigger();
                                             dropCourse(course);
@@ -474,10 +474,10 @@ function CourseSim({ route, navigation }) {
                                         style: 'destructive',
                                     },
                                     {
-                                        text: "取消",
+                                        text: '取消',
                                     },
                                 ],
-                                { cancelable: true, }
+                                { cancelable: true }
                             );
                             break;
 
@@ -488,33 +488,33 @@ function CourseSim({ route, navigation }) {
                 actions={[
                     {
                         id: 'wiki',
-                        title: `${t("查", { ns: 'catalog' })} ARK Wiki !!!`,
+                        title: `${t('查', { ns: 'catalog' })} ARK Wiki !!!`,
                         titleColor: themeColor,
                     },
                     {
                         id: 'what2reg',
-                        title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                        title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'official',
-                        title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
+                        title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'section',
-                        title: `${t("查", { ns: 'catalog' })} ${t("Section / 老師", { ns: 'catalog' })}`,
+                        title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     ...(hasDuplicate ? [{
                         id: 'del',
-                        title: `${t("刪除所有", { ns: 'timetable' })} ${course['Course Code']}`,
+                        title: `${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`,
                         attributes: { destructive: true },
                         image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
                     }] : []),
                     {
                         id: 'drop',
-                        title: `${t("刪除", { ns: 'timetable' })} ${course['Course Code']}-${course['Section']}`,
+                        title: `${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`,
                         attributes: { destructive: true },
                         image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
                     },
@@ -556,7 +556,7 @@ function CourseSim({ route, navigation }) {
 
                     {/* Section */}
                     <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.8 }}>
-                        {course['Section']}
+                        {course.Section}
                     </Text>
 
                     {/* 課程名稱 */}
@@ -564,7 +564,7 @@ function CourseSim({ route, navigation }) {
                         ...uiStyle.defaultText,
                         color: black.main,
                         textAlign: 'center',
-                        opacity: 0.4
+                        opacity: 0.4,
                     }} numberOfLines={4}>
                         {course['Course Title']}
                     </Text>
@@ -574,9 +574,9 @@ function CourseSim({ route, navigation }) {
                         ...uiStyle.defaultText,
                         color: black.main,
                         fontWeight: 'bold',
-                        opacity: 0.5
+                        opacity: 0.5,
                     }}>
-                        {course['Classroom']}
+                        {course.Classroom}
                     </Text>
 
                     {/* 上課時間 */}
@@ -609,7 +609,7 @@ function CourseSim({ route, navigation }) {
             // 將解析結果導入課表
             handleCourseList(parseRes);
         } else {
-            Alert.alert(``, `您輸入的格式有誤，\n有正確全選複製Timetable嗎？`);
+            Alert.alert('', '您輸入的格式有誤，\n有正確全選複製Timetable嗎？');
         }
     };
 
@@ -621,8 +621,8 @@ function CourseSim({ route, navigation }) {
             ...lodash.filter(u_codeSectionList, i => i['Course Code'] !== course['Course Code']),
             {
                 'Course Code': course['Course Code'],
-                'Section': course['Section'],
-            }
+                'Section': course.Section,
+            },
         ];
 
         handleCourseList(tempList);
@@ -635,7 +635,7 @@ function CourseSim({ route, navigation }) {
             ...lodash.map(Object.keys(sectionObj), key => ({
                 'Course Code': courseCode,
                 'Section': key,
-            }))
+            })),
         ];
 
         handleCourseList(tempList);
@@ -646,12 +646,12 @@ function CourseSim({ route, navigation }) {
 
         // 過濾掉指定 Code + Section 的課程
         const newList = lodash.filter(u_codeSectionList, i =>
-            !(i['Course Code'] === course['Course Code'] && i['Section'] === course['Section'])
+            !(i['Course Code'] === course['Course Code'] && i.Section === course.Section)
         );
 
         handleCourseList(newList); // 更新課表清單
 
-        Toast.show(`已刪除 ${course['Course Code']}-${course['Section']}`);
+        Toast.show(`已刪除 ${course['Course Code']}-${course.Section}`);
     };
 
     const clearCourse = () => {
@@ -660,7 +660,7 @@ function CourseSim({ route, navigation }) {
         // 關閉 BottomSheet
         bottomSheetRef?.current?.close();
 
-        Alert.alert(``, `確定要清空當前的模擬課表嗎？`, [
+        Alert.alert('', '確定要清空當前的模擬課表嗎？', [
             {
                 text: '確定清空',
                 onPress: () => {
@@ -673,8 +673,8 @@ function CourseSim({ route, navigation }) {
                     setSearchText(null);
 
                     // 清空本地儲存
-                    setLocalStorage("ARK_Timetable_Storage", []);
-                    setLocalStorage("ARK_WeekTimetable_Storage", []);
+                    setLocalStorage('ARK_Timetable_Storage', []);
+                    setLocalStorage('ARK_WeekTimetable_Storage', []);
 
                     // 滾動到頂部
                     verScroll?.current?.scrollTo({ y: 0 });
@@ -691,17 +691,17 @@ function CourseSim({ route, navigation }) {
     const renderFirstUse = () => {
         return (
             <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5) }}>
-                <Text style={{ ...s.firstUseText }}>{`\n${t("如何開始使用模擬課表？", { ns: 'timetable' })}\n`}</Text>
+                <Text style={{ ...s.firstUseText }}>{`\n${t('如何開始使用模擬課表？', { ns: 'timetable' })}\n`}</Text>
 
                 {/* Add課按鈕提示 */}
                 <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t("方法", { ns: 'timetable' })} 1：`}</Text>
-                    {`${t("右上角按鈕手動“Add”！", { ns: 'timetable' })}\n`}
+                    <Text style={{ color: themeColor }}>{`${t('方法', { ns: 'timetable' })} 1：`}</Text>
+                    {`${t('右上角按鈕手動“Add”！', { ns: 'timetable' })}\n`}
                 </Text>
 
                 <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t("方法", { ns: 'timetable' })} 2：`}</Text>
-                    {`${t("全選、複製Timetable，", { ns: 'timetable' })}\n${t("粘貼到下方輸入框，", { ns: 'timetable' })}\n${t("一鍵導入！", { ns: 'timetable' })}`}
+                    <Text style={{ color: themeColor }}>{`${t('方法', { ns: 'timetable' })} 2：`}</Text>
+                    {`${t('全選、複製Timetable，', { ns: 'timetable' })}\n${t('粘貼到下方輸入框，', { ns: 'timetable' })}\n${t('一鍵導入！', { ns: 'timetable' })}`}
                 </Text>
 
                 {/* 跳轉ISW按鈕 */}
@@ -713,7 +713,7 @@ function CourseSim({ route, navigation }) {
                             openLink(UM_ISW);
                         }}
                     >
-                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t("進入舊ISW複製", { ns: 'timetable' })}`}</Text>
+                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t('進入舊ISW複製', { ns: 'timetable' })}`}</Text>
                     </TouchableOpacity>
                 )}
 
@@ -747,7 +747,7 @@ E11-0000
                         Keyboard.dismiss();
                         importCourseData();
                     }}
-                    clearButtonMode='always'
+                    clearButtonMode="always"
                 />
 
                 <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third }}>
@@ -768,10 +768,10 @@ E11-0000
 
                 {/* 聯絡資訊與致敬 */}
                 <Text style={{ ...s.firstUseText, fontSize: scale(12), marginTop: scale(25) }}>
-                    {`如有問題，立即聯繫umacark@gmail.com`}
+                    {'如有問題，立即聯繫umacark@gmail.com'}
                 </Text>
                 <Text style={{ ...s.firstUseText, fontSize: scale(12) }}>
-                    {`\n靈感源自kchomacau, Raywong前輩的\n“課表模擬”開源倉庫！`}
+                    {'\n靈感源自kchomacau, Raywong前輩的\n“課表模擬”開源倉庫！'}
                 </Text>
             </View>
         );
@@ -885,7 +885,7 @@ E11-0000
                 {/* 時間選擇器 */}
                 <DateTimePickerModal
                     isVisible={showTimePicker}
-                    mode='time'
+                    mode="time"
                     date={
                         timePickerMode === 'from'
                             ? moment(timeFilterFrom, 'HH:mm').toDate()
@@ -986,7 +986,7 @@ E11-0000
                         }}
                         onChangeText={(text) => {
                             setSearchText(text);
-                            if (text.length === 0) setPerSearchText(null);
+                            if (text.length === 0) {setPerSearchText(null);}
                         }}
                         value={searchText}
                         selectTextOnFocus
@@ -1030,7 +1030,7 @@ E11-0000
                                     });
                                 }
 
-                                if (!dayInFilter) return null;
+                                if (!dayInFilter) {return null;}
 
                                 return (
                                     <TouchableOpacity
@@ -1078,11 +1078,11 @@ E11-0000
                                     }}
                                 >
                                     <Text style={{ ...s.searchResultText, color: unread, fontWeight: 'bold' }}>
-                                        {`${t("刪除所有", { ns: 'timetable' })} ${i['Course Code']}`}
+                                        {`${t('刪除所有', { ns: 'timetable' })} ${i['Course Code']}`}
                                     </Text>
                                 </TouchableOpacity>
 
-                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t("全部放入課表", { ns: 'timetable' })}`}</Text>
+                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t('全部放入課表', { ns: 'timetable' })}`}</Text>
 
                                 <TouchableOpacity
                                     style={s.courseCard}
@@ -1104,7 +1104,7 @@ E11-0000
                                     <Text style={s.searchResultText}>{i['Course Title Chi']}</Text>
                                 </TouchableOpacity>
 
-                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t("選取單節", { ns: 'timetable' })}`}</Text>
+                                <Text style={{ ...s.searchResultText, fontWeight: 'bold' }}>{`↓ ${t('選取單節', { ns: 'timetable' })}`}</Text>
                                 <BottomSheetFlatList
                                     data={Object.keys(sectionObj)}
                                     style={{ marginTop: scale(5), width: '100%' }}
@@ -1134,7 +1134,7 @@ E11-0000
                                             }
                                         }
 
-                                        if (!dayInFilter) return null;
+                                        if (!dayInFilter) {return null;}
 
                                         return (
                                             <TouchableOpacity
@@ -1159,7 +1159,7 @@ E11-0000
                                                 </Text>
                                                 {sortedSection.map(itm => (
                                                     <Text style={s.searchResultText}>
-                                                        {`${itm['Day']} ${itm['Time From']} ~ ${itm['Time To']}`}
+                                                        {`${itm.Day} ${itm['Time From']} ~ ${itm['Time To']}`}
                                                     </Text>
                                                 ))}
                                             </TouchableOpacity>
@@ -1178,9 +1178,9 @@ E11-0000
 
     /**
      * 返回搜索候選所需的課程列表
-     * 
+     *
      * @param {string} inputText - 用戶輸入的搜索文本
-     * 
+     *
      * @returns {Array} - 符合搜索條件的課程列表
      */
     function handleSearchFilterCourse(inputText) {
@@ -1200,14 +1200,14 @@ E11-0000
         return (
             <View style={{ width: '100%', alignItems: 'center', marginBottom: scale(5) }}>
                 <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
-                    {t(`檢查課表版本!`, { ns: 'catalog' })}
+                    {t('檢查課表版本!', { ns: 'catalog' })}
                 </Text>
                 <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
-                    {t(`僅作模擬!`, { ns: 'timetable' })}
+                    {t('僅作模擬!', { ns: 'timetable' })}
                 </Text>
             </View>
         );
-    }
+    };
 
     const courseTimeList = useMemo(() => {
         return s_coursePlanTimeFile.Courses;
@@ -1293,7 +1293,7 @@ E11-0000
                     }}
                     onPress={() => {
                         trigger();
-                        if (Keyboard.isVisible()) Keyboard.dismiss();
+                        if (Keyboard.isVisible()) {Keyboard.dismiss();}
 
                         if (hasOpenCourseSearch) {
                             bottomSheetRef.current?.close();

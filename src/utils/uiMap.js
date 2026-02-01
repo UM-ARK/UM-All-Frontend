@@ -90,20 +90,20 @@ export const TIME_TABLE_COLOR = isLight ?
         '#6e5766',
         '#5e5743',
         '#30444a',
-        '#4c6160'
-    ]
+        '#4c6160',
+    ];
 
 
 export const VERSION_EMOJI = {
     ve_Left: '⛱️',
     ve_Right: '🕶️',
-}
+};
 
 export const uiStyle = StyleSheet.create({
     defaultText: {
         fontWeight: 'normal',
         fontSize: verticalScale(12),
-        includeFontPadding: false
+        includeFontPadding: false,
     },
     toastContainer: {
         backgroundColor: COLOR_DIY.themeColor,

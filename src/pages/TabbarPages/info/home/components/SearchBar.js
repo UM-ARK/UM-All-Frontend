@@ -14,7 +14,7 @@ import {
     UIManager,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
 import { getFunctionArr } from '../../../features/FeatureList';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics.js';
@@ -39,12 +39,12 @@ const PLACEHOLDER_TEXTS = [
     '校園巴士',
     '圖書館',
     '打印餘額',
-    '失物認領'
+    '失物認領',
 ];
 
 const SearchBar = ({ navigation }) => {
     const { theme } = useTheme();
-    const { white, black, viewShadow, secondThemeColor, themeColor, bg_color, } = theme;
+    const { white, black, viewShadow, secondThemeColor, themeColor, bg_color } = theme;
     const { t, i18n } = useTranslation();
     const screenIsFocused = useIsFocused();
 
@@ -153,7 +153,7 @@ const SearchBar = ({ navigation }) => {
             marginRight: scale(8),
             width: scale(15),
             alignItems: 'center',
-        }
+        },
     });
 
     const [inputText, setInputText] = useState('');
@@ -174,7 +174,7 @@ const SearchBar = ({ navigation }) => {
                     section.fn.forEach(item => {
                         features.push({
                             ...item,
-                            category: section.title // 保留分類信息
+                            category: section.title, // 保留分類信息
                         });
                     });
                 }
@@ -280,12 +280,12 @@ const SearchBar = ({ navigation }) => {
             const query = encodeURIComponent(`site:umall.one OR site:um.edu.mo ${inputText}`);
             const url = `https://www.google.com/search?q=${query}`;
             openLink({ URL: url, mode: 'fullScreen' });
-        }, 50)
+        }, 50);
     };
 
     // 5. 渲染搜索結果下拉 (Overlay)
     const renderDropdown = () => {
-        if (!isFocused || inputText === '') return null;
+        if (!isFocused || inputText === '') {return null;}
 
         return (
             <View style={styles.dropdownContainer}>
@@ -326,7 +326,7 @@ const SearchBar = ({ navigation }) => {
             <View style={styles.container}>
                 <View style={[
                     styles.inputWrapper,
-                    isFocused && styles.inputWrapperFocused // 聚焦時的視覺反饋
+                    isFocused && styles.inputWrapperFocused, // 聚焦時的視覺反饋
                 ]}>
                     <Ionicons name="search" size={scale(15)} color={isFocused ? themeColor : `${black.third}70`} style={{ marginLeft: scale(8) }} />
 

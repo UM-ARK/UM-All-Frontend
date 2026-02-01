@@ -90,7 +90,7 @@ const IntegratedWebView = ({
         setOutsideCurrentURL(currentURL);
         setCanGoBack(canGoBack);
         setCanGoForward(canGoForward);
-    }
+    };
 
     return (
         <>

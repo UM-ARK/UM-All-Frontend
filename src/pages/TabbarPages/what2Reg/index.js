@@ -11,9 +11,9 @@ import {
     Keyboard,
     Alert,
     LayoutAnimation,
-} from "react-native";
+} from 'react-native';
 
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH, } from "../../../utils/pathMap";
+import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH } from '../../../utils/pathMap';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -23,24 +23,24 @@ import coursePlanTime from '../../../static/UMCourses/coursePlanTime';
 import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
 import CourseCard from './component/CourseCard';
 import { openLink } from '../../../utils/browser';
-import { getLocalStorage, } from '../../../utils/storageKits';
+import { getLocalStorage } from '../../../utils/storageKits';
 import { getCourseData, checkCloudCourseVersion } from '../../../utils/checkCoursesKits';
 import CustomBottomSheet from '../courseSim/BottomSheet';
 
-import { scale, verticalScale } from "react-native-size-matters";
+import { scale, verticalScale } from 'react-native-size-matters';
 import { Header, Dialog } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import TouchableScale from "react-native-touchable-scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import TouchableScale from 'react-native-touchable-scale';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MenuView } from '@react-native-menu/menu';
 import moment from 'moment';
-import { t } from "i18next";
+import { t } from 'i18next';
 import ActionSheet from 'react-native-actions-sheet';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
-import { BottomSheetScrollView, } from '@gorhom/bottom-sheet';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useIsFocused } from '@react-navigation/native';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
@@ -62,7 +62,7 @@ const unitMap = {
     'MSC': ' - ',
     'RC': '書院 - Residential College',
     'HC': '榮譽學院 - Honours College',
-}
+};
 
 // 部門/學系名中文參考
 const depaMap = {
@@ -111,7 +111,7 @@ const depaMap = {
     'EME': '機電工程系',
     'MAT': '數學系',
     'OST': '海洋科學與技術系',
-}
+};
 
 // GE課中文參考
 const geClassMap = {
@@ -119,13 +119,13 @@ const geClassMap = {
     'GELH': '文學與人文 - Literature and Humanities',
     'GESB': '社會與行為 - Society and Behaviour',
     'GEST': '科學和技術 - Science and Technology',
-}
+};
 
 // add drop, pre enroll 中文參考
 const adpeMap = {
     'ad': '增退選',
     'preEnroll': '預選課',
-}
+};
 const modeENStr = {
     'ad': 'Add Drop',
     'preEnroll': 'Pre Enroll',
@@ -136,14 +136,14 @@ const defaultFilterOptions = {
     facultyName: 'FST',
     depaName: 'ECE',
     GE: 'GEST',
-}
+};
 const CMGEList = ['CMRE', 'GE'];
 
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 // 判斷字符串是否包含中文
 function hasChinese(str) {
-    return /[\u4E00-\u9FA5]+/g.test(str)
+    return /[\u4E00-\u9FA5]+/g.test(str);
 }
 
 // 設置本地緩存
@@ -177,10 +177,10 @@ const What2Reg = (props) => {
             alignSelf: 'center',
             marginLeft: scale(5),
             textAlign: 'center',
-        }
-    })
+        },
+    });
 
-    const [inputText, setInputText] = useState("");
+    const [inputText, setInputText] = useState('');
     const [inputOK, setInputOK] = useState(false);
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
     const [s_course_mode, setCourse_mode] = useState('ad'); // preEnroll
@@ -232,7 +232,7 @@ const What2Reg = (props) => {
                     return nextFilterOptions.mode;
                 }
                 return prev;
-            })
+            });
             updateFilterOptions(nextFilterOptions);
         } catch (e) {
             Alert.alert('ARK Courses error, 請聯繫開發者！', e);
@@ -241,25 +241,25 @@ const What2Reg = (props) => {
 
     // 在頁面聚焦時讀取緩存數據，用於同步課程數據
     useEffect(() => {
-        if (isFocused) { refresh() }
+        if (isFocused) { refresh(); }
     }, [isFocused]);
 
     async function refresh() {
         // 課程版本
         getCourseData('version').then(localCourseVersion => {
             if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
-                setS_courseVersion(localCourseVersion)
+                setS_courseVersion(localCourseVersion);
                 getCourseData('adddrop').then(addDropStorageData => {
                     setS_coursePlan(addDropStorageData.adddrop);
                     setS_coursePlanTime(addDropStorageData.timetable);
-                })
+                });
             }
         });
     }
 
     const updateFilterOptions = async (nextOptions) => {
         try {
-            if (lodash.isEqual(nextOptions, filterOptions)) { return }
+            if (lodash.isEqual(nextOptions, filterOptions)) { return; }
             setFilterOptions(nextOptions);
             setLocalOptions(nextOptions);
         } catch (error) {
@@ -269,11 +269,11 @@ const What2Reg = (props) => {
 
     /**
      * 開設課程列表，根據當前課程模式（Add Drop 或 Pre Enroll）選擇對應的課程數據
-     * 
+     *
      * s_course_mode: 'ad' | 'preEnroll'
-     * 
+     *
      * s_coursePlan: coursePlan, // Add Drop課程計劃
-     * 
+     *
      * s_offerCourses: offerCourses, // Pre Enroll課程計劃
      */
     const offerCourseList = useMemo(() => {
@@ -299,7 +299,7 @@ const What2Reg = (props) => {
 
     /**
      * 對開課數據進行分類，根據學院名分組
-     * 
+     *
      * {FAH: [...], FBA: [...], FST: [...], FHS: [...], FSS: [...], FLL: [...], IAPME: [...], ICMS: [...], IME: [...], MSC: [...], RC: [...], HC: [...]}
      */
     const offerCourseByFaculty = useMemo(() => {
@@ -308,7 +308,7 @@ const What2Reg = (props) => {
 
     /**
      * 對開課數據進行分類，根據部門/學系名分組
-     * 
+     *
      * {AIM: [...], ECE: [...], CIS: [...], CEE: [...], ...}
      */
     const offerCourseByDepa = useMemo(() => {
@@ -405,7 +405,7 @@ const What2Reg = (props) => {
                                 fontSize: scale(12),
                             }}>{modeENStr[itm]}</Text>
                         </TouchableScale>
-                    )
+                    );
                 }}
                 ListHeaderComponent={() =>
                     <Text style={{ ...s.classItmTitleText }}>
@@ -471,7 +471,7 @@ const What2Reg = (props) => {
                 numColumns={offerFacultyList.length}
                 columnWrapperStyle={
                     offerFacultyList.length > 1 ? {
-                        flexWrap: 'wrap', justifyContent: 'center'
+                        flexWrap: 'wrap', justifyContent: 'center',
                     } : null
                 }
                 contentContainerStyle={{ alignItems: 'center' }}
@@ -499,7 +499,7 @@ const What2Reg = (props) => {
                             ...uiStyle.defaultText,
                             color: itm === filterOptions.facultyName ? themeColor : black.third,
                             fontWeight: itm === filterOptions.facultyName ? '900' : 'normal',
-                            fontSize: scale(12)
+                            fontSize: scale(12),
                         }}>{itm}</Text>
                     </TouchableScale>
                 )}
@@ -539,7 +539,7 @@ const What2Reg = (props) => {
                         alignSelf: 'center',
                         color: filterOptions.depaName === itm ? themeColor : black.third,
                         fontWeight: filterOptions.depaName === itm ? '900' : 'normal',
-                        fontSize: scale(12)
+                        fontSize: scale(12),
                     }}>{itm}</Text>
                 </TouchableScale>
             )}
@@ -567,7 +567,7 @@ const What2Reg = (props) => {
                 {renderADPESwitch()}
 
                 {/* 渲染CMRE GE選擇 */}
-                <View style={{ width: '100%', marginTop: scale(10), }}>
+                <View style={{ width: '100%', marginTop: scale(10) }}>
                     {renderCMGESwitch()}
                 </View>
 
@@ -579,7 +579,7 @@ const What2Reg = (props) => {
                             {geClassMap[filterOptions.GE]}
                         </Text>
                         {/* 具體GE課程分類按鈕 */}
-                        <View style={{ flexDirection: 'row', marginVertical: scale(5), }}>
+                        <View style={{ flexDirection: 'row', marginVertical: scale(5) }}>
                             {offerGEList.length > 0 && offerGEList.map(itm =>
                                 <TouchableScale
                                     key={itm}
@@ -598,7 +598,7 @@ const What2Reg = (props) => {
                                         ...uiStyle.defaultText,
                                         color: filterOptions.GE === itm ? white : black.third,
                                         fontWeight: filterOptions.GE === itm ? '900' : 'normal',
-                                        fontSize: scale(12)
+                                        fontSize: scale(12),
                                     }}>{itm}</Text>
                                 </TouchableScale>
                             )}
@@ -608,7 +608,7 @@ const What2Reg = (props) => {
                     <View style={{ marginTop: scale(10), width: '100%' }}>
                         {offerFacultyDepaListObj ? renderFacultySwitch() : null}
                         {offerDepaList.length > 0 ? (
-                            <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: scale(10), }}>
+                            <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: scale(10) }}>
                                 {/* 展示學系中文名稱 */}
                                 {filterOptions.depaName in depaMap ?
                                     <Text style={{ ...s.classItmTitleText, marginBottom: scale(-5) }}>
@@ -658,7 +658,7 @@ const What2Reg = (props) => {
                     }}
                     value={inputText}
                     selectTextOnFocus
-                    placeholder={t("試試ECE or Electrical or 電氣", { ns: 'catalog' })}
+                    placeholder={t('試試ECE or Electrical or 電氣', { ns: 'catalog' })}
                     placeholderTextColor={black.third}
                     ref={textInputRef}
                     onFocus={() => trigger()}
@@ -720,17 +720,17 @@ const What2Reg = (props) => {
                 actions={[
                     {
                         id: 'wiki',
-                        title: `${t("查", { ns: 'catalog' })} ARK Wiki`,
+                        title: `${t('查', { ns: 'catalog' })} ARK Wiki`,
                         titleColor: themeColor,
                     },
                     {
                         id: 'what2reg',
-                        title: `${t("查", { ns: 'catalog' })} ${t("選咩課", { ns: 'catalog' })}`,
+                        title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                     {
                         id: 'official',
-                        title: `${t("查", { ns: 'catalog' })} ${t("官方", { ns: 'catalog' })}`,
+                        title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
                         titleColor: black.third,
                     },
                 ]}
@@ -741,7 +741,7 @@ const What2Reg = (props) => {
                         backgroundColor: inputOK ? themeColor : disabled,
                         borderRadius: scale(6),
                         padding: scale(7), paddingHorizontal: scale(8),
-                        alignItems: 'center'
+                        alignItems: 'center',
                     }}
                     disabled={!inputOK}
                     onPress={() => trigger()}
@@ -765,7 +765,7 @@ const What2Reg = (props) => {
                 ...viewShadow,
             }}>
                 {firstLetterList.map(itm =>
-                    <TouchableScale key={itm} style={{ padding: scale(3), }}
+                    <TouchableScale key={itm} style={{ padding: scale(3) }}
                         onPress={() => {
                             trigger();
                             scrollViewRef.current && scrollViewRef.current.scrollTo({
@@ -825,7 +825,7 @@ const What2Reg = (props) => {
                 return itm['Course Code'].toUpperCase().indexOf(inputText) !== -1
                     || itm['Course Title'].toUpperCase().indexOf(inputText) !== -1
                     || itm['Teacher Information'].toUpperCase().indexOf(inputText) !== -1
-                    || (itm['Day'] && itm['Day'].toUpperCase().indexOf(inputText) !== -1)
+                    || (itm.Day && itm.Day.toUpperCase().indexOf(inputText) !== -1)
                     || (itm['Offering Department'] && itm['Offering Department'].toUpperCase().indexOf(inputText) !== -1)
                     || itm['Offering Unit'].toUpperCase().indexOf(inputText) !== -1
                     || itm['Course Title Chi'].indexOf(inputText) !== -1;
@@ -867,14 +867,14 @@ const What2Reg = (props) => {
         return (
             <View style={{ width: '100%', alignItems: 'center', marginBottom: scale(5) }}>
                 <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
-                    {t(`檢查課表版本!`, { ns: 'catalog' })}
+                    {t('檢查課表版本!', { ns: 'catalog' })}
                 </Text>
                 <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
-                    {t(`以官網課表Excel為準!`, { ns: 'catalog' })}
+                    {t('以官網課表Excel為準!', { ns: 'catalog' })}
                 </Text>
             </View>
         );
-    }
+    };
 
     const renderBottomSheet = () => {
         const now = moment();
@@ -913,7 +913,7 @@ const What2Reg = (props) => {
 
                         const isToday = moment().isoWeekday() === dayList.indexOf(day) + 1;
 
-                        const sortedTimes = lodash.sortBy(Object.keys(finalResult), time => moment(time, "HH:mm").toDate());
+                        const sortedTimes = lodash.sortBy(Object.keys(finalResult), time => moment(time, 'HH:mm').toDate());
                         const sortedResult = sortedTimes.map(time => ({ time, num: finalResult[time] }));
                         console.log(day, 'sortedResult', sortedResult);
 
@@ -922,7 +922,7 @@ const What2Reg = (props) => {
                             borderRadius: verticalScale(8), padding: verticalScale(3),
                         }}>
                             {/* 星期幾 */}
-                            <View style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', }}>
+                            <View style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
                                 <View style={{
                                     alignSelf: 'flex-start',
                                     borderBottomColor: isToday ? themeColor : black.second,
@@ -981,15 +981,15 @@ const What2Reg = (props) => {
                                                 color: textColor,
                                             }}>{item.num}</Text>
                                         </View>
-                                    )
+                                    );
                                 })}
                             </View>
-                        </View>)
+                        </View>);
                     })}
                 </BottomSheetScrollView>
             </BottomSheetScrollView>
-        )
-    }
+        );
+    };
 
     // 搜索候選課程
     const searchFilterCourse = useMemo(() => {
@@ -1001,7 +1001,7 @@ const What2Reg = (props) => {
     return (
         <View style={{
             flex: 1, backgroundColor: bg_color,
-            alignItems: 'center', justifyContent: 'center'
+            alignItems: 'center', justifyContent: 'center',
         }}>
             <Header
                 backgroundColor={bg_color}
@@ -1061,7 +1061,7 @@ const What2Reg = (props) => {
                             fontWeight: 'bold',
                             fontSize: scale(16),
                         }}>
-                            {t("手動檢查課表數據更新", { ns: 'catalog' })}
+                            {t('手動檢查課表數據更新', { ns: 'catalog' })}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -1092,7 +1092,7 @@ const What2Reg = (props) => {
                 onBackdropPress={handleDialogClose}
                 statusBarTranslucent={true}
                 overlayStyle={{
-                    backgroundColor: bg_color
+                    backgroundColor: bg_color,
                 }}
             >
                 <Dialog.Loading />
@@ -1102,10 +1102,10 @@ const What2Reg = (props) => {
                 ref={scrollViewRef}
                 style={{ width: '100%' }}
                 stickyHeaderIndices={[1]}
-                keyboardDismissMode='on-drag'
+                keyboardDismissMode="on-drag"
             >
                 {/* 頁面標題欄 */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3), }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3) }}>
                     {/* 更新數據按鈕 */}
                     <TouchableOpacity
                         style={{
@@ -1122,7 +1122,7 @@ const What2Reg = (props) => {
                         <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>{t('更新')}</Text>
                     </TouchableOpacity>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                         {/* ARK Logo */}
                         <Image
                             source={require('../../../static/img/logo.png')}
@@ -1207,14 +1207,14 @@ const What2Reg = (props) => {
                 <View style={{
                     margin: scale(10),
                     padding: scale(10),
-                    alignItems: 'center'
+                    alignItems: 'center',
                 }}>
                     <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>知識無價，評論只供參考~</Text>
                 </View>
 
                 <TouchableOpacity style={{
                     marginTop: scale(10),
-                    alignItems: 'center'
+                    alignItems: 'center',
                 }}
                     onPress={handleUserAgreePress}
                 >
@@ -1235,7 +1235,7 @@ const What2Reg = (props) => {
             </CustomBottomSheet>
 
         </View>
-    )
-}
+    );
+};
 
 export default What2Reg;

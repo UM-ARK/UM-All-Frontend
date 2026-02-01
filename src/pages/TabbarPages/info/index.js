@@ -7,7 +7,6 @@ import HomePage from './home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';
-import AboutPage from './AboutPage';
 
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -18,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 const Tab = createMaterialTopTabNavigator();
 
 const tabWidth = verticalScale(25);
-const numOfTabs = 5;
+const numOfTabs = 4;
 
 export default function NewsScreen() {
     const insets = useSafeAreaInsets();
@@ -103,15 +102,7 @@ export default function NewsScreen() {
                         tabPress: () => trigger(),
                     })}
                 />
-                <Tab.Screen
-                    name="AboutPage"
-                    component={AboutPage}
-                    options={{ title: t('TOPTAB_ABOUT') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
             </Tab.Navigator>
         </View>
     );
-};
+}

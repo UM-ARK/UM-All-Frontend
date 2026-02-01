@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
     Text,
     View,
@@ -6,17 +6,17 @@ import {
     TouchableOpacity,
     FlatList,
     Linking,
-} from 'react-native'
+} from 'react-native';
 
 import { COLOR_DIY } from '../../../../utils/uiMap';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
 import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
-import { UMEH_URI, UMEH_API, WHAT_2_REG } from "../../../../utils/pathMap";
+import { UMEH_URI, UMEH_API, WHAT_2_REG } from '../../../../utils/pathMap';
 
 import axios from 'axios';
-import { scale } from "react-native-size-matters";
+import { scale } from 'react-native-size-matters';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const { themeColor, secondThemeColor, black, white, viewShadow } = COLOR_DIY;
@@ -27,7 +27,7 @@ export default class Course extends Component {
         course_info: undefined,
         prof_info: undefined,
         isLoading: true,
-    }
+    };
 
     componentDidMount() {
         this.getData();
@@ -40,12 +40,12 @@ export default class Course extends Component {
         try {
             const { data: res } = await axios.get(GET_URI);
             // 返回存在的課程
-            if ('course_info' in res && typeof res.course_info == 'object'
+            if ('course_info' in res && typeof res.course_info === 'object'
             ) {
                 this.setState({
                     course_info: res.course_info,
                     prof_info: res.prof_info,
-                })
+                });
             }
         } catch (error) {
             if (error.code == 'ERR_NETWORK') {
@@ -53,15 +53,15 @@ export default class Course extends Component {
                 this.props.navigation.goBack();
             }
         } finally {
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false });
         }
-    }
+    };
 
     jumpToProf = (data) => {
         trigger();
-        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(data.New_code) + '/' + encodeURIComponent(data.prof_name)
+        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(data.New_code) + '/' + encodeURIComponent(data.prof_name);
         openLink(URI);
-    }
+    };
 
     // 渲染可選section
     renderSchedules = (schedulesArr) => {
@@ -80,16 +80,16 @@ export default class Course extends Component {
                             <Text style={{
                                 alignSelf: 'center',
                                 fontSize: scale(9),
-                                color: black.third
+                                color: black.third,
                             }}>
                                 {itm.section}
                             </Text>
                         </View>
-                    )
+                    );
                 }}
             />
-        )
-    }
+        );
+    };
 
     renderProfList = () => {
         const { course_info, prof_info } = this.state;
@@ -117,7 +117,7 @@ export default class Course extends Component {
                                     New_code: course_info.New_code,
                                     prof_name: itm.name,
                                     prof_info: itm,
-                                })
+                                });
                             }}
                         >
                             <Text style={{
@@ -135,17 +135,17 @@ export default class Course extends Component {
                                 <Text style={{
                                     fontSize: scale(10),
                                     color: itm.result >= 3.34 ? COLOR_DIY.success : COLOR_DIY.warning,
-                                    alignSelf: 'center'
+                                    alignSelf: 'center',
                                 }}>
                                     {itm.num} 條評價
                                 </Text>
                             )}
                         </TouchableOpacity>
-                    )
+                    );
                 }}
             />
-        )
-    }
+        );
+    };
 
     render() {
         const { course_info, prof_info, isLoading, courseCode } = this.state;
@@ -204,7 +204,7 @@ export default class Course extends Component {
                                 ? this.renderProfList()
                                 : <View style={{
                                     margin: scale(10),
-                                    alignSelf: 'center'
+                                    alignSelf: 'center',
                                 }}>
                                     <Text style={{ fontSize: scale(12), color: black.third }}>暫無授課教授</Text>
                                 </View>
@@ -215,6 +215,6 @@ export default class Course extends Component {
                     </ScrollView>
                 )}
             </View>
-        )
+        );
     }
 }

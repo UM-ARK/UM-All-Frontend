@@ -14,11 +14,11 @@ import {
     Linking,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { clubTagMap } from '../../../../utils/clubMap';
 import { setAPPInfo } from '../../../../utils/storageKits';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, POST, MAIL, } from '../../../../utils/pathMap';
+import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, POST, MAIL } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { handleLogout } from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
@@ -52,7 +52,7 @@ const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 const ClubDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
     const styles = StyleSheet.create({
         cardContainer: {
             backgroundColor: white,
@@ -233,10 +233,10 @@ const ClubDetail = (props) => {
             if (json.message === 'success') {
                 setToastColor(success);
                 setIsFollow(true);
-                toastRef.current.show(`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`, 2000);
+                toastRef.current.show('感謝 Follow ！❥(^_-)\n有最新動態會提醒您！', 2000);
             } else if (json.code === '400') {
                 setToastColor(warning);
-                toastRef.current.show(`您已經關注過了~`, 2000);
+                toastRef.current.show('您已經關注過了~', 2000);
             }
         } catch (err) {
             console.log('err', err);
@@ -257,7 +257,7 @@ const ClubDetail = (props) => {
             if (json.message === 'success') {
                 setToastColor(themeColor);
                 setIsFollow(false);
-                toastRef.current.show(`有緣再見！o(╥﹏╥)o`, 2000);
+                toastRef.current.show('有緣再見！o(╥﹏╥)o', 2000);
             }
         } catch (err) {
             console.log('err', err);
@@ -405,7 +405,7 @@ const ClubDetail = (props) => {
                             <Image
                                 source={clubData?.logo_url}
                                 style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
-                                contentFit='contain'
+                                contentFit="contain"
                             />
                         </View>
                     </TouchableWithoutFeedback>
