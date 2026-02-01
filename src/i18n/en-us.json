@@ -261,5 +261,38 @@
     },
     "club": {
         "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS"
+    },
+    "setting": {
+        "Settings": "Settings",
+        "Appearance": "Appearance",
+        "Theme": "Theme",
+        "Language": "Language",
+        "Light": "Light",
+        "Dark": "Dark",
+        "System": "System",
+        "Application": "Application",
+        "Clear Cache": "Clear Cache",
+        "Check Update": "Check Update",
+        "About": "About",
+        "Version": "Version",
+        "Open Source": "Open Source",
+        "Common Issues": "Common Issues",
+        "Privacy Policy": "Privacy Policy",
+        "User Agreement": "User Agreement",
+        "Donate": "Donate",
+        "Feedback": "Feedback",
+        "Update Plan": "Update Plan",
+        "Activity": "Activity",
+        "Contact": "Contact",
+        "Official Website": "Official Website",
+        "Email": "Email",
+        "Clear Cache Confirm": "Clear Cache Confirm",
+        "Clear Cache Message": "Clearing cache will delete all local data, including course schedule data. Are you sure you want to continue?",
+        "Cancel": "Cancel",
+        "Confirm": "Confirm",
+        "Latest Version": "You are already on the latest version",
+        "Guest": "Guest",
+        "Student": "Student",
+        "Organization": "Organization"
     }
 }

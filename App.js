@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Dimensions, Alert, useColorScheme } from 'react-native';
+import { Image, Dimensions, Alert, Appearance } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -49,17 +49,59 @@ const performCheck = async () => {
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
-    const isLight = useColorScheme() === 'light';
-    const theme = themes[isLight ? 'light' : 'dark'];
+    const [appTheme, setAppTheme] = useState(themes.light);
+    const [isThemeLoaded, setIsThemeLoaded] = useState(false);
+
+    // 加載保存的主題偏好
+    useEffect(() => {
+        const loadSavedTheme = async () => {
+            try {
+                const savedMode = await getLocalStorage('themePreference');
+                const systemColorScheme = Appearance.getColorScheme();
+                let effectiveTheme;
+
+                if (savedMode !== undefined && savedMode !== null) {
+                    const parsedMode = parseInt(savedMode, 10);
+                    switch (parsedMode) {
+                        case 1: // 強制淺色
+                            effectiveTheme = themes.light;
+                            break;
+                        case 2: // 強制深色
+                            effectiveTheme = themes.dark;
+                            break;
+                        case 0: // 跟隨系統
+                        default:
+                            effectiveTheme = themes[systemColorScheme] || themes.light;
+                    }
+                } else {
+                    // 默認跟隨系統
+                    effectiveTheme = themes[systemColorScheme] || themes.light;
+                }
+
+                setAppTheme(effectiveTheme);
+            } catch (error) {
+                console.error('Failed to load theme in App:', error);
+            } finally {
+                setIsThemeLoaded(true);
+            }
+        };
+
+        loadSavedTheme();
+    }, []);
+
+    const theme = appTheme;
 
     // 開屏動畫
     useEffect(() => {
+        // 等待主題加載完成後再開始計時消失開屏
+        if (!isThemeLoaded) return;
+
         const timer = setTimeout(() => {
             setIsLoaded(true);
         }, 500);
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [isThemeLoaded]);
 
     // 初始化與監聽
     useEffect(() => {

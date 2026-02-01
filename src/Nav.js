@@ -1,6 +1,6 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { Component } from 'react';
-import { Platform, Text } from "react-native";
+import { Platform, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -20,18 +20,19 @@ import AllEvents from './pages/TabbarPages/info/club/AllEvents';
 import Bus from './pages/Features/Bus';
 import CarPark from './pages/Features/CarPark';
 import UMOrg from './pages/Features/UMOrg';
+import SettingPage from './pages/TabbarPages/SettingPage';
 
 import TestScreen from './test/test';
 
 // 創建一個頁面導航棧
 const Stack = Platform.select({
     android: createStackNavigator(),
-    default: createNativeStackNavigator()
+    default: createNativeStackNavigator(),
 });
 // 頭部標題配置：http://www.himeizi.cn/reactnavigation/api/navigators/createStackNavigator.html#options
 
 Text.defaultProps = {
-    allowFontScaling: false
+    allowFontScaling: false,
 };
 
 const Nav = () => {
@@ -84,6 +85,7 @@ const Nav = () => {
                 {/* 普通左右壓動畫組 */}
                 <Stack.Group>
                     <Stack.Screen name="Webviewer" component={Webviewer} />
+                    <Stack.Screen name="SettingPage" component={SettingPage} />
                 </Stack.Group>
 
                 {/* 測試頁 */}

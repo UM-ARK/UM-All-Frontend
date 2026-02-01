@@ -68,7 +68,9 @@ i18n
             useSuspense: false, // 避免在加載時白屏
         },
         defaultNS: 'common',
-        fallbackNS: ['home', 'about', 'wiki', 'harbor', 'catalog', 'timetable', 'features', 'club'],
+        fallbackNS: ['home', 'about', 'wiki', 'harbor', 'catalog', 'timetable', 'features', 'club', 'setting'],
+        nsSeparator: ':',
+        keySeparator: false,
     });
 
 // 用法：

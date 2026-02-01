@@ -1,9 +1,17 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { Appearance, StatusBar, StyleSheet } from 'react-native';
 import { COLOR_DIY, isLight } from '../utils/uiMap';
 import { verticalScale } from 'react-native-size-matters';
+import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 export const ThemeContext = createContext();
+
+// 主題模式常量
+export const THEME_MODE = {
+    SYSTEM: 0,  // 跟隨系統
+    LIGHT: 1,   // 強制淺色
+    DARK: 2,    // 強制深色
+};
 
 // 定义主题配置
 const getColorDiy = (isLight) => ({
@@ -109,29 +117,84 @@ export const themes = {
 };
 // TODO: uiMap.js剩餘的部分可以考慮移到ThemeContext.js中，這樣可以統一管理主題相關的顏色和樣式。
 
+// 根據主題模式和系統顏色方案計算實際主題
+const getEffectiveTheme = (themeMode, systemColorScheme) => {
+    switch (themeMode) {
+        case THEME_MODE.LIGHT:
+            return themes.light;
+        case THEME_MODE.DARK:
+            return themes.dark;
+        case THEME_MODE.SYSTEM:
+        default:
+            return themes[systemColorScheme] || themes.light;
+    }
+};
+
+// 根據主題模式判斷是否為淺色模式
+const getIsLight = (themeMode, systemColorScheme) => {
+    switch (themeMode) {
+        case THEME_MODE.LIGHT:
+            return true;
+        case THEME_MODE.DARK:
+            return false;
+        case THEME_MODE.SYSTEM:
+        default:
+            return systemColorScheme === 'light';
+    }
+};
+
 export const ThemeProvider = ({ children }) => {
     const systemColorScheme = Appearance.getColorScheme();
+    const [themeMode, setThemeMode] = useState(THEME_MODE.SYSTEM);
     const [theme, setTheme] = useState(themes[systemColorScheme] || themes.light);
-    const [isLight, setIsLight] = useState(systemColorScheme === 'light');
+    const [isLightMode, setIsLightMode] = useState(systemColorScheme === 'light');
 
+    // 加載保存的主題偏好設置
     useEffect(() => {
-        const listener = Appearance.addChangeListener(({ colorScheme }) => {
-            const newTheme = themes[colorScheme] || themes.light;
-            setTheme(newTheme);
-            setIsLight(colorScheme === 'light');
-        });
-        return () => listener.remove();
+        const loadThemePreference = async () => {
+            try {
+                const savedMode = await getLocalStorage('themePreference');
+                if (savedMode !== undefined && savedMode !== null) {
+                    const parsedMode = parseInt(savedMode, 10);
+                    if (!isNaN(parsedMode) && parsedMode >= 0 && parsedMode <= 2) {
+                        setThemeMode(parsedMode);
+                        setTheme(getEffectiveTheme(parsedMode, Appearance.getColorScheme()));
+                        setIsLightMode(getIsLight(parsedMode, Appearance.getColorScheme()));
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load theme preference:', error);
+            }
+        };
+        loadThemePreference();
     }, []);
 
-    const toggleTheme = () => {
-        const newMode = isLight ? 'light' : 'dark';
-        const newTheme = themes[newMode];
-        setTheme(newTheme);
-    };
+    // 監聽系統顏色方案變化（僅在 SYSTEM 模式下生效）
+    useEffect(() => {
+        const listener = Appearance.addChangeListener(({ colorScheme }) => {
+            if (themeMode === THEME_MODE.SYSTEM) {
+                const newTheme = themes[colorScheme] || themes.light;
+                setTheme(newTheme);
+                setIsLightMode(colorScheme === 'light');
+            }
+        });
+        return () => listener.remove();
+    }, [themeMode]);
+
+    // 設置主題模式
+    const setThemeModeWithStorage = useCallback(async (mode) => {
+        setThemeMode(mode);
+        const effectiveTheme = getEffectiveTheme(mode, Appearance.getColorScheme());
+        setTheme(effectiveTheme);
+        setIsLightMode(getIsLight(mode, Appearance.getColorScheme()));
+        await setLocalStorage('themePreference', mode);
+    }, []);
 
     const themeContextValue = {
         theme,
-        toggleTheme,
+        themeMode,
+        setThemeMode: setThemeModeWithStorage,
+        isLight: isLightMode,
     };
 
     return (

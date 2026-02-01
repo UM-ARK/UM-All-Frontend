@@ -3,12 +3,12 @@ import {
     ScrollView, Text, View, TouchableOpacity, Linking, Platform, Alert,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
-import { ARK_HARBOR_FEEDBACK, MAIL, } from '../../../utils/pathMap';
-import { logToFirebase } from "../../../utils/firebaseAnalytics";
-import { openLink } from "../../../utils/browser";
-import { trigger } from "../../../utils/trigger";
-import CustomBottomSheet from "../courseSim/BottomSheet";
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
+import { ARK_HARBOR_FEEDBACK, MAIL } from '../../../utils/pathMap';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { openLink } from '../../../utils/browser';
+import { trigger } from '../../../utils/trigger';
+import CustomBottomSheet from '../courseSim/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 
 import { Header } from '@rneui/themed';
@@ -19,9 +19,9 @@ import { FlatGrid } from 'react-native-super-grid';
 import { Image } from 'expo-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Toast from "react-native-simple-toast";
-import TouchableScale from "react-native-touchable-scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from 'react-native-simple-toast';
+import TouchableScale from 'react-native-touchable-scale';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 function Index({ navigation }) {
@@ -122,7 +122,7 @@ function Index({ navigation }) {
 
     // BottomSheet內容渲染
     const renderBottomSheet = () => {
-        if (!bottomSheetInfo) return null;
+        if (!bottomSheetInfo) {return null;}
         const { go_where, webview_param, describe } = bottomSheetInfo;
         const haveLink = (go_where === 'Webview' || go_where === 'Linking');
         return (
@@ -130,7 +130,7 @@ function Index({ navigation }) {
                 {describe && <Text style={{
                     ...uiStyle.defaultText,
                     color: black.main,
-                    textAlign: 'center'
+                    textAlign: 'center',
                 }} selectable>{describe}</Text>}
                 {haveLink && <TouchableOpacity
                     style={{
@@ -162,23 +162,23 @@ function Index({ navigation }) {
             {
                 text: 'Harbor⭐️', onPress: () => {
                     openLink(ARK_HARBOR_FEEDBACK);
-                }
+                },
             },
             {
                 text: 'Email', onPress: () => {
                     Clipboard.setString(MAIL);
                     Toast.show(t('已複製Mail到剪貼板！'));
                     Linking.openURL(mailMes);
-                }
+                },
             },
-            { text: 'No', },
+            { text: 'No' },
         ]);
-    }
+    };
 
     const handleSettingsPress = () => {
         trigger();
-        navigation.navigate('NewsTabbar', { screen: 'AboutPage' });
-    }
+        navigation.navigate('SettingPage');
+    };
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
@@ -232,7 +232,7 @@ function Index({ navigation }) {
                         <Text style={{
                             fontSize: verticalScale(18),
                             color: black.main,
-                            fontWeight: '700'
+                            fontWeight: '700',
                         }}>{t('服務一覽', { ns: 'features' })}</Text>
                     </View>
 

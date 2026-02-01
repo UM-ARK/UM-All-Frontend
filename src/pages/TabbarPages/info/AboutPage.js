@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, StyleSheet, } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, StyleSheet } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import HomeCard from './home/components/HomeCard';
 import {
@@ -23,11 +23,12 @@ import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const IMG_WIDTH = scale(160);
 const iconSize = verticalScale(25);
 
-const AboutPage = () => {
+const AboutPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { black, themeColor, white, bg_color, themeColorUltraLight } = theme;
     const s = StyleSheet.create({
@@ -75,7 +76,7 @@ const AboutPage = () => {
                         fontWeight: 'bold',
                         marginLeft: verticalScale(5),
                     }}>
-                        {t("ABOUT")} ARK ALL
+                        {t('ABOUT')} ARK ALL
                     </Text>
                 </View>
 
@@ -83,11 +84,11 @@ const AboutPage = () => {
                 <HomeCard>
                     {/* 應用版本號 */}
                     <Text style={{ ...s.bodyText }}>
-                        {t("APP Version", { ns: 'about' })}
+                        {t('APP Version', { ns: 'about' })}
                         <Text style={{ ...s.highlightText }}>{packageInfo.version}</Text>
                     </Text>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ ...s.bodyText }}>
                             {t('Language Setting', { ns: 'about' })}
                         </Text>
@@ -136,10 +137,12 @@ const AboutPage = () => {
                             trigger();
                             Alert.alert(
                                 t('重要提示', { ns: 'about' }),
-                                `${t('您可能需要重新加載圖片，會消耗流量！', { ns: 'about' })}\n${t('課表數據和版本將被還原，你需要再進行手動更新！', { ns: 'about' })}\n${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
+                                `${t('您可能需要重新加載圖片，會消耗流量！', { ns: 'about' })}
+${t('課表數據和版本將被還原，你需要再進行手動更新！', { ns: 'about' })}
+${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
                                 [
                                     {
-                                        text: "Yes",
+                                        text: 'Yes',
                                         onPress: async () => {
                                             trigger();
                                             await AsyncStorage.clear();
@@ -149,10 +152,10 @@ const AboutPage = () => {
                                         style: 'destructive',
                                     },
                                     {
-                                        text: "No",
+                                        text: 'No',
                                         onPress: () => {
                                             trigger();
-                                        }
+                                        },
                                     },
                                 ]
                             );
@@ -167,12 +170,12 @@ const AboutPage = () => {
                 {/* 提示資訊 */}
                 <HomeCard>
                     <Text style={{ ...s.bodyText }}>
-                        {t("ARK Describe 1", { ns: 'about' })}
+                        {t('ARK Describe 1', { ns: 'about' })}
                     </Text>
                     {/* 開源地址 */}
-                    <View style={{ flexDirection: 'row', }}>
+                    <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...s.bodyText }}>
-                            {t("ARK Describe 4_1", { ns: 'about' })}
+                            {t('ARK Describe 4_1', { ns: 'about' })}
                             <Text style={{ ...s.highlightText }}
                                 onPress={() => {
                                     trigger();
@@ -182,18 +185,18 @@ const AboutPage = () => {
                                 Github
                             </Text>
                             <Text style={{ ...s.bodyText }}>
-                                {t("ARK Describe 4_2", { ns: 'about' })}
+                                {t('ARK Describe 4_2', { ns: 'about' })}
                             </Text>
                         </Text>
                     </View>
                     <Text style={{ ...s.bodyText }}>
-                        {t("ARK Describe 5", { ns: 'about' })}
+                        {t('ARK Describe 5', { ns: 'about' })}
                     </Text>
 
                     {/* 官網 */}
                     <View style={{ flexDirection: 'row', marginTop: scale(5) }}>
                         <Text style={{ ...s.bodyText }}>
-                            {t("Official Website", { ns: 'about' })}
+                            {t('Official Website', { ns: 'about' })}
                             <Text style={{ ...s.highlightText }} onPress={() => {
                                 trigger();
                                 openLink(BASE_HOST);
@@ -205,7 +208,7 @@ const AboutPage = () => {
                     {/* Email */}
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...s.bodyText }}>
-                            {`Email: `}
+                            {'Email: '}
                             <Text style={{ ...s.highlightText }}
                                 selectable
                                 onPress={() => {
@@ -223,7 +226,7 @@ const AboutPage = () => {
                         }}
                         style={{ marginTop: scale(5) }}
                     >
-                        <Text style={{ ...s.highlightText }}>{t("Donate", { ns: 'about' })}</Text>
+                        <Text style={{ ...s.highlightText }}>{t('Donate', { ns: 'about' })}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => {
@@ -232,7 +235,7 @@ const AboutPage = () => {
                         }}
                         style={{ marginTop: scale(5) }}
                     >
-                        <Text style={{ ...s.highlightText }}>{t("Issues", { ns: 'about' })}</Text>
+                        <Text style={{ ...s.highlightText }}>{t('Issues', { ns: 'about' })}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => {
@@ -241,7 +244,7 @@ const AboutPage = () => {
                         }}
                         style={{ marginTop: scale(5) }}
                     >
-                        <Text style={{ ...s.highlightText }}>{t("Activity", { ns: 'about' })}</Text>
+                        <Text style={{ ...s.highlightText }}>{t('Activity', { ns: 'about' })}</Text>
                     </TouchableOpacity>
                 </HomeCard>
 
@@ -262,7 +265,7 @@ const AboutPage = () => {
                             trigger();
                             openLink(USUAL_Q);
                         }}>
-                        <Text style={{ ...s.highlightText }}>{`${t("Common Issues", { ns: 'about' })}`}</Text>
+                        <Text style={{ ...s.highlightText }}>{`${t('Common Issues', { ns: 'about' })}`}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -271,7 +274,7 @@ const AboutPage = () => {
                             trigger();
                             openLink(USER_AGREE);
                         }}>
-                        <Text style={{ ...s.highlightText }}>{`${t("Privacy Policy & User Agreement", { ns: 'about' })}`}</Text>
+                        <Text style={{ ...s.highlightText }}>{`${t('Privacy Policy & User Agreement', { ns: 'about' })}`}</Text>
                     </TouchableOpacity>
                 </HomeCard>
             </ScrollView>
