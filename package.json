@@ -35,6 +35,7 @@
     "@sbaiahmed1/react-native-blur": "^0.1.2",
     "axios": "^1.13.2",
     "expo": "^54.0.0",
+    "expo-blur": "~15.0.8",
     "expo-build-properties": "~1.0.10",
     "expo-device": "~8.0.10",
     "expo-file-system": "~19.0.21",
