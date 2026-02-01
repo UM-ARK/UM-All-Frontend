@@ -47,6 +47,41 @@ This project uses Expo SDK 54 with Continuous Native Generation (CNG) workflow. 
 3. **Configuration in app.json**: Most native settings are configured in app.json
 4. **Expo Development Builds**: Use `expo run:ios` or `expo run:android` to create development builds
 
+## Language Requirements
+
+### 注釋語言 (Comment Language)
+- **所有代碼注釋必須使用繁體中文**
+- 函數/組件的 JSDoc 註釋使用繁體中文描述功能
+- 複雜邏輯的說明註釋使用繁體中文
+
+### APP 文本語言 (APP Text Language)
+- **APP 介面中顯示的所有中文文本必須使用繁體中文**
+- 包括：按鈕文字、提示信息、標題、對話框內容等
+- 例外：技術術語、品牌名稱、API 返回的原始數據
+
+### 示例 (Examples)
+```javascript
+// ✅ 正確：繁體中文注釋
+// 獲取用戶資料並更新本地存儲
+const fetchUserData = async () => {
+    // 發送 API 請求
+    const response = await axios.get(BASE_URI + GET.USER_INFO);
+};
+
+// ❌ 錯誤：簡體中文或英文注釋（除非是 JSDoc 類型）
+// 获取用户数据
+// fetch user data
+
+// ✅ APP 文本使用繁體中文
+Alert.alert('確認刪除', '您確定要刪除這個項目嗎？', [
+    {text: '取消', style: 'cancel'},
+    {text: '確認刪除', style: 'destructive'},
+]);
+
+// ❌ 錯誤：簡體中文
+// Alert.alert('确认删除', '您确定要删除这个项目吗？')
+```
+
 ## Code Style Guidelines
 
 ### Import Conventions
