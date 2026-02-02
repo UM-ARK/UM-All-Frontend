@@ -1224,10 +1224,15 @@
   resolved "https://mirrors.huaweicloud.com/repository/npm/@babel/runtime/-/runtime-7.28.4.tgz#a70226016fabe25c5783b2f22d3e1c9bc5ca3326"
   integrity sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==
 
-"@babel/runtime@^7.23.2", "@babel/runtime@^7.25.0", "@babel/runtime@^7.25.6", "@babel/runtime@^7.27.6":
+"@babel/runtime@^7.23.2", "@babel/runtime@^7.25.0", "@babel/runtime@^7.25.6":
   version "7.28.3"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.28.3.tgz#75c5034b55ba868121668be5d5bb31cc64e6e61a"
   integrity sha512-9uIQ10o0WGdpP6GDhXcdOJPJuDgFtIDtN/9+ArJQ2NAfAmiuhTQdzkaTGR33v43GYS2UrSA0eX2pPPHoFVvpxA==
+
+"@babel/runtime@^7.28.4":
+  version "7.28.6"
+  resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.28.6.tgz#d267a43cb1836dc4d182cce93ae75ba954ef6d2b"
+  integrity sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==
 
 "@babel/template@^7.25.0", "@babel/template@^7.27.1", "@babel/template@^7.27.2", "@babel/template@^7.3.3":
   version "7.27.2"
@@ -1328,6 +1333,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@callstack/liquid-glass@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.npmjs.org/@callstack/liquid-glass/-/liquid-glass-0.7.0.tgz#d48dc2d348cac4da11178382fc445a9d7b2825e7"
+  integrity sha512-ztPuQnXG3z9kPWT0srf+yIbVZih/aifbynzormDzsFMWR6IQk3e0h8DEYic3sgW7PUa7A/GyaBBCpq10ZZvboA==
+
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"
@@ -1384,10 +1394,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@expo/cli@54.0.22":
-  version "54.0.22"
-  resolved "https://registry.npmmirror.com/@expo/cli/-/cli-54.0.22.tgz#e686cfb7238e0bc2afcbf65140239b3c08030961"
-  integrity sha512-BTH2FCczhJLfj1cpfcKrzhKnvRLTOztgW4bVloKDqH+G3ZSohWLRFNAIz56XtdjPxBbi2/qWhGBAkl7kBon/Jw==
+"@expo/cli@54.0.23":
+  version "54.0.23"
+  resolved "https://registry.npmjs.org/@expo/cli/-/cli-54.0.23.tgz#e8a7dc4e1f2a8a5361afd80bcc352014b57a87ac"
+  integrity sha512-km0h72SFfQCmVycH/JtPFTVy69w6Lx1cHNDmfLfQqgKFYeeHTjx7LVDP4POHCtNxFP2UeRazrygJhlh4zz498g==
   dependencies:
     "@0no-co/graphql.web" "^1.0.8"
     "@expo/code-signing-certificates" "^0.0.6"
@@ -2710,16 +2720,16 @@
     invariant "^2.2.4"
 
 "@react-native-firebase/analytics@^23.8.4":
-  version "23.8.4"
-  resolved "https://registry.npmmirror.com/@react-native-firebase/analytics/-/analytics-23.8.4.tgz#a5eaf833563cce091b38ce4180e6732811ce73d5"
-  integrity sha512-ZWYDOOA7v7YizEs0rd4S/GDtKW8jH2or8n9dEYntqsfa/LER3lu3kkFesjJ8cJU88is0H33899ntDTIa6Ltvmg==
+  version "23.8.5"
+  resolved "https://registry.npmjs.org/@react-native-firebase/analytics/-/analytics-23.8.5.tgz#e9c7e609a4d76d1840beafbdeb6dcfcfa8abb1f8"
+  integrity sha512-jbpz3EgGnWHS2rz/tu47og6ZZ04lwcK4gJmczMqwmsHabXPxT9IpxqlCYlTfNyqKSlc6seSQa9p0rmwXMBpeig==
   dependencies:
     superstruct "^2.0.2"
 
 "@react-native-firebase/app@^23.8.4":
-  version "23.8.4"
-  resolved "https://registry.npmmirror.com/@react-native-firebase/app/-/app-23.8.4.tgz#96913406cf9c2fe0f8584d1512661d3103442a7c"
-  integrity sha512-xURXijgL5gH5O6X7aUXKS5TObDT/aqWpdJpyUNWvRtG2cUxDRcLaSfJnSJP0TREBFAP1Dntdms2kmt5l2oSYZg==
+  version "23.8.5"
+  resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-23.8.5.tgz#a691e924efaf042786b796d4a7ee14e62e03a72f"
+  integrity sha512-kjrnkfhMoYs1wbT+4srONtlK6clM1Vi5WlCg1iQ4q0Jno0ExGTdTrXrCOPWDTGoNhiZGjGVUakirnIcnzYyEyQ==
   dependencies:
     firebase "12.8.0"
 
@@ -3019,83 +3029,92 @@
     invariant "^2.2.4"
     nullthrows "^1.1.1"
 
-"@react-navigation/bottom-tabs@^7.10.1":
-  version "7.10.1"
-  resolved "https://registry.npmmirror.com/@react-navigation/bottom-tabs/-/bottom-tabs-7.10.1.tgz#8d28e623f1f503c0e66b55837fa03a78a20ea2a8"
-  integrity sha512-MirOzKEe/rRwPSE9HMrS4niIo0LyUhewlvd01TpzQ1ipuXjH2wJbzAM9gS/r62zriB6HMHz2OY6oIRduwQJtTw==
+"@react-navigation/bottom-tabs@^8.0.0-alpha.8":
+  version "8.0.0-alpha.8"
+  resolved "https://registry.npmjs.org/@react-navigation/bottom-tabs/-/bottom-tabs-8.0.0-alpha.8.tgz#8a9ff26532031bf7b6fe9a7575c89f1a51a6a1c3"
+  integrity sha512-yav3aA+WzH3+HSRurPaBHoMCG0s8SV2YY9cjxZviHj5tWtQ/TNcxHfYQYPQCGNOQnwsDUcQqpd2jmrizr42alQ==
   dependencies:
-    "@react-navigation/elements" "^2.9.5"
+    "@react-navigation/elements" "^3.0.0-alpha.8"
     color "^4.2.3"
-    sf-symbols-typescript "^2.1.0"
+    sf-symbols-typescript "^2.2.0"
 
-"@react-navigation/core@^7.14.0":
-  version "7.14.0"
-  resolved "https://registry.npmmirror.com/@react-navigation/core/-/core-7.14.0.tgz#d24f93d424ab33f645262dc4775e4708aa3d9a8b"
-  integrity sha512-tMpzskBzVp0E7CRNdNtJIdXjk54Kwe/TF9ViXAef+YFM1kSfGv4e/B2ozfXE+YyYgmh4WavTv8fkdJz1CNyu+g==
+"@react-navigation/core@^8.0.0-alpha.3":
+  version "8.0.0-alpha.3"
+  resolved "https://registry.npmjs.org/@react-navigation/core/-/core-8.0.0-alpha.3.tgz#72867ffa477b8191c6a8ee4290e295df6aa994ad"
+  integrity sha512-ZxOVmiGtCfMJeSIyQmI/DZv/69XnipjqMnh7jY/2zB0CBjU4+I0IN8+c1siwt+MTFGCpEX+Pn5U5e5EMzKZYng==
   dependencies:
-    "@react-navigation/routers" "^7.5.3"
+    "@react-navigation/routers" "^8.0.0-alpha.1"
     escape-string-regexp "^4.0.0"
     fast-deep-equal "^3.1.3"
     nanoid "^3.3.11"
     query-string "^7.1.3"
     react-is "^19.1.0"
-    use-latest-callback "^0.2.4"
+    use-latest-callback "^0.3.2"
     use-sync-external-store "^1.5.0"
 
 "@react-navigation/elements@^2.9.5":
   version "2.9.5"
-  resolved "https://registry.npmmirror.com/@react-navigation/elements/-/elements-2.9.5.tgz#29f68c4975351724dcfe1d3bdc76c4d6dc65fc33"
+  resolved "https://registry.npmjs.org/@react-navigation/elements/-/elements-2.9.5.tgz#29f68c4975351724dcfe1d3bdc76c4d6dc65fc33"
   integrity sha512-iHZU8rRN1014Upz73AqNVXDvSMZDh5/ktQ1CMe21rdgnOY79RWtHHBp9qOS3VtqlUVYGkuX5GEw5mDt4tKdl0g==
   dependencies:
     color "^4.2.3"
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/material-top-tabs@^7.4.13":
-  version "7.4.13"
-  resolved "https://registry.npmmirror.com/@react-navigation/material-top-tabs/-/material-top-tabs-7.4.13.tgz#6a2ccb1bc7b044e11716d5ec9f74deff8c619e36"
-  integrity sha512-evQPmk8bDdY4yksV2Onko+g5z9BwuBdjZEtypuEeshXXTcj+G4Vw6zDIHaeY8jg1JMEFp1I4fPaAeEzSms5tBw==
+"@react-navigation/elements@^3.0.0-alpha.8":
+  version "3.0.0-alpha.8"
+  resolved "https://registry.npmjs.org/@react-navigation/elements/-/elements-3.0.0-alpha.8.tgz#6583bcc884027a3cae107e2fb4e2c91622fe9782"
+  integrity sha512-9ZUPRwW4yjbOO2W9bvv/49c9oJ4HOm0kp9LRlEVf3S/Zj3BXDFHuFB1NmfLaVt90t/ekclMbElQqFRye7/fKTA==
   dependencies:
-    "@react-navigation/elements" "^2.9.5"
     color "^4.2.3"
-    react-native-tab-view "^4.2.2"
+    use-latest-callback "^0.3.2"
+    use-sync-external-store "^1.5.0"
 
-"@react-navigation/native-stack@^7.11.0":
-  version "7.11.0"
-  resolved "https://registry.npmmirror.com/@react-navigation/native-stack/-/native-stack-7.11.0.tgz#017c4b697795565293604168930781026ce97f3b"
-  integrity sha512-yNx9Wr4dfpOHpqjf2sGog4eH6KCYwTAEPlUPrKbvWlQbCRm5bglwPmaTXw9hTovX9v3HIa42yo7bXpbYfq4jzg==
+"@react-navigation/material-top-tabs@^8.0.0-alpha.8":
+  version "8.0.0-alpha.8"
+  resolved "https://registry.npmjs.org/@react-navigation/material-top-tabs/-/material-top-tabs-8.0.0-alpha.8.tgz#77235f692d371bbd4fe3a631f726044b8449c7ba"
+  integrity sha512-x8hhIrspom3p4W/ZHeDA6B46Qm9cqRHN1ZNcPuPWU7Kk5JiVeXy4R0za92JchKs1nsjATL0132A6/PpL97M+mQ==
   dependencies:
-    "@react-navigation/elements" "^2.9.5"
+    "@react-navigation/elements" "^3.0.0-alpha.8"
     color "^4.2.3"
-    sf-symbols-typescript "^2.1.0"
+    react-native-tab-view "^5.0.0-alpha.1"
+
+"@react-navigation/native-stack@^8.0.0-alpha.8":
+  version "8.0.0-alpha.8"
+  resolved "https://registry.npmjs.org/@react-navigation/native-stack/-/native-stack-8.0.0-alpha.8.tgz#244ba50c784201df58110be2209fb0892b8758c8"
+  integrity sha512-pf2JQw/HBK6bnIZD1pVQM+b2ePIielYvM9JeLYui3Kjsqw80k6arZtGqaOc+Ixc1moFi4snZq/WBjyOSsO3nMA==
+  dependencies:
+    "@react-navigation/elements" "^3.0.0-alpha.8"
+    sf-symbols-typescript "^2.2.0"
     warn-once "^0.1.1"
 
-"@react-navigation/native@^7.1.28":
-  version "7.1.28"
-  resolved "https://registry.npmmirror.com/@react-navigation/native/-/native-7.1.28.tgz#1ee75cf3a8b3e4365f94c5d657bb3c015e387720"
-  integrity sha512-d1QDn+KNHfHGt3UIwOZvupvdsDdiHYZBEj7+wL2yDVo3tMezamYy60H9s3EnNVE1Ae1ty0trc7F2OKqo/RmsdQ==
+"@react-navigation/native@^8.0.0-alpha.8":
+  version "8.0.0-alpha.8"
+  resolved "https://registry.npmjs.org/@react-navigation/native/-/native-8.0.0-alpha.8.tgz#e1df9e4e5cc49898b9242701f078f9d78a170233"
+  integrity sha512-n22GETbM0zv2NPrdR4EGe4wc1TYvfsQe09zhDD9hoKb0WzvqoVlOF656pTsj5gbun4wRhb3hDN3DXj7/Oo6YMA==
   dependencies:
-    "@react-navigation/core" "^7.14.0"
+    "@react-navigation/core" "^8.0.0-alpha.3"
     escape-string-regexp "^4.0.0"
     fast-deep-equal "^3.1.3"
     nanoid "^3.3.11"
-    use-latest-callback "^0.2.4"
+    sf-symbols-typescript "^2.2.0"
+    use-latest-callback "^0.3.2"
 
-"@react-navigation/routers@^7.5.3":
-  version "7.5.3"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/@react-navigation/routers/-/routers-7.5.3.tgz#8002930ef5f62351be2475d0dffde3ffaee174d7"
-  integrity sha512-1tJHg4KKRJuQ1/EvJxatrMef3NZXEPzwUIUZ3n1yJ2t7Q97siwRtbynRpQG9/69ebbtiZ8W3ScOZF/OmhvM4Rg==
+"@react-navigation/routers@^8.0.0-alpha.1":
+  version "8.0.0-alpha.1"
+  resolved "https://registry.npmjs.org/@react-navigation/routers/-/routers-8.0.0-alpha.1.tgz#68e872142df1ee9013286a8f7ba011cbf325693f"
+  integrity sha512-QbFEMY/pkQSV5FeA+bPBOBvKIguvpWp2Jc3FxbNr1zTwvk8lnoaWf99vUs19iyQoGRONT3afrwr1PKO6zX1r1g==
   dependencies:
     nanoid "^3.3.11"
 
-"@react-navigation/stack@^7.6.16":
-  version "7.6.16"
-  resolved "https://registry.npmmirror.com/@react-navigation/stack/-/stack-7.6.16.tgz#035c80bdb5be62b748d685f719e73b8a2dda65d2"
-  integrity sha512-kYmogwU2jpxmjIrGO2P9PJCwgBHiju7OdItRkhFEHHppwU4jJQx/ViJtJ9ib3G4pqpurFdmqn1YsVB4bf7Zmxw==
+"@react-navigation/stack@^8.0.0-alpha.8":
+  version "8.0.0-alpha.8"
+  resolved "https://registry.npmjs.org/@react-navigation/stack/-/stack-8.0.0-alpha.8.tgz#f1834a8f981c58aab19dd5ad44e88ec4c1da26e7"
+  integrity sha512-zkLHeH66kFMMNNeHO4r5h2MVs4aopVvEBYEgHvu9/E/EIkWE8uFrtRiRnZpzeQ5V9v/j/UqSXjDfyGHArJqi/A==
   dependencies:
-    "@react-navigation/elements" "^2.9.5"
+    "@react-navigation/elements" "^3.0.0-alpha.8"
     color "^4.2.3"
-    use-latest-callback "^0.2.4"
+    use-latest-callback "^0.3.2"
 
 "@rneui/base@^4.0.0-rc.8":
   version "4.0.0-rc.8"
@@ -3724,10 +3743,10 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-axios@^1.13.2:
-  version "1.13.2"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/axios/-/axios-1.13.2.tgz#9ada120b7b5ab24509553ec3e40123521117f687"
-  integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==
+axios@^1.13.4:
+  version "1.13.4"
+  resolved "https://registry.npmjs.org/axios/-/axios-1.13.4.tgz#15d109a4817fb82f73aea910d41a2c85606076bc"
+  integrity sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.4"
@@ -5332,13 +5351,13 @@ expo-web-browser@~15.0.10:
   resolved "https://registry.npmmirror.com/expo-web-browser/-/expo-web-browser-15.0.10.tgz#ee7fb59b4f143f262c13c020433a83444181f1a3"
   integrity sha512-fvDhW4bhmXAeWFNFiInmsGCK83PAqAcQaFyp/3pE/jbdKmFKoRCWr46uZGIfN4msLK/OODhaQ/+US7GSJNDHJg==
 
-expo@^54.0.0:
-  version "54.0.32"
-  resolved "https://registry.npmmirror.com/expo/-/expo-54.0.32.tgz#eda2c6e742b0f7e2f4354e280dbadf35dcd86ef7"
-  integrity sha512-yL9eTxiQ/QKKggVDAWO5CLjUl6IS0lPYgEvC3QM4q4fxd6rs7ks3DnbXSGVU3KNFoY/7cRNYihvd0LKYP+MCXA==
+expo@^54.0.33:
+  version "54.0.33"
+  resolved "https://registry.npmjs.org/expo/-/expo-54.0.33.tgz#f7d572857323f5a8250a9afe245a487d2ee2735f"
+  integrity sha512-3yOEfAKqo+gqHcV8vKcnq0uA5zxlohnhA3fu4G43likN8ct5ZZ3LjAh9wDdKteEkoad3tFPvwxmXW711S5OHUw==
   dependencies:
     "@babel/runtime" "^7.20.0"
-    "@expo/cli" "54.0.22"
+    "@expo/cli" "54.0.23"
     "@expo/config" "~12.0.13"
     "@expo/config-plugins" "~54.0.4"
     "@expo/devtools" "0.1.8"
@@ -6999,6 +7018,11 @@ lodash@^4.17.15, lodash@^4.17.21:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
+lodash@^4.17.23:
+  version "4.17.23"
+  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.23.tgz#f113b0378386103be4f6893388c73d0bde7f2c5a"
+  integrity sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==
+
 log-symbols@^2.2.0:
   version "2.2.0"
   resolved "https://mirrors.huaweicloud.com/repository/npm/log-symbols/-/log-symbols-2.2.0.tgz#5740e1c5d6f0dfda4ad9323b5332107ef6b4c40a"
@@ -8106,10 +8130,10 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prettier@^3.7.4:
-  version "3.7.4"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/prettier/-/prettier-3.7.4.tgz#d2f8335d4b1cec47e1c8098645411b0c9dff9c0f"
-  integrity sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==
+prettier@^3.8.1:
+  version "3.8.1"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-3.8.1.tgz#edf48977cf991558f4fcbd8a3ba6015ba2a3a173"
+  integrity sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==
 
 pretty-bytes@^5.6.0:
   version "5.6.0"
@@ -8286,12 +8310,12 @@ react-freeze@^1.0.0:
   resolved "https://registry.yarnpkg.com/react-freeze/-/react-freeze-1.0.4.tgz#cbbea2762b0368b05cbe407ddc9d518c57c6f3ad"
   integrity sha512-r4F0Sec0BLxWicc7HEyo2x3/2icUTrRmDjaaRyzzn+7aDyFZliszMDOgLVwSnQnYENOlL1o569Ze2HZefk8clA==
 
-react-i18next@^16.5.0:
-  version "16.5.0"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/react-i18next/-/react-i18next-16.5.0.tgz#107e4323742344a2f8792feb905cea551da6fd2c"
-  integrity sha512-IMpPTyCTKxEj8klCrLKUTIUa8uYTd851+jcu2fJuUB9Agkk9Qq8asw4omyeHVnOXHrLgQJGTm5zTvn8HpaPiqw==
+react-i18next@^16.5.4:
+  version "16.5.4"
+  resolved "https://registry.npmjs.org/react-i18next/-/react-i18next-16.5.4.tgz#4f458b1baab274dca439ab67629c854203bf97c6"
+  integrity sha512-6yj+dcfMncEC21QPhOTsW8mOSO+pzFmT6uvU7XXdvM/Cp38zJkmTeMeKmTrmCMD5ToT79FmiE/mRWiYWcJYW4g==
   dependencies:
-    "@babel/runtime" "^7.27.6"
+    "@babel/runtime" "^7.28.4"
     html-parse-stringify "^3.0.1"
     use-sync-external-store "^1.6.0"
 
@@ -8479,19 +8503,18 @@ react-native-safe-area-context@~5.6.0:
   resolved "https://registry.npmmirror.com/react-native-safe-area-context/-/react-native-safe-area-context-5.6.2.tgz#283e006f5b434fb247fcb4be0971ad7473d5c560"
   integrity sha512-4XGqMNj5qjUTYywJqpdWZ9IG8jgkS3h06sfVjfw5yZQZfWnRFXczi0GnYyFyCc2EBps/qFmoCH8fez//WumdVg==
 
-react-native-screens@~4.16.0:
-  version "4.16.0"
-  resolved "https://registry.npmmirror.com/react-native-screens/-/react-native-screens-4.16.0.tgz#efa42e77a092aa0b5277c9ae41391ea0240e0870"
-  integrity sha512-yIAyh7F/9uWkOzCi1/2FqvNvK6Wb9Y1+Kzn16SuGfN9YFJDTbwlzGRvePCNTOX0recpLQF3kc2FmvMUhyTCH1Q==
+react-native-screens@~4.21.0:
+  version "4.21.0"
+  resolved "https://registry.npmjs.org/react-native-screens/-/react-native-screens-4.21.0.tgz#866f0b4213490a0c53c7ef605b88a867f39d15d1"
+  integrity sha512-vUgbfKntx4LZ/1k+UU/miKohK0Ih6xoF3gYJr9QqZNOpPARksPxt4hq3HdCirvCLClieLYC9oLpGdizz/S+BGg==
   dependencies:
     react-freeze "^1.0.0"
-    react-native-is-edge-to-edge "^1.2.1"
     warn-once "^0.1.0"
 
-react-native-share@^12.2.1:
-  version "12.2.1"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/react-native-share/-/react-native-share-12.2.1.tgz#ee19e2c835099a2f4b627a68e62d2019658ceb05"
-  integrity sha512-DPfvqQMbbLK4ykPkqYarby5AXdgFsbefOhsQHkOrDeAIixWzeI4oe/WvI7AoYmlQxM4Ys2DcBPBWDYQ6gn5xYA==
+react-native-share@^12.2.5:
+  version "12.2.5"
+  resolved "https://registry.npmjs.org/react-native-share/-/react-native-share-12.2.5.tgz#a793f8d7c337b2e8ee123630676b69c531c5addd"
+  integrity sha512-2uwd/PdlUyvpsSBfL7OMiL4sD0Ja51wu5m62JSIXjrtlF+uSTUOGsMrE49ncIRYziqAfYUeI195WwhpvqXB0ww==
 
 react-native-simple-toast@^3.3.2:
   version "3.3.2"
@@ -8523,6 +8546,13 @@ react-native-tab-view@^4.2.2:
   integrity sha512-NXtrG6OchvbGjsvbySJGVocXxo4Y2vA17ph4rAaWtA2jh+AasD8OyikKBRg2SmllEfeQ+GEhcKe8kulHv8BhTg==
   dependencies:
     use-latest-callback "^0.2.4"
+
+react-native-tab-view@^5.0.0-alpha.1:
+  version "5.0.0-alpha.1"
+  resolved "https://registry.npmjs.org/react-native-tab-view/-/react-native-tab-view-5.0.0-alpha.1.tgz#5f33a2dcec73ecf25071ce6e06df029fb7644828"
+  integrity sha512-r/pvo4wyMHdIuXUdjIeXvaQ4vgYA4/yp0jedPaAEmVMZWBgcpV81DICXrzgnrfxThplPSYSTM1sh8fEM6th5Xw==
+  dependencies:
+    use-latest-callback "^0.3.2"
 
 react-native-toast-message@^2.3.3:
   version "2.3.3"
@@ -9033,7 +9063,7 @@ setprototypeof@1.2.0, setprototypeof@~1.2.0:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.2.0.tgz#66c9a24a73f9fc28cbe66b09fed3d33dcaf1b424"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
 
-sf-symbols-typescript@^2.1.0:
+sf-symbols-typescript@^2.2.0:
   version "2.2.0"
   resolved "https://mirrors.huaweicloud.com/repository/npm/sf-symbols-typescript/-/sf-symbols-typescript-2.2.0.tgz#926d6e0715e3d8784cadf7658431e36581254208"
   integrity sha512-TPbeg0b7ylrswdGCji8FRGFAKuqbpQlLbL8SOle3j1iHSs5Ob5mhvMAxWN2UItOjgALAB5Zp3fmMfj8mbWvXKw==
@@ -9755,6 +9785,11 @@ use-latest-callback@^0.2.4:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/use-latest-callback/-/use-latest-callback-0.2.4.tgz#35c0f028f85a3f4cf025b06011110e87cc18f57e"
   integrity sha512-LS2s2n1usUUnDq4oVh1ca6JFX9uSqUncTfAm44WMg0v6TxL7POUTk1B044NH8TeLkFbNajIsgDHcgNpNzZucdg==
+
+use-latest-callback@^0.3.2:
+  version "0.3.3"
+  resolved "https://registry.npmjs.org/use-latest-callback/-/use-latest-callback-0.3.3.tgz#62f3c2a949087605741624850e4be6429e8fe3f1"
+  integrity sha512-G9A/EL7okx4wzBfATt8bdGg0v1K0Gp0IClTzljffM63gtPisgDKCaLCLUb4g2M4CoXDg5yyHjOU+g3SUPbXwrA==
 
 use-sync-external-store@^1.4.0, use-sync-external-store@^1.5.0:
   version "1.5.0"

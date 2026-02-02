@@ -4,7 +4,7 @@ PODS:
   - EXImageLoader (6.0.0):
     - ExpoModulesCore
     - React-Core
-  - Expo (54.0.32):
+  - Expo (54.0.33):
     - ExpoModulesCore
     - hermes-engine
     - RCTRequired
@@ -174,6 +174,28 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
+  - LiquidGlass (0.7.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
@@ -2012,6 +2034,28 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - ReactNativeDependencies (0.81.5)
+  - ReactNavigation (8.0.0-alpha.8):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNCAsyncStorage (2.2.0):
     - hermes-engine
     - RCTRequired
@@ -2078,7 +2122,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNFBAnalytics (23.8.4):
+  - RNFBAnalytics (23.8.5):
     - FirebaseAnalytics/Core (= 12.8.0)
     - FirebaseAnalytics/IdentitySupport (= 12.8.0)
     - hermes-engine
@@ -2103,7 +2147,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBApp (23.8.4):
+  - RNFBApp (23.8.5):
     - Firebase/CoreOnly (= 12.8.0)
     - hermes-engine
     - RCTRequired
@@ -2267,7 +2311,7 @@ PODS:
     - ReactNativeDependencies
     - RNWorklets
     - Yoga
-  - RNScreens (4.16.0):
+  - RNScreens (4.21.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2289,9 +2333,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNScreens/common (= 4.16.0)
+    - RNScreens/common (= 4.21.0)
     - Yoga
-  - RNScreens/common (4.16.0):
+  - RNScreens/common (4.21.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2314,7 +2358,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNShare (12.2.1):
+  - RNShare (12.2.5):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2507,6 +2551,7 @@ DEPENDENCIES:
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - "LiquidGlass (from `../node_modules/@callstack/liquid-glass`)"
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
@@ -2580,6 +2625,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "ReactNativeBlur (from `../node_modules/@sbaiahmed1/react-native-blur`)"
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
+  - "ReactNavigation (from `../node_modules/@react-navigation/native`)"
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
@@ -2654,6 +2700,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-07-07-RNv0.81.0-e0fc67142ec0763c6b6153ca2bf96df815539782
+  LiquidGlass:
+    :path: "../node_modules/@callstack/liquid-glass"
   RCTDeprecation:
     :path: "../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation"
   RCTRequired:
@@ -2798,6 +2846,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sbaiahmed1/react-native-blur"
   ReactNativeDependencies:
     :podspec: "../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
+  ReactNavigation:
+    :path: "../node_modules/@react-navigation/native"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
@@ -2832,7 +2882,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   EXConstants: fce59a631a06c4151602843667f7cfe35f81e271
   EXImageLoader: 189e3476581efe3ad4d1d3fb4735b7179eb26f05
-  Expo: 58cbcad4f708fc1b41d861586310ac1903282d85
+  Expo: 9badfd6f7ffe6748cb8832abea359a7272dedc04
   ExpoAsset: f867e55ceb428aab99e1e8c082b5aee7c159ea18
   ExpoBlur: b90747a3f22a8b6ceffd9cb0dc41a4184efdc656
   ExpoDevice: 6327c3c200816795708885adf540d26ecab83d1a
@@ -2858,6 +2908,7 @@ SPEC CHECKSUMS:
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
+  LiquidGlass: f4f3bc26923fb215efa7b972ced909b49fa6acd4
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCTDeprecation: 943572d4be82d480a48f4884f670135ae30bf990
@@ -2932,17 +2983,18 @@ SPEC CHECKSUMS:
   ReactCommon: 08810150b1206cc44aecf5f6ae19af32f29151a8
   ReactNativeBlur: fc60691cb18683e80c2029e30c205092d53cc801
   ReactNativeDependencies: 71ce9c28beb282aa720ea7b46980fff9669f428a
+  ReactNavigation: eabcf2c47f0ff10eb409ceacb7560e95758e8a82
   RNCAsyncStorage: c8407cc394627a3a4cf56b457d594bfa822b6ab8
   RNCClipboard: fc456104340b49bdf812f68bd00e764abf360361
   RNDateTimePicker: 3b90b0645499e9ae1a86298f23275a648283d415
-  RNFBAnalytics: d91217f387af2f22e76b6f4321fd82a91727387b
-  RNFBApp: 4f45ffec5426079cd552c756b1b1e5ab5dd06de4
+  RNFBAnalytics: 1aa8f92ed2d7fc86a26e9fa76c0fefe5759de0be
+  RNFBApp: 4c26b829839ddd2d075131bebb6193f42bbeb1fd
   RNGestureHandler: c3831b3b1b5014c6afab7fff7e4171394a3419ab
   RNLocalize: c8bcaf5ad46c4b2e8f402ea7f11ec9c3777bcb59
   RNReactNativeHapticFeedback: 68db345e43f221a12c408f1490da31c4067ecb6f
   RNReanimated: 8315d083516a6690fcdb479b56fca8fabf65a73d
-  RNScreens: 33bbd1d0f86ed957557620dc94054b71db0a94ee
-  RNShare: 0e55b37f6e2304435e400054228dbf1b9f8bf144
+  RNScreens: 91b9ad7ca0b5fef14b604abe8c49ff6dd53a5646
+  RNShare: 706dade96bc31153315b8cb349409cd28f3f9bb4
   RNSVG: ac3047fdd9c0ebac9d0b731a352bddf216af6242
   RNVectorIcons: 1db72384402bc567e995855056b8c5d7a9888780
   RNWorklets: 76fce72926e28e304afb44f0da23b2d24f2c1fa0
