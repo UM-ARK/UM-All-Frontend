@@ -23,6 +23,7 @@ import Toast from 'react-native-simple-toast';
 import TouchableScale from 'react-native-touchable-scale';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 function Index({ navigation }) {
     const { theme } = useTheme();
@@ -122,7 +123,7 @@ function Index({ navigation }) {
 
     // BottomSheet內容渲染
     const renderBottomSheet = () => {
-        if (!bottomSheetInfo) {return null;}
+        if (!bottomSheetInfo) { return null; }
         const { go_where, webview_param, describe } = bottomSheetInfo;
         const haveLink = (go_where === 'Webview' || go_where === 'Linking');
         return (
@@ -182,7 +183,7 @@ function Index({ navigation }) {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header
+            {/* <Header
                 backgroundColor={bg_color}
                 statusBarProps={{
                     backgroundColor: 'transparent',
@@ -196,8 +197,8 @@ function Index({ navigation }) {
                     paddingTop: 0,
                     borderBottomWidth: 0,
                 }}
-            />
-            <ScrollView showsVerticalScrollIndicator={true}>
+            /> */}
+            <ScrollView showsVerticalScrollIndicator={true} style={{ paddingTop: useHeaderHeight() }}>
                 {/* 標題與個功能按鍵 */}
                 <View style={{
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

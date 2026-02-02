@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions } from 'react-native';
 
 // 引入本地工具
-import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../components/ThemeContext';
 import ARKImageView from '../../components/ARKImageView';
 import { UM_BUS_LOOP_ZH, UM_BUS_LOOP_EN, UM_MAP } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
-import Header from '../../components/Header';
 import { trigger } from '../../utils/trigger';
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DOMParser } from 'react-native-html-parser';
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
@@ -18,6 +16,7 @@ import TouchableScale from 'react-native-touchable-scale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 const busIcon = require('../../static/img/Bus/bus.png');
 const busRouteImg = require('../../static/img/Bus/bus_route.png');
@@ -98,6 +97,7 @@ const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
 
 // 巴士報站頁 - 畫面佈局與渲染
 const BusScreen = () => {
+    const headerHeight = useHeaderHeight();
     const { theme } = useTheme();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
     const s = StyleSheet.create({
@@ -265,8 +265,6 @@ const BusScreen = () => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header title={t('校園巴士', { ns: 'features' })} iOSDIY={true} />
-
             <ScrollView
                 bounces={false}
                 refreshControl={
@@ -276,8 +274,12 @@ const BusScreen = () => {
                         refreshing={isLoading}
                         onRefresh={fetchBusInfo}
                     />
-                }>
-                <ScrollView horizontal={false}>
+                }
+            >
+                <ScrollView horizontal={false}
+                    // iOS透明Header適配
+                    style={{ paddingTop: headerHeight }}
+                >
                     <ImageBackground
                         style={{
                             width: scale(310),
