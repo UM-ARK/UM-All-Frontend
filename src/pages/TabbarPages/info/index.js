@@ -7,6 +7,7 @@ import HomePage from './home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';
+import WikiPage from '../arkwiki/index';
 
 import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -17,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 const Tab = createMaterialTopTabNavigator();
 
 const tabWidth = verticalScale(25);
-const numOfTabs = 4;
+const numOfTabs = 5;
 
 export default function NewsScreen() {
     const insets = useSafeAreaInsets();
@@ -74,6 +75,14 @@ export default function NewsScreen() {
                     name="HomePage"
                     component={HomePage}
                     options={{ title: t('TOPTAB_MAIN') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
+                <Tab.Screen
+                    name="WikiPage"
+                    component={WikiPage}
+                    options={{ title: t('Wiki') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
                     })}
