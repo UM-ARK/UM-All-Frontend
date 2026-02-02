@@ -19,6 +19,7 @@ import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import { getApp } from '@react-native-firebase/app';
 import { getAnalytics, setUserProperty } from '@react-native-firebase/analytics';
+import { StatusBar } from 'expo-status-bar';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -240,6 +241,8 @@ const App = () => {
                 <Provider RootStore={RootStore}>
                     <ThemeProvider>
                         <Nav />
+                        {/* 全局状态栏配置 */}
+                        <StatusBar style="auto" />
                     </ThemeProvider>
                     <Toast config={toastConfig} />
                 </Provider>
