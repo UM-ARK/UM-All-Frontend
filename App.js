@@ -12,7 +12,6 @@ import sourceCourseVersion from './src/static/UMCourses/courseVersion';
 import { getPreciseDeviceName } from './src/utils/iosModel';
 
 import { Provider } from 'mobx-react';
-import AnimatedSplash from 'react-native-animated-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
@@ -49,7 +48,6 @@ const performCheck = async () => {
 };
 
 const App = () => {
-    const [isLoaded, setIsLoaded] = useState(false);
     const [appTheme, setAppTheme] = useState(themes.light);
     const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
@@ -97,11 +95,7 @@ const App = () => {
         // 等待主題加載完成後再開始計時消失開屏
         if (!isThemeLoaded) {return;}
 
-        const timer = setTimeout(() => {
-            setIsLoaded(true);
-        }, 500);
-
-        return () => clearTimeout(timer);
+        return () => {};
     }, [isThemeLoaded]);
 
     // 初始化與監聽
@@ -221,33 +215,18 @@ const App = () => {
         ),
     };
 
+    // TODO:  使用加載屏splash-screen
     return (
-        <AnimatedSplash
-            translucent={true}
-            isLoaded={isLoaded}
-            customComponent={
-                <Image
-                    source={require('./src/static/img/logo.png')}
-                    style={{
-                        width: LOGO_WIDTH,
-                        height: LOGO_WIDTH,
-                        borderRadius: scale(40),
-                    }}
-                />
-            }
-            backgroundColor={theme.bg_color}
-        >
-            <SafeAreaProvider>
-                <Provider RootStore={RootStore}>
-                    <ThemeProvider>
-                        <Nav />
-                        {/* 全局状态栏配置 */}
-                        <StatusBar style="auto" />
-                    </ThemeProvider>
-                    <Toast config={toastConfig} />
-                </Provider>
-            </SafeAreaProvider>
-        </AnimatedSplash>
+        <SafeAreaProvider>
+            <Provider RootStore={RootStore}>
+                <ThemeProvider>
+                    <Nav theme={theme} />
+                    {/* 全局状态栏配置 */}
+                    <StatusBar style="auto" />
+                </ThemeProvider>
+                <Toast config={toastConfig} />
+            </Provider>
+        </SafeAreaProvider>
     );
 };
 
