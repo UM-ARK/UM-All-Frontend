@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Image, ImageBackground, ScrollView, RefreshControl, Dimensions, TouchableWithoutFeedback, LayoutAnimation } from 'react-native';
-import { Input } from '@rneui/themed';
 
 // 引入本地工具
 import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
 import { UM_API_TOKEN, UM_ORG } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
-import Header from '../../components/Header';
 import { trigger } from '../../utils/trigger';
 import Loading from '../../components/Loading';
 
@@ -115,16 +113,17 @@ const OrgInfo = (props) => {
     );
 };
 
-const UMOrg = () => {
+const UMOrg = ({ navigation }) => {
     const { theme } = useTheme();
     const { bg_color, white, black, themeColor } = theme;
 
     const [orgData, setOrgData] = useState([]);
     const [displayOrgData, setDisplayOrgData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchText, setSearchText] = useState('');
 
     const controller = new AbortController();
-    const searchTextRef = useRef(null);
+    const searchBarRef = useRef(null);
 
     async function getUMOrg() {
         try {
@@ -159,39 +158,56 @@ const UMOrg = () => {
         };
     }, []);
 
+    // 配置導航欄搜索框
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerSearchBarOptions: {
+                ref: searchBarRef,
+                placeholder: 'Search...',
+                hideWhenScrolling: false, // 重要：設置為 false 確保搜索框固定顯示
+                placement: 'stacked', // 設置為 stacked 確保搜索框在 header 下方固定顯示
+                barTintColor: theme.white, // 搜索框背景色
+                tintColor: theme.themeColor, // 光標和取消按鈕顏色
+                textColor: theme.black.main, // 搜索文字顏色
+                hintTextColor: theme.black.third, // 提示文字顏色
+                onChange: (event) => {
+                    const searchText = event.nativeEvent.text.toLowerCase();
+                    setSearchText(searchText);
+                    setDisplayOrgData(orgData.filter(org => {
+                        // 检查主组织的名称和代码
+                        const matchesMainOrg =
+                            org.chinUnitName.toLowerCase().includes(converter(searchText)) ||
+                            org.unitName.toLowerCase().includes(searchText) ||
+                            org.unitCode.toLowerCase().includes(searchText);
+
+                        // 检查子组织的名称和代码
+                        const matchesSubUnit =
+                            org.subUnit &&
+                            Array.isArray(org.subUnit) && // 确保 org.subUnit 是数组
+                            org.subUnit.some(
+                                (subUnit) =>
+                                    subUnit && (
+                                        subUnit.subUnitName.toLowerCase().includes(searchText) ||
+                                        subUnit.subUnitCode.toLowerCase().includes(searchText) ||
+                                        subUnit.chinSubUnitName.toLowerCase().includes(converter(searchText))
+                                    ));
+
+                        return matchesMainOrg || matchesSubUnit;
+                    }));
+                },
+                onCancelButtonPress: () => {
+                    setSearchText('');
+                    setDisplayOrgData(orgData);
+                },
+            },
+        });
+    }, [navigation, orgData, theme]);
+
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header title={t('澳大部門', { ns: 'features' })} iOSDIY={true} />
-
-            {/* 搜索框 */}
-            <Input placeholder="Search..." style={{ color: black.main }} onChange={(e) => {
-                const searchText = e.nativeEvent.text.toLowerCase();
-                setDisplayOrgData(orgData.filter(org => {
-                    // 检查主组织的名称和代码
-                    const matchesMainOrg =
-                        org.chinUnitName.toLowerCase().includes(converter(searchText)) ||
-                        org.unitName.toLowerCase().includes(searchText) ||
-                        org.unitCode.toLowerCase().includes(searchText);
-
-                    // 检查子组织的名称和代码
-                    const matchesSubUnit =
-                        org.subUnit &&
-                        Array.isArray(org.subUnit) && // 确保 org.subUnit 是数组
-                        org.subUnit.some(
-                            (subUnit) =>
-                                subUnit && (
-                                    subUnit.subUnitName.toLowerCase().includes(searchText) ||
-                                    subUnit.subUnitCode.toLowerCase().includes(searchText) ||
-                                    subUnit.chinSubUnitName.toLowerCase().includes(converter(searchText))
-                                ));
-
-                    return matchesMainOrg || matchesSubUnit;
-                }));
-            }} ref={searchTextRef} clearButtonMode="always" />
-
             {/* TODO: 增加下滑刷新 */}
             {displayOrgData && displayOrgData.length > 0 ? (
-                <ScrollView>
+                <ScrollView contentInsetAdjustmentBehavior="automatic">
                     {displayOrgData.map((org, index) => {
                         return org ? (
                             <OrgInfo orgData={org} key={index} />
@@ -208,8 +224,8 @@ const UMOrg = () => {
                             onRefresh={() => {
                                 setLoading(true);
                                 getUMOrg();
-                                if (searchTextRef.current) {
-                                    searchTextRef.current.clear(); // 清空搜索框
+                                if (searchBarRef.current) {
+                                    searchBarRef.current.clearText(); // 清空搜索框
                                 }
                             }}
                         />
