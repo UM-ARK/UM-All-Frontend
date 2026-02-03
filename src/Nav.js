@@ -27,8 +27,6 @@ import CarPark from './pages/Features/CarPark';
 import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/TabbarPages/SettingPage';
 
-import TestScreen from './test/test';
-
 const Stack = createNativeStackNavigator();
 
 Text.defaultProps = {
@@ -155,9 +153,6 @@ const Nav = () => {
                     <Stack.Screen name="Webviewer" component={Webviewer} />
                     <Stack.Screen name="SettingPage" component={SettingPage} />
                 </Stack.Group>
-
-                {/* 測試頁 */}
-                <Stack.Screen name="TestScreen" component={TestScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );
