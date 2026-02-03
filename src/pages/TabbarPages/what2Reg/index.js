@@ -1103,6 +1103,7 @@ const What2Reg = (props) => {
                 style={{ width: '100%' }}
                 stickyHeaderIndices={[1]}
                 keyboardDismissMode="on-drag"
+                contentInsetAdjustmentBehavior="automatic"
             >
                 {/* 頁面標題欄 */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3) }}>

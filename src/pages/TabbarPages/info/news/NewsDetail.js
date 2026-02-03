@@ -3,7 +3,6 @@ import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndica
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
-import Header from '../../../../components/Header';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
@@ -236,8 +235,6 @@ const NewsDetail = ({ route, navigation }) => {
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            <Header title={'新聞詳情'} iOSDIY={true} />
-
             <ScrollView>
                 {/* 文本模式選擇 3語切換 */}
                 {renderModeChoice()}

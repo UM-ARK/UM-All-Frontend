@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl } from 'react-native';
 
-import Header from '../../../../components/Header';
 import EventCard from '../components/EventCard';
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET } from '../../../../utils/pathMap';
@@ -170,7 +169,6 @@ const AllEvents = (props) => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header title={'所有活動查看'} />
             {/* 渲染所有活動 */}
             {renderEvent()}
 

@@ -7,6 +7,8 @@ import { Button, HeaderBackButton, useHeaderHeight } from '@react-navigation/ele
 import { useTheme } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { BlurView } from 'expo-blur';
+import { trigger } from './utils/trigger';
+import { useTranslation } from 'react-i18next';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
@@ -33,10 +35,31 @@ Text.defaultProps = {
     allowFontScaling: false,
 };
 
+// 創建通用 Header 配置
+const createHeaderOptions = (theme) => {
+    const { bg_color, black } = theme;
+
+    return {
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerTintColor: black.main,
+        headerBackButtonDisplayMode: 'minimal',
+        headerBackButtonMenuEnabled: false,
+
+        // iOS 26+ 液態玻璃效果
+        headerTransparent: isLiquidGlassSupported,
+        headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+        // Fallback 背景
+        headerBackground: isLiquidGlassSupported ? null : (() => (
+            <View style={{ flex: 1, backgroundColor: bg_color }} />
+        )),
+    };
+};
+
 const Nav = () => {
     const navigationRef = useNavigationContainerRef();
     const { theme } = useTheme();
-    const { bg_color, black } = theme;
+    const { t } = useTranslation(['features']);
 
     return (
         <NavigationContainer ref={navigationRef}>
@@ -60,58 +83,66 @@ const Nav = () => {
 
                 {/* 服務頁保持原有 Modal 配置 */}
                 <Stack.Group
-                    screenOptions={{
+                    screenOptions={({ navigation }) => ({
+                        ...createHeaderOptions(theme),
                         presentation: Platform.select({
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
                         }),
-                        // animation: 'slide_from_bottom',
                         gestureEnabled: true,
-                        headerShown: true,
-                        headerTitleAlign: 'center',
-                        headerTitle: '',
-                        headerTintColor: black.main,              // 箭頭與文字顏色（使用系統樣式）[web:4]
-                        // headerShadowVisible: false,           // 移除底部陰影，更貼近 iOS 26 扁平風格 [web:4]
-                        // headerBackTitleVisible: false,        // 隱藏返回文字，只留箭頭（iOS）[web:8]
-                        // iOS 26 原生返回按鈕配置
-                        headerBackButtonMenuEnabled: false,   // 禁用返回按鈕長按菜單
-                        headerBackButtonDisplayMode: 'minimal', // 只顯示返回圖標，不顯示文字
-                        // 根據是否支持液態玻璃效果設置導航欄樣式
-                        // headerTransparent: isLiquidGlassSupported,
-                        headerBackground: isLiquidGlassSupported ? undefined : (() => (
-                            <View style={{ flex: 1, backgroundColor: bg_color }} />
-                        )),
-                    }}
+                        headerLeft: (props) => (
+                            <HeaderBackButton
+                                {...props}
+                                onPress={() => {
+                                    trigger();
+                                    navigation.goBack();
+                                }}
+                                label=''
+                            />
+                        ),
+                    })}
                 >
                     {/* 服務頁 */}
                     <Stack.Screen name="Bus" component={Bus}
-                        options={({ navigation, route }) => ({
-                            headerTransparent: true,
-                            headerTitle: '',
-                            headerBackButtonMenuEnabled: false,
-                            headerBackButtonDisplayMode: 'minimal',
-                            headerBackTitleVisible: false,
-                            headerLeft: (props) => (
-                                <HeaderBackButton
-                                    {...props}
-                                    onPress={() => navigation.goBack()}
-                                    label=''
-                                />
-                            ),
-                        })}
+                        options={{
+                            headerTitle: t('校園巴士', { ns: 'features' }),
+                            headerBlurEffect: null,
+                        }}
                     />
-                    <Stack.Screen name="CarPark" component={CarPark} />
-                    <Stack.Screen name="UMOrg" component={UMOrg} />
+                    <Stack.Screen name="CarPark" component={CarPark}
+                        options={{
+                            headerTitle: t('車位', { ns: 'features' }),
+                        }}
+                    />
+                    <Stack.Screen name="UMOrg" component={UMOrg}
+                        options={{
+                            headerTitle: t('澳大部門', { ns: 'features' }),
+                        }}
+                    />
+
 
                     {/* 資訊頁 */}
-                    <Stack.Screen name="ClubDetail" component={ClubDetail} />
+                    <Stack.Screen name="ClubDetail" component={ClubDetail}
+                        options={{
+                            headerTitle: '',
+                        }}
+                    />
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} />
+                    <Stack.Screen name="UMEventDetail" component={UMEventDetail}
+                        options={{
+                            headerTransparent: true,
+                            headerBackground: undefined,
+                        }}
+                    />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課 */}
-                    <Stack.Screen name="LocalCourse" component={LocalCourse} />
+                    <Stack.Screen name="LocalCourse" component={LocalCourse}
+                        options={{
+                            headerTitle: '',
+                        }}
+                    />
                 </Stack.Group>
 
                 {/* 普通左右壓動畫組 */}

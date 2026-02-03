@@ -183,22 +183,7 @@ function Index({ navigation }) {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            {/* <Header
-                backgroundColor={bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: barStyle,
-                }}
-                containerStyle={{
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets?.top || 0,
-                    }),
-                    paddingTop: 0,
-                    borderBottomWidth: 0,
-                }}
-            /> */}
-            <ScrollView showsVerticalScrollIndicator={true} style={{ paddingTop: useHeaderHeight() }}>
+            <ScrollView showsVerticalScrollIndicator={true} contentInsetAdjustmentBehavior="automatic">
                 {/* 標題與個功能按鍵 */}
                 <View style={{
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

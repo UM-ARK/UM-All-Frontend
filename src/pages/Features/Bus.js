@@ -16,7 +16,6 @@ import TouchableScale from 'react-native-touchable-scale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
-import { useHeaderHeight } from '@react-navigation/elements';
 
 const busIcon = require('../../static/img/Bus/bus.png');
 const busRouteImg = require('../../static/img/Bus/bus_route.png');
@@ -97,7 +96,6 @@ const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
 
 // 巴士報站頁 - 畫面佈局與渲染
 const BusScreen = () => {
-    const headerHeight = useHeaderHeight();
     const { theme } = useTheme();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
     const s = StyleSheet.create({
@@ -265,129 +263,114 @@ const BusScreen = () => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <ScrollView
-                bounces={false}
-                refreshControl={
-                    <RefreshControl
-                        colors={[themeColor]}
-                        tintColor={themeColor}
-                        refreshing={isLoading}
-                        onRefresh={fetchBusInfo}
-                    />
-                }
-            >
-                <ScrollView horizontal={false}
-                    // iOS透明Header適配
-                    style={{ paddingTop: headerHeight }}
-                >
-                    <ImageBackground
+            <ScrollView horizontal={false} contentInsetAdjustmentBehavior="automatic">
+                <ImageBackground
+                    style={{
+                        width: scale(310),
+                        height: scale(600),
+                        marginLeft: scale(25),
+                        marginBottom: scale(40),
+                    }}
+                    source={busRouteImg}
+                    resizeMode={'contain'}>
+                    {/* Data From */}
+                    <View
                         style={{
-                            width: scale(310),
-                            height: scale(600),
-                            marginLeft: scale(25),
-                            marginBottom: scale(40),
+                            ...s.infoContainer,
+                            left: scale(60),
+                            top: scale(575),
+                            marginTop: scale(10),
+                        }}>
+                        <Text
+                            style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>
+                            Data From: cmdo.um.edu.mo
+                        </Text>
+                    </View>
+                    {/* 澳大地圖 */}
+                    <TouchableOpacity
+                        style={{
+                            ...s.infoContainer,
+                            left: scale(110),
+                            top: scale(350),
                         }}
-                        source={busRouteImg}
-                        resizeMode={'contain'}>
-                        {/* Data From */}
-                        <View
-                            style={{
-                                ...s.infoContainer,
-                                left: scale(60),
-                                top: scale(575),
-                                marginTop: scale(10),
-                            }}>
-                            <Text
-                                style={{ ...uiStyle.defaultText, fontSize: scale(12), color: black.third }}>
-                                Data From: cmdo.um.edu.mo
-                            </Text>
-                        </View>
-                        {/* 澳大地圖 */}
-                        <TouchableOpacity
-                            style={{
-                                ...s.infoContainer,
-                                left: scale(110),
-                                top: scale(350),
-                            }}
-                            onPress={() => {
-                                trigger();
-                                openLink(UM_MAP);
+                        onPress={() => {
+                            trigger();
+                            openLink(UM_MAP);
+                        }}
+                    >
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>
+                    </TouchableOpacity>
+                    {/* Bus運行信息的渲染 */}
+                    <View
+                        style={{
+                            ...s.infoContainer,
+                            left: scale(65),
+                            top: scale(185),
+                            width: scale(160),
+                        }}>
+                        {busInfoArr.length > 0
+                            ? busInfoArr.map((item, idx) => (
+                                <Text
+                                    key={`busInfo-${idx}`}
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.third,
+                                        fontSize: scale(10),
+                                    }}>
+                                    {item}
+                                </Text>
+                            )) : null}
+                    </View>
+
+                    {/* 巴士圖標 */}
+                    {busPositionArr.length > 0
+                        ? busPositionArr.map(item => (
+                            <TouchableScale
+                                style={busStyleArr[item.index]}
+                                activeScale={0.6}
+                                key={`busIcon-${item.index}`}
+                                onPress={onBusIconPress}>
+                                <Image
+                                    source={busIcon}
+                                    style={{
+                                        width: scale(30),
+                                        height: scale(30),
+                                    }}
+                                />
+                            </TouchableScale>
+                        )) : null}
+
+                    {/* 巴士站點文字 */}
+                    {renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}
+                    {renderBusStopText(145, 302, 'E4', '劉少榮樓', 1)}
+                    {renderBusStopText(145, 82, 'N2', '大學會堂', 2)}
+                    {renderBusStopText(45, 90, 'N6', '行政樓', 3)}
+                    {renderBusStopText(79, 160, 'E11', '科技學院', 4)}
+                    {renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
+                    {renderBusStopText(79, 395, 'E32', '法學院', 6)}
+                    {renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
+
+                    <View style={{
+                        position: 'absolute',
+                        top: scale(5),
+                        left: scale(130),
+                        width: scale(35),
+                    }}>
+                        <CountdownCircleTimer
+                            isPlaying
+                            duration={7}
+                            colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+                            strokeWidth={verticalScale(5)}
+                            colorsTime={[7, 5, 2, 0]}
+                            size={scale(35)}
+                            onComplete={() => {
+                                return { shouldRepeat: true };
                             }}
                         >
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(11), color: themeColor, fontWeight: 'bold' }}>{t('校園地圖', { ns: 'features' })}</Text>
-                        </TouchableOpacity>
-                        {/* Bus運行信息的渲染 */}
-                        <View
-                            style={{
-                                ...s.infoContainer,
-                                left: scale(65),
-                                top: scale(185),
-                                width: scale(160),
-                            }}>
-                            {busInfoArr.length > 0
-                                ? busInfoArr.map((item, idx) => (
-                                    <Text
-                                        key={`busInfo-${idx}`}
-                                        style={{
-                                            ...uiStyle.defaultText,
-                                            color: black.third,
-                                            fontSize: scale(10),
-                                        }}>
-                                        {item}
-                                    </Text>
-                                )) : null}
-                        </View>
-
-                        {/* 巴士圖標 */}
-                        {busPositionArr.length > 0
-                            ? busPositionArr.map(item => (
-                                <TouchableScale
-                                    style={busStyleArr[item.index]}
-                                    activeScale={0.6}
-                                    key={`busIcon-${item.index}`}
-                                    onPress={onBusIconPress}>
-                                    <Image
-                                        source={busIcon}
-                                        style={{
-                                            width: scale(30),
-                                            height: scale(30),
-                                        }}
-                                    />
-                                </TouchableScale>
-                            )) : null}
-
-                        {/* 巴士站點文字 */}
-                        {renderBusStopText(100, 455, 'PGH', '研究生宿舍(起)', 0)}
-                        {renderBusStopText(145, 302, 'E4', '劉少榮樓', 1)}
-                        {renderBusStopText(145, 82, 'N2', '大學會堂', 2)}
-                        {renderBusStopText(45, 90, 'N6', '行政樓', 3)}
-                        {renderBusStopText(79, 160, 'E11', '科技學院', 4)}
-                        {renderBusStopText(79, 267, 'E21', '人文社科樓', 5)}
-                        {renderBusStopText(79, 395, 'E32', '法學院', 6)}
-                        {renderBusStopText(80, 547, 'S4', '研究生宿舍南四座(終)', 7)}
-
-                        <View style={{
-                            position: 'absolute',
-                            top: scale(5),
-                            left: scale(130),
-                            width: scale(35),
-                        }}>
-                            <CountdownCircleTimer
-                                isPlaying
-                                duration={7}
-                                colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-                                strokeWidth={verticalScale(5)}
-                                colorsTime={[7, 5, 2, 0]}
-                                size={scale(35)}
-                                onComplete={() => {
-                                    return { shouldRepeat: true };
-                                }}
-                            >
-                                {({ remainingTime }) => <Text style={{ ...uiStyle.defaultText, color: black.third }}>{remainingTime}</Text>}
-                            </CountdownCircleTimer>
-                        </View>
-                    </ImageBackground>
-                </ScrollView>
+                            {({ remainingTime }) => <Text style={{ ...uiStyle.defaultText, color: black.third }}>{remainingTime}</Text>}
+                        </CountdownCircleTimer>
+                    </View>
+                </ImageBackground>
             </ScrollView>
 
             {/* ARKImageView 圖片查看器 */}

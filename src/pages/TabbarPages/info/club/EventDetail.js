@@ -20,7 +20,6 @@ import ModalBottom from '../../../../components/ModalBottom';
 import ARKImageView from '../../../../components/ARKImageView';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
-import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -680,12 +679,6 @@ const EventDetail = (props) => {
 
     return (
         <View style={{ flex: 1 }}>
-            {isLoading ? (
-                <Header title={'Loading...'} />
-            ) : (
-                <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent={true} />
-            )}
-
             {/* Modal展示需要的信息 */}
             {isShowModal && (
                 <ModalBottom cancel={tiggerModalBottom}>
@@ -761,6 +754,7 @@ const EventDetail = (props) => {
                     alwaysBounceHorizontal={false}
                     scrollViewBackgroundColor={bg_color}
                 >
+                    <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent={true} />
                     {renderMainContent()}
                     <View style={{ height: verticalScale(50) }} />
                 </ImageHeaderScrollView>

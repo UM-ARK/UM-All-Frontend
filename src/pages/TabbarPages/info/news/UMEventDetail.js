@@ -25,7 +25,6 @@ import {trigger} from '../../../../utils/trigger';
 
 import {useTheme, themes, uiStyle} from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
-import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import {logToFirebase} from '../../../../utils/firebaseAnalytics';
 
@@ -579,16 +578,8 @@ const UMEventDetail = ({route, navigation}) => {
 
     return (
         <View style={{backgroundColor: bg_color, flex: 1}}>
-            {/* 懸浮標題欄 */}
-            <Animated.View style={[staticStyles.floatingHeader, headerStyle]}>
-                <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-                <Text style={[staticStyles.floatingHeaderText, {color: black.main}]} numberOfLines={1}>
-                    {getCurrentTitle()}
-                </Text>
-            </Animated.View>
-
             {/* 固定頂部導航 */}
-            <Header title={''} iOSDIY={true} transparent={true} />
+            {/* <Header title={''} iOSDIY={true} transparent={true} /> */}
 
             {/* 圖片查看器 */}
             <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
@@ -598,7 +589,9 @@ const UMEventDetail = ({route, navigation}) => {
                 ref={scrollRef}
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
-                showsVerticalScrollIndicator={false}>
+                showsVerticalScrollIndicator={false}
+                contentInsetAdjustmentBehavior="automatic"
+                >
                 {/* Hero 區域 */}
                 <HeroSection
                     imageUrl={imageUrls}

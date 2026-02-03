@@ -225,9 +225,57 @@ fontSize: moderateScale(16) // font scaling
    ```javascript
    // V8 使用原生底層標籤（iOS 26+ 液態玻璃效果）
    const Tabs = createBottomTabNavigator();
-   
+
    // 如果要使用 JavaScript 實現：
    <Tabs.Navigator implementation="custom">
+   ```
+
+3. **液態玻璃效果判斷**：
+   - 使用 `isLiquidGlassSupported` 函數判斷是否支持液態玻璃樣式
+   - 替代傳統的 Platform 版本和型號判斷方法
+   - 安裝：`@callstack/liquid-glass` 已在項目中安裝（版本 0.7.0）
+
+   ```javascript
+   // 正確用法
+   import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+
+   // 判斷是否支持液態玻璃效果
+   if (isLiquidGlassSupported) {
+       // 使用液態玻璃樣式
+   } else {
+       // 使用 fallback 樣式（如 blur effect）
+   }
+   ```
+
+   **使用場景示例**：
+   ```javascript
+   // 在導航配置中使用
+   const createHeaderOptions = (theme) => {
+       const { bg_color, black } = theme;
+
+       return {
+           headerShown: true,
+           headerTitleAlign: 'center',
+           headerTintColor: black.main,
+
+           // iOS 26+ 液態玻璃效果
+           headerTransparent: isLiquidGlassSupported,
+           headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+           headerBackground: isLiquidGlassSupported ? null : (() => (
+               <View style={{ flex: 1, backgroundColor: bg_color }} />
+           )),
+       };
+   };
+   ```
+
+   **禁止使用**：
+   ```javascript
+   // ❌ 錯誤：使用 Platform 判斷版本或型號
+   import { Platform } from 'react-native';
+
+   // 不要這樣判斷
+   const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
+   const isIPhone16OrLater = Platform.OS === 'ios' && Platform.isPad === false && ...;
    ```
 
 #### 導航結構

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, View } from 'react-native';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
@@ -17,6 +17,7 @@ import { Platform } from 'react-native';
 import { inject } from 'mobx-react';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 
 const Tabs = createBottomTabNavigator();
 
@@ -43,19 +44,15 @@ const Tabbar = () => {
                     ...uiStyle.defaultText,
                     fontSize: labelFontSize,
                     fontWeight: '600',
+                    backgroundColor: theme.bg_color,
                 },
+                tabBarBlurEffect: 'systemChromeMaterial',
 
                 // 活躍/非活躍顏色
                 tabBarActiveTintColor: theme.themeColor,
                 tabBarInactiveTintColor: theme.black.main,
 
-                // 背景色
-                tabBarStyle: {
-                    backgroundColor: theme.bg_color,
-                    paddingBottom: insets.bottom,
-                },
-
-                // tabBarMinimizeBehavior: 'onScrollDown',
+                tabBarMinimizeBehavior: 'onScrollDown', // 如果你要 iOS 26 的縮放行為
             })}
         >
             <Tabs.Screen

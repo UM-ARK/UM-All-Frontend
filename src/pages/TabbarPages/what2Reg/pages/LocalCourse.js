@@ -3,7 +3,6 @@ import { Text, View, ScrollView, TouchableOpacity, FlatList, Alert, StyleSheet }
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
-import Header from '../../../../components/Header';
 import Loading from '../../../../components/Loading';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { openLink } from '../../../../utils/browser';
@@ -453,13 +452,12 @@ const LocalCourse = (props) => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header title={courseCode} iOSDIY={true} />
             {isLoading ? (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                     <Loading />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5) }}>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5) }} contentInsetAdjustmentBehavior="automatic">
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>

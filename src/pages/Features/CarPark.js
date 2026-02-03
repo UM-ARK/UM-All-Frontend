@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../components/ThemeContext';
-import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 import { UM_API_CAR_PARK, UM_API_TOKEN } from '../../utils/pathMap';
 
@@ -70,8 +69,6 @@ const CarPark = () => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header title={'車位訊息'} iOSDIY={true} />
-
             <ScrollView
                 contentContainerStyle={{ paddingHorizontal: scale(10) }}
                 refreshControl={
@@ -84,7 +81,9 @@ const CarPark = () => {
                             getData();
                         }}
                     />
-                }>
+                }
+                contentInsetAdjustmentBehavior="automatic"
+            >
                 {!isLoading ? (
                     <View>
                         {/* Data From */}
@@ -245,8 +244,8 @@ const CarPark = () => {
                                                 var cartype = itm.vehicleType;
                                                 var rest = itm.noOfAvailableSpace;
                                                 if (Sort === 'All' || people === Sort) {
-                                                    if (Type === 'All' || cartype === Type)
-                                                        {return (
+                                                    if (Type === 'All' || cartype === Type) {
+                                                        return (
                                                             <View key={people + cartype + i}>
                                                                 <Text
                                                                     style={{
@@ -281,7 +280,8 @@ const CarPark = () => {
                                                                     剩餘車位：{rest} {rest <= 10 ? '  餘位緊張' : null}
                                                                 </Text>
                                                             </View>
-                                                        );}
+                                                        );
+                                                    }
                                                 }
                                                 return null;
                                             })}

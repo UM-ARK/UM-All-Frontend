@@ -12,6 +12,7 @@ import {
     StyleSheet,
     RefreshControl,
     Linking,
+    Platform,
 } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
@@ -32,7 +33,6 @@ import { updateUserInfo } from '../../../../utils/storageKits';
 import { versionStringCompare } from '../../../../utils/versionKits';
 import { trigger } from '../../../../utils/trigger';
 
-import Header from '../../../../components/Header';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -43,6 +43,7 @@ import axios from 'axios';
 import Toast from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -371,7 +372,7 @@ const ClubDetail = (props) => {
                 }}
                 style={{
                     position: 'absolute',
-                    top: verticalScale(65),
+                    top: isLiquidGlassSupported ? verticalScale(50) : verticalScale(65),
                     left: scale(15),
                     zIndex: 999,
                 }}
@@ -579,12 +580,6 @@ const ClubDetail = (props) => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            {isLoading ? (
-                <Header title={'組織詳情'} />
-            ) : (
-                <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent />
-            )}
-
             {!isLoading && clubData ? (
                 <ImageHeaderScrollView
                     maxOverlayOpacity={0.6}
@@ -612,6 +607,7 @@ const ClubDetail = (props) => {
                     alwaysBounceHorizontal={false}
                     scrollViewBackgroundColor={bg_color}
                 >
+                    <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent />
                     {renderMainContent()}
                 </ImageHeaderScrollView>
             ) : (
