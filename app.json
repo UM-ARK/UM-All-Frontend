@@ -47,7 +47,10 @@
         {
           "ios": {
             "useFrameworks": "static",
-            "forceStaticLinking": ["RNFBApp", "RNFBAnalytics"]
+            "forceStaticLinking": [
+              "RNFBApp",
+              "RNFBAnalytics"
+            ]
           }
         }
       ],
@@ -65,7 +68,8 @@
       ],
       "expo-system-ui",
       "expo-font",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "react-native-bottom-tabs"
     ]
   }
 }
