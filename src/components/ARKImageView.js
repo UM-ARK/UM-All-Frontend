@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
@@ -131,10 +131,8 @@ const ARKImageView = forwardRef((props, ref) => {
 
     // Header 組件 - 包含關閉按鈕（右上角，避免與狀態欄重疊）
     const HeaderComponent = useCallback(() => {
-        // Android 狀態欄高度備選方案
-        const statusBarHeight = StatusBar.currentHeight || 0;
-        // 使用 insets.top 或狀態欄高度的較大值，確保足夠的間距
-        const topPadding = Math.max(insets.top, statusBarHeight, Platform.OS === 'android' ? scale(8) : 0);
+        // 使用 SafeArea insets 確保與狀態欄不重疊
+        const topPadding = Math.max(insets.top, Platform.OS === 'android' ? scale(8) : 0);
 
         return (
             <View style={[styles.headerContainer, { paddingTop: topPadding }]}>

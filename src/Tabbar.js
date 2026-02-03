@@ -76,27 +76,6 @@ const Tabbar = () => {
                 })}
             />
 
-            {/* <Tabs.Screen
-                name="Wiki"
-                component={ARKWiki}
-                options={{
-                    title: t('百科'),
-                    tabBarIcon: Platform.select({
-                        ios: {
-                            type: 'sfSymbol',
-                            name: 'doc.text',
-                        },
-                        android: {
-                            type: 'materialSymbol',
-                            name: 'description',
-                        },
-                    }),
-                }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
-            /> */}
-
             <Tabs.Screen
                 name="Harbor"
                 component={ARKHarbor}
@@ -174,7 +153,7 @@ const Tabbar = () => {
                             type: 'materialSymbol',
                             name: 'apps',
                         },
-                    })
+                    }),
                 }}
                 listeners={() => ({
                     tabPress: () => trigger(),

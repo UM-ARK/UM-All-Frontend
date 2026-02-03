@@ -95,7 +95,7 @@ const App = () => {
     // 開屏動畫
     useEffect(() => {
         // 等待主題加載完成後再開始計時消失開屏
-        if (!isThemeLoaded) return;
+        if (!isThemeLoaded) {return;}
 
         const timer = setTimeout(() => {
             setIsLoaded(true);

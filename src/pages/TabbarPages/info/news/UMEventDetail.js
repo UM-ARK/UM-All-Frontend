@@ -223,7 +223,7 @@ const LanguageSelector = React.memo(
         // 計算指示器位置
         const indicatorStyle = useAnimatedStyle(() => {
             const selectedLayout = buttonLayouts[chooseMode];
-            if (!selectedLayout) return {};
+            if (!selectedLayout) {return {};}
 
             return {
                 transform: [
@@ -500,7 +500,7 @@ const UMEventDetail = ({route, navigation}) => {
         eventData.details.forEach(item => {
             const langMap = {en_US: 'en', pt_PT: 'pt', zh_TW: 'cn'};
             const lang = langMap[item.locale];
-            if (!lang) return;
+            if (!lang) {return;}
 
             result[`title_${lang}`] = item.title || '';
             result[`content_${lang}`] = item.content || '';

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import { Appearance, StatusBar, StyleSheet } from 'react-native';
+import { Appearance, StyleSheet } from 'react-native';
 import { COLOR_DIY, isLight } from '../utils/uiMap';
 import { verticalScale } from 'react-native-size-matters';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
