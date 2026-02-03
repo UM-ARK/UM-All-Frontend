@@ -36,8 +36,8 @@ const getColorDiy = (isLight) => ({
     white: isLight ? '#fff' : '#272729',
     trueWhite: '#fff',
 
-    // 半透明玻璃擬態效果顏色（20% 透明度）
-    glass: 'rgba(255, 255, 255, 0.2)',
+    // 半透明玻璃擬態效果顏色（增加透明度，讓效果更明顯）
+    glass: isLight ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)',
 
     // 全局背景白色(偏灰)
     bg_color: isLight ? '#F5F5F7' : '#121212',

@@ -1,143 +1,274 @@
-import React, { PureComponent } from 'react';
-import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList } from 'react-native';
-
-import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import {
+    View,
+    Text,
+    RefreshControl,
+    TouchableOpacity,
+    Alert,
+    FlatList,
+    Dimensions,
+    StyleSheet,
+    ScrollView,
+    TextInput,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
-import ClubCard from './components/ClubCard';
 import axios from 'axios';
-import { scale, verticalScale } from 'react-native-size-matters';
-import { FlatList } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import TouchableScale from 'react-native-touchable-scale';
+import { Image } from 'expo-image';
+import { Feather } from '@expo/vector-icons';
 
-const COMPONENT_WIDTH = scale(90);
-const ITEMS_PER_ROW = 3;
-let originClubDataList = [];
+const { width: screenWidth } = Dimensions.get('window');
+const ITEM_WIDTH = (screenWidth - scale(40)) / 3;
 
-const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
+// 社团列表项组件
+const ClubItem = React.memo(({ data }) => {
+    const navigation = useNavigation();
+    const { theme } = useTheme();
+    const { themeColor, black, white, trueWhite } = theme;
+    const { logo_url, name, tag } = data;
 
-const chunkIntoRows = (list, size) => {
-    const rows = [];
-    for (let i = 0; i < list.length; i += size) {
-        rows.push(list.slice(i, i + size));
-    }
-    return rows;
+    const handleJumpToDetail = useCallback(() => {
+        trigger();
+        navigation.navigate('ClubDetail', { data });
+    }, [navigation, data]);
+
+    return (
+        <TouchableScale
+            style={[styles.itemContainer]}
+            activeOpacity={0.8}
+            onPress={handleJumpToDetail}
+            activeScale={0.98}
+        >
+            <View style={styles.itemCard}>
+                {/* 社团 Logo */}
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={{ uri: logo_url }}
+                        style={styles.logo}
+                        contentFit="contain"
+                        transition={200}
+                        placeholder={{
+                            uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                        }}
+                    />
+                </View>
+
+                {/* 组织信息 */}
+                <View style={styles.infoContainer}>
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            fontSize: moderateScale(12),
+                            fontWeight: '600',
+                            textAlign: 'center',
+                        }}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                    >
+                        {name}
+                    </Text>
+                </View>
+            </View>
+        </TouchableScale>
+    );
+}, (prev, next) => prev.data?._id === next.data?._id);
+
+// 筛选标签组件
+const FilterTag = ({ tag, active, onPress }) => {
+    const { theme } = useTheme();
+    const { themeColor, black, white, glass } = theme;
+
+    return (
+        <TouchableScale
+            activeOpacity={0.7}
+            onPress={onPress}
+            activeScale={0.95}
+        >
+            <View
+                style={[
+                    styles.filterTag,
+                    {
+                        backgroundColor: active ? themeColor : glass,
+                        borderColor: active ? themeColor : 'rgba(255,255,255,0.3)',
+                    },
+                ]}
+            >
+                <Text
+                    style={[
+                        styles.filterTagText,
+                        {
+                            color: active ? white : black.main,
+                        },
+                    ]}
+                >
+                    {clubTagMap(tag)}
+                </Text>
+            </View>
+        </TouchableScale>
+    );
 };
 
-class ClubPage extends PureComponent {
-    sectionListRef = React.createRef(null);
-    static contextType = ThemeContext;
+// 主页面组件
+const ClubPage = () => {
+    const { theme } = useTheme();
+    const { themeColor, black, bg_color } = theme;
+    const navigation = useNavigation();
 
-    state = {
-        sections: [],
-        isLoading: true,
-        isOtherViewVisible: true,
-    };
+    const [clubDataList, setClubDataList] = useState([]);
+    const [filteredClubDataList, setFilteredClubDataList] = useState([]);
+    const [selectedTag, setSelectedTag] = useState('ALL');
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [searchText, setSearchText] = useState('');
 
-    componentDidMount() {
-        // 獲取所有社團信息
-        this.getData();
-    }
-
-    // 請求所有社團的info
-    getData = async () => {
-        this.handleScrollStart();
-        this.setState({ isLoading: true });
-        let URL = BASE_URI + GET.CLUB_INFO_ALL;
-        try {
-            await axios.get(URL).then(res => {
-                let json = res.data;
-                if (json.message == 'success') {
-                    let clubDataList = json.content;
-                    clubDataList.forEach(itm => {
-                        itm.logo_url = BASE_HOST + itm.logo_url;
-                    });
-                    originClubDataList = clubDataList;
-                    this.setState({
-                        sections: this.buildSections(clubDataList),
-                        isLoading: false,
-                    });
-                    this.handleScrollEnd();
-                } else {
-                    Alert.alert('Warning:', message);
-                }
-            });
-        } catch (error) {
-            if (error.code == 'ERR_NETWORK' || error.code == 'ECONNABORTED') {
-                // 網絡錯誤
-                this.setState({ isLoading: false, clubDataList: undefined });
-            } else {
-                Alert.alert('組織頁，未知錯誤，請聯繫開發者！\n也可能是國內網絡屏蔽所導致！');
-            }
-        }
-    };
-
-    buildSections = (clubDataList) => {
-        if (!clubDataList || clubDataList.length === 0) { return []; }
-        const sections = [];
-        // 先放 ARK 組織
-        const arkList = clubFilter(clubDataList, 'ARK');
-        if (arkList.length) {
-            sections.push({
-                title: 'ARK',
-                data: chunkIntoRows(arkList, ITEMS_PER_ROW),
-            });
-        }
-
-        clubTagList.forEach((tag) => {
-            const list = clubFilter(clubDataList, tag);
-            if (list.length) {
-                sections.push({
-                    title: tag,
-                    data: chunkIntoRows(list, ITEMS_PER_ROW),
-                });
-            }
+    // 配置原生搜索框
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerSearchBarOptions: {
+                placeholder: '搜索社團...',
+                onChange: (event) => {
+                    const text = event.nativeEvent.text;
+                    handleSearch(text);
+                },
+                onClose: () => {
+                    handleSearch('');
+                },
+            },
         });
+    }, [navigation]);
 
-        return sections;
-    };
+    // 获取所有社团信息
+    const getData = useCallback(async () => {
+        try {
+            const URL = BASE_URI + GET.CLUB_INFO_ALL;
+            const response = await axios.get(URL);
+            const json = response.data;
 
-    renderBottomInfo = () => {
-        const { theme } = this.context;
-        const { themeColor, black, white } = theme;
+            if (json.message === 'success') {
+                let data = json.content;
+                data.forEach(itm => {
+                    itm.logo_url = BASE_HOST + itm.logo_url;
+                });
+
+                setClubDataList(data);
+                setFilteredClubDataList(data);
+            } else {
+                Alert.alert('警告', '獲取社團數據失敗');
+            }
+        } catch (error) {
+            if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+                Alert.alert('網絡錯誤', '請檢查網絡連接後重試');
+            } else {
+                Alert.alert('錯誤', '組織頁面出現未知錯誤，請聯繫開發者！');
+            }
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    }, []);
+
+    // 组件挂载时获取数据
+    useEffect(() => {
+        getData();
+    }, [getData]);
+
+    // 筛选社团数据
+    const filterClubs = useCallback((tag) => {
+        setSelectedTag(tag);
+
+        let filteredData = [];
+        if (tag === 'ALL') {
+            filteredData = clubDataList;
+        } else if (tag === 'ARK') {
+            filteredData = clubDataList.filter(club => club.tag === 'ARK');
+        } else {
+            filteredData = clubDataList.filter(club => club.tag === tag);
+        }
+
+        // 应用搜索筛选
+        if (searchText.trim()) {
+            const lowerCaseSearch = searchText.toLowerCase().trim();
+            filteredData = filteredData.filter(club =>
+                club.name.toLowerCase().includes(lowerCaseSearch)
+            );
+        }
+
+        setFilteredClubDataList(filteredData);
+    }, [clubDataList, searchText]);
+
+    // 搜索功能
+    const handleSearch = useCallback((text) => {
+        setSearchText(text);
+
+        let filteredData = [];
+        if (selectedTag === 'ALL') {
+            filteredData = clubDataList;
+        } else if (selectedTag === 'ARK') {
+            filteredData = clubDataList.filter(club => club.tag === 'ARK');
+        } else {
+            filteredData = clubDataList.filter(club => club.tag === selectedTag);
+        }
+
+        if (text.trim()) {
+            const lowerCaseSearch = text.toLowerCase().trim();
+            filteredData = filteredData.filter(club =>
+                club.name.toLowerCase().includes(lowerCaseSearch)
+            );
+        }
+
+        setFilteredClubDataList(filteredData);
+    }, [clubDataList, selectedTag]);
+
+    // 刷新数据
+    const handleRefresh = useCallback(() => {
+        setIsRefreshing(true);
+        getData();
+    }, [getData]);
+
+    // 渲染底部信息
+    const renderBottomInfo = () => {
         return (
-            <View style={{ marginBottom: scale(20) }}>
+            <View style={styles.bottomInfoContainer}>
                 <Text
                     style={{
                         ...uiStyle.defaultText,
                         color: black.third,
-                        alignSelf: 'center',
+                        textAlign: 'center',
                         fontSize: scale(12),
-                    }}>
-                    {'\n\n\n\n' + '已有 ' +
-                        originClubDataList.length +
-                        ' 個組織進駐~~\n'}
+                    }}
+                >
+                    {'已有 ' + clubDataList.length + ' 個組織進駐~~\n'}
                 </Text>
                 <Text
                     style={{
                         ...uiStyle.defaultText,
                         color: black.third,
-                        alignSelf: 'center',
+                        textAlign: 'center',
                         fontSize: scale(12),
-                    }}>
+                    }}
+                >
                     {'下拉可刷新頁面~\n'}
-
                 </Text>
+
                 {/* 進駐提示 */}
                 <TouchableOpacity
                     onPress={() => openLink(USUAL_Q)}
-                    style={{
-                        // marginTop: scale(20),
-                        alignSelf: 'center',
-                    }}>
+                    style={styles.joinButton}
+                >
                     <Text
                         style={{
                             ...uiStyle.defaultText,
                             color: themeColor,
                             fontSize: scale(12),
-                            marginBottom: 10,
+                            textAlign: 'center',
                         }}
                     >
                         {'沒有賬號? 進駐ARK ALL!\n'}
@@ -147,132 +278,199 @@ class ClubPage extends PureComponent {
         );
     };
 
-    handleScrollStart = () => {
-        this.setState({ isOtherViewVisible: false });
-    };
-
-    handleScrollEnd = () => {
-        this.setState({ isOtherViewVisible: true });
-    };
-
-    render() {
-        const { theme } = this.context;
-        const { themeColor, black, white } = theme;
-        const { sections, isLoading, isOtherViewVisible } = this.state;
+    // 渲染筛选标签
+    const renderFilterTags = () => {
+        const tags = ['ALL', 'ARK', ...clubTagList];
         return (
-            <View style={{ flex: 1, backgroundColor: theme.bg_color, alignItems: 'center', justifyContent: 'center' }}>
-                {/* 側邊分類導航 */}
-                {sections.length > 0 && isOtherViewVisible && !isLoading ? (
-                    <View style={{
-                        position: 'absolute',
-                        zIndex: 2,
-                        right: scale(10),
-                        bottom: scale(20),
-                        opacity: 0.9,
-                        backgroundColor: white,
-                        borderRadius: scale(10),
-                        ...theme.viewShadow,
-                    }}>
-                        <FlatList
-                            data={sections.map(sec => sec.title)}
-                            contentContainerStyle={{
-                                paddingHorizontal: scale(3),
-                            }}
-                            renderItem={(itm) => {
-                                return (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            trigger();
-                                            const sectionIndex = sections.findIndex(sec => sec.title === itm.item);
-                                            if (sectionIndex !== -1) {
-                                                this.sectionListRef.current?.scrollToLocation({ sectionIndex, itemIndex: 0, viewOffset: 0, animated: true });
-                                            }
-                                        }}
-                                        style={{
-                                            padding: scale(5),
-                                            width: '100%',
-                                        }}
-                                    >
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            color: black.third,
-                                            fontSize: verticalScale(11),
-                                            fontWeight: 'bold',
-                                        }}>
-                                            {clubTagMap(itm.item)}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            }}
-                            keyExtractor={item => item}
-                            showsHorizontalScrollIndicator={false}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={false}
-                        />
-                    </View>
-                ) : null}
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.filterContainer}
+                contentContainerStyle={styles.filterContent}
+            >
+                {tags.map(tag => (
+                    <FilterTag
+                        key={tag}
+                        tag={tag}
+                        active={selectedTag === tag}
+                        onPress={() => filterClubs(tag)}
+                    />
+                ))}
+            </ScrollView>
+        );
+    };
 
-                {/* 組織展示：使用 SectionList 做虛擬化，避免一次渲染全部卡片 */}
-                <SectionList
-                    ref={this.sectionListRef}
-                    sections={sections}
-                    keyExtractor={(item, index) => {
-                        const firstId = item[0]?._id;
-                        return firstId ? `${firstId}-row-${index}` : `row-${index}`;
-                    }}
-                    renderSectionHeader={({ section }) => (
-                        <View style={{
-                            marginLeft: scale(12),
-                            marginBottom: scale(5),
-                            marginTop: scale(8),
-                        }}>
-                            <Text style={{
+    // 渲染搜索栏
+    const renderSearchBar = () => {
+        return (
+            <View style={styles.searchContainer}>
+                <View style={styles.searchBar}>
+                    <Feather
+                        name="search"
+                        size={moderateScale(16)}
+                        color={black.third}
+                        style={styles.searchIcon}
+                    />
+                    <TextInput
+                        style={[
+                            styles.searchInput,
+                            {
                                 ...uiStyle.defaultText,
-                                color: theme.black.main,
-                                fontSize: verticalScale(15),
-                            }}>
-                                {clubTagMap(section.title) || section.title}
-                            </Text>
-                        </View>
+                                color: black.main,
+                            },
+                        ]}
+                        placeholder="搜索社團..."
+                        placeholderTextColor={black.third}
+                        value={searchText}
+                        onChangeText={handleSearch}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+                    {searchText.trim() > 0 && (
+                        <TouchableOpacity onPress={() => handleSearch('')}>
+                            <Feather
+                                name="x"
+                                size={moderateScale(16)}
+                                color={black.third}
+                            />
+                        </TouchableOpacity>
                     )}
-                    renderItem={({ item }) => (
-                        <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'flex-start',
-                            // paddingHorizontal: scale(6),
-                        }}>
-                            {item.map((club) => (
-                                <View key={club._id} style={{ width: COMPONENT_WIDTH + scale(6) }}>
-                                    <ClubCard data={club} />
-                                </View>
-                            ))}
-                        </View>
-                    )}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={this.state.isLoading}
-                            onRefresh={() => {
-                                this.getData();
-                                this.handleScrollStart();
-                            }}
-                        />
-                    }
-                    onScrollBeginDrag={this.handleScrollStart}
-                    onMomentumScrollEnd={this.handleScrollEnd}
-                    ListEmptyComponent={isLoading ? <Loading /> : null}
-                    ListFooterComponent={!isLoading ? this.renderBottomInfo() : null}
-                    showsVerticalScrollIndicator={false}
-                    stickySectionHeadersEnabled={false}
-                    initialNumToRender={10}
-                    maxToRenderPerBatch={10}
-                    windowSize={7}
-                    removeClippedSubviews
-                />
+                </View>
+            </View>
+        );
+    };
+
+    // 网格布局渲染
+    const renderGridItem = ({ item }) => {
+        return <ClubItem data={item} />;
+    };
+
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
+                <Loading />
             </View>
         );
     }
-}
+
+    return (
+        <View style={{ flex: 1, backgroundColor: bg_color }}>
+            {/* 搜索栏 */}
+            {renderSearchBar()}
+
+            {/* 筛选标签 */}
+            {renderFilterTags()}
+
+            {/* 社团列表 - 网格布局 */}
+            <FlatList
+                data={filteredClubDataList}
+                keyExtractor={(item) => item._id}
+                renderItem={renderGridItem}
+                numColumns={3}
+                ListFooterComponent={renderBottomInfo}
+                refreshControl={
+                    <RefreshControl
+                        colors={[themeColor]}
+                        tintColor={themeColor}
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                    />
+                }
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
+                columnWrapperStyle={styles.columnWrapper}
+            />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    searchContainer: {
+        paddingHorizontal: scale(16),
+        paddingVertical: scale(8),
+        backgroundColor: 'transparent',
+    },
+    searchBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderRadius: scale(10),
+        paddingHorizontal: scale(16),
+        height: scale(44),
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    searchIcon: {
+        marginRight: scale(8),
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: moderateScale(14),
+        height: '100%',
+    },
+    filterContainer: {
+        backgroundColor: 'transparent',
+        paddingHorizontal: scale(12),
+        paddingVertical: scale(12),
+    },
+    filterContent: {
+        gap: scale(8),
+    },
+    filterTag: {
+        paddingHorizontal: scale(16),
+        paddingVertical: scale(10),
+        borderRadius: scale(16),
+        borderWidth: 1,
+        minHeight: scale(36),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    filterTagText: {
+        fontSize: moderateScale(13),
+        fontWeight: '500',
+        lineHeight: moderateScale(16),
+    },
+    listContent: {
+        paddingHorizontal: scale(16),
+        paddingBottom: scale(20),
+    },
+    columnWrapper: {
+        justifyContent: 'space-between',
+    },
+    itemContainer: {
+        width: ITEM_WIDTH,
+        marginBottom: scale(16),
+    },
+    itemCard: {
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: scale(12),
+        padding: scale(12),
+        alignItems: 'center',
+    },
+    logoContainer: {
+        marginBottom: scale(8),
+    },
+    logo: {
+        width: scale(50),
+        height: scale(50),
+        borderRadius: scale(25),
+        backgroundColor: 'rgba(255,255,255,0.8)',
+    },
+    infoContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    bottomInfoContainer: {
+        marginHorizontal: scale(12),
+        marginBottom: scale(20),
+        alignItems: 'center',
+    },
+    joinButton: {
+        marginTop: scale(8),
+    },
+});
 
 export default ClubPage;
