@@ -2773,11 +2773,6 @@
   resolved "https://registry.npmjs.org/@react-native/gradle-plugin/-/gradle-plugin-0.81.5.tgz#a58830f38789f6254b64449a17fe57455b589d00"
   integrity sha512-hORRlNBj+ReNMLo9jme3yQ6JQf4GZpVEBLxmTXGGlIL78MAezDZr5/uq9dwElSbcGmLEgeiax6e174Fie6qPLg==
 
-"@react-native/gradle-plugin@^0.77.3":
-  version "0.77.3"
-  resolved "https://registry.npmjs.org/@react-native/gradle-plugin/-/gradle-plugin-0.77.3.tgz#ee96c818c54803187483b905515a3e20347d5553"
-  integrity sha512-GRVNBDowaFub9j+WBLGI09bDbCq+f7ugaNRr6lmZnLx/xdmiKUj9YKyARt4zn8m65MRK2JGlJk0OqmQOvswpzQ==
-
 "@react-native/js-polyfills@0.79.6":
   version "0.79.6"
   resolved "https://registry.npmjs.org/@react-native/js-polyfills/-/js-polyfills-0.79.6.tgz#11dab284ace2708f0483833cfff0c9aee81274df"
@@ -2836,27 +2831,27 @@
     invariant "^2.2.4"
     nullthrows "^1.1.1"
 
-"@react-navigation/bottom-tabs@^8.0.0-alpha.8":
-  version "8.0.0-alpha.8"
-  resolved "https://registry.npmjs.org/@react-navigation/bottom-tabs/-/bottom-tabs-8.0.0-alpha.8.tgz#8a9ff26532031bf7b6fe9a7575c89f1a51a6a1c3"
-  integrity sha512-yav3aA+WzH3+HSRurPaBHoMCG0s8SV2YY9cjxZviHj5tWtQ/TNcxHfYQYPQCGNOQnwsDUcQqpd2jmrizr42alQ==
+"@react-navigation/bottom-tabs@^7.12.0":
+  version "7.12.0"
+  resolved "https://registry.npmjs.org/@react-navigation/bottom-tabs/-/bottom-tabs-7.12.0.tgz#2bb94bbfa0c075cbbfc879640df3af89bbbf2367"
+  integrity sha512-/GtOfVWRligHG0mvX39I1FGdUWeWl0GVF2okEziQSQj0bOTrLIt7y44C3r/aCLkEpTVltCPGM3swqGTH3UfRCw==
   dependencies:
-    "@react-navigation/elements" "^3.0.0-alpha.8"
+    "@react-navigation/elements" "^2.9.5"
     color "^4.2.3"
-    sf-symbols-typescript "^2.2.0"
+    sf-symbols-typescript "^2.1.0"
 
-"@react-navigation/core@^8.0.0-alpha.3":
-  version "8.0.0-alpha.3"
-  resolved "https://registry.npmjs.org/@react-navigation/core/-/core-8.0.0-alpha.3.tgz#72867ffa477b8191c6a8ee4290e295df6aa994ad"
-  integrity sha512-ZxOVmiGtCfMJeSIyQmI/DZv/69XnipjqMnh7jY/2zB0CBjU4+I0IN8+c1siwt+MTFGCpEX+Pn5U5e5EMzKZYng==
+"@react-navigation/core@^7.14.0":
+  version "7.14.0"
+  resolved "https://registry.npmjs.org/@react-navigation/core/-/core-7.14.0.tgz#d24f93d424ab33f645262dc4775e4708aa3d9a8b"
+  integrity sha512-tMpzskBzVp0E7CRNdNtJIdXjk54Kwe/TF9ViXAef+YFM1kSfGv4e/B2ozfXE+YyYgmh4WavTv8fkdJz1CNyu+g==
   dependencies:
-    "@react-navigation/routers" "^8.0.0-alpha.1"
+    "@react-navigation/routers" "^7.5.3"
     escape-string-regexp "^4.0.0"
     fast-deep-equal "^3.1.3"
     nanoid "^3.3.11"
     query-string "^7.1.3"
     react-is "^19.1.0"
-    use-latest-callback "^0.3.2"
+    use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
 "@react-navigation/elements@^2.9.5":
@@ -2868,60 +2863,51 @@
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/elements@^3.0.0-alpha.8":
-  version "3.0.0-alpha.8"
-  resolved "https://registry.npmjs.org/@react-navigation/elements/-/elements-3.0.0-alpha.8.tgz#6583bcc884027a3cae107e2fb4e2c91622fe9782"
-  integrity sha512-9ZUPRwW4yjbOO2W9bvv/49c9oJ4HOm0kp9LRlEVf3S/Zj3BXDFHuFB1NmfLaVt90t/ekclMbElQqFRye7/fKTA==
+"@react-navigation/material-top-tabs@^7.4.13":
+  version "7.4.13"
+  resolved "https://registry.npmjs.org/@react-navigation/material-top-tabs/-/material-top-tabs-7.4.13.tgz#6a2ccb1bc7b044e11716d5ec9f74deff8c619e36"
+  integrity sha512-evQPmk8bDdY4yksV2Onko+g5z9BwuBdjZEtypuEeshXXTcj+G4Vw6zDIHaeY8jg1JMEFp1I4fPaAeEzSms5tBw==
   dependencies:
+    "@react-navigation/elements" "^2.9.5"
     color "^4.2.3"
-    use-latest-callback "^0.3.2"
-    use-sync-external-store "^1.5.0"
+    react-native-tab-view "^4.2.2"
 
-"@react-navigation/material-top-tabs@^8.0.0-alpha.8":
-  version "8.0.0-alpha.8"
-  resolved "https://registry.npmjs.org/@react-navigation/material-top-tabs/-/material-top-tabs-8.0.0-alpha.8.tgz#77235f692d371bbd4fe3a631f726044b8449c7ba"
-  integrity sha512-x8hhIrspom3p4W/ZHeDA6B46Qm9cqRHN1ZNcPuPWU7Kk5JiVeXy4R0za92JchKs1nsjATL0132A6/PpL97M+mQ==
+"@react-navigation/native-stack@^7.12.0":
+  version "7.12.0"
+  resolved "https://registry.npmjs.org/@react-navigation/native-stack/-/native-stack-7.12.0.tgz#0511234ac6030ed6d716561a380cb2225541373c"
+  integrity sha512-XmNJsPshjkNsahgbxNgGWQUq4s1l6HqH/Fei4QsjBNn/0mTvVrRVZwJ1XrY9YhWYvyiYkAN6/OmarWQaQJ0otQ==
   dependencies:
-    "@react-navigation/elements" "^3.0.0-alpha.8"
+    "@react-navigation/elements" "^2.9.5"
     color "^4.2.3"
-    react-native-tab-view "^5.0.0-alpha.1"
-
-"@react-navigation/native-stack@^8.0.0-alpha.8":
-  version "8.0.0-alpha.8"
-  resolved "https://registry.npmjs.org/@react-navigation/native-stack/-/native-stack-8.0.0-alpha.8.tgz#244ba50c784201df58110be2209fb0892b8758c8"
-  integrity sha512-pf2JQw/HBK6bnIZD1pVQM+b2ePIielYvM9JeLYui3Kjsqw80k6arZtGqaOc+Ixc1moFi4snZq/WBjyOSsO3nMA==
-  dependencies:
-    "@react-navigation/elements" "^3.0.0-alpha.8"
-    sf-symbols-typescript "^2.2.0"
+    sf-symbols-typescript "^2.1.0"
     warn-once "^0.1.1"
 
-"@react-navigation/native@^8.0.0-alpha.8":
-  version "8.0.0-alpha.8"
-  resolved "https://registry.npmjs.org/@react-navigation/native/-/native-8.0.0-alpha.8.tgz#e1df9e4e5cc49898b9242701f078f9d78a170233"
-  integrity sha512-n22GETbM0zv2NPrdR4EGe4wc1TYvfsQe09zhDD9hoKb0WzvqoVlOF656pTsj5gbun4wRhb3hDN3DXj7/Oo6YMA==
+"@react-navigation/native@^7.1.28":
+  version "7.1.28"
+  resolved "https://registry.npmjs.org/@react-navigation/native/-/native-7.1.28.tgz#1ee75cf3a8b3e4365f94c5d657bb3c015e387720"
+  integrity sha512-d1QDn+KNHfHGt3UIwOZvupvdsDdiHYZBEj7+wL2yDVo3tMezamYy60H9s3EnNVE1Ae1ty0trc7F2OKqo/RmsdQ==
   dependencies:
-    "@react-navigation/core" "^8.0.0-alpha.3"
+    "@react-navigation/core" "^7.14.0"
     escape-string-regexp "^4.0.0"
     fast-deep-equal "^3.1.3"
     nanoid "^3.3.11"
-    sf-symbols-typescript "^2.2.0"
-    use-latest-callback "^0.3.2"
+    use-latest-callback "^0.2.4"
 
-"@react-navigation/routers@^8.0.0-alpha.1":
-  version "8.0.0-alpha.1"
-  resolved "https://registry.npmjs.org/@react-navigation/routers/-/routers-8.0.0-alpha.1.tgz#68e872142df1ee9013286a8f7ba011cbf325693f"
-  integrity sha512-QbFEMY/pkQSV5FeA+bPBOBvKIguvpWp2Jc3FxbNr1zTwvk8lnoaWf99vUs19iyQoGRONT3afrwr1PKO6zX1r1g==
+"@react-navigation/routers@^7.5.3":
+  version "7.5.3"
+  resolved "https://registry.npmjs.org/@react-navigation/routers/-/routers-7.5.3.tgz#8002930ef5f62351be2475d0dffde3ffaee174d7"
+  integrity sha512-1tJHg4KKRJuQ1/EvJxatrMef3NZXEPzwUIUZ3n1yJ2t7Q97siwRtbynRpQG9/69ebbtiZ8W3ScOZF/OmhvM4Rg==
   dependencies:
     nanoid "^3.3.11"
 
-"@react-navigation/stack@^8.0.0-alpha.8":
-  version "8.0.0-alpha.8"
-  resolved "https://registry.npmjs.org/@react-navigation/stack/-/stack-8.0.0-alpha.8.tgz#f1834a8f981c58aab19dd5ad44e88ec4c1da26e7"
-  integrity sha512-zkLHeH66kFMMNNeHO4r5h2MVs4aopVvEBYEgHvu9/E/EIkWE8uFrtRiRnZpzeQ5V9v/j/UqSXjDfyGHArJqi/A==
+"@react-navigation/stack@^7.7.0":
+  version "7.7.0"
+  resolved "https://registry.npmjs.org/@react-navigation/stack/-/stack-7.7.0.tgz#472f9bd6a7c65131f101a2e6c3d42c85bd5b2028"
+  integrity sha512-JBu/LIvnqxjftF5DCrwqZekO4y+maOskXO+6FY5Hw9c4Q3ttWBK2dsyzwKn4m5Ba3yO5KFtbyAV948gh6cacIg==
   dependencies:
-    "@react-navigation/elements" "^3.0.0-alpha.8"
+    "@react-navigation/elements" "^2.9.5"
     color "^4.2.3"
-    use-latest-callback "^0.3.2"
+    use-latest-callback "^0.2.4"
 
 "@rneui/base@^4.0.0-rc.8":
   version "4.0.0-rc.8"
@@ -2944,11 +2930,6 @@
   version "3.4.0"
   resolved "https://registry.npmjs.org/@rnx-kit/align-deps/-/align-deps-3.4.0.tgz#c5ab3178952830b756ddb09d28fb35d0613f3e3b"
   integrity sha512-5R3tPJ/2KDQGQ1cZfrIzFMUVeH66JLyvPim3pse2WHTXT2DSQGGUCDmQQrI+DknadG06UPqc97lUvRXfTmeo7w==
-
-"@sbaiahmed1/react-native-blur@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/@sbaiahmed1/react-native-blur/-/react-native-blur-0.1.2.tgz#849d8b9e0281ff79ad8549d5585bebe31f203840"
-  integrity sha512-5VEQiMOH4rHwDFZedqXwZ55EMPE4RqnqS3nLZGzOd50MCRSrxDPm2pF7yv3xsF51c9PL22sQMhvLWLdFarRv6Q==
 
 "@sideway/address@^4.1.5":
   version "4.1.5"
@@ -8123,11 +8104,6 @@ react-native-animatable@1.4.0:
   dependencies:
     prop-types "^15.8.1"
 
-react-native-animated-nav-tab-bar@^3.1.13:
-  version "3.1.13"
-  resolved "https://registry.npmjs.org/react-native-animated-nav-tab-bar/-/react-native-animated-nav-tab-bar-3.1.13.tgz#c2f0e223b4d4fdefee3de41376671da565c22dfb"
-  integrity sha512-/AWf/6sdlGtOgi7KeMzUFipkI3SHGTwK1mthUe0PtI/OrCNangQ4s6KYsXkz4bm33yI3RBhcbUfcUWHeumRWkA==
-
 react-native-animated-splash-screen@^2.0.5:
   version "2.0.5"
   resolved "https://registry.npmjs.org/react-native-animated-splash-screen/-/react-native-animated-splash-screen-2.0.5.tgz#5dcfafc2841a8b0636662eaf6980e791d9acc7e1"
@@ -8268,12 +8244,13 @@ react-native-safe-area-context@~5.6.0:
   resolved "https://registry.npmjs.org/react-native-safe-area-context/-/react-native-safe-area-context-5.6.2.tgz#283e006f5b434fb247fcb4be0971ad7473d5c560"
   integrity sha512-4XGqMNj5qjUTYywJqpdWZ9IG8jgkS3h06sfVjfw5yZQZfWnRFXczi0GnYyFyCc2EBps/qFmoCH8fez//WumdVg==
 
-react-native-screens@~4.21.0:
-  version "4.21.0"
-  resolved "https://registry.npmjs.org/react-native-screens/-/react-native-screens-4.21.0.tgz#866f0b4213490a0c53c7ef605b88a867f39d15d1"
-  integrity sha512-vUgbfKntx4LZ/1k+UU/miKohK0Ih6xoF3gYJr9QqZNOpPARksPxt4hq3HdCirvCLClieLYC9oLpGdizz/S+BGg==
+react-native-screens@~4.16.0:
+  version "4.16.0"
+  resolved "https://registry.npmjs.org/react-native-screens/-/react-native-screens-4.16.0.tgz#efa42e77a092aa0b5277c9ae41391ea0240e0870"
+  integrity sha512-yIAyh7F/9uWkOzCi1/2FqvNvK6Wb9Y1+Kzn16SuGfN9YFJDTbwlzGRvePCNTOX0recpLQF3kc2FmvMUhyTCH1Q==
   dependencies:
     react-freeze "^1.0.0"
+    react-native-is-edge-to-edge "^1.2.1"
     warn-once "^0.1.0"
 
 react-native-share@^12.2.5:
@@ -8311,13 +8288,6 @@ react-native-tab-view@^4.2.2:
   integrity sha512-NXtrG6OchvbGjsvbySJGVocXxo4Y2vA17ph4rAaWtA2jh+AasD8OyikKBRg2SmllEfeQ+GEhcKe8kulHv8BhTg==
   dependencies:
     use-latest-callback "^0.2.4"
-
-react-native-tab-view@^5.0.0-alpha.1:
-  version "5.0.0-alpha.1"
-  resolved "https://registry.npmjs.org/react-native-tab-view/-/react-native-tab-view-5.0.0-alpha.1.tgz#5f33a2dcec73ecf25071ce6e06df029fb7644828"
-  integrity sha512-r/pvo4wyMHdIuXUdjIeXvaQ4vgYA4/yp0jedPaAEmVMZWBgcpV81DICXrzgnrfxThplPSYSTM1sh8fEM6th5Xw==
-  dependencies:
-    use-latest-callback "^0.3.2"
 
 react-native-toast-message@^2.3.3:
   version "2.3.3"
@@ -8800,7 +8770,7 @@ setprototypeof@~1.2.0:
   resolved "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz#66c9a24a73f9fc28cbe66b09fed3d33dcaf1b424"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
 
-sf-symbols-typescript@^2.2.0:
+sf-symbols-typescript@^2.1.0:
   version "2.2.0"
   resolved "https://registry.npmjs.org/sf-symbols-typescript/-/sf-symbols-typescript-2.2.0.tgz#926d6e0715e3d8784cadf7658431e36581254208"
   integrity sha512-TPbeg0b7ylrswdGCji8FRGFAKuqbpQlLbL8SOle3j1iHSs5Ob5mhvMAxWN2UItOjgALAB5Zp3fmMfj8mbWvXKw==
@@ -9509,11 +9479,6 @@ use-latest-callback@^0.2.4:
   version "0.2.6"
   resolved "https://registry.npmjs.org/use-latest-callback/-/use-latest-callback-0.2.6.tgz#e5ea752808c86219acc179ace0ae3c1203255e77"
   integrity sha512-FvRG9i1HSo0wagmX63Vrm8SnlUU3LMM3WyZkQ76RnslpBrX694AdG4A0zQBx2B3ZifFA0yv/BaEHGBnEax5rZg==
-
-use-latest-callback@^0.3.2:
-  version "0.3.3"
-  resolved "https://registry.npmjs.org/use-latest-callback/-/use-latest-callback-0.3.3.tgz#62f3c2a949087605741624850e4be6429e8fe3f1"
-  integrity sha512-G9A/EL7okx4wzBfATt8bdGg0v1K0Gp0IClTzljffM63gtPisgDKCaLCLUb4g2M4CoXDg5yyHjOU+g3SUPbXwrA==
 
 use-sync-external-store@^1.4.0, use-sync-external-store@^1.5.0, use-sync-external-store@^1.6.0:
   version "1.6.0"
