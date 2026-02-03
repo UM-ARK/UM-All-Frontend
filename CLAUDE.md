@@ -18,8 +18,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - iOS simulator: `yarn ios` (iPhone 16 Pro), `yarn iosNew` (iPhone 17 Pro), `yarn iosBig` (iPad Pro), `yarn iosTrue` (physical device)
 - Android: `yarn android` (requires API 31 or 33 emulator)
 - Lint: `yarn lint` (ESLint extends @react-native config)
-- Run all tests: `yarn test`
-- Run single test: `yarn test -- --testPathPattern=App.test.tsx` or `yarn test -- <test-file-path>`
 - Lint specific file: `yarn lint src/pages/TabbarPages/info/ClubPage.js`
 - Start Metro: `yarn start` (with --reset-cache flag: `expo start --reset-cache`)
 
@@ -204,17 +202,6 @@ fontSize: moderateScale(16) // font scaling
 ### React Navigation V7
 
 本項目使用 React Navigation V7 穩定版本。
-
-#### 當前安裝的版本
-
-| Package                             | Version  |
-| ----------------------------------- | -------- |
-| @react-navigation/native            | ^7.1.28  |
-| @react-navigation/bottom-tabs       | ^7.12.0  |
-| @react-navigation/native-stack      | ^7.12.0  |
-| @react-navigation/stack             | ^7.7.0   |
-| @react-navigation/material-top-tabs | ^7.4.13  |
-| @react-navigation/elements          | ^2.9.5   |
 
 #### 液態玻璃效果支持
 
