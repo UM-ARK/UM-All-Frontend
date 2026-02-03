@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Lint: `yarn lint` (ESLint extends @react-native config)
 - Run all tests: `yarn test`
 - Run single test: `yarn test -- --testPathPattern=App.test.tsx` or `yarn test -- <test-file-path>`
+- Lint specific file: `yarn lint src/pages/TabbarPages/info/ClubPage.js`
 - Start Metro: `yarn start` (with --reset-cache flag: `expo start --reset-cache`)
 
 ## Development Workflow
