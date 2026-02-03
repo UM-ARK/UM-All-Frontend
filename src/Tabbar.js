@@ -107,16 +107,16 @@ const Tabbar = () => {
     });
 
     return (
-        <Tabs.Navigator screenOptions={screenOptions}>
+        <Tabs.Navigator
+            screenOptions={screenOptions}
+            hapticFeedbackEnabled={true}
+        >
             <Tabs.Screen
                 name="NewsTabbar"
                 component={NewsScreen}
                 options={{
                     title: t('資訊'),
                 }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
             />
 
             <Tabs.Screen
@@ -125,9 +125,6 @@ const Tabbar = () => {
                 options={{
                     title: t('職涯港'),
                 }}
-                listeners={() => ({
-                    tabPress: async () => trigger(),
-                })}
             />
 
             <Tabs.Screen
@@ -136,9 +133,6 @@ const Tabbar = () => {
                 options={{
                     title: t('搵課'),
                 }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
             />
 
             <Tabs.Screen
@@ -147,9 +141,6 @@ const Tabbar = () => {
                 options={{
                     title: t('課表'),
                 }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
             />
 
             <Tabs.Screen
@@ -158,9 +149,6 @@ const Tabbar = () => {
                 options={{
                     title: t('服務'),
                 }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
             />
         </Tabs.Navigator>
     );
