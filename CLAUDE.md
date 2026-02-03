@@ -151,14 +151,14 @@ const {white, black, bg_color, themeColor, glass} = theme;
 
 #### 禁止行為（絕對不允許）
 
-| 禁止的寫法 | 原因 |
-|-----------|------|
-| `'#fff'` 或 `'#ffffff'` | 硬編碼白色，不支援暗色模式 |
-| `'#000'` 或 `'#000000'` | 硬編碼黑色，不支援暗色模式 |
-| `'rgba(255,255,255,0.2)'` | 硬編碼半透明色，不支援暗色模式 |
-| `'rgba(0,0,0,0.5)'` | 硬編碼半透明色，不支援暗色模式 |
-| `COLOR_DIY` from `uiMap.js` | 遺留代碼，無法響應主題切換 |
-| 任何非 `theme` 對象提供的顏色 | 無法保證亮色/暗色一致性 |
+| 禁止的寫法                    | 原因                           |
+| ----------------------------- | ------------------------------ |
+| `'#fff'` 或 `'#ffffff'`       | 硬編碼白色，不支援暗色模式     |
+| `'#000'` 或 `'#000000'`       | 硬編碼黑色，不支援暗色模式     |
+| `'rgba(255,255,255,0.2)'`     | 硬編碼半透明色，不支援暗色模式 |
+| `'rgba(0,0,0,0.5)'`           | 硬編碼半透明色，不支援暗色模式 |
+| `COLOR_DIY` from `uiMap.js`   | 遺留代碼，無法響應主題切換     |
+| 任何非 `theme` 對象提供的顏色 | 無法保證亮色/暗色一致性        |
 
 #### 半透明/玻璃態效果處理
 
@@ -200,12 +200,42 @@ fontSize: moderateScale(16) // font scaling
 
 ## Project-Specific Patterns
 
-### Navigation Structure
+### React Navigation V8 (⚠️ Alpha 版本)
+
+**重要提示**: 本項目使用 React Navigation V8 Alpha 版本進行重構。
+
+#### 當前安裝的版本
+
+| Package                             | Version        |
+| ----------------------------------- | -------------- |
+| @react-navigation/native            | ^8.0.0-alpha.8 |
+| @react-navigation/bottom-tabs       | ^8.0.0-alpha.8 |
+| @react-navigation/native-stack      | ^8.0.0-alpha.8 |
+| @react-navigation/stack             | ^8.0.0-alpha.8 |
+| @react-navigation/material-top-tabs | ^8.0.0-alpha.8 |
+| @react-navigation/elements          | ^2.9.5         |
+
+#### V8 主要變更
+
+1. **NavigationContainer 仍為主要 API**：
+   - V8 仍使用 `NavigationContainer` 作為導航容器
+   - 主要變更在於底層實現和 iOS 26+ 特性支持
+
+2. **Native Bottom Tabs 現在是默認**：
+   ```javascript
+   // V8 使用原生底層標籤（iOS 26+ 液態玻璃效果）
+   const Tabs = createBottomTabNavigator();
+   
+   // 如果要使用 JavaScript 實現：
+   <Tabs.Navigator implementation="custom">
+   ```
+
+#### 導航結構
 
 - **Main navigation**: `src/Nav.js` (stack navigator)
-- **Bottom tabs**: `src/Tabbar.js` (6 main tabs using AnimatedTabBarNavigator)
+- **Bottom tabs**: `src/Tabbar.js` (6 main tabs - 使用 Native Bottom Tabs)
 - New screens must be registered in BOTH `Nav.js` and `Tabbar.js`
-- Modal vs card transitions configured per-platform
+- Modal vs card: card 動畫配置
 
 ### State Management
 
@@ -280,17 +310,17 @@ import lodash from 'lodash';
 
 **Common Use Cases:**
 
-| Method | Description | Example Usage |
-|--------|-------------|---------------|
-| `lodash.isEqual()` | Deep comparison of objects | `lodash.isEqual(obj1, obj2)` |
-| `lodash.uniq()` | Array deduplication | `lodash.uniq(array)` |
-| `lodash.groupBy()` | Group array by property | `lodash.groupBy(array, 'property')` |
-| `lodash.chain()` | Chain operations | `lodash.chain(array).filter().map().value()` |
-| `lodash.cloneDeep()` | Deep clone object | `lodash.cloneDeep(object)` |
-| `lodash.uniqBy()` | Deduplicate by property | `lodash.uniqBy(array, 'id')` |
-| `lodash.sortBy()` | Sort array by property | `lodash.sortBy(array, 'name')` |
-| `lodash.filter()` | Filter array | `lodash.filter(array, condition)` |
-| `lodash.get()` | Safe property access | `lodash.get(object, 'path.to.property', defaultValue)` |
+| Method               | Description                | Example Usage                                          |
+| -------------------- | -------------------------- | ------------------------------------------------------ |
+| `lodash.isEqual()`   | Deep comparison of objects | `lodash.isEqual(obj1, obj2)`                           |
+| `lodash.uniq()`      | Array deduplication        | `lodash.uniq(array)`                                   |
+| `lodash.groupBy()`   | Group array by property    | `lodash.groupBy(array, 'property')`                    |
+| `lodash.chain()`     | Chain operations           | `lodash.chain(array).filter().map().value()`           |
+| `lodash.cloneDeep()` | Deep clone object          | `lodash.cloneDeep(object)`                             |
+| `lodash.uniqBy()`    | Deduplicate by property    | `lodash.uniqBy(array, 'id')`                           |
+| `lodash.sortBy()`    | Sort array by property     | `lodash.sortBy(array, 'name')`                         |
+| `lodash.filter()`    | Filter array               | `lodash.filter(array, condition)`                      |
+| `lodash.get()`       | Safe property access       | `lodash.get(object, 'path.to.property', defaultValue)` |
 
 **Key Files Using Lodash:**
 - `src/pages/TabbarPages/what2Reg/index.js` - Course data processing
@@ -307,14 +337,14 @@ import moment from 'moment-timezone'; // With timezone support
 
 **Common Use Cases:**
 
-| Method | Description | Example Usage |
-|--------|-------------|---------------|
-| `moment()` | Initialize time | `const now = moment()` |
-| `moment().format()` | Format date/time | `moment().format('MM-DD HH:mm')` |
-| `moment().isBefore()` | Time comparison | `moment(date1).isBefore(date2)` |
-| `moment().isAfter()` | Time comparison | `moment(date1).isAfter(date2)` |
-| `moment().isSame()` | Date comparison | `moment(date1).isSame(date2, 'day')` |
-| `moment().diff()` | Time difference | `moment(date1).diff(date2, 'minutes')` |
+| Method                | Description      | Example Usage                          |
+| --------------------- | ---------------- | -------------------------------------- |
+| `moment()`            | Initialize time  | `const now = moment()`                 |
+| `moment().format()`   | Format date/time | `moment().format('MM-DD HH:mm')`       |
+| `moment().isBefore()` | Time comparison  | `moment(date1).isBefore(date2)`        |
+| `moment().isAfter()`  | Time comparison  | `moment(date1).isAfter(date2)`         |
+| `moment().isSame()`   | Date comparison  | `moment(date1).isSame(date2, 'day')`   |
+| `moment().diff()`     | Time difference  | `moment(date1).diff(date2, 'minutes')` |
 
 **Key Files Using Moment.js:**
 - `src/utils/checkCoursesKits.js` - Course version comparison
