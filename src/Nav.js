@@ -1,14 +1,14 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef, createStaticNavigation, DefaultTheme, } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Button, HeaderBackButton, useHeaderHeight } from '@react-navigation/elements';
-import { useTheme } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { BlurView } from 'expo-blur';
 import { trigger } from './utils/trigger';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
@@ -29,38 +29,13 @@ import SettingPage from './pages/TabbarPages/SettingPage';
 
 const Stack = createNativeStackNavigator();
 
-Text.defaultProps = {
-    allowFontScaling: false,
-};
-
-// 創建通用 Header 配置
-const createHeaderOptions = (theme) => {
+const Nav = ({ theme }) => {
     const { bg_color, black } = theme;
-
-    return {
-        headerShown: true,
-        headerTitleAlign: 'center',
-        headerTintColor: black.main,
-        headerBackButtonDisplayMode: 'minimal',
-        headerBackButtonMenuEnabled: false,
-
-        // iOS 26+ 液態玻璃效果
-        headerTransparent: isLiquidGlassSupported,
-        headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
-        // Fallback 背景
-        headerBackground: isLiquidGlassSupported ? null : (() => (
-            <View style={{ flex: 1, backgroundColor: bg_color }} />
-        )),
-    };
-};
-
-const Nav = () => {
-    const navigationRef = useNavigationContainerRef();
-    const { theme } = useTheme();
     const { t } = useTranslation(['features']);
+    const navigationRef = useNavigationContainerRef();
 
     return (
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer ref={navigationRef}        >
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{
@@ -82,7 +57,26 @@ const Nav = () => {
                 {/* 服務頁保持原有 Modal 配置 */}
                 <Stack.Group
                     screenOptions={({ navigation }) => ({
-                        ...createHeaderOptions(theme),
+                        headerShown: true,
+                        headerTitleAlign: 'center',
+                        headerTintColor: black.main,
+                        headerBackButtonDisplayMode: 'minimal',
+                        headerBackButtonMenuEnabled: false,
+
+                        // iOS 26+ 液態玻璃效果
+                        // headerTransparent: isLiquidGlassSupported,
+                        // headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+                        // // Fallback 背景
+                        // headerBackground: isLiquidGlassSupported ? null : (() => (
+                        //     <View style={{ flex: 1, backgroundColor: bg_color }} />
+                        // )),
+                        // headerTransparent: true,
+                        // headerBlurEffect: null,
+                        // Fallback 背景
+                        // headerBackground: isLiquidGlassSupported ? null : (() => (
+                        //     <View style={{ flex: 1, backgroundColor: bg_color }} />
+                        // )),
+
                         presentation: Platform.select({
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',

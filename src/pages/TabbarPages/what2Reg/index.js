@@ -28,7 +28,7 @@ import { getCourseData, checkCloudCourseVersion } from '../../../utils/checkCour
 import CustomBottomSheet from '../courseSim/BottomSheet';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import { Header, Dialog } from '@rneui/themed';
+import {  Dialog } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -1003,22 +1003,6 @@ const What2Reg = (props) => {
             flex: 1, backgroundColor: bg_color,
             alignItems: 'center', justifyContent: 'center',
         }}>
-            <Header
-                backgroundColor={bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: barStyle,
-                }}
-                containerStyle={{
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets.top,
-                    }),
-                    paddingTop: 0,
-                    borderBottomWidth: 0,
-                }}
-            />
-
             <ActionSheet
                 ref={actionSheetRef}
                 containerStyle={{

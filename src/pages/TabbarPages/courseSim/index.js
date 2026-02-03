@@ -12,7 +12,6 @@ import {
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
-import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
@@ -1219,22 +1218,6 @@ E11-0000
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header
-                backgroundColor={bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: barStyle,
-                }}
-                containerStyle={{
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets.top,
-                    }),
-                    paddingTop: 0,
-                    borderBottomWidth: 0,
-                }}
-            />
-
             {/* 頁面標題列 */}
             <View style={{
                 flexDirection: 'row',

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Dimensions, Platform, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Dimensions, Platform, View, Text, ScrollView } from 'react-native';
+import { InteractionManager } from 'react-native';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
@@ -11,35 +12,53 @@ import { uiStyle, useTheme } from './components/ThemeContext';
 import { trigger } from './utils/trigger';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+// import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
 
 import { inject } from 'mobx-react';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 const Tabs = createNativeBottomTabNavigator();
 
 /**
  * 獲取 Tab Bar 圖標配置
- * 使用 @bottom-tabs/react-navigation 的 sfSymbol 格式
+ * 使用 React Navigation 官方的 sfSymbol 格式
  * iOS: 使用 SF Symbols | Android: 使用 drawable resource
  */
 const getTabBarIcon = (routeName, focused) => {
     // 根據路由名稱獲取對應的 SF Symbol 名稱
     switch (routeName) {
         case 'NewsTabbar':
-            return { sfSymbol: focused ? 'newspaper.fill' : 'newspaper' };
+            return {
+                type: 'sfSymbol',
+                name: focused ? 'newspaper.fill' : 'newspaper'
+            };
         case 'Harbor':
-            return { sfSymbol: focused ? 'heart.fill' : 'heart' };
+            return {
+                type: 'sfSymbol',
+                name: focused ? 'heart.fill' : 'heart'
+            };
         case 'What2RegTab':
-            return { sfSymbol: focused ? 'magnifyingglass.circle.fill' : 'magnifyingglass.circle' };
+            return {
+                type: 'sfSymbol',
+                name: focused ? 'magnifyingglass.circle.fill' : 'magnifyingglass.circle'
+            };
         case 'CourseSimTab':
-            return { sfSymbol: focused ? 'calendar.badge.clock' : 'calendar' };
+            return {
+                type: 'sfSymbol',
+                name: focused ? 'calendar.badge.clock' : 'calendar'
+            };
         case 'FeaturesTabbar':
-            return { sfSymbol: focused ? 'square.grid.2x2.fill' : 'square.grid.2x2' };
+            return {
+                type: 'sfSymbol',
+                name: focused ? 'square.grid.2x2.fill' : 'square.grid.2x2'
+            };
         default:
-            return { sfSymbol: focused ? 'questionmark.circle.fill' : 'questionmark.circle' };
+            return {
+                type: 'sfSymbol',
+                name: focused ? 'questionmark.circle.fill' : 'questionmark.circle'
+            };
     }
 };
 
@@ -48,26 +67,19 @@ const getTabBarIcon = (routeName, focused) => {
  * 支持 iOS 26+ 液態玻璃效果和自動背景色適配
  */
 const getTabBarStyle = (theme) => {
-    // iOS 26+ 液態玻璃效果：背景透明，讓系統自動處理
-    if (Platform.OS === 'ios' && isLiquidGlassSupported) {
+    // iOS 26+：直接設置白色背景，確保可見性
+    if (Platform.OS === 'ios') {
         return {
-            position: 'absolute',
-            backgroundColor: 'transparent',
+            backgroundColor: '#FFFFFF',
             borderTopWidth: 0,
-            elevation: 0,
         };
     }
 
-    // iOS 18 及以下和 Android：使用自定義背景色
+    // Android：使用自定義背景色
     return {
         backgroundColor: theme.bg_color,
         borderTopColor: theme.isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
         borderTopWidth: 0.5,
-        // iOS 陰影
-        shadowColor: theme.black.main,
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
         // Android 陰影
         elevation: 8,
     };
@@ -75,7 +87,6 @@ const getTabBarStyle = (theme) => {
 
 const Tabbar = () => {
     const { theme } = useTheme();
-    const insets = useSafeAreaInsets();
     const { t } = useTranslation(['common', 'home']);
 
     // 判斷是否為橫屏
@@ -100,7 +111,8 @@ const Tabbar = () => {
         tabBarInactiveTintColor: theme.black.main,
         // Tab Bar 樣式（支持 iOS 26+ 液態玻璃）
         tabBarStyle: getTabBarStyle(theme),
-        // 圖標 - 使用 @bottom-tabs/react-navigation 的 sfSymbol 格式
+        translucent: isLiquidGlassSupported ? true : false,
+        // 圖標 - 使用 React Navigation 官方的 sfSymbol 格式
         tabBarIcon: ({ focused }) => getTabBarIcon(route.name, focused),
         // 隱藏標籤（橫屏時）
         tabBarShowLabel: !isLandscape(),
