@@ -201,83 +201,67 @@ fontSize: moderateScale(16) // font scaling
 
 ## Project-Specific Patterns
 
-### React Navigation V8 (⚠️ Alpha 版本)
+### React Navigation V7
 
-**重要提示**: 本項目使用 React Navigation V8 Alpha 版本進行重構。
+本項目使用 React Navigation V7 穩定版本。
 
 #### 當前安裝的版本
 
-| Package                             | Version        |
-| ----------------------------------- | -------------- |
-| @react-navigation/native            | ^8.0.0-alpha.8 |
-| @react-navigation/bottom-tabs       | ^8.0.0-alpha.8 |
-| @react-navigation/native-stack      | ^8.0.0-alpha.8 |
-| @react-navigation/stack             | ^8.0.0-alpha.8 |
-| @react-navigation/material-top-tabs | ^8.0.0-alpha.8 |
-| @react-navigation/elements          | ^2.9.5         |
+| Package                             | Version  |
+| ----------------------------------- | -------- |
+| @react-navigation/native            | ^7.1.28  |
+| @react-navigation/bottom-tabs       | ^7.12.0  |
+| @react-navigation/native-stack      | ^7.12.0  |
+| @react-navigation/stack             | ^7.7.0   |
+| @react-navigation/material-top-tabs | ^7.4.13  |
+| @react-navigation/elements          | ^2.9.5   |
 
-#### V8 主要變更
+#### 液態玻璃效果支持
 
-1. **NavigationContainer 仍為主要 API**：
-   - V8 仍使用 `NavigationContainer` 作為導航容器
-   - 主要變更在於底層實現和 iOS 26+ 特性支持
+使用 `isLiquidGlassSupported` 函數判斷是否支持液態玻璃樣式（來自 `@callstack/liquid-glass` 包）：
 
-2. **Native Bottom Tabs 現在是默認**：
-   ```javascript
-   // V8 使用原生底層標籤（iOS 26+ 液態玻璃效果）
-   const Tabs = createBottomTabNavigator();
+```javascript
+// 正確用法
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
-   // 如果要使用 JavaScript 實現：
-   <Tabs.Navigator implementation="custom">
-   ```
+// 判斷是否支持液態玻璃效果
+if (isLiquidGlassSupported) {
+    // 使用液態玻璃樣式
+} else {
+    // 使用 fallback 樣式（如 blur effect）
+}
+```
 
-3. **液態玻璃效果判斷**：
-   - 使用 `isLiquidGlassSupported` 函數判斷是否支持液態玻璃樣式
-   - 替代傳統的 Platform 版本和型號判斷方法
-   - 安裝：`@callstack/liquid-glass` 已在項目中安裝（版本 0.7.0）
+**使用場景示例**：
+```javascript
+// 在導航配置中使用
+const createHeaderOptions = (theme) => {
+    const { bg_color, black } = theme;
 
-   ```javascript
-   // 正確用法
-   import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+    return {
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerTintColor: black.main,
 
-   // 判斷是否支持液態玻璃效果
-   if (isLiquidGlassSupported) {
-       // 使用液態玻璃樣式
-   } else {
-       // 使用 fallback 樣式（如 blur effect）
-   }
-   ```
+        // iOS 26+ 液態玻璃效果
+        headerTransparent: isLiquidGlassSupported,
+        headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+        headerBackground: isLiquidGlassSupported ? null : (() => (
+            <View style={{ flex: 1, backgroundColor: bg_color }} />
+        )),
+    };
+};
+```
 
-   **使用場景示例**：
-   ```javascript
-   // 在導航配置中使用
-   const createHeaderOptions = (theme) => {
-       const { bg_color, black } = theme;
+**禁止使用**：
+```javascript
+// ❌ 錯誤：使用 Platform 判斷版本或型號
+import { Platform } from 'react-native';
 
-       return {
-           headerShown: true,
-           headerTitleAlign: 'center',
-           headerTintColor: black.main,
-
-           // iOS 26+ 液態玻璃效果
-           headerTransparent: isLiquidGlassSupported,
-           headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
-           headerBackground: isLiquidGlassSupported ? null : (() => (
-               <View style={{ flex: 1, backgroundColor: bg_color }} />
-           )),
-       };
-   };
-   ```
-
-   **禁止使用**：
-   ```javascript
-   // ❌ 錯誤：使用 Platform 判斷版本或型號
-   import { Platform } from 'react-native';
-
-   // 不要這樣判斷
-   const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
-   const isIPhone16OrLater = Platform.OS === 'ios' && Platform.isPad === false && ...;
-   ```
+// 不要這樣判斷
+const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
+const isIPhone16OrLater = Platform.OS === 'ios' && Platform.isPad === false && ...;
+```
 
 #### 導航結構
 
