@@ -35,17 +35,13 @@ const Nav = ({ theme }) => {
     const navigationRef = useNavigationContainerRef();
 
     return (
-        <NavigationContainer ref={navigationRef}        >
+        <NavigationContainer ref={navigationRef}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{
                     headerShown: false,
-                    gestureDirection: 'horizontal',
-                    gestureEnabled: true,
-                    animation: 'default',
                     freezeOnBlur: true,
-                    animationTypeForReplace: 'push',
-                    headerBackButtonMenuEnabled: false,
+                    headerTransparent: isLiquidGlassSupported ? true : false,
                 }}
             >
                 <Stack.Screen
@@ -62,21 +58,6 @@ const Nav = ({ theme }) => {
                         headerTintColor: black.main,
                         headerBackButtonDisplayMode: 'minimal',
                         headerBackButtonMenuEnabled: false,
-
-                        // iOS 26+ 液態玻璃效果
-                        // headerTransparent: isLiquidGlassSupported,
-                        // headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
-                        // // Fallback 背景
-                        // headerBackground: isLiquidGlassSupported ? null : (() => (
-                        //     <View style={{ flex: 1, backgroundColor: bg_color }} />
-                        // )),
-                        // headerTransparent: true,
-                        // headerBlurEffect: null,
-                        // Fallback 背景
-                        // headerBackground: isLiquidGlassSupported ? null : (() => (
-                        //     <View style={{ flex: 1, backgroundColor: bg_color }} />
-                        // )),
-
                         presentation: Platform.select({
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
@@ -95,22 +76,9 @@ const Nav = ({ theme }) => {
                     })}
                 >
                     {/* 服務頁 */}
-                    <Stack.Screen name="Bus" component={Bus}
-                        options={{
-                            headerTitle: t('校園巴士', { ns: 'features' }),
-                            headerBlurEffect: null,
-                        }}
-                    />
-                    <Stack.Screen name="CarPark" component={CarPark}
-                        options={{
-                            headerTitle: t('車位', { ns: 'features' }),
-                        }}
-                    />
-                    <Stack.Screen name="UMOrg" component={UMOrg}
-                        options={{
-                            headerTitle: t('澳大部門', { ns: 'features' }),
-                        }}
-                    />
+                    <Stack.Screen name="Bus" component={Bus} options={{ headerTitle: t('校園巴士', { ns: 'features' }) }} />
+                    <Stack.Screen name="CarPark" component={CarPark} options={{ headerTitle: t('車位', { ns: 'features' }) }} />
+                    <Stack.Screen name="UMOrg" component={UMOrg} options={{ headerTitle: t('澳大部門', { ns: 'features' }) }} />
 
 
                     {/* 資訊頁 */}

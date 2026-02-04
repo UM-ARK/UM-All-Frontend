@@ -98,29 +98,28 @@ const Tabbar = () => {
     // 字體大小
     const labelFontSize = isLandscape() ? verticalScale(10) : scale(10);
 
-    // 獲取 screenOptions
-    const screenOptions = ({ route }) => ({
-        // 標籤樣式
-        tabBarLabelStyle: {
-            ...uiStyle.defaultText,
-            fontSize: labelFontSize,
-            fontWeight: '600',
-        },
-        // 活躍/非活躍顏色
-        tabBarActiveTintColor: theme.themeColor,
-        tabBarInactiveTintColor: theme.black.main,
-        // Tab Bar 樣式（支持 iOS 26+ 液態玻璃）
-        tabBarStyle: getTabBarStyle(theme),
-        translucent: isLiquidGlassSupported ? true : false,
-        // 圖標 - 使用 React Navigation 官方的 sfSymbol 格式
-        tabBarIcon: ({ focused }) => getTabBarIcon(route.name, focused),
-        // 隱藏標籤（橫屏時）
-        tabBarShowLabel: !isLandscape(),
-    });
-
     return (
         <Tabs.Navigator
-            screenOptions={screenOptions}
+            screenOptions={({ route }) => ({
+                // 標籤樣式
+                tabBarLabelStyle: {
+                    ...uiStyle.defaultText,
+                    fontSize: labelFontSize,
+                    fontWeight: '600',
+                },
+                // 活躍/非活躍顏色
+                tabBarActiveTintColor: theme.themeColor,
+                tabBarInactiveTintColor: theme.black.main,
+                // Tab Bar 樣式（支持 iOS 26+ 液態玻璃）
+                tabBarStyle: getTabBarStyle(theme),
+                translucent: isLiquidGlassSupported ? true : false,
+                // 圖標 - 使用 React Navigation 官方的 sfSymbol 格式
+                tabBarIcon: ({ focused }) => getTabBarIcon(route.name, focused),
+                // 隱藏標籤（橫屏時）
+                tabBarShowLabel: !isLandscape(),
+
+                tabBarMinimizeBehavior: 'onScrollDown',
+            })}
             hapticFeedbackEnabled={true}
         >
             <Tabs.Screen
