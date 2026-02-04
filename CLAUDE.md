@@ -413,14 +413,61 @@ logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 
 ### Internationalization (i18n)
 
-Add translations to `src/i18n/en-us.js` and `src/i18n/zh-hk.js`:
+#### 翻譯文件位置
+- **英文翻譯**：`src/i18n/en-us.json`
+- **繁體中文翻譯**：`src/i18n/zh-hk.js`
 
-```javascript
-import {useTranslation} from 'react-i18next';
+#### 使用規範
 
-const {t} = useTranslation(['namespace']);
-console.log(t('namespace:key'));
-```
+1. **命名空間**：`useTranslation` 可以設置多個命名空間：
+   ```javascript
+   import {useTranslation} from 'react-i18next';
+
+   // 單個命名空間
+   const {t} = useTranslation('common');
+
+   // 多個命名空間
+   const {t} = useTranslation(['common', 'home']);
+   ```
+
+2. **鍵名使用中文**：代碼中使用繁體中文作為鍵名：
+   ```javascript
+   // ✅ 正確：使用繁體中文鍵名
+   t('資訊')
+   t('設置')
+   t('關於')
+
+   // ❌ 錯誤：使用英文鍵名
+   t('info')
+   t('settings')
+   ```
+
+3. **en-us.json 結構**：英文翻譯文件中使用中文作為鍵名：
+   ```json
+   {
+       "common": {
+           "資訊": "Info",
+           "設置": "Settings",
+           "關於": "About"
+       },
+       "home": {
+           "校園巴士": "Bus",
+           "支持我們": "Donate"
+       }
+   }
+   ```
+
+4. **命名空間分組**：按功能模塊劃分命名空間：
+   - `common` - 通用翻譯（按鈕、提示等）
+   - `home` - 主頁相關
+   - `about` - 關於頁
+   - `setting` - 設置頁
+   - `catalog` - 課表相關
+   - `timetable` - 模擬課表
+   - `features` - 服務功能
+   - `club` - 組織相關
+   - `wiki` - 百科
+   - `harbor` - 職涯港
 
 ## Gotchas & Critical Don'ts
 
