@@ -114,9 +114,9 @@ const EventPage = forwardRef((props, ref) => {
     // 監聽dataPage變化，重新獲取數據
     useEffect(() => {
         // dataPage控制頁碼，頁碼變化時，會重新獲取數據，實現瀑布流的加載更多功能
-        if (dataPage === 1) {return;}
-        if (isLoading) {return;}
-        if (noMoreData) {return;}
+        if (dataPage === 1) { return; }
+        if (isLoading) { return; }
+        if (noMoreData) { return; }
         // 當dataPage變化時，重新獲取數據
         Toast.show('數據加載中...');
         if (!harborData || harborData.length === 0) {
@@ -352,8 +352,8 @@ const EventPage = forwardRef((props, ref) => {
 
     const loadMoreData = () => {
         trigger();
-        if (isLoading) {return;}
-        if (noMoreData) {return;}
+        if (isLoading) { return; }
+        if (noMoreData) { return; }
         setDataPage(prev => prev + 1);
     };
 
