@@ -2056,7 +2056,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNFBAnalytics (23.8.5):
+  - RNFBAnalytics (23.8.6):
     - FirebaseAnalytics/Core (= 12.8.0)
     - FirebaseAnalytics/IdentitySupport (= 12.8.0)
     - hermes-engine
@@ -2081,7 +2081,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBApp (23.8.5):
+  - RNFBApp (23.8.6):
     - Firebase/CoreOnly (= 12.8.0)
     - hermes-engine
     - RCTRequired
@@ -2909,8 +2909,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: c8407cc394627a3a4cf56b457d594bfa822b6ab8
   RNCClipboard: fc456104340b49bdf812f68bd00e764abf360361
   RNDateTimePicker: 3b90b0645499e9ae1a86298f23275a648283d415
-  RNFBAnalytics: 1aa8f92ed2d7fc86a26e9fa76c0fefe5759de0be
-  RNFBApp: 4c26b829839ddd2d075131bebb6193f42bbeb1fd
+  RNFBAnalytics: fccb6d9e9f0c5ec094c174ac9f6ccc7e02d319b3
+  RNFBApp: 94f303d904c7a1995b6a622686d1df07a3c09d34
   RNGestureHandler: c3831b3b1b5014c6afab7fff7e4171394a3419ab
   RNLocalize: c8bcaf5ad46c4b2e8f402ea7f11ec9c3777bcb59
   RNReactNativeHapticFeedback: 68db345e43f221a12c408f1490da31c4067ecb6f

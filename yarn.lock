@@ -2521,17 +2521,17 @@
   dependencies:
     invariant "^2.2.4"
 
-"@react-native-firebase/analytics@^23.8.4":
-  version "23.8.5"
-  resolved "https://registry.npmjs.org/@react-native-firebase/analytics/-/analytics-23.8.5.tgz#e9c7e609a4d76d1840beafbdeb6dcfcfa8abb1f8"
-  integrity sha512-jbpz3EgGnWHS2rz/tu47og6ZZ04lwcK4gJmczMqwmsHabXPxT9IpxqlCYlTfNyqKSlc6seSQa9p0rmwXMBpeig==
+"@react-native-firebase/analytics@^23.8.6":
+  version "23.8.6"
+  resolved "https://registry.npmjs.org/@react-native-firebase/analytics/-/analytics-23.8.6.tgz#892f76d46eb25811bc2b4f8826208bd6edea6ca9"
+  integrity sha512-qRqPQ2F9ZyDOJMviq9onWjC4LttenqVy1F25z6N0s9yUdmtGariuK2zLggJsuONc3dZHX3bL+afFi4QydZRm/A==
   dependencies:
     superstruct "^2.0.2"
 
-"@react-native-firebase/app@^23.8.4":
-  version "23.8.5"
-  resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-23.8.5.tgz#a691e924efaf042786b796d4a7ee14e62e03a72f"
-  integrity sha512-kjrnkfhMoYs1wbT+4srONtlK6clM1Vi5WlCg1iQ4q0Jno0ExGTdTrXrCOPWDTGoNhiZGjGVUakirnIcnzYyEyQ==
+"@react-native-firebase/app@^23.8.6":
+  version "23.8.6"
+  resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-23.8.6.tgz#a31a7cf320f0bcd85c05690c576fce52f4df936e"
+  integrity sha512-oHM/0c5CbMSDLzIAjdQTH2im7Lr1AoajDYyehye9ge6zH/tuhCtwXtkf19zE0MyFsSqd06IoYRfZP7W05D4m+w==
   dependencies:
     firebase "12.8.0"
 
