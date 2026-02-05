@@ -1,5 +1,5 @@
 import React, { useRef, useContext } from 'react';
-import { View, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { Dimensions, Pressable } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
     useSharedValue,
@@ -11,6 +11,7 @@ import { ThemeContext } from './ThemeContext';
 import { trigger } from '../utils/trigger';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -175,33 +176,31 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
         };
     });
 
-    if (!visible) {return null;}
+    if (!visible) { return null; }
 
     return (
         <GestureDetector gesture={panGesture}>
             <Animated.View
                 style={[
-                    {
-                        position: 'absolute',
-                    },
+                    { position: 'absolute', },
                     animatedStyle,
                 ]}
             >
-                <TouchableWithoutFeedback onPress={handleScrollToTop}>
-                    <View
-                        style={{
-                            backgroundColor: theme.white,
-                            borderRadius: scale(25),
-                            width: buttonSize,
-                            height: buttonSize,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            ...theme.viewShadow,
-                        }}
-                    >
+                <LiquidGlassView
+                    interactive={true}
+                    style={{
+                        backgroundColor: isLiquidGlassSupported ? null : theme.white,
+                        borderRadius: scale(50),
+                        width: buttonSize,
+                        height: buttonSize,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}
+                >
+                    <Pressable onPress={handleScrollToTop}>
                         <Ionicons name="arrow-up" size={scale(24)} color={theme.themeColor} />
-                    </View>
-                </TouchableWithoutFeedback>
+                    </Pressable>
+                </LiquidGlassView>
             </Animated.View>
         </GestureDetector>
     );
