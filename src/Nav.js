@@ -26,12 +26,14 @@ import Bus from './pages/Features/Bus';
 import CarPark from './pages/Features/CarPark';
 import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/TabbarPages/SettingPage';
+import { useTheme } from './components/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
-const Nav = ({ theme }) => {
+const Nav = () => {
+    const { theme } = useTheme();
     const { bg_color, black } = theme;
-    const { t } = useTranslation(['features']);
+    const { t } = useTranslation(['common', 'features']);
     const navigationRef = useNavigationContainerRef();
 
     return (
@@ -39,9 +41,13 @@ const Nav = ({ theme }) => {
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{
-                    headerShown: false,
                     freezeOnBlur: true,
                     headerTransparent: isLiquidGlassSupported ? true : false,
+                    headerTitleAlign: 'center',
+                    headerBackButtonDisplayMode: 'minimal',
+                    headerBackButtonMenuEnabled: false,
+                    gestureEnabled: true,
+                    headerTintColor: black.main,
                 }}
             >
                 <Stack.Screen
@@ -53,16 +59,10 @@ const Nav = ({ theme }) => {
                 {/* 服務頁保持原有 Modal 配置 */}
                 <Stack.Group
                     screenOptions={({ navigation }) => ({
-                        headerShown: true,
-                        headerTitleAlign: 'center',
-                        headerTintColor: black.main,
-                        headerBackButtonDisplayMode: 'minimal',
-                        headerBackButtonMenuEnabled: false,
                         presentation: Platform.select({
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
                         }),
-                        gestureEnabled: true,
                         headerLeft: (props) => (
                             <HeaderBackButton
                                 {...props}
@@ -82,38 +82,23 @@ const Nav = ({ theme }) => {
 
 
                     {/* 資訊頁 */}
-                    <Stack.Screen name="ClubDetail" component={ClubDetail}
-                        options={{
-                            headerTitle: '',
-                        }}
-                    />
+                    <Stack.Screen name="ClubDetail" component={ClubDetail} options={{ headerTitle: '', }} />
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                    <Stack.Screen name="UMEventDetail" component={UMEventDetail}
-                        options={{
-                            headerTransparent: true,
-                            headerBackground: undefined,
-                        }}
-                    />
+                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} options={{ headerTransparent: true, headerBackground: undefined, }} />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課 */}
-                    <Stack.Screen name="LocalCourse" component={LocalCourse}
-                        options={{
-                            headerTitle: '',
-                        }}
-                    />
+                    <Stack.Screen name="LocalCourse" component={LocalCourse} options={{ headerTitle: '', }} />
                 </Stack.Group>
 
                 {/* 普通左右壓動畫組 */}
                 <Stack.Group
                     screenOptions={{
-                        animation: 'default',
-                        gestureEnabled: true,
                     }}
                 >
                     <Stack.Screen name="Webviewer" component={Webviewer} />
-                    <Stack.Screen name="SettingPage" component={SettingPage} />
+                    <Stack.Screen name="SettingPage" component={SettingPage} options={{ headerTitle: t('設置') }} />
                 </Stack.Group>
             </Stack.Navigator>
         </NavigationContainer>

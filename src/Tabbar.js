@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dimensions, Platform, View, Text, ScrollView } from 'react-native';
-import { InteractionManager } from 'react-native';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
@@ -9,10 +8,8 @@ import ARKHarbor from './pages/TabbarPages/arkHarbor';
 import CourseSim from './pages/TabbarPages/courseSim';
 
 import { uiStyle, useTheme } from './components/ThemeContext';
-import { trigger } from './utils/trigger';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-// import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
 
 import { inject } from 'mobx-react';

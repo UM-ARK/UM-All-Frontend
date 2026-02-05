@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, Dimensions, Alert, Appearance } from 'react-native';
+import { Dimensions, Alert, Appearance } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
@@ -93,9 +93,9 @@ const App = () => {
     // 開屏動畫
     useEffect(() => {
         // 等待主題加載完成後再開始計時消失開屏
-        if (!isThemeLoaded) {return;}
+        if (!isThemeLoaded) { return; }
 
-        return () => {};
+        return () => { };
     }, [isThemeLoaded]);
 
     // 初始化與監聽
@@ -220,7 +220,7 @@ const App = () => {
         <SafeAreaProvider>
             <Provider RootStore={RootStore}>
                 <ThemeProvider>
-                    <Nav theme={theme} />
+                    <Nav/>
                     {/* 全局状态栏配置 */}
                     <StatusBar style="auto" />
                 </ThemeProvider>

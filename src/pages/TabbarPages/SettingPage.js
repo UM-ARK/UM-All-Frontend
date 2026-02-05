@@ -367,37 +367,8 @@ const SettingPage = ({ RootStore, navigation }) => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            {/* 頂部導航欄 */}
-            <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingHorizontal: scale(15),
-                paddingTop: verticalScale(50),
-                paddingBottom: verticalScale(10),
-            }}>
-                <TouchableOpacity
-                    onPress={() => {
-                        trigger();
-                        navigation.goBack();
-                    }}
-                    style={{ padding: scale(5) }}
-                >
-                    <Ionicons name="chevron-back" size={scale(24)} color={black.main} />
-                </TouchableOpacity>
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    fontSize: scale(17),
-                    fontWeight: '600',
-                    color: black.main,
-                }}>
-                    {t('setting:Settings')}
-                </Text>
-                <View style={{ width: scale(34) }} />
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* TODO: 用戶資料卡 */}
+            <ScrollView contentInsetAdjustmentBehavior="automatic">
+                {/* TODO: 用戶資料卡，等做好了賬號系統就加回去 */}
                 {/* <ProfileCard userInfo={userInfo} /> */}
 
                 {/* 外觀設置分區 */}
