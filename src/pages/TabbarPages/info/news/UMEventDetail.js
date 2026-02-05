@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -7,7 +7,7 @@ import {
     Dimensions,
     Pressable,
 } from 'react-native';
-import {Image} from 'expo-image';
+import { Image } from 'expo-image';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -18,17 +18,18 @@ import Animated, {
     FadeInUp,
     LinearTransition,
 } from 'react-native-reanimated';
-import {BlurView} from 'expo-blur';
+import { BlurView } from 'expo-blur';
 import moment from 'moment-timezone';
-import {scale, verticalScale, moderateScale} from 'react-native-size-matters';
-import {trigger} from '../../../../utils/trigger';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { trigger } from '../../../../utils/trigger';
 
-import {useTheme, themes, uiStyle} from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
 import HyperlinkText from '../../../../components/HyperlinkText';
-import {logToFirebase} from '../../../../utils/firebaseAnalytics';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const HERO_HEIGHT = verticalScale(420);
 const HEADER_THRESHOLD = verticalScale(200);
 
@@ -48,7 +49,7 @@ const ANIMATION_CONFIG = {
  * 獲取動態樣式 - 使用主題變量
  */
 const getDynamicStyles = (theme) => {
-    const {white, black, themeColor} = theme;
+    const { white, black, themeColor } = theme;
 
     return StyleSheet.create({
         // Hero 區域
@@ -57,7 +58,7 @@ const getDynamicStyles = (theme) => {
             fontWeight: '700',
             color: white,
             textShadowColor: 'rgba(0,0,0,0.5)',
-            textShadowOffset: {width: 0, height: 2},
+            textShadowOffset: { width: 0, height: 2 },
             textShadowRadius: 4,
         },
 
@@ -99,9 +100,9 @@ const getDynamicStyles = (theme) => {
  * 玻璃擬態卡片組件
  * 使用BlurView實現半透明毛玻璃效果
  */
-const GlassmorphismCard = React.memo(({children, style, intensity = 30}) => {
-    const {theme} = useTheme();
-    const {white} = theme;
+const GlassmorphismCard = React.memo(({ children, style, intensity = 30 }) => {
+    const { theme } = useTheme();
+    const { white } = theme;
 
     return (
         <View style={[staticStyles.glassCardContainer, style]}>
@@ -110,7 +111,7 @@ const GlassmorphismCard = React.memo(({children, style, intensity = 30}) => {
                 tint="light"
                 style={[
                     StyleSheet.absoluteFill,
-                    {backgroundColor: `${white}40`},
+                    { backgroundColor: `${white}40` },
                 ]}
             />
             <View style={staticStyles.glassCardContent}>{children}</View>
@@ -132,7 +133,7 @@ const HeroSection = React.memo(
         title,
         themeColor,
     }) => {
-        const {theme} = useTheme();
+        const { theme } = useTheme();
         const dynamicStyles = getDynamicStyles(theme);
 
         // 視差動畫樣式
@@ -150,7 +151,7 @@ const HeroSection = React.memo(
                 Extrapolation.CLAMP,
             );
             return {
-                transform: [{translateY}, {scale}],
+                transform: [{ translateY }, { scale }],
             };
         });
 
@@ -170,12 +171,12 @@ const HeroSection = React.memo(
             );
             return {
                 opacity,
-                transform: [{translateY}],
+                transform: [{ translateY }],
             };
         });
 
         return (
-            <View style={[staticStyles.heroContainer, {height: HERO_HEIGHT}]}>
+            <View style={[staticStyles.heroContainer, { height: HERO_HEIGHT }]}>
                 <Animated.View style={[staticStyles.heroImageWrapper, parallaxStyle]}>
                     <Pressable onPress={onImagePress} style={staticStyles.heroPressable}>
                         <Image
@@ -195,13 +196,15 @@ const HeroSection = React.memo(
                 </Animated.View>
 
                 {/* 漸變遮罩 */}
-                <View style={staticStyles.heroGradientOverlay} />
+                <View style={staticStyles.heroGradientOverlay} pointerEvents="none" />
 
                 {/* 浮動標題 */}
                 {title && (
                     <Animated.View style={[staticStyles.heroTitleContainer, titleStyle]}>
                         <BlurView intensity={40} tint="dark" style={staticStyles.heroTitleBlur}>
-                            <Text style={dynamicStyles.heroTitle} numberOfLines={2}>
+                            <Text style={dynamicStyles.heroTitle}
+                            // numberOfLines={4}
+                            >
                                 {title}
                             </Text>
                         </BlurView>
@@ -217,25 +220,25 @@ const HeroSection = React.memo(
  * 使用動態按鈕和流暢過渡動畫
  */
 const LanguageSelector = React.memo(
-    ({languageMode, chooseMode, onSelect, themeColor, white}) => {
+    ({ languageMode, chooseMode, onSelect, themeColor, white }) => {
         const [buttonLayouts, setButtonLayouts] = useState({});
 
         // 計算指示器位置
         const indicatorStyle = useAnimatedStyle(() => {
             const selectedLayout = buttonLayouts[chooseMode];
-            if (!selectedLayout) {return {};}
+            if (!selectedLayout) { return {}; }
 
             return {
                 transform: [
-                    {translateX: withSpring(selectedLayout.x, ANIMATION_CONFIG.spring)},
+                    { translateX: withSpring(selectedLayout.x, ANIMATION_CONFIG.spring) },
                 ],
                 width: withSpring(selectedLayout.width, ANIMATION_CONFIG.spring),
             };
         });
 
         const handleLayout = useCallback((index, event) => {
-            const {x, width} = event.nativeEvent.layout;
-            setButtonLayouts(prev => ({...prev, [index]: {x, width}}));
+            const { x, width } = event.nativeEvent.layout;
+            setButtonLayouts(prev => ({ ...prev, [index]: { x, width } }));
         }, []);
 
         return (
@@ -245,7 +248,7 @@ const LanguageSelector = React.memo(
                     <Animated.View
                         style={[
                             staticStyles.languageIndicator,
-                            {backgroundColor: themeColor},
+                            { backgroundColor: themeColor },
                             indicatorStyle,
                         ]}
                     />
@@ -255,8 +258,8 @@ const LanguageSelector = React.memo(
                             <Pressable
                                 key={index}
                                 onPress={() => onSelect(index)}
-                                onLayout={event => handleLayout(index, event)}
-                                style={staticStyles.languageButton}>
+                                style={staticStyles.languageButton}
+                            >
                                 <Text
                                     style={[
                                         staticStyles.languageText,
@@ -282,8 +285,8 @@ const LanguageSelector = React.memo(
  * 時間軸式時間顯示組件
  * 現代化日期時間展示
  */
-const TimeDisplay = React.memo(({dateFrom, dateTo, timeFrom, timeTo, mode, themeColor}) => {
-    const {theme} = useTheme();
+const TimeDisplay = React.memo(({ dateFrom, dateTo, timeFrom, timeTo, mode, themeColor }) => {
+    const { theme } = useTheme();
     const dynamicStyles = getDynamicStyles(theme);
     const isSameDay = moment(dateFrom).format('MM-DD') === moment(dateTo).format('MM-DD');
 
@@ -294,11 +297,11 @@ const TimeDisplay = React.memo(({dateFrom, dateTo, timeFrom, timeTo, mode, theme
         <View style={staticStyles.timeContainer}>
             {/* 日期區塊 */}
             <View style={staticStyles.timeBlock}>
-                <View style={[staticStyles.timeIconContainer, {backgroundColor: `${themeColor}15`}]}>
-                    <Text style={[staticStyles.timeIcon, {color: themeColor}]}>📅</Text>
+                <View style={[staticStyles.timeIconContainer, { backgroundColor: `${themeColor}15` }]}>
+                    <Text style={[staticStyles.timeIcon, { color: themeColor }]}>📅</Text>
                 </View>
                 <View style={staticStyles.timeContent}>
-                    <Text style={[staticStyles.timeLabel, {color: themeColor}]}>
+                    <Text style={[staticStyles.timeLabel, { color: themeColor }]}>
                         {dateLabels[mode]}
                     </Text>
                     <Text style={dynamicStyles.timeValue}>
@@ -311,11 +314,11 @@ const TimeDisplay = React.memo(({dateFrom, dateTo, timeFrom, timeTo, mode, theme
 
             {/* 時間區塊 */}
             <View style={staticStyles.timeBlock}>
-                <View style={[staticStyles.timeIconContainer, {backgroundColor: `${themeColor}15`}]}>
-                    <Text style={[staticStyles.timeIcon, {color: themeColor}]}>🕐</Text>
+                <View style={[staticStyles.timeIconContainer, { backgroundColor: `${themeColor}15` }]}>
+                    <Text style={[staticStyles.timeIcon, { color: themeColor }]}>🕐</Text>
                 </View>
                 <View style={staticStyles.timeContent}>
-                    <Text style={[staticStyles.timeLabel, {color: themeColor}]}>
+                    <Text style={[staticStyles.timeLabel, { color: themeColor }]}>
                         {timeLabels[mode]}
                     </Text>
                     <Text style={dynamicStyles.timeValue}>
@@ -331,7 +334,7 @@ const TimeDisplay = React.memo(({dateFrom, dateTo, timeFrom, timeTo, mode, theme
  * 信息卡片組件
  * 統一的信息展示卡片
  */
-const InfoCard = React.memo(({title, children, delay = 0, themeColor}) => {
+const InfoCard = React.memo(({ title, children, delay = 0, themeColor }) => {
     return (
         <Animated.View
             entering={FadeInUp.delay(delay).duration(600).springify()}
@@ -340,9 +343,9 @@ const InfoCard = React.memo(({title, children, delay = 0, themeColor}) => {
                 {title && (
                     <View style={staticStyles.infoCardHeader}>
                         <View
-                            style={[staticStyles.infoCardIndicator, {backgroundColor: themeColor}]}
+                            style={[staticStyles.infoCardIndicator, { backgroundColor: themeColor }]}
                         />
-                        <Text style={[staticStyles.infoCardTitle, {color: themeColor}]}>
+                        <Text style={[staticStyles.infoCardTitle, { color: themeColor }]}>
                             {title}
                         </Text>
                     </View>
@@ -366,7 +369,7 @@ const ContactCard = React.memo(
         themeColor,
         navigation,
     }) => {
-        const {theme} = useTheme();
+        const { theme } = useTheme();
         const dynamicStyles = getDynamicStyles(theme);
         const labels = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
 
@@ -375,10 +378,10 @@ const ContactCard = React.memo(
                 <GlassmorphismCard style={staticStyles.contactCard}>
                     <View style={staticStyles.contactHeader}>
                         <View
-                            style={[staticStyles.contactIconContainer, {backgroundColor: themeColor}]}>
+                            style={[staticStyles.contactIconContainer, { backgroundColor: themeColor }]}>
                             <Text style={staticStyles.contactIcon}>👤</Text>
                         </View>
-                        <Text style={[staticStyles.contactTitle, {color: themeColor}]}>
+                        <Text style={[staticStyles.contactTitle, { color: themeColor }]}>
                             {labels[mode]}
                         </Text>
                     </View>
@@ -423,9 +426,9 @@ const ContactCard = React.memo(
                                     {contactMail[mode + 3]}
                                 </Text>
                                 <HyperlinkText
-                                    linkStyle={{color: themeColor}}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={navigation}>
-                                    <Text style={[dynamicStyles.contactValue, {color: themeColor}]} selectable>
+                                    <Text style={[dynamicStyles.contactValue, { color: themeColor }]} selectable>
                                         {contactMail[mode]}
                                     </Text>
                                 </HyperlinkText>
@@ -442,9 +445,9 @@ const ContactCard = React.memo(
  * UMEventDetail 主組件
  * 2026 現代化重寫版本
  */
-const UMEventDetail = ({route, navigation}) => {
-    const {theme} = useTheme();
-    const {white, black, bg_color, themeColor} = theme;
+const UMEventDetail = ({ route, navigation }) => {
+    const { theme } = useTheme();
+    const { white, black, bg_color, themeColor } = theme;
     const dynamicStyles = getDynamicStyles(theme);
 
     const imageScrollViewer = useRef(null);
@@ -456,17 +459,6 @@ const UMEventDetail = ({route, navigation}) => {
         onScroll: event => {
             scrollY.value = event.contentOffset.y;
         },
-    });
-
-    // Header 動畫樣式
-    const headerStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(
-            scrollY.value,
-            [0, HEADER_THRESHOLD],
-            [0, 1],
-            Extrapolation.CLAMP,
-        );
-        return {opacity};
     });
 
     const eventData = route.params.data;
@@ -487,7 +479,7 @@ const UMEventDetail = ({route, navigation}) => {
             'contactName', 'contactPhone', 'contactFax', 'contactMail',
         ];
 
-        const result = {dateFrom, dateTo, timeFrom, timeTo};
+        const result = { dateFrom, dateTo, timeFrom, timeTo };
 
         // 初始化各語言數據
         languages.forEach(lang => {
@@ -498,9 +490,9 @@ const UMEventDetail = ({route, navigation}) => {
 
         // 解析 eventData.details
         eventData.details.forEach(item => {
-            const langMap = {en_US: 'en', pt_PT: 'pt', zh_TW: 'cn'};
+            const langMap = { en_US: 'en', pt_PT: 'pt', zh_TW: 'cn' };
             const lang = langMap[item.locale];
-            if (!lang) {return;}
+            if (!lang) { return; }
 
             result[`title_${lang}`] = item.title || '';
             result[`content_${lang}`] = item.content || '';
@@ -519,9 +511,9 @@ const UMEventDetail = ({route, navigation}) => {
 
         // 構建語言模式數組
         const LanguageMode = [
-            {locale: 'cn', available: result.title_cn.length > 0, name: '中'},
-            {locale: 'en', available: result.title_en.length > 0, name: 'EN'},
-            {locale: 'pt', available: result.title_pt.length > 0, name: 'PT'},
+            { locale: 'cn', available: result.title_cn.length > 0, name: '中' },
+            { locale: 'en', available: result.title_en.length > 0, name: 'EN' },
+            { locale: 'pt', available: result.title_pt.length > 0, name: 'PT' },
         ];
 
         return {
@@ -536,7 +528,7 @@ const UMEventDetail = ({route, navigation}) => {
     });
 
     useEffect(() => {
-        logToFirebase('openPage', {page: 'UMEvent'});
+        logToFirebase('openPage', { page: 'UMEvent' });
     }, []);
 
     // 獲取當前語言的標題
@@ -548,12 +540,12 @@ const UMEventDetail = ({route, navigation}) => {
     // 處理語言切換
     const handleLanguageSelect = useCallback(index => {
         trigger();
-        setState(prev => ({...prev, chooseMode: index}));
+        setState(prev => ({ ...prev, chooseMode: index }));
     }, []);
 
     // 解構數據
-    const {LanguageMode, chooseMode} = state;
-    const {dateFrom, dateTo, timeFrom, timeTo, imageUrls} = state.data;
+    const { LanguageMode, chooseMode } = state;
+    const { dateFrom, dateTo, timeFrom, timeTo, imageUrls } = state.data;
 
     // 構建數組數據
     const dataArrays = {
@@ -577,10 +569,7 @@ const UMEventDetail = ({route, navigation}) => {
     const hasRemark = !!state.data.remark_cn;
 
     return (
-        <View style={{backgroundColor: bg_color, flex: 1}}>
-            {/* 固定頂部導航 */}
-            {/* <Header title={''} iOSDIY={true} transparent={true} /> */}
-
+        <View style={{ backgroundColor: bg_color, flex: 1 }}>
             {/* 圖片查看器 */}
             <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
 
@@ -590,8 +579,9 @@ const UMEventDetail = ({route, navigation}) => {
                 onScroll={scrollHandler}
                 scrollEventThrottle={16}
                 showsVerticalScrollIndicator={false}
-                contentInsetAdjustmentBehavior="automatic"
-                >
+                // 該頁面是圖片置頂，所以iOS26也無需調整inset
+                contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
+            >
                 {/* Hero 區域 */}
                 <HeroSection
                     imageUrl={imageUrls}
@@ -602,7 +592,7 @@ const UMEventDetail = ({route, navigation}) => {
                     }}
                     imgLoading={state.imgLoading}
                     setImgLoading={loading =>
-                        setState(prev => ({...prev, imgLoading: loading}))
+                        setState(prev => ({ ...prev, imgLoading: loading }))
                     }
                     title={getCurrentTitle()}
                     themeColor={themeColor}
@@ -659,7 +649,7 @@ const UMEventDetail = ({route, navigation}) => {
                                     {dataArrays.venue[chooseMode + 3]}
                                 </Text>
                                 <HyperlinkText
-                                    linkStyle={{color: themeColor}}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={navigation}>
                                     <Text style={dynamicStyles.detailValue} selectable>
                                         {dataArrays.venue[chooseMode]}
@@ -680,10 +670,10 @@ const UMEventDetail = ({route, navigation}) => {
                                             key={idx}
                                             style={[
                                                 staticStyles.tag,
-                                                {backgroundColor: `${themeColor}20`},
+                                                { backgroundColor: `${themeColor}20` },
                                             ]}>
                                             <Text
-                                                style={[staticStyles.tagText, {color: themeColor}]}>
+                                                style={[staticStyles.tagText, { color: themeColor }]}>
                                                 {lang}
                                             </Text>
                                         </View>
@@ -735,7 +725,7 @@ const UMEventDetail = ({route, navigation}) => {
                                     {dataArrays.content[chooseMode + 3]}
                                 </Text>
                                 <HyperlinkText
-                                    linkStyle={{color: themeColor}}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={navigation}>
                                     <Text style={[dynamicStyles.detailValue, staticStyles.detailContent]} selectable>
                                         {dataArrays.content[chooseMode]}
@@ -804,7 +794,7 @@ const staticStyles = StyleSheet.create({
     },
     heroGradientOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        backgroundColor: 'rgba(0,0,0,0.1)',
     },
     heroTitleContainer: {
         position: 'absolute',
