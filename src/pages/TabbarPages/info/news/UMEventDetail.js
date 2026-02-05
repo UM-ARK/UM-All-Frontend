@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -223,6 +223,14 @@ const LanguageSelector = React.memo(
     ({ languageMode, chooseMode, onSelect, themeColor, white }) => {
         const [buttonLayouts, setButtonLayouts] = useState({});
 
+        // 語言選擇器包裝樣式 - 使用主題色的柔和底色
+        const languageWrapperStyle = useMemo(() => ({
+            flexDirection: 'row',
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            borderRadius: scale(25),
+            padding: scale(4),
+        }), [themeColor]);
+
         // 計算指示器位置
         const indicatorStyle = useAnimatedStyle(() => {
             const selectedLayout = buttonLayouts[chooseMode];
@@ -236,14 +244,14 @@ const LanguageSelector = React.memo(
             };
         });
 
-        const handleLayout = useCallback((index, event) => {
+        const handleLayout = useCallback((index) => (event) => {
             const { x, width } = event.nativeEvent.layout;
             setButtonLayouts(prev => ({ ...prev, [index]: { x, width } }));
         }, []);
 
         return (
             <View style={staticStyles.languageContainer}>
-                <View style={staticStyles.languageWrapper}>
+                <View style={[languageWrapperStyle]}>
                     {/* 動態指示器背景 */}
                     <Animated.View
                         style={[
@@ -259,6 +267,7 @@ const LanguageSelector = React.memo(
                                 key={index}
                                 onPress={() => onSelect(index)}
                                 style={staticStyles.languageButton}
+                                onLayout={handleLayout(index)}
                             >
                                 <Text
                                     style={[
@@ -848,14 +857,6 @@ const staticStyles = StyleSheet.create({
     languageContainer: {
         alignItems: 'center',
         marginVertical: verticalScale(8),
-    },
-    languageWrapper: {
-        flexDirection: 'row',
-        backgroundColor: 'rgba(255,255,255,0.5)',
-        borderRadius: scale(25),
-        padding: scale(4),
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.5)',
     },
     languageIndicator: {
         position: 'absolute',
