@@ -4,6 +4,19 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 ```
 
+## Project Configuration
+
+### Development Rules
+
+- Always use memory-keeper to track progress
+- Save architectural decisions and test results
+- Create checkpoints before context limits
+
+### Quality Standards
+
+- All tests must pass before marking complete
+- Document actual vs claimed results
+
 ## Project Overview
 
 - **Type**: React Native 0.81.5 mobile application for University of Macau students using Expo SDK 54
@@ -511,3 +524,199 @@ src/
     ├── en-us.js        # English translations
     └── zh-hk.js        # Traditional Chinese translations
 ```
+
+---
+
+## Agent Memory Management
+
+### 讀取在線文檔後的記錄規範
+
+每次從網絡讀取技術文檔（如 React Navigation、Expo 等官方文檔）後，**必須**將關鍵信息記錄到 **Serena MCP Memory** 中。
+
+#### 為什麼使用 Serena MCP？
+
+| 特性 | Serena MCP | Memory-Keeper |
+|------|-----------|---------------|
+| 存儲內容 | 項目文檔、技術規範 | 會話狀態、臨時筆記 |
+| 持久性 | ⭐⭐⭐ 高（文件形式） | ⭐⭐ 中等 |
+| 與代碼關聯 | ✅ 同層級，易關聯 | ❌ 獨立存儲 |
+| 適合 | 長期參考的文檔用法 | 動態變化的會話信息 |
+
+**結論**：技術文檔屬於項目知識庫，使用 Serena MCP 更合適。
+
+#### 記錄流程
+
+```
+1. 讀取在線文檔 (fetch/fetch 或 web_search)
+   ↓
+2. 提取關鍵信息（核心概念、API 用法、注意事項）
+   ↓
+3. 創建/更新 Serena Memory 文件
+   ↓
+4. 記錄本次學習的內容摘要到 Memory-Keeper（可選）
+```
+
+#### Serena Memory 文件命名規範
+
+```
+<技術名稱>_<主題>_v<版本>.md
+
+示例：
+- react_navigation_v7_static_api.md
+- expo_sdk_54_cng_workflow.md
+- mobx_v6_store_patterns.md
+```
+
+#### 文件內容模板
+
+```markdown
+# [技術名稱] [主題]
+
+## 來源
+- **文檔 URL**: [原始文檔鏈接]
+- **讀取時間**: [日期]
+- **版本**: [文檔版本號]
+
+## 核心概念
+
+### 1. [概念名稱]
+簡要說明...
+
+```javascript
+// 代碼示例
+const example = () => {
+    // 實際用法
+};
+```
+
+### 2. [概念名稱]
+...
+
+## 本項目應用
+
+### 當前使用方式
+```javascript
+// src/[文件路徑]
+// 實際代碼片段
+```
+
+### 注意事項
+- ⚠️ [重要提醒]
+- ✅ [最佳實踐]
+- ❌ [避免的做法]
+
+## 相關鏈接
+- [官方文檔]
+- [相關教程]
+- [GitHub Issues]
+
+---
+
+## 更新日誌
+
+### [日期] - 初始記錄
+- 創建本文檔
+- 記錄 [主要內容]
+```
+
+#### 實際操作示例
+
+**場景**：讀取 React Navigation V7 官方文檔後
+
+```javascript
+// 步驟 1: 讀取文檔
+const docContent = await fetch('https://reactnavigation.org/docs/getting-started/');
+
+// 步驟 2: 提取關鍵信息
+const keyPoints = {
+    staticAPI: '使用對象配置而非 JSX',
+    dynamicAPI: '使用 React 組件，支持運行時變化',
+    recommended: 'Static API 是推薦方式'
+};
+
+// 步驟 3: 創建 Serena Memory 文件
+await writeMemory({
+    file_name: 'react_navigation_v7_static_api.md',
+    content: `
+# React Navigation V7 Static API
+
+## 來源
+- **文檔 URL**: https://reactnavigation.org/docs/getting-started/
+- **讀取時間**: 2026-02-05
+- **版本**: V7
+
+## 核心概念
+
+### Static Configuration（推薦）
+使用對象配置，減少樣板代碼，簡化 TypeScript 類型和深度鏈接。
+
+\`\`\`javascript
+const Stack = createNativeStackNavigator({
+    screens: {
+        Home: HomeScreen,
+        Profile: ProfileScreen,
+    },
+});
+\`\`\`
+
+### Dynamic Configuration
+使用 React 組件，支持運行時根據 state 或 props 變化。
+
+## 本項目應用
+
+### 當前使用方式
+見 \`src/Nav.js\` 和 \`src/Tabbar.js\`
+
+### 注意事項
+- ✅ 本項目使用 Static API
+- ⚠️ 如需動態靈活性，可混合使用兩種配置
+    `
+});
+
+// 步驟 4: 記錄到 Memory-Keeper（可選）
+await contextSave({
+    key: 'rn_v7_learned_today',
+    value: '學到：Static API 使用對象配置而非 JSX',
+    category: 'note'
+});
+```
+
+---
+
+## 記憶管理最佳實踐
+
+### 何時使用 Serena MCP
+
+✅ **推薦使用**:
+- 技術文檔的核心用法和 API 參考
+- 項目架構決策和設計模式
+- 代碼規範和最佳實踐
+- 第三方庫的版本信息和遷移指南
+
+❌ **不推薦使用**:
+- 臨時的會話狀態
+- 頻繁變更的進度信息
+- 一次性的調試記錄
+
+### 何時使用 Memory-Keeper
+
+✅ **推薦使用**:
+- 當前任務的進度追蹤
+- 本次會話完成的工作摘要
+- 遇到的錯誤和解決方案
+- 臨時的筆記和想法
+
+❌ **不推薦使用**:
+- 需要長期保存的技術知識
+- 項目的核心文檔
+
+### 記憶文件維護
+
+1. **定期回顧**: 每月檢查一次記憶文件，刪除過時信息
+2. **版本控制**: 重大更新時在文件頂部添加更新日誌
+3. **交叉引用**: 相關記憶文件之間添加鏈接
+4. **保持簡潔**: 只記錄核心信息，避免冗長
+
+---
+
+**記住：Serena MCP 是你的項目知識庫，Memory-Keeper 是你的會議記錄本。根據內容的性質選擇合適的工具，才能建立高效的記憶管理系統。**
