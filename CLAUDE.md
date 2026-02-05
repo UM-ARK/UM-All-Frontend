@@ -750,3 +750,15 @@ await contextSave({
 ---
 
 **記住：Serena MCP 是你的項目知識庫，Memory-Keeper 是你的會議記錄本。根據內容的性質選擇合適的工具，才能建立高效的記憶管理系統。**
+
+---
+
+## 工具使用注意事項
+
+### Filesystem MCP 工具
+
+#### `mcp__filesystem__read_text_file` 注意事項
+- **`head` 和 `tail` 參數不能同時使用**：同時指定 `head` 和 `tail` 會報錯 `Cannot specify both head and tail parameters simultaneously`。如果需要同時限制頭尾，建議先讀取整個文件後再自行處理。
+
+#### 錯誤處理策略
+- 如果 filesystem MCP 工具遇到持續性錯誤無法正常工作，可以回退使用默認的讀寫工具（如 `Read`、`Edit`、`Write` 等）作為備選方案。
