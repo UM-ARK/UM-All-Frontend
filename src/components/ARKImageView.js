@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
@@ -7,6 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { handleImageDownload } from '../utils/fileKits';
 import { trigger } from '../utils/trigger';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 
 /**
  * ARKImageView - 全局圖片查看器組件
@@ -114,17 +115,37 @@ const ARKImageView = forwardRef((props, ref) => {
                     </Text>
                 )}
 
-                {/* 保存按鈕 */}
-                <TouchableOpacity
-                    style={[styles.saveButton, { backgroundColor: white }]}
-                    onPress={() => handleSaveImage(imageIndex)}
+                {/* 保存按鈕 - 使用 LiquidGlassView */}
+                <LiquidGlassView
+                    interactive={true}
+                    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
+                    style={{
+                        backgroundColor: isLiquidGlassSupported ? null : white,
+                        borderRadius: scale(25),
+                        width: scale(50),
+                        height: scale(50),
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        overflow: 'hidden',
+                    }}
                 >
-                    <Ionicons
-                        name="download-outline"
-                        color={themeColor}
-                        size={scale(24)}
-                    />
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => handleSaveImage(imageIndex)}
+                        activeOpacity={0.8}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Ionicons
+                            name="download-outline"
+                            color={themeColor}
+                            size={scale(24)}
+                        />
+                    </TouchableOpacity>
+                </LiquidGlassView>
             </View>
         );
     }, [processedImages.length, white, themeColor, handleSaveImage]);
@@ -136,19 +157,39 @@ const ARKImageView = forwardRef((props, ref) => {
 
         return (
             <View style={[styles.headerContainer, { paddingTop: topPadding }]}>
-                <TouchableOpacity
-                    style={[styles.closeButton, { backgroundColor: glass }]}
-                    onPress={() => {
-                        trigger();
-                        handleClose();
+                <LiquidGlassView
+                    interactive={true}
+                    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
+                    style={{
+                        backgroundColor: isLiquidGlassSupported ? null : glass,
+                        borderRadius: scale(20),
+                        width: scale(40),
+                        height: scale(40),
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        overflow: 'hidden',
                     }}
                 >
-                    <Ionicons
-                        name="close"
-                        color={white}
-                        size={scale(24)}
-                    />
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            trigger();
+                            handleClose();
+                        }}
+                        activeOpacity={0.8}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Ionicons
+                            name="close"
+                            color={white}
+                            size={scale(24)}
+                        />
+                    </TouchableOpacity>
+                </LiquidGlassView>
             </View>
         );
     }, [white, glass, handleClose, insets]);
