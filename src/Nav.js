@@ -33,7 +33,7 @@ const Stack = createNativeStackNavigator();
 const Nav = () => {
     const { theme } = useTheme();
     const { bg_color, black } = theme;
-    const { t } = useTranslation(['common', 'features']);
+    const { t } = useTranslation(['common', 'features', 'event']);
     const navigationRef = useNavigationContainerRef();
 
     return (
@@ -50,11 +50,7 @@ const Nav = () => {
                     headerTintColor: black.main,
                 }}
             >
-                <Stack.Screen
-                    name="Tabbar"
-                    component={Tabbar}
-                    options={{ headerShown: false }}
-                />
+                <Stack.Screen name="Tabbar" component={Tabbar} options={{ headerShown: false }} />
 
                 {/* 服務頁保持原有 Modal 配置 */}
                 <Stack.Group
@@ -85,7 +81,7 @@ const Nav = () => {
                     <Stack.Screen name="ClubDetail" component={ClubDetail} options={{ headerTitle: '', }} />
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} options={{ headerTransparent: true, headerBackground: undefined, }} />
+                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} options={{ headerTitle: t('活動詳情') }} />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課 */}
