@@ -146,26 +146,29 @@ const App = () => {
         init();
     }, []);
 
+    // 從 theme 提取常用顏色
+    const { themeColor, white, black, unread, warning, } = theme;
+
     // 自定義Toast外觀
     const toastConfig = {
         arkToast: (props) => (
             <BaseToast
                 {...props}
                 style={{
-                    borderLeftColor: theme.themeColor,
-                    backgroundColor: theme.white,
+                    borderLeftColor: themeColor,
+                    backgroundColor: white,
                     width: '80%',
                     height: scale(60),
                 }}
                 contentContainerStyle={{ paddingHorizontal: scale(15) }}
                 text1Style={{
                     ...uiStyle.defaultText,
-                    color: theme.black.main,
+                    color: black.main,
                     fontSize: scale(15),
                 }}
                 text2Style={{
                     ...uiStyle.defaultText,
-                    color: theme.black.third,
+                    color: black.third,
                     fontSize: scale(10),
                 }}
             />
@@ -174,19 +177,19 @@ const App = () => {
             <ErrorToast
                 {...props}
                 style={{
-                    borderLeftColor: theme.unread,
-                    backgroundColor: theme.white,
+                    borderLeftColor: unread,
+                    backgroundColor: white,
                     width: '80%',
                     height: scale(60),
                 }}
                 text1Style={{
                     ...uiStyle.defaultText,
-                    color: theme.black.main,
+                    color: black.main,
                     fontSize: scale(15),
                 }}
                 text2Style={{
                     ...uiStyle.defaultText,
-                    color: theme.black.main,
+                    color: black.main,
                     fontSize: scale(10),
                 }}
             />
@@ -195,20 +198,20 @@ const App = () => {
             <BaseToast
                 {...props}
                 style={{
-                    borderLeftColor: theme.warning,
-                    backgroundColor: theme.white,
+                    borderLeftColor: warning,
+                    backgroundColor: white,
                     width: '80%',
                     height: scale(60),
                 }}
                 contentContainerStyle={{ paddingHorizontal: scale(15) }}
                 text1Style={{
                     ...uiStyle.defaultText,
-                    color: theme.black.main,
+                    color: black.main,
                     fontSize: scale(15),
                 }}
                 text2Style={{
                     ...uiStyle.defaultText,
-                    color: theme.black.third,
+                    color: black.third,
                     fontSize: scale(10),
                 }}
             />
@@ -220,7 +223,7 @@ const App = () => {
         <SafeAreaProvider>
             <Provider RootStore={RootStore}>
                 <ThemeProvider>
-                    <Nav/>
+                    <Nav />
                     {/* 全局状态栏配置 */}
                     <StatusBar style="auto" />
                 </ThemeProvider>
