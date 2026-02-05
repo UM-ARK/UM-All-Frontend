@@ -4,6 +4,36 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 ```
 
+## ⚠️ 代码读取与编辑规则（最高优先级）
+
+### Serena MCP 工具使用规范
+
+- **优先使用 Serena MCP 工具**（find_symbol、find_referencing_symbols 等）来查找和定位代码
+- **不要**使用 Read File 读取整个文件，而是通过符号查找定位具体代码
+- 每次对话开始时，先调用 `serena.check_onboarding_performed` 和 `serena.initial_instructions`
+
+### 代码编辑策略
+
+**重要：优先使用 filesystem/edit_file 工具进行小范围修改**
+
+| 场景 | 推荐工具 | 避免使用 |
+|------|---------|---------|
+| 单行/小范围修改 | `filesystem/edit_file` | `serena/replace_symbol_body` |
+| 大段代码重写 | `filesystem/write_file` | - |
+| 符号级修改 | `serena/replace_symbol_body` | - |
+
+**原因**: `replace_symbol_body` 工具会重写整个符号体，容易导致：
+1. 意外的代码格式变化
+2. 丢失原有代码中的注释和细节
+3. 大规模 diff，难以 code review
+
+**最佳实践**:
+- 使用 `edit_file` 进行精确的小范围修改
+- 对于需要添加 `pointerEvents` 等属性的小改动，直接编辑对应行
+- 保留原始代码格式和注释
+
+---
+
 ## Project Configuration
 
 ### Development Rules
