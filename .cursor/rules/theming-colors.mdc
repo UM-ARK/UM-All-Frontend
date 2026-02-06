@@ -1,0 +1,45 @@
+---
+description: 主题和颜色使用规范 - 强制使用 ThemeContext
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 主题颜色规范
+
+**强制规定：所有颜色必须使用 ThemeContext，禁止硬编码**
+
+## 正确用法
+
+```javascript
+import {useTheme} from '../../components/ThemeContext';
+
+const {theme} = useTheme();
+const {white, black, bg_color, themeColor, glass} = theme;
+```
+
+## 禁止写法
+
+| 禁止 | 原因 |
+|------|------|
+| `'#fff'` / `'#000'` | 不支持暗色模式 |
+| `'rgba(255,255,255,0.2)'` | 硬编码半透明色 |
+| `COLOR_DIY` from `uiMap.js` | 遗留代码，无法响应主题 |
+
+## 玻璃态效果
+
+```javascript
+// ❌ 錯誤
+backgroundColor: 'rgba(255, 255, 255, 0.2)'
+
+// ✅ 正確
+const {glass} = theme;
+backgroundColor: glass
+```
+
+## 新增颜色流程
+
+1. 在 `ThemeContext.js` 的 `getColorDiy` 函数添加:
+   ```javascript
+   newColor: isLight ? '#xxxxxx' : '#xxxxxx',
+   ```
+2. 在组件中使用: `const {newColor} = theme;`

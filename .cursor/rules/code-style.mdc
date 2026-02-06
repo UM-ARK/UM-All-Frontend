@@ -1,0 +1,44 @@
+---
+description: 代码风格和命名规范
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 代码风格
+
+## Import 顺序
+
+1. React Native
+2. 第三方库
+3. 本地模块
+4. utils/components
+
+使用相对路径 `../../`，不用绝对路径。
+
+## 命名规范
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 组件/页面 | PascalCase | `ClubDetail.js` |
+| 函数/变量 | camelCase | `handleLogin` |
+| 常量 | UPPER_SNAKE_CASE | `BASE_URI` |
+
+## Prettier 配置
+
+```javascript
+{
+  singleQuote: true,
+  trailingComma: 'all',
+  tabWidth: 4,
+  arrowParens: 'avoid',
+  bracketSpacing: false,
+  bracketSameLine: true
+}
+```
+
+## MobX 状态管理
+
+- Store: `src/mobx/index.js` (RootStore 单例)
+- 仅存储 `userInfo`
+- 通过 `inject('RootStore')` 访问
+- 其他状态应在组件本地或 AsyncStorage

@@ -1,0 +1,37 @@
+---
+description: ARK ALL React Native 项目概览和构建命令
+alwaysApply: true
+---
+
+# ARK ALL 项目概览
+
+- **类型**: React Native 0.81.5 + Expo SDK 54 移动应用
+- **名称**: ARK ALL (澳门大学学生应用)
+- **版本**: 26.1.1
+- **平台**: iOS, Android
+- **架构**: 离线优先 + Cloudflare Workers API，6小时自动更新
+
+## 构建命令
+
+```bash
+yarn install          # 安装依赖 (Node ≥18)
+yarn ios              # iPhone 16 Pro 模拟器
+yarn iosNew           # iPhone 17 Pro 模拟器
+yarn iosBig           # iPad Pro 模拟器
+yarn iosTrue          # 物理设备
+yarn android          # Android (API 31/33)
+yarn lint             # ESLint 检查
+yarn start            # 启动 Metro
+```
+
+## 开发工作流
+
+- **热重载**: Metro 自动热重载 JS 更改，无需重新运行 `yarn ios`
+- **仅需重启 Metro**: 遇到 Metro 错误或需清理缓存时
+- **仅需重新构建**: 添加/删除原生依赖、修改 `app.json` 或 `package.json`
+
+## Expo CNG 工作流
+
+1. 无需手动 `pod install` - Expo CNG 自动管理
+2. iOS/Android 原生文件从配置生成
+3. 大部分原生设置在 `app.json` 中配置

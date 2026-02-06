@@ -1,0 +1,40 @@
+---
+description: 代码注释和 APP 文本语言规范
+alwaysApply: true
+---
+
+# 语言要求
+
+## 注释语言
+
+**所有代码注释必须使用繁体中文**
+
+```javascript
+// ✅ 正確：繁體中文注釋
+// 獲取用戶資料並更新本地存儲
+const fetchUserData = async () => {
+    // 發送 API 請求
+    const response = await axios.get(BASE_URI + GET.USER_INFO);
+};
+
+// ❌ 錯誤：簡體中文或英文注釋
+// 获取用户数据
+// fetch user data
+```
+
+## APP 文本语言
+
+**APP 界面中显示的所有中文文本必须使用繁体中文**
+
+```javascript
+// ✅ 正確
+Alert.alert('確認刪除', '您確定要刪除這個項目嗎？', [
+    {text: '取消', style: 'cancel'},
+    {text: '確認刪除', style: 'destructive'},
+]);
+
+// ❌ 錯誤：簡體中文
+// Alert.alert('确认删除', '您确定要删除这个项目吗？')
+```
+
+**例外**: 技术术语、品牌名称、API 返回的原始数据

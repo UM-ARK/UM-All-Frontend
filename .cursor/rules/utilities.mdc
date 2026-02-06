@@ -1,0 +1,40 @@
+---
+description: Lodash 和 Moment.js 工具库使用规范
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 工具库使用
+
+## Lodash (^4.17.21)
+
+**使用完整导入**:
+
+```javascript
+import lodash from 'lodash';
+```
+
+常用方法:
+
+| 方法 | 用途 | 示例 |
+|------|------|------|
+| `isEqual()` | 深比较 | `lodash.isEqual(obj1, obj2)` |
+| `uniq()` | 去重 | `lodash.uniq(array)` |
+| `groupBy()` | 分组 | `lodash.groupBy(array, 'prop')` |
+| `cloneDeep()` | 深拷贝 | `lodash.cloneDeep(object)` |
+| `get()` | 安全取值 | `lodash.get(obj, 'path', default)` |
+
+## Moment.js (^2.30.1)
+
+```javascript
+import moment from 'moment';
+import moment from 'moment-timezone'; // 需要时区支持时
+```
+
+常用方法:
+
+| 方法 | 用途 | 示例 |
+|------|------|------|
+| `format()` | 格式化 | `moment().format('MM-DD HH:mm')` |
+| `isBefore()` | 比较 | `moment(d1).isBefore(d2)` |
+| `diff()` | 差值 | `moment(d1).diff(d2, 'minutes')` |

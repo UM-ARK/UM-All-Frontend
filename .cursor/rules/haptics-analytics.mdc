@@ -1,0 +1,36 @@
+---
+description: 触觉反馈和 Firebase Analytics 规范
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 触觉反馈和分析
+
+## 触觉反馈
+
+**所有用户交互必须调用 `trigger()`**:
+
+```javascript
+import { trigger } from '../../utils/trigger';
+
+<TouchableOpacity onPress={() => { 
+    trigger(); 
+    handleAction(); 
+}}>
+```
+
+适用于：按钮按下、标签切换、列表项点击等
+
+## Firebase Analytics
+
+使用 `logToFirebase()` 记录事件:
+
+```javascript
+import {logToFirebase} from '../../utils/firebaseAnalytics';
+
+// 页面浏览
+logToFirebase('screen_view', {screen_name: 'ClubDetail'});
+
+// 自定义事件
+logToFirebase('button_click', {button_name: 'submit'});
+```

@@ -1,0 +1,34 @@
+---
+description: 字体和 UI 尺寸缩放规范
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 字体和缩放规范
+
+## 文字样式
+
+所有文本组件必须使用 `uiStyle.defaultText`:
+
+```javascript
+import { uiStyle } from '../../components/ThemeContext';
+import { scale } from 'react-native-size-matters';
+
+style={{ 
+    ...uiStyle.defaultText, 
+    fontSize: scale(14), 
+    color: theme.black.main 
+}}
+```
+
+## UI 尺寸缩放
+
+**必须使用 `react-native-size-matters`**:
+
+```javascript
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+
+width: scale(100),         // 水平缩放
+height: verticalScale(50), // 垂直缩放
+fontSize: moderateScale(16) // 字体缩放
+```
