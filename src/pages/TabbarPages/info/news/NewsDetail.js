@@ -13,6 +13,7 @@ import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from 'react-native-touchable-scale';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {
@@ -183,7 +184,7 @@ const NewsDetail = ({ route, navigation }) => {
             // 如果當前選擇的語言不可用，切換到第一個可用語言
             if (newModes[chooseMode].available === 0) {
                 const firstAvailableIndex = newModes.findIndex(m => m.available === 1);
-                if (firstAvailableIndex !== -1) {setChooseMode(firstAvailableIndex);}
+                if (firstAvailableIndex !== -1) { setChooseMode(firstAvailableIndex); }
             }
             return newModes;
         });
@@ -235,7 +236,9 @@ const NewsDetail = ({ route, navigation }) => {
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            <ScrollView>
+            <ScrollView
+                // 該頁面是圖片置頂，所以iOS26也無需調整inset
+                contentInsetAdjustmentBehavior={"automatic"}>
                 {/* 文本模式選擇 3語切換 */}
                 {renderModeChoice()}
                 {/* 大標題 */}

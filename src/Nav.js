@@ -55,6 +55,7 @@ const Nav = () => {
                 {/* 服務頁保持原有 Modal 配置 */}
                 <Stack.Group
                     screenOptions={({ navigation }) => ({
+                        headerTitle: '',
                         presentation: Platform.select({
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
@@ -72,20 +73,20 @@ const Nav = () => {
                     })}
                 >
                     {/* 服務頁 */}
-                    <Stack.Screen name="Bus" component={Bus} options={{ headerTitle: t('校園巴士', { ns: 'features' }) }} />
-                    <Stack.Screen name="CarPark" component={CarPark} options={{ headerTitle: t('車位', { ns: 'features' }) }} />
-                    <Stack.Screen name="UMOrg" component={UMOrg} options={{ headerTitle: t('澳大部門', { ns: 'features' }) }} />
+                    <Stack.Screen name="Bus" component={Bus} options={{ headerTitle: t('校園巴士') }} />
+                    <Stack.Screen name="CarPark" component={CarPark} options={{ headerTitle: t('車位') }} />
+                    <Stack.Screen name="UMOrg" component={UMOrg} options={{ headerTitle: t('澳大部門') }} />
 
 
                     {/* 資訊頁 */}
-                    <Stack.Screen name="ClubDetail" component={ClubDetail} options={{ headerTitle: '', }} />
+                    <Stack.Screen name="ClubDetail" component={ClubDetail} />
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} options={{ headerTitle: '' }} />
+                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課 */}
-                    <Stack.Screen name="LocalCourse" component={LocalCourse} options={{ headerTitle: '', }} />
+                    <Stack.Screen name="LocalCourse" component={LocalCourse} />
                 </Stack.Group>
 
                 {/* 普通左右壓動畫組 */}
