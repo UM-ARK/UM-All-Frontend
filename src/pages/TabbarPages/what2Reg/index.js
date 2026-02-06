@@ -28,7 +28,7 @@ import { getCourseData, checkCloudCourseVersion } from '../../../utils/checkCour
 import CustomBottomSheet from '../courseSim/BottomSheet';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import {  Dialog } from '@rneui/themed';
+import { Dialog } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -42,6 +42,7 @@ import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useIsFocused } from '@react-navigation/native';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -202,6 +203,9 @@ const What2Reg = (props) => {
     const isFocused = useIsFocused();
 
     const insets = useSafeAreaInsets();
+    const headerHeight = useHeaderHeight();
+    // Sticky Header 需要的吸頂偏移量，優先使用導航欄實際高度，否則根據安全區和預設高度估算
+    const stickyTopOffset = headerHeight || insets.top;
 
     // 3.0開始，優先使用本地緩存的offerCourses數據展示
     useEffect(() => {
@@ -1084,10 +1088,14 @@ const What2Reg = (props) => {
 
             <ScrollView
                 ref={scrollViewRef}
-                style={{ width: '100%' }}
+                style={{ width: '100%', flex: 1 }}
+                // 透過 contentInset + contentOffset 控制吸頂位置，使其停在導航 Header 下方
+                contentInset={{ top: stickyTopOffset }}
+                contentOffset={{ y: -stickyTopOffset }}
+                scrollIndicatorInsets={{ top: stickyTopOffset }}
                 stickyHeaderIndices={[1]}
                 keyboardDismissMode="on-drag"
-                contentInsetAdjustmentBehavior="automatic"
+                contentInsetAdjustmentBehavior="never"
             >
                 {/* 頁面標題欄 */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3) }}>
@@ -1146,7 +1154,7 @@ const What2Reg = (props) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* 搜索框 */}
+                {/* 搜索框 - 吸頂時保持在 Header 下方 */}
                 <View>
                     {renderSearch()}
                 </View>
