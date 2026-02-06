@@ -144,22 +144,6 @@ const ClubDetail = (props) => {
     useEffect(() => {
         const clubDataParam = props.route.params.data;
         getData(clubDataParam.club_num);
-        // const globalData = props.RootStore;
-        // if (!('userInfo' in globalData) || !globalData.userInfo.isClub) {
-        //     const clubDataParam = props.route.params.data;
-        //     getData(clubDataParam.club_num);
-        // }
-        // 管理員賬號登錄
-        // if (globalData.userInfo && globalData.userInfo.isClub) {
-        //     const clubDataAdmin = globalData.userInfo.clubData;
-        //     setIsAdmin(true);
-        //     getData(clubDataAdmin.club_num);
-        //     getAppData();
-        // }
-        // 已登錄學生賬號
-        // if (globalData.userInfo && globalData.userInfo.stdData) {
-        //     setIsLogin(true);
-        // }
     }, []);
 
     // 獲取指定id的社團信息
@@ -177,18 +161,8 @@ const ClubDetail = (props) => {
                 setIsLoading(false);
                 setIsFollow(clubData.isFollow);
                 getEventData(club_num);
-
-                // if (isAdmin) {
-                //     const clubDataUpdate = {
-                //         isClub: true,
-                //         clubData,
-                //     };
-                //     updateUserInfo(clubDataUpdate);
-                //     props.RootStore.setUserInfo(clubDataUpdate);
-                //     logToFirebase('clubLogin', { club: clubData.name });
-                // }
             } else {
-                alert('Warning:', json.message);
+                Alert.alert('Warning:', json.message);
             }
         } catch (err) {
             console.error(err);
@@ -221,123 +195,11 @@ const ClubDetail = (props) => {
         }
     };
 
-    // 追蹤社團
-    const postAddFollow = async (club_num) => {
-        try {
-            const URL = BASE_URI + POST.ADD_FOLLOW_CLUB;
-            const data = new FormData();
-            data.append('club', club_num);
-            const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            const json = res.data;
-            if (json.message === 'success') {
-                setToastColor(success);
-                setIsFollow(true);
-                toastRef.current.show('感謝 Follow ！❥(^_-)\n有最新動態會提醒您！', 2000);
-            } else if (json.code === '400') {
-                setToastColor(warning);
-                toastRef.current.show('您已經關注過了~', 2000);
-            }
-        } catch (err) {
-            console.log('err', err);
-            alert('錯誤', err.message);
-        }
-    };
-
-    // 取消追蹤社團
-    const postDelFollow = async (club_num) => {
-        try {
-            const URL = BASE_URI + POST.DEL_FOLLOW_CLUB;
-            const data = new FormData();
-            data.append('club', club_num);
-            const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            const json = res.data;
-            if (json.message === 'success') {
-                setToastColor(themeColor);
-                setIsFollow(false);
-                toastRef.current.show('有緣再見！o(╥﹏╥)o', 2000);
-            }
-        } catch (err) {
-            console.log('err', err);
-            alert('錯誤', err.message);
-        }
-    };
-
-    // 獲取APP數據
-    const getAppData = async () => {
-        try {
-            const URL = BASE_URI + GET.APP_INFO;
-            const res = await axios.get(URL);
-            const json = res.data;
-            if (json.message === 'success') {
-                checkInfo(json.content);
-            }
-        } catch (err) {
-            // console.log('err', err);
-        }
-    };
-
-    // 檢查APP信息
-    const checkInfo = async (serverInfo) => {
-        try {
-            const strAppInfo = await AsyncStorage.getItem('appInfo');
-            if (strAppInfo == null) {
-                setAPPInfo(serverInfo);
-            } else {
-                const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
-                if (appInfo.API_version && appInfo.API_version !== serverInfo.API_version) {
-                    alert('服務器API更新，需要重新登錄');
-                    handleLogout();
-                } else {
-                    setAPPInfo(serverInfo);
-                }
-            }
-            if (versionStringCompare(packageInfo.version, serverInfo.app_version) === -1) {
-                props.route.params.setLock(serverInfo.app_version);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    // 點擊Follow按鈕
-    const handleFollow = () => {
-        if (!isLogin) {
-            setShowDialog(true);
-        } else {
-            if (!isFollow) {
-                postAddFollow(clubData.club_num);
-            } else {
-                postDelFollow(clubData.club_num);
-            }
-        }
-        trigger();
-    };
-
     // 下拉刷新
     const onRefresh = () => {
         setIsLoading(true);
         getData(clubData.club_num);
     };
-
-    // 渲染Follow按鈕
-    const renderFollowButton = () => (
-        <TouchableOpacity
-            style={{
-                ...styles.followButton,
-                backgroundColor: isFollow ? black.third : themeColor,
-            }}
-            activeOpacity={0.8}
-            onPress={handleFollow}
-        >
-            <Text style={{ ...uiStyle.defaultText, color: white }}>
-                {isFollow ? 'Del Follow' : 'Follow'}
-            </Text>
-        </TouchableOpacity>
-    );
 
     // 切換Modal顯示
     const tiggerModalBottom = () => setIsShow(!isShow);
@@ -347,39 +209,6 @@ const ClubDetail = (props) => {
         <View style={styles.cardTitleContainer}>
             <Text style={styles.cardTitleText}>{title}</Text>
         </View>
-    );
-
-    // 渲染Header前景
-    const renderForeground = () => (
-        <TouchableOpacity
-            style={{ flex: 1, position: 'relative' }}
-            onPress={() => {
-                if (clubData?.club_photos_list?.length > 0) {
-                    setImageUrls(clubData.club_photos_list);
-                } else {
-                    setImageUrls(ARK_LETTER_IMG);
-                }
-                imageScrollViewer.current.handleOpenImage(0);
-            }}
-            activeOpacity={1}
-        >
-            {/* isAdmin模式不顯示 */}
-            <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => {
-                    trigger();
-                    props.navigation.goBack();
-                }}
-                style={{
-                    position: 'absolute',
-                    top: isLiquidGlassSupported ? verticalScale(50) : verticalScale(65),
-                    left: scale(15),
-                    zIndex: 999,
-                }}
-            >
-                <Ionicons name="chevron-back-circle" size={verticalScale(35)} color={white} />
-            </TouchableOpacity>
-        </TouchableOpacity>
     );
 
     // 渲染主要內容
@@ -443,9 +272,6 @@ const ClubDetail = (props) => {
                         </TouchableOpacity>
                     )}
                 </View>
-
-                {/* Follow按鈕 */}
-                {/* {!isAdmin && false ? renderFollowButton() : null} */}
 
                 {/* 照片 */}
                 {clubData?.club_photos_list?.length > 1 && (
@@ -593,7 +419,6 @@ const ClubDetail = (props) => {
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                         />
                     )}
-                    renderTouchableFixedForeground={renderForeground}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
