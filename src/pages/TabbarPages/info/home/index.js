@@ -15,8 +15,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { uiStyle } from '../../../../utils/uiMap.js';
-import { useTheme } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
     GITHUB_DONATE,
     BASE_HOST,

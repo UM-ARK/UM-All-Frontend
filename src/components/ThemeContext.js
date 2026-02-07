@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { Appearance, StyleSheet } from 'react-native';
-import { COLOR_DIY, isLight } from '../utils/uiMap';
-import { verticalScale } from 'react-native-size-matters';
+import { verticalScale, scale } from 'react-native-size-matters';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 export const ThemeContext = createContext();
@@ -13,109 +12,127 @@ export const THEME_MODE = {
     DARK: 2,    // 強制深色
 };
 
-// 定义主题配置
-const getColorDiy = (isLight) => ({
-    isLight: isLight,
-    // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
-    themeColor: isLight ? '#4796d6' : '#4a9cde',
-    themeColorLight: isLight ? '#7ca8cc' : '#2d5f87',
-    themeColorUltraLight: isLight ? '#c9e1f5' : '#23323d',
-    secondThemeColor: '#FF8627',
-    // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
-    black: {
-        // 最高層級，類似大標題
-        main: isLight ? '#000' : '#fff',
-        // 次標題
-        second: isLight ? '#212121' : '#e5e5e7',
-        // 次次標題
-        third: isLight ? '#666666' : '#e1e1e3',
-    },
-    trueBlack: '#121212',
+// rgba 輔助函數：將 hex 顏色轉為帶透明度的 rgba 字串
+const rgba = (hex, opacity) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
-    // 當想用純白，或其他顏色背景，白色文字時用white的色值
-    white: isLight ? '#fff' : '#272729',
-    trueWhite: '#fff',
+// 定義主題配置
+const getColorDiy = (isLight) => {
+    // 基礎色值定義，避免重複硬編碼
+    const trueWhite = '#fff';
+    const trueBlack = '#121212';
+    const whiteColor = isLight ? trueWhite : '#272729';
+    const blackMain = isLight ? '#000' : trueWhite;
 
-    // 半透明玻璃擬態效果顏色（增加透明度，讓效果更明顯）
-    glass: isLight ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)',
+    return {
+        isLight: isLight,
+        // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
+        themeColor: isLight ? '#4796d6' : '#4a9cde',
+        themeColorLight: isLight ? '#7ca8cc' : '#2d5f87',
+        themeColorUltraLight: isLight ? '#c9e1f5' : '#23323d',
+        secondThemeColor: '#FF8627',
+        // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
+        black: {
+            // 最高層級，類似大標題
+            main: blackMain,
+            // 次標題
+            second: isLight ? '#212121' : '#e5e5e7',
+            // 次次標題
+            third: isLight ? '#666666' : '#e1e1e3',
+        },
+        trueBlack,
 
-    // 全局背景白色(偏灰)
-    bg_color: isLight ? '#F5F5F7' : '#121212',
+        // 當想用純白，或其他顏色背景，白色文字時用white的色值
+        white: whiteColor,
+        trueWhite,
 
-    // 綠色，用在Toast上
-    success: '#27ae60',
-    warning: '#f39c12',
-    unread: '#f75353',
-    disabled: isLight ? '#cad5de' : '#3a3d40',
+        // 半透明玻璃擬態效果顏色（基於 trueWhite 生成不同透明度）
+        glass: rgba(trueWhite, isLight ? 0.4 : 0.15),
+        // 玻璃態搜索欄專用顏色
+        glassBorder: rgba(trueWhite, isLight ? 0.5 : 0.2),
+        glassBg: isLight ? rgba(trueWhite, 0.3) : rgba('#1e1e1e', 0.6),
 
-    // 我的頁顏色
-    meScreenColor: {
-        bg_color: isLight ? '#212121' : '#ededed',
-        card_color: isLight ? '#fff' : '#272729',
-    },
+        // 全局背景白色(偏灰)
+        bg_color: isLight ? '#F5F5F7' : trueBlack,
 
-    // 組織活動編輯
-    eventColor: {
-        imageCard: isLight ? '#f0f0f0' : 'gray',
-    },
+        // 綠色，用在Toast上
+        success: '#27ae60',
+        warning: '#f39c12',
+        unread: '#f75353',
+        disabled: isLight ? '#cad5de' : '#3a3d40',
 
-    // ARK Wiki配色
-    wiki_bg_color: isLight ? '#fff' : '#272729',
+        // 我的頁顏色
+        meScreenColor: {
+            bg_color: isLight ? '#212121' : '#ededed',
+            card_color: whiteColor,
+        },
 
-    // Harbor頁面配色
-    harbor_bg_color: isLight ? '#fbfdff' : '#111111',
+        // 組織活動編輯
+        eventColor: {
+            imageCard: isLight ? '#f0f0f0' : 'gray',
+        },
 
-    // What2Reg，選咩課配色
-    what2reg_color: '#30548b',
+        // ARK Wiki配色（與 white 相同）
+        wiki_bg_color: whiteColor,
 
-    // 提醒頁顏色
-    messageScreenColor: {
-        bg_color: '#fbfbfb',
-    },
+        // Harbor頁面配色
+        harbor_bg_color: isLight ? '#fbfdff' : '#111111',
 
-    // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
-    viewShadow: {
-        shadowColor: isLight ? '#000' : '#fff',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 3,
-        // RN 0.76 後加入的css屬性，但需要新架構支持，新架構目前仍未在項目中啟用
-        // boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.2)',
-    },
+        // What2Reg，選咩課配色
+        what2reg_color: '#30548b',
 
-    barStyle: isLight ? 'dark-content' : 'light-content',
+        // 提醒頁顏色
+        messageScreenColor: {
+            bg_color: isLight ? '#fbfbfb' : trueBlack,
+        },
 
-    TIME_TABLE_COLOR: isLight ?
-        [
-            '#D6BEB8',
-            '#8FCACA',
-            '#BEC8D3',
-            '#B6CFB6',
-            '#d5bae3',
-            '#f5b6e0',
-            '#f7cd50',
-            '#6dbed6',
-            '#C6DBDA',
-        ] :
-        [
-            '#786a67',
-            '#486666',
-            '#4e5c6b',
-            '#4f5e4f',
-            '#584861',
-            '#6e5766',
-            '#5e5743',
-            '#30444a',
-            '#4c6160',
-        ],
-});
+        // 陰影，IOS和Android要分開設置，shadow屬性只適用於IOS
+        viewShadow: {
+            shadowColor: blackMain,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 3,
+            // RN 0.76 後加入的css屬性，但需要新架構支持，新架構目前仍未在項目中啟用
+            // boxShadow: '1px 1px 3px 0px rgba(0,0,0,0.2)',
+        },
+
+        barStyle: isLight ? 'dark-content' : 'light-content',
+
+        TIME_TABLE_COLOR: isLight ?
+            [
+                '#D6BEB8',
+                '#8FCACA',
+                '#BEC8D3',
+                '#B6CFB6',
+                '#d5bae3',
+                '#f5b6e0',
+                '#f7cd50',
+                '#6dbed6',
+                '#C6DBDA',
+            ] :
+            [
+                '#786a67',
+                '#486666',
+                '#4e5c6b',
+                '#4f5e4f',
+                '#584861',
+                '#6e5766',
+                '#5e5743',
+                '#30444a',
+                '#4c6160',
+            ],
+    };
+};
 // 导出主题常量，用于不需要响应式的地方
 export const themes = {
     light: getColorDiy(true),
     dark: getColorDiy(false),
 };
-// TODO: uiMap.js剩餘的部分可以考慮移到ThemeContext.js中，這樣可以統一管理主題相關的顏色和樣式。
 
 // 根據主題模式和系統顏色方案計算實際主題
 const getEffectiveTheme = (themeMode, systemColorScheme) => {
@@ -223,5 +240,11 @@ export const uiStyle = StyleSheet.create({
     defaultText: {
         fontWeight: 'normal',
         fontSize: verticalScale(12),
+    },
+    toastContainer: {
+        padding: scale(10),
+        borderRadius: scale(10),
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

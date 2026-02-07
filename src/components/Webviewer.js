@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, Linking, StyleSheet, Appearance } from 'react-native';
 
-import { COLOR_DIY, uiStyle } from '../utils/uiMap';
+import { themes, uiStyle } from './ThemeContext';
 import IntegratedWebView from './IntegratedWebView';
 import { ARK_WIKI } from '../utils/pathMap';
 import { trigger } from '../utils/trigger';
@@ -20,6 +20,8 @@ const isLight = Appearance.getColorScheme() == 'light';
 class WebViewer extends Component {
     constructor(props) {
         super(props);
+        const isLight = Appearance.getColorScheme() === 'light';
+        const COLOR_DIY = themes[isLight ? 'light' : 'dark'];
         const { bg_color, black, white } = COLOR_DIY;
 
         // 獲取上級頁面傳遞的數據
@@ -88,6 +90,10 @@ class WebViewer extends Component {
             isBarStyleBlack,
             UmPassInfo,
         } = this.state;
+
+        // 獲取當前主題配色
+        const currentIsLight = Appearance.getColorScheme() === 'light';
+        const COLOR_DIY = themes[currentIsLight ? 'light' : 'dark'];
 
         return (
             <View style={{ flex: 1 }}>
@@ -216,9 +222,12 @@ class WebViewer extends Component {
     }
 }
 
+// 模組級別主題配色，用於靜態 StyleSheet
+const MODULE_THEME = themes[Appearance.getColorScheme() === 'light' ? 'light' : 'dark'];
+
 const s = StyleSheet.create({
     iconContainer: {
-        backgroundColor: COLOR_DIY.white,
+        backgroundColor: MODULE_THEME.white,
         width: scale(60),
         height: scale(60),
         borderRadius: scale(20),

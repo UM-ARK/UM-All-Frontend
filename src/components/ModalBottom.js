@@ -3,8 +3,9 @@ import React, { Component } from 'react';
 import { Dimensions, View, Text, Button, TouchableOpacity } from 'react-native';
 
 import Modal from 'react-native-modal';
+import { Appearance } from 'react-native';
 
-import { COLOR_DIY, uiStyle } from '../utils/uiMap';
+import { themes, uiStyle } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -27,6 +28,8 @@ class ModalBottom extends Component {
 
     render() {
         const { isModalBottomVisible } = this.state;
+        const isLight = Appearance.getColorScheme() === 'light';
+        const COLOR_DIY = themes[isLight ? 'light' : 'dark'];
         return (
             <Modal
                 isVisible={isModalBottomVisible}

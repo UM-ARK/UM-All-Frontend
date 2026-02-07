@@ -5,7 +5,7 @@ import moment from 'moment';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import { useTheme } from '../../../../../components/ThemeContext';
-import { uiStyle, VERSION_EMOJI } from '../../../../../utils/uiMap';
+import { uiStyle, VERSION_EMOJI } from '../../../../../components/ThemeContext';
 import { screenWidth } from '../../../../../utils/stylesKits';
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';

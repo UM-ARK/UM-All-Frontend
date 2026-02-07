@@ -47,7 +47,7 @@ const ITEM_HEIGHT = scale(140);
  */
 const ClubPage = () => {
     const { theme, isLight } = useTheme();
-    const { themeColor, black, bg_color, white } = theme;
+    const { themeColor, black, bg_color, glassBorder, glassBg } = theme;
 
     const [clubDataList, setClubDataList] = useState([]);
     const [selectedTag, setSelectedTag] = useState('ALL');
@@ -228,8 +228,6 @@ const ClubPage = () => {
     const renderSearchBar = () => {
         // 根據主題動態計算樣式
         const blurTint = isLight ? 'light' : 'dark';
-        const borderColor = isLight ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)';
-        const backgroundColor = isLight ? `${white}50` : 'rgba(30, 30, 30, 0.6)';
 
         return (
             <View style={styles.searchContainer}>
@@ -239,8 +237,8 @@ const ClubPage = () => {
                     style={[
                         styles.searchBlurContainer,
                         {
-                            borderColor,
-                            backgroundColor,
+                            borderColor: glassBorder,
+                            backgroundColor: glassBg,
                         },
                     ]}
                 >

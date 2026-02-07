@@ -4,7 +4,7 @@ import { Dimensions, Alert, Appearance } from 'react-native';
 // 本地引用
 import Nav from './src/Nav';
 import RootStore from './src/mobx';
-import { uiStyle } from './src/utils/uiMap';
+import { uiStyle } from './src/components/ThemeContext';
 import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
 import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
 import { ThemeProvider, themes } from './src/components/ThemeContext';

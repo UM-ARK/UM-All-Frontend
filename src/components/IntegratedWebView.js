@@ -15,7 +15,7 @@ import SimpleProgressBar from './SimpleProgressBar';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
-import { COLOR_DIY } from '../utils/uiMap';
+import { useTheme } from './ThemeContext';
 
 const IntegratedWebView = ({
     source,
@@ -24,6 +24,7 @@ const IntegratedWebView = ({
     UmPassInfo,
     setOutsideCurrentURL,
 }) => {
+    const { theme } = useTheme();
     // 記錄網站加載進度和是否加載完成
     const [progress, setProgress] = useState(0);
     const [isLoaded, setLoaded] = useState(false);
@@ -100,7 +101,7 @@ const IntegratedWebView = ({
                     progress={progress}
                     width={null} // null -> 寬度為全屏
                     height={2}
-                    color={COLOR_DIY.themeColor}
+                    color={theme.themeColor}
                 />
             ) : null}
 
