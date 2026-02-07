@@ -41,11 +41,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Always use memory-keeper to track progress
 - Save architectural decisions and test results
 - Create checkpoints before context limits
+- Use Gitmoji for commit messages following the guidelines in `.cursor/rules/gitmoji.mdc`
 
 ### Quality Standards
 
 - All tests must pass before marking complete
 - Document actual vs claimed results
+
+### Git Commit Guidelines
+
+Use Gitmoji (https://gitmoji.dev/) to standardize commit messages for better readability. See `.cursor/rules/gitmoji.mdc` for detailed guidelines.
 
 ## Project Overview
 
