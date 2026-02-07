@@ -23,7 +23,7 @@ const {white, black, bg_color, themeColor, glass} = theme;
 |------|------|
 | `'#fff'` / `'#000'` | 不支持暗色模式 |
 | `'rgba(255,255,255,0.2)'` | 硬编码半透明色 |
-| `COLOR_DIY` from `uiMap.js` | 遗留代码，无法响应主题 |
+| 从已删除的 `uiMap.js` 导入 | 统一使用 `ThemeContext` |
 
 ## 玻璃态效果
 

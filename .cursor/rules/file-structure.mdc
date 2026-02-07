@@ -15,7 +15,7 @@ src/
 ├── utils/
 │   ├── storageKits.js  # AsyncStorage 封装
 │   ├── pathMap.js      # API 端点常量
-│   ├── uiMap.js        # 遗留颜色常量 (避免使用)
+│   ├── (uiMap.js 已删除，颜色统一管理于 ThemeContext.js)
 │   ├── trigger.js      # 触觉反馈
 │   ├── firebaseAnalytics.js
 │   └── checkCoursesKits.js

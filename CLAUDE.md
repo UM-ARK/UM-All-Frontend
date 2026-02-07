@@ -199,7 +199,7 @@ const {white, black, bg_color, themeColor, glass} = theme;
 | `'#000'` 或 `'#000000'`       | 硬編碼黑色，不支援暗色模式     |
 | `'rgba(255,255,255,0.2)'`     | 硬編碼半透明色，不支援暗色模式 |
 | `'rgba(0,0,0,0.5)'`           | 硬編碼半透明色，不支援暗色模式 |
-| `COLOR_DIY` from `uiMap.js`   | 遺留代碼，無法響應主題切換     |
+| 直接從 `uiMap.js` 導入顏色   | `uiMap.js` 已刪除，統一使用 ThemeContext |
 | 任何非 `theme` 對象提供的顏色 | 無法保證亮色/暗色一致性        |
 
 #### 半透明/玻璃態效果處理
@@ -519,7 +519,7 @@ logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 - ❌ **NEVER** use AsyncStorage directly - always use `storageKits.js` helpers
 - ❌ **NEVER** write to `offer_courses`, `course_plan`, `course_plan_time` keys directly - use `checkCoursesKits.js`
 - ❌ **NEVER** remove bundled JSONs - they're offline fallbacks
-- ❌ **NEVER** use `COLOR_DIY` from `uiMap.js` - use `useTheme()` for dark mode support
+- ❌ **NEVER** use hardcoded colors or legacy color imports - always use `useTheme()` from `ThemeContext` for dark mode support
 - ❌ **NEVER** forget `trigger()` on interactive elements
 - ❌ **NEVER** suppress type errors with `as any`, `@ts-ignore`, `@ts-except-error`
 - ❌ **NEVER** use hardcoded color values (e.g., `'rgba(255,255,255,0.2)'`) - always use ThemeContext colors
