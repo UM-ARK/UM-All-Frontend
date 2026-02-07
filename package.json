@@ -77,7 +77,7 @@
     "react-native-pager-view": "6.9.1",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
-    "react-native-screens": "^4.22.0",
+    "react-native-screens": "^4.23.0",
     "react-native-share": "^12.2.5",
     "react-native-simple-toast": "^3.3.2",
     "react-native-size-matters": "^0.4.2",
