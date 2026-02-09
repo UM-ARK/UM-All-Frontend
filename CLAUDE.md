@@ -222,6 +222,76 @@ backgroundColor: glass  // 定義為 'rgba(255, 255, 255, 0.2)'
 
 如需不同透明度的玻璃效果，應在 ThemeContext.js 中定義多個層級（如 `glassLight`, `glassMedium`, `glassHeavy`）。
 
+#### Tonal Color System（色調配色系統）
+
+本項目採用 **Tonal Color System**——通過主題色的不同透明度生成背景層級，前景（文字、圖標）使用 100% 主題色。核心目的是 **淡化強主題色的視覺疲勞和強硬感**，同時保持品牌識別。
+
+所有 Tonal 背景色已在 `ThemeContext.js` 的 `theme.tonal` 對象中預定義，無需每次手寫透明度。
+
+**推薦寫法：使用 theme.tonal 預定義色值**
+
+```javascript
+const { themeColor, tonal } = theme;
+
+// 背景用 tonal 預定義色值
+backgroundColor: tonal.primary08   // ~3%  極淺底：輸入框背景
+backgroundColor: tonal.primary15   // ~8%  淺色底：普通按鈕、標籤
+backgroundColor: tonal.primary30   // ~19% 中等底：重點按鈕
+backgroundColor: tonal.primary50   // ~31% 較深底：強調容器、pressed態
+
+// 副主題色
+backgroundColor: tonal.secondary15 // 副主題色淺色底
+
+// 前景始終用原色
+color: themeColor                   // 文字、圖標
+```
+
+**透明度分級速查表：**
+
+| theme.tonal 鍵名 | 透明度 | 用途 | 視覺重要性 |
+|-------------------|--------|------|-----------|
+| `tonal.primary08` / `tonal.secondary08` | ~3% | 大面積輸入區域背景 | ★☆☆☆☆ |
+| `tonal.primary15` / `tonal.secondary15` | ~8% | 普通按鈕、標籤、輕量容器 | ★★☆☆☆ |
+| `tonal.primary30` / `tonal.secondary30` | ~19% | 重點按鈕、CTA 次級按鈕 | ★★★☆☆ |
+| `tonal.primary50` / `tonal.secondary50` | ~31% | 高強調容器、pressed 態 | ★★★★☆ |
+| `themeColor` 實色 | 100% | 最高優先級 CTA 按鈕 | ★★★★★ |
+
+**典型組合模式：**
+
+```javascript
+const { themeColor, themeColorUltraLight, tonal, white } = theme;
+
+// 模式一：淺底 + 深字（最常用）
+<View style={{ backgroundColor: tonal.primary15 }}>
+    <Text style={{ color: themeColor }}>按鈕</Text>
+</View>
+
+// 模式二：淺底 + 邊框（卡片/輸入區）
+<View style={{
+    backgroundColor: tonal.primary08,
+    borderWidth: 1,
+    borderColor: themeColorUltraLight,
+}}>
+    <Text style={{ color: themeColor }}>內容</Text>
+</View>
+
+// 模式三：實色底 + 白字（主 CTA）
+<Pressable style={{ backgroundColor: themeColor }}>
+    <Text style={{ color: white }}>確認</Text>
+</Pressable>
+
+// 模式四：按壓態反饋
+<Pressable style={({ pressed }) => ({
+    backgroundColor: pressed ? tonal.primary50 : tonal.primary15,
+})}>
+    <Text style={{ color: themeColor }}>按鈕</Text>
+</Pressable>
+```
+
+**注意**：`theme.tonal` 基於 `themeColor`（已根據亮/暗模式調整色值）生成，天然支持暗色模式。
+
+> 完整規範見 `.cursor/rules/tonal-color-system.mdc`
+
 ### Typography
 
 All text components must use `uiStyle.defaultText` with scaled font sizes:
@@ -548,12 +618,13 @@ logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 
 ### 設計方向
 
-1. **擁抱平台原生特性** — 特別是 iOS 26 液態玻璃（Liquid Glass）、原生導航按鈕等新特性
-2. **優雅降級** — Android 和舊版 iOS 有合理的 fallback（模糊效果、實色背景等）
-3. **材質層次感** — 用液態玻璃、模糊、半透明區分 UI 層級
-4. **大圓角與柔和陰影** — 卡片圓角 `scale(12)` - `scale(16)`，陰影柔和
-5. **留白與呼吸感** — 元素間距充足，避免擁擠
-6. **動效自然** — 使用 `react-native-reanimated` 實現流暢過渡
+1. **Tonal Color System（色調配色）** — 主題色不再大面積實色使用，改用 `08`/`15`/`30`/`50` 透明度作背景，前景用原色，淡化視覺疲勞
+2. **擁抱平台原生特性** — 特別是 iOS 26 液態玻璃（Liquid Glass）、原生導航按鈕等新特性
+3. **優雅降級** — Android 和舊版 iOS 有合理的 fallback（模糊效果、實色背景等）
+4. **材質層次感** — 用液態玻璃、模糊、Tonal 色調區分 UI 層級
+5. **大圓角與柔和陰影** — 卡片圓角 `scale(12)` - `scale(16)`，陰影柔和
+6. **留白與呼吸感** — 元素間距充足，避免擁擠
+7. **動效自然** — 使用 `react-native-reanimated` 實現流暢過渡
 
 ### AI 助手行為準則
 

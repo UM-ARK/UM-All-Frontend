@@ -28,13 +28,40 @@ const getColorDiy = (isLight) => {
     const whiteColor = isLight ? trueWhite : '#272729';
     const blackMain = isLight ? '#000' : trueWhite;
 
+    // 色值提取為局部變量以便生成 Tonal 色階
+    // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
+    const themeColorValue = isLight ? '#4796d6' : '#4a9cde';
+    const secondThemeColorValue = '#FF8627';
+    const successValue = '#27ae60';
+    const unreadValue = '#f75353';
+
     return {
         isLight: isLight,
-        // 原主題色 #005F95；春日限定：#5f8e5a；夏日限定1：#328ad1;
-        themeColor: isLight ? '#4796d6' : '#4a9cde',
+        themeColor: themeColorValue,
         themeColorLight: isLight ? '#7ca8cc' : '#2d5f87',
         themeColorUltraLight: isLight ? '#c9e1f5' : '#23323d',
-        secondThemeColor: '#FF8627',
+        secondThemeColor: secondThemeColorValue,
+
+        // Tonal Color System — 主題色透明度分級背景色
+        // 用於替代在組件中手寫 `${themeColor}XX` 的模式
+        // 級別：08(極淺) → 15(淺) → 30(中) → 50(較深) → 實色
+        tonal: {
+            // 主題色 (themeColor) 背景分級
+            primary08: `${themeColorValue}08`,   // ~3%  極淺底：大面積輸入區域
+            primary15: `${themeColorValue}15`,   // ~8%  淺色底：普通按鈕、標籤
+            primary30: `${themeColorValue}30`,   // ~19% 中等底：重點按鈕
+            primary50: `${themeColorValue}50`,   // ~31% 較深底：強調容器、pressed態
+            // 副主題色 (secondThemeColor) 背景分級
+            secondary08: `${secondThemeColorValue}08`,
+            secondary15: `${secondThemeColorValue}15`,
+            secondary30: `${secondThemeColorValue}30`,
+            secondary50: `${secondThemeColorValue}50`,
+            // 語義色 (success / unread) 背景分級
+            success15: `${successValue}15`,
+            success30: `${successValue}30`,
+            unread15: `${unreadValue}15`,
+            unread30: `${unreadValue}30`,
+        },
         // B站使用的安卓Material Design，亮色背景下87%的黑色用於顯示
         black: {
             // 最高層級，類似大標題
@@ -60,9 +87,9 @@ const getColorDiy = (isLight) => {
         bg_color: isLight ? '#F5F5F7' : trueBlack,
 
         // 綠色，用在Toast上
-        success: '#27ae60',
+        success: successValue,
         warning: '#f39c12',
-        unread: '#f75353',
+        unread: unreadValue,
         disabled: isLight ? '#cad5de' : '#3a3d40',
 
         // 我的頁顏色

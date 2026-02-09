@@ -36,6 +36,34 @@ const {glass} = theme;
 backgroundColor: glass
 ```
 
+## Tonal Color System（色調配色）
+
+按鈕和容器的背景色使用 `theme.tonal` 預定義色值（已在 ThemeContext.js 中定義）：
+
+```javascript
+const { themeColor, tonal } = theme;
+
+// 背景用 tonal 預定義色值
+backgroundColor: tonal.primary15   // 普通按鈕 ~8%
+backgroundColor: tonal.primary30   // 重點按鈕 ~19%
+backgroundColor: tonal.secondary15 // 副主題色淺底
+
+// 前景用原色
+color: themeColor
+```
+
+| theme.tonal 鍵名 | 用途 |
+|-------------------|------|
+| `tonal.primary08` | 極淺底（輸入框背景） |
+| `tonal.primary15` | 淺色底（普通按鈕、標籤） |
+| `tonal.primary30` | 中等底（重點按鈕、CTA 次級） |
+| `tonal.primary50` | 較深底（強調容器、pressed 態） |
+| `themeColor` 實色 | 最高優先 CTA（白字） |
+
+副主題色：`tonal.secondary08` / `15` / `30` / `50`
+
+**完整規範見** `tonal-color-system.mdc`
+
 ## 新增颜色流程
 
 1. 在 `ThemeContext.js` 的 `getColorDiy` 函数添加:

@@ -132,7 +132,7 @@ function CourseSim({ route, navigation }) {
     const bottomSheetRef = useRef();
 
     const { theme } = useTheme();
-    const { themeColor, themeColorUltraLight, secondThemeColor,
+    const { themeColor, themeColorUltraLight, secondThemeColor, tonal,
         black, white, bg_color, unread, success, trueWhite, barStyle, TIME_TABLE_COLOR, disabled } = theme;
 
     const insets = useSafeAreaInsets();
@@ -172,7 +172,7 @@ function CourseSim({ route, navigation }) {
             borderColor: themeColorUltraLight,
         },
         stepBadge: {
-            backgroundColor: `${themeColor}15`,
+            backgroundColor: tonal.primary15,
             borderRadius: scale(8),
             paddingHorizontal: scale(10),
             paddingVertical: scale(4),
@@ -191,7 +191,7 @@ function CourseSim({ route, navigation }) {
             flex: 1,
         },
         stepButton: {
-            backgroundColor: themeColor,
+            backgroundColor: tonal.primary30,
             borderRadius: scale(10),
             paddingVertical: scale(10),
             paddingHorizontal: scale(16),
@@ -199,7 +199,7 @@ function CourseSim({ route, navigation }) {
         },
         stepButtonText: {
             ...uiStyle.defaultText,
-            color: trueWhite,
+            color: themeColor,
             fontWeight: 'bold',
             fontSize: scale(15),
         },
@@ -217,7 +217,7 @@ function CourseSim({ route, navigation }) {
         },
         guideTextInput: {
             ...uiStyle.defaultText,
-            backgroundColor: `${themeColor}08`,
+            backgroundColor: tonal.primary08,
             borderWidth: 1,
             borderColor: themeColorUltraLight,
             padding: scale(12),
@@ -243,7 +243,6 @@ function CourseSim({ route, navigation }) {
         },
         importButtonText: {
             ...uiStyle.defaultText,
-            color: trueWhite,
             fontWeight: 'bold',
             fontSize: scale(16),
         },
@@ -267,7 +266,7 @@ function CourseSim({ route, navigation }) {
             margin: scale(3),
             padding: scale(5),
             borderRadius: scale(6),
-            backgroundColor: `${themeColor}15`,
+            backgroundColor: tonal.primary15,
             borderWidth: 1, borderColor: themeColorUltraLight,
         },
     });
@@ -839,7 +838,7 @@ function CourseSim({ route, navigation }) {
                             }}
                         >
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                                <Ionicons name="open-outline" size={scale(16)} color={trueWhite} style={{ marginRight: scale(6) }} />
+                                <Ionicons name="open-outline" size={scale(16)} color={themeColor} style={{ marginRight: scale(6) }} />
                                 <Text style={s.stepButtonText}>
                                     {`2.1 ${t('進入舊ISW複製', { ns: 'timetable' })}`}
                                 </Text>
@@ -885,14 +884,14 @@ E11-0000
                     <TouchableOpacity
                         style={{
                             ...s.importButton,
-                            backgroundColor: importTimeTableText ? success : disabled,
+                            backgroundColor: importTimeTableText ? tonal.success30 : disabled,
                         }}
                         onPress={importCourseData}
                         disabled={!importTimeTableText}
                     >
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <Ionicons name="download-outline" size={scale(18)} color={trueWhite} style={{ marginRight: scale(6) }} />
-                            <Text style={s.importButtonText}>
+                            <Ionicons name="download-outline" size={scale(18)} color={importTimeTableText ? success : trueWhite} style={{ marginRight: scale(6) }} />
+                            <Text style={{ ...s.importButtonText, color: importTimeTableText ? success : trueWhite }}>
                                 {t('一鍵導入到模擬課表', { ns: 'timetable' })}
                             </Text>
                         </View>
@@ -1201,7 +1200,7 @@ E11-0000
                                 <TouchableOpacity
                                     style={{
                                         ...s.buttonContainer,
-                                        backgroundColor: `${unread}30`,
+                                        backgroundColor: tonal.unread30,
                                         borderRadius: scale(5),
                                         padding: scale(3),
                                     }}
@@ -1374,7 +1373,7 @@ E11-0000
                             style={{
                                 position: 'absolute',
                                 left: scale(10),
-                                backgroundColor: `${themeColor}15`,
+                                backgroundColor: tonal.primary15,
                                 borderRadius: scale(5),
                                 padding: scale(5),
                             }}
@@ -1413,7 +1412,7 @@ E11-0000
                         style={{
                             position: 'absolute',
                             right: scale(10),
-                            backgroundColor: hasOpenCourseSearch ? `${secondThemeColor}15` : `${themeColor}15`,
+                            backgroundColor: hasOpenCourseSearch ? tonal.secondary15 : tonal.primary15,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
