@@ -251,59 +251,84 @@ fontSize: moderateScale(16) // font scaling
 
 本項目使用 React Navigation V7 穩定版本。
 
-#### 液態玻璃效果支持
-
-使用 `isLiquidGlassSupported` 函數判斷是否支持液態玻璃樣式（來自 `@callstack/liquid-glass` 包）：
-
-```javascript
-// 正確用法
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
-
-// 判斷是否支持液態玻璃效果
-if (isLiquidGlassSupported) {
-    // 使用液態玻璃樣式
-} else {
-    // 使用 fallback 樣式（如 blur effect）
-}
-```
-
-**使用場景示例**：
-```javascript
-// 在導航配置中使用
-const createHeaderOptions = (theme) => {
-    const { bg_color, black } = theme;
-
-    return {
-        headerShown: true,
-        headerTitleAlign: 'center',
-        headerTintColor: black.main,
-
-        // iOS 26+ 液態玻璃效果
-        headerTransparent: isLiquidGlassSupported,
-        headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
-        headerBackground: isLiquidGlassSupported ? null : (() => (
-            <View style={{ flex: 1, backgroundColor: bg_color }} />
-        )),
-    };
-};
-```
-
-**禁止使用**：
-```javascript
-// ❌ 錯誤：使用 Platform 判斷版本或型號
-import { Platform } from 'react-native';
-
-// 不要這樣判斷
-const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
-const isIPhone16OrLater = Platform.OS === 'ios' && Platform.isPad === false && ...;
-```
-
 #### 導航結構
 
-- **Main navigation**: `src/Nav.js` (stack navigator)
-- **Bottom tabs**: `src/Tabbar.js` (6 main tabs - 使用 Native Bottom Tabs)
+- **Main navigation**: `src/Nav.js` (stack navigator - `createNativeStackNavigator`)
+- **Bottom tabs**: `src/Tabbar.js` (6 main tabs - `createNativeBottomTabNavigator`)
 - New screens must be registered in BOTH `Nav.js` and `Tabbar.js`
 - Modal vs card: card 動畫配置
+
+#### 液態玻璃效果支持（iOS 26+）
+
+使用 `isLiquidGlassSupported` 判斷是否支持液態玻璃樣式（來自 `@callstack/liquid-glass` 包）：
+
+```javascript
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+
+// Stack Navigator 配置
+screenOptions={{
+    headerTransparent: isLiquidGlassSupported,
+    headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+}}
+
+// Tab Navigator 配置
+translucent: isLiquidGlassSupported,
+
+// ScrollView 內容區域
+contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
+```
+
+#### `LiquidGlassView` 組件
+
+用於為獨立 UI 元素（如浮動按鈕、工具欄按鈕）添加液態玻璃效果：
+
+```javascript
+import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
+
+<LiquidGlassView
+    interactive={true}
+    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
+    style={{
+        backgroundColor: isLiquidGlassSupported ? null : theme.white,
+        borderRadius: scale(25),
+        // ...
+    }}
+>
+    <Pressable onPress={handlePress}>
+        <Ionicons name="icon" color={theme.themeColor} size={scale(24)} />
+    </Pressable>
+</LiquidGlassView>
+```
+
+**`LiquidGlassView` 在不支持的平台上自動降級為普通 `View`**，但 `backgroundColor` 等視覺屬性需手動處理 fallback。
+
+**已使用的文件**：`ARKImageView.js`、`ScrollToTopButton.js`、`UMEventDetail.js`
+
+#### 液態玻璃使用原則
+
+- ✅ **推薦場景**：導航欄、Tab Bar、浮動按鈕（FAB）、圖片查看器覆蓋層按鈕、工具欄
+- ❌ **避免場景**：列表項/卡片內部、文字標籤、整個頁面背景、輸入框
+- **每個頁面使用液態玻璃的元素應控制在 2-4 個關鍵交互點**
+
+#### 原生按鈕適配
+
+優先使用 React Navigation 提供的原生按鈕組件，iOS 26+ 自動適配液態玻璃樣式：
+
+```javascript
+import { Button, HeaderBackButton } from '@react-navigation/elements';
+
+headerLeft: () => <HeaderBackButton onPress={navigation.goBack} />,
+headerRight: () => <Button onPress={handleAction}>Action</Button>,
+```
+
+#### 禁止的平台檢測方式
+
+```javascript
+// ❌ 絕對禁止：使用 Platform 判斷版本
+const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
+```
+
+**完整的液態玻璃設計規範見** `.cursor/rules/ios26-modern-design.mdc`
 
 ### State Management
 
@@ -446,7 +471,7 @@ Call `trigger()` on all user interactions (button press, tab press):
 ```javascript
 import { trigger } from '../../utils/trigger';
 
-<TouchableOpacity onPress={() => { trigger(); handleAction(); }}>
+<Pressable onPress={() => { trigger(); handleAction(); }}>
 ```
 
 ### Firebase Analytics
@@ -517,6 +542,37 @@ logToFirebase('screen_view', {screen_name: 'ClubDetail'});
    - `wiki` - 百科
    - `harbor` - 職涯港
 
+## 現代化 UI 設計目標（2026）
+
+本項目正在進行現代化 UI 重構，目標是打造 2026 年流行的、現代化的移動應用界面。
+
+### 設計方向
+
+1. **擁抱平台原生特性** — 特別是 iOS 26 液態玻璃（Liquid Glass）、原生導航按鈕等新特性
+2. **優雅降級** — Android 和舊版 iOS 有合理的 fallback（模糊效果、實色背景等）
+3. **材質層次感** — 用液態玻璃、模糊、半透明區分 UI 層級
+4. **大圓角與柔和陰影** — 卡片圓角 `scale(12)` - `scale(16)`，陰影柔和
+5. **留白與呼吸感** — 元素間距充足，避免擁擠
+6. **動效自然** — 使用 `react-native-reanimated` 實現流暢過渡
+
+### AI 助手行為準則
+
+- **遇到 UI 改動需求時**，應主動考慮如何利用原生新特性提升體驗
+- **配色調整或布局重構**，必須先與用戶討論方案再實施
+- **發現現有顏色不滿足設計目標時**，應主動提議在 ThemeContext 中新增顏色
+- **小幅優化**（間距、圓角、字重調整）可直接實施，無需額外討論
+
+### 配色方案演進流程
+
+當需要引入新配色時：
+
+1. **說明需求**：為什麼現有顏色不滿足
+2. **提供方案**：新顏色的亮色/暗色值
+3. **對比展示**：與現有配色的協調性
+4. **用戶確認後**：在 `ThemeContext.js` 的 `getColorDiy` 中添加
+
+---
+
 ## Gotchas & Critical Don'ts
 
 ### Critical Don'ts
@@ -528,6 +584,7 @@ logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 - ❌ **NEVER** forget `trigger()` on interactive elements
 - ❌ **NEVER** suppress type errors with `as any`, `@ts-ignore`, `@ts-except-error`
 - ❌ **NEVER** use hardcoded color values (e.g., `'rgba(255,255,255,0.2)'`) - always use ThemeContext colors
+- ❌ **NEVER** use `TouchableOpacity` series in new code - use `Pressable` instead (migrate legacy code during refactoring)
 
 ### Setup Requirements
 

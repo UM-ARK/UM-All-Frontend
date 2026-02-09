@@ -23,6 +23,48 @@ alwaysApply: false
 | 函数/变量 | camelCase | `handleLogin` |
 | 常量 | UPPER_SNAKE_CASE | `BASE_URI` |
 
+## 交互组件规范：使用 Pressable
+
+**新代码和重构必须使用 `Pressable`，禁止引入新的 `TouchableOpacity` 系列组件**。
+
+```javascript
+import { Pressable } from 'react-native';
+
+// ✅ 正确：使用 Pressable
+<Pressable onPress={() => { trigger(); handleAction(); }}>
+    <Text>按钮</Text>
+</Pressable>
+
+// ✅ 正确：Pressable 自定义按下效果
+<Pressable
+    onPress={handlePress}
+    style={({ pressed }) => [
+        styles.button,
+        pressed && { opacity: 0.7 },
+    ]}
+>
+    <Text>按钮</Text>
+</Pressable>
+
+// ❌ 禁止：在新代码中使用 TouchableOpacity
+import { TouchableOpacity } from 'react-native';
+<TouchableOpacity onPress={handlePress}>...</TouchableOpacity>
+
+// ❌ 禁止：在新代码中使用其他 Touchable 系列
+import { TouchableHighlight, TouchableWithoutFeedback } from 'react-native';
+```
+
+| 组件 | 状态 |
+|------|------|
+| `Pressable` | ✅ 新代码必须使用 |
+| `TouchableOpacity` | ❌ 仅存量代码保留，重构时替换 |
+| `TouchableHighlight` | ❌ 禁止使用 |
+| `TouchableWithoutFeedback` | ❌ 禁止使用 |
+| `TouchableNativeFeedback` | ❌ 禁止使用 |
+| `TouchableScale`（第三方） | ⚠️ 存量保留，新代码用 Pressable + Reanimated 替代 |
+
+> **注意**：存量代码中的 `TouchableOpacity` 不需要立即全部替换，在重构相关组件时顺带迁移即可。
+
 ## Prettier 配置
 
 ```javascript

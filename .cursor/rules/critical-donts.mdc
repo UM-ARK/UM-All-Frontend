@@ -14,6 +14,7 @@ alwaysApply: true
 - ❌ **忘记 `trigger()`** - 所有交互元素都需要触觉反馈
 - ❌ **使用 `as any`, `@ts-ignore`** - 正确处理类型
 - ❌ **硬编码颜色值** (如 `'#fff'`, `'rgba(...)'`) - 使用 ThemeContext
+- ❌ **在新代码中使用 `TouchableOpacity` 系列** - 统一使用 `Pressable`（存量代码重构时迁移）
 
 ## 配置要求
 

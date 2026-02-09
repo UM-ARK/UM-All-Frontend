@@ -12,8 +12,9 @@ alwaysApply: false
 
 ```javascript
 import { trigger } from '../../utils/trigger';
+import { Pressable } from 'react-native';
 
-<TouchableOpacity onPress={() => { 
+<Pressable onPress={() => { 
     trigger(); 
     handleAction(); 
 }}>
