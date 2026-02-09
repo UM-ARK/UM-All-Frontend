@@ -28,6 +28,7 @@ import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 import { setLocalStorage } from '../../../utils/storageKits';
 import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
@@ -132,9 +133,13 @@ function CourseSim({ route, navigation }) {
 
     const { theme } = useTheme();
     const { themeColor, themeColorUltraLight, secondThemeColor,
-        black, white, bg_color, unread, success, trueWhite, barStyle, TIME_TABLE_COLOR } = theme;
+        black, white, bg_color, unread, success, trueWhite, barStyle, TIME_TABLE_COLOR, disabled } = theme;
 
     const insets = useSafeAreaInsets();
+    const headerHeight = useHeaderHeight();
+    // Sticky Header 需要的吸頂偏移量，優先使用導航欄實際高度，否則根據安全區估算
+    const stickyTopOffset = headerHeight || insets.top;
+
     const s = StyleSheet.create({
         firstUseText: {
             ...uiStyle.defaultText,
@@ -148,6 +153,105 @@ function CourseSim({ route, navigation }) {
             borderRadius: scale(10),
             padding: scale(10),
             margin: scale(10),
+        },
+        // 引導頁面樣式
+        guideTitle: {
+            ...uiStyle.defaultText,
+            color: black.main,
+            fontWeight: 'bold',
+            fontSize: scale(22),
+            textAlign: 'center',
+            marginBottom: scale(16),
+        },
+        methodCard: {
+            backgroundColor: white,
+            borderRadius: scale(12),
+            padding: scale(16),
+            marginBottom: scale(12),
+            borderWidth: 1,
+            borderColor: themeColorUltraLight,
+        },
+        stepBadge: {
+            backgroundColor: `${themeColor}15`,
+            borderRadius: scale(8),
+            paddingHorizontal: scale(10),
+            paddingVertical: scale(4),
+        },
+        stepBadgeText: {
+            ...uiStyle.defaultText,
+            color: themeColor,
+            fontWeight: 'bold',
+            fontSize: scale(14),
+        },
+        cardDescription: {
+            ...uiStyle.defaultText,
+            color: black.second,
+            fontSize: scale(15),
+            marginLeft: scale(10),
+            flex: 1,
+        },
+        stepButton: {
+            backgroundColor: themeColor,
+            borderRadius: scale(10),
+            paddingVertical: scale(10),
+            paddingHorizontal: scale(16),
+            marginBottom: scale(4),
+        },
+        stepButtonText: {
+            ...uiStyle.defaultText,
+            color: trueWhite,
+            fontWeight: 'bold',
+            fontSize: scale(15),
+        },
+        guideDivider: {
+            height: 1,
+            backgroundColor: themeColorUltraLight,
+            marginVertical: scale(12),
+        },
+        inputLabel: {
+            ...uiStyle.defaultText,
+            color: black.second,
+            fontWeight: '600',
+            fontSize: scale(14),
+            marginBottom: scale(8),
+        },
+        guideTextInput: {
+            ...uiStyle.defaultText,
+            backgroundColor: `${themeColor}08`,
+            borderWidth: 1,
+            borderColor: themeColorUltraLight,
+            padding: scale(12),
+            borderRadius: scale(10),
+            width: '100%',
+            height: verticalScale(150),
+            color: themeColor,
+            fontSize: scale(12),
+        },
+        inputHint: {
+            ...uiStyle.defaultText,
+            color: black.third,
+            fontSize: scale(11),
+            textAlign: 'center',
+            marginTop: scale(6),
+            marginBottom: scale(10),
+        },
+        importButton: {
+            borderRadius: scale(10),
+            paddingVertical: scale(12),
+            paddingHorizontal: scale(20),
+            alignItems: 'center',
+        },
+        importButtonText: {
+            ...uiStyle.defaultText,
+            color: trueWhite,
+            fontWeight: 'bold',
+            fontSize: scale(16),
+        },
+        footerText: {
+            ...uiStyle.defaultText,
+            color: black.third,
+            fontSize: scale(11),
+            textAlign: 'center',
         },
         filterButtonContainer: {
             paddingHorizontal: scale(5), paddingVertical: verticalScale(2),
@@ -686,92 +790,124 @@ function CourseSim({ route, navigation }) {
         ], { cancelable: true });
     };
 
-    // 渲染首次使用文字提示
+
+    // 渲染首次使用引導頁面
     const renderFirstUse = () => {
         return (
-            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: scale(10), marginHorizontal: scale(5) }}>
-                <Text style={{ ...s.firstUseText }}>{`\n${t('如何開始使用模擬課表？', { ns: 'timetable' })}\n`}</Text>
-
-                {/* Add課按鈕提示 */}
-                <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t('方法', { ns: 'timetable' })} 1：`}</Text>
-                    {`${t('右上角按鈕手動“Add”！', { ns: 'timetable' })}\n`}
+            <View style={{ paddingHorizontal: scale(16), paddingTop: scale(16) }}>
+                {/* 頁面標題 */}
+                <Text style={s.guideTitle}>
+                    {t('如何開始使用模擬課表？', { ns: 'timetable' })}
                 </Text>
 
-                <Text style={{ ...s.firstUseText }}>
-                    <Text style={{ color: themeColor }}>{`${t('方法', { ns: 'timetable' })} 2：`}</Text>
-                    {`${t('全選、複製Timetable，', { ns: 'timetable' })}\n${t('粘貼到下方輸入框，', { ns: 'timetable' })}\n${t('一鍵導入！', { ns: 'timetable' })}`}
-                </Text>
+                {/* 方法一卡片：手動添加 */}
+                <View style={s.methodCard}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(10) }}>
+                        <View style={s.stepBadge}>
+                            <Text style={s.stepBadgeText}>{t('方法', { ns: 'timetable' })} 1</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Ionicons name="add-circle-outline" size={scale(28)} color={themeColor} />
+                        <Text style={s.cardDescription}>
+                            {t('右上角按鈕手動"Add"！', { ns: 'timetable' })}
+                        </Text>
+                    </View>
+                </View>
 
-                {/* 跳轉ISW按鈕 */}
-                {importTimeTableText?.length > 0 ? null : (
-                    <TouchableOpacity
-                        style={s.buttonContainer}
-                        onPress={() => {
-                            trigger();
-                            openLink(UM_ISW);
+                {/* 方法二卡片：ISW 導入 */}
+                <View style={s.methodCard}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(10) }}>
+                        <View style={s.stepBadge}>
+                            <Text style={s.stepBadgeText}>{t('方法', { ns: 'timetable' })} 2</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(12) }}>
+                        <Ionicons name="clipboard-outline" size={scale(28)} color={themeColor} />
+                        <Text style={s.cardDescription}>
+                            {`${t('全選、複製Timetable，', { ns: 'timetable' })}\n${t('粘貼到下方輸入框，', { ns: 'timetable' })}${t('一鍵導入！', { ns: 'timetable' })}`}
+                        </Text>
+                    </View>
+
+                    {/* Step 2.1: 跳轉 ISW 按鈕 */}
+                    {importTimeTableText?.length > 0 ? null : (
+                        <TouchableOpacity
+                            style={s.stepButton}
+                            onPress={() => {
+                                trigger();
+                                openLink(UM_ISW);
+                            }}
+                        >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                <Ionicons name="open-outline" size={scale(16)} color={trueWhite} style={{ marginRight: scale(6) }} />
+                                <Text style={s.stepButtonText}>
+                                    {`2.1 ${t('進入舊ISW複製', { ns: 'timetable' })}`}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+
+                    {/* 分隔線 */}
+                    <View style={s.guideDivider} />
+
+                    {/* Step 2.2: 輸入框 + 導入按鈕 */}
+                    <Text style={s.inputLabel}>
+                        {`2.2 ${t('粘貼課表數據', { ns: 'timetable' })}`}
+                    </Text>
+                    <TextInput
+                        selectTextOnFocus
+                        multiline
+                        numberOfLines={6}
+                        onChangeText={text => setImportTimeTableText(text)}
+                        placeholder={`Click here and enter your timetable:
+Example：
+TimeDay  Mon  Tue  Wed  Thur  Fri  Sat  Sun
+9:00  09:00-10:45 ECEN0000(001)
+E11-0000
+(Lecture)  -  -  09:00-10:45 ...`}
+                        placeholderTextColor={black.third}
+                        value={importTimeTableText}
+                        style={s.guideTextInput}
+                        returnKeyType={'done'}
+                        blurOnSubmit={true}
+                        onSubmitEditing={() => {
+                            Keyboard.dismiss();
+                            importCourseData();
                         }}
+                        clearButtonMode="always"
+                    />
+
+                    <Text style={s.inputHint}>
+                        {t('↑記得先粘貼課表數據，再點擊導入哦', { ns: 'timetable' })}
+                    </Text>
+
+                    {/* 導入課表按鈕 */}
+                    <TouchableOpacity
+                        style={{
+                            ...s.importButton,
+                            backgroundColor: importTimeTableText ? success : disabled,
+                        }}
+                        onPress={importCourseData}
+                        disabled={!importTimeTableText}
                     >
-                        <Text style={{ ...s.firstUseText, color: white }}>{`2.1 ${t('進入舊ISW複製', { ns: 'timetable' })}`}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <Ionicons name="download-outline" size={scale(18)} color={trueWhite} style={{ marginRight: scale(6) }} />
+                            <Text style={s.importButtonText}>
+                                {t('一鍵導入到模擬課表', { ns: 'timetable' })}
+                            </Text>
+                        </View>
                     </TouchableOpacity>
-                )}
-
-                {/* 課表數據輸入框 */}
-                <TextInput
-                    selectTextOnFocus
-                    multiline
-                    numberOfLines={6}
-                    onChangeText={text => setImportTimeTableText(text)}
-                    placeholder={`Click here and enter your timetable:\nExample：
-TimeDay	Mon	Tue	Wed	Thur	Fri	Sat	Sun
-9:00	09:00-10:45 ECEN0000(001)
-E11-0000
-(Lecture)	-	-	09:00-10:45 ECEN0000(001)
-E11-0000
-(Lab/Tutorial)	-	-	-
-9:30	-	-	-	-	-
-18:30	-	-	-	-	-`}
-                    placeholderTextColor={black.third}
-                    value={importTimeTableText}
-                    style={{
-                        backgroundColor: white,
-                        padding: scale(10),
-                        borderRadius: scale(10),
-                        width: '90%', height: verticalScale(170),
-                        color: themeColor,
-                    }}
-                    returnKeyType={'done'}
-                    blurOnSubmit={true}
-                    onSubmitEditing={() => {
-                        Keyboard.dismiss();
-                        importCourseData();
-                    }}
-                    clearButtonMode="always"
-                />
-
-                <Text style={{ marginTop: scale(10), ...uiStyle.defaultText, color: black.third }}>
-                    {`${t('↑記得先粘貼課表數據，再點擊導入哦', { ns: 'timetable' })}`}
-                </Text>
-
-                {/* 導入課表按鈕 */}
-                <TouchableOpacity
-                    style={{
-                        ...s.buttonContainer,
-                        backgroundColor: importTimeTableText ? success : 'gray',
-                    }}
-                    onPress={importCourseData}
-                    disabled={!importTimeTableText}
-                >
-                    <Text style={{ ...s.firstUseText, color: white }}>{`2.2 ${t('一鍵導入到模擬課表', { ns: 'timetable' })}`}</Text>
-                </TouchableOpacity>
+                </View>
 
                 {/* 聯絡資訊與致敬 */}
-                <Text style={{ ...s.firstUseText, fontSize: scale(12), marginTop: scale(25) }}>
-                    {'如有問題，立即聯繫umacark@gmail.com'}
-                </Text>
-                <Text style={{ ...s.firstUseText, fontSize: scale(12) }}>
-                    {'\n靈感源自kchomacau, Raywong前輩的\n“課表模擬”開源倉庫！'}
-                </Text>
+                <View style={{ alignItems: 'center', marginTop: scale(20), marginBottom: scale(30) }}>
+                    <Text style={s.footerText}>
+                        {'如有問題，立即聯繫 umacark@gmail.com'}
+                    </Text>
+                    <Text style={{ ...s.footerText, marginTop: scale(8) }}>
+                        {'靈感源自 kchomacau, Raywong 前輩的\n"課表模擬"開源倉庫！'}
+                    </Text>
+                </View>
             </View>
         );
     };
@@ -985,7 +1121,7 @@ E11-0000
                         }}
                         onChangeText={(text) => {
                             setSearchText(text);
-                            if (text.length === 0) {setPerSearchText(null);}
+                            if (text.length === 0) { setPerSearchText(null); }
                         }}
                         value={searchText}
                         selectTextOnFocus
@@ -1029,7 +1165,7 @@ E11-0000
                                     });
                                 }
 
-                                if (!dayInFilter) {return null;}
+                                if (!dayInFilter) { return null; }
 
                                 return (
                                     <TouchableOpacity
@@ -1133,7 +1269,7 @@ E11-0000
                                             }
                                         }
 
-                                        if (!dayInFilter) {return null;}
+                                        if (!dayInFilter) { return null; }
 
                                         return (
                                             <TouchableOpacity
@@ -1218,94 +1354,100 @@ E11-0000
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            {/* 頁面標題列 */}
-            <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingTop: verticalScale(3),
-            }}>
-                {/* 清空課表按鈕 */}
-                {allCourseAllTime?.length > 0 && (
+            <ScrollView
+                ref={verScroll}
+                keyboardDismissMode="on-drag"
+                contentInsetAdjustmentBehavior='automatic'
+            >
+                {/* 頁面標題列（sticky header） */}
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingTop: verticalScale(3),
+                    paddingBottom: verticalScale(5),
+                    backgroundColor: bg_color,
+                }}>
+                    {/* 清空課表按鈕 */}
+                    {allCourseAllTime?.length > 0 && (
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                left: scale(10),
+                                backgroundColor: `${themeColor}15`,
+                                borderRadius: scale(5),
+                                padding: scale(5),
+                            }}
+                            onPress={clearCourse}
+                        >
+                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>
+                                {t('清空', { ns: 'timetable' })}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {/* 標題 + Logo */}
+                    <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
+                        <Image
+                            source={require('../../../static/img/logo.png')}
+                            style={{
+                                height: iconSize,
+                                width: iconSize,
+                                borderRadius: scale(5),
+                            }}
+                        />
+                        <View style={{ marginLeft: scale(5) }}>
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(18),
+                                color: themeColor,
+                                fontWeight: '600',
+                            }}>
+                                {t('課表模擬', { ns: 'timetable' })}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Add 課按鈕 */}
                     <TouchableOpacity
                         style={{
                             position: 'absolute',
-                            left: scale(10),
-                            backgroundColor: `${themeColor}15`,
+                            right: scale(10),
+                            backgroundColor: hasOpenCourseSearch ? `${secondThemeColor}15` : `${themeColor}15`,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
-                        onPress={clearCourse}
-                    >
-                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>
-                            {t('清空', { ns: 'timetable' })}
-                        </Text>
-                    </TouchableOpacity>
-                )}
+                        onPress={() => {
+                            trigger();
+                            if (Keyboard.isVisible()) { Keyboard.dismiss(); }
 
-                {/* 標題 + Logo */}
-                <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
-                    <Image
-                        source={require('../../../static/img/logo.png')}
-                        style={{
-                            height: iconSize,
-                            width: iconSize,
-                            borderRadius: scale(5),
+                            if (hasOpenCourseSearch) {
+                                bottomSheetRef.current?.close();
+                            } else {
+                                if (allCourseAllTime?.length > 0) {
+                                    bottomSheetRef.current?.snapToIndex(1);
+                                } else {
+                                    bottomSheetRef.current?.expand();
+                                }
+                            }
+
+                            setHasOpenCourseSearch(!hasOpenCourseSearch);
+                            verScroll.current?.scrollTo({ y: 0 });
                         }}
-                    />
-                    <View style={{ marginLeft: scale(5) }}>
+                    >
                         <Text style={{
                             ...uiStyle.defaultText,
-                            fontSize: scale(18),
-                            color: themeColor,
-                            fontWeight: '600',
+                            color: hasOpenCourseSearch ? secondThemeColor : themeColor,
+                            fontWeight: 'bold',
+                            lineHeight: verticalScale(14),
                         }}>
-                            {t('課表模擬', { ns: 'timetable' })}
+                            {hasOpenCourseSearch ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                 </View>
 
-                {/* Add 課按鈕 */}
-                <TouchableOpacity
-                    style={{
-                        position: 'absolute',
-                        right: scale(10),
-                        backgroundColor: hasOpenCourseSearch ? `${secondThemeColor}15` : `${themeColor}15`,
-                        borderRadius: scale(5),
-                        padding: scale(5),
-                    }}
-                    onPress={() => {
-                        trigger();
-                        if (Keyboard.isVisible()) {Keyboard.dismiss();}
-
-                        if (hasOpenCourseSearch) {
-                            bottomSheetRef.current?.close();
-                        } else {
-                            if (allCourseAllTime?.length > 0) {
-                                bottomSheetRef.current?.snapToIndex(1);
-                            } else {
-                                bottomSheetRef.current?.expand();
-                            }
-                        }
-
-                        setHasOpenCourseSearch(!hasOpenCourseSearch);
-                        verScroll.current?.scrollTo({ y: 0 });
-                    }}
-                >
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: hasOpenCourseSearch ? secondThemeColor : themeColor,
-                        fontWeight: 'bold',
-                        lineHeight: verticalScale(14),
-                    }}>
-                        {hasOpenCourseSearch ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView ref={verScroll} keyboardDismissMode="on-drag">
+                {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
-                    {/* 渲染課表或首次使用提示 */}
                     {allCourseAllTime?.length > 0 ? (<>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             {dayList.map(day => renderDay(day))}
