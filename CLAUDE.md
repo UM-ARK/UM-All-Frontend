@@ -554,6 +554,49 @@ import {logToFirebase} from '../../utils/firebaseAnalytics';
 logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 ```
 
+### List Rendering (FlashList)
+
+**项目统一使用 `@shopify/flash-list` 的 `FlashList` 渲染长列表。**
+
+#### 强制规范
+
+- **新代码中列表渲染统一使用 `FlashList`**（来自 `@shopify/flash-list`）
+- **禁止**在新代码中使用 `ScrollView` + `.map()`、`FlatList`、`VirtualizedList` 渲染长列表
+- `renderItem` 函数必须用 `useCallback` 包裹以保持引用稳定
+- 20 个以下的静态短列表可继续使用 `ScrollView` + `map`
+- `BottomSheet` 内列表使用 `@gorhom/bottom-sheet` 的 `BottomSheetFlatList`（FlashList 与 BottomSheet 目前不兼容）
+
+#### FlashList v2 特性
+
+- **不需要 `estimatedItemSize`**：v2 自动处理尺寸
+- **New Architecture 优化**：专为 Fabric 重写，性能提升 5-10 倍
+- **View 回收**：复用列表项 View 而非销毁重建
+- **API 兼容**：与 FlatList API 几乎相同，迁移成本低
+
+#### 示例用法
+
+```javascript
+import { FlashList } from '@shopify/flash-list';
+
+const MyList = ({ data }) => {
+    // renderItem 必须用 useCallback 包裹
+    const renderItem = useCallback(({ item }) => (
+        <MyCard data={item} />
+    ), []);
+
+    return (
+        <FlashList
+            data={data}
+            keyExtractor={item => item._id}
+            renderItem={renderItem}
+            drawDistance={500}
+            ListHeaderComponent={<Header />}
+            ListFooterComponent={<Footer />}
+        />
+    );
+};
+```
+
 ### Internationalization (i18n)
 
 #### 翻譯文件位置
@@ -656,6 +699,7 @@ logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 - ❌ **NEVER** suppress type errors with `as any`, `@ts-ignore`, `@ts-except-error`
 - ❌ **NEVER** use hardcoded color values (e.g., `'rgba(255,255,255,0.2)'`) - always use ThemeContext colors
 - ❌ **NEVER** use `TouchableOpacity` series in new code - use `Pressable` instead (migrate legacy code during refactoring)
+- ❌ **NEVER** use `FlatList` / `VirtualizedList` / `ScrollView` + `.map()` for lists with 20+ items - use `FlashList` from `@shopify/flash-list`（BottomSheet 内除外）
 
 ### Setup Requirements
 
