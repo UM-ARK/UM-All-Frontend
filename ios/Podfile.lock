@@ -2969,7 +2969,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: d4f783e602db80116a232ba27aa33ae49a126120
   RNLocalize: c8bcaf5ad46c4b2e8f402ea7f11ec9c3777bcb59
   RNReactNativeHapticFeedback: 68db345e43f221a12c408f1490da31c4067ecb6f
-  RNReanimated: 8bdea9b027d7d26f9a636140da681150f8059cda
+  RNReanimated: fc5e866dc3b9bc6b87317a669175f6049fbc7806
   RNScreens: 6c5b8c41580fe6b54ee1b332c96b782ee360e73f
   RNShare: 706dade96bc31153315b8cb349409cd28f3f9bb4
   RNSVG: ac3047fdd9c0ebac9d0b731a352bddf216af6242

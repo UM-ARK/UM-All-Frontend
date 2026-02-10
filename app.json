@@ -58,19 +58,9 @@
       [
         "expo-splash-screen",
         {
-          "ios": {
-            "image": "src/static/img/logo.png",
-            "dark": {
-              "image": "src/static/img/logo.png",
-              "backgroundColor": "#000000"
-            }
-          },
-          "android": {
-            "image": "./src/static/img/transparent.png",
-            "dark": {
-              "image": "./src/static/img/transparent.png",
-              "backgroundColor": "#000000"
-            }
+          "image": "./src/static/img/logo_round.png",
+          "dark": {
+            "backgroundColor": "#000000"
           }
         }
       ],
