@@ -1,0 +1,69 @@
+---
+description: react-native-keyboard-controller 鍵盤處理規範
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 鍵盤處理規範 (react-native-keyboard-controller)
+
+## 根級配置
+
+`KeyboardProvider` 已在 `App.js` 根層包裹，子組件無需重複設置。
+
+## KeyboardAwareScrollView
+
+替代原生 `ScrollView`，自動處理鍵盤彈出時的滾動：
+
+```javascript
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+
+<KeyboardAwareScrollView
+    bottomOffset={50}
+    keyboardDismissMode="on-drag"
+    stickyHeaderIndices={[1]}
+>
+    <TextInput placeholder="搜索..." />
+    {/* 頁面內容 */}
+</KeyboardAwareScrollView>
+```
+
+## KeyboardToolbar
+
+多 `TextInput` 頁面搭配工具欄，方便輸入框間切換：
+
+```javascript
+import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
+
+<KeyboardAwareScrollView bottomOffset={50}>
+    <TextInput placeholder="輸入框 1" />
+    <TextInput placeholder="輸入框 2" />
+</KeyboardAwareScrollView>
+<KeyboardToolbar />
+```
+
+## 使用規範
+
+| 場景 | 推薦方式 |
+|------|---------|
+| 含 `TextInput` 的滾動頁面 | 用 `KeyboardAwareScrollView` 替代 `ScrollView` |
+| 多個 `TextInput` 的表單頁面 | 搭配 `<KeyboardToolbar />` |
+| 手動收起鍵盤 | 仍可使用 `Keyboard.dismiss()` |
+| 無 `TextInput` 的純展示頁面 | 繼續使用普通 `ScrollView` 或 `FlashList` |
+
+## 關鍵屬性
+
+| 屬性 | 類型 | 默認值 | 說明 |
+|------|------|--------|------|
+| `bottomOffset` | `number` | `0` | 鍵盤與聚焦輸入框的間距 |
+| `disableScrollOnKeyboardHide` | `boolean` | `false` | 鍵盤收起時禁止自動滾動 |
+| `enabled` | `boolean` | `true` | 啟用/禁用鍵盤感知 |
+
+## 禁止行為
+
+- ❌ 在含 `TextInput` 的新頁面中直接使用 `ScrollView`（應用 `KeyboardAwareScrollView`）
+- ❌ 使用 `KeyboardAvoidingView`（`KeyboardAwareScrollView` 已內建鍵盤迴避）
+- ❌ 在子組件中重複添加 `KeyboardProvider`（根層已配置）
+
+## 已使用文件
+
+- `src/pages/TabbarPages/what2Reg/index.js` — 搜索頁（`KeyboardAwareScrollView` + `KeyboardToolbar`）
