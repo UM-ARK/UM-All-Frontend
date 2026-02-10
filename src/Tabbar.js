@@ -124,6 +124,7 @@ const Tabbar = () => {
                 component={NewsScreen}
                 options={{
                     title: t('資訊'),
+                    headerShown: false,
                 }}
             />
 
