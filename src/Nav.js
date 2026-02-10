@@ -92,6 +92,7 @@ const Nav = () => {
                 {/* 普通左右壓動畫組 */}
                 <Stack.Group
                     screenOptions={{
+                        headerTitle: '',
                     }}
                 >
                     <Stack.Screen name="Webviewer" component={Webviewer} />
