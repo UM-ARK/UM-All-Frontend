@@ -3,7 +3,6 @@ import {
     StyleSheet,
     Text,
     View,
-    ScrollView,
     TextInput,
     TouchableOpacity,
     Platform,
@@ -12,6 +11,7 @@ import {
     Alert,
     LayoutAnimation,
 } from 'react-native';
+import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 
 import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH } from '../../../utils/pathMap';
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
@@ -1086,7 +1086,7 @@ const What2Reg = (props) => {
                 <Dialog.Loading />
             </Dialog>
 
-            <ScrollView
+            <KeyboardAwareScrollView
                 ref={scrollViewRef}
                 style={{ width: '100%', flex: 1 }}
                 // 透過 contentInset + contentOffset 控制吸頂位置，使其停在導航 Header 下方
@@ -1096,6 +1096,7 @@ const What2Reg = (props) => {
                 stickyHeaderIndices={[1]}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
+                bottomOffset={50}
             >
                 {/* 頁面標題欄 */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3) }}>
@@ -1213,7 +1214,8 @@ const What2Reg = (props) => {
                 >
                     <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>ARK ALL 隱私政策 & 用戶協議</Text>
                 </TouchableOpacity>
-            </ScrollView>
+            </KeyboardAwareScrollView>
+            <KeyboardToolbar />
 
             {/* 渲染側邊首字母導航 */}
             {searchFilterCourse && searchFilterCourse.length > 0 ? (
