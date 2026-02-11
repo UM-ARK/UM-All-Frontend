@@ -47,8 +47,6 @@ import CustomBottomSheet from '../../courseSim/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
-import {useTabBarVisibility} from '../TabBarContext';
-
 import { FontAwesome, FontAwesome5, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { FlatGrid } from 'react-native-super-grid';
 import Toast from 'react-native-toast-message';
@@ -84,7 +82,6 @@ const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t } = useTranslation(['common', 'home']);
-    const { setTabBarHidden } = useTabBarVisibility();
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -165,8 +162,6 @@ const HomeScreen = ({ navigation }) => {
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
     const bottomSheetRef = useRef(null);
-    const lastScrollY = useRef(0);
-    const isTabBarHiddenRef = useRef(false);
 
     const { i18n } = useTranslation();
 
@@ -423,22 +418,9 @@ const HomeScreen = ({ navigation }) => {
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
 
-    // 處理 Scroll：檢測滾動方向以收起/展開 Top Tab Bar + 觸底加載
+    // 處理 Scroll：觸底加載更多數據
     const handleScroll = (event) => {
         const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
-        const currentY = contentOffset.y;
-        const dy = currentY - lastScrollY.current;
-
-        // 滾動方向檢測：下滑超過閾值且已滾動一段距離時收起 Top Tab Bar
-        if (dy > 8 && currentY > 50 && !isTabBarHiddenRef.current) {
-            isTabBarHiddenRef.current = true;
-            setTabBarHidden(true);
-        } else if (dy < -8 && isTabBarHiddenRef.current) {
-            // 上滑時展開 Top Tab Bar
-            isTabBarHiddenRef.current = false;
-            setTabBarHidden(false);
-        }
-        lastScrollY.current = currentY;
 
         if (isLoading || isLoadMore) {return;}
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
