@@ -165,12 +165,12 @@ const UMOrg = ({ navigation }) => {
                 ref: searchBarRef,
                 placeholder: 'Search...',
                 hideWhenScrolling: false, // 重要：設置為 false 確保搜索框固定顯示
-                placement: 'stacked', // 設置為 stacked 確保搜索框在 header 下方固定顯示
+                placement: 'automatic',
                 barTintColor: theme.white, // 搜索框背景色
                 tintColor: theme.themeColor, // 光標和取消按鈕顏色
                 textColor: theme.black.main, // 搜索文字顏色
                 hintTextColor: theme.black.third, // 提示文字顏色
-                onChange: (event) => {
+                onChangeText: (event) => {
                     const searchText = event.nativeEvent.text.toLowerCase();
                     setSearchText(searchText);
                     setDisplayOrgData(orgData.filter(org => {
@@ -201,7 +201,7 @@ const UMOrg = ({ navigation }) => {
                 },
             },
         });
-    }, [navigation, orgData, theme]);
+    }, [orgData, theme, navigation]);
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
