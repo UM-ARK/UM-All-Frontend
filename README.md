@@ -32,6 +32,9 @@
   - [📘 Expo CNG 工作流說明](#-expo-cng-工作流說明)
 - [🌈 開發本項目準備](#-開發本項目準備)
   - [⛵ 啟動流程](#-啟動流程)
+    - [📋 Firebase 配置文件說明](#-firebase-配置文件說明)
+      - [`google-services.json` 模板結構](#google-servicesjson-模板結構)
+      - [`GoogleService-Info.plist` 模板結構](#googleservice-infoplist-模板結構)
     - [🤖 Android 運行](#-android-運行)
     - [🍎 iOS 運行](#-ios-運行)
     - [配置Firebase](#配置firebase)
@@ -147,6 +150,99 @@ expo install
 }
 ```
 
+5. 需要配置 Firebase 配置文件（用於 Analytics 等功能）：
+
+#### 📋 Firebase 配置文件說明
+
+本項目需要以下 Firebase 配置文件：
+
+| 平台 | 文件路徑 | 用途 |
+|------|----------|------|
+| Android | `google-services.json`（項目根目錄） | Firebase Analytics、Crashlytics |
+| iOS | `GoogleService-Info.plist`（項目根目錄） | Firebase Analytics、Crashlytics |
+
+**獲取方式：**
+1. 前往 [Firebase Console](https://console.firebase.google.com/) 創建項目
+2. 註冊 Android/iOS 應用（包名：`one.umall`）
+3. 下載配置文件並放到對應目錄
+
+**如果只需運行項目（不使用 Firebase 功能）：**
+
+可以嘗試使用空文件或模板文件。以下是文件結構僅供參考（請勿填入真實隱私 key）：
+
+##### `google-services.json` 模板結構
+```json
+{
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "your-project-id",
+    "storage_bucket": "your-project-id.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "one.umall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+```
+
+##### `GoogleService-Info.plist` 模板結構
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CLIENT_ID</key>
+    <string>000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com</string>
+    <key>REVERSED_CLIENT_ID</key>
+    <string>com.googleusercontent.apps.000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
+    <key>API_KEY</key>
+    <string>YOUR_API_KEY</string>
+    <key>GCM_SENDER_ID</key>
+    <string>000000000000</string>
+    <key>PLIST_VERSION</key>
+    <string>1</string>
+    <key>BUNDLE_ID</key>
+    <string>one.umall</string>
+    <key>PROJECT_ID</key>
+    <string>your-project-id</string>
+    <key>STORAGE_BUCKET</key>
+    <string>your-project-id.appspot.com</string>
+    <key>IS_ADS_ENABLED</key>
+    <false/>
+    <key>IS_ANALYTICS_ENABLED</key>
+    <false/>
+    <key>IS_APPINVITE_ENABLED</key>
+    <true/>
+    <key>IS_GCM_ENABLED</key>
+    <true/>
+    <key>IS_SIGNIN_ENABLED</key>
+    <true/>
+    <key>GOOGLE_APP_ID</key>
+    <string>1:000000000000:ios:0000000000000000000000</string>
+</dict>
+</plist>
+```
+
+> ⚠️ **注意**：空文件可能導致 Firebase 功能異常。建議從 Firebase Console 獲取真實配置文件，或至少填入有效的 `API_KEY`。
+
 #### 🤖 Android 運行
 
 1. 在 Android 上運行 App
@@ -187,7 +283,10 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 - 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `yarn ios` 後會生成）
 
 #### 配置Firebase
-從Firebase控制台導出配置文件放入`android/app/google-services.json`和`ios/GoogleService-Info.plist`。
+
+從Firebase控制台導出配置文件放入項目根目錄 `google-services.json` 和 `GoogleService-Info.plist`。
+
+詳細說明見上方「Firebase 配置文件說明」章節。
 
 ---
 
