@@ -372,6 +372,28 @@ const What2Reg = (props) => {
         return nextFilterCourseList;
     }, [offerCourseList, filterOptions]);
 
+    // 初始化 scrollData - 根據 filterCourseList 計算每個首字母的位置
+    useEffect(() => {
+        if (filterCourseList.length === 0) {
+            setScrollData({});
+            return;
+        }
+        // 計算每個首字母對應的位置
+        const newScrollData = {};
+        const itemHeight = scale(75); // 每個課程卡片的高度估算
+        const firstLetters = lodash.uniq(lodash.map(filterCourseList, itm => itm['Course Code']?.[0]).filter(Boolean));
+
+        firstLetters.forEach((letter, index) => {
+            // 找到第一個以該字母開頭的課程的索引
+            const firstIndex = filterCourseList.findIndex(itm => itm['Course Code']?.[0] === letter);
+            if (firstIndex !== -1) {
+                newScrollData[letter] = firstIndex * itemHeight;
+            }
+        });
+
+        setScrollData(newScrollData);
+    }, [filterCourseList]);
+
     // Add Drop / Pre Enroll 模式選擇
     const renderADPESwitch = () => {
         const modeList = Object.keys(adpeMap);
@@ -784,32 +806,6 @@ const What2Reg = (props) => {
         ) : null;
     }, [scrollData, themeColor]);
 
-    const scrollDataRef = useRef({}); // 用于存储中间状态
-    const pendingUpdatesRef = useRef(0); // 用于跟踪未完成的子组件更新
-    // 记录首字母对应的 scrollData
-    const handleSetLetterData = (letterData, totalComponents) => {
-        const letter = Object.keys(letterData)[0];
-        let newScrollData = {};
-        if (pendingUpdatesRef.current > 0) {
-            newScrollData = lodash.cloneDeep(scrollDataRef.current);
-        } else {
-            newScrollData = {};
-        }
-
-        if (!(letter in newScrollData) || letterData[letter] < newScrollData[letter]) {
-            newScrollData[letter] = letterData[letter];
-            scrollDataRef.current = newScrollData; // 更新引用
-        }
-        // 更新 pendingUpdatesRef
-        pendingUpdatesRef.current += 1;
-        // 如果所有子组件都已更新，设置最终的 scrollData
-        if (pendingUpdatesRef.current === totalComponents) {
-            setScrollData(scrollDataRef.current);
-            pendingUpdatesRef.current = 0; // 重置计数器
-            scrollDataRef.current = {}; // 清空引用
-        }
-    };
-
     // 返回搜索候選所需的課程列表
     const handleSearchFilterCourse = (text) => {
         let inputText = text.toUpperCase();
@@ -835,11 +831,6 @@ const What2Reg = (props) => {
                     || itm['Course Title Chi'].indexOf(inputText) !== -1;
             });
 
-            // 找出coursePlanSearchList有的課程，但filterCourseList沒有的課程，基於Course Code
-            // const filterCoursePlanSearchList = coursePlanSearchList.filter(itm => {
-            //     return !filterCourseList.some(offerItem => offerItem['Course Code'] === itm['Course Code']);
-            // });
-            // console.log('filterCoursePlanSearchList', filterCoursePlanSearchList);
             // 搜索合併
             filterCourseList = filterCourseList.concat(coursePlanSearchList);
             // 搜索去重
@@ -919,7 +910,6 @@ const What2Reg = (props) => {
 
                         const sortedTimes = lodash.sortBy(Object.keys(finalResult), time => moment(time, 'HH:mm').toDate());
                         const sortedResult = sortedTimes.map(time => ({ time, num: finalResult[time] }));
-                        console.log(day, 'sortedResult', sortedResult);
 
                         return (<View style={{
                             marginRight: scale(20), width: scale(85),
@@ -1167,7 +1157,7 @@ const What2Reg = (props) => {
                         <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                     </View>
                     <CourseCard data={searchFilterCourse} mode={'json'}
-                        courseMode={s_course_mode} handleSetLetterData={handleSetLetterData} />
+                        courseMode={s_course_mode} />
                 </View>) : (<View>
                     {/* 篩選列表 */}
                     {renderFilterView()}
@@ -1177,7 +1167,7 @@ const What2Reg = (props) => {
                         <View style={{ alignItems: 'center' }}>
                             {/* 提醒留意公告和課表版本 */}
                             {renderReminder()}
-                            <CourseCard data={filterCourseList} mode={'json'} handleSetLetterData={handleSetLetterData} />
+                            <CourseCard data={filterCourseList} mode={'json'} />
                         </View>
                     ) : null}
                 </View>)}

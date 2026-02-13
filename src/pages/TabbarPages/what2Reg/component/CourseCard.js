@@ -14,8 +14,8 @@ import TouchableScale from 'react-native-touchable-scale';
 import lodash from 'lodash';
 import { t } from 'i18next';
 
-const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMode = 'ad' }) => {
-    // const { data, mode, prof_info, handleSetLetterData, courseMode = 'ad' } = props;
+const CourseCard = memo(({ data, mode, prof_info, courseMode = 'ad' }) => {
+    // const { data, mode, prof_info, courseMode = 'ad' } = props;
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
     const { themeColor, black, secondThemeColor, white, what2reg_color } = theme;
@@ -94,10 +94,6 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                     borderRadius: scale(10),
                                     margin: scale(5),
                                     padding: scale(10), paddingVertical: scale(5),
-                                }}
-                                onLayout={event => {
-                                    const { layout } = event.nativeEvent;
-                                    handleSetLetterData && handleSetLetterData({ [courseCode[0]]: layout.y + scale(10) }, data.length);
                                 }}
                             >
                                 {/* 課程編號與開課標識 */}
