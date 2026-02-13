@@ -8044,6 +8044,11 @@ react-native-animatable@1.4.0:
   dependencies:
     prop-types "^15.8.1"
 
+react-native-context-menu-view@^1.21.0:
+  version "1.21.0"
+  resolved "https://registry.npmjs.org/react-native-context-menu-view/-/react-native-context-menu-view-1.21.0.tgz#96501938294c3a4a2583acd5ead662d11c546795"
+  integrity sha512-GVQckdDxKyM4BYqWqiApnfzzk56vLEMWiVLsvs95mPhJJYvzRXx+Ev3T6DVEasWCZxk6PbgtcZaWi9jnXGdhCQ==
+
 react-native-countdown-circle-timer@^3.2.1:
   version "3.2.1"
   resolved "https://registry.npmjs.org/react-native-countdown-circle-timer/-/react-native-countdown-circle-timer-3.2.1.tgz#077548e943fcf24b47c7e5ce2f12c1dfa35833c2"

@@ -1,0 +1,181 @@
+---
+description: 联网搜索工具使用规范
+alwaysApply: true
+---
+
+# 联网搜索工具使用规范
+
+本规则指导何时使用 web_search、understand_image、Perplexity 等工具获取最新信息和解决问题。
+
+## 一、触发条件
+
+遇到以下情况时，**必须**使用联网搜索工具：
+
+### 1. 前端开发相关任务
+
+- 查找第三方库的**最新文档**、API 用法、示例代码
+- 搜索**社区讨论**、Stack Overflow、GitHub Issues
+- 查找 **bug 解决方案**、已知问题、workaround
+- 搜索**最佳实践**、设计模式、性能优化方案
+
+### 2. 用户明确要求
+
+当用户要求以下关键字时：
+- 「最新」、「在線」、「線上」
+- 「查一下」、「搜索」、「找一下」
+- 「有沒有最新的」、「現在的」
+- 任何要求获取实时/最新信息的需求
+
+### 3. 不确定的技术问题
+
+- 不确定某个 API 的当前用法
+- 遇到陌生的错误信息
+- 需要确认某个库/框架的版本兼容性
+
+## 二、工具选择优先级
+
+### 第一步：web_search（MCP 工具）
+
+优先使用 `web_search` 进行初步搜索：
+
+```javascript
+// 搜索 React Native 最新文档
+web_search({ query: 'React Native 0.81 gesture handler documentation 2026' })
+
+// 搜索特定问题的解决方案
+web_search({ query: 'expo sdk 54 push notification ios 26 issue' })
+```
+
+**适用场景**：快速查找官方文档、社区讨论、博客文章
+
+### 第二步：Perplexity（增强搜索）
+
+当 web_search 结果不理想时，使用 `user-perplexity-perplexity_search` 增强搜索：
+
+```javascript
+// Perplexity 搜索更深入的技术分析
+user-perplexity-perplexity_search({
+  query: 'React Native FlashList vs FlatList performance 2026 benchmark'
+})
+```
+
+**适用场景**：
+- web_search 结果不够详细或不够新
+- 需要更全面的技术分析
+- 多个搜索结果需要整合
+
+### 第三步：图片理解（understand_image）
+
+当需要理解、分析图片内容时：
+
+```javascript
+// 分析 UI 设计图
+user-MiniMax-understand_image({
+  image_source: 'https://example.com/design.png',
+  prompt: '分析这个 React Native 组件的布局和样式特点'
+})
+
+// 分析错误截图
+user-MiniMax-underverse_image({
+  image_source: '/path/to/error.png',
+  prompt: '这个错误信息是什么，如何解决'
+})
+```
+
+**适用场景**：
+- 用户提供 UI 设计图，需要理解布局
+- 错误截图、崩溃日志图片
+- 需要从图片中提取技术信息
+
+## 三、搜索策略
+
+### 高效搜索技巧
+
+| 场景 | 搜索关键词 |
+|------|-----------|
+| 最新文档 | `[库名] documentation 2026` |
+| API 用法 | `[库名] `[API名称]` example` |
+| 问题解决 | `[库名] `[错误信息]` github issue` |
+| 版本兼容性 | `[库名] `[版本1]` vs `[版本2]` compatibility` |
+| 性能优化 | `[框架] performance best practices 2026` |
+
+### 搜索结果处理
+
+1. **优先选择官方文档**：官方文档最权威、最及时
+2. **查看 GitHub Issues**：确认是否为已知 bug
+3. **检查更新时间**：确保信息是最新的
+4. **记录来源**：将关键信息记录到 Serena MCP Memory
+
+## 四、实际应用示例
+
+### 示例 1：用户要求查找最新文档
+
+用户：「幫我查一下 react-native-reanimated v4 的最新用法」
+
+```javascript
+// ✅ 正确：立即联网搜索
+web_search({ query: 'react-native-reanimated v4 documentation 2026' })
+```
+
+### 示例 2：遇到不确定的 API
+
+用户：「這個動畫效果怎麼實現？」
+
+```javascript
+// ✅ 正确：搜索最佳实现方式
+web_search({ query: 'React Native smooth animation transition best practices 2026' })
+```
+
+### 示例 3：用户发送设计图
+
+用户：[发送 UI 设计图]
+
+```javascript
+// ✅ 正确：理解图片内容
+user-MiniMax-underverse_image({
+  image_source: '用户发送的图片',
+  prompt: '分析这个移动端界面的组件结构，使用什么技术实现'
+})
+```
+
+### 示例 4：web_search 结果不足
+
+```javascript
+// 第一步：web_search
+const results = web_search({ query: 'expo router v4 static vs dynamic routes' })
+// 结果只有 3 条，不够详细
+
+// 第二步：Perplexity 增强
+user-perplexity-perplexity_search({
+  query: 'expo router v4 static vs dynamic routes comparison and use cases'
+})
+```
+
+## 五、禁止行为
+
+- ❌ **不要**仅凭记忆回答可能过时的技术问题
+- ❌ **不要**假设某个 API 的用法没有变化
+- ❌ **不要**在用户要求「最新」时仍使用训练数据回答
+- ❌ **不要**忽略用户发送的图片而不理解其内容
+
+## 六、信息记录
+
+搜索到重要信息后，应记录到 Serena MCP Memory：
+
+```markdown
+# [技术名称] [主题]
+
+## 来源
+- **文档 URL**: [搜索到的链接]
+- **搜索时间**: 2026-02-13
+
+## 关键内容
+[记录重要发现]
+
+## 本项目应用
+[如何应用到当前项目]
+```
+
+---
+
+**记住**：前端技术迭代快，最好的答案是**最新的、来自权威来源的**答案。联网搜索不是「不会」的表现，而是「专业」的表现。
