@@ -9,7 +9,7 @@ import { trigger } from '../../../../utils/trigger';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
-import { MenuView } from '@react-native-menu/menu';
+import * as DropdownMenu from 'zeego/dropdown-menu';
 import TouchableScale from 'react-native-touchable-scale';
 import lodash from 'lodash';
 import { t } from 'i18next';
@@ -80,10 +80,81 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                 const credit = item[mode === 'what2Reg' ? 'Credits' : 'Credit Units'];
 
                 return (
-                    <MenuView
-                        onPressAction={({ nativeEvent }) => {
-                            switch (nativeEvent.event) {
-                                case 'wiki':
+                    <DropdownMenu.Root
+                        onOpenChange={(open) => {
+                            if (open) {
+                                trigger();
+                            }
+                        }}
+                    >
+                        <DropdownMenu.Trigger>
+                            <TouchableScale
+                                style={{
+                                    backgroundColor: white,
+                                    borderRadius: scale(10),
+                                    margin: scale(5),
+                                    padding: scale(10), paddingVertical: scale(5),
+                                }}
+                                onLayout={event => {
+                                    const { layout } = event.nativeEvent;
+                                    handleSetLetterData && handleSetLetterData({ [courseCode[0]]: layout.y + scale(10) }, data.length);
+                                }}
+                            >
+                                {/* 課程編號與開課標識 */}
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    {renderCourseCode(courseCode)}
+                                    {/* Pre Enroll標記 */}
+                                    {courseMode === 'preEnroll' ? (
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(10),
+                                            fontWeight: 'bold',
+                                            marginLeft: scale(5),
+                                            color: secondThemeColor,
+                                        }}>PreEnroll</Text>
+                                    ) : null}
+                                </View>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(11),
+                                    color: black.second,
+                                }}>{title}</Text>
+                                {'courseTitleChi' in item && item.courseTitleChi.length > 0 ? (
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(11),
+                                            color: black.second,
+                                        }}>{item.courseTitleChi}</Text>
+                                    ) : null}
+                                {'Course Title Chi' in item && item['Course Title Chi'].length > 0 ? (
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(11),
+                                            color: black.second,
+                                        }}>{item['Course Title Chi']}</Text>
+                                    ) : null}
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(10),
+                                    color: black.third,
+                                }}>
+                                    {offerUnit}
+                                    {offerDepa && (' - ' + offerDepa)}
+                                </Text>
+                                {credit ? (
+                                    <Text style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(10),
+                                        color: black.third,
+                                    }}>{credit} Credit</Text>
+                                ) : null}
+                            </TouchableScale>
+                        </DropdownMenu.Trigger>
+                        {/* Menu 選項列表 */}
+                        <DropdownMenu.Content>
+                            <DropdownMenu.Item
+                                key="ark-wiki"
+                                onSelect={() => {
                                     trigger();
                                     let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
                                     if (prof_info) {
@@ -91,19 +162,37 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                         logToFirebase('checkCourse', {
                                             courseCode: courseCode,
                                             profName: prof_info.name,
+                                            action: 'ark-wiki',
                                         });
                                     }
                                     else {
                                         logToFirebase('checkCourse', {
                                             courseCode: courseCode,
-                                            onLongPress: 0,
+                                            action: 'ark-wiki',
                                         });
                                     }
-                                    // 跳轉ARK Wiki
-                                    navigation.navigate('Wiki', { url: URL });
-                                    break;
-
-                                case 'what2reg':
+                                    // 跳轉到ARK Wiki網頁
+                                    openLink(URL);
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{
+                                        name: 'book',
+                                        pointSize: scale(18),
+                                        hierarchicalColor: {
+                                            dark: themeColor,
+                                            light: themeColor,
+                                        },
+                                    }}
+                                    androidIconName="ic_menu_book"
+                                />
+                                <DropdownMenu.ItemTitle style={{ color: themeColor }}>
+                                    {t('寫', { ns: 'catalog' })} Wiki
+                                </DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                key="what2reg"
+                                onSelect={() => {
                                     trigger();
                                     let webview_param = {
                                         url: '',
@@ -113,163 +202,126 @@ const CourseCard = memo(({ data, mode, prof_info, handleSetLetterData, courseMod
                                         isBarStyleBlack: false,
                                     };
                                     if (prof_info) {
-                                        // 進入搜索特定教授的課程模式，進入評論詳情頁
                                         const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(prof_info.name));
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {
                                             courseCode: courseCode,
                                             profName: prof_info.name,
+                                            action: 'what2reg',
                                         });
                                     }
                                     else {
-                                        // 進入搜索課程代號模式
                                         const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`;
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {
                                             courseCode: courseCode,
-                                            onLongPress: 0,
+                                            action: 'what2reg',
                                         });
                                     }
                                     openLink(webview_param.url);
-                                    break;
-
-                                case 'official':
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{
+                                        name: 'star',
+                                        pointSize: scale(18),
+                                        hierarchicalColor: {
+                                            dark: black.third,
+                                            light: black.third,
+                                        },
+                                    }}
+                                    androidIconName="ic_menu_star"
+                                />
+                                <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                    {t('查', { ns: 'catalog' })} {t('選咩課', { ns: 'catalog' })}
+                                </DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                key="official"
+                                onSelect={() => {
                                     trigger();
                                     const URI = OFFICIAL_COURSE_SEARCH + courseCode;
                                     logToFirebase('checkCourse', {
                                         courseCode: 'Official ' + courseCode,
+                                        action: 'official',
                                     });
                                     openLink(URI);
-                                    break;
-
-                                case 'section':
-                                    trigger();
-                                    logToFirebase('checkCourse', {
-                                        courseCode: courseCode,
-                                    });
-                                    navigation.navigate('LocalCourse', courseCode);
-                                    break;
-
-                                case 'coursesim':
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{
+                                        name: 'graduationcap',
+                                        pointSize: scale(18),
+                                        hierarchicalColor: {
+                                            dark: black.third,
+                                            light: black.third,
+                                        },
+                                    }}
+                                    androidIconName="ic_menu_myplaces"
+                                />
+                                <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                    {t('查', { ns: 'catalog' })} {t('官方', { ns: 'catalog' })}
+                                </DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                key="coursesim"
+                                onSelect={() => {
                                     trigger();
                                     navigation.navigate('Tabbar', {
                                         screen: 'CourseSimTab',
                                         params: { check: courseCode },
                                     });
-                                    break;
-
-                                default:
-                                    break;
-                            }
-                        }}
-                        actions={[
-                            {
-                                id: 'wiki',
-                                title: `${t('查', { ns: 'catalog' })} ARK Wiki`,
-                                titleColor: themeColor,
-                            },
-                            {
-                                id: 'what2reg',
-                                title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-                                titleColor: black.third,
-                            },
-                            {
-                                id: 'official',
-                                title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-                                titleColor: black.third,
-                            },
-                            {
-                                id: 'coursesim',
-                                title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
-                                titleColor: black.third,
-                            },
-                            {
-                                id: 'section',
-                                title: `${t('查', { ns: 'catalog' })} Section`,
-                                titleColor: black.third,
-                            },
-                        ]}
-                        shouldOpenOnLongPress={false}
-                        // 獲取當前位置距離屏幕頂端的高度
-                        onLayout={event => {
-                            const { layout } = event.nativeEvent;
-                            // 記錄首個出現的首字母的高度
-                            handleSetLetterData && handleSetLetterData({ [courseCode[0]]: layout.y + scale(10) }, data.length);
-                        }}
-                    >
-                        <TouchableScale
-                            style={{
-                                backgroundColor: white,
-                                borderRadius: scale(10),
-                                margin: scale(5),
-                                padding: scale(10), paddingVertical: scale(5),
-                            }}
-                            onPress={() => {
-                                trigger('rigid');
-                            }}
-                            onLongPress={() => {
-                                trigger('rigid');
-                                logToFirebase('checkCourse', {
-                                    courseCode: courseCode,
-                                    onLongPress: 1,
-                                });
-                                navigation.navigate('LocalCourse', courseCode);
-                            }}
-                            // BUG: 此處小於300ms的長按事件容易被Menu誤認為點擊事件
-                            delayLongPress={300}
-                        >
-                            {/* 課程編號與開課標識 */}
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                {renderCourseCode(courseCode)}
-                                {/* Pre Enroll標記 */}
-                                {courseMode === 'preEnroll' ? (
-                                    <Text style={{
-                                        ...uiStyle.defaultText,
-                                        fontSize: scale(10),
-                                        fontWeight: 'bold',
-                                        marginLeft: scale(5),
-                                        color: secondThemeColor,
-                                    }}>PreEnroll</Text>
-                                ) : null}
-                            </View>
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(11),
-                                color: black.second,
-                            }}>{title}</Text>
-                            {'courseTitleChi' in item && item.courseTitleChi.length > 0 ? (
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(11),
-                                    color: black.second,
-                                }}>{item.courseTitleChi}</Text>
-                            ) : null}
-                            {'Course Title Chi' in item && item['Course Title Chi'].length > 0 ? (
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(11),
-                                    color: black.second,
-                                }}>{item['Course Title Chi']}</Text>
-                            ) : null}
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(10),
-                                color: black.third,
-                            }}>
-                                {offerUnit}
-                                {offerDepa && (' - ' + offerDepa)}
-                            </Text>
-                            {credit ? (
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(10),
-                                    color: black.third,
-                                }}>{credit} Credit</Text>
-                            ) : null}
-                        </TouchableScale>
-                    </MenuView>
+                                    logToFirebase('checkCourse', {
+                                        courseCode: courseCode,
+                                        action: 'coursesim',
+                                    });
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{
+                                        name: 'calendar',
+                                        pointSize: scale(18),
+                                        hierarchicalColor: {
+                                            dark: black.third,
+                                            light: black.third,
+                                        },
+                                    }}
+                                    androidIconName="ic_menu_my_calendar"
+                                />
+                                <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                    {t('查', { ns: 'catalog' })} {t('模擬課表', { ns: 'catalog' })}
+                                </DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                key="section"
+                                onSelect={() => {
+                                    trigger();
+                                    logToFirebase('checkCourse', {
+                                        courseCode: courseCode,
+                                        action: 'section',
+                                    });
+                                    navigation.navigate('LocalCourse', courseCode);
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{
+                                        name: 'list.bullet',
+                                        pointSize: scale(18),
+                                        hierarchicalColor: {
+                                            dark: black.third,
+                                            light: black.third,
+                                        },
+                                    }}
+                                    androidIconName="ic_menu_agenda"
+                                />
+                                <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                    {t('查', { ns: 'catalog' })} Section
+                                </DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                    </DropdownMenu.Root>
                 );
             }}
             key={data.length}
