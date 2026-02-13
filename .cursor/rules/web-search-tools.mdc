@@ -34,35 +34,49 @@ alwaysApply: true
 
 ## 二、工具选择优先级
 
-### 第一步：web_search（MCP 工具）
+### 第一步：Omnisearch（优先使用）
 
-优先使用 `web_search` 进行初步搜索：
-
-```javascript
-// 搜索 React Native 最新文档
-web_search({ query: 'React Native 0.81 gesture handler documentation 2026' })
-
-// 搜索特定问题的解决方案
-web_search({ query: 'expo sdk 54 push notification ios 26 issue' })
-```
-
-**适用场景**：快速查找官方文档、社区讨论、博客文章
-
-### 第二步：Perplexity（增强搜索）
-
-当 web_search 结果不理想时，使用 `user-perplexity-perplexity_search` 增强搜索：
+**优先使用** `user-omnisearch-ai_search` 或 `user-omnisearch-web_search` 进行搜索，这些工具可以搜索**国外资料**：
 
 ```javascript
-// Perplexity 搜索更深入的技术分析
-user-perplexity-perplexity_search({
-  query: 'React Native FlashList vs FlatList performance 2026 benchmark'
+// AI 语义搜索（推荐用于技术问题）
+user-omnisearch-ai_search({
+  query: 'React Native FlashList vs FlatList performance benchmark 2026',
+  provider: 'perplexity'
+})
+
+// 网页搜索
+user-omnisearch-web_search({
+  query: 'React Native 0.81 new features 2026',
+  provider: 'brave' // 或 'tavily'
 })
 ```
 
 **适用场景**：
-- web_search 结果不够详细或不够新
-- 需要更全面的技术分析
-- 多个搜索结果需要整合
+- 查找**国外技术文档**、Stack Overflow、GitHub
+- 获取**最新的国际技术动态**
+- 需要更全面、更深入的技术分析
+
+**Provider 选择建议**：
+| Provider | 特点 | 适用场景 |
+|----------|------|----------|
+| `perplexity` | 实时 + 推理能力 | 技术问题、深度分析 |
+| `brave` | 隐私保护、支持查询运算符 | 精确搜索 |
+| `tavily` | 事实性搜索 | 查找准确的技术信息 |
+
+### 第二步：Minimax Web Search（备用）
+
+**仅在以下情况**使用 `user-MiniMax-web_search`：
+- 需要**国内技术文档**（如 CSDN、百度百科、掘金）
+- 查找**国内特有的技术问题**讨论
+- 搜索**中文技术社区**的解决方案
+
+```javascript
+// 国内技术文档搜索
+user-MiniMax-web_search({
+  query: 'React Native 中文网 教程'
+})
+```
 
 ### 第三步：图片理解（understand_image）
 
@@ -89,6 +103,11 @@ user-MiniMax-underverse_image({
 
 ## 三、搜索策略
 
+### 搜索优先级
+
+1. **优先使用 Omnisearch** - 搜索国外资料，获取更全面、更权威的技术信息
+2. **仅在需要国内文档时使用 Minimax** - 如 CSDN、掘金、百度百科等中文技术资源
+
 ### 高效搜索技巧
 
 | 场景 | 搜索关键词 |
@@ -113,8 +132,11 @@ user-MiniMax-underverse_image({
 用户：「幫我查一下 react-native-reanimated v4 的最新用法」
 
 ```javascript
-// ✅ 正确：立即联网搜索
-web_search({ query: 'react-native-reanimated v4 documentation 2026' })
+// ✅ 正确：优先使用 Omnisearch 搜索国外资料
+user-omnisearch-ai_search({
+  query: 'react-native-reanimated v4 latest documentation 2026',
+  provider: 'perplexity'
+})
 ```
 
 ### 示例 2：遇到不确定的 API
@@ -122,11 +144,42 @@ web_search({ query: 'react-native-reanimated v4 documentation 2026' })
 用户：「這個動畫效果怎麼實現？」
 
 ```javascript
-// ✅ 正确：搜索最佳实现方式
-web_search({ query: 'React Native smooth animation transition best practices 2026' })
+// ✅ 正确：使用 Omnisearch 搜索最佳实现方式
+user-omnisearch-web_search({
+  query: 'React Native smooth animation transition best practices 2026',
+  provider: 'brave'
+})
 ```
 
-### 示例 3：用户发送设计图
+### 示例 3：需要国内技术文档
+
+用户：「帮我查一下 React Native 中文网的教程」
+
+```javascript
+// ✅ 正确：使用 Minimax 搜索国内资料
+user-MiniMax-web_search({
+  query: 'React Native 中文网 教程'
+})
+```
+
+### 示例 4：Omnisearch 结果不足
+
+```javascript
+// 第一步：Omnisearch AI 搜索
+user-omnisearch-ai_search({
+  query: 'expo router v4 static vs dynamic routes comparison',
+  provider: 'perplexity'
+})
+// 结果不够详细
+
+// 第二步：尝试其他 provider
+user-omnisearch-web_search({
+  query: 'expo router v4 static vs dynamic routes',
+  provider: 'tavily'
+})
+```
+
+### 示例 5：用户发送设计图
 
 用户：[发送 UI 设计图]
 
@@ -135,19 +188,6 @@ web_search({ query: 'React Native smooth animation transition best practices 202
 user-MiniMax-underverse_image({
   image_source: '用户发送的图片',
   prompt: '分析这个移动端界面的组件结构，使用什么技术实现'
-})
-```
-
-### 示例 4：web_search 结果不足
-
-```javascript
-// 第一步：web_search
-const results = web_search({ query: 'expo router v4 static vs dynamic routes' })
-// 结果只有 3 条，不够详细
-
-// 第二步：Perplexity 增强
-user-perplexity-perplexity_search({
-  query: 'expo router v4 static vs dynamic routes comparison and use cases'
 })
 ```
 
