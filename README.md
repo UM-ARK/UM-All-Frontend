@@ -14,20 +14,22 @@
 -   如果 ARK ALL 有幫助到您，可以請我們[喝杯咖啡](https://github.com/UM-ARK/Donate)！
 -   如果您也想參與到 ARK ALL 的開發中，立即聯繫我們 `umacark@gmail.com`！
 
-<details>
-  <summary>APP熒幕截圖</summary>
-  <img src="/README/img/Home.png" height="500rem" alt="Home" />
-  <img src="/README/img/Club.png" height="500rem" alt="Club" />
-  <img src="/README/img/Courses.png" height="500rem" alt="Courses" />
-  <img src="/README/img/Timetable.png" height="500rem" alt="Timetable" />
-  <img src="/README/img/Features.png" height="500rem" alt="Features" />
-  <img src="/README/img/Bus.png" height="500rem" alt="Bus" />
-</details>
+<div align="center">
+
+**APP熒幕截圖**
+
+| | | |
+|:---:|:---:|:---:|
+| <img src="/README/img/Home.png" width="30%" alt="Home" /> | <img src="/README/img/Club.png" width="30%" alt="Club" /> | <img src="/README/img/Courses.png" width="30%" alt="Courses" /> |
+| <img src="/README/img/Timetable.png" width="30%" alt="Timetable" /> | <img src="/README/img/Features.png" width="30%" alt="Features" /> | <img src="/README/img/Bus.png" width="30%" alt="Bus" /> |
+
+</div>
 
 - [**🎉ARK ALL 是一個免費的開源 APP🎉**](#ark-all-是一個免費的開源-app)
 - [🎉 首次運行該項目](#-首次運行該項目)
   - [🤖 Android 環境 Setup](#-android-環境-setup)
   - [🍎 iOS 環境 Setup](#-ios-環境-setup)
+  - [📘 Expo CNG 工作流說明](#-expo-cng-工作流說明)
 - [🌈 開發本項目準備](#-開發本項目準備)
   - [⛵ 啟動流程](#-啟動流程)
     - [🤖 Android 運行](#-android-運行)
@@ -54,17 +56,21 @@
 ### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
 1. 確保自己是 `Android API 33` 或 `API 31` 的模擬器環境，下載安裝 JDK、SDK
-2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `npm i --legacy-peer-deps` 安裝 npm 依賴
-3. 前往 `Android Studio` 啟動所需的模擬器
-4. 敲入 `react-native run-android` or `npm run android` or `yarn android` (如需使用 yarn 需要先`npm install yarn -g`) 運行本項目吧!
+2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+3. 執行 `npx expo prebuild --clean` 生成 Android 原生項目
+   - 僅生成 Android：`npx expo prebuild --clean --platform android`
+   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
+   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
+4. 前往 `Android Studio` 啟動所需的模擬器
+5. 敲入 `yarn android` 運行本項目吧!
 
 ---
 
 ### 🍎 iOS 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
-> 基於 Expo SDK 54，iOS APP 目前只能在 Mac 開發調試
+> 基於 Expo SDK 54 + React Native 0.81.5，iOS APP 目前只能在 Mac 開發調試
 
-1. 先安裝`node`包（Node ≥18），方便之後使用指令`npm`和`npx`
+1. 先安裝`node`包（Node ≥18），方便之後使用指令
 
 ```console
 brew install node
@@ -73,8 +79,12 @@ brew install watchman
 
 2. 確保安裝了 `Xcode` (版本 15 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
 3. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+4. 執行 `npx expo prebuild --clean` 生成 iOS 原生項目
+   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
+   - 僅生成 Android：`npx expo prebuild --clean --platform android`
+   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
 
-4. 使用 Expo 運行 iOS（**不需要手動管理 CocoaPods**）
+5. 使用 Expo 運行 iOS（**不需要手動管理 CocoaPods**）
 
 ```console
 yarn ios          # 運行 iPhone 16 Pro 模擬器
@@ -83,7 +93,27 @@ yarn iosTrue      # 運行到真實設備
 yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
-Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install`。
+> **注意**：Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install` 或 `prebuild`。首次運行 `yarn ios` 時會自動生成原生項目文件。
+
+---
+
+### 📘 Expo CNG 工作流說明
+
+項目使用 **Expo CNG (Continuous Native Generation)** 自動管理原生項目：
+
+| 操作         | 命令                             | 說明                                                           |
+| ------------ | -------------------------------- | -------------------------------------------------------------- |
+| 安裝依賴     | `yarn install` 或 `expo install` | 推薦使用 yarn                                                  |
+| 生成原生項目 | `npx expo prebuild --clean`      | **首次運行前必須執行**，可加 `--platform ios/android` 指定平台 |
+| ------       | ------                           | ------                                                         |
+| 運行 iOS     | `yarn ios`                       | 運行 iOS 模擬器或真機                                          |
+| 運行 Android | `yarn android`                   | 運行 Android 模擬器                                            |
+
+**重要**：
+- **首次運行前必須先執行 `npx expo prebuild --clean`** 生成原生項目文件
+- 生成後會創建 `./ios` 和 `./android` 目錄
+- **無需手動運行 `pod install`**：Expo CNG 會自動處理
+- 如果遇到原生構建問題，可重新運行 `npx expo prebuild --clean` 重新生成
 
 ---
 
@@ -100,11 +130,17 @@ git clone https://github.com/UM-ARK/UM-All-Frontend.git
 2. 在項目根目錄下(`./package.json`所在的目錄)啟動 Terminal/命令行安裝依賴包
 
 ```console
-忽略警告安裝 - 正常會使用這條指令，因為某些有問題的包尚未能解決衝突
-npm i --legacy-peer-deps
+yarn install
+# 或使用 expo install（自動處理依賴兼容性）
+expo install
 ```
 
-3. 需要在項目根目錄放`umAPIToken.json`文件，內容格式為：
+3. 執行 `npx expo prebuild --clean` 生成 iOS/Android 原生項目
+   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
+   - 僅生成 Android：`npx expo prebuild --clean --platform android`
+   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
+
+4. 需要在項目根目錄放`umAPIToken.json`文件，內容格式為：
 ```
 {
     "token":"YOURE_UM_API_TOKEN"
@@ -116,14 +152,13 @@ npm i --legacy-peer-deps
 1. 在 Android 上運行 App
 
 ```console
-npx react-native run-android
-or
 yarn android
-or
-npm run android
 ```
 
-如果不喜歡運行命令後彈出新的窗口，可以先在 VSCode 中打開一個命令行窗口，敲入 `yarn start`，再在另一個命令行窗口中 `yarn android`，就不會有額外彈窗了
+**說明：**
+- Expo CNG 會在首次運行時自動生成 Android 原生項目文件
+- 首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目
+- 運行 `yarn android` 前不需要手動執行 `prebuild`
 
 #### 🍎 iOS 運行
 
@@ -146,6 +181,7 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 
 **說明：**
 - Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴
+- **首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目**
 - **無需手動運行 `pod install`**
 - **無需手動打開 Xcode** 進行編譯
 - 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `yarn ios` 後會生成）
@@ -183,6 +219,8 @@ iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/ana
 1. 確保已安裝 EAS CLI
 
 ```console
+yarn global add eas-cli
+# 或
 npm install -g eas-cli
 ```
 
@@ -204,7 +242,7 @@ eas build --platform ios
 
 如需在 Xcode 中手動構建：
 
-1. 確保已運行過 `yarn ios` 生成 iOS 項目文件
+1. 確保已運行過 `npx expo prebuild --clean` 生成 iOS 項目文件
 2. 打開 `./ios/UMALL.xcworkspace`
 3. 在 Xcode 中配置簽名和版本號
 4. 使用 `Product -> Archive` 進行歸檔和發佈
@@ -230,9 +268,10 @@ eas build --platform android
 
 #### 方式二：本地 Gradle 構建
 
-1. 確保密鑰文件配置正確
-2. 在 `android/app` 目錄下放置簽名密鑰（`.keystore` 或 `.jks`）
-3. 運行構建命令：
+1. 確保已運行過 `npx expo prebuild --clean` 生成 Android 項目文件
+2. 確保密鑰文件配置正確
+3. 在 `android/app` 目錄下放置簽名密鑰（`.keystore` 或 `.jks`）
+4. 運行構建命令：
 
 ```console
 cd android
