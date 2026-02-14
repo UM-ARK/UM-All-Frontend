@@ -88,9 +88,47 @@ alwaysApply: true
 - 简明描述应清晰说明变更的内容
 - 详细描述可包含变更的原因和影响
 
+## 合并 PR 时保留原作者信息
+
+### 重要要求
+
+当合并 PR 提交时，**必须**保留该 PR 的原作者信息，不要用自己的信息覆盖原作者。
+
+### 如何在 GitHub 中保留原作者信息
+
+#### 方法 1：使用 GitHub 网页界面合并（推荐）
+使用 GitHub 网页界面的 "Merge pull request" 按钮，系统会自动保留原作者信息。
+
+#### 方法 2：使用命令行合并时保留原作者
+如果使用命令行合并，使用 `--no-ff` 和正确的作者信息：
+
+```bash
+# 切换到目标分支
+git checkout main
+
+# 合并 PR 分支，保留原作者信息
+git merge --no-ff pr-branch-name
+
+# 确保提交作者是原作者
+git commit --amend --author="Original Author <author@example.com>"
+```
+
+### GitHub CLI 合并
+使用 GitHub CLI 合并时，系统也会自动保留原作者信息：
+
+```bash
+gh pr merge <pr-number> --merge
+```
+
+### 生效条件
+此规则适用于：
+- 合并任何有作者的 PR 提交
+- 使用任何方式合并 PR 时
+
 ## 生效条件
 
 此规则适用于：
 - 用户要求生成 commit message
 - 用户点击 Cursor 的 "Generate Commit Message" 按钮
 - 用户要求你帮助 commit 代码
+- 合并有作者的 PR 提交
