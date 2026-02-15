@@ -1,5 +1,5 @@
 import React, { useContext, memo } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, Text } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { WHAT_2_REG, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../utils/pathMap';
@@ -14,11 +14,18 @@ import TouchableScale from 'react-native-touchable-scale';
 import lodash from 'lodash';
 import { t } from 'i18next';
 
-const CourseCard = memo(({ data, mode, prof_info, courseMode = 'ad' }) => {
-    // const { data, mode, prof_info, courseMode = 'ad' } = props;
+const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
+    // const { item, mode, prof_info, courseMode = 'ad' } = props;
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
     const { themeColor, black, secondThemeColor, white, what2reg_color } = theme;
+
+    // 從 item 中提取課程資訊
+    const courseCode = item[mode === 'what2Reg' ? 'New_code' : 'Course Code'];
+    const title = item[mode === 'what2Reg' ? 'courseTitleEng' : 'Course Title'];
+    const offerUnit = item[mode === 'what2Reg' ? 'Offering_Unit' : 'Offering Unit'];
+    const offerDepa = item[mode === 'what2Reg' ? 'Offering_Department' : 'Offering Department'];
+    const credit = item[mode === 'what2Reg' ? 'Credits' : 'Credit Units'];
 
     // 渲染課程代號
     const renderCourseCode = (code) => {
@@ -67,85 +74,72 @@ const CourseCard = memo(({ data, mode, prof_info, courseMode = 'ad' }) => {
     };
 
     return (
-        <FlatList
-            data={data}
-            numColumns={data.length}
-            columnWrapperStyle={data.length > 1 ? { flexWrap: 'wrap' } : null}
-            style={{ marginHorizontal: scale(5) }}
-            renderItem={({ item }) => {
-                const courseCode = item[mode === 'what2Reg' ? 'New_code' : 'Course Code'];
-                const title = item[mode === 'what2Reg' ? 'courseTitleEng' : 'Course Title'];
-                const offerUnit = item[mode === 'what2Reg' ? 'Offering_Unit' : 'Offering Unit'];
-                const offerDepa = item[mode === 'what2Reg' ? 'Offering_Department' : 'Offering Department'];
-                const credit = item[mode === 'what2Reg' ? 'Credits' : 'Credit Units'];
-
-                return (
-                    <DropdownMenu.Root
-                        onOpenChange={(open) => {
-                            if (open) {
-                                trigger();
-                            }
-                        }}
-                    >
-                        <DropdownMenu.Trigger>
-                            <TouchableScale
-                                style={{
-                                    backgroundColor: white,
-                                    borderRadius: scale(10),
-                                    margin: scale(5),
-                                    padding: scale(10), paddingVertical: scale(5),
-                                }}
-                            >
-                                {/* 課程編號與開課標識 */}
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    {renderCourseCode(courseCode)}
-                                    {/* Pre Enroll標記 */}
-                                    {courseMode === 'preEnroll' ? (
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(10),
-                                            fontWeight: 'bold',
-                                            marginLeft: scale(5),
-                                            color: secondThemeColor,
-                                        }}>PreEnroll</Text>
-                                    ) : null}
-                                </View>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(11),
-                                    color: black.second,
-                                }}>{title}</Text>
-                                {'courseTitleChi' in item && item.courseTitleChi.length > 0 ? (
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(11),
-                                            color: black.second,
-                                        }}>{item.courseTitleChi}</Text>
-                                    ) : null}
-                                {'Course Title Chi' in item && item['Course Title Chi'].length > 0 ? (
-                                        <Text style={{
-                                            ...uiStyle.defaultText,
-                                            fontSize: scale(11),
-                                            color: black.second,
-                                        }}>{item['Course Title Chi']}</Text>
-                                    ) : null}
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(10),
-                                    color: black.third,
-                                }}>
-                                    {offerUnit}
-                                    {offerDepa && (' - ' + offerDepa)}
-                                </Text>
-                                {credit ? (
-                                    <Text style={{
-                                        ...uiStyle.defaultText,
-                                        fontSize: scale(10),
-                                        color: black.third,
-                                    }}>{credit} Credit</Text>
-                                ) : null}
-                            </TouchableScale>
-                        </DropdownMenu.Trigger>
+        <DropdownMenu.Root
+            onOpenChange={(open) => {
+                if (open) {
+                    trigger();
+                }
+            }}
+        >
+            <DropdownMenu.Trigger>
+                <TouchableScale
+                    style={{
+                        backgroundColor: white,
+                        borderRadius: scale(10),
+                        margin: scale(5),
+                        padding: scale(10), paddingVertical: scale(5),
+                    }}
+                >
+                    {/* 課程編號與開課標識 */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {renderCourseCode(courseCode)}
+                        {/* Pre Enroll標記 */}
+                        {courseMode === 'preEnroll' ? (
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(10),
+                                fontWeight: 'bold',
+                                marginLeft: scale(5),
+                                color: secondThemeColor,
+                            }}>PreEnroll</Text>
+                        ) : null}
+                    </View>
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        fontSize: scale(11),
+                        color: black.second,
+                    }}>{title}</Text>
+                    {'courseTitleChi' in item && item.courseTitleChi.length > 0 ? (
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(11),
+                                color: black.second,
+                            }}>{item.courseTitleChi}</Text>
+                        ) : null}
+                    {'Course Title Chi' in item && item['Course Title Chi'].length > 0 ? (
+                            <Text style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(11),
+                                color: black.second,
+                            }}>{item['Course Title Chi']}</Text>
+                        ) : null}
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        fontSize: scale(10),
+                        color: black.third,
+                    }}>
+                        {offerUnit}
+                        {offerDepa && (' - ' + offerDepa)}
+                    </Text>
+                    {credit ? (
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            fontSize: scale(10),
+                            color: black.third,
+                        }}>{credit} Credit</Text>
+                    ) : null}
+                </TouchableScale>
+            </DropdownMenu.Trigger>
                         {/* Menu 選項列表 */}
                         <DropdownMenu.Content>
                             <DropdownMenu.Item
@@ -318,14 +312,6 @@ const CourseCard = memo(({ data, mode, prof_info, courseMode = 'ad' }) => {
                             </DropdownMenu.Item>
                         </DropdownMenu.Content>
                     </DropdownMenu.Root>
-                );
-            }}
-            key={data.length}
-            scrollEnabled={false}
-            keyExtractor={(item, index) => index.toString()}
-            initialNumToRender={10}
-            windowSize={21}
-        />
     );
 }, (prevProps, nextProps) => {
     // 比較props，避免不必要的重渲染

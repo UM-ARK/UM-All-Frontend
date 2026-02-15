@@ -11,6 +11,7 @@ import {
     Alert,
     LayoutAnimation,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 
 import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH } from '../../../utils/pathMap';
@@ -1156,18 +1157,39 @@ const What2Reg = (props) => {
                     <View style={{ alignSelf: 'center' }}>
                         <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>ヾ(ｏ･ω･)ﾉ 拿走不謝~</Text>
                     </View>
-                    <CourseCard data={searchFilterCourse} mode={'json'}
-                        courseMode={s_course_mode} />
+                    <FlashList
+                        data={searchFilterCourse}
+                        renderItem={({ item }) => (
+                            <CourseCard
+                                item={item}
+                                mode={'json'}
+                                courseMode={s_course_mode}
+                            />
+                        )}
+                        estimatedItemSize={120}
+                        keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
+                    />
                 </View>) : (<View>
                     {/* 篩選列表 */}
                     {renderFilterView()}
 
                     {/* 渲染篩選出的課程 */}
                     {filterCourseList && filterCourseList.length > 0 ? (
-                        <View style={{ alignItems: 'center' }}>
-                            {/* 提醒留意公告和課表版本 */}
-                            {renderReminder()}
-                            <CourseCard data={filterCourseList} mode={'json'} />
+                        <View>
+                            <FlashList
+                                data={filterCourseList}
+                                // TODO: 優化長標題階段問題
+                                numColumns={3}
+                                masonry
+                                renderItem={({ item }) => (
+                                    <CourseCard
+                                        item={item}
+                                        mode={'json'}
+                                    />
+                                )}
+                                estimatedItemSize={scale(75)}
+                                keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
+                            />
                         </View>
                     ) : null}
                 </View>)}
