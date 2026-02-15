@@ -25,7 +25,7 @@ import AllEvents from './pages/TabbarPages/info/club/AllEvents';
 import Bus from './pages/Features/Bus';
 import CarPark from './pages/Features/CarPark';
 import UMOrg from './pages/Features/UMOrg';
-import SettingPage from './pages/TabbarPages/SettingPage';
+import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
 
 const Stack = createNativeStackNavigator();
