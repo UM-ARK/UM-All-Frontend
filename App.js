@@ -3,7 +3,6 @@ import { Dimensions, Alert, Appearance } from 'react-native';
 
 // 本地引用
 import Nav from './src/Nav';
-import RootStore from './src/mobx';
 import { uiStyle } from './src/components/ThemeContext';
 import { checkCloudCourseVersion, needUpdate, saveCourseDataToStorage } from './src/utils/checkCoursesKits';
 import { getLocalStorage, setLocalStorage } from './src/utils/storageKits';
@@ -11,7 +10,6 @@ import { ThemeProvider, themes } from './src/components/ThemeContext';
 import sourceCourseVersion from './src/static/UMCourses/courseVersion';
 import { getPreciseDeviceName } from './src/utils/iosModel';
 
-import { Provider } from 'mobx-react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
@@ -105,7 +103,6 @@ const App = () => {
             try {
                 const strUserInfo = await AsyncStorage.getItem('userInfo');
                 const userInfo = strUserInfo ? JSON.parse(strUserInfo) : {};
-                if (userInfo.stdData || userInfo.clubData) { RootStore.setUserInfo(userInfo); }
 
                 let localCourseVersion = await getLocalStorage('course_version');
                 // 首次啟動，優先用本地打包的 sourceCourseVersion
@@ -223,14 +220,12 @@ const App = () => {
     return (
         <SafeAreaProvider>
             <KeyboardProvider>
-                <Provider RootStore={RootStore}>
-                    <ThemeProvider>
-                        <Nav />
-                        {/* 全局狀態欄配置 */}
-                        <StatusBar style="auto" />
-                    </ThemeProvider>
-                    <Toast config={toastConfig} />
-                </Provider>
+                <ThemeProvider>
+                    <Nav />
+                    {/* 全局狀態欄配置 */}
+                    <StatusBar style="auto" />
+                </ThemeProvider>
+                <Toast config={toastConfig} />
             </KeyboardProvider>
         </SafeAreaProvider>
     );

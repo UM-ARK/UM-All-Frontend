@@ -4,7 +4,6 @@ import {useTheme} from './components/ThemeContext';
 
 import {scale, verticalScale} from 'react-native-size-matters';
 
-import {inject} from 'mobx-react';
 import {useTranslation} from 'react-i18next';
 
 // 原生 tab bar组件，iOS用下面的，Android用上面的
@@ -236,4 +235,4 @@ const Tabbar = () => {
     return TabbarComponent;
 };
 
-export default inject('RootStore')(Tabbar);
+export default Tabbar;

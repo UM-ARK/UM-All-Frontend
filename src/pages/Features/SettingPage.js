@@ -28,7 +28,6 @@ import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
-import { inject, observer } from 'mobx-react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 /**
@@ -290,10 +289,9 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
 
 /**
  * 設置頁面主元件
- * @param {Object} RootStore - MobX 根存儲
  * @param {Object} navigation - 導航對象
  */
-const SettingPage = ({ RootStore, navigation }) => {
+const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
     const { themeColor, white, bg_color, black } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common']);
@@ -592,4 +590,4 @@ const SettingPage = ({ RootStore, navigation }) => {
     );
 };
 
-export default inject('RootStore')(observer(SettingPage));
+export default SettingPage;

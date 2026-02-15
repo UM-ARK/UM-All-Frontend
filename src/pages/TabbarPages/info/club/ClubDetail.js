@@ -38,7 +38,6 @@ import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
 import { Image } from 'expo-image';
-import { inject } from 'mobx-react';
 import axios from 'axios';
 import Toast from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -488,4 +487,4 @@ const ClubDetail = (props) => {
     );
 };
 
-export default inject('RootStore')(ClubDetail);
+export default ClubDetail;

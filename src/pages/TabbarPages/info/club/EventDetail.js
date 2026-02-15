@@ -26,7 +26,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
 import { Image } from 'expo-image';
-import { inject } from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import Toast from 'react-native-easy-toast';
@@ -105,21 +104,8 @@ const EventDetail = (props) => {
     const imageScrollViewer = useRef(null);
     const toast = useRef(null);
 
-    // 取得全局資料
-    const globalData = props.RootStore;
-
     // componentDidMount & componentDidUpdate for route.params change
     useEffect(() => {
-        // 已登錄判斷
-        if (globalData?.userInfo) {
-            if (globalData.userInfo.stdData) {
-                updateState({ isLogin: true });
-            }
-            if (globalData.userInfo.isClub) {
-                updateState({ isClub: true });
-            }
-        }
-
         getAllThings();
     }, []);
 
@@ -314,9 +300,7 @@ const EventDetail = (props) => {
                     <TouchableWithoutFeedback
                         onPress={() => {
                             trigger();
-                            if (!state.isClub) {
-                                props.navigation.navigate('ClubDetail', { data: state.clubData });
-                            }
+                            props.navigation.navigate('ClubDetail', { data: state.clubData });
                         }}
                     >
                         <View style={{
@@ -433,53 +417,8 @@ const EventDetail = (props) => {
     };
 
     // 重構編輯按鈕（管理員可見）
-    const renderEditButton = () => {
-        if (!state.isClub) {return null;}
-
-        return (
-            <View style={{ alignItems: 'center', marginVertical: verticalScale(10) }}>
-                <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => {
-                        Platform.OS === 'ios' && props.navigation.pop(2);
-                        props.navigation.navigate('EventSetting', {
-                            mode: 'edit',
-                            eventData: { _id: state.eventData._id },
-                            refresh: onRefresh,
-                        });
-                    }}
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        backgroundColor: secondThemeColor,
-                        borderRadius: scale(15),
-                        paddingHorizontal: scale(15),
-                        paddingVertical: scale(8),
-                    }}
-                >
-                    <Ionicons name="settings-outline" size={scale(25)} color={white} />
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: white,
-                        fontSize: verticalScale(16),
-                        fontWeight: 'bold',
-                        marginLeft: scale(5),
-                    }}>
-                        編輯活動
-                    </Text>
-                </TouchableOpacity>
-                <Text style={{
-                    ...uiStyle.defaultText,
-                    fontSize: verticalScale(12),
-                    color: secondThemeColor,
-                    fontWeight: 'bold',
-                    marginTop: scale(5),
-                }}>
-                    更新活動資訊請點我！
-                </Text>
-            </View>
-        );
-    };
+    // 社團管理功能已移除
+    const renderEditButton = () => null;
 
     // 重構 renderMainContent 方法
     const renderMainContent = () => {
@@ -662,4 +601,4 @@ const EventDetail = (props) => {
     );
 };
 
-export default inject('RootStore')(EventDetail);
+export default EventDetail;

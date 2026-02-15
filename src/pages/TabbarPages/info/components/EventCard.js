@@ -12,12 +12,11 @@ import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import TouchableScale from 'react-native-touchable-scale';
-import { inject } from 'mobx-react';
 
 const DEFAULT_IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);
 
-const EventCard = ({ data, cardWidth, RootStore }) => {
+const EventCard = ({ data, cardWidth }) => {
     // NavigationContext組件可以在非基頁面拿到路由信息
     // this.context === this.props.navigation 等同效果
     const navigation = useContext(NavigationContext);
@@ -78,7 +77,6 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
         relateImgUrl: undefined,
         type: undefined,
         imgLoading: true,
-        isAdmin: false,
         eventData: undefined,
     });
 
@@ -94,25 +92,15 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
             type: eventData.type,
             link: eventData.link,
             eventData,
-            // 社團賬號登錄
-            isAdmin: RootStore.userInfo && RootStore.userInfo.clubData ? true : false,
         }));
-    }, [data, RootStore]);
+    }, [data]);
 
     const handleJumpToDetail = () => {
-        const { type, link, title, isAdmin, eventData } = state;
+        const { type, link, title, eventData } = state;
         trigger();
         setTimeout(() => {
             if (type === 'WEBSITE') {
-                if (isAdmin) {
-                    // 跳轉活動info編輯頁，並傳遞刷新函數
-                    navigation.navigate('EventSetting', {
-                        mode: 'edit',
-                        eventData: { _id: eventData._id },
-                    });
-                } else {
-                    openLink(link);
-                }
+                openLink(link);
             } else {
                 navigation.navigate('EventDetail', {
                     data: eventData,
@@ -287,4 +275,4 @@ const EventCard = ({ data, cardWidth, RootStore }) => {
     );
 };
 
-export default inject('RootStore')(memo(EventCard));
+export default memo(EventCard);

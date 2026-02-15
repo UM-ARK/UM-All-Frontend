@@ -51,8 +51,6 @@
     "i18next": "^23.16.8",
     "intl-pluralrules": "^2.0.1",
     "lodash": "^4.17.23",
-    "mobx": "^6.15.0",
-    "mobx-react": "^9.2.1",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
     "opencc-js": "^1.0.5",
