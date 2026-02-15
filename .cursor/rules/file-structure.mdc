@@ -19,8 +19,6 @@ src/
 │   ├── trigger.js      # 触觉反馈
 │   ├── firebaseAnalytics.js
 │   └── checkCoursesKits.js
-├── mobx/
-│   └── index.js        # MobX RootStore
 ├── static/
 │   ├── UMCourses/      # 打包课程 JSON (离线后备)
 │   └── UMARK_Assets/   # 图片、图标等

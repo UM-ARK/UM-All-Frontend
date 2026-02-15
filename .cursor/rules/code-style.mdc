@@ -77,10 +77,3 @@ import { TouchableHighlight, TouchableWithoutFeedback } from 'react-native';
   bracketSameLine: true
 }
 ```
-
-## MobX 状态管理
-
-- Store: `src/mobx/index.js` (RootStore 单例)
-- 仅存储 `userInfo`
-- 通过 `inject('RootStore')` 访问
-- 其他状态应在组件本地或 AsyncStorage

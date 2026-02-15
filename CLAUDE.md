@@ -405,12 +405,6 @@ const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >
 
 **完整的液態玻璃設計規範見** `.cursor/rules/ios26-modern-design.mdc`
 
-### State Management
-
-- **MobX**: `src/mobx/index.js` (RootStore singleton)
-- Stores `userInfo` only - access via `inject('RootStore')` or props
-- All other state should be local to components or cached in AsyncStorage
-
 ### Storage (CRITICAL)
 
 **NEVER use AsyncStorage directly**. Use `src/utils/storageKits.js`:
@@ -795,10 +789,7 @@ src/
 ├── utils/
 │   ├── storageKits.js  # AsyncStorage wrappers
 │   ├── pathMap.js      # API endpoint constants
-│   ├── uiMap.js        # Legacy color constants (AVOID)
 │   └── ...
-├── mobx/
-│   └── index.js        # MobX RootStore
 ├── static/
 │   ├── UMCourses/      # Bundled course JSONs (offline fallbacks)
 │   └── UMARK_Assets/   # Images, icons, etc.
@@ -846,7 +837,6 @@ src/
 示例：
 - react_navigation_v7_static_api.md
 - expo_sdk_54_cng_workflow.md
-- mobx_v6_store_patterns.md
 ```
 
 #### 文件內容模板
