@@ -1180,8 +1180,7 @@ const What2Reg = (props) => {
                         <View>
                             <FlashList
                                 data={filterCourseList}
-                                // TODO: 優化長標題階段問題
-                                numColumns={3}
+                                numColumns={2}
                                 masonry
                                 renderItem={({ item }) => (
                                     <CourseCard
@@ -1189,6 +1188,7 @@ const What2Reg = (props) => {
                                         mode={'json'}
                                     />
                                 )}
+                                contentContainerStyle={{ paddingHorizontal: scale(5) }}
                                 estimatedItemSize={itemHeight}
                                 keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
                             />
@@ -1205,7 +1205,7 @@ const What2Reg = (props) => {
                         數據日期版本: {s_course_mode == 'ad' ? s_courseVersion.adddrop.updateTime : s_courseVersion.pre.updateTime}
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }}>
-                        記得更新APP或右上角手動更新以獲得最新數據~
+                        記得提醒開發者最新Excel課表版本
                     </Text>
                     <Text style={{ ...uiStyle.defaultText, fontSize: scale(9), color: themeColor }} selectable>
                         遇到BUG可聯繫umacark@gmail.com
