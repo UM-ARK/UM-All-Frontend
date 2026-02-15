@@ -404,6 +404,7 @@ const What2Reg = (props) => {
         return (
             <FlatList
                 data={modeList}
+                key={`modeList-${modeList.length}`}
                 keyExtractor={(item, index) => index}
                 numColumns={modeList.length}
                 contentContainerStyle={{ alignItems: 'center' }}
@@ -1177,22 +1178,17 @@ const What2Reg = (props) => {
 
                     {/* 渲染篩選出的課程 */}
                     {filterCourseList && filterCourseList.length > 0 ? (
-                        <View>
-                            <FlashList
-                                data={filterCourseList}
-                                numColumns={2}
-                                masonry
-                                renderItem={({ item }) => (
-                                    <CourseCard
-                                        item={item}
-                                        mode={'json'}
-                                    />
-                                )}
-                                contentContainerStyle={{ paddingHorizontal: scale(5) }}
-                                estimatedItemSize={itemHeight}
-                                keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
-                            />
-                        </View>
+                        <FlatList
+                            key={`courseList-${filterCourseList.length}`}
+                            data={filterCourseList}
+                            numColumns={filterCourseList.length}
+                            columnWrapperStyle={filterCourseList.length > 1 ? { flexWrap: 'wrap' } : null}
+                            renderItem={({ item }) => <CourseCard item={item} mode={'json'} />}
+                            contentContainerStyle={{ paddingHorizontal: scale(5) }}
+                            estimatedItemSize={itemHeight}
+                            keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
+                            scrollEnabled={false}
+                        />
                     ) : null}
                 </View>)}
 
