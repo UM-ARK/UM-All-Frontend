@@ -208,6 +208,9 @@ const What2Reg = (props) => {
     // Sticky Header 需要的吸頂偏移量，優先使用導航欄實際高度，否則根據安全區和預設高度估算
     const stickyTopOffset = headerHeight || insets.top;
 
+    // 課程卡片高度
+    const itemHeight = scale(75);
+
     // 3.0開始，優先使用本地緩存的offerCourses數據展示
     useEffect(() => {
         logToFirebase('openPage', { page: 'chooseCourses' });
@@ -248,6 +251,27 @@ const What2Reg = (props) => {
     useEffect(() => {
         if (isFocused) { refresh(); }
     }, [isFocused]);
+
+    // 初始化 scrollData - 根據 filterCourseList 計算每個首字母的位置
+    useEffect(() => {
+        if (filterCourseList.length === 0) {
+            setScrollData({});
+            return;
+        }
+        // 計算每個首字母對應的位置
+        const newScrollData = {};
+        const firstLetters = lodash.uniq(lodash.map(filterCourseList, itm => itm['Course Code']?.[0]).filter(Boolean));
+
+        firstLetters.forEach((letter, index) => {
+            // 找到第一個以該字母開頭的課程的索引
+            const firstIndex = filterCourseList.findIndex(itm => itm['Course Code']?.[0] === letter);
+            if (firstIndex !== -1) {
+                newScrollData[letter] = firstIndex * itemHeight;
+            }
+        });
+
+        setScrollData(newScrollData);
+    }, [filterCourseList]);
 
     async function refresh() {
         // 課程版本
@@ -372,28 +396,6 @@ const What2Reg = (props) => {
         }
         return nextFilterCourseList;
     }, [offerCourseList, filterOptions]);
-
-    // 初始化 scrollData - 根據 filterCourseList 計算每個首字母的位置
-    useEffect(() => {
-        if (filterCourseList.length === 0) {
-            setScrollData({});
-            return;
-        }
-        // 計算每個首字母對應的位置
-        const newScrollData = {};
-        const itemHeight = scale(75); // 每個課程卡片的高度估算
-        const firstLetters = lodash.uniq(lodash.map(filterCourseList, itm => itm['Course Code']?.[0]).filter(Boolean));
-
-        firstLetters.forEach((letter, index) => {
-            // 找到第一個以該字母開頭的課程的索引
-            const firstIndex = filterCourseList.findIndex(itm => itm['Course Code']?.[0] === letter);
-            if (firstIndex !== -1) {
-                newScrollData[letter] = firstIndex * itemHeight;
-            }
-        });
-
-        setScrollData(newScrollData);
-    }, [filterCourseList]);
 
     // Add Drop / Pre Enroll 模式選擇
     const renderADPESwitch = () => {
@@ -1166,7 +1168,7 @@ const What2Reg = (props) => {
                                 courseMode={s_course_mode}
                             />
                         )}
-                        estimatedItemSize={120}
+                        estimatedItemSize={itemHeight}
                         keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
                     />
                 </View>) : (<View>
@@ -1187,7 +1189,7 @@ const What2Reg = (props) => {
                                         mode={'json'}
                                     />
                                 )}
-                                estimatedItemSize={scale(75)}
+                                estimatedItemSize={itemHeight}
                                 keyExtractor={(item, index) => item.CourseCode || item.New_code || index.toString()}
                             />
                         </View>
