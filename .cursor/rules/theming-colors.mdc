@@ -1,14 +1,14 @@
 ---
-description: 主题和颜色使用规范 - 强制使用 ThemeContext
+description: 主題和顏色使用規範 - 強制使用 ThemeContext
 globs: "**/*.js"
 alwaysApply: false
 ---
 
-# 主题颜色规范
+# 主題顏色規範
 
-**强制规定：所有颜色必须使用 ThemeContext，禁止硬编码**
+**強制規定：所有顏色必須使用 ThemeContext，禁止硬編碼**
 
-## 正确用法
+## 正確用法
 
 ```javascript
 import {useTheme} from '../../components/ThemeContext';
@@ -17,15 +17,15 @@ const {theme} = useTheme();
 const {white, black, bg_color, themeColor, glass} = theme;
 ```
 
-## 禁止写法
+## 禁止寫法
 
 | 禁止 | 原因 |
 |------|------|
-| `'#fff'` / `'#000'` | 不支持暗色模式 |
-| `'rgba(255,255,255,0.2)'` | 硬编码半透明色 |
-| 从已删除的 `uiMap.js` 导入 | 统一使用 `ThemeContext` |
+| `'#fff'` / `'#000'` | 不支援暗色模式 |
+| `'rgba(255,255,255,0.2)'` | 硬編碼半透明色 |
+| 從已刪除的 `uiMap.js` 匯入 | 統一使用 `ThemeContext` |
 
-## 玻璃态效果
+## 玻璃態效果
 
 ```javascript
 // ❌ 錯誤
@@ -64,10 +64,10 @@ color: themeColor
 
 **完整規範見** `tonal-color-system.mdc`
 
-## 新增颜色流程
+## 新增顏色流程
 
-1. 在 `ThemeContext.js` 的 `getColorDiy` 函数添加:
+1. 在 `ThemeContext.js` 的 `getColorDiy` 函數新增:
    ```javascript
    newColor: isLight ? '#xxxxxx' : '#xxxxxx',
    ```
-2. 在组件中使用: `const {newColor} = theme;`
+2. 在元件中使用: `const {newColor} = theme;`

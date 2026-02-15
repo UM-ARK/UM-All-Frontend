@@ -1,14 +1,14 @@
 ---
-description: 触觉反馈和 Firebase Analytics 规范
+description: 觸覺回饋和 Firebase Analytics 規範
 globs: "**/*.js"
 alwaysApply: false
 ---
 
-# 触觉反馈和分析
+# 觸覺回饋和分析
 
-## 触觉反馈
+## 觸覺回饋
 
-**所有用户交互必须调用 `trigger()`**:
+**所有使用者互動必須呼叫 `trigger()`**:
 
 ```javascript
 import { trigger } from '../../utils/trigger';
@@ -20,18 +20,18 @@ import { Pressable } from 'react-native';
 }}>
 ```
 
-适用于：按钮按下、标签切换、列表项点击等
+適用於：按鈕按下、標籤切換、列表項點擊等
 
 ## Firebase Analytics
 
-使用 `logToFirebase()` 记录事件:
+使用 `logToFirebase()` 記錄事件:
 
 ```javascript
 import {logToFirebase} from '../../utils/firebaseAnalytics';
 
-// 页面浏览
+// 頁面瀏覽
 logToFirebase('screen_view', {screen_name: 'ClubDetail'});
 
-// 自定义事件
+// 自訂事件
 logToFirebase('button_click', {button_name: 'submit'});
 ```

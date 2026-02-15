@@ -1,31 +1,31 @@
 ---
-description: 国际化 (i18n) 使用规范
+description: 國際化 (i18n) 使用規範
 globs: "**/*.js"
 alwaysApply: false
 ---
 
-# 国际化规范
+# 國際化規範
 
-## 翻译文件
+## 翻譯檔案
 
 - **英文**: `src/i18n/en-us.json`
-- **繁体中文**: `src/i18n/zh-hk.js`
+- **繁體中文**: `src/i18n/zh-hk.js`
 
 ## 使用方式
 
 ```javascript
 import {useTranslation} from 'react-i18next';
 
-// 单个命名空间
+// 單個命名空間
 const {t} = useTranslation('common');
 
-// 多个命名空间
+// 多個命名空間
 const {t} = useTranslation(['common', 'home']);
 ```
 
-## 键名规范
+## 鍵名規範
 
-**使用繁体中文作为键名**:
+**使用繁體中文作為鍵名**:
 
 ```javascript
 // ✅ 正確
@@ -37,13 +37,13 @@ t('info')
 t('settings')
 ```
 
-## 命名空间分组
+## 命名空間分組
 
-| 命名空间 | 用途 |
+| 命名空間 | 用途 |
 |---------|------|
-| `common` | 通用（按钮、提示） |
-| `home` | 主页 |
-| `setting` | 设置 |
-| `catalog` | 课表 |
-| `club` | 组织 |
-| `features` | 功能服务 |
+| `common` | 通用（按鈕、提示） |
+| `home` | 主頁 |
+| `setting` | 設定 |
+| `catalog` | 課表 |
+| `club` | 組織 |
+| `features` | 功能服務 |

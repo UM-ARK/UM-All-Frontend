@@ -1,37 +1,37 @@
 ---
-description: 项目文件结构参考
+description: 專案檔案結構參考
 alwaysApply: false
 ---
 
-# 项目文件结构
+# 專案檔案結構
 
 ```
 src/
-├── components/          # 可复用 UI 组件
+├── components/          # 可複用 UI 元件
 ├── pages/
-│   ├── TabbarPages/    # 主标签页面
-│   ├── ClubSystem/     # 组织相关页面
-│   └── Features/       # 功能页面
+│   ├── TabbarPages/    # 主標籤頁面
+│   ├── ClubSystem/     # 組織相關頁面
+│   └── Features/       # 功能頁面
 ├── utils/
-│   ├── storageKits.js  # AsyncStorage 封装
-│   ├── pathMap.js      # API 端点常量
-│   ├── (uiMap.js 已删除，颜色统一管理于 ThemeContext.js)
-│   ├── trigger.js      # 触觉反馈
+│   ├── storageKits.js  # AsyncStorage 封裝
+│   ├── pathMap.js      # API 端點常數
+│   ├── (uiMap.js 已刪除，顏色統一管理於 ThemeContext.js)
+│   ├── trigger.js      # 觸覺回饋
 │   ├── firebaseAnalytics.js
 │   └── checkCoursesKits.js
 ├── static/
-│   ├── UMCourses/      # 打包课程 JSON (离线后备)
-│   └── UMARK_Assets/   # 图片、图标等
+│   ├── UMCourses/      # 打包課程 JSON (離線後備)
+│   └── UMARK_Assets/   # 圖片、圖示等
 └── i18n/
-    ├── en-us.json      # 英文翻译
-    └── zh-hk.js        # 繁体中文翻译
+    ├── en-us.json      # 英文翻譯
+    └── zh-hk.js        # 繁體中文翻譯
 ```
 
-## 关键文件
+## 關鍵檔案
 
-| 文件 | 用途 |
+| 檔案 | 用途 |
 |------|------|
-| `src/Nav.js` | 主 Stack 导航 |
-| `src/Tabbar.js` | 底部标签导航 |
-| `src/components/ThemeContext.js` | 主题管理 |
-| `app.json` | Expo 配置 |
+| `src/Nav.js` | 主 Stack 導覽 |
+| `src/Tabbar.js` | 底部標籤導覽 |
+| `src/components/ThemeContext.js` | 主題管理 |
+| `app.json` | Expo 設定 |

@@ -1,37 +1,37 @@
 ---
-description: ARK ALL React Native 项目概览和构建命令
+description: ARK ALL React Native 專案概覽和建構命令
 alwaysApply: true
 ---
 
-# ARK ALL 项目概览
+# ARK ALL 專案概覽
 
-- **类型**: React Native 0.81.5 + Expo SDK 54 移动应用
-- **名称**: ARK ALL (澳门大学学生应用)
+- **類型**: React Native 0.81.5 + Expo SDK 54 行動應用
+- **名稱**: ARK ALL (澳門大學學生應用)
 - **版本**: 26.1.1
 - **平台**: iOS, Android
-- **架构**: 离线优先 + Cloudflare Workers API，6小时自动更新
+- **架構**: 離線優先 + Cloudflare Workers API，6小時自動更新
 
-## 构建命令
+## 建構命令
 
 ```bash
-yarn install          # 安装依赖 (Node ≥18)
-yarn ios              # iPhone 16 Pro 模拟器
-yarn iosNew           # iPhone 17 Pro 模拟器
-yarn iosBig           # iPad Pro 模拟器
-yarn iosTrue          # 物理设备
+yarn install          # 安裝相依 (Node ≥18)
+yarn ios              # iPhone 16 Pro 模擬器
+yarn iosNew           # iPhone 17 Pro 模擬器
+yarn iosBig           # iPad Pro 模擬器
+yarn iosTrue          # 實體裝置
 yarn android          # Android (API 31/33)
-yarn lint             # ESLint 检查
-yarn start            # 启动 Metro
+yarn lint             # ESLint 檢查
+yarn start            # 啟動 Metro
 ```
 
-## 开发工作流
+## 開發工作流程
 
-- **热重载**: Metro 自动热重载 JS 更改，无需重新运行 `yarn ios`
-- **仅需重启 Metro**: 遇到 Metro 错误或需清理缓存时
-- **仅需重新构建**: 添加/删除原生依赖、修改 `app.json` 或 `package.json`
+- **熱重載**: Metro 自動熱重載 JS 變更，無需重新執行 `yarn ios`
+- **僅需重啟 Metro**: 遇到 Metro 錯誤或需清理快取時
+- **僅需重新建構**: 新增/刪除原生相依、修改 `app.json` 或 `package.json`
 
-## Expo CNG 工作流
+## Expo CNG 工作流程
 
-1. 无需手动 `pod install` - Expo CNG 自动管理
-2. iOS/Android 原生文件从配置生成
-3. 大部分原生设置在 `app.json` 中配置
+1. 無需手動 `pod install` - Expo CNG 自動管理
+2. iOS/Android 原生檔案從設定產生
+3. 大部分原生設定在 `app.json` 中設定

@@ -1,12 +1,12 @@
 ---
-description: 本地存储规范 - 禁止直接使用 AsyncStorage
+description: 本地儲存規範 - 禁止直接使用 AsyncStorage
 globs: "**/*.js"
 alwaysApply: false
 ---
 
-# 存储规范
+# 儲存規範
 
-**禁止直接使用 AsyncStorage**，必须使用 `storageKits.js`:
+**禁止直接使用 AsyncStorage**，必須使用 `storageKits.js`:
 
 ```javascript
 import {
@@ -17,21 +17,21 @@ import {
     updateUserInfo,
 } from '../../utils/storageKits';
 
-// 数据持久化
+// 資料持久化
 await setLocalStorage('key', object);
 const data = await getLocalStorage('key');
 
-// 认证（会通过 reloadAppAsync 重启应用）
+// 認證（會透過 reloadAppAsync 重啟應用程式）
 await handleLogin(userInfo);
 await handleLogout();
 
-// 实时更新（无需重启）
+// 即時更新（無需重啟）
 await updateUserInfo(userInfo);
 ```
 
-## 课程数据管理
+## 課程資料管理
 
-使用 `checkCoursesKits.js` 管理课程数据:
+使用 `checkCoursesKits.js` 管理課程資料:
 
 ```javascript
 import {
@@ -44,4 +44,4 @@ import {
 const courses = getCourseData('pre'); // 或 'adddrop'
 ```
 
-**禁止直接写入**: `offer_courses`, `course_plan`, `course_plan_time` 键
+**禁止直接寫入**: `offer_courses`, `course_plan`, `course_plan_time` 鍵

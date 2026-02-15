@@ -1,25 +1,25 @@
 ---
-description: 关键禁止事项 - 必须遵守
+description: 關鍵禁止事項 - 必須遵守
 alwaysApply: true
 ---
 
-# 关键禁止事项
+# 關鍵禁止事項
 
-## 绝对禁止
+## 絕對禁止
 
 - ❌ **直接使用 AsyncStorage** - 使用 `storageKits.js`
-- ❌ **直接写入课程数据键** (`offer_courses`, `course_plan`, `course_plan_time`) - 使用 `checkCoursesKits.js`
-- ❌ **删除打包的 JSON 文件** - 它们是离线后备
-- ❌ **使用遗留颜色导入** - 统一使用 `useTheme()` 从 `ThemeContext` 获取主题颜色
-- ❌ **忘记 `trigger()`** - 所有交互元素都需要触觉反馈
-- ❌ **使用 `as any`, `@ts-ignore`** - 正确处理类型
-- ❌ **硬编码颜色值** (如 `'#fff'`, `'rgba(...)'`) - 使用 ThemeContext
-- ❌ **在新代码中使用 `TouchableOpacity` 系列** - 统一使用 `Pressable`（存量代码重构时迁移）
-- ❌ **新代码中使用 `FlatList` / `VirtualizedList` / `ScrollView+map` 渲染长列表** - 统一使用 `FlashList`（`@shopify/flash-list`）
+- ❌ **直接寫入課程資料鍵** (`offer_courses`, `course_plan`, `course_plan_time`) - 使用 `checkCoursesKits.js`
+- ❌ **刪除打包的 JSON 檔案** - 它們是離線後備
+- ❌ **使用遺留顏色匯入** - 統一使用 `useTheme()` 從 `ThemeContext` 取得主題顏色
+- ❌ **忘記 `trigger()`** - 所有互動元件都需要觸覺回饋
+- ❌ **使用 `as any`, `@ts-ignore`** - 正確處理型別
+- ❌ **硬編碼顏色值** (如 `'#fff'`, `'rgba(...)'`) - 使用 ThemeContext
+- ❌ **在新程式碼中使用 `TouchableOpacity` 系列** - 統一使用 `Pressable`（存量程式碼重構時遷移）
+- ❌ **新程式碼中使用 `FlatList` / `VirtualizedList` / `ScrollView+map` 渲染長列表** - 統一使用 `FlashList`（`@shopify/flash-list`）
 
-## 配置要求
+## 設定要求
 
-- **iOS**: Xcode 10+，Expo CNG 自动管理 CocoaPods
-- **Android**: API 31 或 33 模拟器
+- **iOS**: Xcode 10+，Expo CNG 自動管理 CocoaPods
+- **Android**: API 31 或 33 模擬器
 - **Firebase**: 需要 `google-services.json` 和 `GoogleService-Info.plist`
-- **API Token**: 根目录 `umAPIToken.json` 包含 `{"token":"..."}`
+- **API Token**: 根目錄 `umAPIToken.json` 包含 `{"token":"..."}`

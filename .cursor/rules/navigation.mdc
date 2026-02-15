@@ -1,20 +1,20 @@
 ---
-description: React Navigation V7 导航规范与 iOS 26 原生适配
+description: React Navigation V7 導覽規範與 iOS 26 原生適配
 globs: "**/*.js"
 alwaysApply: false
 ---
 
-# React Navigation V7 规范
+# React Navigation V7 規範
 
-## 导航结构
+## 導覽結構
 
-- **主导航**: `src/Nav.js` (Stack Navigator - `createNativeStackNavigator`)
-- **底部标签**: `src/Tabbar.js` (6 个主标签 - `createNativeBottomTabNavigator`)
-- **新页面必须同时注册到** `Nav.js` 和 `Tabbar.js`
+- **主導覽**: `src/Nav.js` (Stack Navigator - `createNativeStackNavigator`)
+- **底部標籤**: `src/Tabbar.js` (6 個主標籤 - `createNativeBottomTabNavigator`)
+- **新頁面必須同時註冊到** `Nav.js` 和 `Tabbar.js`
 
-## 液态玻璃效果（iOS 26+）
+## 液態玻璃效果（iOS 26+）
 
-使用 `isLiquidGlassSupported` 判断是否支持:
+使用 `isLiquidGlassSupported` 判斷是否支援:
 
 ```javascript
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
@@ -25,7 +25,7 @@ screenOptions={{
     headerTransparent: isLiquidGlassSupported,
     headerTitleAlign: 'center',
     headerBackButtonDisplayMode: 'minimal',
-    // 非液态玻璃时使用 BlurView 或实色背景
+    // 非液態玻璃時使用 BlurView 或實色背景
     headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
 }}
 
@@ -36,32 +36,32 @@ tabBarOptions={{
 }}
 ```
 
-## 原生按钮适配
+## 原生按鈕適配
 
-优先使用 React Navigation 提供的原生按钮组件，在 iOS 26+ 上自动适配液态玻璃样式：
+優先使用 React Navigation 提供的原生按鈕元件，在 iOS 26+ 上自動適配液態玻璃樣式：
 
 ```javascript
 import { Button, HeaderBackButton } from '@react-navigation/elements';
 
-// 原生返回按钮
+// 原生返回按鈕
 headerLeft: () => <HeaderBackButton onPress={navigation.goBack} />,
 
-// 原生操作按钮（自动适配 iOS 26 风格）
+// 原生操作按鈕（自動適配 iOS 26 風格）
 headerRight: () => <Button onPress={handleAction}>Action</Button>,
 ```
 
-## 内容区域适配
+## 內容區域適配
 
 ```javascript
-// ScrollView / FlatList 需根据液态玻璃状态调整 contentInset
+// ScrollView / FlatList 需根據液態玻璃狀態調整 contentInset
 contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
 ```
 
-## 禁止的检测方式
+## 禁止的檢測方式
 
 ```javascript
-// ❌ 绝对禁止：使用 Platform 判断 iOS 版本
+// ❌ 絕對禁止：使用 Platform 判斷 iOS 版本
 const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
 ```
 
-**详细的液态玻璃设计规范见** `ios26-modern-design.mdc`
+**詳細的液態玻璃設計規範見** `ios26-modern-design.mdc`

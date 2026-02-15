@@ -1,41 +1,41 @@
 ---
-description: 使用 react-native-debugger-mcp 工具读取 React Native 台日志
-always模拟器控制Apply: false
+description: 使用 react-native-debugger-mcp 工具讀取 React Native 台日誌
+alwaysApply: false
 ---
 
-# React Native 模拟器日志读取规则
+# React Native 模擬器日誌讀取規則
 
-当需要读取 React Native 模拟器的控制台日志时，使用 `react-native-debugger-mcp` 工具。
+當需要讀取 React Native 模擬器的控制台日誌時，使用 `react-native-debugger-mcp` 工具。
 
-## 工具函数
+## 工具函數
 
-| 函数 | 说明 |
+| 函數 | 說明 |
 |------|------|
-| `getConnectedApps` | 获取已连接的 React Native 应用列表 |
-| `readConsoleLogsFromApp` | 读取指定应用的控制台日志 |
+| `getConnectedApps` | 取得已連線的 React Native 應用程式清單 |
+| `readConsoleLogsFromApp` | 讀取指定應用程式的控制台日誌 |
 
 ## 使用前提
 
-- Metro 开发服务器正在运行 (`yarn start`)
-- React Native 应用已启动并连接到 Metro
+- Metro 開發伺服器正在執行 (`yarn start`)
+- React Native 應用程式已啟動並連線到 Metro
 
 ## 使用方法
 
-### 1. 获取已连接的应用
+### 1. 取得已連線的應用程式
 
 ```javascript
 user-react-native-debugger-mcp-getConnectedApps({
-  metroServerPort: 8081  // Metro 端口号，默认 8081
+  metroServerPort: 8081  // Metro 連接埠號，預設 8081
 })
 ```
 
-返回结果包含：
-- `id`: 应用连接 ID
-- `title`: 应用标题和设备信息
+傳回結果包含：
+- `id`: 應用程式連線 ID
+- `title`: 應用程式標題和裝置資訊
 - `description`: React Native 模式描述
-- `webSocketDebuggerUrl`: WebSocket 调试地址
+- `webSocketDebuggerUrl`: WebSocket 偵錯位址
 
-### 2. 读取控制台日志
+### 2. 讀取控制台日誌
 
 ```javascript
 user-react-native-debugger-mcp-readConsoleLogsFromApp({
@@ -44,25 +44,25 @@ user-react-native-debugger-mcp-readConsoleLogsFromApp({
     description: "React Native Bridgeless [C++ connection]",
     webSocketDebuggerUrl: "ws://localhost:8081/inspector/debug?device=xxx&page=1"
   },
-  maxLogs: 50  // 最多读取的日志数量，默认 100
+  maxLogs: 50  // 最多讀取的日誌數量，預設 100
 })
 ```
 
-返回结果为日志数组，每条日志包含：
-- `type`: 日志类型 (log, error, warn, info)
-- `text`: 日志内容
-- `level`: 日志级别
-- `timestamp`: 时间戳
+傳回結果為日誌陣列，每條日誌包含：
+- `type`: 日誌類型 (log, error, warn, info)
+- `text`: 日誌內容
+- `level`: 日誌級別
+- `timestamp`: 時間戳記
 
-## 典型使用场景
+## 典型使用場景
 
-1. **调试运行时错误**：读取 error 级别日志
-2. **追踪应用行为**：查看 console.log 输出
-3. **监控网络请求**：查看 API 调用日志
-4. **分析崩溃原因**：查看异常堆栈信息
+1. **偵錯執行階段錯誤**：讀取 error 級別日誌
+2. **追蹤應用程式行為**：查看 console.log 輸出
+3. **監控網路請求**：查看 API 呼叫日誌
+4. **分析崩潰原因**：查看異常堆疊資訊
 
-## 注意事项
+## 注意事項
 
-- 日志读取需要应用保持运行状态
-- `maxLogs` 参数可控制返回的日志数量
-- 应用重启后需要重新获取连接信息
+- 日誌讀取需要應用程式保持執行狀態
+- `maxLogs` 參數可控制傳回的日誌數量
+- 應用程式重新啟動後需要重新取得連線資訊
