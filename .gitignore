@@ -101,5 +101,6 @@ web-build/
 # Local env files
 .env
 .mcp.json
+.cursor/mcp.json
 
 .omc

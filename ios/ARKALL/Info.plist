@@ -30,6 +30,12 @@
           <string>one.umall</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>exp+arkall</string>
+        </array>
+      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>26.1.1</string>
