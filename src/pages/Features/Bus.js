@@ -16,6 +16,7 @@ import TouchableScale from 'react-native-touchable-scale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
+import { useKeepAwake } from 'expo-keep-awake';
 
 const busIcon = require('../../static/img/Bus/bus.png');
 const busRouteImg = require('../../static/img/Bus/bus_route.png');
@@ -96,6 +97,7 @@ const BUS_URL_DEFAULT = UM_BUS_LOOP_ZH;
 
 // 巴士報站頁 - 畫面佈局與渲染
 const BusScreen = () => {
+    useKeepAwake();
     const { theme } = useTheme();
     const { bg_color, white, black, themeColor, secondThemeColor, viewShadow } = theme;
     const s = StyleSheet.create({

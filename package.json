@@ -43,6 +43,7 @@
     "expo-font": "~55.0.6",
     "expo-image": "~55.0.8",
     "expo-image-picker": "~55.0.16",
+    "expo-keep-awake": "~55.0.6",
     "expo-linear-gradient": "~55.0.11",
     "expo-media-library": "~55.0.12",
     "expo-splash-screen": "~55.0.15",
