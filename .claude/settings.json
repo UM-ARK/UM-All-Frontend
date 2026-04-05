@@ -1,8 +1,0 @@
-{
-  "enabledPlugins": {
-    "expo-app-design@expo-plugins": true,
-    "upgrading-expo@expo-plugins": true,
-    "expo-deployment@expo-plugins": true,
-    "typescript-lsp@claude-plugins-official": true
-  }
-}
