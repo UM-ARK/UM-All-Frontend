@@ -97,7 +97,7 @@ const ARKHarbor = (props) => {
         const parsedItem = item ? JSON.parse(item) : null;
         setHarborSetting(parsedItem);
 
-        if (parsedItem.tabbarMode === 'webview') {
+        if (parsedItem?.tabbarMode === 'webview') {
             logToFirebase('openPage', { page: 'harbor_webview' });
         }
     };
