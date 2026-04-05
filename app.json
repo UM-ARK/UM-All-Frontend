@@ -5,7 +5,6 @@
     "version": "26.1.1",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "userInterfaceStyle": "automatic",
@@ -23,8 +22,7 @@
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
       },
-      "icon": "./src/static/img/logo.png",
-      "edgeToEdgeEnabled": true
+      "icon": "./src/static/img/logo.png"
     },
     "plugins": [
       [
@@ -72,7 +70,8 @@
       ],
       "expo-system-ui",
       "expo-font",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-image"
     ]
   }
 }
