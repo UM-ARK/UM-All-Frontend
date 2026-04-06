@@ -29,52 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-/**
- * 分段控制元件 - 用於主題選擇
- * @param {Object} options - 選項配置
- * @param {number} selectedIndex - 當前選中索引
- * @param {Function} onChange - 變更回調函數
- */
-const SegmentControl = ({ options, selectedIndex, onChange }) => {
-    const { theme } = useTheme();
-    const { white, themeColor, bg_color, black } = theme;
-
-    return (
-        <View style={{
-            flexDirection: 'row',
-            backgroundColor: bg_color,
-            borderRadius: scale(999),
-            padding: scale(3),
-            overflow: 'hidden',
-        }}>
-            {options.map((option, index) => (
-                <TouchableOpacity
-                    key={option.key}
-                    onPress={() => {
-                        trigger();
-                        onChange(index);
-                    }}
-                    style={{
-                        paddingHorizontal: scale(12),
-                        paddingVertical: verticalScale(5),
-                        borderRadius: scale(999),
-                        backgroundColor: selectedIndex === index ? `${themeColor}15` : 'transparent',
-                    }}
-                >
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(11),
-                        color: selectedIndex === index ? themeColor : black.third,
-                        fontWeight: selectedIndex === index ? '600' : '400',
-                    }}>
-                        {option.label}
-                    </Text>
-                </TouchableOpacity>
-            ))}
-        </View>
-    );
-};
+import SegmentControl from '../../components/SegmentControl';
 
 /**
  * 用戶資料卡元件 - 玻璃擬態效果
@@ -473,6 +428,7 @@ const SettingPage = ({ navigation }) => {
                         subtitle={`v${packageInfo.version}`}
                         onPress={() => {
                             trigger();
+                            // TODO: 似乎還沒有真正的檢查更新邏輯
                             Alert.alert(t('setting:Check Update'), t('setting:Latest Version'));
                         }}
                     />

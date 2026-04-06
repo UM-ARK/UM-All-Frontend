@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Text, View, ScrollView, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Text, View, ScrollView, FlatList, Alert } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import Loading from '../../../../components/Loading';
+import SegmentControl from '../../../../components/SegmentControl';
 import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { getCourseData } from '../../../../utils/checkCoursesKits';
 import coursePlanTime from '../../../../static/UMCourses/coursePlanTime';
@@ -30,7 +31,7 @@ const daySort = (objArr) => {
 
 const LocalCourse = (props) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, bg_color } = theme;
+    const { themeColor, black, bg_color } = theme;
 
     const { navigation } = props;
 
@@ -159,37 +160,10 @@ const LocalCourse = (props) => {
         ));
     };
 
-    // Group By 切換
-    const renderGroupChoice = useCallback(() => {
-        const s = StyleSheet.create({
-            button: {
-                backgroundColor: themeColor,
-                paddingVertical: scale(6),
-                paddingHorizontal: scale(14),
-                borderRadius: scale(999),
-                marginLeft: scale(10),
-            },
-        });
-        return (
-            <View style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>Group By:</Text>
-                <TouchableOpacity style={{
-                    ...s.button,
-                    backgroundColor: groupChoice === 'section' ? themeColor : null,
-                }}
-                    onPress={() => setGroupChoice('section')}>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: groupChoice === 'section' ? white : black.third }}>Section</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{
-                    ...s.button,
-                    backgroundColor: groupChoice === 'teacher' ? themeColor : null,
-                }}
-                    onPress={() => setGroupChoice('teacher')}>
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: groupChoice === 'teacher' ? white : black.third }}>Teacher</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }, [black, groupChoice, themeColor, white]);
+    const groupByOptions = useMemo(() => ([
+        { key: 'section', label: 'Section' },
+        { key: 'teacher', label: 'Teacher' },
+    ]), []);
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
@@ -218,7 +192,15 @@ const LocalCourse = (props) => {
                     ) : null}
 
                     {/* Group By Section / Teacher */}
-                    {renderGroupChoice()}
+                    <View style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', marginVertical: scale(8) }}>
+                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>Group By:</Text>
+                        <SegmentControl
+                            style={{ marginLeft: scale(10) }}
+                            options={groupByOptions}
+                            selectedIndex={groupChoice === 'section' ? 0 : 1}
+                            onChange={(index) => setGroupChoice(index === 0 ? 'section' : 'teacher')}
+                        />
+                    </View>
 
                     {/* 可選教授和Section */}
                     {groupChoice === 'section' && relateSectionObj
