@@ -7,7 +7,6 @@ import {
     StyleSheet,
     TextInput,
     Keyboard,
-    Platform,
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -17,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import TouchableScale from 'react-native-touchable-scale';
-import { MenuView } from '@react-native-menu/menu';
+import * as DropdownMenu from 'zeego/dropdown-menu';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -512,58 +511,240 @@ function CourseSim({ route, navigation }) {
             {afternoonReminder}
             {timeDiffReminder}
 
-            <MenuView
-                onPressAction={({ nativeEvent }) => {
-                    switch (nativeEvent.event) {
-                        case 'wiki':
-                            trigger();
-                            const URL = ARK_WIKI_SEARCH + encodeURIComponent(course['Course Code']);
-                            navigation.navigate('Wiki', { url: URL });
-                            break;
+            <DropdownMenu.Root
+                onOpenChange={(open) => {
+                    if (open) {
+                        trigger();
+                    }
+                }}
+            >
+                <DropdownMenu.Trigger>
+                    <TouchableScale
+                        style={{
+                            margin: scale(5),
+                            backgroundColor: timeWarning ? unread :
+                                TIME_TABLE_COLOR[lodash.indexOf(u_code_list, course['Course Code']) % TIME_TABLE_COLOR.length],
+                            borderRadius: scale(10),
+                            padding: scale(5),
+                            alignItems: 'center', justifyContent: 'center',
+                        }}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            trigger('rigid');
+                            if (hasOpenCourseSearch) {
+                                bottomSheetRef?.current?.snapToIndex(0);
+                            }
+                        }}
+                    >
+                        {/* 課號 */}
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            opacity: 0.7,
+                            fontSize: scale(20),
+                            textAlign: 'center',
+                            fontWeight: '700',
+                        }}>
+                            {course['Course Code'].substring(0, 4) + '\n'}
+                            <Text style={{ fontSize: scale(20), fontWeight: 'bold' }}>
+                                {course['Course Code'].substring(4, 8)}
+                            </Text>
+                        </Text>
 
-                        case 'what2reg':
+                        {/* Section */}
+                        <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.8 }}>
+                            {course.Section}
+                        </Text>
+
+                        {/* 課程名稱 */}
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            textAlign: 'center',
+                            opacity: 0.4,
+                        }} numberOfLines={4}>
+                            {course['Course Title']}
+                        </Text>
+
+                        {/* 教室 */}
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            fontWeight: 'bold',
+                            opacity: 0.5,
+                        }}>
+                            {course.Classroom}
+                        </Text>
+
+                        {/* 上課時間 */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }}>
+                            <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', opacity: 0.8 }}>
+                                {course['Time From']}
+                            </Text>
+                            <Ionicons name="ellipsis-horizontal" size={scale(20)} color={black.main} style={{ opacity: 0.4 }} />
+                            <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', opacity: 0.8 }}>
+                                {course['Time To']}
+                            </Text>
+                        </View>
+                    </TouchableScale>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content>
+                    <DropdownMenu.Item
+                        key="wiki"
+                        onSelect={() => {
                             trigger();
                             const courseCode = course['Course Code'];
                             const profName = course['Teacher Information'];
-                            const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(profName);
+                            let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+                            if (profName) {
+                                URL = ARK_WIKI_SEARCH + encodeURIComponent(profName);
+                                logToFirebase('checkCourse', {
+                                    courseCode,
+                                    profName,
+                                    action: 'ark-wiki',
+                                });
+                            }
+                            else {
+                                logToFirebase('checkCourse', {
+                                    courseCode,
+                                    action: 'ark-wiki',
+                                });
+                            }
+                            openLink(URL);
+                        }}
+                    >
+                        <DropdownMenu.ItemIcon
+                            ios={{
+                                name: 'book',
+                                pointSize: scale(18),
+                                hierarchicalColor: {
+                                    dark: themeColor,
+                                    light: themeColor,
+                                },
+                            }}
+                            androidIconName="ic_menu_book"
+                        />
+                        <DropdownMenu.ItemTitle style={{ color: themeColor }}>
+                            {`${t('寫', { ns: 'catalog' })} ARK Wiki !!!`}
+                        </DropdownMenu.ItemTitle>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                        key="what2reg"
+                        onSelect={() => {
+                            trigger();
+                            const courseCode = course['Course Code'];
+                            const profName = course['Teacher Information'];
+                            const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(profName));
                             openLink(URI);
-                            break;
-
-                        case 'official':
+                        }}
+                    >
+                        <DropdownMenu.ItemIcon
+                            ios={{
+                                name: 'star',
+                                pointSize: scale(18),
+                                hierarchicalColor: {
+                                    dark: black.third,
+                                    light: black.third,
+                                },
+                            }}
+                            androidIconName="ic_menu_star"
+                        />
+                        <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                            {`${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`}
+                        </DropdownMenu.ItemTitle>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                        key="official"
+                        onSelect={() => {
                             trigger();
                             openLink(OFFICIAL_COURSE_SEARCH + course['Course Code']);
-                            break;
-
-                        case 'section':
+                        }}
+                    >
+                        <DropdownMenu.ItemIcon
+                            ios={{
+                                name: 'graduationcap',
+                                pointSize: scale(18),
+                                hierarchicalColor: {
+                                    dark: black.third,
+                                    light: black.third,
+                                },
+                            }}
+                            androidIconName="ic_menu_myplaces"
+                        />
+                        <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                            {`${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`}
+                        </DropdownMenu.ItemTitle>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                        key="section"
+                        onSelect={() => {
                             trigger();
                             navigation.navigate('LocalCourse', course['Course Code']);
-                            break;
-
-                        case 'del':
-                            trigger();
-                            Alert.alert('', `要在模擬課表中刪除${course['Course Code']}的所有Section嗎？`,
-                                [
-                                    {
-                                        text: 'Yes',
-                                        onPress: () => {
-                                            trigger();
-                                            const tempList = lodash.filter(u_codeSectionList,
-                                                i => course['Course Code'] !== i['Course Code']
-                                            );
-                                            handleCourseList(tempList);
-                                            verScroll.current?.scrollTo({ y: 0 });
+                        }}
+                    >
+                        <DropdownMenu.ItemIcon
+                            ios={{
+                                name: 'list.bullet',
+                                pointSize: scale(18),
+                                hierarchicalColor: {
+                                    dark: black.third,
+                                    light: black.third,
+                                },
+                            }}
+                            androidIconName="ic_menu_agenda"
+                        />
+                        <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                            {`${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`}
+                        </DropdownMenu.ItemTitle>
+                    </DropdownMenu.Item>
+                    {hasDuplicate ? (
+                        <DropdownMenu.Item
+                            key="del-all-sections"
+                            destructive
+                            onSelect={() => {
+                                trigger();
+                                Alert.alert('', `要在模擬課表中刪除${course['Course Code']}的所有Section嗎？`,
+                                    [
+                                        {
+                                            text: 'Yes',
+                                            onPress: () => {
+                                                trigger();
+                                                const tempList = lodash.filter(u_codeSectionList,
+                                                    i => course['Course Code'] !== i['Course Code']
+                                                );
+                                                handleCourseList(tempList);
+                                                verScroll.current?.scrollTo({ y: 0 });
+                                            },
+                                            style: 'destructive',
                                         },
-                                        style: 'destructive',
+                                        {
+                                            text: 'No',
+                                        },
+                                    ],
+                                    { cancelable: true }
+                                );
+                            }}
+                        >
+                            <DropdownMenu.ItemIcon
+                                ios={{
+                                    name: 'trash',
+                                    pointSize: scale(18),
+                                    hierarchicalColor: {
+                                        dark: unread,
+                                        light: unread,
                                     },
-                                    {
-                                        text: 'No',
-                                    },
-                                ],
-                                { cancelable: true }
-                            );
-                            break;
-
-                        case 'drop':
+                                }}
+                                androidIconName="ic_menu_delete"
+                            />
+                            <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                {`${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`}
+                            </DropdownMenu.ItemTitle>
+                        </DropdownMenu.Item>
+                    ) : null}
+                    <DropdownMenu.Item
+                        key="drop-section"
+                        destructive
+                        onSelect={() => {
                             trigger();
                             Alert.alert('', `要在模擬課表中刪除${course['Course Code']}-${course.Section}嗎？`,
                                 [
@@ -581,118 +762,25 @@ function CourseSim({ route, navigation }) {
                                 ],
                                 { cancelable: true }
                             );
-                            break;
-
-                        default:
-                            break;
-                    }
-                }}
-                actions={[
-                    {
-                        id: 'wiki',
-                        title: `${t('查', { ns: 'catalog' })} ARK Wiki !!!`,
-                        titleColor: themeColor,
-                    },
-                    {
-                        id: 'what2reg',
-                        title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-                        titleColor: black.third,
-                    },
-                    {
-                        id: 'official',
-                        title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-                        titleColor: black.third,
-                    },
-                    {
-                        id: 'section',
-                        title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
-                        titleColor: black.third,
-                    },
-                    ...(hasDuplicate ? [{
-                        id: 'del',
-                        title: `${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`,
-                        attributes: { destructive: true },
-                        image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
-                    }] : []),
-                    {
-                        id: 'drop',
-                        title: `${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`,
-                        attributes: { destructive: true },
-                        image: Platform.select({ ios: 'trash', android: 'ic_menu_delete' }),
-                    },
-                ]}
-                shouldOpenOnLongPress={false}
-            >
-                <TouchableScale
-                    style={{
-                        margin: scale(5),
-                        backgroundColor: timeWarning ? unread :
-                            TIME_TABLE_COLOR[lodash.indexOf(u_code_list, course['Course Code']) % TIME_TABLE_COLOR.length],
-                        borderRadius: scale(10),
-                        padding: scale(5),
-                        alignItems: 'center', justifyContent: 'center',
-                    }}
-                    activeOpacity={0.8}
-                    onPress={() => {
-                        trigger('rigid');
-                        if (hasOpenCourseSearch) {
-                            bottomSheetRef?.current?.snapToIndex(0);
-                        }
-                    }}
-                    delayLongPress={300}
-                >
-                    {/* 課號 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        opacity: 0.7,
-                        fontSize: scale(20),
-                        textAlign: 'center',
-                        fontWeight: '700',
-                    }}>
-                        {course['Course Code'].substring(0, 4) + '\n'}
-                        <Text style={{ fontSize: scale(20), fontWeight: 'bold' }}>
-                            {course['Course Code'].substring(4, 8)}
-                        </Text>
-                    </Text>
-
-                    {/* Section */}
-                    <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.8 }}>
-                        {course.Section}
-                    </Text>
-
-                    {/* 課程名稱 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        textAlign: 'center',
-                        opacity: 0.4,
-                    }} numberOfLines={4}>
-                        {course['Course Title']}
-                    </Text>
-
-                    {/* 教室 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        fontWeight: 'bold',
-                        opacity: 0.5,
-                    }}>
-                        {course.Classroom}
-                    </Text>
-
-                    {/* 上課時間 */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }}>
-                        <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', opacity: 0.8 }}>
-                            {course['Time From']}
-                        </Text>
-                        <Ionicons name="ellipsis-horizontal" size={scale(20)} color={black.main} style={{ opacity: 0.4 }} />
-                        <Text style={{ ...uiStyle.defaultText, color: black.main, fontWeight: '600', opacity: 0.8 }}>
-                            {course['Time To']}
-                        </Text>
-                    </View>
-                </TouchableScale>
-            </MenuView>
+                        }}
+                    >
+                        <DropdownMenu.ItemIcon
+                            ios={{
+                                name: 'trash',
+                                pointSize: scale(18),
+                                hierarchicalColor: {
+                                    dark: unread,
+                                    light: unread,
+                                },
+                            }}
+                            androidIconName="ic_menu_delete"
+                        />
+                        <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                            {`${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`}
+                        </DropdownMenu.ItemTitle>
+                    </DropdownMenu.Item>
+                </DropdownMenu.Content>
+            </DropdownMenu.Root>
         </View>
         );
     };
