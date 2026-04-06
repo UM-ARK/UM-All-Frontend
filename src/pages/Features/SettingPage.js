@@ -174,6 +174,42 @@ const ProfileCard = ({ userInfo }) => {
 };
 
 /**
+ * 同一分區內多個設置項的容器：單一圓角卡片；項間分隔與功能頁卡片標題底線相同（bg_color、verticalScale(2)）
+ * @param {React.ReactNode} children - 子節點（通常為多個 SettingItem，需傳 grouped）
+ */
+const SettingSectionCard = ({ children }) => {
+    const { theme } = useTheme();
+    const { white, bg_color, viewShadow } = theme;
+    const items = React.Children.toArray(children).filter(Boolean);
+
+    return (
+        <View style={{
+            marginHorizontal: scale(15),
+            marginBottom: verticalScale(8),
+            borderRadius: scale(16),
+            overflow: 'hidden',
+            backgroundColor: white,
+            ...viewShadow,
+        }}>
+            {items.map((child, index) => (
+                <React.Fragment key={index}>
+                    {index > 0 ? (
+                        <View
+                            style={{
+                                height: verticalScale(2),
+                                width: '100%',
+                                backgroundColor: bg_color,
+                            }}
+                        />
+                    ) : null}
+                    {child}
+                </React.Fragment>
+            ))}
+        </View>
+    );
+};
+
+/**
  * 設置分區標題元件
  * @param {string} title - 分區標題文字
  * @param {string} icon - Ionicons 圖標名稱
@@ -188,7 +224,7 @@ const SettingSection = ({ title, icon }) => {
             alignItems: 'center',
             marginHorizontal: scale(15),
             marginTop: verticalScale(20),
-            marginBottom: verticalScale(8),
+            marginBottom: verticalScale(6),
         }}>
             {icon && (
                 <Ionicons name={icon} size={scale(14)} color={black.third} style={{ marginRight: scale(6) }} />
@@ -216,8 +252,9 @@ const SettingSection = ({ title, icon }) => {
  * @param {Function} onPress - 點擊回調函數
  * @param {ReactNode} rightElement - 右側自定義元素（可選）
  * @param {boolean} showArrow - 是否顯示右箭頭，默認為 true
+ * @param {boolean} grouped - 是否置於 SettingSectionCard 內（共用外層圓角與陰影）
  */
-const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, showArrow = true }) => {
+const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, showArrow = true, grouped = false }) => {
     const { theme } = useTheme();
     const { white, black, viewShadow } = theme;
 
@@ -233,10 +270,14 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
                 backgroundColor: white,
                 paddingHorizontal: scale(15),
                 paddingVertical: verticalScale(12),
-                borderRadius: scale(16),
-                marginHorizontal: scale(15),
-                marginBottom: verticalScale(8),
-                ...viewShadow,
+                ...(grouped
+                    ? {}
+                    : {
+                        borderRadius: scale(16),
+                        marginHorizontal: scale(15),
+                        marginBottom: verticalScale(8),
+                        ...viewShadow,
+                    }),
             }}
             activeOpacity={0.7}
         >
@@ -380,176 +421,174 @@ const SettingPage = ({ navigation }) => {
                 {/* 外觀設置分區 */}
                 <SettingSection title={t('setting:Appearance')} icon="color-palette" />
 
-                {/* 主題設置項 */}
-                <SettingItem
-                    icon="sunny"
-                    iconColor="#FF9500"
-                    title={t('setting:Theme')}
-                    subtitle={themeOptions[themeMode].label}
-                    showArrow={false}
-                    rightElement={
-                        <SegmentControl
-                            options={themeOptions}
-                            selectedIndex={themeMode}
-                            onChange={handleThemeChange}
-                        />
-                    }
-                />
-
-                {/* 語言設置項 */}
-                <SettingItem
-                    icon="language"
-                    iconColor="#5856D6"
-                    title={t('setting:Language')}
-                    subtitle={i18n.language === 'tc' ? '繁體中文' : 'English'}
-                    showArrow={false}
-                    rightElement={
-                        <SegmentControl
-                            options={languageOptions}
-                            selectedIndex={languageIndex}
-                            onChange={(index) => handleLanguageChange(languageOptions[index].key)}
-                        />
-                    }
-                />
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="sunny"
+                        iconColor="#FF9500"
+                        title={t('setting:Theme')}
+                        subtitle={themeOptions[themeMode].label}
+                        showArrow={false}
+                        rightElement={
+                            <SegmentControl
+                                options={themeOptions}
+                                selectedIndex={themeMode}
+                                onChange={handleThemeChange}
+                            />
+                        }
+                    />
+                    <SettingItem
+                        grouped
+                        icon="language"
+                        iconColor="#5856D6"
+                        title={t('setting:Language')}
+                        subtitle={i18n.language === 'tc' ? '繁體中文' : 'English'}
+                        showArrow={false}
+                        rightElement={
+                            <SegmentControl
+                                options={languageOptions}
+                                selectedIndex={languageIndex}
+                                onChange={(index) => handleLanguageChange(languageOptions[index].key)}
+                            />
+                        }
+                    />
+                </SettingSectionCard>
 
                 {/* 應用設置分區 */}
                 <SettingSection title={t('setting:Application')} icon="apps" />
 
-                {/* 清除緩存設置項 */}
-                <SettingItem
-                    icon="trash"
-                    iconColor="#FF3B30"
-                    title={t('setting:Clear Cache')}
-                    onPress={handleClearCache}
-                />
-
-                {/* 檢查更新設置項 */}
-                <SettingItem
-                    icon="cloud-download"
-                    iconColor="#34C759"
-                    title={t('setting:Check Update')}
-                    subtitle={`v${packageInfo.version}`}
-                    onPress={() => {
-                        trigger();
-                        Alert.alert(t('setting:Check Update'), t('setting:Latest Version'));
-                    }}
-                />
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="trash"
+                        iconColor="#FF3B30"
+                        title={t('setting:Clear Cache')}
+                        onPress={handleClearCache}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="cloud-download"
+                        iconColor="#34C759"
+                        title={t('setting:Check Update')}
+                        subtitle={`v${packageInfo.version}`}
+                        onPress={() => {
+                            trigger();
+                            Alert.alert(t('setting:Check Update'), t('setting:Latest Version'));
+                        }}
+                    />
+                </SettingSectionCard>
 
                 {/* 關於分區 */}
                 <SettingSection title={t('setting:About')} icon="information-circle" />
 
-                {/* 版本設置項 */}
-                <SettingItem
-                    icon="logo-apple"
-                    iconColor={black.main}
-                    title={t('setting:Version')}
-                    subtitle={`v${packageInfo.version}`}
-                    showArrow={false}
-                />
-
-                {/* 開源地址設置項 */}
-                <SettingItem
-                    icon="logo-github"
-                    iconColor={black.second}
-                    title={t('setting:Open Source')}
-                    onPress={() => {
-                        trigger();
-                        openLink(GITHUB_PAGE);
-                    }}
-                />
-
-                {/* 常見問題設置項 */}
-                <SettingItem
-                    icon="help-circle"
-                    iconColor="#007AFF"
-                    title={t('setting:Common Issues')}
-                    onPress={() => {
-                        trigger();
-                        openLink(USUAL_Q);
-                    }}
-                />
-
-                {/* 隱私政策設置項 */}
-                <SettingItem
-                    icon="shield-checkmark"
-                    iconColor="#5856D6"
-                    title={t('setting:Privacy Policy')}
-                    onPress={() => {
-                        trigger();
-                        openLink(USER_AGREE);
-                    }}
-                />
-
-                {/* 捐贈支持設置項 */}
-                <SettingItem
-                    icon="heart"
-                    iconColor="#FF2D55"
-                    title={t('setting:Donate')}
-                    onPress={() => {
-                        trigger();
-                        openLink(GITHUB_DONATE);
-                    }}
-                />
-
-                {/* 問題反饋設置項 */}
-                <SettingItem
-                    icon="chatbubble-ellipses"
-                    iconColor="#34C759"
-                    title={t('setting:Feedback')}
-                    onPress={() => {
-                        trigger();
-                        openLink(GITHUB_UPDATE_PLAN);
-                    }}
-                />
-
-                {/* 開發動態設置項 */}
-                <SettingItem
-                    icon="pulse"
-                    iconColor="#FF9500"
-                    title={t('setting:Activity')}
-                    onPress={() => {
-                        trigger();
-                        openLink(GITHUB_ACTIVITY);
-                    }}
-                />
-
-                {/* 關於 ARK ALL 設置項 */}
-                <SettingItem
-                    icon="school"
-                    iconColor="#4796d6"
-                    title={`${t('common:ABOUT')} ARK ALL`}
-                    onPress={() => {
-                        trigger();
-                        openLink(ARK_WIKI_ABOUT_ARK);
-                    }}
-                />
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="logo-apple"
+                        iconColor={black.main}
+                        title={t('setting:Version')}
+                        subtitle={`v${packageInfo.version}`}
+                        showArrow={false}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="logo-github"
+                        iconColor={black.second}
+                        title={t('setting:Open Source')}
+                        onPress={() => {
+                            trigger();
+                            openLink(GITHUB_PAGE);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="help-circle"
+                        iconColor="#007AFF"
+                        title={t('setting:Common Issues')}
+                        onPress={() => {
+                            trigger();
+                            openLink(USUAL_Q);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="shield-checkmark"
+                        iconColor="#5856D6"
+                        title={t('setting:Privacy Policy')}
+                        onPress={() => {
+                            trigger();
+                            openLink(USER_AGREE);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="heart"
+                        iconColor="#FF2D55"
+                        title={t('setting:Donate')}
+                        onPress={() => {
+                            trigger();
+                            openLink(GITHUB_DONATE);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="chatbubble-ellipses"
+                        iconColor="#34C759"
+                        title={t('setting:Feedback')}
+                        onPress={() => {
+                            trigger();
+                            openLink(GITHUB_UPDATE_PLAN);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="pulse"
+                        iconColor="#FF9500"
+                        title={t('setting:Activity')}
+                        onPress={() => {
+                            trigger();
+                            openLink(GITHUB_ACTIVITY);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="school"
+                        iconColor="#4796d6"
+                        title={`${t('common:ABOUT')} ARK ALL`}
+                        onPress={() => {
+                            trigger();
+                            openLink(ARK_WIKI_ABOUT_ARK);
+                        }}
+                    />
+                </SettingSectionCard>
 
                 {/* 聯繫我們分區 */}
                 <SettingSection title={t('setting:Contact')} icon="mail" />
 
-                {/* 官方網站設置項 */}
-                <SettingItem
-                    icon="globe"
-                    iconColor="#007AFF"
-                    title={t('setting:Official Website')}
-                    subtitle={BASE_HOST}
-                    onPress={() => {
-                        trigger();
-                        openLink(BASE_HOST);
-                    }}
-                />
-
-                {/* 電子郵箱設置項 */}
-                <SettingItem
-                    icon="mail"
-                    iconColor="#5856D6"
-                    title={t('setting:Email')}
-                    subtitle={MAIL}
-                    onPress={() => {
-                        trigger();
-                        Linking.openURL('mailto:' + MAIL);
-                    }}
-                />
+                <SettingSectionCard>
+                    <SettingItem
+                        grouped
+                        icon="globe"
+                        iconColor="#007AFF"
+                        title={t('setting:Official Website')}
+                        subtitle={BASE_HOST}
+                        onPress={() => {
+                            trigger();
+                            openLink(BASE_HOST);
+                        }}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="mail"
+                        iconColor="#5856D6"
+                        title={t('setting:Email')}
+                        subtitle={MAIL}
+                        onPress={() => {
+                            trigger();
+                            Linking.openURL('mailto:' + MAIL);
+                        }}
+                    />
+                </SettingSectionCard>
 
                 {/* 底部間距 */}
                 <View style={{ height: verticalScale(30) }} />
