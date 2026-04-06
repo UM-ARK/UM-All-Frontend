@@ -44,8 +44,9 @@ const SegmentControl = ({ options, selectedIndex, onChange }) => {
         <View style={{
             flexDirection: 'row',
             backgroundColor: bg_color,
-            borderRadius: scale(8),
-            padding: scale(2),
+            borderRadius: scale(999),
+            padding: scale(3),
+            overflow: 'hidden',
         }}>
             {options.map((option, index) => (
                 <TouchableOpacity
@@ -55,9 +56,9 @@ const SegmentControl = ({ options, selectedIndex, onChange }) => {
                         onChange(index);
                     }}
                     style={{
-                        paddingHorizontal: scale(10),
-                        paddingVertical: verticalScale(4),
-                        borderRadius: scale(6),
+                        paddingHorizontal: scale(12),
+                        paddingVertical: verticalScale(5),
+                        borderRadius: scale(999),
                         backgroundColor: selectedIndex === index ? white : 'transparent',
                     }}
                 >
@@ -232,7 +233,7 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
                 backgroundColor: white,
                 paddingHorizontal: scale(15),
                 paddingVertical: verticalScale(12),
-                borderRadius: scale(10),
+                borderRadius: scale(16),
                 marginHorizontal: scale(15),
                 marginBottom: verticalScale(8),
                 ...viewShadow,
@@ -244,7 +245,7 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
                 <View style={{
                     width: scale(32),
                     height: scale(32),
-                    borderRadius: scale(8),
+                    borderRadius: scale(12),
                     backgroundColor: `${iconColor}15`,
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -293,7 +294,7 @@ const SettingItem = ({ icon, iconColor, title, subtitle, onPress, rightElement, 
  */
 const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
-    const { themeColor, white, bg_color, black } = theme;
+    const { bg_color, black } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common']);
     const [userInfo, setUserInfo] = useState({});
 
@@ -363,6 +364,13 @@ const SettingPage = ({ navigation }) => {
         { key: 'dark', label: t('setting:Dark') },
     ];
 
+    // 語言選項（與主題列共用 SegmentControl 樣式：灰底容器、選中白底主題色字）
+    const languageOptions = [
+        { key: 'tc', label: '繁中' },
+        { key: 'en', label: 'EN' },
+    ];
+    const languageIndex = i18n.language === 'en' ? 1 : 0;
+
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
@@ -396,51 +404,11 @@ const SettingPage = ({ navigation }) => {
                     subtitle={i18n.language === 'tc' ? '繁體中文' : 'English'}
                     showArrow={false}
                     rightElement={
-                        <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    trigger();
-                                    handleLanguageChange('tc');
-                                }}
-                                style={{
-                                    paddingHorizontal: scale(12),
-                                    paddingVertical: verticalScale(6),
-                                    backgroundColor: i18n.language === 'tc' ? themeColor : 'transparent',
-                                    borderRadius: scale(6),
-                                    marginRight: scale(8),
-                                }}
-                            >
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(12),
-                                    color: i18n.language === 'tc' ? white : black.third,
-                                    fontWeight: i18n.language === 'tc' ? '600' : '400',
-                                }}>
-                                    繁中
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    trigger();
-                                    handleLanguageChange('en');
-                                }}
-                                style={{
-                                    paddingHorizontal: scale(12),
-                                    paddingVertical: verticalScale(6),
-                                    backgroundColor: i18n.language === 'en' ? themeColor : 'transparent',
-                                    borderRadius: scale(6),
-                                }}
-                            >
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(12),
-                                    color: i18n.language === 'en' ? white : black.third,
-                                    fontWeight: i18n.language === 'en' ? '600' : '400',
-                                }}>
-                                    EN
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        <SegmentControl
+                            options={languageOptions}
+                            selectedIndex={languageIndex}
+                            onChange={(index) => handleLanguageChange(languageOptions[index].key)}
+                        />
                     }
                 />
 
