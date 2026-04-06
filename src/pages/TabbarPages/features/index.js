@@ -187,8 +187,7 @@ function Index({ navigation }) {
                 {/* 標題與個功能按鍵 */}
                 <View style={{
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                    paddingVertical: verticalScale(10), // 增加頂部呼吸感
-                    paddingHorizontal: scale(16), // 兩側留白增加至 16
+                    paddingHorizontal: scale(10), // 兩側留白增加至 16
                 }}>
                     {/* 左側：反饋 (使用淺色背景膠囊樣式) */}
                     <TouchableOpacity
