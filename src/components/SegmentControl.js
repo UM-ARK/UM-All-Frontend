@@ -10,15 +10,36 @@ import { trigger } from '../utils/trigger';
  * @param {number} selectedIndex - 當前選中索引
  * @param {(index: number) => void} onChange - 變更回調
  * @param {object} [style] - 外層容器額外樣式
+ * @param {string} [trackBackgroundColor] - 軌道底色（預設 theme.bg_color）
+ * @param {string} [accentColor] - 選中態強調色（預設 theme.themeColor）
+ * @param {string} [inactiveLabelColor] - 未選中文字色（預設 theme.black.third）
+ * @param {number} [fontSize] - 標籤字級（預設 scale(11)）
+ * @param {boolean} [wrap] - 是否允許換行（多選項窄螢幕）
  */
-const SegmentControl = ({ options, selectedIndex, onChange, style }) => {
+const SegmentControl = ({
+    options,
+    selectedIndex,
+    onChange,
+    style,
+    trackBackgroundColor,
+    accentColor,
+    inactiveLabelColor,
+    fontSize,
+    wrap,
+}) => {
     const { theme } = useTheme();
     const { themeColor, bg_color, black } = theme;
+    const accent = accentColor ?? themeColor;
+    const track = trackBackgroundColor ?? bg_color;
+    const inactive = inactiveLabelColor ?? black.third;
+    const labelSize = fontSize ?? scale(11);
 
     return (
         <View style={[{
             flexDirection: 'row',
-            backgroundColor: bg_color,
+            flexWrap: wrap ? 'wrap' : 'nowrap',
+            justifyContent: wrap ? 'center' : undefined,
+            backgroundColor: track,
             borderRadius: scale(999),
             padding: scale(3),
             overflow: 'hidden',
@@ -34,14 +55,14 @@ const SegmentControl = ({ options, selectedIndex, onChange, style }) => {
                         paddingHorizontal: scale(12),
                         paddingVertical: verticalScale(5),
                         borderRadius: scale(999),
-                        backgroundColor: selectedIndex === index ? `${themeColor}15` : 'transparent',
+                        backgroundColor: selectedIndex === index ? `${accent}15` : 'transparent',
                         opacity: pressed ? 0.85 : 1,
                     })}
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
-                        fontSize: scale(11),
-                        color: selectedIndex === index ? themeColor : black.third,
+                        fontSize: labelSize,
+                        color: selectedIndex === index ? accent : inactive,
                         fontWeight: selectedIndex === index ? '600' : '400',
                     }}>
                         {option.label}

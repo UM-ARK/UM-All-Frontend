@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
@@ -6,6 +6,7 @@ import ARKImageView from '../../../../components/ARKImageView';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
+import SegmentControl from '../../../../components/SegmentControl';
 
 import { Image } from 'expo-image';
 import { FlatGrid } from 'react-native-super-grid';
@@ -49,12 +50,6 @@ const NewsDetail = ({ route, navigation }) => {
             alignSelf: 'flex-end',
             marginRight: scale(15),
             fontWeight: '600',
-        },
-        languageModeButtonContainer: {
-            padding: scale(10),
-            marginVertical: scale(5),
-            borderRadius: scale(10),
-            // ...viewShadow,
         },
         contentContainer: {
             marginHorizontal: scale(10),
@@ -190,37 +185,22 @@ const NewsDetail = ({ route, navigation }) => {
         });
     }, [data, chooseMode]);
 
-    // 文本語言模式選擇
-    const renderModeChoice = () => {
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                {LanguageMode.map((item, index) => {
-                    //只渲染存在的语言的按钮
-                    if (item.available === 1) {
-                        return (
-                            <TouchableScale key={index}
-                                style={{
-                                    ...styles.languageModeButtonContainer,
-                                    backgroundColor: chooseMode === index ? themeColor : white,
-                                }}
-                                onPress={() => {
-                                    trigger();
-                                    setChooseMode(index);
-                                }}>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    color: chooseMode === index ? white : themeColor,
-                                }}>
-                                    {item.name}
-                                </Text>
-                            </TouchableScale>
-                        );
-                    }
-                    return null;
-                })}
-            </View >
-        );
-    };
+    // 僅含可用語言；保留 langIndex 對應 title/content 陣列索引
+    const languageSegmentOptions = useMemo(() => (
+        LanguageMode
+            .map((item, langIndex) => ({ ...item, langIndex }))
+            .filter(item => item.available === 1)
+            .map(item => ({
+                key: item.locale,
+                label: item.name,
+                langIndex: item.langIndex,
+            }))
+    ), [LanguageMode]);
+
+    const languageSegmentSelectedIndex = useMemo(() => {
+        const i = languageSegmentOptions.findIndex(o => o.langIndex === chooseMode);
+        return i >= 0 ? i : 0;
+    }, [languageSegmentOptions, chooseMode]);
 
     const handleHyperLink = (url) => {
         if (url.includes('mailto:')) {
@@ -238,9 +218,22 @@ const NewsDetail = ({ route, navigation }) => {
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
             <ScrollView
                 // 該頁面是圖片置頂，所以iOS26也無需調整inset
-                contentInsetAdjustmentBehavior={"automatic"}>
+                contentInsetAdjustmentBehavior={'automatic'}>
                 {/* 文本模式選擇 3語切換 */}
-                {renderModeChoice()}
+                {languageSegmentOptions.length > 0 ? (
+                    <View style={{ alignItems: 'center', marginVertical: scale(5) }}>
+                        <SegmentControl
+                            options={languageSegmentOptions}
+                            selectedIndex={languageSegmentSelectedIndex}
+                            onChange={(segIdx) => {
+                                const opt = languageSegmentOptions[segIdx];
+                                if (opt) { setChooseMode(opt.langIndex); }
+                            }}
+                            trackBackgroundColor={white}
+                            fontSize={scale(14)}
+                        />
+                    </View>
+                ) : null}
                 {/* 大標題 */}
                 <Text style={styles.title} selectable={true}>
                     {title[chooseMode]}
