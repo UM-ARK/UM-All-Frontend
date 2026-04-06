@@ -38,6 +38,7 @@ export default {
         'Cancel': '取消',
         'Confirm': '確定',
         'Latest Version': '當前已是最新版本',
+        'Check Update Error': '無法取得最新版本資訊，請檢查網路後重試。',
         'Guest': '訪客',
         'Student': '學生',
         'Organization': '組織',

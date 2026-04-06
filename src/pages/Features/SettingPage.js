@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -30,6 +30,11 @@ import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SegmentControl from '../../components/SegmentControl';
+import {
+    fetchAppInfoFromServer,
+    isLocalAppOlderThanServer,
+    showAppStoreUpdateAlert,
+} from '../../utils/appUpdateKits';
 
 /**
  * 用戶資料卡元件 - 玻璃擬態效果
@@ -353,6 +358,23 @@ const SettingPage = ({ navigation }) => {
         );
     };
 
+    /**
+     * 向伺服器查詢 app_version，若有新版本則與首頁相同方式 Alert 並可跳轉商店／官網
+     */
+    const handleCheckUpdate = useCallback(async () => {
+        trigger();
+        const result = await fetchAppInfoFromServer();
+        if (!result.ok) {
+            Alert.alert(t('setting:Check Update'), t('setting:Check Update Error'));
+            return;
+        }
+        if (isLocalAppOlderThanServer(result.content)) {
+            showAppStoreUpdateAlert(result.content);
+        } else {
+            Alert.alert(t('setting:Check Update'), t('setting:Latest Version'));
+        }
+    }, [t]);
+
     // 主題選項配置
     const themeOptions = [
         { key: 'system', label: t('setting:System') },
@@ -426,11 +448,7 @@ const SettingPage = ({ navigation }) => {
                         iconColor="#34C759"
                         title={t('setting:Check Update')}
                         subtitle={`v${packageInfo.version}`}
-                        onPress={() => {
-                            trigger();
-                            // TODO: 似乎還沒有真正的檢查更新邏輯
-                            Alert.alert(t('setting:Check Update'), t('setting:Latest Version'));
-                        }}
+                        onPress={handleCheckUpdate}
                     />
                 </SettingSectionCard>
 

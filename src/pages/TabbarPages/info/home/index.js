@@ -34,7 +34,7 @@ import {
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
 import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
-import { versionStringCompare } from '../../../../utils/versionKits.js';
+import { isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
 import packageInfo from '../../../../../package.json';
 import HomeCard from './components/HomeCard.js';
 import { screenWidth } from '../../../../utils/stylesKits.js';
@@ -238,32 +238,14 @@ const HomeScreen = ({ navigation }) => {
                 }
             }
 
-            // APP版本滯後，提示下載新版本
-            const shouldUpdate = versionStringCompare(packageInfo.version, serverInfo.app_version) == -1;
-            if (shouldUpdate) {
-                setShowUpdateInfo(shouldUpdate);
+            // APP 版本滯後，提示下載新版本（與設定頁共用 appUpdateKits）
+            if (isLocalAppOlderThanServer(serverInfo)) {
+                setShowUpdateInfo(true);
                 setAppVersion({
                     lastest: serverInfo.app_version,
                     local: packageInfo.version,
                 });
-
-                Alert.alert(`ARK ${serverInfo.app_version} 現可更新！！`,
-                    'version_info' in serverInfo
-                        ? serverInfo.version_info
-                        : '新版有許多新特性，舊版APP可能會在某時刻不可用，現在前往更新嗎？🥺',
-                    [
-                        {
-                            text: 'Yes',
-                            onPress: () => {
-                                trigger();
-                                const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                Linking.openURL(url);
-                            },
-                        },
-                        {
-                            text: 'No',
-                        },
-                    ]);
+                showAppStoreUpdateAlert(serverInfo);
                 if ('version_info' in serverInfo) {
                     setVersionInfo(serverInfo.version_info);
                 }

@@ -292,6 +292,7 @@
         "Cancel": "Cancel",
         "Confirm": "Confirm",
         "Latest Version": "You are already on the latest version",
+        "Check Update Error": "Unable to fetch version info. Check your connection and try again.",
         "Guest": "Guest",
         "Student": "Student",
         "Organization": "Organization"
