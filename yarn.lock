@@ -2807,11 +2807,6 @@
   dependencies:
     firebase "12.10.0"
 
-"@react-native-menu/menu@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@react-native-menu/menu/-/menu-2.0.0.tgz#21d3fcb15687df86386fee7815cc5ff79d26bc9e"
-  integrity sha512-hb8Mirw6aKPGONhgo52IiNpwHtISVrgCT3rMdFX1qS7eOFNzOcQh8d2UDnaH5zVpxN+QuvWtaaiRMGFpIjzdtA==
-
 "@react-native-vector-icons/common@^12.4.0":
   version "12.4.0"
   resolved "https://registry.npmjs.org/@react-native-vector-icons/common/-/common-12.4.0.tgz#60fc6f4d9a0e7e7b06f7c3a996e320c72c588a15"

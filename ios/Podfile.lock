@@ -1871,28 +1871,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-menu (2.0.0):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - react-native-pager-view (8.0.0):
     - hermes-engine
     - RCTRequired
@@ -2964,7 +2942,6 @@ DEPENDENCIES:
   - react-native-ios-context-menu (from `../node_modules/react-native-ios-context-menu`)
   - react-native-ios-utilities (from `../node_modules/react-native-ios-utilities`)
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
-  - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
@@ -3186,8 +3163,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-ios-utilities"
   react-native-keyboard-controller:
     :path: "../node_modules/react-native-keyboard-controller"
-  react-native-menu:
-    :path: "../node_modules/@react-native-menu/menu"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-safe-area-context:
@@ -3383,7 +3358,6 @@ SPEC CHECKSUMS:
   react-native-ios-context-menu: 107249ea55fe81916a6731190ff1b02f9a74c020
   react-native-ios-utilities: 75dbcc66b08299444bc5cacc9b82ff1253686385
   react-native-keyboard-controller: d8883e2d24952e3f50241d481e7729193d0e8a17
-  react-native-menu: 87ccd6e99bfdd28cb67dd00adb123001153055ef
   react-native-pager-view: 9ebb71ac08f26122d9838c3ed72dd5a61bdc2640
   react-native-safe-area-context: c5d42c4294aa175415947e23c2ac956253abfc7d
   react-native-simple-toast: a1eb60d5c91875d156fd0c1ef314fa889cd4361e

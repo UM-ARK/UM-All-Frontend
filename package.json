@@ -23,7 +23,6 @@
     "@react-native-community/datetimepicker": "8.6.0",
     "@react-native-firebase/analytics": "^24.0.0",
     "@react-native-firebase/app": "^24.0.0",
-    "@react-native-menu/menu": "^2.0.0",
     "@react-native-vector-icons/material-design-icons": "^12.4.0",
     "@react-navigation/bottom-tabs": "^7.15.9",
     "@react-navigation/elements": "^2.9.14",
