@@ -59,7 +59,7 @@ const SegmentControl = ({ options, selectedIndex, onChange }) => {
                         paddingHorizontal: scale(12),
                         paddingVertical: verticalScale(5),
                         borderRadius: scale(999),
-                        backgroundColor: selectedIndex === index ? white : 'transparent',
+                        backgroundColor: selectedIndex === index ? `${themeColor}15` : 'transparent',
                     }}
                 >
                     <Text style={{
