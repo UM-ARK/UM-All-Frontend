@@ -403,6 +403,24 @@ const ClubDetail = (props) => {
         );
     };
 
+    // 點擊頂部封面開啟大圖（需掛在 ImageHeaderScrollView 的 renderForeground）
+    const renderForeground = () => (
+        <TouchableOpacity
+            style={{ flex: 1 }}
+            activeOpacity={1}
+            onPress={() => {
+                trigger();
+                const list = clubData?.club_photos_list;
+                if (list && list.length > 0) {
+                    setImageUrls(list);
+                } else {
+                    setImageUrls(list?.[0] || ARK_LETTER_IMG);
+                }
+                imageScrollViewer.current?.handleOpenImage(0);
+            }}
+        />
+    );
+
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             {!isLoading && clubData ? (
@@ -412,6 +430,7 @@ const ClubDetail = (props) => {
                     fadeOutForeground
                     minHeight={verticalScale(150)}
                     maxHeight={verticalScale(300)}
+                    renderForeground={renderForeground}
                     renderHeader={() => (
                         <Image
                             source={clubData?.club_photos_list?.[0] || ARK_LETTER_IMG}

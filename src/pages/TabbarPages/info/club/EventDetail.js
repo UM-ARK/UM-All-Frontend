@@ -466,30 +466,12 @@ const EventDetail = (props) => {
             <TouchableOpacity
                 style={{ flex: 1, position: 'relative' }}
                 onPress={() => {
+                    trigger();
                     updateState({ imageUrls: state.coverImgUrl });
-                    imageScrollViewer.current.handleOpenImage(0);
+                    imageScrollViewer.current?.handleOpenImage(0);
                 }}
                 activeOpacity={1}
             >
-                {/* 返回按鈕 */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: verticalScale(65),
-                        left: scale(15),
-                        zIndex: 999,
-                    }}
-                >
-                    <TouchableOpacity
-                        activeOpacity={0.7}
-                        onPress={() => {
-                            trigger();
-                            props.navigation.goBack();
-                        }}
-                    >
-                        <Ionicons name="chevron-back-circle" size={verticalScale(35)} color={white} />
-                    </TouchableOpacity>
-                </View>
             </TouchableOpacity>
         );
     };
@@ -575,6 +557,7 @@ const EventDetail = (props) => {
                     fadeOutForeground
                     minHeight={verticalScale(150)}
                     maxHeight={verticalScale(350)}
+                    renderForeground={renderForeground}
                     renderHeader={() => (
                         <Image
                             source={state.coverImgUrl.replace('http:', 'https:')}
