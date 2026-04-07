@@ -20,6 +20,7 @@ const DEFAULT_SPRING = {
  *
  * @param {number} [activeScale=0.95] 按下時的 scale（相對於 1）
  * @param {object} [springConfig] 覆寫 withSpring 第二參數
+ * @param {boolean} [disabled=false] 為 true 時不觸發 onPress、不播放縮放動畫（對應 Pressable disabled）
  */
 const TouchableScale = forwardRef(function TouchableScale(
     {
@@ -30,7 +31,8 @@ const TouchableScale = forwardRef(function TouchableScale(
         onPressIn,
         onPressOut,
         onPressCancel,
-        disabled,
+        disabled = false,
+        accessibilityState,
         ...pressableProps
     },
     ref,
@@ -78,12 +80,16 @@ const TouchableScale = forwardRef(function TouchableScale(
     return (
         <AnimatedPressable
             ref={ref}
+            {...pressableProps}
+            accessibilityState={{
+                ...accessibilityState,
+                disabled: !!disabled,
+            }}
             disabled={disabled}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             onPressCancel={handlePressCancel}
             style={[style, animatedStyle]}
-            {...pressableProps}
         >
             {children}
         </AnimatedPressable>

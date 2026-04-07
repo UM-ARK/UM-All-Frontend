@@ -7,7 +7,7 @@ import { trigger } from '../../../../utils/trigger';
 import { NavigationContext } from '@react-navigation/native';
 // import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../../components/TouchableScale';
 
 const IMG_SIZE = verticalScale(45);
 

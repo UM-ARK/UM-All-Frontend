@@ -20,7 +20,6 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
-import RNTouchableScale from 'react-native-touchable-scale';
 import { useTranslation } from 'react-i18next';
 
 function Index({ navigation }) {
@@ -77,7 +76,7 @@ function Index({ navigation }) {
                     }
                     const { go_where, webview_param, needLogin } = item;
                     return (
-                        <RNTouchableScale
+                        <TouchableScale
                             style={{ justifyContent: 'center', alignItems: 'center' }}
                             activeOpacity={0.7}
                             onPress={() => {
@@ -109,7 +108,7 @@ function Index({ navigation }) {
                             }}>
                                 {item.fn_name}
                             </Text>
-                        </RNTouchableScale>
+                        </TouchableScale>
                     );
                 }}
                 showsVerticalScrollIndicator={false}

@@ -22,7 +22,7 @@ import axios from 'axios';
 import Toast from 'react-native-simple-toast';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../../components/TouchableScale';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { NavigationContext } from '@react-navigation/native';

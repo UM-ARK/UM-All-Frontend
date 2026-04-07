@@ -7611,14 +7611,6 @@ react-native-toast-message@^2.3.3:
   resolved "https://registry.npmjs.org/react-native-toast-message/-/react-native-toast-message-2.3.3.tgz#e301508d386a9902ff6b4559ecc6674f8cfdf97a"
   integrity sha512-4IIUHwUPvKHu4gjD0Vj2aGQzqPATiblL1ey8tOqsxOWRPGGu52iIbL8M/mCz4uyqecvPdIcMY38AfwRuUADfQQ==
 
-react-native-touchable-scale@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.npmjs.org/react-native-touchable-scale/-/react-native-touchable-scale-2.2.0.tgz#b12723014a66ba14af3e55c1925e4d7c77ef7209"
-  integrity sha512-EKWOpvqFKKvw4FsaMqoIqqALQbhEcEYeyd5iIctub4lA+6nUfQ472NeQzDLtXMJD65JUYxsC8XEKz/Ttj5+b/Q==
-  dependencies:
-    deprecated-react-native-prop-types "^2.3.0"
-    prop-types "^15.6.0"
-
 react-native-vector-icons@^10.3.0:
   version "10.3.0"
   resolved "https://registry.npmjs.org/react-native-vector-icons/-/react-native-vector-icons-10.3.0.tgz#de440f2627a2ed1079ce3b99d5b9d4f86894df28"

@@ -11,7 +11,7 @@ import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../../components/TouchableScale';
 
 const DEFAULT_IMAGE_SIZE = scale(160);
 const BORDER_RADIUS = scale(8);

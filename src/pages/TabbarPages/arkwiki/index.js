@@ -10,7 +10,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../components/TouchableScale';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';

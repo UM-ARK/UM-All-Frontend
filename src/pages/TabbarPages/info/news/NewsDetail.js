@@ -13,8 +13,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
-import TouchableScale from 'react-native-touchable-scale';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import TouchableScale from '../../../../components/TouchableScale';
 
 // HTML正則篩數據
 function repalceHtmlToText(str) {

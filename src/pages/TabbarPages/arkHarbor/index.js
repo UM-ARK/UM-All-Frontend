@@ -2,11 +2,10 @@ import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { View, Text, Platform, StyleSheet, BackHandler, TouchableOpacity, Alert } from 'react-native';
 
 import { WebView } from 'react-native-webview';
-import { Header } from '@rneui/themed';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
 import SimpleProgressBar from '../../../components/SimpleProgressBar';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../components/TouchableScale';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
@@ -160,25 +159,6 @@ const ARKHarbor = (props) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <Header
-                // harbor的默認配色
-                backgroundColor={harbor_bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: barStyle,
-                }}
-                containerStyle={{
-                    // 修復頂部空白過多問題
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets.top,
-                    }),
-                    paddingTop: 0,
-                    // 修復深色模式頂部小白條問題
-                    borderBottomWidth: 0,
-                }}
-            />
-
             {!isLoaded ? (
                 <SimpleProgressBar
                         progress={progress}

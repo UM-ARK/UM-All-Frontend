@@ -15,7 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../components/TouchableScale';
 import * as DropdownMenu from 'zeego/dropdown-menu';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,6 +43,7 @@ import { getCourseData } from '../../../utils/checkCoursesKits';
 
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
+// TODO: 點擊加課會觸發屏幕上移，導致iOS26需要再往下才能點關閉
 
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];

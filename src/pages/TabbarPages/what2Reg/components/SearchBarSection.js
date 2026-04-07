@@ -2,7 +2,7 @@ import React from 'react';
 import { Keyboard, Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as DropdownMenu from 'zeego/dropdown-menu';
-import TouchableScale from 'react-native-touchable-scale';
+import TouchableScale from '../../../../components/TouchableScale';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../components/ThemeContext';
@@ -96,7 +96,6 @@ const SearchBarSection = ({
                             paddingHorizontal: scale(8),
                             alignItems: 'center',
                         }}
-                        activeOpacity={0.8}
                         disabled={!inputOK}
                         onPress={onPressSearchButton}
                     >

@@ -12,11 +12,11 @@ import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
 import { DOMParser } from 'react-native-html-parser';
 import { scale, verticalScale } from 'react-native-size-matters';
 import axios from 'axios';
-import TouchableScale from 'react-native-touchable-scale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from 'i18next';
 import Toast from 'react-native-simple-toast';
 import { useKeepAwake } from 'expo-keep-awake';
+import TouchableScale from '../../components/TouchableScale';
 
 const busIcon = require('../../static/img/Bus/bus.png');
 const busRouteImg = require('../../static/img/Bus/bus_route.png');
