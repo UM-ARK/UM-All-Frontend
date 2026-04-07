@@ -186,21 +186,21 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
                     animatedStyle,
                 ]}
             >
-                <LiquidGlassView
-                    interactive={true}
-                    style={{
-                        backgroundColor: isLiquidGlassSupported ? null : theme.white,
-                        borderRadius: scale(50),
-                        width: buttonSize,
-                        height: buttonSize,
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}
-                >
-                    <Pressable onPress={handleScrollToTop}>
+                <Pressable onPress={handleScrollToTop}>
+                    <LiquidGlassView
+                        interactive={true}
+                        style={{
+                            backgroundColor: isLiquidGlassSupported ? null : theme.white,
+                            borderRadius: scale(50),
+                            width: buttonSize,
+                            height: buttonSize,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
                         <Ionicons name="arrow-up" size={scale(24)} color={theme.themeColor} />
-                    </Pressable>
-                </LiquidGlassView>
+                    </LiquidGlassView>
+                </Pressable>
             </Animated.View>
         </GestureDetector>
     );
