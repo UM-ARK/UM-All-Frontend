@@ -23,7 +23,6 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     }
 
     const isPE = courseRow['Course Code'] === 'CPED1001' || courseRow['Course Code'] === 'CPED1002';
-    const firstRowWrap = variant === 'section' ? { flexWrap: 'wrap' } : {};
     const timeRowWrap = variant === 'section' ? { flexWrap: 'wrap' } : {};
     const showTeacherInCard = variant === 'section' && courseRow['Teacher Information'];
 
@@ -49,11 +48,13 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                     activeOpacity={0.8}
                     onPress={() => { trigger('rigid'); }}
                 >
-                    <View style={{ flexDirection: 'row', ...firstRowWrap }}>
-                        <Text style={{
-                            ...uiStyle.defaultText, fontSize: scale(12), color: black.third,
-                        }}>{courseRow.Section + ' - ' + courseRow['Medium of Instruction']}</Text>
-                    </View>
+                    {variant !== 'section' && (
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text style={{
+                                ...uiStyle.defaultText, fontSize: scale(12), color: black.third,
+                            }}>{courseRow.Section + ' - ' + courseRow['Medium of Instruction']}</Text>
+                        </View>
+                    )}
                     {isPE && (<View style={{ alignItems: 'center' }}>
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseRow['Course Title']}</Text>
                         <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>{courseRow['Course Title Chi']}</Text>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, ScrollView, FlatList, Alert } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import Loading from '../../../../components/Loading';
@@ -8,11 +9,14 @@ import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { getCourseData } from '../../../../utils/checkCoursesKits';
 import coursePlanTime from '../../../../static/UMCourses/coursePlanTime';
 
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 import groupBy from 'lodash/groupBy';
 import lodash from 'lodash';
 
 import LocalCourseOfferingMenuCard from '../components/LocalCourseOfferingMenuCard';
+
+/** 與 ClubPage Section 標題列對齊的左右內距 */
+const LOCAL_SECTION_HORIZONTAL_PADDING = scale(10);
 
 const daySorter = {
     'MON': 1,
@@ -93,29 +97,67 @@ const LocalCourse = (props) => {
         }
     }, [relateList, isLoading, courseCode, navigation]);
 
-    // 渲染可選section
+    // ClubPage 風格區塊標題（左側主題色豎條 + 粗體標題）
+    const renderClubStyleSectionHeader = (title, isFirstSection) => (
+        <View
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: 0,
+                paddingTop: isFirstSection ? scale(6) : scale(18),
+                paddingBottom: scale(8),
+                backgroundColor: bg_color,
+            }}>
+            <View
+                style={{
+                    width: scale(3),
+                    height: verticalScale(15),
+                    borderRadius: scale(2),
+                    backgroundColor: themeColor,
+                    marginRight: scale(10),
+                }}
+            />
+            <Text
+                style={{
+                    ...uiStyle.defaultText,
+                    flex: 1,
+                    color: black.second,
+                    fontSize: verticalScale(16),
+                    fontWeight: '700',
+                    letterSpacing: -0.25,
+                }}
+                numberOfLines={1}>
+                {title}
+            </Text>
+        </View>
+    );
+
+    // 渲染可選 section（每個班別一組標題 + 卡片，視覺對齊 ClubPage SectionList）
     const renderSchedules = (schedulesObj) => {
         const schedulesArr = Object.keys(schedulesObj);
         return (
-            <FlatList
-                key={schedulesArr.length}   // 綁定key用於強制渲染
-                data={schedulesArr}
-                numColumns={schedulesArr.length}
-                columnWrapperStyle={schedulesArr.length > 1 ? { flexWrap: 'wrap' } : null}
-                contentContainerStyle={{ alignItems: 'center' }}
-                renderItem={({ item: itm }) => {
+            <>
+                {schedulesArr.map((itm, index) => {
                     const slots = daySort([...(schedulesObj[itm] ?? [])]);
+                    const medium = slots[0]?.['Medium of Instruction'];
+                    const sectionHeaderTitle = medium
+                        ? `Section ${itm} - ${medium}`
+                        : `Section ${itm}`;
                     return (
-                        <LocalCourseOfferingMenuCard
-                            navigation={navigation}
-                            slots={slots}
-                            variant="section"
-                        />
+                        <View key={itm}>
+                            {renderClubStyleSectionHeader(sectionHeaderTitle, index === 0)}
+                            <View style={{ alignItems: 'center' }}>
+                                <LocalCourseOfferingMenuCard
+                                    navigation={navigation}
+                                    slots={slots}
+                                    variant="section"
+                                />
+                            </View>
+                        </View>
                     );
-                }}
-                ListFooterComponent={<View style={{ marginBottom: scale(50) }} />}
-                scrollEnabled={false}
-            />
+                })}
+                <View style={{ marginBottom: scale(50) }} />
+            </>
         );
     };
 
@@ -132,32 +174,59 @@ const LocalCourse = (props) => {
             uniqSecByTeachObj[key] = objArr;
         });
 
-        return teacherArr.length > 0 && teacherArr.map(teacherName => (
-            <View style={{ margin: scale(5) }} key={teacherName}>
-                <Text style={{ ...uiStyle.defaultText, fontSize: scale(15), color: themeColor, marginLeft: scale(5) }}>{teacherName}</Text>
-                {uniqSecByTeachObj[teacherName] && uniqSecByTeachObj[teacherName].length > 0 ? (
-                    <FlatList
-                        data={uniqSecByTeachObj[teacherName]}
-                        horizontal={true}
-                        renderItem={({ item: itm }) => {
-                            const slots = daySort([...(schedulesObj[itm] ?? [])]);
-                            return (
-                                <LocalCourseOfferingMenuCard
-                                    navigation={navigation}
-                                    slots={slots}
-                                    variant="teacher"
-                                />
-                            );
-                        }}
-                        keyExtractor={(item, idx) => teacherName + item + idx}
-                    />
-                ) : (
-                    <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>
-                        No section
+        if (teacherArr.length === 0) {
+            return null;
+        }
+
+        return (
+            <>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: scale(8),
+                    }}>
+                    <Ionicons name="swap-horizontal-outline" size={scale(16)} color={black.third} />
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            marginLeft: scale(6),
+                            fontSize: scale(11),
+                            color: black.third,
+                        }}>
+                        班別列可左右滑動瀏覽
                     </Text>
-                )}
-            </View>
-        ));
+                </View>
+                {teacherArr.map((teacherName, index) => (
+                    <View key={teacherName}>
+                        {renderClubStyleSectionHeader(teacherName, index === 0)}
+                        {uniqSecByTeachObj[teacherName] && uniqSecByTeachObj[teacherName].length > 0 ? (
+                            <FlatList
+                                data={uniqSecByTeachObj[teacherName]}
+                                horizontal={true}
+                                showsHorizontalScrollIndicator={true}
+                                renderItem={({ item: itm }) => {
+                                    const slots = daySort([...(schedulesObj[itm] ?? [])]);
+                                    return (
+                                        <LocalCourseOfferingMenuCard
+                                            navigation={navigation}
+                                            slots={slots}
+                                            variant="teacher"
+                                        />
+                                    );
+                                }}
+                                keyExtractor={(item, idx) => teacherName + item + idx}
+                            />
+                        ) : (
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>
+                                暫無班別
+                            </Text>
+                        )}
+                    </View>
+                ))}
+            </>
+        );
     };
 
     const groupByOptions = useMemo(() => ([
@@ -172,7 +241,7 @@ const LocalCourse = (props) => {
                     <Loading />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={{ paddingHorizontal: scale(5) }} contentInsetAdjustmentBehavior="automatic">
+                <ScrollView contentContainerStyle={{ paddingHorizontal: LOCAL_SECTION_HORIZONTAL_PADDING }} contentInsetAdjustmentBehavior="automatic">
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>
