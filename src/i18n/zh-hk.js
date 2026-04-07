@@ -67,4 +67,11 @@ export default {
         'Common Issues': '常見問題',
         'Privacy Policy & User Agreement': '隱私政策 & 用戶協議',
     },
+
+    club: {
+        SEARCH_PLACEHOLDER: '搜尋組織名稱',
+        CANCEL: '取消',
+        A11Y_CLEAR_SEARCH: '清除搜尋',
+        '社團/組織賬號登錄入口，請勿使用UMPASS': '社團/組織賬號登錄入口，請勿使用UMPASS',
+    },
 };

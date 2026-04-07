@@ -261,7 +261,10 @@
         "UM部門，提供各種校內部門的資訊": "UM Departments, providing information on various campus departments"
     },
     "club": {
-        "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS"
+        "社團/組織賬號登錄入口，請勿使用UMPASS": "Club account login, please don't use UMPASS",
+        "SEARCH_PLACEHOLDER": "Search organization name",
+        "CANCEL": "Cancel",
+        "A11Y_CLEAR_SEARCH": "Clear search"
     },
     "setting": {
         "Settings": "Settings",

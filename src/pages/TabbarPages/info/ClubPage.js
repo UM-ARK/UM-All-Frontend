@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useContext, useEffect, useRef, useState, } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
 import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, } from 'react-native';
 
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
@@ -8,6 +8,7 @@ import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
+import ClubSearchBar from './components/ClubSearchBar';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -17,7 +18,6 @@ const CLUB_GRID_HORIZONTAL_PADDING = scale(10);
 const CLUB_COLUMN_GAP = scale(6);
 /** 單欄上限：寬螢幕／橫屏時避免卡片被拉滿，維持約手機三欄視覺並靠左排列 */
 const CLUB_CELL_MAX_WIDTH = scale(122);
-let originClubDataList = [];
 
 const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
 
@@ -56,10 +56,21 @@ const buildSections = (clubDataList) => {
 function ClubPage() {
     const { theme } = useContext(ThemeContext);
     const { themeColor, black, white } = theme;
-    const [sections, setSections] = useState([]);
+    const [allClubs, setAllClubs] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
     const sectionListRef = useRef(null);
+
+    const filteredClubs = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) {
+            return allClubs;
+        }
+        return allClubs.filter((c) => (c.name || '').toLowerCase().includes(q));
+    }, [allClubs, searchQuery]);
+
+    const sections = useMemo(() => buildSections(filteredClubs), [filteredClubs]);
 
     const handleScrollStart = useCallback(() => {
         setIsOtherViewVisible(false);
@@ -81,8 +92,7 @@ function ClubPage() {
                     clubDataList.forEach(itm => {
                         itm.logo_url = BASE_HOST + itm.logo_url;
                     });
-                    originClubDataList = clubDataList;
-                    setSections(buildSections(clubDataList));
+                    setAllClubs(clubDataList);
                     setIsLoading(false);
                     handleScrollEnd();
                 } else {
@@ -102,6 +112,10 @@ function ClubPage() {
         getData();
     }, [getData]);
 
+    const handleSearchFocus = useCallback(() => {
+        trigger();
+    }, []);
+
     const renderBottomInfo = useCallback(() => (
         <View style={{ marginBottom: scale(20) }}>
             <Text
@@ -112,7 +126,7 @@ function ClubPage() {
                     fontSize: scale(12),
                 }}>
                 {'\n\n\n\n' + '已有 ' +
-                    originClubDataList.length +
+                    allClubs.length +
                     ' 個組織進駐~~\n'}
             </Text>
             <Text
@@ -141,7 +155,7 @@ function ClubPage() {
                 </Text>
             </TouchableOpacity>
         </View>
-    ), [black.third, themeColor]);
+    ), [allClubs.length, black.third, themeColor]);
 
     const windowWidth = Dimensions.get('window').width;
     const rawCellWidth =
@@ -153,6 +167,19 @@ function ClubPage() {
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
+            <ClubSearchBar
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                loading={isLoading}
+                onFocus={handleSearchFocus}
+                onCancel={() => setSearchQuery('')}
+                containerStyle={{
+                    backgroundColor: theme.bg_color,
+                    borderTopWidth: 0,
+                    borderBottomWidth: 0,
+                }}
+            />
+
             {sections.length > 0 && isOtherViewVisible && !isLoading ? (
                 <View style={{
                     position: 'absolute',
