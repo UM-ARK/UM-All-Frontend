@@ -4,6 +4,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/patch-react-navigation-elements-assets.js",
     "android": "expo run:android",
     "ios": "npx expo run:ios --device \"iPhone 16 Pro\"",
     "iosNew": "npx expo run:ios --device \"iPhone 17 Pro\"",
