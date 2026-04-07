@@ -5,7 +5,7 @@ alwaysApply: true
 
 # ARK ALL 專案概覽
 
-- **類型**: React Native 0.81.5 + Expo SDK 54 行動應用
+- **類型**: React Native 0.81.5 + Expo SDK 55 行動應用
 - **名稱**: ARK ALL (澳門大學學生應用)
 - **版本**: 26.1.1
 - **平台**: iOS, Android
