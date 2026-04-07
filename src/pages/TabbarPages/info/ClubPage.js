@@ -16,6 +16,8 @@ const ITEMS_PER_ROW = 3;
 /** 與網格對齊的左右內距 */
 const CLUB_GRID_HORIZONTAL_PADDING = scale(10);
 const CLUB_COLUMN_GAP = scale(6);
+/** 單欄上限：寬螢幕／橫屏時避免卡片被拉滿，維持約手機三欄視覺並靠左排列 */
+const CLUB_CELL_MAX_WIDTH = scale(122);
 let originClubDataList = [];
 
 const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
@@ -162,11 +164,12 @@ class ClubPage extends PureComponent {
         const { themeColor, black, white } = theme;
         const { sections, isLoading, isOtherViewVisible } = this.state;
         const windowWidth = Dimensions.get('window').width;
-        const cellWidth =
+        const rawCellWidth =
             (windowWidth -
                 CLUB_GRID_HORIZONTAL_PADDING * 2 -
                 CLUB_COLUMN_GAP * (ITEMS_PER_ROW - 1)) /
             ITEMS_PER_ROW;
+        const cellWidth = Math.min(rawCellWidth, CLUB_CELL_MAX_WIDTH);
         return (
             <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
                 {/* 側邊分類導航 */}
