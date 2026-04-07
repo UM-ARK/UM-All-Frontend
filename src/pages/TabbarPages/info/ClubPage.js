@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, } from 'react-native';
+import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, } from 'react-native';
 
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
@@ -12,8 +12,10 @@ import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { FlatList } from 'react-native';
 
-const COMPONENT_WIDTH = scale(90);
 const ITEMS_PER_ROW = 3;
+/** 與網格對齊的左右內距 */
+const CLUB_GRID_HORIZONTAL_PADDING = scale(10);
+const CLUB_COLUMN_GAP = scale(6);
 let originClubDataList = [];
 
 const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
@@ -159,8 +161,14 @@ class ClubPage extends PureComponent {
         const { theme } = this.context;
         const { themeColor, black, white } = theme;
         const { sections, isLoading, isOtherViewVisible } = this.state;
+        const windowWidth = Dimensions.get('window').width;
+        const cellWidth =
+            (windowWidth -
+                CLUB_GRID_HORIZONTAL_PADDING * 2 -
+                CLUB_COLUMN_GAP * (ITEMS_PER_ROW - 1)) /
+            ITEMS_PER_ROW;
         return (
-            <View style={{ flex: 1, backgroundColor: theme.bg_color, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
                 {/* 側邊分類導航 */}
                 {sections.length > 0 && isOtherViewVisible && !isLoading ? (
                     <View style={{
@@ -215,6 +223,7 @@ class ClubPage extends PureComponent {
                 {/* 組織展示：使用 SectionList 做虛擬化，避免一次渲染全部卡片 */}
                 <SectionList
                     ref={this.sectionListRef}
+                    style={{ flex: 1, width: '100%' }}
                     sections={sections}
                     keyExtractor={(item, index) => {
                         const firstId = item[0]?._id;
@@ -222,7 +231,7 @@ class ClubPage extends PureComponent {
                     }}
                     renderSectionHeader={({ section }) => (
                         <View style={{
-                            marginLeft: scale(12),
+                            paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING + scale(5),
                             marginBottom: scale(5),
                             marginTop: scale(8),
                         }}>
@@ -239,10 +248,11 @@ class ClubPage extends PureComponent {
                         <View style={{
                             flexDirection: 'row',
                             justifyContent: 'flex-start',
-                            // paddingHorizontal: scale(6),
+                            paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                            columnGap: CLUB_COLUMN_GAP,
                         }}>
                             {item.map((club) => (
-                                <View key={club._id} style={{ width: COMPONENT_WIDTH + scale(6) }}>
+                                <View key={club._id} style={{ width: cellWidth }}>
                                     <ClubCard data={club} />
                                 </View>
                             ))}

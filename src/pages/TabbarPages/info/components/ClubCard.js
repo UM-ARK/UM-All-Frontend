@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: scale(8),
         margin: scale(3),
+        width: '100%',
     },
     logo: {
         width: IMG_SIZE,
