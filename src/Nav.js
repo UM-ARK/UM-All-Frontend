@@ -1,14 +1,12 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
-import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
-import { NavigationContainer, useNavigationContainerRef, createStaticNavigation, DefaultTheme, } from '@react-navigation/native';
+import React, { useMemo } from 'react';
+import { Platform } from 'react-native';
+import { NavigationContainer, useNavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Button, HeaderBackButton, useHeaderHeight } from '@react-navigation/elements';
+import { HeaderBackButton } from '@react-navigation/elements';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
-import { BlurView } from 'expo-blur';
 import { trigger } from './utils/trigger';
 import { useTranslation } from 'react-i18next';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // 本地頁面，首字母需大寫
 import Tabbar from './Tabbar';
@@ -32,17 +30,38 @@ const Stack = createNativeStackNavigator();
 
 const Nav = () => {
     const { theme } = useTheme();
-    const { bg_color, black } = theme;
+    const { black } = theme;
     const { t } = useTranslation(['common', 'features', 'event']);
     const navigationRef = useNavigationContainerRef();
 
+    // 與 ThemeContext 對齊，否則透明標題列下會透出 Navigation 預設淺色底（深色模式頂部出現白條）
+    const navigationTheme = useMemo(() => {
+        const base = theme.isLight ? DefaultTheme : DarkTheme;
+        return {
+            ...base,
+            colors: {
+                ...base.colors,
+                primary: theme.themeColor,
+                background: theme.bg_color,
+                card: theme.white,
+                text: theme.black.main,
+                notification: theme.unread,
+            },
+        };
+    }, [theme]);
+
     return (
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer ref={navigationRef} theme={navigationTheme}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{
                     freezeOnBlur: true,
-                    headerTransparent: isLiquidGlassSupported ? true : false,
+                    headerTransparent: isLiquidGlassSupported,
+                    headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+                    headerStyle: {
+                        backgroundColor: isLiquidGlassSupported ? 'transparent' : theme.white,
+                    },
+                    contentStyle: { backgroundColor: theme.bg_color },
                     headerTitleAlign: 'center',
                     headerBackButtonDisplayMode: 'minimal',
                     headerBackButtonMenuEnabled: false,

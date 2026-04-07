@@ -223,6 +223,7 @@ const App = () => {
                 <ThemeProvider>
                     <Nav />
                     {/* 全局狀態欄配置 */}
+                    {/* TODO: 如果SettingPage設置了自定義深淺色模式，這裡會改變StatusBar的顏色，導致跟實際APP不一致 */}
                     <StatusBar style="auto" />
                 </ThemeProvider>
                 <Toast config={toastConfig} />
