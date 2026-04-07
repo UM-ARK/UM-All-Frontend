@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, Image } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
@@ -25,7 +25,7 @@ import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass
 const ARKImageView = forwardRef((props, ref) => {
     const { imageUrls } = props;
     const { theme } = useTheme();
-    const { white, themeColor, glass } = theme;
+    const { white, themeColor, black, viewShadow } = theme;
 
     const [visible, setVisible] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
@@ -129,9 +129,8 @@ const ARKImageView = forwardRef((props, ref) => {
                         overflow: 'hidden',
                     }}
                 >
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => handleSaveImage(imageIndex)}
-                        activeOpacity={0.8}
                         style={{
                             width: '100%',
                             height: '100%',
@@ -144,7 +143,7 @@ const ARKImageView = forwardRef((props, ref) => {
                             color={themeColor}
                             size={scale(24)}
                         />
-                    </TouchableOpacity>
+                    </Pressable>
                 </LiquidGlassView>
             </View>
         );
@@ -161,21 +160,23 @@ const ARKImageView = forwardRef((props, ref) => {
                     interactive={true}
                     hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
                     style={{
-                        backgroundColor: isLiquidGlassSupported ? null : glass,
+                        // 深色模式下 theme.white 為表面灰底，搭配 black.main 圖標對比清楚；
+                        // 非液態玻璃時不用過淡的 glass，改為實色圓形按鈕並加陰影層次
+                        backgroundColor: isLiquidGlassSupported ? null : white,
                         borderRadius: scale(20),
                         width: scale(40),
                         height: scale(40),
                         justifyContent: 'center',
                         alignItems: 'center',
                         overflow: 'hidden',
+                        ...(isLiquidGlassSupported ? {} : viewShadow),
                     }}
                 >
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => {
                             trigger();
                             handleClose();
                         }}
-                        activeOpacity={0.8}
                         style={{
                             width: '100%',
                             height: '100%',
@@ -185,14 +186,14 @@ const ARKImageView = forwardRef((props, ref) => {
                     >
                         <Ionicons
                             name="close"
-                            color={white}
+                            color={black.main}
                             size={scale(24)}
                         />
-                    </TouchableOpacity>
+                    </Pressable>
                 </LiquidGlassView>
             </View>
         );
-    }, [white, glass, handleClose, insets]);
+    }, [white, black.main, viewShadow, handleClose, insets]);
 
     if (processedImages.length === 0) {return null;}
 
