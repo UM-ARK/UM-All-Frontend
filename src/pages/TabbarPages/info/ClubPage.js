@@ -9,6 +9,7 @@ import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
 import ClubSearchBar from './components/ClubSearchBar';
+import { filterClubsBySearchQuery } from './utils/clubSearchFilter';
 import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -62,13 +63,10 @@ function ClubPage() {
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
     const sectionListRef = useRef(null);
 
-    const filteredClubs = useMemo(() => {
-        const q = searchQuery.trim().toLowerCase();
-        if (!q) {
-            return allClubs;
-        }
-        return allClubs.filter((c) => (c.name || '').toLowerCase().includes(q));
-    }, [allClubs, searchQuery]);
+    const filteredClubs = useMemo(
+        () => filterClubsBySearchQuery(allClubs, searchQuery),
+        [allClubs, searchQuery],
+    );
 
     const sections = useMemo(() => buildSections(filteredClubs), [filteredClubs]);
 
