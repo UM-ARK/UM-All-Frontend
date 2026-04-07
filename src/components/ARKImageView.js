@@ -1,6 +1,6 @@
-import React, { useState, forwardRef, useImperativeHandle, useCallback } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, Image } from 'react-native';
-import ImageView from 'react-native-image-viewing';
+import GalleryPreview from 'react-native-gallery-preview';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -12,7 +12,7 @@ import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass
 /**
  * ARKImageView - 全局圖片查看器組件
  * 用於替換舊的 ImageScrollViewer
- * 基於 react-native-image-viewing 實現
+ * 基於 react-native-gallery-preview 實現
  *
  * @example
  * const imageViewerRef = useRef(null);
@@ -25,66 +25,65 @@ import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass
 const ARKImageView = forwardRef((props, ref) => {
     const { imageUrls } = props;
     const { theme } = useTheme();
-    const { white, themeColor, black, viewShadow } = theme;
+    const { white, themeColor, black, viewShadow, trueBlack, trueWhite } = theme;
 
     const [visible, setVisible] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
 
-    // 保存原始圖片列表（用於長按保存）
-    const [originalImages, setOriginalImages] = useState([]);
-
-    // 使用 SafeArea insets - 必須在組件頂部調用，遵循 React Hooks 規則
     const insets = useSafeAreaInsets();
 
-    // 處理圖片 URL 格式轉換
-    const processedImages = React.useMemo(() => {
-        if (!imageUrls) {return [];}
+    const { processedImages, originalImages } = useMemo(() => {
+        if (!imageUrls) {
+            return { processedImages: [], originalImages: [] };
+        }
 
         const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+        const sources = [];
+        const originals = [];
 
-        // 保存原始圖片列表
-        setOriginalImages(urls);
-
-        return urls.map(url => {
+        urls.forEach((url) => {
+            let uri = '';
             if (typeof url === 'string') {
-                return { uri: url };
+                uri = url;
+            } else if (typeof url === 'number') {
+                const assetSource = Image.resolveAssetSource(url);
+                uri = assetSource?.uri || '';
             } else if (url && typeof url === 'object') {
-                if (url.url) {return { uri: url.url };}
-                if (url.uri) {return { uri: url.uri };}
+                if (url.url) {uri = url.url;}
+                else if (url.uri) {uri = url.uri;}
             }
-            return { uri: '' };
-        }).filter(item => item.uri);
+            if (uri) {
+                sources.push({ uri });
+                originals.push(url);
+            }
+        });
+
+        return { processedImages: sources, originalImages: originals };
     }, [imageUrls]);
 
-    // 打開指定索引的圖片
     const handleOpenImage = useCallback((index = 0) => {
         setStartIndex(index);
         setVisible(true);
     }, []);
 
-    // 兼容舊版 API - 打開第一張圖
     const tiggerModal = useCallback(() => {
         setStartIndex(0);
         setVisible(true);
     }, []);
 
-    // 關閉圖片查看器
     const handleClose = useCallback(() => {
         setVisible(false);
     }, []);
 
-    // 處理保存圖片
     const handleSaveImage = useCallback((imageIndex) => {
         const imageUrl = originalImages[imageIndex];
         if (!imageUrl) {return;}
 
-        // 解析各種格式的圖片 URL
         let actualUrl = null;
 
         if (typeof imageUrl === 'string') {
             actualUrl = imageUrl;
         } else if (typeof imageUrl === 'number') {
-            // require 的本地圖片
             const assetSource = Image.resolveAssetSource(imageUrl);
             actualUrl = assetSource?.uri || null;
         } else if (typeof imageUrl === 'object') {
@@ -98,140 +97,149 @@ const ARKImageView = forwardRef((props, ref) => {
         }
     }, [originalImages]);
 
-    // 暴露方法給父組件
     useImperativeHandle(ref, () => ({
         handleOpenImage,
         tiggerModal,
         close: handleClose,
     }), [handleOpenImage, tiggerModal, handleClose]);
 
-    // Footer 組件 - 包含圖片計數器和保存按鈕
-    const FooterComponent = useCallback(({ imageIndex }) => {
-        return (
-            <View style={styles.footerContainer}>
-                {processedImages.length > 1 && (
-                    <Text style={[styles.footerText, { color: white }]}>
-                        {imageIndex + 1} / {processedImages.length}
-                    </Text>
-                )}
-
-                {/* 保存按鈕 - 使用 LiquidGlassView */}
-                <LiquidGlassView
-                    interactive={true}
-                    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
-                    style={{
-                        backgroundColor: isLiquidGlassSupported ? null : white,
-                        borderRadius: scale(25),
-                        width: scale(50),
-                        height: scale(50),
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        overflow: 'hidden',
-                    }}
-                >
-                    <Pressable
-                        onPress={() => handleSaveImage(imageIndex)}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Ionicons
-                            name="download-outline"
-                            color={themeColor}
-                            size={scale(24)}
-                        />
-                    </Pressable>
-                </LiquidGlassView>
-            </View>
-        );
-    }, [processedImages.length, white, themeColor, handleSaveImage]);
-
-    // Header 組件 - 包含關閉按鈕（右上角，避免與狀態欄重疊）
-    const HeaderComponent = useCallback(() => {
-        // 使用 SafeArea insets 確保與狀態欄不重疊
+    const OverlayComponent = useCallback(({
+        onClose,
+        currentImageIndex,
+        imagesLength,
+    }) => {
         const topPadding = Math.max(insets.top, Platform.OS === 'android' ? scale(8) : 0);
+        const bottomPadding = Math.max(insets.bottom, scale(20));
 
         return (
-            <View style={[styles.headerContainer, { paddingTop: topPadding }]}>
-                <LiquidGlassView
-                    interactive={true}
-                    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
-                    style={{
-                        // 深色模式下 theme.white 為表面灰底，搭配 black.main 圖標對比清楚；
-                        // 非液態玻璃時不用過淡的 glass，改為實色圓形按鈕並加陰影層次
-                        backgroundColor: isLiquidGlassSupported ? null : white,
-                        borderRadius: scale(20),
-                        width: scale(40),
-                        height: scale(40),
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        overflow: 'hidden',
-                        ...(isLiquidGlassSupported ? {} : viewShadow),
-                    }}
+            <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+                <View
+                    style={[styles.headerContainer, { paddingTop: topPadding }]}
+                    pointerEvents="box-none"
                 >
-                    <Pressable
-                        onPress={() => {
-                            trigger();
-                            handleClose();
-                        }}
+                    <LiquidGlassView
+                        interactive={true}
+                        hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
                         style={{
-                            width: '100%',
-                            height: '100%',
+                            backgroundColor: isLiquidGlassSupported ? null : white,
+                            borderRadius: scale(20),
+                            width: scale(40),
+                            height: scale(40),
                             justifyContent: 'center',
                             alignItems: 'center',
+                            overflow: 'hidden',
+                            ...(isLiquidGlassSupported ? {} : viewShadow),
                         }}
                     >
-                        <Ionicons
-                            name="close"
-                            color={black.main}
-                            size={scale(24)}
-                        />
-                    </Pressable>
-                </LiquidGlassView>
+                        <Pressable
+                            onPress={() => {
+                                trigger();
+                                onClose();
+                            }}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Ionicons
+                                name="close"
+                                color={black.main}
+                                size={scale(24)}
+                            />
+                        </Pressable>
+                    </LiquidGlassView>
+                </View>
+
+                <View
+                    style={[styles.footerContainer, { paddingBottom: bottomPadding }]}
+                    pointerEvents="box-none"
+                >
+                    {imagesLength > 1 && (
+                        <Text style={[styles.footerText, { color: trueWhite }]}>
+                            {currentImageIndex + 1} / {imagesLength}
+                        </Text>
+                    )}
+
+                    <LiquidGlassView
+                        interactive={true}
+                        hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
+                        style={{
+                            backgroundColor: isLiquidGlassSupported ? null : white,
+                            borderRadius: scale(25),
+                            width: scale(50),
+                            height: scale(50),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <Pressable
+                            onPress={() => handleSaveImage(currentImageIndex)}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Ionicons
+                                name="download-outline"
+                                color={black.main}
+                                size={scale(24)}
+                            />
+                        </Pressable>
+                    </LiquidGlassView>
+                </View>
             </View>
         );
-    }, [white, black.main, viewShadow, handleClose, insets]);
+    }, [
+        black.main,
+        handleSaveImage,
+        insets.bottom,
+        insets.top,
+        themeColor,
+        trueWhite,
+        viewShadow,
+        white,
+    ]);
 
     if (processedImages.length === 0) {return null;}
 
     return (
-        <ImageView
-            images={processedImages}
-            imageIndex={startIndex}
-            visible={visible}
+        <GalleryPreview
+            isVisible={visible}
             onRequestClose={handleClose}
-            presentationStyle="overFullScreen"
-            animationType="fade"
-            doubleTapToZoomEnabled={true}
+            images={processedImages}
+            initialIndex={startIndex}
+            OverlayComponent={OverlayComponent}
+            backgroundColor={trueBlack}
+            headerTextColor={trueWhite}
+            doubleTabEnabled={true}
+            pinchEnabled={true}
             swipeToCloseEnabled={true}
-            HeaderComponent={HeaderComponent}
-            FooterComponent={FooterComponent}
         />
     );
 });
 
 const styles = StyleSheet.create({
     headerContainer: {
-        width: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
         paddingHorizontal: scale(16),
     },
-    closeButton: {
-        width: scale(40),
-        height: scale(40),
-        borderRadius: scale(20),
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     footerContainer: {
-        width: '100%',
-        paddingVertical: scale(20),
-        paddingBottom: scale(40),
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingTop: scale(20),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -239,18 +247,6 @@ const styles = StyleSheet.create({
         fontSize: scale(16),
         fontWeight: '500',
         marginBottom: scale(12),
-    },
-    saveButton: {
-        width: scale(50),
-        height: scale(50),
-        borderRadius: scale(25),
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
     },
 });
 
