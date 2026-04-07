@@ -232,21 +232,43 @@ class ClubPage extends PureComponent {
                         const firstId = item[0]?._id;
                         return firstId ? `${firstId}-row-${index}` : `row-${index}`;
                     }}
-                    renderSectionHeader={({ section }) => (
-                        <View style={{
-                            paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING + scale(5),
-                            marginBottom: scale(5),
-                            marginTop: scale(8),
-                        }}>
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                color: theme.black.main,
-                                fontSize: verticalScale(15)
-                            }}>
-                                {clubTagMap(section.title) || section.title}
-                            </Text>
-                        </View>
-                    )}
+                    renderSectionHeader={({ section }) => {
+                        const sectionIndex = sections.findIndex((s) => s.title === section.title);
+                        const isFirstSection = sectionIndex <= 0;
+                        return (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                                    paddingTop: isFirstSection ? scale(6) : scale(18),
+                                    paddingBottom: scale(8),
+                                    backgroundColor: theme.bg_color,
+                                }}>
+                                <View
+                                    style={{
+                                        width: scale(3),
+                                        height: verticalScale(15),
+                                        borderRadius: scale(2),
+                                        backgroundColor: theme.themeColor,
+                                        marginRight: scale(10),
+                                    }}
+                                />
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        flex: 1,
+                                        color: black.second,
+                                        fontSize: verticalScale(16),
+                                        fontWeight: '700',
+                                        letterSpacing: -0.25,
+                                    }}
+                                    numberOfLines={1}>
+                                    {clubTagMap(section.title) || section.title}
+                                </Text>
+                            </View>
+                        );
+                    }}
                     renderItem={({ item }) => (
                         <View style={{
                             flexDirection: 'row',
@@ -277,7 +299,7 @@ class ClubPage extends PureComponent {
                     ListEmptyComponent={isLoading ? <Loading /> : null}
                     ListFooterComponent={!isLoading ? this.renderBottomInfo() : null}
                     showsVerticalScrollIndicator={false}
-                    stickySectionHeadersEnabled={false}
+                    stickySectionHeadersEnabled
                     initialNumToRender={10}
                     maxToRenderPerBatch={10}
                     windowSize={7}
