@@ -23,6 +23,26 @@ const SearchBarSection = ({
 }) => {
     const { themeColor, black, white, disabled } = theme;
 
+    const searchBtnStyle = {
+        backgroundColor: inputOK ? themeColor : disabled,
+        borderRadius: scale(6),
+        padding: scale(7),
+        paddingHorizontal: scale(8),
+        alignItems: 'center',
+    };
+
+    const searchBtnLabel = (
+        <Text style={{
+            ...uiStyle.defaultText,
+            fontSize: scale(12),
+            color: white,
+            fontWeight: 'bold',
+            lineHeight: verticalScale(14),
+        }}>
+            {t('搜索')}
+        </Text>
+    );
+
     return (
         <View style={{
             alignItems: 'center',
@@ -80,6 +100,11 @@ const SearchBarSection = ({
                 ) : null}
             </View>
 
+            {/*
+              Zeego iOS 以原生 ContextMenuButton 包住 Trigger 子元件，disabled 無法阻擋選單彈出；
+              無有效輸入時改為不掛 DropdownMenu，只顯示禁用按鈕。
+            */}
+            {inputOK ? (
             <DropdownMenu.Root
                 onOpenChange={(open) => {
                     if (open) {
@@ -89,25 +114,10 @@ const SearchBarSection = ({
             >
                 <DropdownMenu.Trigger>
                     <TouchableScale
-                        style={{
-                            backgroundColor: inputOK ? themeColor : disabled,
-                            borderRadius: scale(6),
-                            padding: scale(7),
-                            paddingHorizontal: scale(8),
-                            alignItems: 'center',
-                        }}
-                        disabled={!inputOK}
+                        style={searchBtnStyle}
                         onPress={onPressSearchButton}
                     >
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(12),
-                            color: white,
-                            fontWeight: 'bold',
-                            lineHeight: verticalScale(14),
-                        }}>
-                            {t('搜索')}
-                        </Text>
+                        {searchBtnLabel}
                     </TouchableScale>
                 </DropdownMenu.Trigger>
                 {/* Menu 選項列表 */}
@@ -186,6 +196,11 @@ const SearchBarSection = ({
                     </DropdownMenu.Item>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
+            ) : (
+                <TouchableScale style={searchBtnStyle} disabled>
+                    {searchBtnLabel}
+                </TouchableScale>
+            )}
         </View>
     );
 };
