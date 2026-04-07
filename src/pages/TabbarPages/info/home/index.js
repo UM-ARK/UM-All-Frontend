@@ -55,11 +55,11 @@ import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
 import moment from 'moment';
-import TouchableScale from 'react-native-touchable-scale';
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
+import TouchableScale from '../../../../components/TouchableScale';
 
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
@@ -363,7 +363,7 @@ const HomeScreen = ({ navigation }) => {
         }
 
         return (
-            <TouchableOpacity
+            <TouchableScale
                 style={{
                     justifyContent: 'center', alignItems: 'center',
                     width: containerSize, height: containerSize,
@@ -393,7 +393,7 @@ const HomeScreen = ({ navigation }) => {
                         {function_name}
                     </Text>
                 </View>)}
-            </TouchableOpacity>
+            </TouchableScale>
         );
     };
 
