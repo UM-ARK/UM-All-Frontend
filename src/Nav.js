@@ -67,6 +67,8 @@ const Nav = () => {
                     headerBackButtonMenuEnabled: false,
                     gestureEnabled: true,
                     headerTintColor: black.main,
+                    // 與 ThemeContext 一致（自訂淺/深色時勿跟隨系統預設 auto）
+                    statusBarStyle: theme.isLight ? 'dark' : 'light',
                 }}
             >
                 <Stack.Screen name="Tabbar" component={Tabbar} options={{ headerShown: false }} />
@@ -98,7 +100,8 @@ const Nav = () => {
 
 
                     {/* 資訊頁 */}
-                    <Stack.Screen name="ClubDetail" component={ClubDetail} />
+                    {/* 圖片大標題頁：強制 light 讓狀態列圖示在深色封面圖上可見 */}
+                    <Stack.Screen name="ClubDetail" component={ClubDetail} options={{ statusBarStyle: 'light' }} />
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
                     <Stack.Screen name="UMEventDetail" component={UMEventDetail} />

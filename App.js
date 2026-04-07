@@ -16,7 +16,6 @@ import { scale } from 'react-native-size-matters';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import { getApp } from '@react-native-firebase/app';
 import { getAnalytics, setUserProperty } from '@react-native-firebase/analytics';
-import { StatusBar } from 'expo-status-bar';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
@@ -222,9 +221,6 @@ const App = () => {
             <KeyboardProvider>
                 <ThemeProvider>
                     <Nav />
-                    {/* 全局狀態欄配置 */}
-                    {/* TODO: 如果SettingPage設置了自定義深淺色模式，這裡會改變StatusBar的顏色，導致跟實際APP不一致 */}
-                    <StatusBar style="auto" />
                 </ThemeProvider>
                 <Toast config={toastConfig} />
             </KeyboardProvider>

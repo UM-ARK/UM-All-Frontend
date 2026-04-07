@@ -4,7 +4,6 @@ import {
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    StatusBar,
     Dimensions,
     StyleSheet,
     ScrollView,

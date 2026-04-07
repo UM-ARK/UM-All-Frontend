@@ -4,7 +4,6 @@ import {
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    StatusBar,
     Dimensions,
     FlatList,
     ScrollView,
@@ -450,7 +449,6 @@ const ClubDetail = (props) => {
                     alwaysBounceHorizontal={false}
                     scrollViewBackgroundColor={bg_color}
                 >
-                    <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent />
                     {renderMainContent()}
                 </ImageHeaderScrollView>
             ) : (
