@@ -1,8 +1,9 @@
 import React from 'react';
-import { FlatList, LayoutAnimation, Pressable, Text, View } from 'react-native';
+import { FlatList, LayoutAnimation, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../components/ThemeContext';
+import TouchableScale from '../../../../components/TouchableScale';
 
 /**
  * 篩選面板
@@ -57,7 +58,7 @@ const FilterPanel = ({
                 contentContainerStyle={{ alignItems: 'center' }}
                 scrollEnabled={false}
                 renderItem={({ item }) => (
-                    <Pressable
+                    <TouchableScale
                         style={{
                             ...classItmStyle,
                             paddingHorizontal: scale(5),
@@ -83,7 +84,7 @@ const FilterPanel = ({
                         }}>
                             {modeENStr[item]}
                         </Text>
-                    </Pressable>
+                    </TouchableScale>
                 )}
                 ListHeaderComponent={() => (
                     <Text style={classItmTitleTextStyle}>
@@ -102,7 +103,7 @@ const FilterPanel = ({
             key={`flatList_cmge_${CMGEList.length}`}
             contentContainerStyle={{ alignItems: 'center' }}
             renderItem={({ item }) => (
-                <Pressable
+                <TouchableScale
                     style={{
                         ...classItmStyle,
                         paddingHorizontal: scale(5),
@@ -123,7 +124,7 @@ const FilterPanel = ({
                     }}>
                         {item}
                     </Text>
-                </Pressable>
+                </TouchableScale>
             )}
             ListHeaderComponent={() => (
                 <Text style={classItmTitleTextStyle}>
@@ -145,7 +146,7 @@ const FilterPanel = ({
             columnWrapperStyle={offerFacultyList.length > 1 ? { flexWrap: 'wrap', justifyContent: 'center' } : null}
             contentContainerStyle={{ alignItems: 'center' }}
             renderItem={({ item }) => (
-                <Pressable
+                <TouchableScale
                     style={{
                         ...classItmStyle,
                         backgroundColor: item === filterOptions.facultyName ? `${themeColor}15` : null,
@@ -170,7 +171,7 @@ const FilterPanel = ({
                     }}>
                         {item}
                     </Text>
-                </Pressable>
+                </TouchableScale>
             )}
             ListHeaderComponent={() => (
                 <Text style={classItmTitleTextStyle}>
@@ -190,7 +191,7 @@ const FilterPanel = ({
             style={{ marginTop: scale(5) }}
             contentContainerStyle={{ alignItems: 'center' }}
             renderItem={({ item }) => (
-                <Pressable
+                <TouchableScale
                     style={{
                         ...classItmStyle,
                         paddingHorizontal: scale(5),
@@ -211,7 +212,7 @@ const FilterPanel = ({
                     }}>
                         {item}
                     </Text>
-                </Pressable>
+                </TouchableScale>
             )}
         />
     );
@@ -240,7 +241,7 @@ const FilterPanel = ({
                     </Text>
                     <View style={{ flexDirection: 'row', marginVertical: scale(5) }}>
                         {offerGEList.map(item => (
-                            <Pressable
+                            <TouchableScale
                                 key={item}
                                 style={{
                                     ...classItmStyle,
@@ -262,7 +263,7 @@ const FilterPanel = ({
                                 }}>
                                     {item}
                                 </Text>
-                            </Pressable>
+                            </TouchableScale>
                         ))}
                     </View>
                 </View>

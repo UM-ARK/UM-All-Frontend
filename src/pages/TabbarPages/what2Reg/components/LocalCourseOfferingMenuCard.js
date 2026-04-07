@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, View, Alert } from 'react-native';
 import * as DropdownMenu from 'zeego/dropdown-menu';
-import TouchableScale from 'react-native-touchable-scale';
 import { scale } from 'react-native-size-matters';
 import lodash from 'lodash';
 import { t } from 'i18next';
@@ -11,6 +10,7 @@ import { trigger } from '../../../../utils/trigger';
 import { WHAT_2_REG, ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import TouchableScale from '../../../../components/TouchableScale';
 
 // 單一 offering（section）卡片與長按選單：Section／Teacher 分組共用。
 const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {

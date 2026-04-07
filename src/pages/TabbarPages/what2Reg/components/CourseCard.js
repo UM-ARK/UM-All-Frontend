@@ -6,11 +6,11 @@ import { WHAT_2_REG, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../..
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
+import TouchableScale from '../../../../components/TouchableScale';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
 import * as DropdownMenu from 'zeego/dropdown-menu';
-import TouchableScale from 'react-native-touchable-scale';
 import lodash from 'lodash';
 import { t } from 'i18next';
 

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
-    ScrollView, Text, View, TouchableOpacity, Linking, Platform, Alert,
+    ScrollView, Text, View, TouchableOpacity, Linking, Alert,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { ARK_HARBOR_FEEDBACK, MAIL } from '../../../utils/pathMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
@@ -11,7 +11,6 @@ import { trigger } from '../../../utils/trigger';
 import CustomBottomSheet from '../courseSim/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 
-import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -20,21 +19,19 @@ import { Image } from 'expo-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
-import TouchableScale from 'react-native-touchable-scale';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import TouchableScale from '../../../components/TouchableScale';
+import RNTouchableScale from 'react-native-touchable-scale';
 import { useTranslation } from 'react-i18next';
-import { useHeaderHeight } from '@react-navigation/elements';
 
 function Index({ navigation }) {
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, barStyle, viewShadow } = theme;
+    const { themeColor, white, black, trueWhite, bg_color, viewShadow } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = getFunctionArr(t);
     const fontSize = i18n.language === 'tc' ? verticalScale(10) : verticalScale(8);
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
-    const insets = useSafeAreaInsets();
 
     // 功能卡片渲染，useCallback避免不必要的重渲染
     const GetFunctionCard = useCallback((title, fn_list) => (
@@ -80,7 +77,7 @@ function Index({ navigation }) {
                     }
                     const { go_where, webview_param, needLogin } = item;
                     return (
-                        <TouchableScale
+                        <RNTouchableScale
                             style={{ justifyContent: 'center', alignItems: 'center' }}
                             activeOpacity={0.7}
                             onPress={() => {
@@ -112,14 +109,14 @@ function Index({ navigation }) {
                             }}>
                                 {item.fn_name}
                             </Text>
-                        </TouchableScale>
+                        </RNTouchableScale>
                     );
                 }}
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={false}
             />
         </View >
-    ), [white, fontSize]);  // useCallback依賴於此
+    ), [white, fontSize, bg_color, black, navigation, themeColor, trueWhite, viewShadow]);
 
     // BottomSheet內容渲染
     const renderBottomSheet = () => {
@@ -190,7 +187,7 @@ function Index({ navigation }) {
                     paddingHorizontal: scale(10), // 兩側留白增加至 16
                 }}>
                     {/* 左側：反饋 (使用淺色背景膠囊樣式) */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             flexDirection: 'row', alignItems: 'center',
                             backgroundColor: `${themeColor}15`, // 15 是 10% 透明度，讓顏色更柔和
@@ -210,7 +207,7 @@ function Index({ navigation }) {
                         }}>
                             {t('反饋')}
                         </Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
 
                     {/* 中間：標題 */}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -222,7 +219,7 @@ function Index({ navigation }) {
                     </View>
 
                     {/* 右側：設置 (與左側對稱) */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             flexDirection: 'row', alignItems: 'center',
                             backgroundColor: `${themeColor}15`,
@@ -243,7 +240,7 @@ function Index({ navigation }) {
                         }}>
                             {t('設置')}
                         </Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 </View>
 
                 {functionArr.map(fn_card => GetFunctionCard(fn_card.title, fn_card.fn))}

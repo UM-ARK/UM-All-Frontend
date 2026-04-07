@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Pressable, Text, View } from 'react-native';
+import { Alert, FlatList, Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useIsFocused } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -32,6 +32,7 @@ import FirstLetterNav from './components/FirstLetterNav';
 import EatingScheduleSheetContent from './components/EatingScheduleSheetContent';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, modeENStr } from './constants/options';
+import TouchableScale from '../../../components/TouchableScale';
 
 const iconSize = scale(25);
 const itemHeight = scale(75);
@@ -265,12 +266,12 @@ const What2Reg = props => {
                     }}>
                         {`${t('Add Drop Data Version', { ns: 'about' }) + courseVersion.adddrop.updateTime}\n${courseVersion.adddrop.academicYear} - Sem ${courseVersion.adddrop.sem}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + courseVersion.pre.updateTime}\n${courseVersion.pre.academicYear} - Sem ${courseVersion.pre.sem}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
                     </Text>
-                    <Pressable style={styles.actionButton(themeColor)} onPress={handleManualUpdate}>
+                    <TouchableScale style={styles.actionButton(themeColor)} onPress={handleManualUpdate}>
                         <Text style={styles.actionButtonText}>
                             {t('手動檢查課表數據更新', { ns: 'catalog' })}
                         </Text>
-                    </Pressable>
-                    <Pressable
+                    </TouchableScale>
+                    <TouchableScale
                         style={styles.actionButton(black.third)}
                         onPress={() => {
                             trigger();
@@ -280,7 +281,7 @@ const What2Reg = props => {
                         <Text style={styles.actionButtonText}>
                             {t('Cancel')}
                         </Text>
-                    </Pressable>
+                    </TouchableScale>
                 </View>
             </ActionSheet>
 
@@ -305,10 +306,10 @@ const What2Reg = props => {
                 bottomOffset={50}
             >
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3) }}>
-                    <Pressable style={styles.titleRightButton} onPress={handleUpdatePress}>
+                    <TouchableScale style={styles.titleRightButton} onPress={handleUpdatePress}>
                         <Ionicons name={'build'} size={verticalScale(14)} color={themeColor} />
                         <Text style={styles.titleButtonText}>{t('更新')}</Text>
-                    </Pressable>
+                    </TouchableScale>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                         <Image
@@ -322,7 +323,7 @@ const What2Reg = props => {
                         </View>
                     </View>
 
-                    <Pressable
+                    <TouchableScale
                         style={styles.titleLeftButton}
                         onPress={() => {
                             trigger();
@@ -336,7 +337,7 @@ const What2Reg = props => {
                     >
                         <Ionicons name={'alarm'} size={verticalScale(14)} color={themeColor} />
                         <Text style={styles.titleButtonText}>{t('幹飯', { ns: 'catalog' })}</Text>
-                    </Pressable>
+                    </TouchableScale>
                 </View>
 
                 <SearchBarSection
@@ -424,11 +425,11 @@ const What2Reg = props => {
                     </Text>
                 </View>
 
-                <Pressable style={{ marginTop: scale(10), alignItems: 'center' }} onPress={handleUserAgreePress}>
+                <TouchableScale style={{ marginTop: scale(10), alignItems: 'center' }} onPress={handleUserAgreePress}>
                     <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(10) }}>
                         ARK ALL 隱私政策 & 用戶協議
                     </Text>
-                </Pressable>
+                </TouchableScale>
             </KeyboardAwareScrollView>
 
             <KeyboardToolbar />
