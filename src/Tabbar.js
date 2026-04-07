@@ -58,12 +58,15 @@ const androidTabIconConfig = {
 };
 
 /**
- * 获取 Tab Bar 样式配置
+ * 取得 Tab Bar 樣式（iOS 勿硬編碼純白，深色模式下會與主題脫節）
  */
 const getTabBarStyle = theme => {
     if (Platform.OS === 'ios') {
         return {
-            backgroundColor: '#FFFFFF',
+            // 液態玻璃 + translucent 時由系統材質呈現；否則與頁面背景一致
+            backgroundColor: isLiquidGlassSupported
+                ? 'transparent'
+                : theme.bg_color,
             borderTopWidth: 0,
         };
     }
