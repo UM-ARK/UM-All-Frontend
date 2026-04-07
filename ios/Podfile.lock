@@ -247,7 +247,7 @@ PODS:
     - ExpoModulesCore
   - ExpoSystemUI (55.0.13):
     - ExpoModulesCore
-  - ExpoUI (55.0.8):
+  - ExpoUI (55.0.9):
     - ExpoModulesCore
     - React-RCTFabric
   - ExpoWebBrowser (55.0.12):
@@ -1986,7 +1986,7 @@ PODS:
     - ReactNativeDependencies
     - Toast (~> 4)
     - Yoga
-  - react-native-vector-icons-material-design-icons (12.4.0)
+  - react-native-vector-icons-material-design-icons (13.0.0)
   - react-native-webview (13.16.0):
     - hermes-engine
     - RCTRequired
@@ -3300,7 +3300,7 @@ SPEC CHECKSUMS:
   ExpoModulesJSI: c4d43b571e2dc2f3d269f30313a8684cf08f2c43
   ExpoSplashScreen: 67f390cdc5cc93c9ca6d55be3e9055a9478541ac
   ExpoSystemUI: 4d04b94370a12492d7a8f3ef9202bbedab434497
-  ExpoUI: 7b72217e39cb810a4320684a48652ac0c790409b
+  ExpoUI: e8df9cbe9923d9357c6e6c1d41bbf4270f048a30
   ExpoWebBrowser: c24affc884b7cb6cbd6b84a1528665c4bc6e8f48
   EXUpdatesInterface: 39d05400a9226c438565dbaaa8447b5f0672ba45
   FBLazyVector: 061f518bbd81677ed8a8317e2ae60b8779495808
@@ -3361,7 +3361,7 @@ SPEC CHECKSUMS:
   react-native-pager-view: 9ebb71ac08f26122d9838c3ed72dd5a61bdc2640
   react-native-safe-area-context: c5d42c4294aa175415947e23c2ac956253abfc7d
   react-native-simple-toast: a1eb60d5c91875d156fd0c1ef314fa889cd4361e
-  react-native-vector-icons-material-design-icons: 76cd460b3540b80527b4a80fb7f867f7deedb498
+  react-native-vector-icons-material-design-icons: 1955bd08457a8310e6a2d3c87c7f1ebaca159098
   react-native-webview: 6b41d44f853c7f8dd8b685d8d289fe33349e4e1b
   React-NativeModulesApple: f3eb751b0ea23645a5283ed8c8bb8ebeeda32d15
   React-networking: 2f433c56001ba5a9b6a5b2b0d87d0f672bac9eed
