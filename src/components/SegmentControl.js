@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTheme, uiStyle } from './ThemeContext';
 import { trigger } from '../utils/trigger';
+import TouchableScale from './TouchableScale';
 
 /**
  * 分段控制元件（膠囊樣式，用於設定列、篩選等）
@@ -45,19 +46,18 @@ const SegmentControl = ({
             overflow: 'hidden',
         }, style]}>
             {options.map((option, index) => (
-                <Pressable
+                <TouchableScale
                     key={option.key}
                     onPress={() => {
                         trigger();
                         onChange(index);
                     }}
-                    style={({ pressed }) => ({
+                    style={{
                         paddingHorizontal: scale(12),
                         paddingVertical: verticalScale(5),
                         borderRadius: scale(999),
                         backgroundColor: selectedIndex === index ? `${accent}15` : 'transparent',
-                        opacity: pressed ? 0.85 : 1,
-                    })}
+                    }}
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
@@ -67,7 +67,7 @@ const SegmentControl = ({
                     }}>
                         {option.label}
                     </Text>
-                </Pressable>
+                </TouchableScale>
             ))}
         </View>
     );
