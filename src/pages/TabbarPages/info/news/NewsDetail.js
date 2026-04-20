@@ -270,14 +270,19 @@ const NewsDetail = ({ route, navigation }) => {
                                 source={item}
                                 style={{ width: '100%', height: '100%' }}
                                 onLoadStart={() => {
-                                    const newLoadingState = [...imgLoading];
-                                    newLoadingState[index] = true; // 设置当前图片为加载中
-                                    setImgLoading(newLoadingState);
+                                    // 使用函數式更新，避免多張圖片並行載入時 stale closure 導致狀態互相覆蓋
+                                    setImgLoading(prev => {
+                                        const next = [...prev];
+                                        next[index] = true;
+                                        return next;
+                                    });
                                 }}
                                 onLoadEnd={() => {
-                                    const newLoadingState = [...imgLoading];
-                                    newLoadingState[index] = false; // 设置当前图片为加载完成
-                                    setImgLoading(newLoadingState);
+                                    setImgLoading(prev => {
+                                        const next = [...prev];
+                                        next[index] = false;
+                                        return next;
+                                    });
                                 }}
                             />
                             {imgLoading[index] && (
