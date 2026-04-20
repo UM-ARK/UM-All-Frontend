@@ -16,7 +16,6 @@ import Animated, {
     Extrapolation,
     withSpring,
     FadeInUp,
-    LinearTransition,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import moment from 'moment-timezone';
@@ -100,20 +99,15 @@ const getDynamicStyles = (theme) => {
  * 玻璃擬態卡片組件
  * 使用BlurView實現半透明毛玻璃效果
  */
-const GlassmorphismCard = React.memo(({ children, style, intensity = 30 }) => {
+const GlassmorphismCard = React.memo(({ children, style }) => {
     const { theme } = useTheme();
-    const { white } = theme;
 
     return (
-        <View style={[staticStyles.glassCardContainer, style]}>
-            <BlurView
-                intensity={intensity}
-                tint="light"
-                style={[
-                    StyleSheet.absoluteFill,
-                    { backgroundColor: `${white}40` },
-                ]}
-            />
+        <View style={[
+            staticStyles.glassCardContainer,
+            { backgroundColor: theme.glassBg, borderColor: theme.glassBorder },
+            style,
+        ]}>
             <View style={staticStyles.glassCardContent}>{children}</View>
         </View>
     );
@@ -132,9 +126,8 @@ const HeroSection = React.memo(
         setImgLoading,
         title,
         themeColor,
+        dynamicStyles,
     }) => {
-        const { theme } = useTheme();
-        const dynamicStyles = getDynamicStyles(theme);
 
         // 視差動畫樣式
         const parallaxStyle = useAnimatedStyle(() => {
@@ -144,14 +137,8 @@ const HeroSection = React.memo(
                 [0, HERO_HEIGHT * 0.4],
                 Extrapolation.CLAMP,
             );
-            const scale = interpolate(
-                scrollY.value,
-                [0, HERO_HEIGHT],
-                [1, 1.15],
-                Extrapolation.CLAMP,
-            );
             return {
-                transform: [{ translateY }, { scale }],
+                transform: [{ translateY }],
             };
         });
 
@@ -201,7 +188,7 @@ const HeroSection = React.memo(
                 {/* 浮動標題 */}
                 {title && (
                     <Animated.View style={[staticStyles.heroTitleContainer, titleStyle]}>
-                        <BlurView intensity={40} tint="dark" style={staticStyles.heroTitleBlur}>
+                        <BlurView intensity={25} tint="dark" style={staticStyles.heroTitleBlur}>
                             <Text style={dynamicStyles.heroTitle}
                             // numberOfLines={4}
                             >
@@ -294,9 +281,7 @@ const LanguageSelector = React.memo(
  * 時間軸式時間顯示組件
  * 現代化日期時間展示
  */
-const TimeDisplay = React.memo(({ dateFrom, dateTo, timeFrom, timeTo, mode, themeColor }) => {
-    const { theme } = useTheme();
-    const dynamicStyles = getDynamicStyles(theme);
+const TimeDisplay = React.memo(({ dateFrom, dateTo, timeFrom, timeTo, mode, themeColor, dynamicStyles }) => {
     const isSameDay = moment(dateFrom).format('MM-DD') === moment(dateTo).format('MM-DD');
 
     const dateLabels = ['活動日期：', 'Date: ', 'Data: '];
@@ -346,8 +331,7 @@ const TimeDisplay = React.memo(({ dateFrom, dateTo, timeFrom, timeTo, mode, them
 const InfoCard = React.memo(({ title, children, delay = 0, themeColor }) => {
     return (
         <Animated.View
-            entering={FadeInUp.delay(delay).duration(600).springify()}
-            layout={LinearTransition.springify()}>
+            entering={FadeInUp.delay(delay).duration(350)}>
             <GlassmorphismCard style={staticStyles.infoCard}>
                 {title && (
                     <View style={staticStyles.infoCardHeader}>
@@ -377,13 +361,12 @@ const ContactCard = React.memo(
         mode,
         themeColor,
         navigation,
+        dynamicStyles,
     }) => {
-        const { theme } = useTheme();
-        const dynamicStyles = getDynamicStyles(theme);
         const labels = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
 
         return (
-            <Animated.View entering={FadeInUp.delay(400).duration(600).springify()}>
+            <Animated.View entering={FadeInUp.delay(400).duration(350)}>
                 <GlassmorphismCard style={staticStyles.contactCard}>
                     <View style={staticStyles.contactHeader}>
                         <View
@@ -457,7 +440,7 @@ const ContactCard = React.memo(
 const UMEventDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
     const { white, black, bg_color, themeColor } = theme;
-    const dynamicStyles = getDynamicStyles(theme);
+    const dynamicStyles = useMemo(() => getDynamicStyles(theme), [theme]);
 
     const imageScrollViewer = useRef(null);
     const scrollRef = useRef(null);
@@ -557,7 +540,7 @@ const UMEventDetail = ({ route, navigation }) => {
     const { dateFrom, dateTo, timeFrom, timeTo, imageUrls } = state.data;
 
     // 構建數組數據
-    const dataArrays = {
+    const dataArrays = useMemo(() => ({
         speaker: [state.data.speaker_cn, state.data.speaker_en, state.data.speaker_pt, '講者：', 'Speaker: ', 'Orador: '],
         venue: [state.data.venue_cn, state.data.venue_en, state.data.venue_pt, '地點：', 'Venue: ', 'Local: '],
         language: [state.data.language_cn, state.data.language_en, state.data.language_pt, '語言：', 'Language: ', 'Língua: '],
@@ -570,7 +553,7 @@ const UMEventDetail = ({ route, navigation }) => {
         contactPhone: [state.data.contactPhone_cn, state.data.contactPhone_en, state.data.contactPhone_pt, '電話：', 'Phone: ', 'Telefone: '],
         contactFax: [state.data.contactFax_cn, state.data.contactFax_en, state.data.contactFax_pt, '傳真：', 'Fax: ', 'Fax: '],
         contactMail: [state.data.contactMail_cn, state.data.contactMail_en, state.data.contactMail_pt, '電郵：', 'E-mail: ', 'E-mail: '],
-    };
+    }), [state.data]);
 
     // 檢查內容是否存在
     const hasCoorganiser = !!state.data.coorganiser_cn;
@@ -605,12 +588,13 @@ const UMEventDetail = ({ route, navigation }) => {
                     }
                     title={getCurrentTitle()}
                     themeColor={themeColor}
+                    dynamicStyles={dynamicStyles}
                 />
 
                 {/* 內容容器 */}
                 <View style={staticStyles.contentWrapper}>
                     {/* 語言選擇器 */}
-                    <Animated.View entering={FadeInUp.delay(100).duration(500)}>
+                    <Animated.View entering={FadeInUp.delay(100).duration(350)}>
                         <LanguageSelector
                             languageMode={LanguageMode}
                             chooseMode={chooseMode}
@@ -621,7 +605,7 @@ const UMEventDetail = ({ route, navigation }) => {
                     </Animated.View>
 
                     {/* 時間顯示 */}
-                    <Animated.View entering={FadeInUp.delay(150).duration(500)}>
+                    <Animated.View entering={FadeInUp.delay(150).duration(350)}>
                         <GlassmorphismCard style={staticStyles.timeCard}>
                             <TimeDisplay
                                 dateFrom={dateFrom}
@@ -630,6 +614,7 @@ const UMEventDetail = ({ route, navigation }) => {
                                 timeTo={timeTo}
                                 mode={chooseMode}
                                 themeColor={themeColor}
+                                dynamicStyles={dynamicStyles}
                             />
                         </GlassmorphismCard>
                     </Animated.View>
@@ -765,6 +750,7 @@ const UMEventDetail = ({ route, navigation }) => {
                         mode={chooseMode}
                         themeColor={themeColor}
                         navigation={navigation}
+                        dynamicStyles={dynamicStyles}
                     />
 
                     {/* 底部留白 */}
@@ -840,7 +826,6 @@ const staticStyles = StyleSheet.create({
         borderRadius: scale(20),
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.3)',
     },
     glassCardContent: {
         padding: scale(16),
@@ -909,12 +894,12 @@ const staticStyles = StyleSheet.create({
 
     // 信息卡片
     infoCard: {
-        marginVertical: verticalScale(8),
+        marginVertical: verticalScale(4),
     },
     infoCardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: verticalScale(12),
+        marginBottom: verticalScale(6),
         paddingBottom: verticalScale(8),
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0,0,0,0.05)',
