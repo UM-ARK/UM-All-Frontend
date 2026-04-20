@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator, Platform } from 'react-native';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import ARKImageView from '../../../../components/ARKImageView';
@@ -15,15 +15,17 @@ import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
 
-// HTML正則篩數據
+// 正文字體：iOS 用 PingFang SC，Android 用 Noto Sans
+const BODY_FONT = Platform.select({ ios: 'PingFang SC', android: 'NotoSansCJK-Regular', default: undefined });
+
+// HTML正則篩數據，並在每個段落開頭插入全形空格實現首行縮進
 function repalceHtmlToText(str) {
-    // str = str.replace(/(<([^>]+)>)/g, '');
-    // str = str.replace(/<\/?.+?>/g, '');
-    // str = str.replace(/&nbsp;/g, '');
-    // str = str.replace(/[\r\n]/g, '');
     str = str.replace(/<br\s*\/?>/g, '');
     str = str.replace(/<p><\s*\/?p>/g, '');
     str = str.replace(/<div><\s*\/?div>/g, '');
+    // 段首加兩個全形空格模擬縮進
+    str = str.replace(/<p(\s[^>]*)?>/gi, '<p$1>\u3000\u3000');
+    str = str.replace(/<div(\s[^>]*)?>/gi, '<div$1>\u3000\u3000');
     return str;
 }
 
@@ -62,23 +64,72 @@ const NewsDetail = ({ route, navigation }) => {
     const htmlStyles = StyleSheet.create({
         p: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.second,
+            lineHeight: scale(22),
+            marginBottom: scale(8),
+            textAlign: 'justify',
         },
         span: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.second,
+            lineHeight: scale(22),
         },
         div: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.second,
+            lineHeight: scale(22),
+            marginBottom: scale(8),
+            textAlign: 'justify',
         },
         td: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.third,
+            lineHeight: scale(20),
         },
         a: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: themeColor,
+            textDecorationLine: 'underline',
+        },
+        h1: {
+            fontFamily: BODY_FONT,
+            fontWeight: 'bold',
+            fontSize: scale(20),
+            color: black.first,
+            marginBottom: scale(8),
+            lineHeight: scale(28),
+        },
+        h2: {
+            fontFamily: BODY_FONT,
+            fontWeight: 'bold',
+            fontSize: scale(18),
+            color: black.first,
+            marginBottom: scale(6),
+            lineHeight: scale(26),
+        },
+        h3: {
+            fontFamily: BODY_FONT,
+            fontWeight: '600',
+            fontSize: scale(16),
+            color: black.first,
+            marginBottom: scale(6),
+            lineHeight: scale(24),
+        },
+        strong: {
+            fontFamily: BODY_FONT,
+            fontWeight: 'bold',
+            color: black.first,
+        },
+        li: {
+            fontFamily: BODY_FONT,
+            color: black.second,
+            lineHeight: scale(22),
+            marginBottom: scale(4),
         },
     });
 
