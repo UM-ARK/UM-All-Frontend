@@ -458,12 +458,12 @@ function CourseSim({ route, navigation }) {
                             textAlign: 'center',
                         }}
                     >
-                        休息
+                        {t('休息', { ns: 'timetable' })}
                         <Text style={{ fontWeight: 'bold', color: timeWarning ? unread : themeColor }}>
                             {hourDiff >= 1 ? `${hourDiff}` : `${minuteDiff}`}
                         </Text>
-                        {hourDiff >= 1 ? '小時' : '分鐘'}後
-                        {timeWarning ? <Text>{'\n🆘課程衝突🆘'}</Text> : null}
+                        {hourDiff >= 1 ? t('小時後', { ns: 'timetable' }) : t('分鐘後', { ns: 'timetable' })}
+                        {timeWarning ? <Text>{'\n🆘' + t('課程衝突', { ns: 'timetable' }) + '🆘'}</Text> : null}
                     </Text>
                 );
             }
@@ -704,7 +704,7 @@ function CourseSim({ route, navigation }) {
                             destructive
                             onSelect={() => {
                                 trigger();
-                                Alert.alert('', `要在模擬課表中刪除${course['Course Code']}的所有Section嗎？`,
+                                Alert.alert('', t('刪除所有Section確認', { ns: 'timetable', code: course['Course Code'] }),
                                     [
                                         {
                                             text: 'Yes',
@@ -747,7 +747,7 @@ function CourseSim({ route, navigation }) {
                         destructive
                         onSelect={() => {
                             trigger();
-                            Alert.alert('', `要在模擬課表中刪除${course['Course Code']}-${course.Section}嗎？`,
+                            Alert.alert('', t('刪除Section確認', { ns: 'timetable', code: course['Course Code'], section: course.Section }),
                                 [
                                     {
                                         text: 'Drop',
@@ -758,7 +758,7 @@ function CourseSim({ route, navigation }) {
                                         style: 'destructive',
                                     },
                                     {
-                                        text: '取消',
+                                        text: t('取消', { ns: 'timetable' }),
                                     },
                                 ],
                                 { cancelable: true }
@@ -800,7 +800,7 @@ function CourseSim({ route, navigation }) {
             // 將解析結果導入課表
             handleCourseList(parseRes);
         } else {
-            Alert.alert('', '您輸入的格式有誤，\n有正確全選複製Timetable嗎？');
+            Alert.alert('', t('導入格式錯誤', { ns: 'timetable' }));
         }
     };
 
@@ -842,7 +842,7 @@ function CourseSim({ route, navigation }) {
 
         handleCourseList(newList); // 更新課表清單
 
-        Toast.show(`已刪除 ${course['Course Code']}-${course.Section}`);
+        Toast.show(t('已刪除課程', { ns: 'timetable', code: course['Course Code'], section: course.Section }));
     };
 
     const clearCourse = () => {
@@ -851,9 +851,9 @@ function CourseSim({ route, navigation }) {
         // 關閉 BottomSheet
         bottomSheetRef?.current?.close();
 
-        Alert.alert('', '確定要清空當前的模擬課表嗎？', [
+        Alert.alert('', t('清空確認', { ns: 'timetable' }), [
             {
-                text: '確定清空',
+                text: t('確定清空', { ns: 'timetable' }),
                 onPress: () => {
                     trigger(); // 再次觸發動效
 
