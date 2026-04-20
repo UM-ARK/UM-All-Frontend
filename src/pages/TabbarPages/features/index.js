@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-    ScrollView, Text, View, TouchableOpacity, Linking, Alert,
+    ScrollView, Text, View, TouchableOpacity, Linking,
 } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
@@ -21,6 +21,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
+import * as DropdownMenu from 'zeego/dropdown-menu';
 
 function Index({ navigation }) {
     const { theme } = useTheme();
@@ -148,30 +149,6 @@ function Index({ navigation }) {
         );
     };
 
-    const handleFeedbackPress = () => {
-        trigger();
-        const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
-        // if (Platform.OS === 'android') {
-        // } else {
-        //     Linking.openURL(mailMes);
-        // }
-        Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
-            {
-                text: 'Harbor⭐️', onPress: () => {
-                    openLink(ARK_HARBOR_FEEDBACK);
-                },
-            },
-            {
-                text: 'Email', onPress: () => {
-                    Clipboard.setString(MAIL);
-                    Toast.show(t('已複製Mail到剪貼板！'));
-                    Linking.openURL(mailMes);
-                },
-            },
-            { text: 'No' },
-        ]);
-    };
-
     const handleSettingsPress = () => {
         trigger();
         navigation.navigate('SettingPage');
@@ -185,28 +162,61 @@ function Index({ navigation }) {
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
                     paddingHorizontal: scale(10), // 兩側留白增加至 16
                 }}>
-                    {/* 左側：反饋 (使用淺色背景膠囊樣式) */}
-                    <TouchableScale
-                        style={{
-                            flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: `${themeColor}15`, // 15 是 10% 透明度，讓顏色更柔和
-                            borderRadius: scale(20), // 完全圓角更現代
-                            paddingVertical: scale(6),
-                            paddingHorizontal: scale(10),
-                        }}
-                        onPress={handleFeedbackPress} // 邏輯抽離
-                    >
-                        <MaterialIcons name={'feedback'} size={verticalScale(14)} color={themeColor} />
-                        <Text style={{
-                            marginLeft: scale(4),
-                            fontSize: verticalScale(12),
-                            color: themeColor,
-                            fontWeight: '600',
-                            lineHeight: verticalScale(14),
-                        }}>
-                            {t('反饋')}
-                        </Text>
-                    </TouchableScale>
+                    {/* 左側：反饋 */}
+                    <DropdownMenu.Root onOpenChange={(open) => { if (open) { trigger(); } }}>
+                        <DropdownMenu.Trigger>
+                            <TouchableScale
+                                style={{
+                                    flexDirection: 'row', alignItems: 'center',
+                                    backgroundColor: `${themeColor}15`,
+                                    borderRadius: scale(20),
+                                    paddingVertical: scale(6),
+                                    paddingHorizontal: scale(10),
+                                }}
+                            >
+                                <MaterialIcons name={'feedback'} size={verticalScale(14)} color={themeColor} />
+                                <Text style={{
+                                    marginLeft: scale(4),
+                                    fontSize: verticalScale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                    lineHeight: verticalScale(14),
+                                }}>
+                                    {t('反饋')}
+                                </Text>
+                            </TouchableScale>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                            <DropdownMenu.Item
+                                key="harbor"
+                                onSelect={() => {
+                                    trigger();
+                                    openLink(ARK_HARBOR_FEEDBACK);
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{ name: 'star.fill', pointSize: scale(16), hierarchicalColor: { dark: themeColor, light: themeColor } }}
+                                    androidIconName="ic_menu_star"
+                                />
+                                <DropdownMenu.ItemTitle>{'Harbor ⭐️'}</DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                key="email"
+                                onSelect={() => {
+                                    trigger();
+                                    Clipboard.setString(MAIL);
+                                    Toast.show(t('已複製Mail到剪貼板！'));
+                                    Linking.openURL(`mailto:${MAIL}?subject=ARK功能反饋`);
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{ name: 'envelope', pointSize: scale(16), hierarchicalColor: { dark: themeColor, light: themeColor } }}
+                                    androidIconName="ic_menu_send"
+                                />
+                                <DropdownMenu.ItemTitle>{'Email'}</DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                    </DropdownMenu.Root>
 
                     {/* 中間：標題 */}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
