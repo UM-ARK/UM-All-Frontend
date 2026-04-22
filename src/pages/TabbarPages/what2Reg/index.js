@@ -18,7 +18,8 @@ import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
 import { setLocalStorage } from '../../../utils/storageKits';
 import { checkCloudCourseVersion } from '../../../utils/checkCoursesKits';
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, WHAT_2_REG_SEARCH } from '../../../utils/pathMap';
+import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
+import { refreshUmehHost, useUmehHost } from '../../../utils/umehHost';
 
 import CourseCard from './components/CourseCard';
 import CustomBottomSheet from '../courseSim/BottomSheet';
@@ -39,6 +40,7 @@ const itemHeight = scale(75);
 
 const What2Reg = props => {
     const { theme } = useTheme();
+    const { searchHost } = useUmehHost();
     const { themeColor, black, white, bg_color } = theme;
     const styles = useMemo(() => getStyles(themeColor, white), [themeColor, white]);
 
@@ -118,6 +120,7 @@ const What2Reg = props => {
     const initPageData = useCallback(async () => {
         try {
             logToFirebase('openPage', { page: 'chooseCourses' });
+            refreshUmehHost(); // 不 await，背景探測 host
             const nextFilterOptions = await initCourseData();
             setFilterOptions(nextFilterOptions);
         } catch (e) {
@@ -156,7 +159,7 @@ const What2Reg = props => {
                 break;
             }
             case 'what2reg': {
-                openLink(`${WHAT_2_REG_SEARCH}${encodeURIComponent(inputText)}`);
+                openLink(`${searchHost}${encodeURIComponent(inputText)}`);
                 break;
             }
             case 'official': {

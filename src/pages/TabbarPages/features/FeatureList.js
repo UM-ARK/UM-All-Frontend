@@ -8,7 +8,6 @@ import {
     UM_PORTAL,
     UM_CALENDAR,
     UM_Moodle,
-    WHAT_2_REG,
     UM_PRE_ENROLMENT,
     UM_ADD_DROP,
     UM_WHOLE_PERSON,
@@ -43,6 +42,7 @@ import {
     UM_ALUMNI,
     ARK_HARBOR,
 } from '../../../utils/pathMap';
+import { getCurrentUmehHost } from '../../../utils/umehHost';
 
 const iconTypes = {
     ionicons: 'ionicons',
@@ -565,7 +565,7 @@ export const getFunctionArr = (t) => [
                 go_where: 'Webview',
                 webview_param: {
                     // import pathMap的鏈接進行跳轉
-                    url: WHAT_2_REG,
+                    url: getCurrentUmehHost(),
                     title: '澳大選咩課',
                     // 標題顏色，默認為black.main
                     text_color: '#fff',

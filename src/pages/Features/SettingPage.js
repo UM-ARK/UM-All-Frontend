@@ -11,6 +11,8 @@ import { useTheme, uiStyle } from '../../components/ThemeContext';
 import { openLink } from '../../utils/browser';
 import { trigger } from '../../utils/trigger';
 import { getLocalStorage, setLocalStorage } from '../../utils/storageKits';
+import { getUmehHostPref, setUmehHostPref, refreshUmehHost } from '../../utils/umehHost';
+import * as DropdownMenu from 'zeego/dropdown-menu';
 import {
     USUAL_Q,
     USER_AGREE,
@@ -298,10 +300,12 @@ const SettingPage = ({ navigation }) => {
     const { bg_color, black } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common']);
     const [userInfo, setUserInfo] = useState({});
+    const [umehHostPref, setUmehHostPrefState] = useState('auto');
 
-    // 組件掛載時加載用戶資訊
+    // 組件掛載時加載用戶資訊和 host 偏好
     useEffect(() => {
         loadUserInfo();
+        getUmehHostPref().then(setUmehHostPrefState);
     }, []);
 
     /**
@@ -374,6 +378,18 @@ const SettingPage = ({ navigation }) => {
             Alert.alert(t('setting:Check Update'), t('setting:Latest Version'));
         }
     }, [t]);
+
+    const handleUmehHostPrefChange = async (pref) => {
+        await setUmehHostPref(pref);
+        setUmehHostPrefState(pref);
+        refreshUmehHost();
+    };
+
+    const umehHostPrefLabels = {
+        auto: t('setting:Auto'),
+        primary: 'umeh',
+        backup: 'cf',
+    };
 
     // 主題選項配置
     const themeOptions = [
@@ -449,6 +465,55 @@ const SettingPage = ({ navigation }) => {
                         title={t('setting:Check Update')}
                         subtitle={`v${packageInfo.version}`}
                         onPress={handleCheckUpdate}
+                    />
+                    <SettingItem
+                        grouped
+                        icon="globe-outline"
+                        iconColor="#007AFF"
+                        title={t('setting:What2Reg Host')}
+                        subtitle={umehHostPrefLabels[umehHostPref]}
+                        showArrow={false}
+                        rightElement={
+                            <DropdownMenu.Root>
+                                <DropdownMenu.Trigger>
+                                    <TouchableOpacity
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            backgroundColor: `${'#007AFF'}15`,
+                                            borderRadius: scale(8),
+                                            paddingHorizontal: scale(10),
+                                            paddingVertical: scale(5),
+                                        }}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text style={{
+                                            ...uiStyle.defaultText,
+                                            fontSize: scale(13),
+                                            color: '#007AFF',
+                                            fontWeight: '500',
+                                        }}>
+                                            {umehHostPrefLabels[umehHostPref]}
+                                        </Text>
+                                        <Ionicons name="chevron-down" size={scale(12)} color="#007AFF" style={{ marginLeft: scale(4) }} />
+                                    </TouchableOpacity>
+                                </DropdownMenu.Trigger>
+                                <DropdownMenu.Content>
+                                    {['auto', 'primary', 'backup'].map(pref => (
+                                        <DropdownMenu.CheckboxItem
+                                            key={pref}
+                                            value={umehHostPref === pref ? 'on' : 'off'}
+                                            onValueChange={() => handleUmehHostPrefChange(pref)}
+                                        >
+                                            <DropdownMenu.ItemIndicator />
+                                            <DropdownMenu.ItemTitle>
+                                                {umehHostPrefLabels[pref]}
+                                            </DropdownMenu.ItemTitle>
+                                        </DropdownMenu.CheckboxItem>
+                                    ))}
+                                </DropdownMenu.Content>
+                            </DropdownMenu.Root>
+                        }
                     />
                 </SettingSectionCard>
 

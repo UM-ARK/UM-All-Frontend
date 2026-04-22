@@ -42,6 +42,8 @@ export default {
         'Guest': '訪客',
         'Student': '學生',
         'Organization': '組織',
+        'What2Reg Host': '選咩課網站',
+        'Auto': '自動',
     },
 
     // 關於頁

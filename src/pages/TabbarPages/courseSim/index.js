@@ -35,7 +35,8 @@ import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
 import coursePlanFile from '../../../static/UMCourses/coursePlan';
 import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
 import { openLink } from '../../../utils/browser';
-import { UM_ISW, ARK_WIKI_SEARCH, WHAT_2_REG, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
+import { UM_ISW, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
+import { getCurrentUmehHost } from '../../../utils/umehHost';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { trigger } from '../../../utils/trigger';
 import CustomBottomSheet from './BottomSheet';
@@ -635,7 +636,7 @@ function CourseSim({ route, navigation }) {
                             trigger();
                             const courseCode = course['Course Code'];
                             const profName = course['Teacher Information'];
-                            const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(profName));
+                            const URI = getCurrentUmehHost() + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(profName));
                             openLink(URI);
                         }}
                     >

@@ -7,7 +7,8 @@ import { t } from 'i18next';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
-import { WHAT_2_REG, ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
+import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
+import { useUmehHost } from '../../../../utils/umehHost';
 import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import TouchableScale from '../../../../components/TouchableScale';
@@ -15,6 +16,7 @@ import TouchableScale from '../../../../components/TouchableScale';
 // 單一 offering（section）卡片與長按選單：Section／Teacher 分組共用。
 const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     const { theme } = useTheme();
+    const { baseHost } = useUmehHost();
     const { themeColor, black, white } = theme;
 
     const courseRow = slots?.[0];
@@ -133,7 +135,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                         const courseCode_ = courseRow['Course Code'];
                         const profName = courseRow['Teacher Information'];
                         if (profName) {
-                            const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode_) + '/' + encodeURIComponent(lodash.deburr(profName));
+                            const URI = baseHost + '/reviews/' + encodeURIComponent(courseCode_) + '/' + encodeURIComponent(lodash.deburr(profName));
                             logToFirebase('checkCourse', {
                                 courseCode: courseCode_,
                                 profName,
@@ -142,7 +144,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                             openLink(URI);
                         }
                         else {
-                            const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode_)}`;
+                            const URI = `${baseHost}/course/${encodeURIComponent(courseCode_)}`;
                             logToFirebase('checkCourse', {
                                 courseCode: courseCode_,
                                 action: 'what2reg',

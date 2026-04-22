@@ -2,7 +2,8 @@ import React, { useContext, memo } from 'react';
 import { View, Text } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import { WHAT_2_REG, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../utils/pathMap';
+import { ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../utils/pathMap';
+import { useUmehHost } from '../../../../utils/umehHost';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
@@ -18,6 +19,7 @@ const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
     // const { item, mode, prof_info, courseMode = 'ad' } = props;
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
+    const { baseHost } = useUmehHost();
     const { themeColor, black, secondThemeColor, white, what2reg_color } = theme;
 
     // 從 item 中提取課程資訊
@@ -192,7 +194,7 @@ const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
                                         isBarStyleBlack: false,
                                     };
                                     if (prof_info) {
-                                        const URI = WHAT_2_REG + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(prof_info.name));
+                                        const URI = baseHost + '/reviews/' + encodeURIComponent(courseCode) + '/' + encodeURIComponent(lodash.deburr(prof_info.name));
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {
@@ -202,7 +204,7 @@ const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
                                         });
                                     }
                                     else {
-                                        const URI = `${WHAT_2_REG}/course/${encodeURIComponent(courseCode)}`;
+                                        const URI = `${baseHost}/course/${encodeURIComponent(courseCode)}`;
                                         webview_param.url = URI;
                                         webview_param.title = courseCode;
                                         logToFirebase('checkCourse', {

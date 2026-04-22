@@ -312,6 +312,8 @@
         "Check Update Error": "Unable to fetch version info. Check your connection and try again.",
         "Guest": "Guest",
         "Student": "Student",
-        "Organization": "Organization"
+        "Organization": "Organization",
+        "What2Reg Host": "What2Reg Host",
+        "Auto": "Auto"
     }
 }
