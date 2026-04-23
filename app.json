@@ -38,6 +38,7 @@
       ]
     },
     "plugins": [
+      "./plugins/withAndroidSigning",
       [
         "expo-dev-client",
         {
