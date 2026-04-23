@@ -1,6 +1,7 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
 import React, { useMemo } from 'react';
-import { Platform } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContainer, useNavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HeaderBackButton } from '@react-navigation/elements';
@@ -59,7 +60,8 @@ const Nav = () => {
                     headerTransparent: isLiquidGlassSupported,
                     headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
                     headerStyle: {
-                        backgroundColor: isLiquidGlassSupported ? 'transparent' : theme.white,
+                        backgroundColor: isLiquidGlassSupported ? 'transparent' : theme.bg_color,
+                        elevation: 0,
                     },
                     contentStyle: { backgroundColor: theme.bg_color },
                     headerTitleAlign: 'center',
@@ -81,13 +83,24 @@ const Nav = () => {
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
                         }),
-                        headerLeft: (props) => (
+                        headerLeft: (props) => Platform.OS === 'android' ? (
+                            <TouchableOpacity
+                                onPress={() => { trigger(); navigation.goBack(); }}
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 18,
+                                    backgroundColor: theme.black.main + '14',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Ionicons name="chevron-back" size={22} color={black.main} />
+                            </TouchableOpacity>
+                        ) : (
                             <HeaderBackButton
                                 {...props}
-                                onPress={() => {
-                                    trigger();
-                                    navigation.goBack();
-                                }}
+                                onPress={() => { trigger(); navigation.goBack(); }}
                                 label=''
                             />
                         ),

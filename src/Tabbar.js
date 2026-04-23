@@ -1,14 +1,14 @@
-import {Dimensions, Platform} from 'react-native';
+import { Dimensions, Platform, View } from 'react-native';
 
-import {useTheme} from './components/ThemeContext';
+import { useTheme } from './components/ThemeContext';
 
-import {scale, verticalScale} from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 // 原生 tab bar组件，iOS用下面的，Android用上面的
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {createNativeBottomTabNavigator} from '@react-navigation/bottom-tabs/unstable';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
@@ -20,12 +20,12 @@ import HarborNewTopicTab, {
 import CourseSim from './pages/TabbarPages/courseSim';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {trigger} from './utils/trigger';
-import {openLink} from './utils/browser';
-import {ARK_HARBOR_NEW_TOPIC} from './utils/pathMap';
-import {logToFirebase} from './utils/firebaseAnalytics';
-import {uiStyle} from './components/ThemeContext';
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import { trigger } from './utils/trigger';
+import { openLink } from './utils/browser';
+import { ARK_HARBOR_NEW_TOPIC } from './utils/pathMap';
+import { logToFirebase } from './utils/firebaseAnalytics';
+import { uiStyle } from './components/ThemeContext';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 // 图标描述
 const tabIconDescription = {
@@ -109,19 +109,19 @@ class IOSTabbar {
                 <this.Tabs.Screen
                     name={name}
                     component={tabScreen[name]}
-                    options={{title: t(tabIconDescription[name])}}
+                    options={{ title: t(tabIconDescription[name]) }}
                 />
             );
         };
         this.createTabbar = () => {
             return (
                 <this.Tabs.Navigator
-                    screenListeners={({route}) => ({
+                    screenListeners={({ route }) => ({
                         focus: () => {
                             trackLastNonHarborPostTab(route.name);
                         },
                     })}
-                    screenOptions={({route}) => ({
+                    screenOptions={({ route }) => ({
                         tabBarLabelStyle: {
                             ...uiStyle.defaultText,
                             fontSize: labelFontSize,
@@ -131,7 +131,7 @@ class IOSTabbar {
                         tabBarInactiveTintColor: theme.black.main,
                         tabBarStyle: getTabBarStyle(theme),
                         translucent: isLiquidGlassSupported ? true : false,
-                        tabBarIcon: ({focused}) =>
+                        tabBarIcon: ({ focused }) =>
                             this.getTabbarIcon(route.name, focused),
                         tabBarShowLabel: !isLandscape,
                         tabBarMinimizeBehavior: 'onScrollDown',
@@ -169,25 +169,25 @@ class AndroidTabbar {
             const listeners =
                 name === HARBOR_NEW_TOPIC_TAB
                     ? () => ({
-                          tabPress: e => {
-                              e.preventDefault();
-                              trigger();
-                              logToFirebase('funcUse', {
-                                  funcName: 'harbor_new',
-                              });
-                              openLink({
-                                  URL: ARK_HARBOR_NEW_TOPIC,
-                                  mode: 'fullScreen',
-                              });
-                          },
-                      })
-                    : () => ({tabPress: () => trigger()});
+                        tabPress: e => {
+                            e.preventDefault();
+                            trigger();
+                            logToFirebase('funcUse', {
+                                funcName: 'harbor_new',
+                            });
+                            openLink({
+                                URL: ARK_HARBOR_NEW_TOPIC,
+                                mode: 'fullScreen',
+                            });
+                        },
+                    })
+                    : () => ({ tabPress: () => trigger() });
             return (
                 <this.Tabs.Screen
                     name={name}
                     component={tabScreen[name]}
                     options={{
-                        tabBarIcon: ({focused, color}) =>
+                        tabBarIcon: ({ focused, color }) =>
                             this.getTabbarIcon(name, focused, color),
                         title: t(tabIconDescription[name]),
                     }}
@@ -197,28 +197,33 @@ class AndroidTabbar {
         };
 
         this.createTabbar = () => {
+            // 勿在此包 SafeAreaView（edges top）：各分頁已自行處理頂部 insets，否則與
+            // NewsScreen / CourseSim 等重疊會導致 Android 頂部留白過大或佈局異常
             return (
-                <this.Tabs.Navigator
-                    screenListeners={({route}) => ({
-                        focus: () => {
-                            trackLastNonHarborPostTab(route.name);
-                        },
-                    })}
-                    screenOptions={{
-                        tabBarLabelStyle: {
-                            ...uiStyle.defaultText,
-                            fontSize: labelFontSize,
-                            fontWeight: '600',
-                        },
-                        tabBarActiveTintColor: theme.themeColor,
-                        tabBarInactiveTintColor: theme.black.main,
-                        tabBarStyle: getTabBarStyle(theme),
-                    }}
-                    initialRouteName={'NewsTabbar'}>
-                    {Object.keys(tabScreen).map(name =>
-                        this.createTabScreen(name),
-                    )}
-                </this.Tabs.Navigator>
+                <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
+                    <this.Tabs.Navigator
+                        screenListeners={({ route }) => ({
+                            focus: () => {
+                                trackLastNonHarborPostTab(route.name);
+                            },
+                        })}
+                        screenOptions={{
+                            headerShown: false,
+                            tabBarLabelStyle: {
+                                ...uiStyle.defaultText,
+                                fontSize: labelFontSize,
+                                fontWeight: '600',
+                            },
+                            tabBarActiveTintColor: theme.themeColor,
+                            tabBarInactiveTintColor: theme.black.main,
+                            tabBarStyle: getTabBarStyle(theme),
+                        }}
+                        initialRouteName={'NewsTabbar'}>
+                        {Object.keys(tabScreen).map(name =>
+                            this.createTabScreen(name),
+                        )}
+                    </this.Tabs.Navigator>
+                </View>
             );
         };
     }
@@ -250,12 +255,12 @@ export const tabbarFactory = (
 };
 
 const Tabbar = () => {
-    const {theme} = useTheme();
-    const {t} = useTranslation(['common', 'home']);
+    const { theme } = useTheme();
+    const { t } = useTranslation(['common', 'home']);
 
     // 判斷是否為橫屏
     const isLandscape = () => {
-        const {width, height} = Dimensions.get('window');
+        const { width, height } = Dimensions.get('window');
         return width > height;
     };
 

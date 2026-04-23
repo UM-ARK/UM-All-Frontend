@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
+    Platform,
     ScrollView, Text, View, TouchableOpacity, Linking,
 } from 'react-native';
 
@@ -22,8 +23,10 @@ import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
 import * as DropdownMenu from 'zeego/dropdown-menu';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function Index({ navigation }) {
+    const insets = useSafeAreaInsets();
     const { theme } = useTheme();
     const { themeColor, white, black, trueWhite, bg_color, viewShadow } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
@@ -154,8 +157,17 @@ function Index({ navigation }) {
         navigation.navigate('SettingPage');
     };
 
+    // Android 底欄外層不再包 SafeAreaView；此處單獨補頂部狀態列區，避免內容頂到螢幕
+    const topInsetAndroid = Platform.OS === 'android' ? insets.top : 0;
+
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color }}>
+        <View
+            style={{
+                flex: 1,
+                backgroundColor: bg_color,
+                paddingTop: topInsetAndroid,
+            }}
+        >
             <ScrollView showsVerticalScrollIndicator={true} contentInsetAdjustmentBehavior="automatic">
                 {/* 標題與個功能按鍵 */}
                 <View style={{

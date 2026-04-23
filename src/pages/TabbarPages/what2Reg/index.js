@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Text, View } from 'react-native';
+import { Alert, FlatList, Platform, Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useIsFocused } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -56,7 +56,9 @@ const What2Reg = props => {
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const headerHeight = useHeaderHeight();
+    // iOS：用 contentInset + contentOffset 避開導航列/狀態列；Android 上該組合常不生效，改由外層 paddingTop
     const stickyTopOffset = headerHeight || insets.top;
+    const scrollTopInset = Platform.OS === 'android' ? 0 : stickyTopOffset;
 
     const {
         courseMode,
@@ -250,7 +252,15 @@ const What2Reg = props => {
     const hasSearchResult = searchFilterCourse?.length > 0;
 
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
+        <View
+            style={{
+                flex: 1,
+                backgroundColor: bg_color,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: Platform.OS === 'android' ? insets.top : 0,
+            }}
+        >
             <ActionSheet
                 ref={actionSheetRef}
                 containerStyle={{
@@ -300,9 +310,9 @@ const What2Reg = props => {
             <KeyboardAwareScrollView
                 ref={scrollViewRef}
                 style={{ width: '100%', flex: 1 }}
-                contentInset={{ top: stickyTopOffset }}
-                contentOffset={{ y: -stickyTopOffset }}
-                scrollIndicatorInsets={{ top: stickyTopOffset }}
+                contentInset={{ top: scrollTopInset }}
+                contentOffset={{ y: -scrollTopInset }}
+                scrollIndicatorInsets={{ top: scrollTopInset }}
                 stickyHeaderIndices={[1]}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
