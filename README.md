@@ -49,6 +49,7 @@
   - [🤖 Android 打包](#-android-打包)
     - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦-1)
     - [方式二：本地 Gradle 構建](#方式二本地-gradle-構建)
+    - [本機 Release 簽名設定](#本機-release-簽名設定)
   - [🐛 故障排除](#-故障排除)
 - [⛵ 維護須知](#-維護須知)
 
@@ -408,9 +409,8 @@ eas build --platform android
 #### 方式二：本地 Gradle 構建
 
 1. 確保已運行過 `npx expo prebuild --clean` 生成 Android 項目文件
-2. 確保密鑰文件配置正確
-3. 在 `android/app` 目錄下放置簽名密鑰（`.keystore` 或 `.jks`）
-4. 運行構建命令：
+2. 依下方 [本機 Release 簽名設定](#本機-release-簽名設定) 完成 Release 簽名（本倉庫透過 Expo config plugin 注入，無需在 `android/app/build.gradle` 手動改寫）
+3. 運行構建命令：
 
 ```console
 cd android
@@ -424,6 +424,36 @@ cd android
 - 版本號在 `app.json` 中統一管理
 - 首次發布到 Play Store 需要使用 AAB 格式
 - 內部測試可使用 APK 格式直接安裝
+
+#### 本機 Release 簽名設定
+
+對應最新提交中的 **Android Release 簽名與 Expo CNG**：`app.json` 已掛載 `./plugins/withAndroidSigning`，在執行 `npx expo prebuild` 時會自動在 `android/app/build.gradle` 注入 **Release** 的 `signingConfigs`。只有當 Gradle 能讀到 `MYAPP_RELEASE_*` 屬性時才會套用正式 keystore；**密碼與路徑請勿寫入倉庫內的 `gradle.properties`**（避免提交）。
+
+**1. Keystore 檔要放哪？**
+
+- `MYAPP_RELEASE_STORE_FILE` 在 Gradle 裡會解析成：**相對於專案根目錄**（與 `package.json` 同層）的路徑。
+- 常見做法：把keystore.keystore放在根目錄
+- 亦可將檔案放在倉庫外，只要 `MYAPP_RELEASE_STORE_FILE` 仍能以「自專案根目錄起算」的相對路徑指到該檔（或依你本機 Gradle／Java 版本使用絕對路徑；仍以不進版控為原則）。
+
+**2. 在 `~/.gradle/` 裡怎麼配置？**
+
+在使用者家目錄建立或編輯 **`~/.gradle/gradle.properties`**（全機共用、不進專案 Git），寫入以下鍵值（請替換成你自己的路徑與密碼）：
+
+```properties
+# Android Release 簽名（僅本機，勿提交）
+# MYAPP_RELEASE_STORE_FILE：相對「專案根目錄」的 keystore 路徑
+MYAPP_RELEASE_STORE_FILE=android/app/release.keystore
+MYAPP_RELEASE_STORE_PASSWORD=你的_store_密碼
+MYAPP_RELEASE_KEY_ALIAS=你的_key_alias
+MYAPP_RELEASE_KEY_PASSWORD=你的_key_密碼
+```
+
+存檔後在專案根目錄執行 `cd android && ./gradlew bundleRelease`（或 `assembleRelease`）即可。若未設定上述屬性，Release 區塊不會套用 store 檔，請勿在遺失簽名設定的情況下誤發佈。
+
+**3. 維護提醒**
+
+- 重新執行 `npx expo prebuild --clean` 時，只要 `app.json` 仍包含 `./plugins/withAndroidSigning`，簽名區塊會一併重新產生，無需手動合併 `build.gradle`。
+- CI／EAS 請改用 EAS 的 [Android 憑證管理](https://docs.expo.dev/app-signing/app-credentials/) 或對應的 secrets，而不是依賴某台機器上的 `~/.gradle/gradle.properties`。
 
 ---
 
