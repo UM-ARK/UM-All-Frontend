@@ -44,6 +44,7 @@
   - [🍎 iOS 打包](#-ios-打包)
     - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦)
     - [方式二：本地 Xcode 構建（傳統方式）](#方式二本地-xcode-構建傳統方式)
+    - [本地 Release 真機除錯（不走 EAS）](#本地-release-真機除錯不走-eas)
   - [🤖 Android 打包](#-android-打包)
     - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦-1)
     - [方式二：本地 Gradle 構建](#方式二本地-gradle-構建)
@@ -350,6 +351,21 @@ eas build --platform ios
 - 版本號在 `app.json` 中統一管理，構建時會自動同步到原生項目
 - 使用 EAS 構建時，不需要手動管理簽名證書
 - 提交 App Store 前確保已在 [App Store Connect](https://appstoreconnect.apple.com) 創建應用記錄
+
+#### 本地 Release 真機除錯（不走 EAS）
+
+在需要驗證 **Production / Release** 行為、且希望**不經 EAS 雲端建置**時，可在本機用 **Xcode 簽名**，將 **Release** 組態直接安裝到已以 USB 連接的真機。
+
+```console
+npx expo run:ios --configuration Release --device
+```
+
+| | |
+| --- | --- |
+| **好處** | 不必等待 EAS 雲端排隊，本機建置與重裝較快。 |
+| **條件 / 壞處** | 需要有效的 **Apple 開發者帳號**，且本機 **Xcode 與簽名環境**（Team、憑證、裝置信任等）需設定正確。 |
+
+首次使用前請先依上文完成 `npx expo prebuild` 與依賴安裝；若簽名失敗，請在 Xcode 中開啟 `ios` 內的 workspace，檢查 **Signing & Capabilities** 與目標裝置是否已加入開發團隊。
 
 ---
 
