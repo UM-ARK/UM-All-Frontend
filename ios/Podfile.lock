@@ -247,7 +247,7 @@ PODS:
     - ExpoModulesCore
   - ExpoSystemUI (55.0.15):
     - ExpoModulesCore
-  - ExpoUI (55.0.9):
+  - ExpoUI (55.0.11):
     - ExpoModulesCore
     - React-RCTFabric
   - ExpoWebBrowser (55.0.14):
@@ -346,7 +346,7 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
-  - LiquidGlass (0.7.0):
+  - LiquidGlass (0.7.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1871,6 +1871,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-menu (2.0.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-pager-view (8.0.0):
     - hermes-engine
     - RCTRequired
@@ -2942,6 +2964,7 @@ DEPENDENCIES:
   - react-native-ios-context-menu (from `../node_modules/react-native-ios-context-menu`)
   - react-native-ios-utilities (from `../node_modules/react-native-ios-utilities`)
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
+  - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
@@ -3163,6 +3186,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-ios-utilities"
   react-native-keyboard-controller:
     :path: "../node_modules/react-native-keyboard-controller"
+  react-native-menu:
+    :path: "../node_modules/@react-native-menu/menu"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-safe-area-context:
@@ -3300,7 +3325,7 @@ SPEC CHECKSUMS:
   ExpoModulesJSI: 936d7b87f07a959f739ac5127ccafeeb8d36ccb8
   ExpoSplashScreen: 6ae5b8547defd9e561b6cdf9439bb2db235f85d8
   ExpoSystemUI: 709410d6e473378d568e5df28fe409cade0ba530
-  ExpoUI: e8df9cbe9923d9357c6e6c1d41bbf4270f048a30
+  ExpoUI: 5e98fba91241cd4bdd976729be965ab71d7f761d
   ExpoWebBrowser: f88a3ba50a025b673236a46d2654a49b985953d6
   EXUpdatesInterface: 39d05400a9226c438565dbaaa8447b5f0672ba45
   FBLazyVector: 061f518bbd81677ed8a8317e2ae60b8779495808
@@ -3315,7 +3340,7 @@ SPEC CHECKSUMS:
   libavif: 5f8e715bea24debec477006f21ef9e95432e254d
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
-  LiquidGlass: f4f3bc26923fb215efa7b972ced909b49fa6acd4
+  LiquidGlass: ce908019d1374704534dbbef911a6f58ad2aec8e
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCTDeprecation: 5045f20b2cc1239bf422764004338c720684a22f
@@ -3358,6 +3383,7 @@ SPEC CHECKSUMS:
   react-native-ios-context-menu: 107249ea55fe81916a6731190ff1b02f9a74c020
   react-native-ios-utilities: 75dbcc66b08299444bc5cacc9b82ff1253686385
   react-native-keyboard-controller: d8883e2d24952e3f50241d481e7729193d0e8a17
+  react-native-menu: 87ccd6e99bfdd28cb67dd00adb123001153055ef
   react-native-pager-view: 9ebb71ac08f26122d9838c3ed72dd5a61bdc2640
   react-native-safe-area-context: c5d42c4294aa175415947e23c2ac956253abfc7d
   react-native-simple-toast: a1eb60d5c91875d156fd0c1ef314fa889cd4361e
