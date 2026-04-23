@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState, } from 'react';
-import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, } from 'react-native';
+import { Text, View, RefreshControl, TouchableOpacity, Alert, SectionList, Dimensions, FlatList, Platform, } from 'react-native';
 
 import { uiStyle, ThemeContext, } from '../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
@@ -307,7 +307,8 @@ function ClubPage() {
                 initialNumToRender={10}
                 maxToRenderPerBatch={10}
                 windowSize={7}
-                removeClippedSubviews
+                // Android + Fabric：removeClippedSubviews 與 sticky 區段標題會導致掛載索引錯亂而閃退（addViewAt / IndexOutOfBounds）
+                removeClippedSubviews={Platform.OS === 'ios'}
             />
         </View>
     );
