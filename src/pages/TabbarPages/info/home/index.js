@@ -184,13 +184,14 @@ const HomeScreen = ({ navigation }) => {
     }, []);
 
     // 其餘方法轉為函式
+    // App 從背景回到前景時：更新 App 資訊、曆與下節課，但不自動重打活動 API，
+    // 否則每次從多工或鎖定回來都會讓活動列表閃爍/重載，體感不佳。活動列表請用下拉重新整理。
     const handleAppStateChange = (nextAppState) => {
         if (AppState.currentState == 'active') {
             if (navigation?.isFocused()) {
                 setIsLoading(true);
                 getAppData(false);
                 onRefresh();
-                eventPage.current?.onRefresh();
             }
         }
     };
