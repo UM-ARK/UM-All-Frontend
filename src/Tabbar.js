@@ -13,11 +13,17 @@ import {createNativeBottomTabNavigator} from '@react-navigation/bottom-tabs/unst
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
-import ARKHarbor from './pages/TabbarPages/arkHarbor';
+import HarborNewTopicTab, {
+    HARBOR_NEW_TOPIC_TAB,
+    trackLastNonHarborPostTab,
+} from './pages/TabbarPages/HarborNewTopicTab';
 import CourseSim from './pages/TabbarPages/courseSim';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {trigger} from './utils/trigger';
+import {openLink} from './utils/browser';
+import {ARK_HARBOR_NEW_TOPIC} from './utils/pathMap';
+import {logToFirebase} from './utils/firebaseAnalytics';
 import {uiStyle} from './components/ThemeContext';
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 
@@ -26,6 +32,7 @@ const tabIconDescription = {
     NewsTabbar: '資訊',
     Harbor: '職涯港',
     What2RegTab: '揾課',
+    [HARBOR_NEW_TOPIC_TAB]: '新想法',
     CourseSimTab: '課表',
     FeaturesTabbar: '服務',
 };
@@ -33,8 +40,9 @@ const tabIconDescription = {
 // 页面组件映射
 const tabScreen = {
     NewsTabbar: NewsScreen,
-    Harbor: ARKHarbor,
+    // Harbor: ARKHarbor,
     What2RegTab: What2RegTabIndex,
+    [HARBOR_NEW_TOPIC_TAB]: HarborNewTopicTab,
     CourseSimTab: CourseSim,
     FeaturesTabbar: FeaturesScreen,
 };
@@ -44,6 +52,7 @@ const iosTabIconConfig = {
     NewsTabbar: 'newspaper',
     Harbor: 'heart',
     What2RegTab: 'magnifyingglass.circle',
+    [HARBOR_NEW_TOPIC_TAB]: 'plus.circle.fill',
     CourseSimTab: 'calendar',
     FeaturesTabbar: 'square.grid.2x2',
 };
@@ -53,6 +62,7 @@ const androidTabIconConfig = {
     NewsTabbar: 'newspaper-variant',
     Harbor: 'chat-processing',
     What2RegTab: 'database-search',
+    [HARBOR_NEW_TOPIC_TAB]: 'plus-circle',
     CourseSimTab: 'calendar-clock',
     FeaturesTabbar: 'view-grid',
 };
@@ -106,6 +116,11 @@ class IOSTabbar {
         this.createTabbar = () => {
             return (
                 <this.Tabs.Navigator
+                    screenListeners={({route}) => ({
+                        focus: () => {
+                            trackLastNonHarborPostTab(route.name);
+                        },
+                    })}
                     screenOptions={({route}) => ({
                         tabBarLabelStyle: {
                             ...uiStyle.defaultText,
@@ -151,6 +166,22 @@ class AndroidTabbar {
         };
 
         this.createTabScreen = name => {
+            const listeners =
+                name === HARBOR_NEW_TOPIC_TAB
+                    ? () => ({
+                          tabPress: e => {
+                              e.preventDefault();
+                              trigger();
+                              logToFirebase('funcUse', {
+                                  funcName: 'harbor_new',
+                              });
+                              openLink({
+                                  URL: ARK_HARBOR_NEW_TOPIC,
+                                  mode: 'fullScreen',
+                              });
+                          },
+                      })
+                    : () => ({tabPress: () => trigger()});
             return (
                 <this.Tabs.Screen
                     name={name}
@@ -160,7 +191,7 @@ class AndroidTabbar {
                             this.getTabbarIcon(name, focused, color),
                         title: t(tabIconDescription[name]),
                     }}
-                    listeners={() => ({tabPress: () => trigger()})}
+                    listeners={listeners}
                 />
             );
         };
@@ -168,6 +199,11 @@ class AndroidTabbar {
         this.createTabbar = () => {
             return (
                 <this.Tabs.Navigator
+                    screenListeners={({route}) => ({
+                        focus: () => {
+                            trackLastNonHarborPostTab(route.name);
+                        },
+                    })}
                     screenOptions={{
                         tabBarLabelStyle: {
                             ...uiStyle.defaultText,

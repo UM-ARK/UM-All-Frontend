@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 const Tab = createMaterialTopTabNavigator();
 
 const tabWidth = verticalScale(25);
-const numOfTabs = 5;
+const numOfTabs = 4;
 const TAB_BAR_HEIGHT = scale(30);
 
 export default function NewsScreen() {
