@@ -1,5 +1,3 @@
-import UMAPITOKEN from '../../umAPIToken.json';
-
 // 網站地址映射
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
@@ -169,7 +167,7 @@ export const UM_API_EVENT =
 export const UM_API_NEWS =
     'https://api.data.um.edu.mo/service/media/news/all';
 // 澳大 - API token
-export const UM_API_TOKEN = UMAPITOKEN.token;
+export const UM_API_TOKEN = process.env.EXPO_PUBLIC_UM_API_TOKEN;
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站

@@ -32,6 +32,7 @@
   - [📘 Expo CNG 工作流說明](#-expo-cng-工作流說明)
 - [🌈 開發本項目準備](#-開發本項目準備)
   - [⛵ 啟動流程](#-啟動流程)
+    - [🔑 UM Open Data API Token 配置](#-um-open-data-api-token-配置)
     - [📋 Firebase 配置文件說明](#-firebase-配置文件說明)
       - [`google-services.json` 模板結構](#google-servicesjson-模板結構)
       - [`GoogleService-Info.plist` 模板結構](#googleservice-infoplist-模板結構)
@@ -144,12 +145,35 @@ expo install
    - 僅生成 Android：`npx expo prebuild --clean --platform android`
    - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
 
-4. 需要在項目根目錄放`umAPIToken.json`文件，內容格式為：
+4. 配置 **UM Open Data API Token**（新聞、活動、停車場即時資料等 `api.data.um.edu.mo` 請求需要 `Authorization`）。請見下方 [🔑 UM Open Data API Token 配置](#-um-open-data-api-token-配置)。
+
+#### 🔑 UM Open Data API Token 配置
+
+程式透過 `src/utils/pathMap.js` 匯出的 `UM_API_TOKEN` 讀取 **`process.env.EXPO_PUBLIC_UM_API_TOKEN`**（Expo 會在打包／開發時把 `EXPO_PUBLIC_*` 內嵌進 JS，因此必須使用此前綴）。
+
+**本機開發**
+
+1. 在專案**根目錄**（與 `package.json` 同層）新增 `.env` 或 `.env.local`。
+2. 寫入一行（將值換成你向澳大 Open Data 申請到的金鑰，勿使用範例字串）：
+
+```bash
+EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 ```
-{
-    "token":"YOURE_UM_API_TOKEN"
-}
-```
+
+3. 修改環境變數後請**重新啟動 Metro**；若仍讀不到，可嘗試 `yarn start --clear` 清快取再啟動。
+
+**版控與安全**
+
+- `.env`、`.env.local` 與歷史上的 `umAPIToken.json` 均已列於 `.gitignore`，**請勿把真實 Token 提交到 Git**。
+- 舊版文件曾要求根目錄 `umAPIToken.json`；**目前程式碼已不再讀取該 JSON**，請改用上方的 `EXPO_PUBLIC_UM_API_TOKEN`。
+
+**EAS / 雲端建置**
+
+- 雲端機器不會自動帶上你電腦裡的 `.env`。使用 EAS Build 時，請在 [Expo 專案 Environment variables](https://docs.expo.dev/eas/environment-variables/) 為對應建置 profile 設定同名變數 `EXPO_PUBLIC_UM_API_TOKEN`，否則正式版中相關 API 可能無法通過驗證。
+
+**取得 Token**
+
+- 請依澳門大學 Open Data／Data API 官方流程申請；維護者或團隊內部文件會說明申請管道與權限範圍。開源貢獻者若無金鑰，與上述 API 有關的畫面可能無法取得資料，屬預期行為。
 
 5. 需要配置 Firebase 配置文件（用於 Analytics 等功能）：
 
