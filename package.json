@@ -10,6 +10,7 @@
     "iosNew": "npx expo run:ios --device \"iPhone 17 Pro\"",
     "iosTrue": "npx expo run:ios --device",
     "iosBig": "npx expo run:ios --device \"iPad Pro 13-inch (M5)\"",
+    "iosRelease": "npx expo run:ios --configuration Release --device",
     "lint": "eslint .",
     "start": "npx expo start --reset-cache",
     "test": "jest"
