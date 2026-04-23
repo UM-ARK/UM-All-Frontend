@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useContext, useCallback, memo } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef, useCallback, memo } from 'react';
 import {
     Text,
     View,
@@ -24,15 +24,11 @@ import moment from 'moment-timezone';
 import { scale, verticalScale } from 'react-native-size-matters';
 import TouchableScale from '../../../../components/TouchableScale';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { NavigationContext } from '@react-navigation/native';
 import lodash from 'lodash';
 
 const EventPage = forwardRef((props, ref) => {
     const { theme } = useTheme();
     const { black, white, themeColor, viewShadow, bg_color } = theme;
-    const navigation = useContext(NavigationContext);
-
     const s = StyleSheet.create({
         waterFlowContainer: {
             flexDirection: 'row',
@@ -63,8 +59,6 @@ const EventPage = forwardRef((props, ref) => {
     const [numColumns, setNumColumns] = useState(2); // 橫豎屏動態列數
     const [cardWidth, setCardWidth] = useState(scale(160)); // 卡片寬度隨列數更新
     const windowLayout = useWindowDimensions();
-
-    const { getItem, setItem } = useAsyncStorage('ARK_Harbor_Setting');
 
     // 暴露方法給父組件
     useImperativeHandle(ref, () => ({
@@ -469,23 +463,28 @@ const EventPage = forwardRef((props, ref) => {
                 width: cardWidth,
                 alignItems: 'flex-start', justifyContent: 'center',
             }}
-                onPress={async () => {
+                onPress={() => {
                     trigger();
                     const URL = ARK_HARBOR_TOPIC + item.id;
-                    const settingStr = await getItem();
-                    const setting = settingStr ? JSON.parse(settingStr) : null;
+                    // 升版後一律外開：不再讀 ARK_Harbor_Setting，避免舊快取 tabbarMode==='webview' 仍呼叫已移除的 Harbor 路由
                     logToFirebase('clickHarbor', {
                         title: item.title,
-                        mode: setting ? setting.tabbarMode : 'browser',
+                        mode: 'openLink',
                     });
-                    // 用戶偏好是Webview則導航到Tabbar
-                    if (setting && setting.tabbarMode == 'webview') {
-                        navigation.navigate('Harbor', { url: URL });
-                    } else {
-                        // openLink({ URL: URL, mode: 'fullScreen' });
-                        // iOS默認使用modal來打開卡片，除非設置了用Webview
-                        openLink(URL);
-                    }
+                    openLink({ URL, mode: 'fullScreen' });
+
+                    // --- 舊邏輯（組件層：useAsyncStorage('ARK_Harbor_Setting')；依 tabbarMode 決定 navigate('Harbor') 或 openLink）---
+                    // const settingStr = await getItem();
+                    // const setting = settingStr ? JSON.parse(settingStr) : null;
+                    // logToFirebase('clickHarbor', {
+                    //     title: item.title,
+                    //     mode: setting ? setting.tabbarMode : 'browser',
+                    // });
+                    // if (setting && setting.tabbarMode == 'webview') {
+                    //     navigation.navigate('Harbor', { url: URL });
+                    // } else {
+                    //     openLink(URL);
+                    // }
                 }}
             >
                 {/* 帖子內容 */}
