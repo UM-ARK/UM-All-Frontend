@@ -235,7 +235,7 @@ export const UM_EXCHANGE = 'https://isw.um.edu.mo/seas';
 export const UM_SCHOLARSHIP =
     'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
 // 澳大 - 證明文件
-export const UM_DOCUMENTS = 'https://ops.fo.um.edu.mo/services/?lang=zh-hant';
+export const UM_DOCUMENTS = 'https://isw.um.edu.mo/siaod';
 // 澳大 - 論文時間安排計劃
 export const UM_PAPER_PLAN = 'http://library2.um.edu.mo/html/services/reference/a_cal/index_wo_layout.php';
 // 澳大 - 預選課Excel表格
