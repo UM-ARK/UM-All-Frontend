@@ -2,7 +2,7 @@
   "expo": {
     "name": "ARK ALL",
     "slug": "arkall",
-    "version": "26.1.1",
+    "version": "26.4.0",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -11,7 +11,7 @@
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
-      "buildNumber": "26.1.1",
+      "buildNumber": "26.4.0",
       "infoPlist": {
         "UIViewControllerBasedStatusBarAppearance": true
       }
@@ -20,7 +20,7 @@
       "userInterfaceStyle": "automatic",
       "googleServicesFile": "./google-services.json",
       "package": "one.umall",
-      "versionCode": 74,
+      "versionCode": 77,
       "adaptiveIcon": {
         "foregroundImage": "./src/static/img/ic_launcher_foreground.png",
         "backgroundColor": "#E6AB52"
