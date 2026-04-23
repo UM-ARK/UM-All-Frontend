@@ -302,7 +302,7 @@ export const getFunctionArr = (t) => [
                 },
                 describe: t('查看LCWC W22飯堂當前排隊人數', { ns: 'features' }),
                 key_name: '飯堂排隊',
-                keywords: 'Canteen Queue, Dining, LCWC, W22, 飯堂, 排隊, 人數, 食堂',
+                keywords: 'Canteen Queue, Dining Hall, LCWC, W22, 飯堂, 排隊, 人數, 食堂, 餐廳, 統計',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
