@@ -5,14 +5,12 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    Animated,
+    Animated as RNAnimated,
     Keyboard,
     FlatList,
     TouchableWithoutFeedback,
-    LayoutAnimation,
-    Platform,
-    UIManager,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import { useTheme, themes, uiStyle, ThemeContext } from '../../../../../components/ThemeContext';
 import { openLink } from '../../../../../utils/browser';
@@ -28,10 +26,7 @@ import { useIsFocused } from '@react-navigation/native';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
-// 開啟 LayoutAnimation (Android 需要)
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+const TIMING_MS = 220;
 
 const PLACEHOLDER_TEXTS = [
     '關於澳大的一切...',
@@ -49,6 +44,25 @@ const SearchBar = ({ navigation }) => {
     const screenIsFocused = useIsFocused();
 
     const functionArr = getFunctionArr(t);
+
+    const focused = useSharedValue(0);
+    const cancelW = useSharedValue(0);
+
+    const inputOuterAnimated = useAnimatedStyle(() => ({
+        marginRight: withTiming(focused.value * cancelW.value, { duration: TIMING_MS }),
+    }));
+
+    const cancelAnimated = useAnimatedStyle(() => ({
+        opacity: cancelW.value > 1 ? 1 : 0,
+        transform: [
+            {
+                translateX: withTiming((1 - focused.value) * cancelW.value, {
+                    duration: TIMING_MS,
+                }),
+            },
+        ],
+    }));
+
     const styles = StyleSheet.create({
         container: {
             flexDirection: 'row',
@@ -57,6 +71,12 @@ const SearchBar = ({ navigation }) => {
             marginTop: verticalScale(10),
             height: verticalScale(30),
             zIndex: 101, // 確保在下拉層之上
+            overflow: 'hidden',
+        },
+        inputOuter: {
+            flex: 1,
+            minWidth: 0,
+            height: '100%',
         },
         inputWrapper: {
             flex: 1,
@@ -93,9 +113,13 @@ const SearchBar = ({ navigation }) => {
             color: `${black.third}70`,
             fontSize: verticalScale(13),
         },
-        cancelButton: {
-            marginLeft: scale(5),
+        cancelWrap: {
+            position: 'absolute',
+            right: 0,
+            justifyContent: 'center',
             paddingVertical: verticalScale(5),
+            paddingLeft: scale(6),
+            paddingRight: scale(2),
         },
         cancelText: {
             color: themeColor,
@@ -161,8 +185,7 @@ const SearchBar = ({ navigation }) => {
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
     const [localResults, setLocalResults] = useState([]);
 
-    // 動畫值
-    const fadeAnim = useRef(new Animated.Value(1)).current;
+    const fadeAnim = useRef(new RNAnimated.Value(1)).current;
     const textInputRef = useRef(null);
 
     // 1. 預處理本地功能列表：將嵌套的 FeatureList 展平，方便搜索
@@ -189,7 +212,7 @@ const SearchBar = ({ navigation }) => {
         if (!isFocused && inputText === '') {
             interval = setInterval(() => {
                 // 淡出
-                Animated.timing(fadeAnim, {
+                RNAnimated.timing(fadeAnim, {
                     toValue: 0,
                     duration: 300,
                     useNativeDriver: true,
@@ -197,7 +220,7 @@ const SearchBar = ({ navigation }) => {
                     // 切換文字
                     setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDER_TEXTS.length);
                     // 淡入
-                    Animated.timing(fadeAnim, {
+                    RNAnimated.timing(fadeAnim, {
                         toValue: 1,
                         duration: 300,
                         useNativeDriver: true,
@@ -210,11 +233,9 @@ const SearchBar = ({ navigation }) => {
 
     useEffect(() => {
         if (!screenIsFocused) {
-            // 页面失焦时清理所有状态
             textInputRef.current?.blur();
             setIsFocused(false);
-            // setInputText('');
-            // setLocalResults([]);
+            focused.value = 0;
             Keyboard.dismiss();
         }
     }, [screenIsFocused]);
@@ -324,74 +345,82 @@ const SearchBar = ({ navigation }) => {
     return (
         <View style={{ zIndex: 100, width: scale(310) }}>
             <View style={styles.container}>
-                <View style={[
-                    styles.inputWrapper,
-                    isFocused && styles.inputWrapperFocused, // 聚焦時的視覺反饋
-                ]}>
-                    <Ionicons name="search" size={scale(15)} color={isFocused ? themeColor : `${black.third}70`} style={{ marginLeft: scale(8) }} />
+                <Animated.View style={[styles.inputOuter, inputOuterAnimated]}>
+                    <View style={[
+                        styles.inputWrapper,
+                        isFocused && styles.inputWrapperFocused,
+                    ]}>
+                        <Ionicons name="search" size={scale(15)} color={isFocused ? themeColor : `${black.third}70`} style={{ marginLeft: scale(8) }} />
 
-                    <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <TextInput
-                            ref={textInputRef}
-                            style={styles.textInput}
-                            value={inputText}
-                            onChangeText={(text) => {
-                                setInputText(text);
-                                debouncedSearch(text);
-                            }}
-                            onFocus={() => {
-                                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                                setIsFocused(true);
-                            }}
-                            onBlur={() => {
-                                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                                setIsFocused(false);
-                            }}
-                            placeholder="" // 禁用默認 placeholder，使用自定義 View 覆蓋
-                            returnKeyType="search"
-                            onSubmitEditing={goToGoogle}
-                        />
+                        <View style={{ flex: 1, justifyContent: 'center' }}>
+                            <TextInput
+                                ref={textInputRef}
+                                style={styles.textInput}
+                                value={inputText}
+                                onChangeText={(text) => {
+                                    setInputText(text);
+                                    debouncedSearch(text);
+                                }}
+                                onFocus={() => {
+                                    focused.value = 1;
+                                    setIsFocused(true);
+                                }}
+                                onBlur={() => {
+                                    setIsFocused(false);
+                                }}
+                                placeholder=""
+                                returnKeyType="search"
+                                onSubmitEditing={goToGoogle}
+                            />
 
-                        {/* 自定義輪播 Placeholder */}
-                        {inputText === '' && (
-                            <Animated.View style={[styles.placeholderContainer, { opacity: fadeAnim }]} pointerEvents="none">
-                                <Text style={styles.placeholderText}>
-                                    {isFocused ? `${t('輸入關鍵詞')}...` : `${t('搜索')}: ${t(PLACEHOLDER_TEXTS[placeholderIndex], { ns: 'features' })}`}
-                                </Text>
-                            </Animated.View>
+                            {/* 自定義輪播 Placeholder */}
+                            {inputText === '' && (
+                                <RNAnimated.View style={[styles.placeholderContainer, { opacity: fadeAnim }]} pointerEvents="none">
+                                    <Text style={styles.placeholderText}>
+                                        {isFocused ? `${t('輸入關鍵詞')}...` : `${t('搜索')}: ${t(PLACEHOLDER_TEXTS[placeholderIndex], { ns: 'features' })}`}
+                                    </Text>
+                                </RNAnimated.View>
+                            )}
+                        </View>
+
+                        {/* 清空按鈕 */}
+                        {inputText.length > 0 && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setInputText('');
+                                    setLocalResults([]);
+                                    textInputRef.current.focus();
+                                }}
+                                style={{
+                                    paddingHorizontal: scale(5),
+                                }}
+                            >
+                                <Ionicons name="close-circle" size={verticalScale(12)} color="#ccc" />
+                            </TouchableOpacity>
                         )}
                     </View>
+                </Animated.View>
 
-                    {/* 清空按鈕 */}
-                    {inputText.length > 0 && (
-                        <TouchableOpacity
-                            onPress={() => {
-                                setInputText('');
-                                setLocalResults([]);
-                                textInputRef.current.focus();
-                            }}
-                            style={{
-                                paddingHorizontal: scale(5),
-                            }}
-                        >
-                            <Ionicons name="close-circle" size={verticalScale(12)} color="#ccc" />
-                        </TouchableOpacity>
-                    )}
-                </View>
-
-                {/* 取消按鈕 (僅在聚焦時顯示) */}
-                {isFocused && (
+                {/* 取消按鈕：reanimated 滑入動畫 */}
+                <Animated.View
+                    style={[styles.cancelWrap, cancelAnimated]}
+                    onLayout={(e) => {
+                        const w = e.nativeEvent.layout.width;
+                        if (w > 0) { cancelW.value = w; }
+                    }}
+                >
                     <TouchableOpacity
                         onPress={() => {
+                            focused.value = 0;
                             Keyboard.dismiss();
                             setInputText('');
                             setIsFocused(false);
+                            setLocalResults([]);
                         }}
-                        style={styles.cancelButton}
                     >
                         <Text style={styles.cancelText}>{t('取消')}</Text>
                     </TouchableOpacity>
-                )}
+                </Animated.View>
             </View>
 
             {/* 下拉結果層 */}
