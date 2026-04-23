@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useContext } from 'react';
 import {
     View,
     Text,
@@ -27,7 +27,7 @@ import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
-import { useHeaderHeight } from '@react-navigation/elements';
+import { BottomTabBarHeightContext, useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 import { setLocalStorage } from '../../../utils/storageKits';
 import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
@@ -44,7 +44,6 @@ import { getCourseData } from '../../../utils/checkCoursesKits';
 
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
-// TODO: 點擊加課會觸發屏幕上移，導致iOS26需要再往下才能點關閉
 
 const iconSize = scale(25);
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -137,9 +136,7 @@ function CourseSim({ route, navigation }) {
         black, white, bg_color, unread, success, trueWhite, barStyle, TIME_TABLE_COLOR, disabled } = theme;
 
     const insets = useSafeAreaInsets();
-    const headerHeight = useHeaderHeight();
-    // Sticky Header 需要的吸頂偏移量，優先使用導航欄實際高度，否則根據安全區估算
-    const stickyTopOffset = headerHeight || insets.top;
+    const tabBarHeight = useContext(BottomTabBarHeightContext) ?? (insets.bottom + 49);
 
     const s = StyleSheet.create({
         firstUseText: {
@@ -1442,99 +1439,100 @@ E11-0000
     }, [s_coursePlanFile]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <ScrollView
-                ref={verScroll}
-                keyboardDismissMode="on-drag"
-                contentInsetAdjustmentBehavior='automatic'
-            >
-                {/* 頁面標題列（sticky header） */}
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingTop: verticalScale(3),
-                    paddingBottom: verticalScale(5),
-                    backgroundColor: bg_color,
-                }}>
-                    {/* 清空課表按鈕 */}
-                    {allCourseAllTime?.length > 0 && (
-                        <TouchableOpacity
-                            style={{
-                                position: 'absolute',
-                                left: scale(10),
-                                backgroundColor: tonal.primary15,
-                                borderRadius: scale(5),
-                                padding: scale(5),
-                            }}
-                            onPress={clearCourse}
-                        >
-                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>
-                                {t('清空', { ns: 'timetable' })}
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-
-                    {/* 標題 + Logo */}
-                    <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
-                        <Image
-                            source={require('../../../static/img/logo.png')}
-                            style={{
-                                height: iconSize,
-                                width: iconSize,
-                                borderRadius: scale(5),
-                            }}
-                        />
-                        <View style={{ marginLeft: scale(5) }}>
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(18),
-                                color: themeColor,
-                                fontWeight: '600',
-                            }}>
-                                {t('課表模擬', { ns: 'timetable' })}
-                            </Text>
-                        </View>
-                    </View>
-
-                    {/* Add 課按鈕 */}
+        <View style={{ flex: 1, backgroundColor: bg_color, paddingTop: insets.top }}>
+            {/* 頁面標題列（固定於 ScrollView 外，不受 iOS 26 BottomSheet/鍵盤推動影響） */}
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: verticalScale(3),
+                paddingBottom: verticalScale(5),
+                backgroundColor: bg_color,
+            }}>
+                {/* 清空課表按鈕 */}
+                {allCourseAllTime?.length > 0 && (
                     <TouchableOpacity
                         style={{
                             position: 'absolute',
-                            right: scale(10),
-                            backgroundColor: hasOpenCourseSearch ? tonal.secondary15 : tonal.primary15,
+                            left: scale(10),
+                            backgroundColor: tonal.primary15,
                             borderRadius: scale(5),
                             padding: scale(5),
                         }}
-                        onPress={() => {
-                            trigger();
-                            if (Keyboard.isVisible()) { Keyboard.dismiss(); }
-
-                            if (hasOpenCourseSearch) {
-                                bottomSheetRef.current?.close();
-                            } else {
-                                if (allCourseAllTime?.length > 0) {
-                                    bottomSheetRef.current?.snapToIndex(1);
-                                } else {
-                                    bottomSheetRef.current?.expand();
-                                }
-                            }
-
-                            setHasOpenCourseSearch(!hasOpenCourseSearch);
-                            verScroll.current?.scrollTo({ y: 0 });
-                        }}
+                        onPress={clearCourse}
                     >
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            color: hasOpenCourseSearch ? secondThemeColor : themeColor,
-                            fontWeight: 'bold',
-                            lineHeight: verticalScale(14),
-                        }}>
-                            {hasOpenCourseSearch ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontWeight: 'bold', lineHeight: verticalScale(14) }}>
+                            {t('清空', { ns: 'timetable' })}
                         </Text>
                     </TouchableOpacity>
+                )}
+
+                {/* 標題 + Logo */}
+                <View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
+                    <Image
+                        source={require('../../../static/img/logo.png')}
+                        style={{
+                            height: iconSize,
+                            width: iconSize,
+                            borderRadius: scale(5),
+                        }}
+                    />
+                    <View style={{ marginLeft: scale(5) }}>
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            fontSize: scale(18),
+                            color: themeColor,
+                            fontWeight: '600',
+                        }}>
+                            {t('課表模擬', { ns: 'timetable' })}
+                        </Text>
+                    </View>
                 </View>
 
+                {/* Add 課按鈕 */}
+                <TouchableOpacity
+                    style={{
+                        position: 'absolute',
+                        right: scale(10),
+                        backgroundColor: hasOpenCourseSearch ? tonal.secondary15 : tonal.primary15,
+                        borderRadius: scale(5),
+                        padding: scale(5),
+                    }}
+                    onPress={() => {
+                        trigger();
+                        if (Keyboard.isVisible()) { Keyboard.dismiss(); }
+
+                        if (hasOpenCourseSearch) {
+                            bottomSheetRef.current?.close();
+                        } else {
+                            if (allCourseAllTime?.length > 0) {
+                                bottomSheetRef.current?.snapToIndex(1);
+                            } else {
+                                bottomSheetRef.current?.expand();
+                            }
+                        }
+
+                        setHasOpenCourseSearch(!hasOpenCourseSearch);
+                        verScroll.current?.scrollTo({ y: 0 });
+                    }}
+                >
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: hasOpenCourseSearch ? secondThemeColor : themeColor,
+                        fontWeight: 'bold',
+                        lineHeight: verticalScale(14),
+                    }}>
+                        {hasOpenCourseSearch ? t('關閉', { ns: 'timetable' }) : t('搵課/加課', { ns: 'timetable' })}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            <ScrollView
+                ref={verScroll}
+                keyboardDismissMode="on-drag"
+                contentInsetAdjustmentBehavior="never"
+                contentContainerStyle={{ paddingBottom: tabBarHeight }}
+            >
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
                     {allCourseAllTime?.length > 0 ? (<>
