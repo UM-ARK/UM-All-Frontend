@@ -1221,7 +1221,7 @@ E11-0000
                     />
                 </View>
 
-                <BottomSheetScrollView>
+                <BottomSheetScrollView contentContainerStyle={{ paddingBottom: tabBarHeight }}>
                     {/* 篩選條件（星期與時間） */}
                     {renderDayFilter()}
                     {dayFilterChoice && renderTimeFilter()}
