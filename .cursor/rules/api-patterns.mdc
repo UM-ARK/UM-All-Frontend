@@ -1,0 +1,37 @@
+---
+description: API 呼叫和錯誤處理模式
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# API 呼叫模式
+
+## 端點定義
+
+所有端點在 `src/utils/pathMap.js` 定義:
+
+```javascript
+import {BASE_URI, BASE_HOST, GET, POST} from '../../utils/pathMap';
+
+const response = await axios.get(BASE_URI + GET.CLUB_INFO_ALL);
+// 注意: BASE_URI 包含尾部斜線
+```
+
+## 錯誤處理
+
+**使用者可見錯誤必須顯示 Alert 或 Toast**:
+
+```javascript
+try {
+    // API 呼叫
+} catch (error) {
+    Alert.alert(
+        'Error Title',
+        'Descriptive error message.\nPlease check network...',
+        null,
+        {cancelable: true},
+    );
+    // 或
+    Toast.show({type: 'error', text1: 'Error', text2: 'Message'});
+}
+```

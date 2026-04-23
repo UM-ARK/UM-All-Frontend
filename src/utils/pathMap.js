@@ -1,5 +1,3 @@
-import UMAPITOKEN from "../../umAPIToken.json";
-
 // 網站地址映射
 
 // 服務器基地址，其他分地址可以直接寫'/bus'、'/login'
@@ -133,31 +131,30 @@ export const USUAL_Q = 'https://umall.one/qa.html';
 // Webview 服務
 // 選咩課
 export const WHAT_2_REG = 'https://www.umeh.top';
-export const WHAT_2_REG_SEARCH = 'https://www.umeh.top/search/course/';
 // 澳大討論區
 export const UM_WHOLE = 'https://umbbs.xyz';
 
 // 選咩課API
-export const UMEH_URI = "https://mpserver.umeh.top/";
+export const UMEH_URI = 'https://mpserver.umeh.top/';
 export const UMEH_API = {
     GET: {
         // 根據課程編號返回信息
-        COURSE_INFO: "course_info?New_code=",
+        COURSE_INFO: 'course_info?New_code=',
         COURSE_COMMENT: {
-            CODE: "comment_info/?New_code=",
-            PROF: "&prof_name="
+            CODE: 'comment_info/?New_code=',
+            PROF: '&prof_name=',
         },
         // 字母全大寫
-        PROF: "prof_info?name=",
+        PROF: 'prof_info?name=',
         // 模糊搜索
         // FUZZY: "fuzzy_search?text=Test&type=course/prof/title",
-        FUZZY: "fuzzy_search?text=",
+        FUZZY: 'fuzzy_search?text=',
         // 返回統計數據
-        STAT: "get_stat"
+        STAT: 'get_stat',
     },
     POST: {
-        SUBMIT_COMMENT: "submit_comment/"
-    }
+        SUBMIT_COMMENT: 'submit_comment/',
+    },
 };
 
 // 澳大 - API 車位
@@ -170,7 +167,7 @@ export const UM_API_EVENT =
 export const UM_API_NEWS =
     'https://api.data.um.edu.mo/service/media/news/all';
 // 澳大 - API token
-export const UM_API_TOKEN = UMAPITOKEN.token;
+export const UM_API_TOKEN = process.env.EXPO_PUBLIC_UM_API_TOKEN;
 
 // 澳大 Webview
 // 澳大 - 環校巴士報站
@@ -236,7 +233,7 @@ export const UM_EXCHANGE = 'https://isw.um.edu.mo/seas';
 export const UM_SCHOLARSHIP =
     'https://sds.sao.um.edu.mo/whole-person-nurturing/scholarship-and-awards/?lang=zh-hant';
 // 澳大 - 證明文件
-export const UM_DOCUMENTS = 'https://ops.fo.um.edu.mo/services/?lang=zh-hant';
+export const UM_DOCUMENTS = 'https://isw.um.edu.mo/siaod';
 // 澳大 - 論文時間安排計劃
 export const UM_PAPER_PLAN = 'http://library2.um.edu.mo/html/services/reference/a_cal/index_wo_layout.php';
 // 澳大 - 預選課Excel表格
@@ -296,3 +293,6 @@ export const UM_RC = 'https://ado.um.edu.mo/rc/?lang=zh-hant';
 
 // 澳大 - 組織架構
 export const UM_ORG = 'https://api.data.um.edu.mo/service/aboutum/organizational_units/all';
+
+// 飯堂排隊
+export const CANTEEN_QUEUE = 'https://queue.umall.one/';

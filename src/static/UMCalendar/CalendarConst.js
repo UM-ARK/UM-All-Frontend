@@ -1,5 +1,5 @@
-import { t } from "i18next";
-import moment from "moment";
+import { t } from 'i18next';
+import moment from 'moment';
 
 export const getWeekLiteral = (index) => {
     const literals = [

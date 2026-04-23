@@ -4,7 +4,6 @@ import {
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    StatusBar,
     Dimensions,
     FlatList,
     ScrollView,
@@ -12,19 +11,20 @@ import {
     StyleSheet,
     RefreshControl,
     Linking,
+    Platform,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { clubTagMap } from '../../../../utils/clubMap';
 import { setAPPInfo } from '../../../../utils/storageKits';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, POST, MAIL, } from '../../../../utils/pathMap';
+import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, POST, MAIL } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { handleLogout } from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ARKImageView from '../../../../components/ARKImageView';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
@@ -32,17 +32,16 @@ import { updateUserInfo } from '../../../../utils/storageKits';
 import { versionStringCompare } from '../../../../utils/versionKits';
 import { trigger } from '../../../../utils/trigger';
 
-import Header from '../../../../components/Header';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
 import { Image } from 'expo-image';
-import { inject } from 'mobx-react';
 import axios from 'axios';
 import Toast from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
@@ -52,7 +51,7 @@ const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 const ClubDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
     const styles = StyleSheet.create({
         cardContainer: {
             backgroundColor: white,
@@ -143,22 +142,6 @@ const ClubDetail = (props) => {
     useEffect(() => {
         const clubDataParam = props.route.params.data;
         getData(clubDataParam.club_num);
-        // const globalData = props.RootStore;
-        // if (!('userInfo' in globalData) || !globalData.userInfo.isClub) {
-        //     const clubDataParam = props.route.params.data;
-        //     getData(clubDataParam.club_num);
-        // }
-        // 管理員賬號登錄
-        // if (globalData.userInfo && globalData.userInfo.isClub) {
-        //     const clubDataAdmin = globalData.userInfo.clubData;
-        //     setIsAdmin(true);
-        //     getData(clubDataAdmin.club_num);
-        //     getAppData();
-        // }
-        // 已登錄學生賬號
-        // if (globalData.userInfo && globalData.userInfo.stdData) {
-        //     setIsLogin(true);
-        // }
     }, []);
 
     // 獲取指定id的社團信息
@@ -176,18 +159,8 @@ const ClubDetail = (props) => {
                 setIsLoading(false);
                 setIsFollow(clubData.isFollow);
                 getEventData(club_num);
-
-                // if (isAdmin) {
-                //     const clubDataUpdate = {
-                //         isClub: true,
-                //         clubData,
-                //     };
-                //     updateUserInfo(clubDataUpdate);
-                //     props.RootStore.setUserInfo(clubDataUpdate);
-                //     logToFirebase('clubLogin', { club: clubData.name });
-                // }
             } else {
-                alert('Warning:', json.message);
+                Alert.alert('Warning:', json.message);
             }
         } catch (err) {
             console.error(err);
@@ -220,123 +193,11 @@ const ClubDetail = (props) => {
         }
     };
 
-    // 追蹤社團
-    const postAddFollow = async (club_num) => {
-        try {
-            const URL = BASE_URI + POST.ADD_FOLLOW_CLUB;
-            const data = new FormData();
-            data.append('club', club_num);
-            const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            const json = res.data;
-            if (json.message === 'success') {
-                setToastColor(success);
-                setIsFollow(true);
-                toastRef.current.show(`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`, 2000);
-            } else if (json.code === '400') {
-                setToastColor(warning);
-                toastRef.current.show(`您已經關注過了~`, 2000);
-            }
-        } catch (err) {
-            console.log('err', err);
-            alert('錯誤', err.message);
-        }
-    };
-
-    // 取消追蹤社團
-    const postDelFollow = async (club_num) => {
-        try {
-            const URL = BASE_URI + POST.DEL_FOLLOW_CLUB;
-            const data = new FormData();
-            data.append('club', club_num);
-            const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            const json = res.data;
-            if (json.message === 'success') {
-                setToastColor(themeColor);
-                setIsFollow(false);
-                toastRef.current.show(`有緣再見！o(╥﹏╥)o`, 2000);
-            }
-        } catch (err) {
-            console.log('err', err);
-            alert('錯誤', err.message);
-        }
-    };
-
-    // 獲取APP數據
-    const getAppData = async () => {
-        try {
-            const URL = BASE_URI + GET.APP_INFO;
-            const res = await axios.get(URL);
-            const json = res.data;
-            if (json.message === 'success') {
-                checkInfo(json.content);
-            }
-        } catch (err) {
-            // console.log('err', err);
-        }
-    };
-
-    // 檢查APP信息
-    const checkInfo = async (serverInfo) => {
-        try {
-            const strAppInfo = await AsyncStorage.getItem('appInfo');
-            if (strAppInfo == null) {
-                setAPPInfo(serverInfo);
-            } else {
-                const appInfo = strAppInfo ? JSON.parse(strAppInfo) : {};
-                if (appInfo.API_version && appInfo.API_version !== serverInfo.API_version) {
-                    alert('服務器API更新，需要重新登錄');
-                    handleLogout();
-                } else {
-                    setAPPInfo(serverInfo);
-                }
-            }
-            if (versionStringCompare(packageInfo.version, serverInfo.app_version) === -1) {
-                props.route.params.setLock(serverInfo.app_version);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    // 點擊Follow按鈕
-    const handleFollow = () => {
-        if (!isLogin) {
-            setShowDialog(true);
-        } else {
-            if (!isFollow) {
-                postAddFollow(clubData.club_num);
-            } else {
-                postDelFollow(clubData.club_num);
-            }
-        }
-        trigger();
-    };
-
     // 下拉刷新
     const onRefresh = () => {
         setIsLoading(true);
         getData(clubData.club_num);
     };
-
-    // 渲染Follow按鈕
-    const renderFollowButton = () => (
-        <TouchableOpacity
-            style={{
-                ...styles.followButton,
-                backgroundColor: isFollow ? black.third : themeColor,
-            }}
-            activeOpacity={0.8}
-            onPress={handleFollow}
-        >
-            <Text style={{ ...uiStyle.defaultText, color: white }}>
-                {isFollow ? 'Del Follow' : 'Follow'}
-            </Text>
-        </TouchableOpacity>
-    );
 
     // 切換Modal顯示
     const tiggerModalBottom = () => setIsShow(!isShow);
@@ -346,39 +207,6 @@ const ClubDetail = (props) => {
         <View style={styles.cardTitleContainer}>
             <Text style={styles.cardTitleText}>{title}</Text>
         </View>
-    );
-
-    // 渲染Header前景
-    const renderForeground = () => (
-        <TouchableOpacity
-            style={{ flex: 1, position: 'relative' }}
-            onPress={() => {
-                if (clubData?.club_photos_list?.length > 0) {
-                    setImageUrls(clubData.club_photos_list);
-                } else {
-                    setImageUrls(ARK_LETTER_IMG);
-                }
-                imageScrollViewer.current.handleOpenImage(0);
-            }}
-            activeOpacity={1}
-        >
-            {/* isAdmin模式不顯示 */}
-            <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => {
-                    trigger();
-                    props.navigation.goBack();
-                }}
-                style={{
-                    position: 'absolute',
-                    top: verticalScale(65),
-                    left: scale(15),
-                    zIndex: 999,
-                }}
-            >
-                <Ionicons name="chevron-back-circle" size={verticalScale(35)} color={white} />
-            </TouchableOpacity>
-        </TouchableOpacity>
     );
 
     // 渲染主要內容
@@ -405,7 +233,7 @@ const ClubDetail = (props) => {
                             <Image
                                 source={clubData?.logo_url}
                                 style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
-                                contentFit='contain'
+                                contentFit="contain"
                             />
                         </View>
                     </TouchableWithoutFeedback>
@@ -442,9 +270,6 @@ const ClubDetail = (props) => {
                         </TouchableOpacity>
                     )}
                 </View>
-
-                {/* Follow按鈕 */}
-                {/* {!isAdmin && false ? renderFollowButton() : null} */}
 
                 {/* 照片 */}
                 {clubData?.club_photos_list?.length > 1 && (
@@ -577,14 +402,26 @@ const ClubDetail = (props) => {
         );
     };
 
+    // 點擊頂部封面開啟大圖（需掛在 ImageHeaderScrollView 的 renderForeground）
+    const renderForeground = () => (
+        <TouchableOpacity
+            style={{ flex: 1 }}
+            activeOpacity={1}
+            onPress={() => {
+                trigger();
+                const list = clubData?.club_photos_list;
+                if (list && list.length > 0) {
+                    setImageUrls(list);
+                } else {
+                    setImageUrls(list?.[0] || ARK_LETTER_IMG);
+                }
+                imageScrollViewer.current?.handleOpenImage(0);
+            }}
+        />
+    );
+
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            {isLoading ? (
-                <Header title={'組織詳情'} />
-            ) : (
-                <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent />
-            )}
-
             {!isLoading && clubData ? (
                 <ImageHeaderScrollView
                     maxOverlayOpacity={0.6}
@@ -592,13 +429,13 @@ const ClubDetail = (props) => {
                     fadeOutForeground
                     minHeight={verticalScale(150)}
                     maxHeight={verticalScale(300)}
+                    renderForeground={renderForeground}
                     renderHeader={() => (
                         <Image
                             source={clubData?.club_photos_list?.[0] || ARK_LETTER_IMG}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                         />
                     )}
-                    renderTouchableFixedForeground={renderForeground}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
@@ -620,7 +457,7 @@ const ClubDetail = (props) => {
                 </View>
             )}
 
-            <ImageScrollViewer ref={imageScrollViewer} imageUrls={imageUrls} />
+            <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
 
             <DialogDIY
                 showDialog={showDialog}
@@ -667,4 +504,4 @@ const ClubDetail = (props) => {
     );
 };
 
-export default inject('RootStore')(ClubDetail);
+export default ClubDetail;

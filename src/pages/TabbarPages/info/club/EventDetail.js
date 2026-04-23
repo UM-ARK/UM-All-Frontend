@@ -4,7 +4,6 @@ import {
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    StatusBar,
     Dimensions,
     StyleSheet,
     ScrollView,
@@ -13,56 +12,54 @@ import {
     Platform,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { BASE_URI, BASE_HOST, GET, POST, MAIL } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
+import ARKImageView from '../../../../components/ARKImageView';
 import DialogDIY from '../../../../components/DialogDIY';
 import Loading from '../../../../components/Loading';
-import Header from '../../../../components/Header';
 import HyperlinkText from '../../../../components/HyperlinkText';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { ImageHeaderScrollView } from 'react-native-image-header-scroll-view';
 import { Image } from 'expo-image';
-import { inject } from 'mobx-react';
 import axios from 'axios';
 import moment from 'moment-timezone';
-import Toast, { DURATION } from 'react-native-easy-toast';
+import Toast from 'react-native-easy-toast';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const { height: PAGE_HEIGHT } = Dimensions.get('window');
-const CLUB_LOGO_SIZE = verticalScale(60);
 const CLUB_IMAGE_WIDTH = PAGE_WIDTH * 0.19;
 const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 const EventDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
 
+    // 統一化卡片樣式（與 ClubDetail 保持一致）
     const styles = StyleSheet.create({
-        // 展示 from to，在哪裡舉辦的文字的樣式
-        infoShowContainer: {
-            borderColor: themeColor,
-            borderWidth: scale(1),
-            paddingHorizontal: scale(6),
-            paddingVertical: scale(1),
-            borderRadius: scale(10),
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        clubLogoContainer: {
-            width: CLUB_LOGO_SIZE,
-            height: CLUB_LOGO_SIZE,
-            borderRadius: scale(50),
-            overflow: 'hidden',
-            marginTop: verticalScale(5),
-            marginHorizontal: scale(20),
+        cardContainer: {
             backgroundColor: white,
-            ...viewShadow,
+            borderRadius: scale(10),
+            marginHorizontal: scale(15),
+            marginBottom: verticalScale(8),
+            marginTop: scale(10),
+        },
+        cardTitleContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: scale(10),
+            paddingHorizontal: scale(10),
+        },
+        cardTitleText: {
+            ...uiStyle.defaultText,
+            fontSize: verticalScale(13),
+            color: themeColor,
+            fontWeight: 'bold',
         },
         followButton: {
             marginTop: scale(5),
@@ -73,50 +70,41 @@ const EventDetail = (props) => {
             borderRadius: scale(12),
         },
     });
-    // state
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLogin, setIsLogin] = useState(false);
-    const [isClub, setIsClub] = useState(false);
-    // 訪問該頁的用戶對該組織的Follow狀態
-    const [isFollow, setIsFollow] = useState(false);
-    const [eventData, setEventData] = useState(undefined);
-    const [clubData, setClubData] = useState(undefined);
-    const [imageUrls, setImageUrls] = useState('');
-    const [showDialog, setShowDialog] = useState(false);
-    const [reportChoice, setReportChoice] = useState(false);
-    const [toastColor, setToastColor] = useState(themeColor);
-    const [showUpInfo, setShowUpInfo] = useState(false);
-    const [isShowModal, setIsShowModal] = useState(false);
 
-    // 其他state拆分為單獨變量
-    const [coverImgUrl, setCoverImgUrl] = useState('');
-    const [title, setTitle] = useState('');
-    const [introduction, setIntroduction] = useState('');
-    const [startTimeStamp, setStartTimeStamp] = useState(null);
-    const [finishTimeStamp, setFinishTimeStamp] = useState(null);
-    const [type, setType] = useState('');
-    const [relateImgUrl, setRelateImgUrl] = useState([]);
-    const [location, setLocation] = useState('');
+    // 合併狀態管理
+    const [state, setState] = useState({
+        isLoading: true,
+        isLogin: false,
+        isClub: false,
+        isFollow: false,
+        eventData: undefined,
+        clubData: undefined,
+        imageUrls: '',
+        showDialog: false,
+        reportChoice: false,
+        toastColor: themeColor,
+        showUpInfo: false,
+        isShowModal: false,
+        coverImgUrl: '',
+        title: '',
+        introduction: '',
+        startTimeStamp: null,
+        finishTimeStamp: null,
+        type: '',
+        relateImgUrl: [],
+        location: '',
+    });
+
+    const updateState = (newState) => {
+        setState(prev => ({ ...prev, ...newState }));
+    };
 
     // ref
     const imageScrollViewer = useRef(null);
     const toast = useRef(null);
 
-    // 取得全局資料
-    const globalData = props.RootStore;
-
     // componentDidMount & componentDidUpdate for route.params change
     useEffect(() => {
-        // 已登錄判斷
-        if (globalData?.userInfo) {
-            if (globalData.userInfo.stdData) {
-                setIsLogin(true);
-            }
-            if (globalData.userInfo.isClub) {
-                setIsClub(true);
-            }
-        }
-
         getAllThings();
     }, []);
 
@@ -142,7 +130,7 @@ const EventDetail = (props) => {
             if (json.message === 'success') {
                 let clubData = json.content;
                 clubData.logo_url = BASE_HOST + clubData.logo_url;
-                setClubData(clubData);
+                updateState({ clubData });
             }
         } catch (err) {
             console.log('err', err);
@@ -162,22 +150,20 @@ const EventDetail = (props) => {
                     let addHostArr = eventData.relate_image_url.map((itm) => BASE_HOST + itm);
                     eventData.relate_image_url = addHostArr;
                 }
-                setCoverImgUrl(eventData.cover_image_url);
-                setTitle(eventData.title);
-                setIntroduction(eventData.introduction);
-                setStartTimeStamp(eventData.startdatetime);
-                setFinishTimeStamp(eventData.enddatetime);
-                setType(eventData.type);
-                setImageUrls(eventData.cover_image_url);
-                setRelateImgUrl(
-                    eventData.relate_image_url && eventData.relate_image_url.length > 0
-                        ? eventData.relate_image_url
-                        : [],
-                );
-                setLocation(eventData.location);
-                setEventData(eventData);
-                setIsFollow(eventData.isFollow);
-                setIsLoading(false);
+                updateState({
+                    coverImgUrl: eventData.cover_image_url,
+                    title: eventData.title,
+                    introduction: eventData.introduction,
+                    startTimeStamp: eventData.startdatetime,
+                    finishTimeStamp: eventData.enddatetime,
+                    type: eventData.type,
+                    imageUrls: eventData.cover_image_url,
+                    relateImgUrl: eventData.relate_image_url && eventData.relate_image_url.length > 0 ? eventData.relate_image_url : [],
+                    location: eventData.location,
+                    eventData,
+                    isFollow: eventData.isFollow,
+                    isLoading: false,
+                });
             }
         } catch (err) {
             console.log('err', err);
@@ -186,18 +172,18 @@ const EventDetail = (props) => {
 
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => {
-        setIsShowModal((prev) => !prev);
+        updateState({ isShowModal: !state.isShowModal });
     };
 
     // 點擊Follow按鈕響應事件
     const handleFollow = () => {
-        if (!isLogin) {
-            setShowDialog(true);
+        if (!state.isLogin) {
+            updateState({ showDialog: true });
         } else {
-            if (!isFollow) {
-                postAddFollow(eventData._id);
+            if (!state.isFollow) {
+                postAddFollow(state.eventData._id);
             } else {
-                postDelFollow(eventData._id);
+                postDelFollow(state.eventData._id);
             }
         }
         trigger();
@@ -209,18 +195,17 @@ const EventDetail = (props) => {
         data.append('activity_id', eventID);
         try {
             const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': `multipart/form-data` },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             let json = res.data;
             if (json.message === 'success') {
                 // 關注成功
-                setToastColor(success);
-                setIsFollow(true);
-                toast.current?.show(`感謝 Follow ！❥(^_-)\n有最新動態會提醒您！`, 2000);
+                updateState({ toastColor: success, isFollow: true });
+                toast.current?.show('感謝 Follow ！❥(^_-)\\n有最新動態會提醒您！', 2000);
             } else if (json.code === '400') {
                 // 已經關注
-                setToastColor(warning);
-                toast.current?.show(`您已經關注過了~`, 2000);
+                updateState({ toastColor: warning });
+                toast.current?.show('您已經關注過了~', 2000);
             }
         } catch (err) {
             console.log('err', err);
@@ -234,14 +219,13 @@ const EventDetail = (props) => {
         data.append('activity_id', eventID);
         try {
             const res = await axios.post(URL, data, {
-                headers: { 'Content-Type': `multipart/form-data` },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             let json = res.data;
             if (json.message === 'success') {
                 // del follow成功
-                setToastColor(themeColor);
-                setIsFollow(false);
-                toast.current?.show(`有緣再見！o(╥﹏╥)o`, 2000);
+                updateState({ toastColor: themeColor, isFollow: false });
+                toast.current?.show('有緣再見！o(╥﹏╥)o', 2000);
             }
         } catch (err) {
             console.log('err', err);
@@ -254,390 +238,198 @@ const EventDetail = (props) => {
         <RefreshControl
             colors={[themeColor]}
             tintColor={themeColor}
-            refreshing={isLoading}
+            refreshing={state.isLoading}
             progressViewOffset={scale(220)}
             onRefresh={onRefresh}
         />
     );
 
     const onRefresh = () => {
-        setIsLoading(true);
-        getEventData(eventData._id);
+        updateState({ isLoading: true });
+        getEventData(state.eventData._id);
     };
 
-    // 活動基本信息
-    const renderEventBasicInfo = () => {
-        return (
-            <View
-                style={{
-                    backgroundColor: white,
-                    marginVertical: verticalScale(5),
-                    marginHorizontal: scale(15),
-                    borderRadius: scale(10),
-                    paddingVertical: verticalScale(10),
-                    paddingHorizontal: scale(15),
-                }}
-            >
-                {/* 活動大標題 */}
-                <View style={{ marginBottom: verticalScale(5) }}>
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            fontWeight: 'bold',
-                            fontSize: verticalScale(15),
-                        }}
-                    >
-                        {title}
+    // 統一的卡片標題渲染方法（與 ClubDetail 一致）
+    const renderCardTitle = (title) => (
+        <View style={styles.cardTitleContainer}>
+            <Text style={styles.cardTitleText}>{title}</Text>
+        </View>
+    );
+
+    // 活動基本信息組件
+    const renderEventBasicInfo = () => (
+        <View style={styles.cardContainer}>
+            {renderCardTitle('活動資訊')}
+            <View style={{ margin: scale(10), marginTop: scale(0) }}>
+                {/* 活動標題 */}
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    fontSize: verticalScale(18),
+                    fontWeight: 'bold',
+                    marginBottom: verticalScale(8),
+                }}>
+                    {state.title}
+                </Text>
+
+                {/* 活動地點 */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(5) }}>
+                    <Ionicons name="location-outline" size={scale(16)} color={themeColor} style={{ marginRight: scale(5) }} />
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: black.third,
+                    }}>
+                        {state.location}
                     </Text>
                 </View>
 
-                {/* 活動地點 */}
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ width: scale(25) }}>
-                        <View style={{ ...styles.infoShowContainer }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: verticalScale(11),
-                                    color: themeColor,
-                                }}
-                            >
-                                @
-                            </Text>
-                        </View>
-                    </View>
-                    <View style={{ marginLeft: scale(5), width: '90%' }}>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.third,
-                            }}
-                        >
-                            {location}
-                        </Text>
-                    </View>
-                </View>
-
                 {/* 活動時間 */}
-                <View style={{ marginTop: verticalScale(5) }}>
-                    <View style={{ flexDirection: 'row' }}>
-                        <View style={{ ...styles.infoShowContainer }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: verticalScale(11),
-                                    color: themeColor,
-                                }}
-                            >
-                                from
-                            </Text>
-                        </View>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                marginHorizontal: scale(5),
-                                color: black.third,
-                            }}
-                        >
-                            {moment(startTimeStamp).format('YYYY/MM/DD, HH:mm')}
-                        </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', marginTop: scale(5) }}>
-                        <View style={{ ...styles.infoShowContainer }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: verticalScale(11),
-                                    color: themeColor,
-                                }}
-                            >
-                                to
-                            </Text>
-                        </View>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                marginLeft: scale(5),
-                                color: black.third,
-                            }}
-                        >
-                            {moment(finishTimeStamp).format('YYYY/MM/DD, HH:mm')}
-                        </Text>
-                    </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(5) }}>
+                    <Ionicons name="calendar-outline" size={scale(16)} color={themeColor} style={{ marginRight: scale(5) }} />
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: black.third,
+                    }}>
+                        {moment(state.startTimeStamp).format('YYYY/MM/DD, HH:mm')} - {moment(state.finishTimeStamp).format('HH:mm')}
+                    </Text>
                 </View>
 
-                {/* 舉辦方頭像 */}
-                <TouchableWithoutFeedback
-                    onPress={() => {
-                        trigger();
-                        if (!isClub) {
-                            props.navigation.navigate('ClubDetail', {
-                                data: clubData,
-                            });
-                        }
-                    }}
-                >
-                    <View style={{ alignSelf: 'center', flexDirection: 'row' }}>
-                        {/* 社團名 */}
-                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <View style={{ ...styles.infoShowContainer }}>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        fontSize: verticalScale(11),
-                                        color: themeColor,
-                                    }}
-                                >
-                                    Created By
+                {/* 舉辦方信息 */}
+                {state.clubData && (
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            trigger();
+                            props.navigation.navigate('ClubDetail', { data: state.clubData });
+                        }}
+                    >
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: verticalScale(8),
+                            paddingVertical: scale(8),
+                            paddingHorizontal: scale(10),
+                            backgroundColor: theme.bg_color,
+                            borderRadius: scale(8),
+                        }}>
+                            <Image
+                                source={state.clubData.logo_url}
+                                style={{
+                                    width: scale(40),
+                                    height: scale(40),
+                                    borderRadius: scale(20),
+                                    backgroundColor: trueWhite,
+                                    marginRight: scale(10),
+                                }}
+                                contentFit="contain"
+                            />
+                            <View>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontSize: verticalScale(12),
+                                }}>
+                                    主辦方
+                                </Text>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.main,
+                                    fontSize: verticalScale(14),
+                                    fontWeight: '500',
+                                }}>
+                                    {state.clubData.name}
                                 </Text>
                             </View>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    alignSelf: 'center',
-                                    marginTop: scale(5),
-                                    color: black.third,
-                                }}
-                            >
-                                {clubData == undefined ? '' : clubData.name}
-                            </Text>
                         </View>
-                        {/* 社團Logo */}
-                        <Image
-                            source={clubData == undefined ? '' : clubData.logo_url}
-                            style={{ ...styles.clubLogoContainer, backgroundColor: trueWhite }}
-                            contentFit='contain'
-                        />
-                    </View>
-                </TouchableWithoutFeedback>
+                    </TouchableWithoutFeedback>
+                )}
+            </View>
+        </View>
+    );
+
+    // 重構活動詳情展示
+    const renderEventIntroduction = () => {
+        if (!state.eventData?.introduction) {return null;}
+
+        return (
+            <View style={styles.cardContainer}>
+                {renderCardTitle('活動詳情')}
+                <View style={{ margin: scale(10), marginTop: scale(0) }}>
+                    <HyperlinkText linkStyle={{ color: themeColor }} navigation={props.navigation}>
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: black.second,
+                            fontSize: verticalScale(13),
+                            lineHeight: verticalScale(20),
+                        }} selectable>
+                            {state.eventData.introduction}
+                        </Text>
+                    </HyperlinkText>
+                </View>
             </View>
         );
     };
 
-    // 渲染Header前景，返回按鈕
-    const renderForeground = () => {
+    // 重構相關照片展示
+    const renderRelatedPhotos = () => {
+        if (!state.relateImgUrl?.length) {return null;}
+
         return (
-            <TouchableOpacity
-                style={{ flex: 1, position: 'relative' }}
-                onPress={() => {
-                    setImageUrls(coverImgUrl);
-                    imageScrollViewer.current.handleOpenImage(0);
-                }}
-                activeOpacity={1}
-            >
-                {/* 返回按鈕 */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: verticalScale(65),
-                        left: scale(15),
-                        zIndex: 999,
-                    }}
-                >
-                    <TouchableOpacity
-                        activeOpacity={0.7}
-                        onPress={() => {
-                            trigger();
-                            props.navigation.goBack();
-                        }}
-                    >
-                        <Ionicons name="chevron-back-circle" size={verticalScale(35)} color={white} />
-                    </TouchableOpacity>
+            <View style={styles.cardContainer}>
+                {renderCardTitle('相關照片')}
+                <View style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    margin: scale(10),
+                    marginTop: scale(0),
+                }}>
+                    {state.relateImgUrl.map((item, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={{
+                                width: CLUB_IMAGE_WIDTH,
+                                height: CLUB_IMAGE_HEIGHT,
+                                borderRadius: scale(5),
+                                overflow: 'hidden',
+                                margin: scale(5),
+                                ...viewShadow,
+                            }}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                updateState({ imageUrls: state.relateImgUrl });
+                                imageScrollViewer.current.handleOpenImage(index);
+                            }}
+                        >
+                            <Image
+                                source={item}
+                                style={{
+                                    backgroundColor: trueWhite,
+                                    width: '100%',
+                                    height: '100%',
+                                }}
+                                contentFit="cover"
+                            />
+                        </TouchableOpacity>
+                    ))}
                 </View>
-            </TouchableOpacity>
+            </View>
         );
     };
 
-    // 渲染頁面主要內容
+    // 重構編輯按鈕（管理員可見）
+    // 社團管理功能已移除
+    const renderEditButton = () => null;
+
+    // 重構 renderMainContent 方法
     const renderMainContent = () => {
         return (
-            <View style={{ backgroundColor: bg_color, flex: 1, marginTop: verticalScale(5) }}>
+            <View style={{ backgroundColor: bg_color }}>
                 {renderEventBasicInfo()}
 
-                {/* 設置按鈕 */}
-                {isClub ? (
-                    <>
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => {
-                                // 關閉iOS Modal視圖
-                                Platform.OS === 'ios' && props.navigation.pop(2);
-                                // 跳轉活動info編輯頁，並傳遞刷新函數
-                                props.navigation.navigate('EventSetting', {
-                                    mode: 'edit',
-                                    eventData: { _id: eventData._id },
-                                    refresh: onRefresh,
-                                });
-                            }}
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                alignSelf: 'center',
-                                backgroundColor: secondThemeColor,
-                                borderRadius: scale(15),
-                                paddingHorizontal: scale(10),
-                                paddingVertical: scale(5),
-                                margin: scale(70),
-                                marginVertical: scale(5),
-                            }}
-                        >
-                            <Ionicons name="settings-outline" size={scale(25)} color={white} />
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: white,
-                                    fontSize: verticalScale(20),
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                {' '}
-                                編輯活動
-                            </Text>
-                        </TouchableOpacity>
-                        <View>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: verticalScale(12),
-                                    color: secondThemeColor,
-                                    fontWeight: 'bold',
-                                    alignSelf: 'center',
-                                }}
-                            >
-                                Update活動資訊請點我！↑
-                            </Text>
-                        </View>
-                    </>
-                ) : null}
+                {renderEditButton()}
 
-                {/* 詳情介紹 */}
-                {eventData != undefined && eventData.introduction && eventData.introduction.length > 0 && (
-                    <View
-                        style={{
-                            backgroundColor: white,
-                            borderRadius: scale(10),
-                            marginHorizontal: scale(15),
-                            marginTop: verticalScale(5),
-                        }}
-                    >
-                        {/* 卡片標題 */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingVertical: scale(10),
-                                paddingHorizontal: scale(10),
-                            }}
-                            activeOpacity={0.6}
-                        >
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: verticalScale(12),
-                                    color: themeColor,
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                詳情
-                            </Text>
-                        </View>
-                        {/* 卡片內容 */}
-                        <View
-                            style={{
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                                flexDirection: 'row',
-                                margin: scale(10),
-                                marginTop: scale(0),
-                            }}
-                        >
-                            {/* 文字 */}
-                            <HyperlinkText linkStyle={{ color: themeColor }} navigation={props.navigation}>
-                                <Text style={{ ...uiStyle.defaultText, color: black.second }} selectable>
-                                    {eventData.introduction}
-                                </Text>
-                            </HyperlinkText>
-                        </View>
-                    </View>
-                )}
+                {renderEventIntroduction()}
 
-                {/* 相關照片 */}
-                {relateImgUrl != undefined && relateImgUrl.length > 0 && (
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: white,
-                            borderRadius: scale(10),
-                            marginHorizontal: scale(15),
-                            marginBottom: scale(8),
-                            marginTop: scale(10),
-                        }}
-                        activeOpacity={0.7}
-                        onPress={() => {
-                            setImageUrls(relateImgUrl);
-                            imageScrollViewer.current.tiggerModal();
-                        }}
-                    >
-                        {/* 卡片標題 */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingVertical: scale(10),
-                                paddingHorizontal: scale(10),
-                            }}
-                            activeOpacity={0.6}
-                        >
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: verticalScale(12),
-                                    color: themeColor,
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                相關照片
-                            </Text>
-                        </View>
-
-                        {/* 卡片內容 */}
-                        <View
-                            style={{
-                                justifyContent: 'space-around',
-                                alignItems: 'flex-start',
-                                flexDirection: 'row',
-                                margin: scale(10),
-                                marginTop: scale(0),
-                            }}
-                        >
-                            {/* 圖片相冊 最多4張 */}
-                            {relateImgUrl.map((item, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    activeOpacity={0.8}
-                                    onPress={() => {
-                                        setImageUrls(relateImgUrl);
-                                        imageScrollViewer.current.handleOpenImage(index);
-                                    }}
-                                >
-                                    <Image
-                                        source={item}
-                                        style={{
-                                            backgroundColor: trueWhite,
-                                            width: CLUB_IMAGE_WIDTH,
-                                            height: CLUB_IMAGE_HEIGHT,
-                                            borderRadius: scale(5),
-                                            ...viewShadow,
-                                        }}
-                                    />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </TouchableOpacity>
-                )}
+                {renderRelatedPhotos()}
 
                 {/* 舉報活動 */}
                 <TouchableOpacity
@@ -649,16 +441,37 @@ const EventDetail = (props) => {
                         justifyContent: 'center',
                     }}
                     activeOpacity={0.8}
-                    onPress={() => {
-                        setReportChoice(true);
-                    }}
+                    onPress={() => updateState({ reportChoice: true })}
                 >
                     <EvilIcons name="exclamation" size={scale(20)} color={black.third} />
-                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: verticalScale(13) }}>
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: black.third,
+                        fontSize: verticalScale(13),
+                    }}>
                         向管理員舉報該活動
                     </Text>
                 </TouchableOpacity>
+
+                {/* 底部留白 */}
+                <View style={{ height: verticalScale(100), backgroundColor: bg_color }} />
             </View>
+        );
+    };
+
+    // 渲染Header前景，返回按鈕
+    const renderForeground = () => {
+        return (
+            <TouchableOpacity
+                style={{ flex: 1, position: 'relative' }}
+                onPress={() => {
+                    trigger();
+                    updateState({ imageUrls: state.coverImgUrl });
+                    imageScrollViewer.current?.handleOpenImage(0);
+                }}
+                activeOpacity={1}
+            >
+            </TouchableOpacity>
         );
     };
 
@@ -668,26 +481,20 @@ const EventDetail = (props) => {
             <TouchableOpacity
                 style={{
                     ...styles.followButton,
-                    backgroundColor: isFollow ? black.third : themeColor,
+                    backgroundColor: state.isFollow ? black.third : themeColor,
                 }}
                 activeOpacity={0.8}
                 onPress={handleFollow}
             >
-                <Text style={{ ...uiStyle.defaultText, color: white }}>{isFollow ? 'Del Follow' : 'Follow'}</Text>
+                <Text style={{ ...uiStyle.defaultText, color: white }}>{state.isFollow ? 'Del Follow' : 'Follow'}</Text>
             </TouchableOpacity>
         );
     };
 
     return (
         <View style={{ flex: 1 }}>
-            {isLoading ? (
-                <Header title={'Loading...'} />
-            ) : (
-                <StatusBar barStyle="light-content" backgroundColor={'transparent'} translucent={true} />
-            )}
-
             {/* Modal展示需要的信息 */}
-            {isShowModal && (
+            {state.isShowModal && (
                 <ModalBottom cancel={tiggerModalBottom}>
                     <View style={{ padding: scale(20), height: PAGE_HEIGHT * 0.7 }}>
                         <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: verticalScale(13) }}>詳情</Text>
@@ -698,7 +505,7 @@ const EventDetail = (props) => {
                                 beforeJump={tiggerModalBottom}
                             >
                                 <Text style={{ ...uiStyle.defaultText, color: black.main, fontSize: verticalScale(16) }} selectable>
-                                    {introduction}
+                                    {state.introduction}
                                 </Text>
                             </HyperlinkText>
                         </ScrollView>
@@ -707,26 +514,26 @@ const EventDetail = (props) => {
             )}
 
             {/* 彈出層展示圖片查看器 */}
-            <ImageScrollViewer ref={imageScrollViewer} imageUrls={imageUrls} />
+            <ARKImageView ref={imageScrollViewer} imageUrls={state.imageUrls} />
 
             {/* Dialog提示登錄 */}
             <DialogDIY
-                showDialog={showDialog}
+                showDialog={state.showDialog}
                 text={'登錄後能Follow活動和接收最新消息，現在去登錄嗎？'}
                 handleConfirm={() => {
-                    setShowDialog(false);
+                    updateState({ showDialog: false });
                     props.navigation.navigate('MeTabbar');
                 }}
-                handleCancel={() => setShowDialog(false)}
+                handleCancel={() => updateState({ showDialog: false })}
             />
             <DialogDIY
-                showDialog={reportChoice}
+                showDialog={state.reportChoice}
                 text={'請在郵件中說明需舉報活動的標題，和舉報的原因。'}
                 handleConfirm={() => {
                     Linking.openURL('mailto:' + MAIL);
-                    setReportChoice(false);
+                    updateState({ reportChoice: false });
                 }}
-                handleCancel={() => setReportChoice(false)}
+                handleCancel={() => updateState({ reportChoice: false })}
             />
 
             {/* Tost */}
@@ -736,26 +543,26 @@ const EventDetail = (props) => {
                 positionValue={PAGE_HEIGHT * 0.1}
                 textStyle={{ color: white }}
                 style={{
-                    backgroundColor: toastColor,
+                    backgroundColor: state.toastColor,
                     borderRadius: scale(10),
                 }}
             />
 
             {/* 渲染主要內容 */}
-            {!isLoading && eventData ? (
+            {!state.isLoading && state.eventData ? (
                 <ImageHeaderScrollView
                     maxOverlayOpacity={0.6}
                     minOverlayOpacity={0.3}
                     fadeOutForeground
                     minHeight={verticalScale(150)}
                     maxHeight={verticalScale(350)}
+                    renderForeground={renderForeground}
                     renderHeader={() => (
                         <Image
-                            source={coverImgUrl.replace('http:', 'https:')}
+                            source={state.coverImgUrl.replace('http:', 'https:')}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                         />
                     )}
-                    renderTouchableFixedForeground={renderForeground}
                     showsVerticalScrollIndicator={false}
                     refreshControl={renderRefreshCompo()}
                     alwaysBounceHorizontal={false}
@@ -776,4 +583,4 @@ const EventDetail = (props) => {
     );
 };
 
-export default inject('RootStore')(EventDetail);
+export default EventDetail;

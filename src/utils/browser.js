@@ -1,6 +1,6 @@
 import { Linking, Platform, Appearance, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { themes } from "../components/ThemeContext";
+import { themes } from '../components/ThemeContext';
 
 // 定義 Android 上支持 Custom Tabs 的常見瀏覽器包名
 // 優先級：Chrome > Edge > Firefox > 其他
@@ -17,7 +17,7 @@ const PREFERRED_BROWSERS = [
  * 獲取最佳瀏覽器配置 (僅限 Android)
  */
 async function getBestBrowserPackage() {
-    if (Platform.OS !== 'android') return undefined;
+    if (Platform.OS !== 'android') {return undefined;}
 
     try {
         // 獲取所有支持 Custom Tabs 的瀏覽器
@@ -50,7 +50,7 @@ export const openLink = async (input) => {
         mode = undefined;
     } else if (typeof input === 'object' && input !== null) {
         url = input.URL;
-        mode = input.mode
+        mode = input.mode;
     } else {
         throw new Error('openLink: Invalid input');
     }
@@ -131,7 +131,7 @@ export const openLink = async (input) => {
             await Linking.openURL(url);
         } catch (fallbackError) {
             console.log('Linking Error:', fallbackError);
-            Alert.alert('Cannot open the link!')
+            Alert.alert('Cannot open the link!');
         }
     }
 };

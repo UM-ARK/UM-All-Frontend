@@ -1,0 +1,166 @@
+---
+description: Tonal Color System（色調配色系統）- 主題色透明度分級規範
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# Tonal Color System（色調配色系統）
+
+本項目採用 **Tonal Color System**（色調色彩系統），通過主題色的不同透明度生成背景層級，前景（文字、圖標）使用 100% 主題色。所有 Tonal 背景色已在 `ThemeContext.js` 的 `theme.tonal` 中預定義。
+
+## 設計理念
+
+- **淡化強主題色**：避免大面積實色造成的視覺疲勞和強硬感
+- **背景用淺色調（tint）、前景用原色**：保持品牌識別的同時提升閱讀舒適度
+- **單色系層次**：同一色相通過透明度梯度建立清晰的視覺層級
+
+## 透明度分級標準
+
+| 級別 | theme.tonal 鍵名 | Hex Alpha | 透明度 | 用途 |
+|------|------------------|-----------|--------|------|
+| **極淺底** | `tonal.primary08` | `08` | ~3% | 大面積輸入區域背景、文本框底色 |
+| **淺色底** | `tonal.primary15` | `15` | ~8% | 普通按鈕底色、標籤底色、輕量容器 |
+| **中等底** | `tonal.primary30` | `30` | ~19% | 重點按鈕底色、CTA 次級按鈕 |
+| **較深底** | `tonal.primary50` | `50` | ~31% | 高強調容器、pressed 狀態 |
+| **實色** | `themeColor` | — | 100% | 最高優先級 CTA 按鈕、選中態 |
+
+副主題色同理：`tonal.secondary08` / `tonal.secondary15` / `tonal.secondary30` / `tonal.secondary50`
+
+### 層級選擇原則
+
+```
+視覺重要性：低 ──────────────────────────────────────────── 高
+tonal 級別：primary08 → primary15 → primary30 → primary50 → 實色
+場景：       輸入底色   普通按鈕    重點按鈕    強調容器   主CTA
+```
+
+## 代碼寫法
+
+### ✅ 推薦：使用 theme.tonal 預定義色值
+
+```javascript
+const { theme } = useTheme();
+const { themeColor, tonal } = theme;
+
+// 極淺底 - 輸入框背景
+backgroundColor: tonal.primary08
+
+// 淺色底 - 普通按鈕、標籤
+backgroundColor: tonal.primary15
+
+// 中等底 - 重點按鈕
+backgroundColor: tonal.primary30
+
+// 較深底 - pressed 態
+backgroundColor: tonal.primary50
+
+// 副主題色
+backgroundColor: tonal.secondary15
+
+// 前景始終用原色
+color: themeColor
+```
+
+### ✅ 仍可接受：模板字串寫法（向後兼容）
+
+```javascript
+// 舊寫法仍然可以使用，但推薦優先用 theme.tonal
+backgroundColor: `${themeColor}15`
+```
+
+### ❌ 禁止：硬編碼色值
+
+```javascript
+// ❌ 不要這樣寫
+backgroundColor: 'rgba(71, 150, 214, 0.15)'
+backgroundColor: '#4796d615'  // 不要硬編碼 hex 值
+```
+
+## 組件配色模式
+
+### 模式一：淺底 + 深字（最常用）
+
+適用：按鈕、標籤、卡片內操作區
+
+```javascript
+const { themeColor, tonal } = theme;
+
+// 淺色底 + 主題色文字/圖標
+<View style={{ backgroundColor: tonal.primary15, borderRadius: scale(8) }}>
+    <Text style={{ color: themeColor }}>按鈕文字</Text>
+</View>
+
+// 搭配圖標
+<View style={{ backgroundColor: tonal.primary15 }}>
+    <Ionicons name="icon-name" color={themeColor} size={scale(16)} />
+    <Text style={{ color: themeColor }}>操作</Text>
+</View>
+```
+
+### 模式二：淺底 + 邊框 + 深字
+
+適用：信息卡片、輸入區域、步驟容器
+
+```javascript
+const { themeColor, themeColorUltraLight, tonal } = theme;
+
+<View style={{
+    backgroundColor: tonal.primary08,
+    borderWidth: 1,
+    borderColor: themeColorUltraLight,
+    borderRadius: scale(10),
+}}>
+    <Text style={{ color: themeColor }}>內容</Text>
+</View>
+```
+
+### 模式三：實色底 + 白字（高優先級）
+
+適用：主 CTA 按鈕、選中態
+
+```javascript
+<Pressable style={{ backgroundColor: themeColor, borderRadius: scale(10) }}>
+    <Text style={{ color: white }}>確認操作</Text>
+</Pressable>
+```
+
+### 模式四：按壓態反饋
+
+適用：Pressable 的 pressed 樣式
+
+```javascript
+<Pressable
+    style={({ pressed }) => ({
+        backgroundColor: pressed ? tonal.primary50 : tonal.primary15,
+        borderRadius: scale(8),
+    })}
+>
+    <Text style={{ color: themeColor }}>按鈕</Text>
+</Pressable>
+```
+
+## 暗色模式注意事項
+
+`theme.tonal` 中的色值基於 `theme.themeColor`（已根據亮/暗模式調整過色值）生成，天然支持暗色模式：
+
+- 亮色模式：`#4796d6` + `15` → 淺藍色底
+- 暗色模式：`#4a9cde` + `15` → 深色中的微亮藍底
+
+**無需額外處理暗色模式的 tonal 背景色。**
+
+## 與現有配色體系的關係
+
+| 配色方式 | 適用場景 | 定義位置 |
+|---------|---------|---------|
+| `theme.themeColor` | 前景文字、圖標、實色按鈕 | ThemeContext.js |
+| `theme.themeColorLight` | 次級主題色 | ThemeContext.js |
+| `theme.themeColorUltraLight` | 邊框、分割線 | ThemeContext.js |
+| `theme.tonal.primaryXX` | 主題色 Tonal 背景 | ThemeContext.js `tonal` |
+| `theme.tonal.secondaryXX` | 副主題色 Tonal 背景 | ThemeContext.js `tonal` |
+| `theme.glass` | 玻璃擬態效果（白色半透明） | ThemeContext.js |
+
+## 設計參考
+
+- **Google Material Design 3** — Tonal Palette / Container & On-Container 配色
+- **Apple iOS 18+** — 系統應用的 Tinted Backgrounds
+- **Monochromatic Color Scheme** — 單色相多明度的經典色彩理論

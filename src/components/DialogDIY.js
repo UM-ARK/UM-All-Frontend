@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 
-import { COLOR_DIY, uiStyle, } from '../utils/uiMap';
+import { themes, uiStyle } from './ThemeContext';
+import { Appearance } from 'react-native';
 
 import { Dialog } from '@rneui/themed';
 
 class DialogDIY extends Component {
     state = {};
     render() {
+        const isLight = Appearance.getColorScheme() === 'light';
+        const COLOR_DIY = themes[isLight ? 'light' : 'dark'];
         return (
             <Dialog
                 isVisible={this.props.showDialog}

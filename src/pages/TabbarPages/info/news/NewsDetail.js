@@ -1,29 +1,31 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator, } from 'react-native';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { View, Text, Dimensions, ScrollView, StyleSheet, Linking, ActivityIndicator, Platform } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
-import Header from '../../../../components/Header';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
+import ARKImageView from '../../../../components/ARKImageView';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
+import SegmentControl from '../../../../components/SegmentControl';
 
 import { Image } from 'expo-image';
 import { FlatGrid } from 'react-native-super-grid';
 import moment from 'moment-timezone';
 import HTMLView from 'react-native-htmlview';
 import { scale } from 'react-native-size-matters';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from '../../../../components/TouchableScale';
 
-// HTML正則篩數據
+// 正文字體：iOS 用 PingFang SC，Android 用 Noto Sans
+const BODY_FONT = Platform.select({ ios: 'PingFang SC', android: 'NotoSansCJK-Regular', default: undefined });
+
+// HTML正則篩數據，並在每個段落開頭插入全形空格實現首行縮進
 function repalceHtmlToText(str) {
-    // str = str.replace(/(<([^>]+)>)/g, '');
-    // str = str.replace(/<\/?.+?>/g, '');
-    // str = str.replace(/&nbsp;/g, '');
-    // str = str.replace(/[\r\n]/g, '');
     str = str.replace(/<br\s*\/?>/g, '');
     str = str.replace(/<p><\s*\/?p>/g, '');
     str = str.replace(/<div><\s*\/?div>/g, '');
+    // 段首加兩個全形空格模擬縮進
+    str = str.replace(/<p(\s[^>]*)?>/gi, '<p$1>\u3000\u3000');
+    str = str.replace(/<div(\s[^>]*)?>/gi, '<div$1>\u3000\u3000');
     return str;
 }
 
@@ -50,12 +52,6 @@ const NewsDetail = ({ route, navigation }) => {
             marginRight: scale(15),
             fontWeight: '600',
         },
-        languageModeButtonContainer: {
-            padding: scale(10),
-            marginVertical: scale(5),
-            borderRadius: scale(10),
-            // ...viewShadow,
-        },
         contentContainer: {
             marginHorizontal: scale(10),
             paddingHorizontal: scale(15),
@@ -68,24 +64,73 @@ const NewsDetail = ({ route, navigation }) => {
     const htmlStyles = StyleSheet.create({
         p: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.second,
+            lineHeight: scale(22),
+            marginBottom: scale(8),
+            textAlign: 'justify',
         },
         span: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.second,
+            lineHeight: scale(22),
         },
         div: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.second,
+            lineHeight: scale(22),
+            marginBottom: scale(8),
+            textAlign: 'justify',
         },
         td: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: black.third,
+            lineHeight: scale(20),
         },
         a: {
             ...uiStyle.defaultText,
+            fontFamily: BODY_FONT,
             color: themeColor,
-        }
+            textDecorationLine: 'underline',
+        },
+        h1: {
+            fontFamily: BODY_FONT,
+            fontWeight: 'bold',
+            fontSize: scale(20),
+            color: black.first,
+            marginBottom: scale(8),
+            lineHeight: scale(28),
+        },
+        h2: {
+            fontFamily: BODY_FONT,
+            fontWeight: 'bold',
+            fontSize: scale(18),
+            color: black.first,
+            marginBottom: scale(6),
+            lineHeight: scale(26),
+        },
+        h3: {
+            fontFamily: BODY_FONT,
+            fontWeight: '600',
+            fontSize: scale(16),
+            color: black.first,
+            marginBottom: scale(6),
+            lineHeight: scale(24),
+        },
+        strong: {
+            fontFamily: BODY_FONT,
+            fontWeight: 'bold',
+            color: black.first,
+        },
+        li: {
+            fontFamily: BODY_FONT,
+            color: black.second,
+            lineHeight: scale(22),
+            marginBottom: scale(4),
+        },
     });
 
     const imageScrollViewer = useRef(null);
@@ -184,43 +229,28 @@ const NewsDetail = ({ route, navigation }) => {
             // 如果當前選擇的語言不可用，切換到第一個可用語言
             if (newModes[chooseMode].available === 0) {
                 const firstAvailableIndex = newModes.findIndex(m => m.available === 1);
-                if (firstAvailableIndex !== -1) setChooseMode(firstAvailableIndex);
+                if (firstAvailableIndex !== -1) { setChooseMode(firstAvailableIndex); }
             }
             return newModes;
         });
     }, [data, chooseMode]);
 
-    // 文本語言模式選擇
-    const renderModeChoice = () => {
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                {LanguageMode.map((item, index) => {
-                    //只渲染存在的语言的按钮
-                    if (item.available === 1) {
-                        return (
-                            <TouchableScale key={index}
-                                style={{
-                                    ...styles.languageModeButtonContainer,
-                                    backgroundColor: chooseMode === index ? themeColor : white,
-                                }}
-                                onPress={() => {
-                                    trigger();
-                                    setChooseMode(index);
-                                }}>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    color: chooseMode === index ? white : themeColor,
-                                }}>
-                                    {item.name}
-                                </Text>
-                            </TouchableScale>
-                        );
-                    }
-                    return null;
-                })}
-            </View >
-        );
-    };
+    // 僅含可用語言；保留 langIndex 對應 title/content 陣列索引
+    const languageSegmentOptions = useMemo(() => (
+        LanguageMode
+            .map((item, langIndex) => ({ ...item, langIndex }))
+            .filter(item => item.available === 1)
+            .map(item => ({
+                key: item.locale,
+                label: item.name,
+                langIndex: item.langIndex,
+            }))
+    ), [LanguageMode]);
+
+    const languageSegmentSelectedIndex = useMemo(() => {
+        const i = languageSegmentOptions.findIndex(o => o.langIndex === chooseMode);
+        return i >= 0 ? i : 0;
+    }, [languageSegmentOptions, chooseMode]);
 
     const handleHyperLink = (url) => {
         if (url.includes('mailto:')) {
@@ -236,11 +266,24 @@ const NewsDetail = ({ route, navigation }) => {
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            <Header title={'新聞詳情'} iOSDIY={true} />
-
-            <ScrollView>
+            <ScrollView
+                // 該頁面是圖片置頂，所以iOS26也無需調整inset
+                contentInsetAdjustmentBehavior={'automatic'}>
                 {/* 文本模式選擇 3語切換 */}
-                {renderModeChoice()}
+                {languageSegmentOptions.length > 0 ? (
+                    <View style={{ alignItems: 'center', marginVertical: scale(5) }}>
+                        <SegmentControl
+                            options={languageSegmentOptions}
+                            selectedIndex={languageSegmentSelectedIndex}
+                            onChange={(segIdx) => {
+                                const opt = languageSegmentOptions[segIdx];
+                                if (opt) { setChooseMode(opt.langIndex); }
+                            }}
+                            trackBackgroundColor={white}
+                            fontSize={scale(14)}
+                        />
+                    </View>
+                ) : null}
                 {/* 大標題 */}
                 <Text style={styles.title} selectable={true}>
                     {title[chooseMode]}
@@ -278,14 +321,19 @@ const NewsDetail = ({ route, navigation }) => {
                                 source={item}
                                 style={{ width: '100%', height: '100%' }}
                                 onLoadStart={() => {
-                                    const newLoadingState = [...imgLoading];
-                                    newLoadingState[index] = true; // 设置当前图片为加载中
-                                    setImgLoading(newLoadingState);
+                                    // 使用函數式更新，避免多張圖片並行載入時 stale closure 導致狀態互相覆蓋
+                                    setImgLoading(prev => {
+                                        const next = [...prev];
+                                        next[index] = true;
+                                        return next;
+                                    });
                                 }}
                                 onLoadEnd={() => {
-                                    const newLoadingState = [...imgLoading];
-                                    newLoadingState[index] = false; // 设置当前图片为加载完成
-                                    setImgLoading(newLoadingState);
+                                    setImgLoading(prev => {
+                                        const next = [...prev];
+                                        next[index] = false;
+                                        return next;
+                                    });
                                 }}
                             />
                             {imgLoading[index] && (
@@ -322,7 +370,7 @@ const NewsDetail = ({ route, navigation }) => {
                 </View>
 
                 {/* 彈出層展示圖片查看器 */}
-                <ImageScrollViewer
+                <ARKImageView
                     ref={imageScrollViewer}
                     imageUrls={data.imageUrls}
                 />

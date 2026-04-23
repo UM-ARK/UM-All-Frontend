@@ -1,10 +1,7 @@
 // 處理緩存相關的工具
 
-import RNRestart from 'react-native-restart';
+import { reloadAppAsync } from 'expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CookieManager from '@react-native-cookies/cookies';
-
-import RootStore from '../mobx';
 
 // 登錄，需要放入服務器返回的token
 export async function handleLogin(userInfo) {
@@ -13,7 +10,7 @@ export async function handleLogin(userInfo) {
         const strUserInfo = JSON.stringify(userInfo);
         await AsyncStorage.setItem('userInfo', strUserInfo)
             .then(() => {
-                RNRestart.Restart();
+                reloadAppAsync();
             })
             .catch(e => console.log('handleLogin error', e));
     } catch (e) {
@@ -27,12 +24,10 @@ export async function handleLogout() {
         // await AsyncStorage.clear();
         await AsyncStorage.removeItem('userInfo');
         await AsyncStorage.removeItem('appInfo');
-        // 清除所有的cookies
-        await CookieManager.clearAll();
     } catch (e) {
         alert(e);
     } finally {
-        RNRestart.Restart();
+        reloadAppAsync();
     }
 }
 
@@ -78,7 +73,7 @@ export async function setLocalStorage(itemName, data) {
         const strData = JSON.stringify(data);
         await AsyncStorage.setItem(itemName, strData);
     } catch (error) {
-        console.log('AsyncStorage Error', error)
+        console.log('AsyncStorage Error', error);
         return error;
     } finally {
         console.log(itemName, '已存入緩存');

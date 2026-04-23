@@ -1,0 +1,47 @@
+---
+description: 本地儲存規範 - 禁止直接使用 AsyncStorage
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 儲存規範
+
+**禁止直接使用 AsyncStorage**，必須使用 `storageKits.js`:
+
+```javascript
+import {
+    getLocalStorage,
+    setLocalStorage,
+    handleLogin,
+    handleLogout,
+    updateUserInfo,
+} from '../../utils/storageKits';
+
+// 資料持久化
+await setLocalStorage('key', object);
+const data = await getLocalStorage('key');
+
+// 認證（會透過 reloadAppAsync 重啟應用程式）
+await handleLogin(userInfo);
+await handleLogout();
+
+// 即時更新（無需重啟）
+await updateUserInfo(userInfo);
+```
+
+## 課程資料管理
+
+使用 `checkCoursesKits.js` 管理課程資料:
+
+```javascript
+import {
+    getCourseData,
+    needUpdate,
+    saveCourseDataToStorage,
+    checkCloudCourseVersion,
+} from '../../utils/checkCoursesKits';
+
+const courses = getCourseData('pre'); // 或 'adddrop'
+```
+
+**禁止直接寫入**: `offer_courses`, `course_plan`, `course_plan_time` 鍵

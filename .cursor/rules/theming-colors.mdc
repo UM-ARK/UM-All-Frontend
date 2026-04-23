@@ -1,0 +1,73 @@
+---
+description: 主題和顏色使用規範 - 強制使用 ThemeContext
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# 主題顏色規範
+
+**強制規定：所有顏色必須使用 ThemeContext，禁止硬編碼**
+
+## 正確用法
+
+```javascript
+import {useTheme} from '../../components/ThemeContext';
+
+const {theme} = useTheme();
+const {white, black, bg_color, themeColor, glass} = theme;
+```
+
+## 禁止寫法
+
+| 禁止 | 原因 |
+|------|------|
+| `'#fff'` / `'#000'` | 不支援暗色模式 |
+| `'rgba(255,255,255,0.2)'` | 硬編碼半透明色 |
+| 從已刪除的 `uiMap.js` 匯入 | 統一使用 `ThemeContext` |
+
+## 玻璃態效果
+
+```javascript
+// ❌ 錯誤
+backgroundColor: 'rgba(255, 255, 255, 0.2)'
+
+// ✅ 正確
+const {glass} = theme;
+backgroundColor: glass
+```
+
+## Tonal Color System（色調配色）
+
+按鈕和容器的背景色使用 `theme.tonal` 預定義色值（已在 ThemeContext.js 中定義）：
+
+```javascript
+const { themeColor, tonal } = theme;
+
+// 背景用 tonal 預定義色值
+backgroundColor: tonal.primary15   // 普通按鈕 ~8%
+backgroundColor: tonal.primary30   // 重點按鈕 ~19%
+backgroundColor: tonal.secondary15 // 副主題色淺底
+
+// 前景用原色
+color: themeColor
+```
+
+| theme.tonal 鍵名 | 用途 |
+|-------------------|------|
+| `tonal.primary08` | 極淺底（輸入框背景） |
+| `tonal.primary15` | 淺色底（普通按鈕、標籤） |
+| `tonal.primary30` | 中等底（重點按鈕、CTA 次級） |
+| `tonal.primary50` | 較深底（強調容器、pressed 態） |
+| `themeColor` 實色 | 最高優先 CTA（白字） |
+
+副主題色：`tonal.secondary08` / `15` / `30` / `50`
+
+**完整規範見** `tonal-color-system.mdc`
+
+## 新增顏色流程
+
+1. 在 `ThemeContext.js` 的 `getColorDiy` 函數新增:
+   ```javascript
+   newColor: isLight ? '#xxxxxx' : '#xxxxxx',
+   ```
+2. 在元件中使用: `const {newColor} = theme;`

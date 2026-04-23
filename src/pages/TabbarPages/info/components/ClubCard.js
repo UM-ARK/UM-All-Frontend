@@ -1,13 +1,13 @@
 import React, { useContext, useCallback, memo } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 
 import { NavigationContext } from '@react-navigation/native';
 // import { Image } from 'expo-image';
 import { scale, verticalScale } from 'react-native-size-matters';
-import TouchableScale from "react-native-touchable-scale";
+import TouchableScale from '../../../../components/TouchableScale';
 
 const IMG_SIZE = verticalScale(45);
 
@@ -37,7 +37,7 @@ const ClubCard = ({ data }) => {
             <Image
                 source={{ uri: logo_url }}
                 style={[styles.logo, { backgroundColor: trueWhite }]}
-                resizeMode='contain'
+                resizeMode="contain"
             />
 
             {/* 组织名 */}
@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: scale(8),
         margin: scale(3),
+        width: '100%',
     },
     logo: {
         width: IMG_SIZE,

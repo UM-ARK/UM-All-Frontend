@@ -1,0 +1,270 @@
+---
+description: iOS 26 原生特性、液態玻璃設計規範與 2026 現代化 UI 指引
+globs: "**/*.js"
+alwaysApply: true
+---
+
+# iOS 26 原生特性與現代化 UI 設計規範
+
+## 核心目標
+
+**APP 正在進行現代化 UI 重構**，目標是引入 2026 年流行的設計趨勢，特別是 iOS 26 原生新特性。所有 UI 改動都應遵循以下優先級：
+
+1. 擁抱平台原生特性（iOS 26 液態玻璃、原生導覽按鈕等）
+2. 保持跨平台優雅降級（Android / 舊 iOS 有合理 fallback）
+3. 遵循專案現有主題色體系（ThemeContext），必要時提議新配色
+
+---
+
+## 一、`isLiquidGlassSupported` 平台檢測
+
+### 唯一檢測方式
+
+```javascript
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+```
+
+| 平台 | 結果 |
+|------|------|
+| iOS 26+ | `true` |
+| iOS < 26 | `false` |
+| Android 所有版本 | `false` |
+
+### 禁止的檢測方式
+
+```javascript
+// ❌ 絕對禁止：使用 Platform 判斷版本
+const isIOS26 = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
+
+// ❌ 禁止：硬編碼平台判斷
+if (Platform.OS === 'ios') { /* 液態玻璃邏輯 */ }
+```
+
+---
+
+## 二、`LiquidGlassView` 元件規範
+
+### 基本用法
+
+```javascript
+import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
+import { Pressable } from 'react-native';
+
+// 圓形按鈕範例（如浮動操作按鈕、關閉按鈕）
+<LiquidGlassView
+    interactive={true}
+    hover={isLiquidGlassSupported ? { effect: 'highlight' } : null}
+    style={{
+        backgroundColor: isLiquidGlassSupported ? null : theme.white,
+        borderRadius: scale(25),
+        width: scale(50),
+        height: scale(50),
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    }}
+>
+    <Pressable onPress={handlePress}>
+        <Ionicons name="icon-name" color={theme.themeColor} size={scale(24)} />
+    </Pressable>
+</LiquidGlassView>
+```
+
+### 關鍵模式
+
+| 屬性 | iOS 26+ | 舊平台 fallback |
+|------|---------|-----------------|
+| `backgroundColor` | `null`（液態玻璃自帶材質） | `theme.white` / `theme.glass` / `theme.bg_color` |
+| `hover` | `{ effect: 'highlight' }` | `null` |
+| `interactive` | `true` | `true`（元件自動降級為普通 View） |
+
+### 重要提醒
+
+- `LiquidGlassView` 在不支援的平台上會自動降級為普通 `View`，因此可以安全使用
+- 但 `backgroundColor` 等視覺屬性**必須手動處理 fallback**
+- `hover` 屬性僅在 `isLiquidGlassSupported` 時設定
+
+---
+
+## 三、適用場景指引
+
+### ✅ 推薦使用液態玻璃的場景
+
+| 場景 | 原因 | 專案範例 |
+|------|------|---------|
+| **導覽列 (Header)** | 原生一致性，iOS 26 系統級支援 | `Nav.js` - `headerTransparent` |
+| **底部標籤列 (Tab Bar)** | 原生一致性 | `Tabbar.js` - `translucent` |
+| **浮動操作按鈕 (FAB)** | 懸浮元素適合玻璃態 | `ScrollToTopButton.js` |
+| **圖片檢視器疊加層按鈕** | 覆蓋在內容上的控件 | `ARKImageView.js` |
+| **全螢幕彈窗內的操作按鈕** | 強調操作入口的同時保持通透 | — |
+| **工具列** | 浮動工具列、底部操作列 | — |
+
+### ❌ 不推薦使用液態玻璃的場景
+
+| 場景 | 原因 |
+|------|------|
+| **列表項 / 卡片內部** | 大量重複使用會導致視覺混亂和效能問題 |
+| **文字標籤 / Badge** | 元素太小，液態玻璃效果不明顯 |
+| **整個頁面背景** | 不符合液態玻璃「點綴」的設計理念 |
+| **輸入框** | 影響可讀性，不適合文字輸入場景 |
+| **列表分割線 / 小型裝飾** | 效能浪費，視覺收益低 |
+| **已有明確背景色的區域** | 液態玻璃與實色背景衝突 |
+
+### 設計原則
+
+> **液態玻璃是"高光點綴"，不是"全面覆蓋"**
+> 
+> 每個頁面使用液態玻璃的元素應控制在 **2-4 個**關鍵互動點。過多使用會讓介面顯得廉價，而非現代。
+
+---
+
+## 四、降級策略
+
+### 導覽系統降級
+
+```javascript
+// Nav.js / Tabbar.js
+headerTransparent: isLiquidGlassSupported,
+headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+
+// Tab Bar
+translucent: isLiquidGlassSupported,
+```
+
+### 元件降級
+
+```javascript
+// 浮動按鈕 - 降級為實色 + 陰影
+<LiquidGlassView style={{
+    backgroundColor: isLiquidGlassSupported ? null : theme.white,
+    // 非液態玻璃時新增陰影提升層次感
+    ...(isLiquidGlassSupported ? {} : {
+        shadowColor: theme.black.main,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    }),
+}}>
+```
+
+### 內容區域降級
+
+```javascript
+// ScrollView contentInsetAdjustmentBehavior
+contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
+```
+
+### 降級視覺標準
+
+| 元件類型 | iOS 26+ | iOS < 26 | Android |
+|---------|---------|----------|---------|
+| 導覽列 | 液態玻璃透明 | BlurView 模糊 | 實色 `bg_color` |
+| 浮動按鈕 | 液態玻璃 | `theme.glass` 半透明 | `theme.white` + 陰影 |
+| 工具列 | 液態玻璃 | `theme.glass` | 實色 + elevation |
+
+---
+
+## 五、React Navigation 原生適配
+
+### 原生按鈕
+
+在 iOS 26+ 上，React Navigation V7 自動支援原生風格按鈕。應優先使用 React Navigation 提供的原生元件：
+
+```javascript
+import { Button, HeaderBackButton } from '@react-navigation/elements';
+
+// 使用原生返回按鈕
+headerLeft: () => <HeaderBackButton onPress={navigation.goBack} />,
+
+// 使用原生按鈕（自動適配 iOS 26 液態玻璃樣式）
+headerRight: () => <Button onPress={handleAction}>Action</Button>,
+```
+
+### 導覽級液態玻璃設定
+
+```javascript
+// 在 screenOptions 中統一設定
+screenOptions={{
+    headerTransparent: isLiquidGlassSupported,
+    headerTitleAlign: 'center',
+    headerBackButtonDisplayMode: 'minimal',
+}}
+```
+
+---
+
+## 六、2026 現代化 UI 設計原則
+
+### 設計趨勢
+
+1. **Tonal Color System** — 主題色透過 `08`/`15`/`30`/`50` 透明度梯度生成背景層級，前景用原色，淡化視覺疲勞（詳見 `tonal-color-system.mdc`）
+2. **材質層次感** — 用液態玻璃、模糊、Tonal 色調區分 UI 層級
+3. **大圓角與柔和陰影** — 卡片圓角 `scale(12)` - `scale(16)`，陰影柔和
+4. **留白與呼吸感** — 元素間距充足，避免擁擠
+5. **動效自然** — 使用 `react-native-reanimated` 實現流暢過渡
+6. **平台原生感** — iOS 上盡量使用原生元件和特性，Android 遵循 Material Design 3
+
+### 改動尺度分級
+
+| 級別 | 描述 | 是否需討論 |
+|------|------|-----------|
+| 小幅最佳化 | 調整間距、圓角、字重 | 直接實施 |
+| 元件重構 | 重寫列表項、卡片、按鈕樣式 | 簡要說明意圖 |
+| 配色調整 | 引入新顏色或修改現有配色 | **必須先發起討論** |
+| 佈局重構 | 整頁佈局改動 | **必須先發起討論** |
+
+---
+
+## 七、配色方案演進流程
+
+### 現有主題色必須尊重
+
+目前 ThemeContext 定義的顏色體系是基礎，**任何配色改動都必須在 ThemeContext 中操作**。
+
+### 提議新配色的流程
+
+1. **說明需求**：為什麼現有顏色不滿足（哪個場景、什麼視覺效果）
+2. **提供方案**：新顏色的亮色/暗色值，以及適用場景
+3. **對比展示**：與現有配色的對比，確保協調
+4. **使用者確認後**：在 `ThemeContext.js` 的 `getColorDiy` 中新增
+
+```javascript
+// 提議範例：
+// 需求: 卡片需要更輕的背景色以突出內容層次
+// 方案: cardBg - 亮色 '#F8F9FA' / 暗色 '#1E1E1E'
+// 影響範圍: 資訊卡片、課程卡片
+
+const getColorDiy = (isLight) => ({
+    // ... 現有顏色 ...
+    cardBg: isLight ? '#F8F9FA' : '#1E1E1E',
+});
+```
+
+### 配色討論觸發條件
+
+當 AI 助手遇到以下情況時，**應主動發起配色討論**：
+
+- 現有顏色無法實現設計目標
+- 發現新頁面需要 ThemeContext 中未定義的語義顏色
+- 使用者要求的 UI 效果需要新增顏色層級
+- 暗色模式下現有顏色對比度不足
+
+---
+
+## 八、原生特性採納通用原則
+
+### 採納標準
+
+| 條件 | 說明 |
+|------|------|
+| 有官方庫支援 | 如 `@callstack/liquid-glass` |
+| 降級方案明確 | 不支援的平台有合理 fallback |
+| 不破壞跨平台一致性 | 核心功能在所有平台可用 |
+| 效能影響可控 | 不引入明顯的效能回退 |
+
+### 禁止行為
+
+- ❌ 為單一平台引入僅該平台可用的核心功能
+- ❌ 使用未經社群驗證的原生特性橋接
+- ❌ 在降級方案不明確時引入新原生特性

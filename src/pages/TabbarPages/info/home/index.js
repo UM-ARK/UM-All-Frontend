@@ -15,8 +15,7 @@ import {
 } from 'react-native';
 
 // 本地工具
-import { uiStyle } from '../../../../utils/uiMap.js';
-import { useTheme } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
     GITHUB_DONATE,
     BASE_HOST,
@@ -35,7 +34,7 @@ import {
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
 import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
-import { versionStringCompare } from '../../../../utils/versionKits.js';
+import { isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
 import packageInfo from '../../../../../package.json';
 import HomeCard from './components/HomeCard.js';
 import { screenWidth } from '../../../../utils/stylesKits.js';
@@ -48,9 +47,7 @@ import CustomBottomSheet from '../../courseSim/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';
-
 import { FontAwesome, FontAwesome5, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-// import Interactable from 'react-native-interactable';
 import { FlatGrid } from 'react-native-super-grid';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -58,17 +55,18 @@ import axios from 'axios';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
 import moment from 'moment';
-import TouchableScale from "react-native-touchable-scale";
 import lodash from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import ScrollToTopButton from '../../../../components/ScrollToTopButton';
+import TouchableScale from '../../../../components/TouchableScale';
 
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
     require('../../../../static/img/donate/mpay.jpg'),
     require('../../../../static/img/donate/wechat.jpg'),
     require('../../../../static/img/donate/alipay.jpg'),
-]
+];
 
 // 定義可使用icon，注意大小寫
 const iconTypes = {
@@ -83,7 +81,7 @@ const iconTypes = {
 const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
-    const { t } = useTranslation(['common', 'home',]);
+    const { t } = useTranslation(['common', 'home']);
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -114,7 +112,7 @@ const HomeScreen = ({ navigation }) => {
                 trigger();
                 logToFirebase('funcUse', { funcName: 'harbor_new' });
                 openLink({ URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen' });
-            }
+            },
         },
         {
             icon_name: 'volunteer-activism',
@@ -180,19 +178,20 @@ const HomeScreen = ({ navigation }) => {
 
         return () => {
             // componentWillUnmount
-            if (toastTimer.current) clearTimeout(toastTimer.current);
-            if (appStateListener.current) appStateListener.current.remove();
+            if (toastTimer.current) {clearTimeout(toastTimer.current);}
+            if (appStateListener.current) {appStateListener.current.remove();}
         };
     }, []);
 
     // 其餘方法轉為函式
+    // App 從背景回到前景時：更新 App 資訊、曆與下節課，但不自動重打活動 API，
+    // 否則每次從多工或鎖定回來都會讓活動列表閃爍/重載，體感不佳。活動列表請用下拉重新整理。
     const handleAppStateChange = (nextAppState) => {
         if (AppState.currentState == 'active') {
             if (navigation?.isFocused()) {
                 setIsLoading(true);
                 getAppData(false);
                 onRefresh();
-                eventPage.current?.onRefresh();
             }
         }
     };
@@ -214,7 +213,7 @@ const HomeScreen = ({ navigation }) => {
                 }
             }).finally(() => {
                 setIsLoading(false);
-            })
+            });
     };
 
     const checkInfo = async (serverInfo, isLogin) => {
@@ -240,32 +239,14 @@ const HomeScreen = ({ navigation }) => {
                 }
             }
 
-            // APP版本滯後，提示下載新版本
-            const shouldUpdate = versionStringCompare(packageInfo.version, serverInfo.app_version) == -1;
-            if (shouldUpdate) {
-                setShowUpdateInfo(shouldUpdate);
+            // APP 版本滯後，提示下載新版本（與設定頁共用 appUpdateKits）
+            if (isLocalAppOlderThanServer(serverInfo)) {
+                setShowUpdateInfo(true);
                 setAppVersion({
                     lastest: serverInfo.app_version,
                     local: packageInfo.version,
                 });
-
-                Alert.alert(`ARK ${serverInfo.app_version} 現可更新！！`,
-                    'version_info' in serverInfo
-                        ? serverInfo.version_info
-                        : `新版有許多新特性，舊版APP可能會在某時刻不可用，現在前往更新嗎？🥺`,
-                    [
-                        {
-                            text: "Yes",
-                            onPress: () => {
-                                trigger();
-                                const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
-                                Linking.openURL(url);
-                            },
-                        },
-                        {
-                            text: "No",
-                        },
-                    ])
+                showAppStoreUpdateAlert(serverInfo);
                 if ('version_info' in serverInfo) {
                     setVersionInfo(serverInfo.version_info);
                 }
@@ -302,11 +283,11 @@ const HomeScreen = ({ navigation }) => {
         try {
             const now = moment(new Date());
             const s_allCourseAllTime = await getLocalStorage('ARK_WeekTimetable_Storage');
-            const curTime = moment().format("HH:mm");
-            const curDay = now.format("ddd").toUpperCase();
+            const curTime = moment().format('HH:mm');
+            const curDay = now.format('ddd').toUpperCase();
 
             const todayCourses = lodash.get(s_allCourseAllTime, curDay, []);
-            const upComing = todayCourses.filter(course => moment(course["Time From"], "HH:mm").isAfter(moment(curTime, "HH:mm")));
+            const upComing = todayCourses.filter(course => moment(course['Time From'], 'HH:mm').isAfter(moment(curTime, 'HH:mm')));
             setUpcomingCourse(upComing[0]);
         } catch (error) {
             console.log('error', error);
@@ -315,7 +296,7 @@ const HomeScreen = ({ navigation }) => {
 
     // 渲染顶部校历图标
     // 渲染功能圖標
-    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func, }) => {
+    const GetFunctionIcon = ({ icon_type, icon_name, function_name, func }) => {
         let icon = null;
         const imageSize = verticalScale(23);
         const iconSize = verticalScale(23);
@@ -353,7 +334,7 @@ const HomeScreen = ({ navigation }) => {
                     size={iconSize - verticalScale(3)}
                     color={iconColor}
                 />
-            )
+            );
         } else if (icon_type == 'img') {
             icon = (
                 <Image
@@ -379,11 +360,11 @@ const HomeScreen = ({ navigation }) => {
                         color={white}
                     />
                 </View>
-            )
+            );
         }
 
         return (
-            <TouchableOpacity
+            <TouchableScale
                 style={{
                     justifyContent: 'center', alignItems: 'center',
                     width: containerSize, height: containerSize,
@@ -413,70 +394,18 @@ const HomeScreen = ({ navigation }) => {
                         {function_name}
                     </Text>
                 </View>)}
-            </TouchableOpacity>
+            </TouchableScale>
         );
     };
 
     // 打開/關閉底部Modal
     const tiggerModalBottom = () => setIsShowModal(!isShowModal);
 
-    // 懸浮按鈕
-    // const renderGoTopButton = () => {
-    //     const { viewShadow } = theme;
-    //     return (
-    //         <Interactable.View
-    //             style={{
-    //                 zIndex: 999,
-    //                 position: 'absolute',
-    //             }}
-    //             // 設定所有可吸附的屏幕位置 0,0為屏幕中心
-    //             snapPoints={[
-    //                 { x: -scale(140), y: -verticalScale(220) },
-    //                 { x: scale(140), y: -verticalScale(220) },
-    //                 { x: -scale(140), y: -verticalScale(120) },
-    //                 { x: scale(140), y: -verticalScale(120) },
-    //                 { x: -scale(140), y: verticalScale(0) },
-    //                 { x: scale(140), y: verticalScale(0) },
-    //                 { x: -scale(140), y: verticalScale(120) },
-    //                 { x: scale(140), y: verticalScale(120) },
-    //                 { x: -scale(140), y: verticalScale(220) },
-    //                 { x: scale(140), y: verticalScale(220) },
-    //             ]}
-    //             // 設定初始吸附位置
-    //             initialPosition={{ x: scale(140), y: verticalScale(220) }}>
-    //             {/* 懸浮吸附按鈕，回頂箭頭 */}
-    //             <TouchableWithoutFeedback
-    //                 onPress={() => {
-    //                     trigger();
-    //                     // 回頂
-    //                     scrollView.current.scrollTo({ x: 0, y: 0, duration: 500 });
-    //                 }}>
-    //                 <View
-    //                     style={{
-    //                         width: scale(50),
-    //                         height: scale(50),
-    //                         backgroundColor: theme.white,
-    //                         borderRadius: scale(50),
-    //                         justifyContent: 'center',
-    //                         alignItems: 'center',
-    //                         ...viewShadow,
-    //                         margin: scale(5),
-    //                     }}>
-    //                     <Ionicons
-    //                         name={'chevron-up'}
-    //                         size={scale(40)}
-    //                         color={theme.themeColor}
-    //                     />
-    //                 </View>
-    //             </TouchableWithoutFeedback>
-    //         </Interactable.View>
-    //     );
-    // };
-
-    // 處理 Scroll
+    // 處理 Scroll：觸底加載更多數據
     const handleScroll = (event) => {
-        if (isLoading || isLoadMore) return;
-        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+        const {layoutMeasurement, contentOffset, contentSize} = event.nativeEvent;
+
+        if (isLoading || isLoadMore) {return;}
         const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - verticalScale(100);
 
         // 接近底部時，獲取更多數據
@@ -503,7 +432,7 @@ const HomeScreen = ({ navigation }) => {
     const renderBottomSheet = () => {
         return (
             <BottomSheetScrollView>
-                <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(10), }}>
+                <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: scale(10) }}>
                     <HyperlinkText linkStyle={{ color: themeColor }} navigation={navigation}>
                         <Text style={{
                             ...uiStyle.defaultText, fontWeight: '500',
@@ -511,21 +440,21 @@ const HomeScreen = ({ navigation }) => {
                         }}>
                             {t('捐贈UM ARK，Push開發者，讓ARK ALL更健康發展！', { ns: 'home' })}
                             {'\n'}
-                            {t(`原文Link：`, { ns: 'home' })}
+                            {t('原文Link：', { ns: 'home' })}
                             {GITHUB_DONATE}
                         </Text>
                     </HyperlinkText>
-                    <HyperlinkText linkStyle={{ color: themeColor, }} navigation={navigation}>
+                    <HyperlinkText linkStyle={{ color: themeColor }} navigation={navigation}>
                         <Text style={{
                             ...uiStyle.defaultText, fontWeight: '500',
                             color: black.main,
                         }} numberOfLines={1}>
-                            {t(`捐贈榜：`, { ns: 'home' })}
+                            {t('捐贈榜：', { ns: 'home' })}
                             {ARK_WIKI_DONATE_RANK}
                         </Text>
                     </HyperlinkText>
 
-                    <Text style={{ ...uiStyle.defaultText, color: black.third, }}>
+                    <Text style={{ ...uiStyle.defaultText, color: black.third }}>
                         {t('您的寶貴贊助將用於ARK的各類應用、服務進行升級維護！', { ns: 'home' })}
                         {'\n'}
                         {t('目前每年需要的維護費用約為1.5k RMB(此數字可能更新不及時)，純為愛發電中QAQ', { ns: 'home' })}
@@ -548,29 +477,28 @@ const HomeScreen = ({ navigation }) => {
                                 <Text style={{
                                     ...uiStyle.defaultText,
                                     color: themeColor,
-                                    fontWeight: '500'
+                                    fontWeight: '500',
                                 }}>
                                     {paymentTextArr[index]}
                                 </Text>
                                 <Image
                                     source={item}
-                                    style={{ width: '100%', height: '100%', }}
-                                    contentFit='contain'
+                                    style={{ width: '100%', height: '100%' }}
+                                    contentFit="contain"
                                 />
-                            </View>
+                            </View>;
                         }}
                         ListFooterComponent={<View style={{ marginBottom: verticalScale(50) }} />}
                         scrollEnabled={false}
                     />
                 </View>
             </BottomSheetScrollView>
-        )
-    }
+        );
+    };
 
     // 主渲染
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
-            {/* {isLoading ? null : renderGoTopButton()} */}
             <ScrollView
                 refreshControl={
                     <RefreshControl
@@ -589,10 +517,10 @@ const HomeScreen = ({ navigation }) => {
                 ref={scrollView}
                 showsVerticalScrollIndicator={true}
                 onScroll={handleScroll}
-                scrollEventThrottle={400}
+                scrollEventThrottle={16}
                 keyboardDismissMode={'on-drag'}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ width: '100%', alignItems: 'center', }}
+                contentContainerStyle={{ width: '100%', alignItems: 'center' }}
             >
 
                 <SearchBar navigation={navigation} />
@@ -602,38 +530,38 @@ const HomeScreen = ({ navigation }) => {
 
                 {/** 即將到來的課程 */}
                 <View style={{
-                    flexDirection: "row",
-                    alignItems: "center", justifyContent: "center",
-                    alignSelf: "center",
+                    flexDirection: 'row',
+                    alignItems: 'center', justifyContent: 'center',
+                    alignSelf: 'center',
                     width: screenWidth * 0.8,
                     marginTop: verticalScale(3),
                 }}>
                     <TouchableScale
-                        style={{ width: "100%", }}
+                        style={{ width: '100%' }}
                         onPress={() => {
                             trigger();
-                            navigation.navigate("CourseSimTab");
+                            navigation.navigate('CourseSimTab');
                         }}>
                         {upcomingCourse ? (
                             <View style={{
                                 flexDirection: 'row', flex: 1,
-                                alignItems: "center", justifyContent: "center",
+                                alignItems: 'center', justifyContent: 'center',
                                 gap: scale(3),
                                 backgroundColor: `${themeColor}15`,
                                 paddingHorizontal: scale(20), paddingVertical: scale(10),
                                 borderRadius: scale(5),
                             }}>
-                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: "bold" }}>{`⏰${t(`下節課：`, { ns: 'timetable' })}`}</Text>
-                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Course Code"]}</Text>
-                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, }}>{upcomingCourse["Time From"]}</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7, fontWeight: 'bold' }}>{`⏰${t('下節課：', { ns: 'timetable' })}`}</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Course Code']}</Text>
+                                <Text style={{ ...uiStyle.defaultText, color: black.main, opacity: 0.7 }}>{upcomingCourse['Time From']}</Text>
                             </View>
                         ) : (
                             <View style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                width: "100%",
-                                alignItems: "center",
-                                justifyContent: "center",
+                                display: 'flex',
+                                flexDirection: 'row',
+                                width: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                                 paddingVertical: verticalScale(8),
                                 backgroundColor: `${theme.disabled}70`,
                                 opacity: 0.7,
@@ -643,19 +571,19 @@ const HomeScreen = ({ navigation }) => {
                                     ...uiStyle.defaultText,
                                     color: black.second,
                                     fontSize: i18n.resolvedLanguage === 'en' ? verticalScale(10) : verticalScale(12),
-                                }}>{`☕${t(`接下來無課程~ 點我看課表！`, { ns: 'timetable' })}👀`}</Text>
+                                }}>{`☕${t('接下來無課程~ 點我看課表！', { ns: 'timetable' })}👀`}</Text>
                             </View>
                         )}
                     </TouchableScale>
                 </View>
 
                 {/* 快捷功能圖標 */}
-                <View style={{ width: screenWidth * 0.8, marginTop: verticalScale(5), }}>
+                <View style={{ width: screenWidth * 0.8, marginTop: verticalScale(5) }}>
                     <FlatGrid
                         style={{
                             backgroundColor: white, borderRadius: verticalScale(5),
                         }}
-                        itemContainerStyle={{ alignItems: 'center', justifyContent: 'center', }}
+                        itemContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
                         maxItemsPerRow={5}
                         itemDimension={scale(50)}
                         spacing={verticalScale(2)}
@@ -679,7 +607,7 @@ const HomeScreen = ({ navigation }) => {
                                     alignSelf: 'center',
                                     textAlign: 'center',
                                 }}>
-                                {`🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥`}
+                                {'🔥🔥🔥🔥🔥新版本來了‼️🔥🔥🔥🔥🔥'}
                             </Text>
                             {/* 版本更新說明 */}
                             {version_info ? (
@@ -720,7 +648,7 @@ const HomeScreen = ({ navigation }) => {
                                         marginTop: scale(5),
                                         fontWeight: 'bold',
                                     }}>
-                                    {`無Google Play Store用戶可以通過APK方式安裝~`}
+                                    {'無Google Play Store用戶可以通過APK方式安裝~'}
                                 </Text>
                             )}
                             <TouchableOpacity
@@ -752,10 +680,10 @@ const HomeScreen = ({ navigation }) => {
 
                 {/* 活動頁 */}
                 {networkError ? (
-                    <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third, }}>網絡錯誤，請手動刷新！</Text>
+                    <Text style={{ alignSelf: 'center', marginTop: verticalScale(3), ...uiStyle.defaultText, color: black.third }}>網絡錯誤，請手動刷新！</Text>
                 ) : null}
                 {/* 活動瀑布流，預留間距避免遮擋上方快捷入口 */}
-                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3), }} />
+                <EventPage ref={eventPage} style={{ marginTop: verticalScale(3) }} />
             </ScrollView>
 
             {/* Modal */}
@@ -817,6 +745,8 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 </ModalBottom>
             )}
+
+            <ScrollToTopButton virtualizedListRef={scrollView} />
 
             <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={(idx) => setSheetIndex(idx)}>
                 {renderBottomSheet()}

@@ -1,188 +1,518 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    Dimensions,
+    Pressable,
+} from 'react-native';
 import { Image } from 'expo-image';
-import TouchableScale from "react-native-touchable-scale";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    useAnimatedScrollHandler,
+    interpolate,
+    Extrapolation,
+    withSpring,
+    FadeInUp,
+} from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
 import moment from 'moment-timezone';
-import { scale } from 'react-native-size-matters';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import { trigger } from '../../../../utils/trigger';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../../components/ThemeContext';
-import ImageScrollViewer from '../../../../components/ImageScrollViewer';
-import Header from '../../../../components/Header';
+import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
+import ARKImageView from '../../../../components/ARKImageView';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 
-const COMPONENT_WIDTH = scale(320);
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const HERO_HEIGHT = verticalScale(420);
+const HEADER_THRESHOLD = verticalScale(200);
 
+// 動畫配置常量
+const ANIMATION_CONFIG = {
+    spring: {
+        damping: 15,
+        stiffness: 150,
+        mass: 1,
+    },
+    timing: {
+        duration: 400,
+    },
+};
+
+/**
+ * 獲取動態樣式 - 使用主題變量
+ */
+const getDynamicStyles = (theme) => {
+    const { white, black, themeColor } = theme;
+
+    return StyleSheet.create({
+        // Hero 區域
+        heroTitle: {
+            fontSize: moderateScale(22),
+            fontWeight: '700',
+            color: white,
+            textShadowColor: 'rgba(0,0,0,0.5)',
+            textShadowOffset: { width: 0, height: 2 },
+            textShadowRadius: 4,
+        },
+
+        // 時間顯示
+        timeValue: {
+            fontSize: moderateScale(15),
+            fontWeight: '600',
+            color: black.main,
+        },
+
+        // 詳情標籤
+        detailLabel: {
+            fontSize: moderateScale(13),
+            fontWeight: '600',
+            color: black.secondary,
+        },
+        detailValue: {
+            fontSize: moderateScale(14),
+            fontWeight: '400',
+            color: black.main,
+            lineHeight: moderateScale(20),
+        },
+
+        // 聯絡人
+        contactLabel: {
+            fontSize: moderateScale(12),
+            fontWeight: '500',
+            color: black.secondary,
+        },
+        contactValue: {
+            fontSize: moderateScale(14),
+            fontWeight: '400',
+            color: black.main,
+        },
+    });
+};
+
+/**
+ * 玻璃擬態卡片組件
+ * 使用BlurView實現半透明毛玻璃效果
+ */
+const GlassmorphismCard = React.memo(({ children, style }) => {
+    const { theme } = useTheme();
+
+    return (
+        <View style={[
+            staticStyles.glassCardContainer,
+            { backgroundColor: theme.glassBg, borderColor: theme.glassBorder },
+            style,
+        ]}>
+            <View style={staticStyles.glassCardContent}>{children}</View>
+        </View>
+    );
+});
+
+/**
+ * Hero區域組件
+ * 包含視差滾動效果的海報圖片
+ */
+const HeroSection = React.memo(
+    ({
+        imageUrl,
+        scrollY,
+        onImagePress,
+        imgLoading,
+        setImgLoading,
+        title,
+        themeColor,
+        dynamicStyles,
+    }) => {
+
+        // 視差動畫樣式
+        const parallaxStyle = useAnimatedStyle(() => {
+            const translateY = interpolate(
+                scrollY.value,
+                [0, HERO_HEIGHT],
+                [0, HERO_HEIGHT * 0.4],
+                Extrapolation.CLAMP,
+            );
+            return {
+                transform: [{ translateY }],
+            };
+        });
+
+        // 標題淡入動畫
+        const titleStyle = useAnimatedStyle(() => {
+            const opacity = interpolate(
+                scrollY.value,
+                [0, HERO_HEIGHT * 0.5, HERO_HEIGHT * 0.8],
+                [1, 0.8, 0],
+                Extrapolation.CLAMP,
+            );
+            const translateY = interpolate(
+                scrollY.value,
+                [0, HERO_HEIGHT * 0.5],
+                [0, -30],
+                Extrapolation.CLAMP,
+            );
+            return {
+                opacity,
+                transform: [{ translateY }],
+            };
+        });
+
+        return (
+            <View style={[staticStyles.heroContainer, { height: HERO_HEIGHT }]}>
+                <Animated.View style={[staticStyles.heroImageWrapper, parallaxStyle]}>
+                    <Pressable onPress={onImagePress} style={staticStyles.heroPressable}>
+                        <Image
+                            source={imageUrl}
+                            style={staticStyles.heroImage}
+                            contentFit="cover"
+                            onLoadStart={() => setImgLoading(true)}
+                            onLoad={() => setImgLoading(false)}
+                            transition={500}
+                        />
+                        {imgLoading && (
+                            <View style={staticStyles.heroLoadingOverlay}>
+                                <ActivityIndicator size="large" color={themeColor} />
+                            </View>
+                        )}
+                    </Pressable>
+                </Animated.View>
+
+                {/* 漸變遮罩 */}
+                <View style={staticStyles.heroGradientOverlay} pointerEvents="none" />
+
+                {/* 浮動標題 */}
+                {title && (
+                    <Animated.View style={[staticStyles.heroTitleContainer, titleStyle]}>
+                        <BlurView intensity={25} tint="dark" style={staticStyles.heroTitleBlur}>
+                            <Text style={dynamicStyles.heroTitle}
+                            // numberOfLines={4}
+                            >
+                                {title}
+                            </Text>
+                        </BlurView>
+                    </Animated.View>
+                )}
+            </View>
+        );
+    },
+);
+
+/**
+ * 現代化語言選擇器
+ * 使用動態按鈕和流暢過渡動畫
+ */
+const LanguageSelector = React.memo(
+    ({ languageMode, chooseMode, onSelect, themeColor, white }) => {
+        const [buttonLayouts, setButtonLayouts] = useState({});
+
+        // 語言選擇器包裝樣式 - 使用主題色的柔和底色
+        const languageWrapperStyle = useMemo(() => ({
+            flexDirection: 'row',
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            borderRadius: scale(25),
+            padding: scale(4),
+        }), [themeColor]);
+
+        // 計算指示器位置
+        const indicatorStyle = useAnimatedStyle(() => {
+            const selectedLayout = buttonLayouts[chooseMode];
+            if (!selectedLayout) { return {}; }
+
+            return {
+                transform: [
+                    { translateX: withSpring(selectedLayout.x, ANIMATION_CONFIG.spring) },
+                ],
+                width: withSpring(selectedLayout.width, ANIMATION_CONFIG.spring),
+            };
+        });
+
+        const handleLayout = useCallback((index) => (event) => {
+            const { x, width } = event.nativeEvent.layout;
+            setButtonLayouts(prev => ({ ...prev, [index]: { x, width } }));
+        }, []);
+
+        return (
+            <View style={staticStyles.languageContainer}>
+                <View style={[languageWrapperStyle]}>
+                    {/* 動態指示器背景 */}
+                    <Animated.View
+                        style={[
+                            staticStyles.languageIndicator,
+                            { backgroundColor: themeColor },
+                            indicatorStyle,
+                        ]}
+                    />
+
+                    {languageMode.map((item, index) =>
+                        item.available ? (
+                            <Pressable
+                                key={index}
+                                onPress={() => onSelect(index)}
+                                style={staticStyles.languageButton}
+                                onLayout={handleLayout(index)}
+                            >
+                                <Text
+                                    style={[
+                                        staticStyles.languageText,
+                                        {
+                                            color:
+                                                chooseMode === index
+                                                    ? white
+                                                    : themeColor,
+                                        },
+                                    ]}>
+                                    {item.name}
+                                </Text>
+                            </Pressable>
+                        ) : null,
+                    )}
+                </View>
+            </View>
+        );
+    },
+);
+
+/**
+ * 時間軸式時間顯示組件
+ * 現代化日期時間展示
+ */
+const TimeDisplay = React.memo(({ dateFrom, dateTo, timeFrom, timeTo, mode, themeColor, dynamicStyles }) => {
+    const isSameDay = moment(dateFrom).format('MM-DD') === moment(dateTo).format('MM-DD');
+
+    const dateLabels = ['活動日期：', 'Date: ', 'Data: '];
+    const timeLabels = ['活動時間：', 'Time: ', 'Horário: '];
+
+    return (
+        <View style={staticStyles.timeContainer}>
+            {/* 日期區塊 */}
+            <View style={staticStyles.timeBlock}>
+                <View style={[staticStyles.timeIconContainer, { backgroundColor: `${themeColor}15` }]}>
+                    <Text style={[staticStyles.timeIcon, { color: themeColor }]}>📅</Text>
+                </View>
+                <View style={staticStyles.timeContent}>
+                    <Text style={[staticStyles.timeLabel, { color: themeColor }]}>
+                        {dateLabels[mode]}
+                    </Text>
+                    <Text style={dynamicStyles.timeValue}>
+                        {isSameDay
+                            ? moment(dateFrom).format('YYYY-MM-DD')
+                            : `${moment(dateFrom).format('MM-DD')} ~ ${moment(dateTo).format('MM-DD')}`}
+                    </Text>
+                </View>
+            </View>
+
+            {/* 時間區塊 */}
+            <View style={staticStyles.timeBlock}>
+                <View style={[staticStyles.timeIconContainer, { backgroundColor: `${themeColor}15` }]}>
+                    <Text style={[staticStyles.timeIcon, { color: themeColor }]}>🕐</Text>
+                </View>
+                <View style={staticStyles.timeContent}>
+                    <Text style={[staticStyles.timeLabel, { color: themeColor }]}>
+                        {timeLabels[mode]}
+                    </Text>
+                    <Text style={dynamicStyles.timeValue}>
+                        {`${moment(timeFrom).format('HH:mm')} ~ ${moment(timeTo).format('HH:mm')}`}
+                    </Text>
+                </View>
+            </View>
+        </View>
+    );
+});
+
+/**
+ * 信息卡片組件
+ * 統一的信息展示卡片
+ */
+const InfoCard = React.memo(({ title, children, delay = 0, themeColor }) => {
+    return (
+        <Animated.View
+            entering={FadeInUp.delay(delay).duration(350)}>
+            <GlassmorphismCard style={staticStyles.infoCard}>
+                {title && (
+                    <View style={staticStyles.infoCardHeader}>
+                        <View
+                            style={[staticStyles.infoCardIndicator, { backgroundColor: themeColor }]}
+                        />
+                        <Text style={[staticStyles.infoCardTitle, { color: themeColor }]}>
+                            {title}
+                        </Text>
+                    </View>
+                )}
+                <View style={staticStyles.infoCardBody}>{children}</View>
+            </GlassmorphismCard>
+        </Animated.View>
+    );
+});
+
+/**
+ * 聯絡人卡片組件
+ */
+const ContactCard = React.memo(
+    ({
+        contactName,
+        contactPhone,
+        contactFax,
+        contactMail,
+        mode,
+        themeColor,
+        navigation,
+        dynamicStyles,
+    }) => {
+        const labels = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
+
+        return (
+            <Animated.View entering={FadeInUp.delay(400).duration(350)}>
+                <GlassmorphismCard style={staticStyles.contactCard}>
+                    <View style={staticStyles.contactHeader}>
+                        <View
+                            style={[staticStyles.contactIconContainer, { backgroundColor: themeColor }]}>
+                            <Text style={staticStyles.contactIcon}>👤</Text>
+                        </View>
+                        <Text style={[staticStyles.contactTitle, { color: themeColor }]}>
+                            {labels[mode]}
+                        </Text>
+                    </View>
+
+                    <View style={staticStyles.contactBody}>
+                        {contactName[mode] && (
+                            <View style={staticStyles.contactRow}>
+                                <Text style={dynamicStyles.contactLabel}>
+                                    {contactName[mode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.contactValue} selectable>
+                                    {contactName[mode]}
+                                </Text>
+                            </View>
+                        )}
+
+                        {contactPhone[mode] && (
+                            <View style={staticStyles.contactRow}>
+                                <Text style={dynamicStyles.contactLabel}>
+                                    {contactPhone[mode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.contactValue} selectable>
+                                    {contactPhone[mode]}
+                                </Text>
+                            </View>
+                        )}
+
+                        {contactFax[mode] && (
+                            <View style={staticStyles.contactRow}>
+                                <Text style={dynamicStyles.contactLabel}>
+                                    {contactFax[mode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.contactValue} selectable>
+                                    {contactFax[mode]}
+                                </Text>
+                            </View>
+                        )}
+
+                        {contactMail[mode] && (
+                            <View style={staticStyles.contactRow}>
+                                <Text style={dynamicStyles.contactLabel}>
+                                    {contactMail[mode + 3]}
+                                </Text>
+                                <HyperlinkText
+                                    linkStyle={{ color: themeColor }}
+                                    navigation={navigation}>
+                                    <Text style={[dynamicStyles.contactValue, { color: themeColor }]} selectable>
+                                        {contactMail[mode]}
+                                    </Text>
+                                </HyperlinkText>
+                            </View>
+                        )}
+                    </View>
+                </GlassmorphismCard>
+            </Animated.View>
+        );
+    },
+);
+
+/**
+ * UMEventDetail 主組件
+ * 2026 現代化重寫版本
+ */
 const UMEventDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
-    const { white, black, viewShadow, bg_color, themeColor } = theme;
-    const styles = StyleSheet.create({
-        languageModeButtonContainer: {
-            padding: scale(10),
-            marginVertical: scale(5),
-            borderRadius: scale(10),
-            // ...viewShadow,
-        },
-        imgContainer: {
-            width: COMPONENT_WIDTH,
-            height: COMPONENT_WIDTH,
-            backgroundColor: bg_color,
-            borderRadius: scale(10),
-            overflow: 'hidden',
-            alignSelf: 'center',
-            marginVertical: scale(10),
-            ...viewShadow,
-        },
-        infoCardContainer: {
-            marginVertical: scale(8),
-            marginHorizontal: scale(20),
-            borderRadius: scale(10),
-            backgroundColor: white,
-            paddingHorizontal: scale(15),
-            paddingVertical: scale(10),
-            ...viewShadow,
-        },
-        contentContainer: {
-            flexDirection: 'row',
-            marginVertical: scale(2),
-        },
-        secondTitle: {
-            ...uiStyle.defaultText,
-            color: themeColor,
-            fontSize: scale(15),
-            fontWeight: '600',
-        },
-        content: {
-            ...uiStyle.defaultText,
-            color: black.third,
-            fontSize: scale(15),
-            fontWeight: 'normal',
+    const { white, black, bg_color, themeColor } = theme;
+    const dynamicStyles = useMemo(() => getDynamicStyles(theme), [theme]);
+
+    const imageScrollViewer = useRef(null);
+    const scrollRef = useRef(null);
+    const scrollY = useSharedValue(0);
+
+    // 滾動事件處理
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: event => {
+            scrollY.value = event.contentOffset.y;
         },
     });
 
-    const imageScrollViewer = useRef(null);
-
     const eventData = route.params.data;
 
-    // 匹配对语言的标题和内容
+    // 初始化狀態
     const [state, setState] = useState(() => {
-        let dateFrom = eventData.common.dateFrom;
-        let dateTo = eventData.common.dateTo;
-        let timeFrom = eventData.common.timeFrom;
-        let timeTo = eventData.common.timeTo;
+        // 解析日期時間
+        const dateFrom = eventData.common.dateFrom;
+        const dateTo = eventData.common.dateTo;
+        const timeFrom = eventData.common.timeFrom;
+        const timeTo = eventData.common.timeTo;
 
-        let title_cn = '', title_en = '', title_pt = '';
-        let content_cn = '', content_en = '', content_pt = '';
-        let organiser_cn = '', organiser_en = '', organiser_pt = '';
-        let coorganiser_cn = '', coorganiser_en = '', coorganiser_pt = '';
-        let venue_cn = '', venue_en = '', venue_pt = '';
-        let targetAudience_cn = '', targetAudience_en = '', targetAudience_pt = '';
-        let speaker_cn = '', speaker_en = '', speaker_pt = '';
-        let remark_cn = '', remark_en = '', remark_pt = '';
-        let language_cn = '', language_en = '', language_pt = '';
-        let contactName_cn = '', contactName_en = '', contactName_pt = '';
-        let contactPhone_cn = '', contactPhone_en = '', contactPhone_pt = '';
-        let contactFax_cn = '', contactFax_en = '', contactFax_pt = '';
-        let contactMail_cn = '', contactMail_en = '', contactMail_pt = '';
+        // 初始化語言數據
+        const languages = ['cn', 'en', 'pt'];
+        const dataKeys = [
+            'title', 'content', 'organiser', 'coorganiser', 'venue',
+            'targetAudience', 'speaker', 'remark', 'language',
+            'contactName', 'contactPhone', 'contactFax', 'contactMail',
+        ];
 
-        eventData.details.forEach(item => {
-            if (item.locale === 'en_US') {
-                title_en = item.title;
-                content_en = item.content;
-                organiser_en = item.organizedBys;
-                coorganiser_en = item.coorganizers;
-                venue_en = item.venues;
-                targetAudience_en = item.targetAudiences;
-                speaker_en = item.speakers;
-                remark_en = item.remark;
-                language_en = item.languages;
-                contactName_en = item.contactName;
-                contactPhone_en = item.contactPhone;
-                contactFax_en = item.contactFax;
-                contactMail_en = item.contactEmail;
-            } else if (item.locale === 'pt_PT') {
-                title_pt = item.title;
-                content_pt = item.content;
-                organiser_pt = item.organizedBys;
-                coorganiser_pt = item.coorganizers;
-                venue_pt = item.venues;
-                targetAudience_pt = item.targetAudiences;
-                speaker_pt = item.speakers;
-                remark_pt = item.remark;
-                language_pt = item.languages;
-                contactName_pt = item.contactName;
-                contactPhone_pt = item.contactPhone;
-                contactFax_pt = item.contactFax;
-                contactMail_pt = item.contactEmail;
-            } else if (item.locale === 'zh_TW') {
-                title_cn = item.title;
-                content_cn = item.content;
-                organiser_cn = item.organizedBys;
-                coorganiser_cn = item.coorganizers;
-                venue_cn = item.venues;
-                targetAudience_cn = item.targetAudiences;
-                speaker_cn = item.speakers;
-                remark_cn = item.remark;
-                language_cn = item.languages;
-                contactName_cn = item.contactName;
-                contactPhone_cn = item.contactPhone;
-                contactFax_cn = item.contactFax;
-                contactMail_cn = item.contactEmail;
-            }
+        const result = { dateFrom, dateTo, timeFrom, timeTo };
+
+        // 初始化各語言數據
+        languages.forEach(lang => {
+            dataKeys.forEach(key => {
+                result[`${key}_${lang}`] = '';
+            });
         });
 
+        // 解析 eventData.details
+        eventData.details.forEach(item => {
+            const langMap = { en_US: 'en', pt_PT: 'pt', zh_TW: 'cn' };
+            const lang = langMap[item.locale];
+            if (!lang) { return; }
+
+            result[`title_${lang}`] = item.title || '';
+            result[`content_${lang}`] = item.content || '';
+            result[`organiser_${lang}`] = item.organizedBys || '';
+            result[`coorganiser_${lang}`] = item.coorganizers || '';
+            result[`venue_${lang}`] = item.venues || '';
+            result[`targetAudience_${lang}`] = item.targetAudiences || '';
+            result[`speaker_${lang}`] = item.speakers || '';
+            result[`remark_${lang}`] = item.remark || '';
+            result[`language_${lang}`] = item.languages || '';
+            result[`contactName_${lang}`] = item.contactName || '';
+            result[`contactPhone_${lang}`] = item.contactPhone || '';
+            result[`contactFax_${lang}`] = item.contactFax || '';
+            result[`contactMail_${lang}`] = item.contactEmail || '';
+        });
+
+        // 構建語言模式數組
+        const LanguageMode = [
+            { locale: 'cn', available: result.title_cn.length > 0, name: '中' },
+            { locale: 'en', available: result.title_en.length > 0, name: 'EN' },
+            { locale: 'pt', available: result.title_pt.length > 0, name: 'PT' },
+        ];
+
         return {
-            LanguageMode: [
-                { locale: 'cn', available: title_cn.length > 0, name: '中' },
-                { locale: 'en', available: title_en.length > 0, name: 'EN' },
-                { locale: 'pt', available: title_pt.length > 0, name: 'PT' },
-            ],
+            LanguageMode,
             chooseMode: 0,
             data: {
-                dateFrom,
-                dateTo,
-                timeFrom,
-                timeTo,
-                title_cn,
-                title_en,
-                title_pt,
-                content_cn,
-                content_en,
-                content_pt,
-                organiser_cn,
-                organiser_en,
-                organiser_pt,
-                coorganiser_cn,
-                coorganiser_en,
-                coorganiser_pt,
-                venue_cn,
-                venue_en,
-                venue_pt,
-                targetAudience_cn,
-                targetAudience_en,
-                targetAudience_pt,
-                speaker_cn,
-                speaker_en,
-                speaker_pt,
-                remark_cn,
-                remark_en,
-                remark_pt,
-                language_cn,
-                language_en,
-                language_pt,
-                contactName_cn,
-                contactName_en,
-                contactName_pt,
-                contactPhone_cn,
-                contactPhone_en,
-                contactPhone_pt,
-                contactFax_cn,
-                contactFax_en,
-                contactFax_pt,
-                contactMail_cn,
-                contactMail_en,
-                contactMail_pt,
+                ...result,
                 imageUrls: eventData.common.posterUrl?.replace('http:', 'https:') || '',
             },
             imgLoading: true,
@@ -193,480 +523,466 @@ const UMEventDetail = ({ route, navigation }) => {
         logToFirebase('openPage', { page: 'UMEvent' });
     }, []);
 
-    const renderModeChoice = () => {
-        const { LanguageMode, chooseMode } = state;
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                {LanguageMode.map((item, index) => (
-                    item.available ? (
-                        <TouchableScale
-                            key={index}
-                            activeOpacity={0.8}
-                            style={{
-                                ...styles.languageModeButtonContainer,
-                                backgroundColor: chooseMode === index ? themeColor : white,
-                            }}
-                            onPress={() => {
-                                trigger();
-                                setState(prev => ({ ...prev, chooseMode: index }));
-                            }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: chooseMode === index ? white : themeColor,
-                                }}>
-                                {item.name}
-                            </Text>
-                        </TouchableScale>
-                    ) : null
-                ))}
-            </View>
-        );
-    };
+    // 獲取當前語言的標題
+    const getCurrentTitle = useCallback(() => {
+        const locale = state.LanguageMode[state.chooseMode].locale;
+        return state.data[`title_${locale}`];
+    }, [state]);
 
+    // 處理語言切換
+    const handleLanguageSelect = useCallback(index => {
+        trigger();
+        setState(prev => ({ ...prev, chooseMode: index }));
+    }, []);
+
+    // 解構數據
     const { LanguageMode, chooseMode } = state;
-    const {
-        //共通内容
-        dateFrom,
-        dateTo,
-        timeFrom,
-        timeTo,
-        // 中文
-        title_cn,
-        category_cn,
-        organiser_cn,
-        coorganiser_cn,
-        venue_cn,
-        content_cn,
-        targetAudience_cn,
-        speaker_cn,
-        remark_cn,
-        language_cn,
-        contactName_cn,
-        contactPhone_cn,
-        contactFax_cn,
-        contactMail_cn,
-        // 英文
-        title_en,
-        category_en,
-        organiser_en,
-        coorganiser_en,
-        venue_en,
-        content_en,
-        targetAudience_en,
-        speaker_en,
-        remark_en,
-        language_en,
-        contactName_en,
-        contactPhone_en,
-        contactFax_en,
-        contactMail_en,
-        // 葡文
-        title_pt,
-        category_pt,
-        organiser_pt,
-        coorganiser_pt,
-        venue_pt,
-        content_pt,
-        targetAudience_pt,
-        speaker_pt,
-        remark_pt,
-        language_pt,
-        contactName_pt,
-        contactPhone_pt,
-        contactFax_pt,
-        contactMail_pt,
-    } = state.data;
+    const { dateFrom, dateTo, timeFrom, timeTo, imageUrls } = state.data;
 
-    //判断协办单位，详情和备注是否存在
-    var available = [1, 1, 1];
-    if (coorganiser_cn == undefined) {
-        available[0] = 0;
-    }
-    if (content_cn == undefined) {
-        available[1] = 0;
-    }
-    if (remark_cn == undefined) {
-        available[2] = 0;
-    }
+    // 構建數組數據
+    const dataArrays = useMemo(() => ({
+        speaker: [state.data.speaker_cn, state.data.speaker_en, state.data.speaker_pt, '講者：', 'Speaker: ', 'Orador: '],
+        venue: [state.data.venue_cn, state.data.venue_en, state.data.venue_pt, '地點：', 'Venue: ', 'Local: '],
+        language: [state.data.language_cn, state.data.language_en, state.data.language_pt, '語言：', 'Language: ', 'Língua: '],
+        targetAudience: [state.data.targetAudience_cn, state.data.targetAudience_en, state.data.targetAudience_pt, '對象：', 'Target Audience: ', 'Audiência-alvo: '],
+        organiser: [state.data.organiser_cn, state.data.organiser_en, state.data.organiser_pt, '主辦單位：', 'Organiser: ', 'Organizador: '],
+        coorganiser: [state.data.coorganiser_cn, state.data.coorganiser_en, state.data.coorganiser_pt, '協辦單位：', 'Coorganiser: ', 'Co-organizador: '],
+        content: [state.data.content_cn, state.data.content_en, state.data.content_pt, '詳情：', 'Content: '],
+        remark: [state.data.remark_cn, state.data.remark_en, state.data.remark_pt, '備註：', 'Remark: ', 'Observação: '],
+        contactName: [state.data.contactName_cn, state.data.contactName_en, state.data.contactName_pt, '名稱：', 'Name: ', 'Nome: '],
+        contactPhone: [state.data.contactPhone_cn, state.data.contactPhone_en, state.data.contactPhone_pt, '電話：', 'Phone: ', 'Telefone: '],
+        contactFax: [state.data.contactFax_cn, state.data.contactFax_en, state.data.contactFax_pt, '傳真：', 'Fax: ', 'Fax: '],
+        contactMail: [state.data.contactMail_cn, state.data.contactMail_en, state.data.contactMail_pt, '電郵：', 'E-mail: ', 'E-mail: '],
+    }), [state.data]);
 
-    //用数组存储内容，便于根据语言筛选条件显示
-    var title = [title_cn, title_en, title_pt];
-    var category = [category_cn, category_en, category_pt];
-    var organiser = [
-        organiser_cn,
-        organiser_en,
-        organiser_pt,
-        '主辦單位：',
-        'Organiser: ',
-        'Organizador: ',
-    ];
-    var coorganiser = [
-        coorganiser_cn,
-        coorganiser_en,
-        coorganiser_pt,
-        '協辦單位：',
-        'Coorganiser: ',
-        'Co-organizador: ',
-    ];
-    var venue = [
-        venue_cn,
-        venue_en,
-        venue_pt,
-        '地點：',
-        'Venue: ',
-        'Local: ',
-    ];
-    var content = [
-        content_cn,
-        content_en,
-        content_pt,
-        '詳情：',
-        'Content: ',
-    ];
-    var targetAudience = [
-        targetAudience_cn,
-        targetAudience_en,
-        targetAudience_pt,
-        '對象：',
-        'Target Audience: ',
-        'Audiência-alvo: ',
-    ];
-    var speaker = [
-        speaker_cn,
-        speaker_en,
-        speaker_pt,
-        '講者：',
-        'Speaker: ',
-        'Orador: ',
-    ];
-    var remark = [
-        remark_cn,
-        remark_en,
-        remark_pt,
-        '備註：',
-        'Remark: ',
-        'Observação: ',
-    ];
-    var language = [
-        language_cn,
-        language_en,
-        language_pt,
-        '語言：',
-        'Language: ',
-        'Língua: ',
-    ];
-    var contactName = [
-        contactName_cn,
-        contactName_en,
-        contactName_pt,
-        '名稱：',
-        'Name: ',
-        'Nome: ',
-    ];
-    var contactPhone = [
-        contactPhone_cn,
-        contactPhone_en,
-        contactPhone_pt,
-        '電話：',
-        'Phone: ',
-        'Telefone: ',
-    ];
-    var contactFax = [
-        contactFax_cn,
-        contactFax_en,
-        contactFax_pt,
-        '傳真：',
-        'Fax: ',
-        'Fax: ',
-    ];
-    var contactMail = [
-        contactMail_cn,
-        contactMail_en,
-        contactMail_pt,
-        '電郵：',
-        'E-mail: ',
-        'E-mail: ',
-    ];
-    var date = ['活動日期：', 'Date: ', 'Data: '];
-    var time = ['活動時間：', 'Time: ', 'Horário: '];
-    var contact = ['聯絡人', 'Contact Person', 'Pessoa a Contactar'];
+    // 檢查內容是否存在
+    const hasCoorganiser = !!state.data.coorganiser_cn;
+    const hasContent = !!state.data.content_cn;
+    const hasRemark = !!state.data.remark_cn;
 
     return (
         <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            <Header title={'活動詳情'} iOSDIY={true} />
-            {/* 彈出層展示圖片查看器 */}
-            <ImageScrollViewer
-                ref={imageScrollViewer}
-                imageUrls={state.data.imageUrls}
-            // 父組件調用 this.imageScrollViewer.current.tiggerModal(); 打開圖層
-            // 父組件調用 this.imageScrollViewer.current.handleOpenImage(index); 設置要打開的ImageUrls的圖片下標，默認0
-            />
+            {/* 圖片查看器 */}
+            <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />
 
-            <ScrollView>
-                {/* 文本模式選擇 3語切換 */}
-                {renderModeChoice()}
-                {/* 活動大標題 */}
-                <View style={{
-                    marginHorizontal: scale(10),
-                    marginTop: scale(10),
-                    alignItems: 'center',
-                }}>
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        color: themeColor,
-                        fontWeight: 'bold',
-                        fontSize: scale(20),
-                        textAlign: 'center',
-                    }}
-                        selectable={true}>
-                        {state.data[`title_${state.LanguageMode[state.chooseMode].locale}`]}
-                    </Text>
-                </View>
-                {/* 海報 */}
-                <TouchableScale
-                    activeOpacity={0.8}
-                    style={styles.imgContainer}
-                    // 瀏覽大圖
-                    onPress={() => {
+            {/* 主滾動內容 */}
+            <Animated.ScrollView
+                ref={scrollRef}
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                // 該頁面是圖片置頂，所以iOS26也無需調整inset
+                contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
+            >
+                {/* Hero 區域 */}
+                <HeroSection
+                    imageUrl={imageUrls}
+                    scrollY={scrollY}
+                    onImagePress={() => {
                         trigger();
-                        imageScrollViewer.current.handleOpenImage(0);
-                    }}>
-                    <Image
-                        source={state.data.imageUrls}
-                        style={{ width: '100%', height: '100%' }}
-                        onLoadStart={() => setState(prev => ({ ...prev, imgLoading: true }))}
-                        onLoad={() => setState(prev => ({ ...prev, imgLoading: false }))}>
-                        {state.imgLoading && (
-                            <View style={{
-                                width: '100%',
-                                height: '100%',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                position: 'absolute',
-                            }}>
-                                <ActivityIndicator size={'large'} color={themeColor} />
+                        imageScrollViewer.current?.handleOpenImage(0);
+                    }}
+                    imgLoading={state.imgLoading}
+                    setImgLoading={loading =>
+                        setState(prev => ({ ...prev, imgLoading: loading }))
+                    }
+                    title={getCurrentTitle()}
+                    themeColor={themeColor}
+                    dynamicStyles={dynamicStyles}
+                />
+
+                {/* 內容容器 */}
+                <View style={staticStyles.contentWrapper}>
+                    {/* 語言選擇器 */}
+                    <Animated.View entering={FadeInUp.delay(100).duration(350)}>
+                        <LanguageSelector
+                            languageMode={LanguageMode}
+                            chooseMode={chooseMode}
+                            onSelect={handleLanguageSelect}
+                            themeColor={themeColor}
+                            white={white}
+                        />
+                    </Animated.View>
+
+                    {/* 時間顯示 */}
+                    <Animated.View entering={FadeInUp.delay(150).duration(350)}>
+                        <GlassmorphismCard style={staticStyles.timeCard}>
+                            <TimeDisplay
+                                dateFrom={dateFrom}
+                                dateTo={dateTo}
+                                timeFrom={timeFrom}
+                                timeTo={timeTo}
+                                mode={chooseMode}
+                                themeColor={themeColor}
+                                dynamicStyles={dynamicStyles}
+                            />
+                        </GlassmorphismCard>
+                    </Animated.View>
+
+                    {/* 活動詳情卡片 */}
+                    <InfoCard
+                        title={['活動詳情', 'Event Details', 'Detalhes do Evento'][chooseMode]}
+                        delay={200}
+                        themeColor={themeColor}>
+                        {/* 講者 */}
+                        {dataArrays.speaker[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.speaker[chooseMode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.detailValue} selectable>
+                                    {dataArrays.speaker[chooseMode]}
+                                </Text>
                             </View>
                         )}
-                    </Image>
-                </TouchableScale>
 
-                {/* 詳情資訊 */}
-                <View style={styles.infoCardContainer}>
-                    {/* 日期 */}
-                    {/* 如果活動當天結束顯示活動日期，若為多日活動則顯示開始和結束日期 */}
-                    {moment(dateFrom).format('MM-DD') ==
-                        moment(dateTo).format('MM-DD') ? (
-                        <Text style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(18),
-                            fontWeight: '700',
-                            color: '#FF8627',
-                        }}>
-                            {date[state.chooseMode]}
-                            {moment(dateFrom).format('MM-DD')}
-                        </Text>
-                    ) : (
-                        <View>
-                            <Text style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(18),
-                                fontWeight: '700',
-                                color: '#FF8627',
-                            }}>
-                                {date[state.chooseMode]}
-                                {moment(dateFrom).format('MM-DD') + ' ~ '}
-                                {moment(dateTo).format('MM-DD')}
-                            </Text>
-                        </View>
-                    )}
-                    {/* 時間 */}
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(18),
-                        fontWeight: '700',
-                        color: '#FF8627',
-                    }}>
-                        {time[state.chooseMode]}
-                        {moment(timeFrom).format('HH:SS') + ' ~ '}
-                        {moment(timeTo).format('HH:SS')}
-                    </Text>
-                    {/* 講者 */}
-                    {speaker[state.chooseMode] ? (
-                        <View style={styles.contentContainer}>
-                            {/* 文本標題，e.g. 講者： */}
-                            <Text style={styles.secondTitle} selectable>
-                                {speaker[state.chooseMode + 3]}
-                                {/* 對應該活動的講者名稱 */}
-                                <Text style={styles.content}>
-                                    {speaker[state.chooseMode]}
+                        {/* 地點 */}
+                        {dataArrays.venue[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.venue[chooseMode + 3]}
                                 </Text>
-                            </Text>
-                        </View>
-                    ) : null}
-                    {/*地點*/}
-                    {venue[state.chooseMode] ? (
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle} selectable>
-                                {venue[state.chooseMode + 3]}
-                            </Text>
-                            <View style={{ width: '75%' }}>
                                 <HyperlinkText
-                                    linkStyle={{
-                                        color: themeColor,
-                                    }}
+                                    linkStyle={{ color: themeColor }}
                                     navigation={navigation}>
-                                    <Text style={styles.content} selectable>
-                                        {venue[state.chooseMode]}
+                                    <Text style={dynamicStyles.detailValue} selectable>
+                                        {dataArrays.venue[chooseMode]}
                                     </Text>
                                 </HyperlinkText>
                             </View>
-                        </View>
-                    ) : null}
-                    {/*語言*/}
-                    {language[state.chooseMode] ? (
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle}>
-                                {language[state.chooseMode + 3]}
-                                {language[state.chooseMode].map((itm, idx) => {
-                                    let show = itm;
-                                    if (
-                                        language[state.chooseMode].length - 1 !=
-                                        idx
-                                    ) {
-                                        show = show + ', ';
-                                    }
-                                    return (
-                                        <Text style={styles.content} key={idx} >
-                                            {show}
-                                        </Text>
-                                    );
-                                })}
-                            </Text>
-                        </View>
-                    ) : null}
-                    {/*對象*/}
-                    {targetAudience[state.chooseMode] ? (
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle} selectable>
-                                {targetAudience[state.chooseMode + 3]}
-                                <Text style={styles.content}>
-                                    {targetAudience[state.chooseMode]}
-                                </Text>
-                            </Text>
-                        </View>
-                    ) : null}
-                    {/*主辦單位*/}
-                    {organiser[state.chooseMode] ? (
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle} selectable>
-                                {organiser[state.chooseMode + 3]}
-                                <Text style={styles.content}>
-                                    {organiser[state.chooseMode]}
-                                </Text>
-                            </Text>
-                        </View>
-                    ) : null}
-                    {/* 協辦單位 */}
-                    {available[0] == 1 && (
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle} selectable>
-                                {coorganiser[state.chooseMode + 3]}
-                            </Text>
-                            <Text style={styles.content} selectable>
-                                {coorganiser[state.chooseMode]}
-                            </Text>
-                        </View>
-                    )}
-                    {/* 詳情 */}
-                    {available[1] == 1 && (
-                        <View style={styles.contentContainer}>
-                            <HyperlinkText
-                                linkStyle={{
-                                    color: themeColor,
-                                }}
-                                navigation={navigation}>
-                                <Text style={styles.secondTitle} selectable>
-                                    {content[state.chooseMode + 3]}
-                                    <Text style={styles.content}>
-                                        {content[state.chooseMode]}
-                                    </Text>
-                                </Text>
-                            </HyperlinkText>
-                        </View>
-                    )}
-                    {/*備註*/}
-                    {available[2] == 1 && (
-                        <View style={styles.contentContainer}>
-                            <Text style={styles.secondTitle} selectable>
-                                {remark[state.chooseMode + 3]}
-                                <Text style={styles.content}>
-                                    {remark[state.chooseMode]}
-                                </Text>
-                            </Text>
-                        </View>
-                    )}
-                </View>
+                        )}
 
-                {/* 聯絡人 */}
-                <View style={{
-                    ...styles.infoCardContainer,
-                    marginBottom: scale(50),
-                }}>
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: 18,
-                        fontWeight: '700',
-                        color: '#FF8627',
-                    }}>
-                        {contact[state.chooseMode]}
-                    </Text>
-                    {/* 聯絡名稱 */}
-                    <View style={styles.contentContainer}>
-                        <Text style={styles.secondTitle}>
-                            {contactName[state.chooseMode + 3]}
-                        </Text>
-                        <Text style={styles.content} selectable>
-                            {contactName[state.chooseMode]}
-                        </Text>
-                    </View>
-                    {/* 聯繫電話 */}
-                    <View style={styles.contentContainer}>
-                        <Text style={styles.secondTitle}>
-                            {contactPhone[state.chooseMode + 3]}
-                        </Text>
-                        <Text style={styles.content} selectable>
-                            {contactPhone[state.chooseMode]}
-                        </Text>
-                    </View>
-                    {/* 傳真 */}
-                    <View style={styles.contentContainer}>
-                        <Text style={styles.secondTitle}>
-                            {contactFax[state.chooseMode + 3]}
-                        </Text>
-                        <Text style={styles.content} selectable>
-                            {contactFax[state.chooseMode]}
-                        </Text>
-                    </View>
-                    {/* 電郵 */}
-                    <View style={styles.contentContainer}>
-                        <Text style={styles.secondTitle}>
-                            {contactMail[state.chooseMode + 3]}
-                        </Text>
-                        <HyperlinkText
-                            linkStyle={{
-                                color: themeColor,
-                            }}
-                            navigation={navigation}>
-                            <Text style={styles.content} selectable>
-                                {contactMail[state.chooseMode]}
-                            </Text>
-                        </HyperlinkText>
-                    </View>
+                        {/* 語言 */}
+                        {dataArrays.language[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.language[chooseMode + 3]}
+                                </Text>
+                                <View style={staticStyles.tagContainer}>
+                                    {dataArrays.language[chooseMode].map((lang, idx) => (
+                                        <View
+                                            key={idx}
+                                            style={[
+                                                staticStyles.tag,
+                                                { backgroundColor: `${themeColor}20` },
+                                            ]}>
+                                            <Text
+                                                style={[staticStyles.tagText, { color: themeColor }]}>
+                                                {lang}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+
+                        {/* 對象 */}
+                        {dataArrays.targetAudience[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.targetAudience[chooseMode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.detailValue} selectable>
+                                    {dataArrays.targetAudience[chooseMode]}
+                                </Text>
+                            </View>
+                        )}
+
+                        {/* 主辦單位 */}
+                        {dataArrays.organiser[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.organiser[chooseMode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.detailValue} selectable>
+                                    {dataArrays.organiser[chooseMode]}
+                                </Text>
+                            </View>
+                        )}
+
+                        {/* 協辦單位 */}
+                        {hasCoorganiser && dataArrays.coorganiser[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.coorganiser[chooseMode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.detailValue} selectable>
+                                    {dataArrays.coorganiser[chooseMode]}
+                                </Text>
+                            </View>
+                        )}
+
+                        {/* 詳情 */}
+                        {hasContent && dataArrays.content[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.content[chooseMode + 3]}
+                                </Text>
+                                <HyperlinkText
+                                    linkStyle={{ color: themeColor }}
+                                    navigation={navigation}>
+                                    <Text style={[dynamicStyles.detailValue, staticStyles.detailContent]} selectable>
+                                        {dataArrays.content[chooseMode]}
+                                    </Text>
+                                </HyperlinkText>
+                            </View>
+                        )}
+
+                        {/* 備註 */}
+                        {hasRemark && dataArrays.remark[chooseMode] && (
+                            <View style={staticStyles.detailRow}>
+                                <Text style={dynamicStyles.detailLabel}>
+                                    {dataArrays.remark[chooseMode + 3]}
+                                </Text>
+                                <Text style={dynamicStyles.detailValue} selectable>
+                                    {dataArrays.remark[chooseMode]}
+                                </Text>
+                            </View>
+                        )}
+                    </InfoCard>
+
+                    {/* 聯絡人卡片 */}
+                    <ContactCard
+                        contactName={dataArrays.contactName}
+                        contactPhone={dataArrays.contactPhone}
+                        contactFax={dataArrays.contactFax}
+                        contactMail={dataArrays.contactMail}
+                        mode={chooseMode}
+                        themeColor={themeColor}
+                        navigation={navigation}
+                        dynamicStyles={dynamicStyles}
+                    />
+
+                    {/* 底部留白 */}
+                    <View style={staticStyles.bottomSpacer} />
                 </View>
-            </ScrollView>
+            </Animated.ScrollView>
         </View>
     );
 };
+
+/**
+ * 靜態樣式 - 不依賴主題的純佈局樣式
+ */
+const staticStyles = StyleSheet.create({
+    // Hero 區域樣式
+    heroContainer: {
+        position: 'relative',
+        overflow: 'hidden',
+    },
+    heroImageWrapper: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    heroPressable: {
+        width: '100%',
+        height: '100%',
+    },
+    heroImage: {
+        width: '100%',
+        height: '100%',
+    },
+    heroLoadingOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    heroGradientOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.1)',
+    },
+    heroTitleContainer: {
+        position: 'absolute',
+        bottom: verticalScale(30),
+        left: scale(20),
+        right: scale(20),
+    },
+    heroTitleBlur: {
+        borderRadius: scale(16),
+        padding: scale(16),
+        overflow: 'hidden',
+    },
+
+    // 懸浮標題欄
+    floatingHeader: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: verticalScale(90),
+        justifyContent: 'flex-end',
+        paddingBottom: verticalScale(12),
+        paddingHorizontal: scale(20),
+        zIndex: 100,
+    },
+    floatingHeaderText: {
+        fontSize: moderateScale(17),
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+
+    // 玻璃擬態卡片
+    glassCardContainer: {
+        borderRadius: scale(20),
+        overflow: 'hidden',
+        borderWidth: 1,
+    },
+    glassCardContent: {
+        padding: scale(16),
+    },
+
+    // 內容容器
+    contentWrapper: {
+        marginTop: verticalScale(-40),
+        paddingHorizontal: scale(16),
+        gap: verticalScale(16),
+    },
+
+    // 語言選擇器
+    languageContainer: {
+        alignItems: 'center',
+        marginVertical: verticalScale(8),
+    },
+    languageIndicator: {
+        position: 'absolute',
+        height: '100%',
+        borderRadius: scale(21),
+        top: scale(4),
+    },
+    languageButton: {
+        paddingHorizontal: scale(20),
+        paddingVertical: scale(10),
+        borderRadius: scale(21),
+        minWidth: scale(60),
+        alignItems: 'center',
+    },
+    languageText: {
+        fontSize: moderateScale(14),
+        fontWeight: '600',
+    },
+
+    // 時間顯示
+    timeCard: {
+        marginVertical: verticalScale(8),
+    },
+    timeContainer: {
+        gap: verticalScale(12),
+    },
+    timeBlock: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(12),
+    },
+    timeIconContainer: {
+        width: scale(44),
+        height: scale(44),
+        borderRadius: scale(12),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    timeIcon: {
+        fontSize: moderateScale(20),
+    },
+    timeContent: {
+        flex: 1,
+    },
+    timeLabel: {
+        fontSize: moderateScale(12),
+        fontWeight: '500',
+        marginBottom: verticalScale(2),
+    },
+
+    // 信息卡片
+    infoCard: {
+        marginVertical: verticalScale(4),
+    },
+    infoCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: verticalScale(6),
+        paddingBottom: verticalScale(8),
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0,0,0,0.05)',
+    },
+    infoCardIndicator: {
+        width: scale(4),
+        height: scale(20),
+        borderRadius: scale(2),
+        marginRight: scale(8),
+    },
+    infoCardTitle: {
+        fontSize: moderateScale(17),
+        fontWeight: '700',
+    },
+    infoCardBody: {
+        gap: verticalScale(10),
+    },
+
+    // 詳情行
+    detailRow: {
+        flexDirection: 'column',
+        gap: verticalScale(4),
+    },
+    detailContent: {
+        marginTop: verticalScale(4),
+    },
+
+    // 標籤
+    tagContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: scale(6),
+    },
+    tag: {
+        paddingHorizontal: scale(8),
+        paddingVertical: verticalScale(2),
+        borderRadius: scale(6),
+    },
+    tagText: {
+        fontSize: moderateScale(12),
+        fontWeight: '500',
+    },
+
+    // 聯絡人卡片
+    contactCard: {
+        marginVertical: verticalScale(8),
+        marginBottom: verticalScale(24),
+    },
+    contactHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: verticalScale(16),
+        paddingBottom: verticalScale(12),
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0,0,0,0.05)',
+    },
+    contactIconContainer: {
+        width: scale(44),
+        height: scale(44),
+        borderRadius: scale(14),
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: scale(12),
+    },
+    contactIcon: {
+        fontSize: moderateScale(22),
+    },
+    contactTitle: {
+        fontSize: moderateScale(18),
+        fontWeight: '700',
+    },
+    contactBody: {
+        gap: verticalScale(12),
+    },
+    contactRow: {
+        flexDirection: 'column',
+        gap: verticalScale(2),
+    },
+
+    // 底部留白
+    bottomSpacer: {
+        height: verticalScale(40),
+    },
+});
 
 export default UMEventDetail;

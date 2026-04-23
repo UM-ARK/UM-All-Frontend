@@ -11,12 +11,11 @@ import {
 } from 'react-native';
 
 import { WebView } from 'react-native-webview';
-import * as Progress from 'react-native-progress';
+import SimpleProgressBar from './SimpleProgressBar';
 import Icon from 'react-native-vector-icons/AntDesign';
-import CookieManager from '@react-native-cookies/cookies';
 import { NavigationContext } from '@react-navigation/native';
 import { scale } from 'react-native-size-matters';
-import { COLOR_DIY } from '../utils/uiMap';
+import { useTheme } from './ThemeContext';
 
 const IntegratedWebView = ({
     source,
@@ -25,6 +24,7 @@ const IntegratedWebView = ({
     UmPassInfo,
     setOutsideCurrentURL,
 }) => {
+    const { theme } = useTheme();
     // 記錄網站加載進度和是否加載完成
     const [progress, setProgress] = useState(0);
     const [isLoaded, setLoaded] = useState(false);
@@ -91,19 +91,17 @@ const IntegratedWebView = ({
         setOutsideCurrentURL(currentURL);
         setCanGoBack(canGoBack);
         setCanGoForward(canGoForward);
-    }
+    };
 
     return (
         <>
             {/* 判斷: 網站加載完成則隱藏進度條 */}
             {!isLoaded ? (
-                <Progress.Bar
+                <SimpleProgressBar
                     progress={progress}
-                    borderWidth={0}
-                    borderRadius={0}
                     width={null} // null -> 寬度為全屏
                     height={2}
-                    color={COLOR_DIY.themeColor}
+                    color={theme.themeColor}
                 />
             ) : null}
 

@@ -31,6 +31,9 @@ export function clubTagMap(tag) {
         case 'BUSINESS':
             return '商業';
             break;
+        case 'ARK':
+            return 'ARK';
+            break;
         default:
             return tag;
             break;

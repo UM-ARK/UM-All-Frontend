@@ -1,10 +1,9 @@
-import { Alert } from "react-native";
+import { Alert } from 'react-native';
 import 'intl-pluralrules';
-import i18n, { changeLanguage } from "i18next";
-import { initReactI18next } from "react-i18next";
-import RNRestart from 'react-native-restart';
+import i18n, { changeLanguage } from 'i18next';
+import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as RNLocalize from "react-native-localize";
+import * as RNLocalize from 'react-native-localize';
 
 import EN_US from './en-us';
 import ZH_HK from './zh-hk';
@@ -14,7 +13,7 @@ import ZH_HK from './zh-hk';
 // 但這裡的key無法使用 - ，故沒有使用 zh-hk
 const resources = {
     en: EN_US,
-    tc: ZH_HK
+    tc: ZH_HK,
 };
 
 
@@ -69,7 +68,9 @@ i18n
             useSuspense: false, // 避免在加載時白屏
         },
         defaultNS: 'common',
-        fallbackNS: ['home', 'about', 'wiki', 'harbor', 'catalog', 'timetable', 'features', 'club'],
+        fallbackNS: ['home', 'about', 'wiki', 'harbor', 'catalog', 'timetable', 'features', 'club', 'setting'],
+        nsSeparator: ':',
+        keySeparator: false,
     });
 
 // 用法：

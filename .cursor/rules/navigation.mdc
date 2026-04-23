@@ -1,0 +1,67 @@
+---
+description: React Navigation V7 導覽規範與 iOS 26 原生適配
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# React Navigation V7 規範
+
+## 導覽結構
+
+- **主導覽**: `src/Nav.js` (Stack Navigator - `createNativeStackNavigator`)
+- **底部標籤**: `src/Tabbar.js` (6 個主標籤 - `createNativeBottomTabNavigator`)
+- **新頁面必須同時註冊到** `Nav.js` 和 `Tabbar.js`
+
+## 液態玻璃效果（iOS 26+）
+
+使用 `isLiquidGlassSupported` 判斷是否支援:
+
+```javascript
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+
+// Stack Navigator - screenOptions
+screenOptions={{
+    freezeOnBlur: true,
+    headerTransparent: isLiquidGlassSupported,
+    headerTitleAlign: 'center',
+    headerBackButtonDisplayMode: 'minimal',
+    // 非液態玻璃時使用 BlurView 或實色背景
+    headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+}}
+
+// Tab Navigator
+tabBarOptions={{
+    translucent: isLiquidGlassSupported,
+    tabBarStyle: getTabBarStyle(theme),
+}}
+```
+
+## 原生按鈕適配
+
+優先使用 React Navigation 提供的原生按鈕元件，在 iOS 26+ 上自動適配液態玻璃樣式：
+
+```javascript
+import { Button, HeaderBackButton } from '@react-navigation/elements';
+
+// 原生返回按鈕
+headerLeft: () => <HeaderBackButton onPress={navigation.goBack} />,
+
+// 原生操作按鈕（自動適配 iOS 26 風格）
+headerRight: () => <Button onPress={handleAction}>Action</Button>,
+```
+
+## 內容區域適配
+
+```javascript
+// ScrollView / FlatList 需根據液態玻璃狀態調整 contentInset
+contentInsetAdjustmentBehavior={isLiquidGlassSupported ? null : "automatic"}
+```
+
+## 禁止的檢測方式
+
+```javascript
+// ❌ 絕對禁止：使用 Platform 判斷 iOS 版本
+const isIOS26OrLater = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 26;
+```
+
+**詳細的液態玻璃設計規範見** `ios26-modern-design.mdc`

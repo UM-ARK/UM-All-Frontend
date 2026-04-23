@@ -1,15 +1,18 @@
 // 車位訊息
-import React, { useState, useEffect, useCallback } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView, RefreshControl, } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Text, View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../components/ThemeContext';
-import Header from '../../components/Header';
+import { useTheme, uiStyle } from '../../components/ThemeContext';
 import Loading from '../../components/Loading';
+import SegmentControl from '../../components/SegmentControl';
 import { UM_API_CAR_PARK, UM_API_TOKEN } from '../../utils/pathMap';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
 import { scale } from 'react-native-size-matters';
+
+const CAR_PARK_SORT_VALUES = ['All', 'Staff', 'Monthly Pass', 'Visitor'];
+const CAR_PARK_TYPE_VALUES = ['All', 'Light Vehicle', 'Motorcycle'];
 
 const CarPark = () => {
     const { theme } = useTheme();
@@ -20,17 +23,21 @@ const CarPark = () => {
             alignSelf: 'center',
             color: black.third,
         },
-        choiceText: {
-            ...uiStyle.defaultText,
-            fontWeight: 'bold',
-            fontSize: scale(13),
-        },
     });
     // 狀態管理
     const [data, setData] = useState([]);
     const [Sort, setSort] = useState('All');
     const [Type, setType] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
+
+    const sortOptions = useMemo(
+        () => CAR_PARK_SORT_VALUES.map(v => ({ key: v, label: v })),
+        [],
+    );
+    const typeOptions = useMemo(
+        () => CAR_PARK_TYPE_VALUES.map(v => ({ key: v, label: v })),
+        [],
+    );
 
     // 獲取數據
     const getData = useCallback(async () => {
@@ -70,8 +77,6 @@ const CarPark = () => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header title={'車位訊息'} iOSDIY={true} />
-
             <ScrollView
                 contentContainerStyle={{ paddingHorizontal: scale(10) }}
                 refreshControl={
@@ -84,11 +89,13 @@ const CarPark = () => {
                             getData();
                         }}
                     />
-                }>
+                }
+                contentInsetAdjustmentBehavior="automatic"
+            >
                 {!isLoading ? (
                     <View>
                         {/* Data From */}
-                        <Text style={{ ...s.UMText, }}>Data from: data.um.edu.mo</Text>
+                        <Text style={{ ...s.UMText }}>Data from: data.um.edu.mo</Text>
 
                         {/* 渲染車位數據 */}
                         {data.length > 0 && (
@@ -107,88 +114,40 @@ const CarPark = () => {
                                         .format('YYYY-MM-DD, HH:mm:ss')}
                                 </Text>
 
-                                {/* 提供对象筛选器 */}
-                                <View
+                                {/* 提供對象篩選 */}
+                                <SegmentControl
+                                    wrap
                                     style={{
-                                        width: '100%',
-                                        height: scale(30),
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        marginTop: scale(-10),
-                                        paddingHorizontal: scale(10),
-                                        justifyContent: 'space-between',
+                                        marginTop: scale(-4),
+                                        marginBottom: scale(8),
+                                        paddingHorizontal: scale(4),
                                         zIndex: 9,
-                                    }}>
-                                    <TouchableOpacity onPress={() => setSort('All')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Sort === 'All' ? secondThemeColor : themeColor,
-                                        }}>
-                                            All
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setSort('Staff')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Sort === 'Staff' ? secondThemeColor : themeColor,
-                                        }}>
-                                            Staff
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setSort('Monthly Pass')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Sort === 'Monthly Pass' ? secondThemeColor : themeColor,
-                                        }}>
-                                            Monthly Pass
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setSort('Visitor')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Sort === 'Visitor' ? secondThemeColor : themeColor,
-                                        }}>
-                                            Visitor
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
+                                    }}
+                                    options={sortOptions}
+                                    selectedIndex={Math.max(0, CAR_PARK_SORT_VALUES.indexOf(Sort))}
+                                    onChange={(i) => setSort(CAR_PARK_SORT_VALUES[i])}
+                                    accentColor={secondThemeColor}
+                                    inactiveLabelColor={themeColor}
+                                    trackBackgroundColor={white}
+                                    fontSize={scale(11)}
+                                />
 
-                                {/* 车辆类型筛选器 */}
-                                <View
+                                {/* 車輛類型篩選 */}
+                                <SegmentControl
+                                    wrap
                                     style={{
-                                        width: '100%',
-                                        height: scale(30),
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        marginTop: scale(-10),
-                                        justifyContent: 'space-around',
+                                        marginBottom: scale(8),
+                                        paddingHorizontal: scale(4),
                                         zIndex: 9,
-                                    }}>
-                                    <TouchableOpacity onPress={() => setType('All')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Type === 'All' ? secondThemeColor : themeColor,
-                                        }}>
-                                            All
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setType('Light Vehicle')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Type === 'Light Vehicle' ? secondThemeColor : themeColor,
-                                        }}>
-                                            Light Vehicle
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setType('Motorcycle')}>
-                                        <Text style={{
-                                            ...s.choiceText,
-                                            color: Type === 'Motorcycle' ? secondThemeColor : themeColor,
-                                        }}>
-                                            Motorcycle
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
+                                    }}
+                                    options={typeOptions}
+                                    selectedIndex={Math.max(0, CAR_PARK_TYPE_VALUES.indexOf(Type))}
+                                    onChange={(i) => setType(CAR_PARK_TYPE_VALUES[i])}
+                                    accentColor={secondThemeColor}
+                                    inactiveLabelColor={themeColor}
+                                    trackBackgroundColor={white}
+                                    fontSize={scale(11)}
+                                />
 
                                 {data.map((item, idx) => {
                                     let place;
@@ -245,7 +204,7 @@ const CarPark = () => {
                                                 var cartype = itm.vehicleType;
                                                 var rest = itm.noOfAvailableSpace;
                                                 if (Sort === 'All' || people === Sort) {
-                                                    if (Type === 'All' || cartype === Type)
+                                                    if (Type === 'All' || cartype === Type) {
                                                         return (
                                                             <View key={people + cartype + i}>
                                                                 <Text
@@ -281,7 +240,8 @@ const CarPark = () => {
                                                                     剩餘車位：{rest} {rest <= 10 ? '  餘位緊張' : null}
                                                                 </Text>
                                                             </View>
-                                                        )
+                                                        );
+                                                    }
                                                 }
                                                 return null;
                                             })}
@@ -302,7 +262,7 @@ const CarPark = () => {
                         <Loading />
                     </View>
                 )}
-                <View style={{ marginBottom: scale(50) }}></View>
+                <View style={{ marginBottom: scale(50) }} />
             </ScrollView>
         </View>
     );

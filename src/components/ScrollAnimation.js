@@ -2,7 +2,8 @@
 import React from 'react';
 import {Animated} from 'react-native';
 
-import {COLOR_DIY} from '../utils/uiMap';
+import { themes } from './ThemeContext';
+import { Appearance } from 'react-native';
 import {pxToDp} from '../utils/stylesKits';
 
 export const getTranslateX = (
@@ -121,7 +122,7 @@ const ScrollAnimation = ({translateX}) => {
                         translateX,
                     },
                 ],
-            }}></Animated.View>
+            }} />
     );
 };
 

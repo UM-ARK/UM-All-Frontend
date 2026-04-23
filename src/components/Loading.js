@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { View, Text, } from 'react-native';
+import { View, Text } from 'react-native';
 
 import { useTheme, themes, uiStyle } from '../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { LinearProgress } from '@rneui/themed';
+import SimpleProgressBar from './SimpleProgressBar';
 import { useTranslation } from 'react-i18next';
 
 export default function Loading({ progress = 0.5 }) {
@@ -31,12 +31,12 @@ export default function Loading({ progress = 0.5 }) {
                 }}>
                 {t('ARK ALL瘋狂加載中')}
             </Text>
-            <LinearProgress
+            <SimpleProgressBar
                 style={{ marginVertical: verticalScale(10) }}
                 color={themeColor}
-                value={progress}
-                animation={{ duration: 3000 }}
-                variant="determinate"
+                progress={progress}
+                width={scale(200)}
+                height={scale(4)}
             />
             <Text
                 style={{
@@ -50,5 +50,5 @@ export default function Loading({ progress = 0.5 }) {
                 {`${t('確保網絡正常')}\n${t('可以刷新或重啟APP再試')}`}
             </Text>
         </View>
-    )
+    );
 }

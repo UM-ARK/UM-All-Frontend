@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, Platform, Dimensions } from 'react-native';
 
 import { trigger } from '../../../utils/trigger';
@@ -7,42 +7,26 @@ import HomePage from './home/index';
 import NewsPage from './NewsPage';
 import ClubPage from './ClubPage';
 import UMEventPage from './UMEventPage';
-import AboutPage from './AboutPage';
+import WikiPage from '../arkwiki/index';
 
-import { Header } from '@rneui/themed';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 const Tab = createMaterialTopTabNavigator();
 
 const tabWidth = verticalScale(25);
-const numOfTabs = 5;
+const numOfTabs = 4;
+const TAB_BAR_HEIGHT = scale(30);
 
 export default function NewsScreen() {
-    const insets = useContext(SafeAreaInsetsContext);
     const { theme } = useTheme();
     const { bg_color, black, themeColor } = theme;
     const { t } = useTranslation(['common', 'home']);
 
     return (
-        <View style={{ backgroundColor: bg_color, flex: 1 }}>
-            <Header
-                backgroundColor={bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: theme.barStyle,
-                }}
-                containerStyle={{
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets?.top || 0,
-                    }),
-                    paddingTop: 0,
-                    borderBottomWidth: 0,
-                }}
-            />
+        <SafeAreaView style={{ backgroundColor: bg_color, flex: 1 }} edges={['top']}>
             <Tab.Navigator
                 screenOptions={{
                     tabBarLabelStyle: {
@@ -51,8 +35,8 @@ export default function NewsScreen() {
                     },
                     tabBarStyle: {
                         backgroundColor: bg_color,
-                        minHeight: scale(20),
-                        maxHeight: scale(30),
+                        height: TAB_BAR_HEIGHT,
+                        overflow: 'hidden',
                     },
                     tabBarContentContainerStyle: {
                         alignItems: 'center',
@@ -65,53 +49,56 @@ export default function NewsScreen() {
                     tabBarIndicatorStyle: {
                         backgroundColor: themeColor,
                         width: tabWidth,
-                        left: (Dimensions.get('window').width / numOfTabs - tabWidth) / 2,
+                        marginLeft:
+                            (Dimensions.get('window').width / numOfTabs -
+                                tabWidth) /
+                            2,
                     },
                     lazy: true,
                 }}
                 initialRouteName="HomePage"
             >
-                <Tab.Screen
-                    name="HomePage"
-                    component={HomePage}
-                    options={{ title: t('TOPTAB_MAIN') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name="ClubPage"
-                    component={ClubPage}
-                    options={{ title: t('TOPTAB_CLUB') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name="UMEventPage"
-                    component={UMEventPage}
-                    options={{ title: t('TOPTAB_EVENT') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name="NewsPage"
-                    component={NewsPage}
-                    options={{ title: t('TOPTAB_NEWS') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name="AboutPage"
-                    component={AboutPage}
-                    options={{ title: t('TOPTAB_ABOUT') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
+                    <Tab.Screen
+                        name="HomePage"
+                        component={HomePage}
+                        options={{ title: t('TOPTAB_MAIN') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                    {/* <Tab.Screen
+                        name="WikiPage"
+                        component={WikiPage}
+                        options={{ title: t('Wiki') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    /> */}
+                    <Tab.Screen
+                        name="ClubPage"
+                        component={ClubPage}
+                        options={{ title: t('TOPTAB_CLUB') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                    <Tab.Screen
+                        name="UMEventPage"
+                        component={UMEventPage}
+                        options={{ title: t('TOPTAB_EVENT') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                    <Tab.Screen
+                        name="NewsPage"
+                        component={NewsPage}
+                        options={{ title: t('TOPTAB_NEWS') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
             </Tab.Navigator>
-        </View>
+        </SafeAreaView>
     );
-};
+}

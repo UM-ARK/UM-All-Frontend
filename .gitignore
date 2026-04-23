@@ -87,9 +87,8 @@ ios/UMAllWhite.xcodeproj/project.pbxproj
 ios/UMAllWhite.xcodeproj/project.pbxproj
 
 # Google Firebase
-android/app/google-services.json
 google-services.json
-ios/GoogleService-Info.plist
+GoogleService-Info.plist
 
 # UM API Token
 umAPIToken.json
@@ -98,3 +97,15 @@ umAPIToken.json
 .expo
 dist/
 web-build/
+
+# Local env files
+.env
+.env.local
+.mcp.json
+.cursor/mcp.json
+
+.omc
+
+# Apple Distribution Certificate
+*.cer
+*.p12

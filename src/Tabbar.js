@@ -1,169 +1,282 @@
-import React from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, Platform, View } from 'react-native';
+
+import { useTheme } from './components/ThemeContext';
+
+import { scale, verticalScale } from 'react-native-size-matters';
+
+import { useTranslation } from 'react-i18next';
+
+// 原生 tab bar组件，iOS用下面的，Android用上面的
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
-import ARKWiki from './pages/TabbarPages/arkwiki';
-import ARKHarbor from './pages/TabbarPages/arkHarbor';
+import HarborNewTopicTab, {
+    HARBOR_NEW_TOPIC_TAB,
+    trackLastNonHarborPostTab,
+} from './pages/TabbarPages/HarborNewTopicTab';
 import CourseSim from './pages/TabbarPages/courseSim';
 
-import { uiStyle, useTheme } from './components/ThemeContext';
-import { trigger } from './utils/trigger';
-
-import { scale, verticalScale } from 'react-native-size-matters';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { AnimatedTabBarNavigator } from 'react-native-animated-nav-tab-bar';
-import { inject } from 'mobx-react';
-import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { trigger } from './utils/trigger';
+import { openLink } from './utils/browser';
+import { ARK_HARBOR_NEW_TOPIC } from './utils/pathMap';
+import { logToFirebase } from './utils/firebaseAnalytics';
+import { uiStyle } from './components/ThemeContext';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
-const Tabs = AnimatedTabBarNavigator();
+// 图标描述
+const tabIconDescription = {
+    NewsTabbar: '資訊',
+    Harbor: '職涯港',
+    What2RegTab: '揾課',
+    [HARBOR_NEW_TOPIC_TAB]: '新想法',
+    CourseSimTab: '課表',
+    FeaturesTabbar: '服務',
+};
+
+// 页面组件映射
+const tabScreen = {
+    NewsTabbar: NewsScreen,
+    // Harbor: ARKHarbor,
+    What2RegTab: What2RegTabIndex,
+    [HARBOR_NEW_TOPIC_TAB]: HarborNewTopicTab,
+    CourseSimTab: CourseSim,
+    FeaturesTabbar: FeaturesScreen,
+};
+
+// iOS SF Symbols 配置
+const iosTabIconConfig = {
+    NewsTabbar: 'newspaper',
+    Harbor: 'heart',
+    What2RegTab: 'magnifyingglass.circle',
+    [HARBOR_NEW_TOPIC_TAB]: 'plus.circle.fill',
+    CourseSimTab: 'calendar',
+    FeaturesTabbar: 'square.grid.2x2',
+};
+
+// Android MaterialCommunityIcons 名称映射
+const androidTabIconConfig = {
+    NewsTabbar: 'newspaper-variant',
+    Harbor: 'chat-processing',
+    What2RegTab: 'database-search',
+    [HARBOR_NEW_TOPIC_TAB]: 'plus-circle',
+    CourseSimTab: 'calendar-clock',
+    FeaturesTabbar: 'view-grid',
+};
+
+/**
+ * 取得 Tab Bar 樣式（iOS 勿硬編碼純白，深色模式下會與主題脫節）
+ */
+const getTabBarStyle = theme => {
+    if (Platform.OS === 'ios') {
+        return {
+            // 液態玻璃 + translucent 時由系統材質呈現；否則與頁面背景一致
+            backgroundColor: isLiquidGlassSupported
+                ? 'transparent'
+                : theme.bg_color,
+            borderTopWidth: 0,
+        };
+    }
+    return {
+        backgroundColor: theme.bg_color,
+        borderTopColor: theme.isLight
+            ? 'rgba(0,0,0,0.1)'
+            : 'rgba(255,255,255,0.1)',
+        borderTopWidth: 0.5,
+        elevation: 8,
+    };
+};
+
+// iOS TabBar 类
+class IOSTabbar {
+    constructor(t, insets, theme, isLandscape, labelFontSize) {
+        this.Tabs = createNativeBottomTabNavigator();
+        this.getTabbarIcon = (routeName, focused) => {
+            let baseName = iosTabIconConfig[routeName] || 'questionmark.circle';
+            if (focused) {
+                baseName += '.fill';
+            }
+            return {
+                type: 'sfSymbol',
+                name: baseName,
+            };
+        };
+        this.createTabScreen = name => {
+            return (
+                <this.Tabs.Screen
+                    name={name}
+                    component={tabScreen[name]}
+                    options={{ title: t(tabIconDescription[name]) }}
+                />
+            );
+        };
+        this.createTabbar = () => {
+            return (
+                <this.Tabs.Navigator
+                    screenListeners={({ route }) => ({
+                        focus: () => {
+                            trackLastNonHarborPostTab(route.name);
+                        },
+                    })}
+                    screenOptions={({ route }) => ({
+                        tabBarLabelStyle: {
+                            ...uiStyle.defaultText,
+                            fontSize: labelFontSize,
+                            fontWeight: '600',
+                        },
+                        tabBarActiveTintColor: theme.themeColor,
+                        tabBarInactiveTintColor: theme.black.main,
+                        tabBarStyle: getTabBarStyle(theme),
+                        translucent: isLiquidGlassSupported ? true : false,
+                        tabBarIcon: ({ focused }) =>
+                            this.getTabbarIcon(route.name, focused),
+                        tabBarShowLabel: !isLandscape,
+                        tabBarMinimizeBehavior: 'onScrollDown',
+                    })}
+                    hapticFeedbackEnabled={true}>
+                    {Object.keys(tabScreen).map(name =>
+                        this.createTabScreen(name),
+                    )}
+                </this.Tabs.Navigator>
+            );
+        };
+    }
+}
+
+// Android TabBar 类
+class AndroidTabbar {
+    constructor(t, insets, theme, isLandscape, labelFontSize) {
+        this.Tabs = createBottomTabNavigator();
+
+        this.getTabbarIcon = (routeName, focused, color) => {
+            let baseName = androidTabIconConfig[routeName] || 'help-circle';
+            if (!focused) {
+                baseName += '-outline';
+            }
+            return (
+                <MaterialCommunityIcons
+                    name={baseName}
+                    size={24}
+                    color={focused ? color : '#222'}
+                />
+            );
+        };
+
+        this.createTabScreen = name => {
+            const listeners =
+                name === HARBOR_NEW_TOPIC_TAB
+                    ? () => ({
+                        tabPress: e => {
+                            e.preventDefault();
+                            trigger();
+                            logToFirebase('funcUse', {
+                                funcName: 'harbor_new',
+                            });
+                            openLink({
+                                URL: ARK_HARBOR_NEW_TOPIC,
+                                mode: 'fullScreen',
+                            });
+                        },
+                    })
+                    : () => ({ tabPress: () => trigger() });
+            return (
+                <this.Tabs.Screen
+                    name={name}
+                    component={tabScreen[name]}
+                    options={{
+                        tabBarIcon: ({ focused, color }) =>
+                            this.getTabbarIcon(name, focused, color),
+                        title: t(tabIconDescription[name]),
+                    }}
+                    listeners={listeners}
+                />
+            );
+        };
+
+        this.createTabbar = () => {
+            // 勿在此包 SafeAreaView（edges top）：各分頁已自行處理頂部 insets，否則與
+            // NewsScreen / CourseSim 等重疊會導致 Android 頂部留白過大或佈局異常
+            return (
+                <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
+                    <this.Tabs.Navigator
+                        screenListeners={({ route }) => ({
+                            focus: () => {
+                                trackLastNonHarborPostTab(route.name);
+                            },
+                        })}
+                        screenOptions={{
+                            headerShown: false,
+                            tabBarLabelStyle: {
+                                ...uiStyle.defaultText,
+                                fontSize: labelFontSize,
+                                fontWeight: '600',
+                            },
+                            tabBarActiveTintColor: theme.themeColor,
+                            tabBarInactiveTintColor: theme.black.main,
+                            tabBarStyle: getTabBarStyle(theme),
+                        }}
+                        initialRouteName={'NewsTabbar'}>
+                        {Object.keys(tabScreen).map(name =>
+                            this.createTabScreen(name),
+                        )}
+                    </this.Tabs.Navigator>
+                </View>
+            );
+        };
+    }
+}
+
+// 工厂函数
+export const tabbarFactory = (
+    platform,
+    t,
+    insets,
+    theme,
+    isLandscape,
+    labelFontSize,
+) => {
+    let tabbarClass = null;
+    if (platform === 'ios') {
+        tabbarClass = IOSTabbar;
+    } else {
+        tabbarClass = AndroidTabbar;
+    }
+
+    return new tabbarClass(
+        t,
+        insets,
+        theme,
+        isLandscape,
+        labelFontSize,
+    ).createTabbar();
+};
 
 const Tabbar = () => {
     const { theme } = useTheme();
-    const insets = useSafeAreaInsets();
-    const { t } = useTranslation(['common', 'home',]);
+    const { t } = useTranslation(['common', 'home']);
 
+    // 判斷是否為橫屏
     const isLandscape = () => {
         const { width, height } = Dimensions.get('window');
         return width > height;
     };
 
-    // 統一圖標大小，方便維護
-    const iconSize = isLandscape() ? verticalScale(18) : scale(18);
+    // 字體大小
+    const labelFontSize = isLandscape() ? verticalScale(10) : scale(10);
 
-    return (
-        <Tabs.Navigator
-            tabBarOptions={{
-                inactiveTintColor: theme.black.main,
-                labelStyle: {
-                    ...uiStyle.defaultText,
-                    fontSize: isLandscape() ? verticalScale(10) : scale(10),
-                    fontWeight: '600',
-                },
-                tabStyle: {
-                    paddingBottom: insets.bottom,
-                }
-            }}
-            appearance={{
-                activeTabBackgrounds: `${theme.themeColor}15`,
-                activeColors: theme.themeColor,
-                tabBarBackground: theme.bg_color,
-                whenInactiveShow: 'both',
-                tabButtonLayout: 'vertical',
-            }}
-            initialRouteName={'NewsTabbar'}
-        >
-            <Tabs.Screen
-                name="NewsTabbar"
-                component={NewsScreen}
-                options={{
-                    tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name={focused ? "newspaper-variant" : "newspaper-variant-outline"}
-                            size={iconSize}
-                            color={focused ? color : theme.black.main}
-                        />
-                    ),
-                    title: t('資訊'),
-                }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
-            />
-
-            <Tabs.Screen
-                name="Wiki"
-                component={ARKWiki}
-                options={{
-                    tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name={focused ? "file-document" : "file-document-outline"}
-                            size={iconSize}
-                            color={focused ? color : theme.black.main}
-                        />
-                    ),
-                    title: t('百科'),
-                }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
-            />
-
-            <Tabs.Screen
-                name="Harbor"
-                component={ARKHarbor}
-                options={{
-                    tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name={focused ? "chat-processing" : "chat-processing-outline"}
-                            size={iconSize}
-                            color={focused ? color : theme.black.main}
-                        />
-                    ),
-                    title: t('職涯港'),
-                }}
-                listeners={() => ({
-                    tabPress: async () => trigger(),
-                })}
-            />
-
-            <Tabs.Screen
-                name="What2RegTab"
-                component={What2RegTabIndex}
-                options={{
-                    tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name={focused ? "database-search" : "database-search-outline"}
-                            size={iconSize}
-                            color={focused ? color : theme.black.main}
-                        />
-                    ),
-                    title: t('搵課'),
-                }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
-            />
-
-            <Tabs.Screen
-                name="CourseSimTab"
-                component={CourseSim}
-                options={{
-                    tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name={focused ? "calendar-clock" : "calendar-clock-outline"}
-                            size={iconSize}
-                            color={focused ? color : theme.black.main}
-                        />
-                    ),
-                    title: t('課表'),
-                }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
-            />
-
-            <Tabs.Screen
-                name="FeaturesTabbar"
-                component={FeaturesScreen}
-                options={{
-                    tabBarIcon: ({ focused, color }) => (
-                        <MaterialCommunityIcons
-                            name={focused ? "view-grid" : "view-grid-outline"}
-                            size={iconSize}
-                            color={focused ? color : theme.black.main}
-                        />
-                    ),
-                    title: t('服務'),
-                }}
-                listeners={() => ({
-                    tabPress: () => trigger(),
-                })}
-            />
-        </Tabs.Navigator>
+    const TabbarComponent = tabbarFactory(
+        Platform.OS,
+        t,
+        null,
+        theme,
+        isLandscape,
+        labelFontSize,
     );
+
+    return TabbarComponent;
 };
 
-export default inject('RootStore')(Tabbar);
+export default Tabbar;

@@ -1,0 +1,36 @@
+---
+description: 需要按下縮放彈簧回饋時使用內建 TouchableScale（Reanimated Pressable）
+globs: src/**/*.js
+alwaysApply: false
+---
+
+# TouchableScale 互動按鈕
+
+## 適用時機
+
+凡需要**按下時縮放、鬆手彈簧回彈**等互動回饋的按鈕或可點區域，應使用專案內建元件，**不要**僅用無動畫的 `Pressable`／為此目的新增 `react-native-touchable-scale`。
+
+## 正確用法
+
+- 元件路徑：[src/components/TouchableScale.js](src/components/TouchableScale.js)
+- 依檔案深度調整匯入，例如自 `src/pages/...`：`import TouchableScale from '../../../components/TouchableScale';`
+- 與一般 `Pressable` 相同：可傳 `style`、`onPress`、`onLongPress`、`disabled`、`hitSlop` 等；互動時維持 **`trigger()`** 觸覺（若為使用者可見操作）。
+
+```javascript
+import TouchableScale from '../../../components/TouchableScale';
+
+<TouchableScale style={pillStyle} onPress={() => { trigger(); handlePress(); }}>
+  <Text>操作</Text>
+</TouchableScale>
+```
+
+## 可選 Props
+
+- **`activeScale`**：按下目標 scale（預設見元件內 `DEFAULT_ACTIVE_SCALE`）。
+- **`springConfig`**：覆寫 `withSpring` 第二參數（`damping` / `stiffness` / `mass` 等）。
+
+## 禁止與例外
+
+- ❌ 為「要有縮放回饋」而在新程式碼引入 **`TouchableOpacity`**（專案規範以 `Pressable` 為主；縮放請用 `TouchableScale`）。
+- ❌ 新功能不要依賴 **`react-native-touchable-scale`**（舊版 `Animated`）；存量可逐步改為內建 `TouchableScale`。
+- 不需縮放動畫時（例如純列表列、導覽列原生按鈕）仍依 `code-style.mdc`（Pressable 規範）或 React Navigation 原生按鈕即可。

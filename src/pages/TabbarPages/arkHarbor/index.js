@@ -1,36 +1,37 @@
-import React, { useRef, useState, useEffect, useCallback, useContext, useMemo } from 'react';
-import { View, Text, Platform, StyleSheet, BackHandler, TouchableOpacity, Alert, } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, Platform, StyleSheet, BackHandler, TouchableOpacity, Alert } from 'react-native';
 
 import { WebView } from 'react-native-webview';
-import { Header } from '@rneui/themed';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
-import * as Progress from 'react-native-progress';
-import TouchableScale from "react-native-touchable-scale";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
-import { t } from "i18next";
+import SimpleProgressBar from '../../../components/SimpleProgressBar';
+import TouchableScale from '../../../components/TouchableScale';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { t } from 'i18next';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import Share from 'react-native-share';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
+import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { ARK_HARBOR } from '../../../utils/pathMap';
-import { logToFirebase } from "../../../utils/firebaseAnalytics";
-import { trigger } from "../../../utils/trigger";
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { trigger } from '../../../utils/trigger';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { openLink } from '../../../utils/browser';
 
 
 const ARKHarbor = (props) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color, viewShadow, } = theme;
+    const { themeColor, black, white, wiki_bg_color, barStyle, isLight, harbor_bg_color, bg_color, viewShadow } = theme;
+    const insets = useSafeAreaInsets();
+
     const s = StyleSheet.create({
         titleText: {
             ...uiStyle.defaultText,
             fontSize: scale(18),
             color: themeColor,
-            fontWeight: '600'
+            fontWeight: '600',
         },
         settingButtonContainer: {
             width: scale(240),
@@ -62,8 +63,6 @@ const ARKHarbor = (props) => {
         },
     });
     const iconSize = useMemo(() => verticalScale(20), []);
-
-    const insets = useContext(SafeAreaInsetsContext);
 
     // 初始狀態
     const [currentURL, setCurrentURL] = useState(ARK_HARBOR);
@@ -97,7 +96,7 @@ const ARKHarbor = (props) => {
         const parsedItem = item ? JSON.parse(item) : null;
         setHarborSetting(parsedItem);
 
-        if (parsedItem.tabbarMode === 'webview') {
+        if (parsedItem?.tabbarMode === 'webview') {
             logToFirebase('openPage', { page: 'harbor_webview' });
         }
     };
@@ -160,34 +159,13 @@ const ARKHarbor = (props) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <Header
-                // harbor的默認配色
-                backgroundColor={harbor_bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: barStyle,
-                }}
-                containerStyle={{
-                    // 修復頂部空白過多問題
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets.top,
-                    }),
-                    paddingTop: 0,
-                    // 修復深色模式頂部小白條問題
-                    borderBottomWidth: 0,
-                }}
-            />
-
             {!isLoaded ? (
-                <Progress.Bar
-                    progress={progress}
-                    borderWidth={0}
-                    borderRadius={0}
-                    width={null} // null -> 寬度為全屏
-                    height={2}
-                    color={themeColor}
-                />
+                <SimpleProgressBar
+                        progress={progress}
+                        width={null} // null -> 寬度為全屏
+                        height={2}
+                        color={themeColor}
+                    />
             ) : null}
 
             {/* 用戶偏好為Browser時不顯示WebView，顯示設定選項 */}
@@ -224,10 +202,10 @@ const ARKHarbor = (props) => {
                     {/* 標題區域 */}
                     <View style={{ marginBottom: verticalScale(30), alignItems: 'center' }}>
                         <Text style={{ fontSize: scale(20), fontWeight: 'bold', color: black.main, marginBottom: verticalScale(8) }}>
-                            {t("瀏覽方式偏好", { ns: 'harbor' })}
+                            {t('瀏覽方式偏好', { ns: 'harbor' })}
                         </Text>
                         <Text style={{ fontSize: scale(13), color: black.third, textAlign: 'center', lineHeight: scale(20) }}>
-                            {t("選擇最適合您的 Harbor 論壇瀏覽體驗", { ns: 'harbor' })}
+                            {t('選擇最適合您的 Harbor 論壇瀏覽體驗', { ns: 'harbor' })}
                         </Text>
                     </View>
 
@@ -246,7 +224,7 @@ const ARKHarbor = (props) => {
                         onPress={() => {
                             trigger();
                             logToFirebase('clickHarbor', {
-                                mode: "browser"
+                                mode: 'browser',
                             });
                             setHarborSetting({ tabbarMode: 'browser' });
                             setItem(JSON.stringify({ tabbarMode: 'browser' }));
@@ -269,15 +247,15 @@ const ARKHarbor = (props) => {
                                 numberOfLines={1}
                                 ellipsizeMode="tail"
                             >
-                                {t("系統瀏覽器 (推薦)", { ns: 'harbor' })}
+                                {t('系統瀏覽器 (推薦)', { ns: 'harbor' })}
                             </Text>
                             <View style={{ backgroundColor: bg_color, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: scale(8) }}>
                                 <Text style={{ color: themeColor, fontSize: scale(8), fontWeight: 'bold' }}>STABLE</Text>
                             </View>
                         </View>
                         <Text style={{ fontSize: scale(13), color: black.second, lineHeight: scale(18) }}>
-                            ✅ {t("支援自動填充密碼", { ns: 'harbor' })}{'\n'}
-                            ✅ {t("兼容性最佳，解決舊設備錯誤", { ns: 'harbor' })}
+                            ✅ {t('支援自動填充密碼', { ns: 'harbor' })}{'\n'}
+                            ✅ {t('兼容性最佳，解決舊設備錯誤', { ns: 'harbor' })}
                         </Text>
                     </TouchableScale>
 
@@ -296,7 +274,7 @@ const ARKHarbor = (props) => {
                         onPress={() => {
                             trigger();
                             logToFirebase('clickHarbor', {
-                                mode: "webview"
+                                mode: 'webview',
                             });
                             setHarborSetting({ tabbarMode: 'webview' });
                             setItem(JSON.stringify({ tabbarMode: 'webview' }));
@@ -308,13 +286,13 @@ const ARKHarbor = (props) => {
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: scale(8) }}>
                             <Ionicons name="phone-portrait-outline" size={scale(16)} color={black.main} />
                             <Text style={{ fontSize: scale(16), fontWeight: '600', color: black.main, marginLeft: scale(8) }}>
-                                {t("APP 內嵌入瀏覽", { ns: 'harbor' })}
+                                {t('APP 內嵌入瀏覽', { ns: 'harbor' })}
                             </Text>
                         </View>
                         <Text style={{ fontSize: scale(13), color: black.second, lineHeight: scale(18) }}>
-                            ⚡️ {t("頁面切換更流暢", { ns: 'harbor' })}{'\n'}
-                            ⚠️ {t("需手動輸入密碼，舊版 Android 可能報錯", { ns: 'harbor' })}{'\n'}
-                            ⚠️ {t("報錯需要自行前往應用商店更新Webview組件", { ns: 'harbor' })}
+                            ⚡️ {t('頁面切換更流暢', { ns: 'harbor' })}{'\n'}
+                            ⚠️ {t('需手動輸入密碼，舊版 Android 可能報錯', { ns: 'harbor' })}{'\n'}
+                            ⚠️ {t('報錯需要自行前往應用商店更新Webview組件', { ns: 'harbor' })}
                         </Text>
                     </TouchableScale>
 
@@ -329,18 +307,18 @@ const ARKHarbor = (props) => {
                             }
                         }}
                     >
-                        <Text style={{ fontSize: scale(14), color: black.third, }}>
-                            {t("隨時通過本頁面右下角設置按鈕修改偏好", { ns: 'harbor' })}
+                        <Text style={{ fontSize: scale(14), color: black.third }}>
+                            {t('隨時通過本頁面右下角設置按鈕修改偏好', { ns: 'harbor' })}
                         </Text>
                         <Text style={{ fontSize: scale(15), color: black.third, textDecorationLine: 'underline' }}>
-                            {t("暫不修改，返回", { ns: 'harbor' })}
+                            {t('暫不修改，返回', { ns: 'harbor' })}
                         </Text>
                     </TouchableScale>
                 </View>
             )}
 
             {/* Browser/Webview/回主頁 導航按鈕 */}
-            <View style={[s.navContainer,]}>
+            <View style={[s.navContainer]}>
                 {/* 主頁按鈕 */}
                 <TouchableOpacity
                     style={s.button}

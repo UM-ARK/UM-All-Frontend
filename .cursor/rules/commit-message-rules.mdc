@@ -1,0 +1,141 @@
+---
+description: Git commit message 生成規則 - 使用 Gitmoji 規範
+alwaysApply: true
+---
+
+# Git Commit Message 規則
+
+為了使提交歷史更清晰易讀，我們使用 Gitmoji (https://gitmoji.dev/) 來標準化提交訊息的格式。
+
+## 核心要求
+
+當你幫助用戶生成 Git commit message 時，**必須**遵循以下規則。
+
+## 格式規範
+
+```
+:gitmoji: 簡明描述 (最多 50 字元)
+
+詳細描述（可選，換行後）
+```
+
+### ⚠️ 語言要求（最高優先級）
+
+**所有 commit message 必須使用繁體中文**
+
+- ✅ 正確：使用繁體中文描述
+- ❌ 錯誤：使用簡體中文或英文（除非是技術術語）
+
+### 必須使用的 Gitmoji 前綴
+
+根據變更類型選擇正確的 Gitmoji：
+
+| 變更類型 | Gitmoji | 說明 |
+|---------|----------|------|
+| 新功能 | ✨ `:sparkles:` | 添加新功能 |
+| Bug 修復 | 🐛 `:bug:` | 修復 bug |
+| 程式碼重構 | ♻️ `:recycle:` | 重構程式碼 |
+| UI/樣式更新 | 💄 `:lipstick:` | 介面樣式改變 |
+| 效能優化 | ⚡️ `:zap:` | 效能提升 |
+| 文檔更新 | 📝 `:memo:` | 添加文檔 |
+| 程式碼刪除 | 🔥 `:fire:` | 刪除程式碼/檔案 |
+| 添加依賴 | ➕ `:heavy_plus_sign:` | 新增依賴 |
+| 刪除依賴 | ➖ `:heavy_minus_sign:` | 移除依賴 |
+| 升級依賴 | ⬆️ `:arrow_up:` | 升級依賴 |
+| 降級依賴 | ⬇️ `:arrow_down:` | 降級依賴 |
+| 設定檔 | 🔧 `:wrench:` | 設定檔的修改 |
+| 程式碼格式 | 🎨 `:art:` | 程式碼格式優化 |
+| 添加測試 | ✅ `:white_check_mark:` | 添加/更新測試 |
+| 失敗測試 | 🧪 `:test_tube:` | 添加失敗的測試 |
+| 緊急修復 | 🚑️ `:ambulance:` | 緊急修復 |
+| 簡單修復 | 🩹 `:adhesive_bandage:` | 簡單修復（非關鍵問題） |
+| 部署相關 | 🚀 `:rocket:` | 部署相關 |
+| CI 構建 | 👷 `:construction_worker:` | 添加/更新 CI 構建系統 |
+| 編譯檔案 | 📦️ `:package:` | 添加/更新編譯檔案或套件 |
+| 添加註釋 | 💡 `:bulb:` | 添加/更新程式碼註釋 |
+| 進行中 | 🚧 `:construction:` | 進行中的工作 |
+| 棄用程式碼 | 🗑️ `:wastebasket:` | 棄用需要清理的程式碼 |
+| 合併分支 | 🔀 `:twisted_rightwards_arrows:` | 合併分支 |
+| 回滾變更 | ⏪️ `:rewind:` | 回滾變更 |
+
+## 輸出格式範例
+
+```
+✨ 添加課程搜索功能
+
+- 實現課程搜索界面
+- 添加搜索結果展示
+- 優化搜索演算法
+```
+
+```
+🐛 修復課程列表加載失敗
+
+- 修復網路請求超時處理
+- 優化錯誤提示訊息
+```
+
+```
+♻️ 重構課程資料處理邏輯
+
+- 提取公共方法
+- 優化效能
+```
+
+## 禁止事項
+
+- ❌ 不要使用 `feat:`、`fix:` 等傳統前綴
+- ❌ 不要省略 Gitmoji
+- ❌ 不要使用未在列表中的 emoji
+- ❌ 不要使用簡體中文
+
+## 最佳實踐
+
+- 每個提交應專注於單一功能或修復
+- 簡明描述應清晰說明變更的內容
+- 詳細描述可包含變更的原因和影響
+
+## 合併 PR 時保留原作者資訊
+
+### 重要要求
+
+當合併 PR 提交時，**必須**保留該 PR 的原作者資訊，不要用自己的資訊覆蓋原作者。
+
+### 如何在 GitHub 中保留原作者資訊
+
+#### 方法 1：使用 GitHub 網頁介面合併（推薦）
+使用 GitHub 網頁介面的 "Merge pull request" 按鈕，系統會自動保留原作者資訊。
+
+#### 方法 2：使用命令列合併時保留原作者
+如果使用命令列合併，使用 `--no-ff` 和正確的作者資訊：
+
+```bash
+# 切換到目標分支
+git checkout main
+
+# 合併 PR 分支，保留原作者資訊
+git merge --no-ff pr-branch-name
+
+# 確保提交作者是原作者
+git commit --amend --author="Original Author <author@example.com>"
+```
+
+### GitHub CLI 合併
+使用 GitHub CLI 合併時，系統也會自動保留原作者資訊：
+
+```bash
+gh pr merge <pr-number> --merge
+```
+
+### 生效條件
+此規則適用於：
+- 合併任何有作者的 PR 提交
+- 使用任何方式合併 PR 時
+
+## 生效條件
+
+此規則適用於：
+- 用戶要求生成 commit message
+- 用戶點擊 Cursor 的 "Generate Commit Message" 按鈕
+- 用戶要求你幫助 commit 程式碼
+- 合併有作者的 PR 提交

@@ -8,7 +8,6 @@ import {
     UM_PORTAL,
     UM_CALENDAR,
     UM_Moodle,
-    WHAT_2_REG,
     UM_PRE_ENROLMENT,
     UM_ADD_DROP,
     UM_WHOLE_PERSON,
@@ -42,7 +41,10 @@ import {
     UM_RC,
     UM_ALUMNI,
     ARK_HARBOR,
+    ARK_WIKI,
+    CANTEEN_QUEUE,
 } from '../../../utils/pathMap';
+import { getCurrentUmehHost } from '../../../utils/umehHost';
 
 const iconTypes = {
     ionicons: 'ionicons',
@@ -289,6 +291,21 @@ export const getFunctionArr = (t) => [
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
+                icon_name: 'silverware-fork-knife',
+                fn_name: t('飯堂排隊', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'Webview',
+                webview_param: {
+                    url: CANTEEN_QUEUE,
+                    title: '飯堂排隊人數',
+                    bg_color_diy: '#fff',
+                },
+                describe: t('查看LCWC W22飯堂當前排隊人數', { ns: 'features' }),
+                key_name: '飯堂排隊',
+                keywords: 'Canteen Queue, Dining Hall, LCWC, W22, 飯堂, 排隊, 人數, 食堂, 餐廳, 統計',
+            },
+            {
+                icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'school',
                 fn_name: t('學生會', { ns: 'features' }),
                 needLogin: false,
@@ -349,21 +366,21 @@ export const getFunctionArr = (t) => [
                 key_name: '維修預約',
                 keywords: 'Maintenance Booking, CMMS, Repair, Facility, 維修, 報修, 修理, 設施, 預約',
             },
-            {
-                icon_type: iconTypes.ionicons,
-                icon_name: 'book',
-                fn_name: t('Lib佔用', { ns: 'features' }),
-                needLogin: false,
-                go_where: 'Linking',
-                webview_param: {
-                    url: UM_LIB_USING,
-                    title: 'UM 圖書館資源佔用',
-                    text_color: '#010101',
-                },
-                describe: t('包含圖書館的電腦、房間佔用情況、其他科技資訊等', { ns: 'features' }),
-                key_name: 'Lib佔用',
-                keywords: 'Library Occupancy, Library Resources, Computer, Room, 圖書館, 佔用, 電腦, 房間, 資源',
-            },
+            // {
+            //     icon_type: iconTypes.ionicons,
+            //     icon_name: 'book',
+            //     fn_name: t('Lib佔用', { ns: 'features' }),
+            //     needLogin: false,
+            //     go_where: 'Linking',
+            //     webview_param: {
+            //         url: UM_LIB_USING,
+            //         title: 'UM 圖書館資源佔用',
+            //         text_color: '#010101',
+            //     },
+            //     describe: t('包含圖書館的電腦、房間佔用情況、其他科技資訊等', { ns: 'features' }),
+            //     key_name: 'Lib佔用',
+            //     keywords: 'Library Occupancy, Library Resources, Computer, Room, 圖書館, 佔用, 電腦, 房間, 資源',
+            // },
             {
                 icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'basketball',
@@ -542,7 +559,12 @@ export const getFunctionArr = (t) => [
                 icon_name: 'file-document-edit-outline',
                 fn_name: 'Wiki',
                 needLogin: false,
-                go_where: 'Wiki', // a function
+                go_where: 'Linking',
+                webview_param: {
+                    // import pathMap的鏈接進行跳轉
+                    url: ARK_WIKI,
+                    title: 'ARK Wiki',
+                },
                 describe: t('ARK Wiki，希望集成澳大的所有資訊、攻略、學習方法等', { ns: 'features' }),
                 key_name: 'Wiki',
                 keywords: 'Wiki, Guide, Information, Knowledge Base, 百科, 攻略, 資訊, 知識庫',
@@ -565,7 +587,7 @@ export const getFunctionArr = (t) => [
                 go_where: 'Webview',
                 webview_param: {
                     // import pathMap的鏈接進行跳轉
-                    url: WHAT_2_REG,
+                    url: getCurrentUmehHost(),
                     title: '澳大選咩課',
                     // 標題顏色，默認為black.main
                     text_color: '#fff',
@@ -575,7 +597,7 @@ export const getFunctionArr = (t) => [
                     isBarStyleBlack: false,
                 },
                 describe: t('選咩課，UM Helper開發的課程評論網站', { ns: 'features' }),                key_name: '選咀課',
-                keywords: 'What2Reg, Course Review, Course Rating, UM Helper, 課程評論, 評分, 教授評價, 選課',            },
+                keywords: 'What2Reg, Course Review, Course Rating, UM Helper, 課程評論, 評分, 教授評價, 選課'            },
             {
                 icon_type: iconTypes.materialCommunityIcons,
                 icon_name: 'ab-testing',
@@ -882,4 +904,4 @@ export const getFunctionArr = (t) => [
             },
         ],
     },
-]
+];

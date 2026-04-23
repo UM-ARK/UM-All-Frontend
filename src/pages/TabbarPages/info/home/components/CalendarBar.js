@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { View, Text, VirtualizedList, LayoutAnimation } from 'react-native';
-import TouchableScale from 'react-native-touchable-scale';
 import moment from 'moment';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 import { useTheme } from '../../../../../components/ThemeContext';
-import { uiStyle, VERSION_EMOJI } from '../../../../../utils/uiMap';
+import { uiStyle, VERSION_EMOJI } from '../../../../../components/ThemeContext';
 import { screenWidth } from '../../../../../utils/stylesKits';
 import { getWeek } from '../../../../../static/UMCalendar/CalendarConst';
 import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
 import { trigger } from '../../../../../utils/trigger';
+import TouchableScale from '../../../../../components/TouchableScale';
 
 const calItemWidth = verticalScale(50);
 
@@ -119,7 +119,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
         );
     };
 
-    if (!cal || cal.length === 0) return null;
+    if (!cal || cal.length === 0) {return null;}
 
     return (
         <View style={{ backgroundColor: bg_color, width: '100%', marginTop: verticalScale(5), justifyContent: 'center' }}>

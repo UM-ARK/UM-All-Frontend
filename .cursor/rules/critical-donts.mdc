@@ -1,0 +1,25 @@
+---
+description: 關鍵禁止事項 - 必須遵守
+alwaysApply: true
+---
+
+# 關鍵禁止事項
+
+## 絕對禁止
+
+- ❌ **直接使用 AsyncStorage** - 使用 `storageKits.js`
+- ❌ **直接寫入課程資料鍵** (`offer_courses`, `course_plan`, `course_plan_time`) - 使用 `checkCoursesKits.js`
+- ❌ **刪除打包的 JSON 檔案** - 它們是離線後備
+- ❌ **使用遺留顏色匯入** - 統一使用 `useTheme()` 從 `ThemeContext` 取得主題顏色
+- ❌ **忘記 `trigger()`** - 所有互動元件都需要觸覺回饋
+- ❌ **使用 `as any`, `@ts-ignore`** - 正確處理型別
+- ❌ **硬編碼顏色值** (如 `'#fff'`, `'rgba(...)'`) - 使用 ThemeContext
+- ❌ **在新程式碼中使用 `TouchableOpacity` 系列** - 統一使用 `Pressable`（存量程式碼重構時遷移）
+- ❌ **新程式碼中使用 `FlatList` / `VirtualizedList` / `ScrollView+map` 渲染長列表** - 統一使用 `FlashList`（`@shopify/flash-list`）
+
+## 設定要求
+
+- **iOS**: Xcode 10+，Expo CNG 自動管理 CocoaPods
+- **Android**: API 31 或 33 模擬器
+- **Firebase**: 需要 `google-services.json` 和 `GoogleService-Info.plist`
+- **API Token**: 根目錄 `umAPIToken.json` 包含 `{"token":"..."}`

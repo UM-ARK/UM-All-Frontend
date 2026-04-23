@@ -1,0 +1,68 @@
+---
+description: 使用 react-native-debugger-mcp 工具讀取 React Native 台日誌
+alwaysApply: false
+---
+
+# React Native 模擬器日誌讀取規則
+
+當需要讀取 React Native 模擬器的控制台日誌時，使用 `react-native-debugger-mcp` 工具。
+
+## 工具函數
+
+| 函數 | 說明 |
+|------|------|
+| `getConnectedApps` | 取得已連線的 React Native 應用程式清單 |
+| `readConsoleLogsFromApp` | 讀取指定應用程式的控制台日誌 |
+
+## 使用前提
+
+- Metro 開發伺服器正在執行 (`yarn start`)
+- React Native 應用程式已啟動並連線到 Metro
+
+## 使用方法
+
+### 1. 取得已連線的應用程式
+
+```javascript
+user-react-native-debugger-mcp-getConnectedApps({
+  metroServerPort: 8081  // Metro 連接埠號，預設 8081
+})
+```
+
+傳回結果包含：
+- `id`: 應用程式連線 ID
+- `title`: 應用程式標題和裝置資訊
+- `description`: React Native 模式描述
+- `webSocketDebuggerUrl`: WebSocket 偵錯位址
+
+### 2. 讀取控制台日誌
+
+```javascript
+user-react-native-debugger-mcp-readConsoleLogsFromApp({
+  app: {
+    id: "xxx-1",
+    description: "React Native Bridgeless [C++ connection]",
+    webSocketDebuggerUrl: "ws://localhost:8081/inspector/debug?device=xxx&page=1"
+  },
+  maxLogs: 50  // 最多讀取的日誌數量，預設 100
+})
+```
+
+傳回結果為日誌陣列，每條日誌包含：
+- `type`: 日誌類型 (log, error, warn, info)
+- `text`: 日誌內容
+- `level`: 日誌級別
+- `timestamp`: 時間戳記
+
+## 典型使用場景
+
+1. **偵錯執行階段錯誤**：讀取 error 級別日誌
+2. **追蹤應用程式行為**：查看 console.log 輸出
+3. **監控網路請求**：查看 API 呼叫日誌
+4. **分析崩潰原因**：查看異常堆疊資訊
+
+## 注意事項
+
+- 日誌讀取需要應用程式保持執行狀態
+- `maxLogs` 參數可控制傳回的日誌數量
+- 應用程式重新啟動後需要重新取得連線資訊

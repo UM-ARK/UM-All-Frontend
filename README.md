@@ -14,22 +14,28 @@
 -   如果 ARK ALL 有幫助到您，可以請我們[喝杯咖啡](https://github.com/UM-ARK/Donate)！
 -   如果您也想參與到 ARK ALL 的開發中，立即聯繫我們 `umacark@gmail.com`！
 
-<details>
-  <summary>APP熒幕截圖</summary>
-  <img src="/README/img/Home.png" height="500rem" alt="Home" />
-  <img src="/README/img/Club.png" height="500rem" alt="Club" />
-  <img src="/README/img/Courses.png" height="500rem" alt="Courses" />
-  <img src="/README/img/Timetable.png" height="500rem" alt="Timetable" />
-  <img src="/README/img/Features.png" height="500rem" alt="Features" />
-  <img src="/README/img/Bus.png" height="500rem" alt="Bus" />
-</details>
+<div align="center">
+
+**APP熒幕截圖**
+
+| | | |
+|:---:|:---:|:---:|
+| <img src="/README/img/Home.png" width="30%" alt="Home" /> | <img src="/README/img/Club.png" width="30%" alt="Club" /> | <img src="/README/img/Courses.png" width="30%" alt="Courses" /> |
+| <img src="/README/img/Timetable.png" width="30%" alt="Timetable" /> | <img src="/README/img/Features.png" width="30%" alt="Features" /> | <img src="/README/img/Bus.png" width="30%" alt="Bus" /> |
+
+</div>
 
 - [**🎉ARK ALL 是一個免費的開源 APP🎉**](#ark-all-是一個免費的開源-app)
 - [🎉 首次運行該項目](#-首次運行該項目)
   - [🤖 Android 環境 Setup](#-android-環境-setup)
   - [🍎 iOS 環境 Setup](#-ios-環境-setup)
+  - [📘 Expo CNG 工作流說明](#-expo-cng-工作流說明)
 - [🌈 開發本項目準備](#-開發本項目準備)
   - [⛵ 啟動流程](#-啟動流程)
+    - [🔑 UM Open Data API Token 配置](#-um-open-data-api-token-配置)
+    - [📋 Firebase 配置文件說明](#-firebase-配置文件說明)
+      - [`google-services.json` 模板結構](#google-servicesjson-模板結構)
+      - [`GoogleService-Info.plist` 模板結構](#googleservice-infoplist-模板結構)
     - [🤖 Android 運行](#-android-運行)
     - [🍎 iOS 運行](#-ios-運行)
     - [配置Firebase](#配置firebase)
@@ -37,7 +43,13 @@
     - [Google Firebase Analytics](#google-firebase-analytics)
 - [📦 打包方式](#-打包方式)
   - [🍎 iOS 打包](#-ios-打包)
+    - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦)
+    - [方式二：本地 Xcode 構建（傳統方式）](#方式二本地-xcode-構建傳統方式)
+    - [本地 Release 真機除錯（不走 EAS）](#本地-release-真機除錯不走-eas)
   - [🤖 Android 打包](#-android-打包)
+    - [方式一：使用 Expo 構建（推薦）](#方式一使用-expo-構建推薦-1)
+    - [方式二：本地 Gradle 構建](#方式二本地-gradle-構建)
+    - [本機 Release 簽名設定](#本機-release-簽名設定)
   - [🐛 故障排除](#-故障排除)
 - [⛵ 維護須知](#-維護須知)
 
@@ -45,49 +57,69 @@
 
 ## 🎉 首次運行該項目
 
-在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)
+在此查看[已知 BUG](./README/debugging_doc.md#android%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83)，現在可以參考`./AGENTS.md`文件看項目說明了~~AI萬歲~~。
 
 ### 🤖 Android 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
 1. 確保自己是 `Android API 33` 或 `API 31` 的模擬器環境，下載安裝 JDK、SDK
-2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `npm i --legacy-peer-deps` 安裝 npm 依賴
-3. 前往 `Android Studio` 啟動所需的模擬器
-4. 敲入 `react-native run-android` or `npm run android` or `yarn android` (如需使用 yarn 需要先`npm install yarn -g`) 運行本項目吧!
+2. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+3. 執行 `npx expo prebuild --clean` 生成 Android 原生項目
+   - 僅生成 Android：`npx expo prebuild --clean --platform android`
+   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
+   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
+4. 前往 `Android Studio` 啟動所需的模擬器
+5. 敲入 `yarn android` 運行本項目吧!
 
 ---
 
 ### 🍎 iOS 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
-> 基於 React Native CLI 下的安裝流程，iOS APP 目前只能在 Mac 開發調試
+> 基於 Expo SDK 54 + React Native 0.81.5，iOS APP 目前只能在 Mac 開發調試
 
-1. 先安裝`node`包，方便之後使用指令`npm`和`npx`
+1. 先安裝`node`包（Node ≥18），方便之後使用指令
 
 ```console
 brew install node
 brew install watchman
 ```
 
-2. 確保安裝了 `Xcode` (版本 10 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
-3. 安裝`CocoaPods`去管理 ios 系統相關的包
+2. 確保安裝了 `Xcode` (版本 15 或以上)，建議在[官網](https://developer.apple.com/download/all/?q=Xcode)下載
+3. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `yarn install` 安裝依賴
+4. 執行 `npx expo prebuild --clean` 生成 iOS 原生項目
+   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
+   - 僅生成 Android：`npx expo prebuild --clean --platform android`
+   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
+
+5. 使用 Expo 運行 iOS（**不需要手動管理 CocoaPods**）
 
 ```console
-brew install cocoapods
+yarn ios          # 運行 iPhone 16 Pro 模擬器
+yarn iosNew       # 運行 iPhone 17 Pro 模擬器
+yarn iosTrue      # 運行到真實設備
+yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
 
-4. 在項目根目錄(`package.json`所在的目錄)打開命令行運行 `npm i --legacy-peer-deps` 安裝 npm 依賴
-   2024 年更新：在react-native@0.73+，使用`yarn install`安裝依賴。
-5. Pod 自動鏈接好 iOS 的包
+> **注意**：Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴，無需手動運行 `pod install` 或 `prebuild`。首次運行 `yarn ios` 時會自動生成原生項目文件。
 
-```console
-cd ios
-pod install --repo-update
-```
+---
 
-如有衝突可先刪除`./ios/Podfile.lock`文件再運行上述命令。
+### 📘 Expo CNG 工作流說明
 
-6. 啟動 `Xcode` ，打開項目 `./ios/UMALL.xcworkspace`
-7. `Command + R` 運行項目，先除錯，沒有問題再回 VSCode 的命令行使用 `yarn ios` 啟動
-   react-native@0.73+更新：需要在`Xcode -> Product -> Scheme -> Edit Scheme`，設置為 Debug 模式，Metro 才能接收控制台命令進行調試和 log。
+項目使用 **Expo CNG (Continuous Native Generation)** 自動管理原生項目：
+
+| 操作         | 命令                             | 說明                                                           |
+| ------------ | -------------------------------- | -------------------------------------------------------------- |
+| 安裝依賴     | `yarn install` 或 `expo install` | 推薦使用 yarn                                                  |
+| 生成原生項目 | `npx expo prebuild --clean`      | **首次運行前必須執行**，可加 `--platform ios/android` 指定平台 |
+| ------       | ------                           | ------                                                         |
+| 運行 iOS     | `yarn ios`                       | 運行 iOS 模擬器或真機                                          |
+| 運行 Android | `yarn android`                   | 運行 Android 模擬器                                            |
+
+**重要**：
+- **首次運行前必須先執行 `npx expo prebuild --clean`** 生成原生項目文件
+- 生成後會創建 `./ios` 和 `./android` 目錄
+- **無需手動運行 `pod install`**：Expo CNG 會自動處理
+- 如果遇到原生構建問題，可重新運行 `npx expo prebuild --clean` 重新生成
 
 ---
 
@@ -104,54 +136,183 @@ git clone https://github.com/UM-ARK/UM-All-Frontend.git
 2. 在項目根目錄下(`./package.json`所在的目錄)啟動 Terminal/命令行安裝依賴包
 
 ```console
-忽略警告安裝 - 正常會使用這條指令，因為某些有問題的包尚未能解決衝突
-npm i --legacy-peer-deps
+yarn install
+# 或使用 expo install（自動處理依賴兼容性）
+expo install
 ```
 
-3. 需要在項目根目錄放`umAPIToken.json`文件，內容格式為：
+3. 執行 `npx expo prebuild --clean` 生成 iOS/Android 原生項目
+   - 僅生成 iOS：`npx expo prebuild --clean --platform ios`
+   - 僅生成 Android：`npx expo prebuild --clean --platform android`
+   - 如安裝了跨平台庫，直接使用 `npx expo prebuild --clean` 生成兩個平台
+
+4. 配置 **UM Open Data API Token**（新聞、活動、停車場即時資料等 `api.data.um.edu.mo` 請求需要 `Authorization`）。請見下方 [🔑 UM Open Data API Token 配置](#-um-open-data-api-token-配置)。
+
+#### 🔑 UM Open Data API Token 配置
+
+程式透過 `src/utils/pathMap.js` 匯出的 `UM_API_TOKEN` 讀取 **`process.env.EXPO_PUBLIC_UM_API_TOKEN`**（Expo 會在打包／開發時把 `EXPO_PUBLIC_*` 內嵌進 JS，因此必須使用此前綴）。
+
+**本機開發**
+
+1. 在專案**根目錄**（與 `package.json` 同層）新增 `.env` 或 `.env.local`。
+2. 寫入一行（將值換成你向澳大 Open Data 申請到的金鑰，勿使用範例字串）：
+
+```bash
+EXPO_PUBLIC_UM_API_TOKEN=你的_UM_Open_Data_Token
 ```
+
+3. 修改環境變數後請**重新啟動 Metro**；若仍讀不到，可嘗試 `yarn start --clear` 清快取再啟動。
+
+**版控與安全**
+
+- `.env`、`.env.local` 與歷史上的 `umAPIToken.json` 均已列於 `.gitignore`，**請勿把真實 Token 提交到 Git**。
+- 舊版文件曾要求根目錄 `umAPIToken.json`；**目前程式碼已不再讀取該 JSON**，請改用上方的 `EXPO_PUBLIC_UM_API_TOKEN`。
+
+**EAS / 雲端建置**
+
+- 雲端機器不會自動帶上你電腦裡的 `.env`。使用 EAS Build 時，請在 [Expo 專案 Environment variables](https://docs.expo.dev/eas/environment-variables/) 為對應建置 profile 設定同名變數 `EXPO_PUBLIC_UM_API_TOKEN`，否則正式版中相關 API 可能無法通過驗證。
+
+**取得 Token**
+
+- 請依澳門大學 Open Data／Data API 官方流程申請；維護者或團隊內部文件會說明申請管道與權限範圍。開源貢獻者若無金鑰，與上述 API 有關的畫面可能無法取得資料，屬預期行為。
+
+5. 需要配置 Firebase 配置文件（用於 Analytics 等功能）：
+
+#### 📋 Firebase 配置文件說明
+
+本項目需要以下 Firebase 配置文件：
+
+| 平台 | 文件路徑 | 用途 |
+|------|----------|------|
+| Android | `google-services.json`（項目根目錄） | Firebase Analytics、Crashlytics |
+| iOS | `GoogleService-Info.plist`（項目根目錄） | Firebase Analytics、Crashlytics |
+
+**獲取方式：**
+1. 前往 [Firebase Console](https://console.firebase.google.com/) 創建項目
+2. 註冊 Android/iOS 應用（包名：`one.umall`）
+3. 下載配置文件並放到對應目錄
+
+**如果只需運行項目（不使用 Firebase 功能）：**
+
+可以嘗試使用空文件或模板文件。以下是文件結構僅供參考（請勿填入真實隱私 key）：
+
+##### `google-services.json` 模板結構
+```json
 {
-    "token":"YOURE_UM_API_TOKEN"
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "your-project-id",
+    "storage_bucket": "your-project-id.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "one.umall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
 }
 ```
+
+##### `GoogleService-Info.plist` 模板結構
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CLIENT_ID</key>
+    <string>000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com</string>
+    <key>REVERSED_CLIENT_ID</key>
+    <string>com.googleusercontent.apps.000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
+    <key>API_KEY</key>
+    <string>YOUR_API_KEY</string>
+    <key>GCM_SENDER_ID</key>
+    <string>000000000000</string>
+    <key>PLIST_VERSION</key>
+    <string>1</string>
+    <key>BUNDLE_ID</key>
+    <string>one.umall</string>
+    <key>PROJECT_ID</key>
+    <string>your-project-id</string>
+    <key>STORAGE_BUCKET</key>
+    <string>your-project-id.appspot.com</string>
+    <key>IS_ADS_ENABLED</key>
+    <false/>
+    <key>IS_ANALYTICS_ENABLED</key>
+    <false/>
+    <key>IS_APPINVITE_ENABLED</key>
+    <true/>
+    <key>IS_GCM_ENABLED</key>
+    <true/>
+    <key>IS_SIGNIN_ENABLED</key>
+    <true/>
+    <key>GOOGLE_APP_ID</key>
+    <string>1:000000000000:ios:0000000000000000000000</string>
+</dict>
+</plist>
+```
+
+> ⚠️ **注意**：空文件可能導致 Firebase 功能異常。建議從 Firebase Console 獲取真實配置文件，或至少填入有效的 `API_KEY`。
 
 #### 🤖 Android 運行
 
 1. 在 Android 上運行 App
 
 ```console
-npx react-native run-android
-or
 yarn android
-or
-npm run android
 ```
 
-如果不喜歡運行命令後彈出新的窗口，可以先在 VSCode 中打開一個命令行窗口，敲入 `yarn start`，再在另一個命令行窗口中 `yarn android`，就不會有額外彈窗了
+**說明：**
+- Expo CNG 會在首次運行時自動生成 Android 原生項目文件
+- 首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目
+- 運行 `yarn android` 前不需要手動執行 `prebuild`
 
 #### 🍎 iOS 運行
 
-1. 在 ios 上自動鏈接 Pod
+> 項目使用 Expo SDK 54 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
+
+1. 確保已安裝依賴
 
 ```console
-cd ios
-pod install
+yarn install
 ```
 
-完成此步驟後，`./ios`的代碼將更新
-
-2. 打開`Xcode`，使用`Command + R`編譯運行 APP，先 Debug，再回 VSCode 開發調試
-
-3. 命令行編譯/運行 App
+2. 使用 Expo 運行 iOS
 
 ```console
-yarn ios
-or
-yarn ios --simulator="iPhone 15"
+yarn ios          # 運行 iPhone 16 Pro 模擬器
+yarn iosNew       # 運行 iPhone 17 Pro 模擬器
+yarn iosTrue      # 運行到真實設備
+yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 ```
+
+**說明：**
+- Expo CNG 會自動處理 iOS 原生代碼生成和 CocoaPods 依賴
+- **首次運行前需先執行 `npx expo prebuild --clean` 生成原生項目**
+- **無需手動運行 `pod install`**
+- **無需手動打開 Xcode** 進行編譯
+- 如需在 Xcode 中調試，可打開 `./ios` 目錄下的項目文件（首次運行 `yarn ios` 後會生成）
 
 #### 配置Firebase
-從Firebase控制台導出配置文件放入`android/app/google-services.json`和`ios/GoogleService-Info.plist`。
+
+從Firebase控制台導出配置文件放入項目根目錄 `google-services.json` 和 `GoogleService-Info.plist`。
+
+詳細說明見上方「Firebase 配置文件說明」章節。
 
 ---
 
@@ -161,15 +322,9 @@ yarn ios --simulator="iPhone 15"
 -   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
 <br>
 
-**react-native@0.73+更新：**
-- iOS 模擬器`Open Debugger`可能無法正確跳轉到瀏覽器，
-    -   方法1：Chrome 可前往`chrome://inspect`，在`Remote Target`中找到`React Native Experimental (Improved Chrome Reloads)`下的 inspect 按鈕打開DevTools。
-    -   方法2：使用`sh debug.sh`，其實是運行`npx react-devtools`，然後再在模擬器中`Open Debugger`，即會使用該插件打開Console查看log。
-
-<br>
-
-**react-native@0.77+更新：**
+**react-native@0.81+更新：**
 - 在`Metro`中直接使用`j`調出React DevTools。
+- iOS 模擬器支持最新的 Debugging 方案。
 
 #### Google Firebase Analytics
 
@@ -182,34 +337,125 @@ iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/ana
 
 ### 🍎 iOS 打包
 
-1. Xcode中找到 `./ios/UMALL.xcworkspace`（Pods鏈接的項目使用workspace，其他使用proj），點擊使用Xcode打開。
-2. Build。
+> 項目使用 Expo SDK 54 與 CNG，推薦使用 Expo 進行打包
 
--   點擊左側欄目找到`UMALL`項目，然後再中間的面板中輸入新的版本號（Version 和 Build 通常一樣）。
--   將設備設為"Any iOS Device"，並`command+B`來 Build，並進行實機測試。
+#### 方式一：使用 Expo 構建（推薦）
 
-3. 歸檔並發佈。
+1. 確保已安裝 EAS CLI
 
--   Build 成功後，點擊頂欄 Product->Archive 歸檔，隨後在彈出的頁面中一直點擊確認。
--   最後點擊 Distribute App 按鈕發佈。
+```console
+yarn global add eas-cli
+# 或
+npm install -g eas-cli
+```
 
-4. 到[Appstore Connect 頁面](https://appstoreconnect.apple.com)查看並提交審核。
-5. 注意：
+2. 登錄 Expo 賬號
 
--   一個 Build 號只能用一次。如果 build 失敗則更換 build 號，通常加一個小版本即可（如 2.2.0->2.2.1）。
--   檢查`Info.plist`的`App Uses Non-Exempt Encription`選項，必須設置為 No，否則會被 Apple 禁止上傳。
+```console
+eas login
+```
 
-6. 發佈注意：
+3. 構建 iOS 應用
 
--   切換 Any iOS Device arm64 進行 Build
--   使用 Product - Archive 進行封包，如提示`React-Core.common`字樣的問題，在 Pods 中刪除非`React-Core.common-CoreModulesHeaders`的相似文件，再進行 Build 與 Archive
+```console
+eas build --platform ios
+```
+
+4. 按照提示選擇構建類型（內部分發或 App Store 提交）
+
+#### 方式二：本地 Xcode 構建（傳統方式）
+
+如需在 Xcode 中手動構建：
+
+1. 確保已運行過 `npx expo prebuild --clean` 生成 iOS 項目文件
+2. 打開 `./ios/UMALL.xcworkspace`
+3. 在 Xcode 中配置簽名和版本號
+4. 使用 `Product -> Archive` 進行歸檔和發佈
+
+**注意事項：**
+- 版本號在 `app.json` 中統一管理，構建時會自動同步到原生項目
+- 使用 EAS 構建時，不需要手動管理簽名證書
+- 提交 App Store 前確保已在 [App Store Connect](https://appstoreconnect.apple.com) 創建應用記錄
+
+#### 本地 Release 真機除錯（不走 EAS）
+
+在需要驗證 **Production / Release** 行為、且希望**不經 EAS 雲端建置**時，可在本機用 **Xcode 簽名**，將 **Release** 組態直接安裝到已以 USB 連接的真機。
+
+```console
+npx expo run:ios --configuration Release --device
+```
+
+| | |
+| --- | --- |
+| **好處** | 不必等待 EAS 雲端排隊，本機建置與重裝較快。 |
+| **條件 / 壞處** | 需要有效的 **Apple 開發者帳號**，且本機 **Xcode 與簽名環境**（Team、憑證、裝置信任等）需設定正確。 |
+
+首次使用前請先依上文完成 `npx expo prebuild` 與依賴安裝；若簽名失敗，請在 Xcode 中開啟 `ios` 內的 workspace，檢查 **Signing & Capabilities** 與目標裝置是否已加入開發團隊。
+
+---
 
 ### 🤖 Android 打包
 
-1. Android 端需保存好`.keystore`或`.jks`文件。編譯出包時，將該文件放置在`android/app`目錄下，以作 App 密鑰。
-2. Android 打包，需要保證 jdk 版本為`18.0.2.1`
-3. 在 `./android` 目錄下，使用 `gradlew assembleRelease` 打包 APK 文件，但似乎會出現密鑰不正確的問題無法繼承安裝。
-4. 在 `./android` 目錄下，使用 `gradlew bundleRelease` 打包 Google Play Store 所需的 `.adb` 文件。
+#### 方式一：使用 Expo 構建（推薦）
+
+```console
+eas build --platform android
+```
+
+選擇構建類型：
+- **APK**：內部分發測試
+- **AAB (Android App Bundle)**：Google Play Store 提交
+
+#### 方式二：本地 Gradle 構建
+
+1. 確保已運行過 `npx expo prebuild --clean` 生成 Android 項目文件
+2. 依下方 [本機 Release 簽名設定](#本機-release-簽名設定) 完成 Release 簽名（本倉庫透過 Expo config plugin 注入，無需在 `android/app/build.gradle` 手動改寫）
+3. 運行構建命令：
+
+```console
+cd android
+./gradlew assembleRelease  # 構建 APK
+# 或
+./gradlew bundleRelease    # 構建 AAB (Google Play)
+```
+
+**注意事項：**
+- 確保 JDK 版本為 18 或以上
+- 版本號在 `app.json` 中統一管理
+- 首次發布到 Play Store 需要使用 AAB 格式
+- 內部測試可使用 APK 格式直接安裝
+
+#### 本機 Release 簽名設定
+
+對應最新提交中的 **Android Release 簽名與 Expo CNG**：`app.json` 已掛載 `./plugins/withAndroidSigning`，在執行 `npx expo prebuild` 時會自動在 `android/app/build.gradle` 注入 **Release** 的 `signingConfigs`。只有當 Gradle 能讀到 `MYAPP_RELEASE_*` 屬性時才會套用正式 keystore；**密碼與路徑請勿寫入倉庫內的 `gradle.properties`**（避免提交）。
+
+**1. Keystore 檔要放哪？**
+
+- `MYAPP_RELEASE_STORE_FILE` 在 Gradle 裡會解析成：**相對於專案根目錄**（與 `package.json` 同層）的路徑。
+- 常見做法：把keystore.keystore放在根目錄
+- 亦可將檔案放在倉庫外，只要 `MYAPP_RELEASE_STORE_FILE` 仍能以「自專案根目錄起算」的相對路徑指到該檔（或依你本機 Gradle／Java 版本使用絕對路徑；仍以不進版控為原則）。
+
+**2. 在 `~/.gradle/` 裡怎麼配置？**
+
+在使用者家目錄建立或編輯 **`~/.gradle/gradle.properties`**（全機共用、不進專案 Git），寫入以下鍵值（請替換成你自己的路徑與密碼）：
+
+```properties
+# Android Release 簽名（僅本機，勿提交）
+# MYAPP_RELEASE_STORE_FILE：相對「專案根目錄」的 keystore 路徑
+MYAPP_RELEASE_STORE_FILE=android/app/release.keystore
+MYAPP_RELEASE_STORE_PASSWORD=你的_store_密碼
+MYAPP_RELEASE_KEY_ALIAS=你的_key_alias
+MYAPP_RELEASE_KEY_PASSWORD=你的_key_密碼
+```
+
+存檔後在專案根目錄執行 `cd android && ./gradlew bundleRelease`（或 `assembleRelease`）即可。若未設定上述屬性，Release 區塊不會套用 store 檔，請勿在遺失簽名設定的情況下誤發佈。
+
+**3. 維護提醒**
+
+- 重新執行 `npx expo prebuild --clean` 時，只要 `app.json` 仍包含 `./plugins/withAndroidSigning`，簽名區塊會一併重新產生，無需手動合併 `build.gradle`。
+- CI／EAS 請改用 EAS 的 [Android 憑證管理](https://docs.expo.dev/app-signing/app-credentials/) 或對應的 secrets，而不是依賴某台機器上的 `~/.gradle/gradle.properties`。
+
+---
 
 ### 🐛 故障排除
 

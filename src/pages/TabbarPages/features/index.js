@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
-    ScrollView, Text, View, TouchableOpacity, Linking, Platform, Alert,
+    Platform,
+    ScrollView, Text, View, TouchableOpacity, Linking,
 } from 'react-native';
 
-import { useTheme, themes, uiStyle, ThemeContext, } from '../../../components/ThemeContext';
-import { ARK_HARBOR_FEEDBACK, MAIL, } from '../../../utils/pathMap';
-import { logToFirebase } from "../../../utils/firebaseAnalytics";
-import { openLink } from "../../../utils/browser";
-import { trigger } from "../../../utils/trigger";
-import CustomBottomSheet from "../courseSim/BottomSheet";
+import { useTheme, uiStyle } from '../../../components/ThemeContext';
+import { ARK_HARBOR_FEEDBACK, MAIL } from '../../../utils/pathMap';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
+import { openLink } from '../../../utils/browser';
+import { trigger } from '../../../utils/trigger';
+import CustomBottomSheet from '../courseSim/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 
-import { Header } from '@rneui/themed';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -19,21 +19,22 @@ import { FlatGrid } from 'react-native-super-grid';
 import { Image } from 'expo-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
-import Toast from "react-native-simple-toast";
-import TouchableScale from "react-native-touchable-scale";
-import { SafeAreaInsetsContext } from "react-native-safe-area-context";
+import Toast from 'react-native-simple-toast';
+import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
+import * as DropdownMenu from 'zeego/dropdown-menu';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function Index({ navigation }) {
+    const insets = useSafeAreaInsets();
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, barStyle, viewShadow } = theme;
+    const { themeColor, white, black, trueWhite, bg_color, viewShadow } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = getFunctionArr(t);
     const fontSize = i18n.language === 'tc' ? verticalScale(10) : verticalScale(8);
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
-    const insets = useContext(SafeAreaInsetsContext);
 
     // 功能卡片渲染，useCallback避免不必要的重渲染
     const GetFunctionCard = useCallback((title, fn_list) => (
@@ -118,11 +119,11 @@ function Index({ navigation }) {
                 scrollEnabled={false}
             />
         </View >
-    ), [white, fontSize]);  // useCallback依賴於此
+    ), [white, fontSize, bg_color, black, navigation, themeColor, trueWhite, viewShadow]);
 
     // BottomSheet內容渲染
     const renderBottomSheet = () => {
-        if (!bottomSheetInfo) return null;
+        if (!bottomSheetInfo) { return null; }
         const { go_where, webview_param, describe } = bottomSheetInfo;
         const haveLink = (go_where === 'Webview' || go_where === 'Linking');
         return (
@@ -130,7 +131,7 @@ function Index({ navigation }) {
                 {describe && <Text style={{
                     ...uiStyle.defaultText,
                     color: black.main,
-                    textAlign: 'center'
+                    textAlign: 'center',
                 }} selectable>{describe}</Text>}
                 {haveLink && <TouchableOpacity
                     style={{
@@ -151,93 +152,95 @@ function Index({ navigation }) {
         );
     };
 
-    const handleFeedbackPress = () => {
-        trigger();
-        const mailMes = `mailto:${MAIL}?subject=ARK功能反饋`;
-        // if (Platform.OS === 'android') {
-        // } else {
-        //     Linking.openURL(mailMes);
-        // }
-        Alert.alert(t('反饋'), t(`請在郵件${MAIL}中給我們建議！`), [
-            {
-                text: 'Harbor⭐️', onPress: () => {
-                    openLink(ARK_HARBOR_FEEDBACK);
-                }
-            },
-            {
-                text: 'Email', onPress: () => {
-                    Clipboard.setString(MAIL);
-                    Toast.show(t('已複製Mail到剪貼板！'));
-                    Linking.openURL(mailMes);
-                }
-            },
-            { text: 'No', },
-        ]);
-    }
-
     const handleSettingsPress = () => {
         trigger();
-        navigation.navigate('NewsTabbar', { screen: 'AboutPage' });
-    }
+        navigation.navigate('SettingPage');
+    };
+
+    // Android 底欄外層不再包 SafeAreaView；此處單獨補頂部狀態列區，避免內容頂到螢幕
+    const topInsetAndroid = Platform.OS === 'android' ? insets.top : 0;
 
     return (
-        <View style={{ flex: 1, backgroundColor: bg_color }}>
-            <Header
-                backgroundColor={bg_color}
-                statusBarProps={{
-                    backgroundColor: 'transparent',
-                    barStyle: barStyle,
-                }}
-                containerStyle={{
-                    height: Platform.select({
-                        android: scale(38),
-                        default: insets?.top || 0,
-                    }),
-                    paddingTop: 0,
-                    borderBottomWidth: 0,
-                }}
-            />
-            <ScrollView showsVerticalScrollIndicator={true}>
+        <View
+            style={{
+                flex: 1,
+                backgroundColor: bg_color,
+                paddingTop: topInsetAndroid,
+            }}
+        >
+            <ScrollView showsVerticalScrollIndicator={true} contentInsetAdjustmentBehavior="automatic">
                 {/* 標題與個功能按鍵 */}
                 <View style={{
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                    paddingVertical: verticalScale(10), // 增加頂部呼吸感
-                    paddingHorizontal: scale(16), // 兩側留白增加至 16
+                    paddingHorizontal: scale(10), // 兩側留白增加至 16
                 }}>
-                    {/* 左側：反饋 (使用淺色背景膠囊樣式) */}
-                    <TouchableOpacity
-                        style={{
-                            flexDirection: 'row', alignItems: 'center',
-                            backgroundColor: `${themeColor}15`, // 15 是 10% 透明度，讓顏色更柔和
-                            borderRadius: scale(20), // 完全圓角更現代
-                            paddingVertical: scale(6),
-                            paddingHorizontal: scale(10),
-                        }}
-                        onPress={handleFeedbackPress} // 邏輯抽離
-                    >
-                        <MaterialIcons name={'feedback'} size={verticalScale(14)} color={themeColor} />
-                        <Text style={{
-                            marginLeft: scale(4),
-                            fontSize: verticalScale(12),
-                            color: themeColor,
-                            fontWeight: '600',
-                            lineHeight: verticalScale(14),
-                        }}>
-                            {t('反饋')}
-                        </Text>
-                    </TouchableOpacity>
+                    {/* 左側：反饋 */}
+                    <DropdownMenu.Root onOpenChange={(open) => { if (open) { trigger(); } }}>
+                        <DropdownMenu.Trigger>
+                            <TouchableScale
+                                style={{
+                                    flexDirection: 'row', alignItems: 'center',
+                                    backgroundColor: `${themeColor}15`,
+                                    borderRadius: scale(20),
+                                    paddingVertical: scale(6),
+                                    paddingHorizontal: scale(10),
+                                }}
+                            >
+                                <MaterialIcons name={'feedback'} size={verticalScale(14)} color={themeColor} />
+                                <Text style={{
+                                    marginLeft: scale(4),
+                                    fontSize: verticalScale(12),
+                                    color: themeColor,
+                                    fontWeight: '600',
+                                    lineHeight: verticalScale(14),
+                                }}>
+                                    {t('反饋')}
+                                </Text>
+                            </TouchableScale>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                            <DropdownMenu.Item
+                                key="harbor"
+                                onSelect={() => {
+                                    trigger();
+                                    openLink(ARK_HARBOR_FEEDBACK);
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{ name: 'star.fill', pointSize: scale(16), hierarchicalColor: { dark: themeColor, light: themeColor } }}
+                                    androidIconName="btn_star"
+                                />
+                                <DropdownMenu.ItemTitle>{'Harbor ⭐️'}</DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                key="email"
+                                onSelect={() => {
+                                    trigger();
+                                    Clipboard.setString(MAIL);
+                                    Toast.show(t('已複製Mail到剪貼板！'));
+                                    Linking.openURL(`mailto:${MAIL}?subject=ARK功能反饋`);
+                                }}
+                            >
+                                <DropdownMenu.ItemIcon
+                                    ios={{ name: 'envelope', pointSize: scale(16), hierarchicalColor: { dark: themeColor, light: themeColor } }}
+                                    androidIconName="ic_menu_send"
+                                />
+                                <DropdownMenu.ItemTitle>{'Email'}</DropdownMenu.ItemTitle>
+                            </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                    </DropdownMenu.Root>
 
                     {/* 中間：標題 */}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{
                             fontSize: verticalScale(18),
                             color: black.main,
-                            fontWeight: '700'
+                            fontWeight: '700',
                         }}>{t('服務一覽', { ns: 'features' })}</Text>
                     </View>
 
                     {/* 右側：設置 (與左側對稱) */}
-                    <TouchableOpacity
+                    <TouchableScale
                         style={{
                             flexDirection: 'row', alignItems: 'center',
                             backgroundColor: `${themeColor}15`,
@@ -258,7 +261,7 @@ function Index({ navigation }) {
                         }}>
                             {t('設置')}
                         </Text>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 </View>
 
                 {functionArr.map(fn_card => GetFunctionCard(fn_card.title, fn_card.fn))}
