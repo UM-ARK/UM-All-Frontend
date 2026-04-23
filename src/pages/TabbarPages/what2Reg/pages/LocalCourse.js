@@ -6,6 +6,7 @@ import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import Loading from '../../../../components/Loading';
 import SegmentControl from '../../../../components/SegmentControl';
 import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
+import { openLink } from '../../../../utils/browser';
 import { getCourseData } from '../../../../utils/checkCoursesKits';
 import coursePlanTime from '../../../../static/UMCourses/coursePlanTime';
 
@@ -81,10 +82,7 @@ const LocalCourse = (props) => {
             setIsLoading(true);
             if (navigation.canGoBack()) {
                 navigation.goBack();
-                navigation.navigate('Tabbar', {
-                    screen: 'Wiki',
-                    params: { url: URL },
-                });
+                openLink(URL);
             }
         } else {
             // 按section分離課程數據

@@ -155,7 +155,7 @@ const What2Reg = props => {
         switch (eventId) {
             case 'wiki': {
                 const url = ARK_WIKI_SEARCH + encodeURIComponent(inputText);
-                props.navigation.navigate('Wiki', { url });
+                openLink(url);
                 break;
             }
             case 'what2reg': {
@@ -172,7 +172,7 @@ const What2Reg = props => {
             default:
                 break;
         }
-    }, [inputText, props.navigation]);
+    }, [inputText]);
 
     const onClearInput = useCallback(() => {
         trigger();

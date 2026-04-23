@@ -66,14 +66,14 @@ export default function NewsScreen() {
                             tabPress: () => trigger(),
                         })}
                     />
-                    <Tab.Screen
+                    {/* <Tab.Screen
                         name="WikiPage"
                         component={WikiPage}
                         options={{ title: t('Wiki') }}
                         listeners={() => ({
                             tabPress: () => trigger(),
                         })}
-                    />
+                    /> */}
                     <Tab.Screen
                         name="ClubPage"
                         component={ClubPage}
