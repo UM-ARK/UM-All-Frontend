@@ -1,12 +1,12 @@
 {
   "name": "umall",
-  "version": "26.1.0",
+  "version": "26.4.0",
   "main": "index.js",
   "private": true,
   "scripts": {
     "postinstall": "node scripts/patch-react-navigation-elements-assets.js",
     "android": "expo run:android",
-    "ios": "npx expo run:ios --device 05E0D4A1-B9E4-4A31-906C-85CE724BFB06",
+    "ios": "npx expo run:ios --device",
     "iosNew": "npx expo run:ios --device \"iPhone 17 Pro\"",
     "iosTrue": "npx expo run:ios --device",
     "iosBig": "npx expo run:ios --device \"iPad Pro 13-inch (M5)\"",
@@ -24,6 +24,7 @@
     "@react-native-community/datetimepicker": "8.6.0",
     "@react-native-firebase/analytics": "^24.0.0",
     "@react-native-firebase/app": "^24.0.0",
+    "@react-native-menu/menu": "^2.0.0",
     "@react-native-vector-icons/material-design-icons": "^13.0.0",
     "@react-navigation/bottom-tabs": "^7.15.9",
     "@react-navigation/elements": "^2.9.14",
