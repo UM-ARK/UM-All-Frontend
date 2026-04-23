@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     Linking,
     Alert,
+    Platform,
 } from 'react-native';
 import { useTheme, uiStyle } from '../../components/ThemeContext';
 import { openLink } from '../../utils/browser';
@@ -523,7 +524,7 @@ const SettingPage = ({ navigation }) => {
                 <SettingSectionCard>
                     <SettingItem
                         grouped
-                        icon="logo-apple"
+                        icon={Platform.OS === 'android' ? 'logo-android' : 'logo-apple'}
                         iconColor={black.main}
                         title={t('setting:Version')}
                         subtitle={`v${packageInfo.version}`}
