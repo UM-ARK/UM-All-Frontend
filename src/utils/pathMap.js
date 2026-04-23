@@ -295,3 +295,6 @@ export const UM_RC = 'https://ado.um.edu.mo/rc/?lang=zh-hant';
 
 // 澳大 - 組織架構
 export const UM_ORG = 'https://api.data.um.edu.mo/service/aboutum/organizational_units/all';
+
+// 飯堂排隊
+export const CANTEEN_QUEUE = 'https://queue.umall.one/';

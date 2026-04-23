@@ -42,6 +42,7 @@ import {
     UM_ALUMNI,
     ARK_HARBOR,
     ARK_WIKI,
+    CANTEEN_QUEUE,
 } from '../../../utils/pathMap';
 import { getCurrentUmehHost } from '../../../utils/umehHost';
 
@@ -287,6 +288,21 @@ export const getFunctionArr = (t) => [
                 describe: t('查看澳大書院菜單', { ns: 'features' }),
                 key_name: '書院餐單',
                 keywords: 'Residential College Menu, Dining, Food, Meal, 餐單, 菜單, 飲食, 食堂, 書院',
+            },
+            {
+                icon_type: iconTypes.materialCommunityIcons,
+                icon_name: 'silverware-fork-knife',
+                fn_name: t('飯堂排隊', { ns: 'features' }),
+                needLogin: false,
+                go_where: 'Webview',
+                webview_param: {
+                    url: CANTEEN_QUEUE,
+                    title: '飯堂排隊人數',
+                    bg_color_diy: '#fff',
+                },
+                describe: t('查看LCWC W22飯堂當前排隊人數', { ns: 'features' }),
+                key_name: '飯堂排隊',
+                keywords: 'Canteen Queue, Dining, LCWC, W22, 飯堂, 排隊, 人數, 食堂',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
