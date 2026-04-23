@@ -6,6 +6,7 @@
   "scripts": {
     "postinstall": "node scripts/patch-react-navigation-elements-assets.js",
     "android": "expo run:android",
+    "androidRelease": "npx expo run:android --variant release --device",
     "ios": "npx expo run:ios --device",
     "iosNew": "npx expo run:ios --device \"iPhone 17 Pro\"",
     "iosTrue": "npx expo run:ios --device",
