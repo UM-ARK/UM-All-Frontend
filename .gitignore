@@ -104,3 +104,7 @@ web-build/
 .cursor/mcp.json
 
 .omc
+
+# Apple Distribution Certificate
+*.cer
+*.p12
