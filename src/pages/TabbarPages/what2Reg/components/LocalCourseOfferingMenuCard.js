@@ -25,7 +25,6 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     }
 
     const isPE = courseRow['Course Code'] === 'CPED1001' || courseRow['Course Code'] === 'CPED1002';
-    const timeRowWrap = variant === 'section' ? { flexWrap: 'wrap' } : {};
     const showTeacherInCard = variant === 'section' && courseRow['Teacher Information'];
 
     const keyPrefix = variant;
@@ -67,7 +66,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                         </View>
                     )}
                     {slots.length >= 1 && slots.every(item => 'Time From' in item && item['Time From']) && (
-                        <View style={{ flexDirection: 'row', ...timeRowWrap }}>
+                        <View style={{ flexDirection: 'row' }}>
                             {slots.map((sameSection, idx) => (
                                 <View
                                     key={variant === 'teacher' ? sameSection.Day + sameSection.Classroom + idx : sameSection.Day + sameSection.Classroom}
