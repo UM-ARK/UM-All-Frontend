@@ -247,8 +247,7 @@ const FilterPanel = ({
                                     ...classItmStyle,
                                     paddingHorizontal: scale(5),
                                     paddingVertical: scale(3),
-                                    borderColor: filterOptions.GE === item ? themeColor : black.third,
-                                    backgroundColor: filterOptions.GE === item ? themeColor : null,
+                                    backgroundColor: filterOptions.GE === item ? `${themeColor}15` : null,
                                 }}
                                 onPress={() => {
                                     trigger();
@@ -257,7 +256,7 @@ const FilterPanel = ({
                             >
                                 <Text style={{
                                     ...uiStyle.defaultText,
-                                    color: filterOptions.GE === item ? white : black.third,
+                                    color: filterOptions.GE === item ? themeColor : black.third,
                                     fontWeight: filterOptions.GE === item ? '900' : 'normal',
                                     fontSize: scale(12),
                                 }}>
