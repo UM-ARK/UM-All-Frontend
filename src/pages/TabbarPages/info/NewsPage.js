@@ -87,7 +87,15 @@ const NewsPage = () => {
     // const [imgLoading, setImgLoading] = useState(true);
 
     const progressRef = useRef(0);
-    const renderNewsItem = useCallback(({ item }) => <NewsCard data={item} />, []);
+    // VirtualizedList 列寬有時不撐滿，外層需固定寬度 NewsCard 內層才能正確留白
+    const renderNewsItem = useCallback(
+        ({ item }) => (
+            <View style={{ width: '100%' }}>
+                <NewsCard data={item} />
+            </View>
+        ),
+        [],
+    );
 
     // 請求澳大新聞API
     useEffect(() => {
@@ -232,7 +240,11 @@ const NewsPage = () => {
 
     return (
         <View style={{
-            flex: 1, justifyContent: 'center', alignItems: 'center',
+            flex: 1,
+            justifyContent: 'center',
+            // 勿用 alignItems: 'center'：橫向不拉伸會讓 VirtualizedList 列寬塌縮，
+            // NewsCard 內 row 的 flex:1 文字欄變成極窄直排
+            alignItems: 'stretch',
             backgroundColor: bg_color,
         }}>
             {/* 懸浮可拖動按鈕 */}
@@ -243,6 +255,10 @@ const NewsPage = () => {
             {isLoading ? (
                 // 渲染Loading時的骨架屏
                 <ScrollView
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: 'center',
+                    }}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -262,10 +278,11 @@ const NewsPage = () => {
 
             {/* 渲染新聞列表 */}
             {isLoading ? null : (
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, width: '100%' }}>
                     <VirtualizedList
                     data={newsList}
                     ref={virtualizedList}
+                    style={{ flex: 1, width: '100%' }}
                     // 初始渲染的元素，設置為剛好覆蓋屏幕
                     initialNumToRender={4}
                     windowSize={8}

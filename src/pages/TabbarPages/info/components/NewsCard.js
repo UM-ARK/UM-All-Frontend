@@ -44,13 +44,22 @@ const NewsCard = ({ data, type = 'news' }) => {
             marginTop: verticalScale(6),
             marginHorizontal: scale(16),
             borderRadius: scale(16),
+            // 在 VirtualizedList 等父層未給定寬度時，仍撐滿可視列寬，供內層水平 flex 正確分配
+            alignSelf: 'stretch',
             ...viewShadow,
         },
         newsCardContentContainer: {
             flexDirection: 'row',
-            justifyContent: 'space-between',
-            padding: verticalScale(12),
+            alignItems: 'center',
+            // 明確指定左右內邊距，避免與固定寬度圖片併用時右側被擠壓
+            paddingHorizontal: scale(12),
             paddingVertical: verticalScale(10),
+        },
+        newsCardTextColumn: {
+            flex: 1,
+            minWidth: 0,
+            // 與左側內邊距對稱的間隔，使圖片與卡片右緣保持舒適留白
+            marginRight: scale(12),
         },
         newsCardImg: {
             width: verticalScale(90),
@@ -133,10 +142,10 @@ const NewsCard = ({ data, type = 'news' }) => {
             <View style={styles.newsCardContentContainer}>
                 {/* 标题 */}
                 <View
-                    style={{
-                        width: haveImage ? '70%' : '100%',
-                        flexDirection: 'column',
-                    }}>
+                    style={[
+                        styles.newsCardTextColumn,
+                        !haveImage && { marginRight: 0 },
+                    ]}>
                     {/* 英文标题 */}
                     {title_en.length > 0 && (
                         <Text
@@ -188,7 +197,7 @@ const NewsCard = ({ data, type = 'news' }) => {
 
                 {/* 新聞卡片配圖 */}
                 {haveImage && (
-                    <View style={{ alignSelf: 'center' }}>
+                    <View style={{ flexShrink: 0, alignSelf: 'center' }}>
                         <View
                             style={{
                                 borderRadius: scale(12),
