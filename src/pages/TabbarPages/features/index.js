@@ -208,7 +208,7 @@ function Index({ navigation }) {
                             >
                                 <DropdownMenu.ItemIcon
                                     ios={{ name: 'star.fill', pointSize: scale(16), hierarchicalColor: { dark: themeColor, light: themeColor } }}
-                                    androidIconName="ic_menu_star"
+                                    androidIconName="btn_star"
                                 />
                                 <DropdownMenu.ItemTitle>{'Harbor ⭐️'}</DropdownMenu.ItemTitle>
                             </DropdownMenu.Item>

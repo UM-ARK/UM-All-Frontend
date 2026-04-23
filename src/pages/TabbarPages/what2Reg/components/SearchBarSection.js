@@ -140,7 +140,7 @@ const SearchBarSection = ({
                                     light: themeColor,
                                 },
                             }}
-                            androidIconName="ic_menu_book"
+                            androidIconName="ic_menu_edit"
                         />
                         <DropdownMenu.ItemTitle style={{ color: themeColor }}>
                             {t('寫', { ns: 'catalog' })} Wiki
@@ -164,7 +164,7 @@ const SearchBarSection = ({
                                     light: black.third,
                                 },
                             }}
-                            androidIconName="ic_menu_star"
+                            androidIconName="btn_star"
                         />
                         <DropdownMenu.ItemTitle style={{ color: black.third }}>
                             {t('查', { ns: 'catalog' })} {t('選咩課', { ns: 'catalog' })}
