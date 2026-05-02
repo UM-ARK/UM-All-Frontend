@@ -9,7 +9,7 @@ PODS:
   - EXJSONUtils (55.0.2)
   - EXManifests (55.0.16):
     - ExpoModulesCore
-  - Expo (55.0.17):
+  - Expo (55.0.19):
     - ExpoModulesCore
     - hermes-engine
     - RCTRequired
@@ -34,15 +34,15 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - expo-dev-client (55.0.28):
+  - expo-dev-client (55.0.30):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (55.0.29):
+  - expo-dev-launcher (55.0.31):
     - EXManifests
-    - expo-dev-launcher/Main (= 55.0.29)
+    - expo-dev-launcher/Main (= 55.0.31)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -71,7 +71,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - expo-dev-launcher/Main (55.0.29):
+  - expo-dev-launcher/Main (55.0.31):
     - EXManifests
     - expo-dev-launcher/Unsafe
     - expo-dev-menu
@@ -102,7 +102,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - expo-dev-launcher/Unsafe (55.0.29):
+  - expo-dev-launcher/Unsafe (55.0.31):
     - EXManifests
     - expo-dev-menu
     - expo-dev-menu-interface
@@ -132,8 +132,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - expo-dev-menu (55.0.24):
-    - expo-dev-menu/Main (= 55.0.24)
+  - expo-dev-menu (55.0.26):
+    - expo-dev-menu/Main (= 55.0.26)
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -156,7 +156,7 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - expo-dev-menu-interface (55.0.2)
-  - expo-dev-menu/Main (55.0.24):
+  - expo-dev-menu/Main (55.0.26):
     - EXManifests
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -204,7 +204,7 @@ PODS:
     - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoImagePicker (55.0.19):
     - ExpoModulesCore
-  - ExpoKeepAwake (55.0.6):
+  - ExpoKeepAwake (55.0.7):
     - ExpoModulesCore
   - ExpoLinearGradient (55.0.13):
     - ExpoModulesCore
@@ -213,7 +213,7 @@ PODS:
   - ExpoMediaLibrary (55.0.15):
     - ExpoModulesCore
     - React-Core
-  - ExpoModulesCore (55.0.23):
+  - ExpoModulesCore (55.0.24):
     - ExpoModulesJSI
     - hermes-engine
     - RCTRequired
@@ -238,7 +238,7 @@ PODS:
     - ReactNativeDependencies
     - RNWorklets
     - Yoga
-  - ExpoModulesJSI (55.0.23):
+  - ExpoModulesJSI (55.0.24):
     - hermes-engine
     - React-Core
     - React-runtimescheduler
@@ -247,7 +247,7 @@ PODS:
     - ExpoModulesCore
   - ExpoSystemUI (55.0.16):
     - ExpoModulesCore
-  - ExpoUI (55.0.12):
+  - ExpoUI (55.0.13):
     - ExpoModulesCore
     - React-RCTFabric
   - ExpoWebBrowser (55.0.14):
@@ -2009,7 +2009,7 @@ PODS:
     - ReactNativeDependencies
     - Toast (~> 4)
     - Yoga
-  - react-native-vector-icons-material-design-icons (13.0.0)
+  - react-native-vector-icons-material-design-icons (13.1.1)
   - react-native-webview (13.16.0):
     - hermes-engine
     - RCTRequired
@@ -2530,7 +2530,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNGestureHandler (2.30.0):
+  - RNGestureHandler (2.30.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2553,7 +2553,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNLocalize (3.6.1):
+  - RNLocalize (3.7.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2575,7 +2575,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNReactNativeHapticFeedback (2.3.3):
+  - RNReactNativeHapticFeedback (3.0.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2718,7 +2718,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNShare (12.2.5):
+  - RNShare (12.2.6):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -3305,10 +3305,10 @@ SPEC CHECKSUMS:
   EXConstants: 5caf448ff399f60be9d1053e77aed32e39411900
   EXJSONUtils: 04bc3807d351331a5fe154ce1da596ec15d99169
   EXManifests: f4e50a54115948e206f4c2391bdea755a1aa74ec
-  Expo: e69380bbe241a1d2a15f7c9d3f87792edaaa389e
-  expo-dev-client: 6802a357b6ee3b36669c4c9e9622be55b3cd4494
-  expo-dev-launcher: 61f723bd5ae4720f65379aeb76c3f20fc4fedda7
-  expo-dev-menu: e1a5ed3af09107db08400ccbf514119874535cbd
+  Expo: 727d09735b17bb2d5e0d4f0193c7542d97ec05f7
+  expo-dev-client: 66718bbf6f0bf3aa82a522d1c0b2833fcf1cfa3a
+  expo-dev-launcher: faef903639dee813767199b124d1f1af9acf7723
+  expo-dev-menu: a621d9d64dcac74265de76f03fb36ed0978514bb
   expo-dev-menu-interface: 833795f4c98a674d36cbc12b11b21756c38e01e8
   ExpoAsset: f56ed740b6a127da2bfd90832cf688ae309d4410
   ExpoBlur: 7a86e84e7728108fa6908d7103fa527705a3dbbf
@@ -3318,15 +3318,15 @@ SPEC CHECKSUMS:
   ExpoFont: cdd7a1d574a376fa003c713eff49e0a4df8672c7
   ExpoImage: bd9e9c5bc4eff7a6883339be305f8b0bb5a0cf1c
   ExpoImagePicker: 6d8e97db8aa1fcdd357c0ed1e7365cf30100a0fe
-  ExpoKeepAwake: a1baf9810a2dee1905aa9bdd336852598f7220e9
+  ExpoKeepAwake: 861c66deb0f9f28f87882610195f26c4b88fba6f
   ExpoLinearGradient: c654e92d726a6d64c588a0988bb22bea331d5e79
   ExpoLogBox: 617da77cbc083627692b2ea050a3666808aef2cd
   ExpoMediaLibrary: 4f73cc006973a250134ae1b2ab311fde399c0b6a
-  ExpoModulesCore: e534083199d92892718561f3b2373056ff046262
-  ExpoModulesJSI: bd01f4d433a586cbb8a24316ddf914bd4af5cb44
+  ExpoModulesCore: 71ae9984891450cf6c493bda40f113e7b6806c51
+  ExpoModulesJSI: bbd6d912b19ba7455d95b2c2fd3bc73459f8cba9
   ExpoSplashScreen: 43517d54a0f90d381c80deda859aa6087e80884b
   ExpoSystemUI: f0f31e6aea8f76b549a463483bdeeb1dcb8a5593
-  ExpoUI: 16f18266ea44f85b00a363760b7e2b8a0b257359
+  ExpoUI: 8620210ed7d67c6b3b4515554e16c37b3a95b7a8
   ExpoWebBrowser: f88a3ba50a025b673236a46d2654a49b985953d6
   EXUpdatesInterface: 4c11f4d1594526258f14d09817dc407acbf24e3b
   FBLazyVector: 427fa1856a481856091061293ce865a75aa4f20f
@@ -3388,7 +3388,7 @@ SPEC CHECKSUMS:
   react-native-pager-view: 9ebb71ac08f26122d9838c3ed72dd5a61bdc2640
   react-native-safe-area-context: c5d42c4294aa175415947e23c2ac956253abfc7d
   react-native-simple-toast: a1eb60d5c91875d156fd0c1ef314fa889cd4361e
-  react-native-vector-icons-material-design-icons: 1955bd08457a8310e6a2d3c87c7f1ebaca159098
+  react-native-vector-icons-material-design-icons: 99c750d15cbc5df6f240bf1e7a45a0c07d42a015
   react-native-webview: 6b41d44f853c7f8dd8b685d8d289fe33349e4e1b
   React-NativeModulesApple: 9068613f7650828eed29ead6fc0d0a1620117e6a
   React-networking: 96d4cbebde99461fcb0d631c546a905494cb7a68
@@ -3429,12 +3429,12 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 39207e620903192715b66fc2dbae4025a9d554b8
   RNFBAnalytics: a19c5a561f70aa6c9e098408b37e143c4693a020
   RNFBApp: d3d00521ed4a8d47be861fc810f87d2a81a2ead9
-  RNGestureHandler: 9dc1bed03b87d1014b3af102ff3e8fa3815fd03d
-  RNLocalize: c8bcaf5ad46c4b2e8f402ea7f11ec9c3777bcb59
-  RNReactNativeHapticFeedback: 68db345e43f221a12c408f1490da31c4067ecb6f
+  RNGestureHandler: 4773ef29c28ddd856de30bdc7048edad8506ba73
+  RNLocalize: 0da45ec541d1460051b1f23c3a1820a8caa0fe6b
+  RNReactNativeHapticFeedback: 52c9ac4deb817e0a158bcfb3e25f5b9e9e3448bb
   RNReanimated: d3fb8615bdd33f0eb81c2afd5f6191be3fa141d7
   RNScreens: 6c5b8c41580fe6b54ee1b332c96b782ee360e73f
-  RNShare: 706dade96bc31153315b8cb349409cd28f3f9bb4
+  RNShare: de24c244a3e35d82ab1f96e5315d0ba61df28e42
   RNSVG: 0f9847106cff58a2017ee4f2ddf191efe83c0c9f
   RNVectorIcons: 1db72384402bc567e995855056b8c5d7a9888780
   RNWorklets: 5eddf924d11308d62920405addeddc3dfe1daaaa
