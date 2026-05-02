@@ -129,7 +129,8 @@
         "以官網課表Excel為準!": "Based on the official timetable Excel!",
         "幹飯": "Eating",
         "幹飯時間表": "Eating Schedule",
-        "下課Section數": "Number of Sections After Class"
+        "下課Section數": "Number of Sections After Class",
+        "上課Section數": "Number of Sections at Class Start"
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",
