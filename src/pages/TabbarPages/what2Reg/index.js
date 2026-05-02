@@ -18,7 +18,7 @@ import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
 import { setLocalStorage } from '../../../utils/storageKits';
 import { checkCloudCourseVersion } from '../../../utils/checkCoursesKits';
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
+import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
 import { refreshUmehHost, useUmehHost } from '../../../utils/umehHost';
 
 import CourseCard from './components/CourseCard';
@@ -174,7 +174,7 @@ const What2Reg = props => {
             default:
                 break;
         }
-    }, [inputText]);
+    }, [inputText, searchHost]);
 
     const onClearInput = useCallback(() => {
         trigger();
@@ -217,6 +217,12 @@ const What2Reg = props => {
             });
     }, [handleDialogClose, initCourseData]);
 
+    const handleOfficialSharePointPress = useCallback(() => {
+        trigger();
+        actionSheetRef.current?.hide();
+        openLink(UM_PRE_ENROLMENT_EXCEL);
+    }, []);
+
     const onScrollToLetter = useCallback(letter => {
         trigger();
         const offsetY = scrollData[letter];
@@ -245,8 +251,8 @@ const What2Reg = props => {
     ), [courseMode]);
 
     const renderFilterCourseCard = useCallback(({ item }) => (
-        <CourseCard item={item} mode={'json'} />
-    ), []);
+        <CourseCard item={item} mode={'json'} courseMode={courseMode} />
+    ), [courseMode]);
 
     const keyExtractor = useCallback((item, index) => item.CourseCode || item.New_code || index.toString(), []);
     const hasSearchResult = searchFilterCourse?.length > 0;
@@ -282,6 +288,11 @@ const What2Reg = props => {
                     <TouchableScale style={styles.actionButton(themeColor)} onPress={handleManualUpdate}>
                         <Text style={styles.actionButtonText}>
                             {t('手動檢查課表數據更新', { ns: 'catalog' })}
+                        </Text>
+                    </TouchableScale>
+                    <TouchableScale style={styles.actionButton(themeColor)} onPress={handleOfficialSharePointPress}>
+                        <Text style={styles.actionButtonText}>
+                            {t('檢查官方SharePoint版本', { ns: 'catalog' })}
                         </Text>
                     </TouchableScale>
                     <TouchableScale

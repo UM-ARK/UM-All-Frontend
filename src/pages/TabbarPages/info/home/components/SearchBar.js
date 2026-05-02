@@ -7,8 +7,7 @@ import {
     StyleSheet,
     Animated as RNAnimated,
     Keyboard,
-    FlatList,
-    TouchableWithoutFeedback,
+    Platform,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
@@ -18,15 +17,21 @@ import { getFunctionArr } from '../../../features/FeatureList';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { debounce } from 'lodash';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import * as OpenCC from 'opencc-js';
 import { useIsFocused } from '@react-navigation/native';
+import { Image } from 'expo-image';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 const TIMING_MS = 220;
+const ANDROID_FOCUS_STATE_DELAY_MS = 250;
 
 const PLACEHOLDER_TEXTS = [
     '關於澳大的一切...',
@@ -92,7 +97,7 @@ const SearchBar = ({ navigation }) => {
         inputWrapperFocused: {
             borderColor: themeColor,
             backgroundColor: white,
-            elevation: 4,
+            ...(Platform.OS === 'android' ? {} : { elevation: 4 }),
         },
         textInput: {
             flex: 1,
@@ -178,15 +183,32 @@ const SearchBar = ({ navigation }) => {
             width: scale(15),
             alignItems: 'center',
         },
+        featureImageIcon: {
+            width: verticalScale(17),
+            height: verticalScale(17),
+            borderRadius: verticalScale(5),
+            backgroundColor: white,
+        },
+        featureViewIcon: {
+            width: verticalScale(17),
+            height: verticalScale(17),
+            borderRadius: verticalScale(5),
+            backgroundColor: themeColor,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
     });
 
     const [inputText, setInputText] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
     const [localResults, setLocalResults] = useState([]);
+    // Android：`TextInput` 外層寬窄若用動畫變動，易在聚焦瞬間被系統視為視圖異動而失去焦點
+    const [cancelButtonWidth, setCancelButtonWidth] = useState(0);
 
     const fadeAnim = useRef(new RNAnimated.Value(1)).current;
     const textInputRef = useRef(null);
+    const focusStateTimerRef = useRef(null);
 
     // 1. 預處理本地功能列表：將嵌套的 FeatureList 展平，方便搜索
     const flattenFeatures = useMemo(() => {
@@ -233,12 +255,21 @@ const SearchBar = ({ navigation }) => {
 
     useEffect(() => {
         if (!screenIsFocused) {
+            if (focusStateTimerRef.current) {
+                clearTimeout(focusStateTimerRef.current);
+            }
             textInputRef.current?.blur();
             setIsFocused(false);
             focused.value = 0;
             Keyboard.dismiss();
         }
     }, [screenIsFocused]);
+
+    useEffect(() => () => {
+        if (focusStateTimerRef.current) {
+            clearTimeout(focusStateTimerRef.current);
+        }
+    }, []);
 
     // 3. 混合搜索邏輯 (Hybrid Search)
     const handleSearch = (text) => {
@@ -263,6 +294,41 @@ const SearchBar = ({ navigation }) => {
 
     // 使用防抖，避免頻繁計算
     const debouncedSearch = useMemo(() => debounce(handleSearch, 100), [flattenFeatures]);
+
+    const renderFeatureIcon = (item) => {
+        const iconSize = verticalScale(16);
+        const imageSize = verticalScale(11);
+
+        if (item.icon_type === 'ionicons') {
+            return <Ionicons name={item.icon_name} size={iconSize} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'MaterialCommunityIcons') {
+            return <MaterialCommunityIcons name={item.icon_name} size={iconSize + scale(2)} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'FontAwesome5') {
+            return <FontAwesome5 name={item.icon_name} size={iconSize - verticalScale(2)} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'MaterialIcons') {
+            return <MaterialIcons name={item.icon_name} size={iconSize - verticalScale(2)} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'img' && item.icon_name) {
+            return <Image source={item.icon_name} style={styles.featureImageIcon} />;
+        }
+
+        if (item.icon_type === 'view') {
+            return (
+                <View style={styles.featureViewIcon}>
+                    <FontAwesome name={item.icon_name || 'plus'} size={imageSize} color={white} />
+                </View>
+            );
+        }
+
+        return <Ionicons name="apps-outline" size={iconSize} color={themeColor} />;
+    };
 
     // 4. 執行跳轉邏輯
     const executeNavigation = (item) => {
@@ -318,7 +384,7 @@ const SearchBar = ({ navigation }) => {
                         onPress={() => executeNavigation(item)}
                     >
                         <View style={styles.iconContainer}>
-                            <Ionicons name="apps-outline" size={16} color={themeColor} />
+                            {renderFeatureIcon(item)}
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.resultTitle}>{item.fn_name}</Text>
@@ -342,10 +408,26 @@ const SearchBar = ({ navigation }) => {
         );
     };
 
+    const skipLayoutAnimation = Platform.OS === 'android';
+    const inputOuterNonAnimatedStyle = {
+        marginRight: isFocused ? cancelButtonWidth : 0,
+    };
+    const cancelNonAnimatedStyle = skipLayoutAnimation
+        ? {
+            opacity: cancelButtonWidth > 1 && isFocused ? 1 : 0,
+            transform: [{ translateX: !isFocused ? cancelButtonWidth : 0 }],
+        }
+        : {};
+
     return (
         <View style={{ zIndex: 100, width: scale(310) }}>
             <View style={styles.container}>
-                <Animated.View style={[styles.inputOuter, inputOuterAnimated]}>
+                <Animated.View
+                    style={[
+                        styles.inputOuter,
+                        skipLayoutAnimation ? inputOuterNonAnimatedStyle : inputOuterAnimated,
+                    ]}
+                >
                     <View style={[
                         styles.inputWrapper,
                         isFocused && styles.inputWrapperFocused,
@@ -363,9 +445,22 @@ const SearchBar = ({ navigation }) => {
                                 }}
                                 onFocus={() => {
                                     focused.value = 1;
-                                    setIsFocused(true);
+                                    if (focusStateTimerRef.current) {
+                                        clearTimeout(focusStateTimerRef.current);
+                                    }
+                                    if (Platform.OS === 'android') {
+                                        focusStateTimerRef.current = setTimeout(() => {
+                                            setIsFocused(true);
+                                        }, ANDROID_FOCUS_STATE_DELAY_MS);
+                                    } else {
+                                        setIsFocused(true);
+                                    }
                                 }}
                                 onBlur={() => {
+                                    if (focusStateTimerRef.current) {
+                                        clearTimeout(focusStateTimerRef.current);
+                                    }
+                                    focused.value = 0;
                                     setIsFocused(false);
                                 }}
                                 placeholder=""
@@ -403,10 +498,16 @@ const SearchBar = ({ navigation }) => {
 
                 {/* 取消按鈕：reanimated 滑入動畫 */}
                 <Animated.View
-                    style={[styles.cancelWrap, cancelAnimated]}
+                    style={[
+                        styles.cancelWrap,
+                        skipLayoutAnimation ? cancelNonAnimatedStyle : cancelAnimated,
+                    ]}
                     onLayout={(e) => {
                         const w = e.nativeEvent.layout.width;
-                        if (w > 0) { cancelW.value = w; }
+                        if (w > 0) {
+                            cancelW.value = w;
+                            setCancelButtonWidth(prev => (prev !== w ? w : prev));
+                        }
                     }}
                 >
                     <TouchableOpacity

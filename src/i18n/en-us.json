@@ -111,6 +111,7 @@
         "更新Add Drop/Timetable數據": "Update Add Drop/TimeTable data",
         "更新Pre Enroll數據": "Update Pre Enroll data",
         "手動檢查課表數據更新": "Check Course Data Update",
+        "檢查官方SharePoint版本": "Check Official SharePoint Version",
         "查": "Search",
         "寫": "Write",
         "選咩課": "What2Reg",
@@ -128,7 +129,8 @@
         "以官網課表Excel為準!": "Based on the official timetable Excel!",
         "幹飯": "Eating",
         "幹飯時間表": "Eating Schedule",
-        "下課Section數": "Number of Sections After Class"
+        "下課Section數": "Number of Sections After Class",
+        "上課Section數": "Number of Sections at Class Start"
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",
