@@ -518,8 +518,8 @@ const HomeScreen = ({ navigation }) => {
                 showsVerticalScrollIndicator={true}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
-                keyboardDismissMode={'on-drag'}
-                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={Platform.OS === 'android' ? 'none' : 'on-drag'}
+                keyboardShouldPersistTaps={Platform.OS === 'android' ? 'always' : 'handled'}
                 contentContainerStyle={{ width: '100%', alignItems: 'center' }}
             >
 

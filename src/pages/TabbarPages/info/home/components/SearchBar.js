@@ -7,8 +7,7 @@ import {
     StyleSheet,
     Animated as RNAnimated,
     Keyboard,
-    FlatList,
-    TouchableWithoutFeedback,
+    Platform,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
@@ -27,6 +26,7 @@ import { useIsFocused } from '@react-navigation/native';
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 const TIMING_MS = 220;
+const ANDROID_FOCUS_STATE_DELAY_MS = 250;
 
 const PLACEHOLDER_TEXTS = [
     '關於澳大的一切...',
@@ -92,7 +92,7 @@ const SearchBar = ({ navigation }) => {
         inputWrapperFocused: {
             borderColor: themeColor,
             backgroundColor: white,
-            elevation: 4,
+            ...(Platform.OS === 'android' ? {} : { elevation: 4 }),
         },
         textInput: {
             flex: 1,
@@ -184,9 +184,12 @@ const SearchBar = ({ navigation }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
     const [localResults, setLocalResults] = useState([]);
+    // Android：`TextInput` 外層寬窄若用動畫變動，易在聚焦瞬間被系統視為視圖異動而失去焦點
+    const [cancelButtonWidth, setCancelButtonWidth] = useState(0);
 
     const fadeAnim = useRef(new RNAnimated.Value(1)).current;
     const textInputRef = useRef(null);
+    const focusStateTimerRef = useRef(null);
 
     // 1. 預處理本地功能列表：將嵌套的 FeatureList 展平，方便搜索
     const flattenFeatures = useMemo(() => {
@@ -233,12 +236,21 @@ const SearchBar = ({ navigation }) => {
 
     useEffect(() => {
         if (!screenIsFocused) {
+            if (focusStateTimerRef.current) {
+                clearTimeout(focusStateTimerRef.current);
+            }
             textInputRef.current?.blur();
             setIsFocused(false);
             focused.value = 0;
             Keyboard.dismiss();
         }
     }, [screenIsFocused]);
+
+    useEffect(() => () => {
+        if (focusStateTimerRef.current) {
+            clearTimeout(focusStateTimerRef.current);
+        }
+    }, []);
 
     // 3. 混合搜索邏輯 (Hybrid Search)
     const handleSearch = (text) => {
@@ -342,10 +354,26 @@ const SearchBar = ({ navigation }) => {
         );
     };
 
+    const skipLayoutAnimation = Platform.OS === 'android';
+    const inputOuterNonAnimatedStyle = {
+        marginRight: isFocused ? cancelButtonWidth : 0,
+    };
+    const cancelNonAnimatedStyle = skipLayoutAnimation
+        ? {
+            opacity: cancelButtonWidth > 1 && isFocused ? 1 : 0,
+            transform: [{ translateX: !isFocused ? cancelButtonWidth : 0 }],
+        }
+        : {};
+
     return (
         <View style={{ zIndex: 100, width: scale(310) }}>
             <View style={styles.container}>
-                <Animated.View style={[styles.inputOuter, inputOuterAnimated]}>
+                <Animated.View
+                    style={[
+                        styles.inputOuter,
+                        skipLayoutAnimation ? inputOuterNonAnimatedStyle : inputOuterAnimated,
+                    ]}
+                >
                     <View style={[
                         styles.inputWrapper,
                         isFocused && styles.inputWrapperFocused,
@@ -363,9 +391,22 @@ const SearchBar = ({ navigation }) => {
                                 }}
                                 onFocus={() => {
                                     focused.value = 1;
-                                    setIsFocused(true);
+                                    if (focusStateTimerRef.current) {
+                                        clearTimeout(focusStateTimerRef.current);
+                                    }
+                                    if (Platform.OS === 'android') {
+                                        focusStateTimerRef.current = setTimeout(() => {
+                                            setIsFocused(true);
+                                        }, ANDROID_FOCUS_STATE_DELAY_MS);
+                                    } else {
+                                        setIsFocused(true);
+                                    }
                                 }}
                                 onBlur={() => {
+                                    if (focusStateTimerRef.current) {
+                                        clearTimeout(focusStateTimerRef.current);
+                                    }
+                                    focused.value = 0;
                                     setIsFocused(false);
                                 }}
                                 placeholder=""
@@ -403,10 +444,16 @@ const SearchBar = ({ navigation }) => {
 
                 {/* 取消按鈕：reanimated 滑入動畫 */}
                 <Animated.View
-                    style={[styles.cancelWrap, cancelAnimated]}
+                    style={[
+                        styles.cancelWrap,
+                        skipLayoutAnimation ? cancelNonAnimatedStyle : cancelAnimated,
+                    ]}
                     onLayout={(e) => {
                         const w = e.nativeEvent.layout.width;
-                        if (w > 0) { cancelW.value = w; }
+                        if (w > 0) {
+                            cancelW.value = w;
+                            setCancelButtonWidth(prev => (prev !== w ? w : prev));
+                        }
                     }}
                 >
                     <TouchableOpacity
