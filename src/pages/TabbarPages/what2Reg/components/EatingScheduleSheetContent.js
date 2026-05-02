@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
@@ -14,6 +14,32 @@ import { uiStyle } from '../../../../components/ThemeContext';
 const EatingScheduleSheetContent = ({ theme, dayList, courses }) => {
     const { black, themeColor, themeColorUltraLight, unread, warning } = theme;
     const now = useMemo(() => moment(), []);
+    const horizontalScrollRef = useRef(null);
+    const hasAutoScrolledRef = useRef(false);
+
+    const currentDay = useMemo(() => dayList[now.isoWeekday() - 1], [dayList, now]);
+    const visibleDayList = useMemo(
+        () => dayList.filter(day => lodash.filter(courses, { Day: day }).length > 0),
+        [courses, dayList],
+    );
+    const currentDayIndex = visibleDayList.indexOf(currentDay);
+
+    useEffect(() => {
+        hasAutoScrolledRef.current = false;
+    }, [currentDayIndex]);
+
+    const scrollToCurrentDay = useCallback(() => {
+        if (hasAutoScrolledRef.current || currentDayIndex < 0 || !horizontalScrollRef.current) {
+            return;
+        }
+
+        hasAutoScrolledRef.current = true;
+        const dayColumnWidth = scale(85) + scale(20);
+        horizontalScrollRef.current.scrollTo({
+            x: Math.max(currentDayIndex * dayColumnWidth - scale(10), 0),
+            animated: true,
+        });
+    }, [currentDayIndex]);
 
     const isWithin30Min = timeStr => {
         const target = moment(`${now.format('YYYY-MM-DD')} ${timeStr}`, 'YYYY-MM-DD HH:mm');
@@ -33,9 +59,11 @@ const EatingScheduleSheetContent = ({ theme, dayList, courses }) => {
             </Text>
 
             <BottomSheetScrollView
+                ref={horizontalScrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: scale(10) }}
+                onContentSizeChange={scrollToCurrentDay}
             >
                 {dayList.map(day => {
                     const groupByDay = lodash.filter(courses, { Day: day });
@@ -50,7 +78,7 @@ const EatingScheduleSheetContent = ({ theme, dayList, courses }) => {
                             .map(([key, arr]) => [key, arr.length]),
                     );
 
-                    const isToday = moment().isoWeekday() === dayList.indexOf(day) + 1;
+                    const isToday = currentDay === day;
                     const sortedTimes = lodash.sortBy(Object.keys(finalResult), time => moment(time, 'HH:mm').toDate());
                     const sortedResult = sortedTimes.map(time => ({ time, num: finalResult[time] }));
 
