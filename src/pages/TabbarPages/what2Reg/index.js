@@ -174,7 +174,7 @@ const What2Reg = props => {
             default:
                 break;
         }
-    }, [inputText]);
+    }, [inputText, searchHost]);
 
     const onClearInput = useCallback(() => {
         trigger();
@@ -245,8 +245,8 @@ const What2Reg = props => {
     ), [courseMode]);
 
     const renderFilterCourseCard = useCallback(({ item }) => (
-        <CourseCard item={item} mode={'json'} />
-    ), []);
+        <CourseCard item={item} mode={'json'} courseMode={courseMode} />
+    ), [courseMode]);
 
     const keyExtractor = useCallback((item, index) => item.CourseCode || item.New_code || index.toString(), []);
     const hasSearchResult = searchFilterCourse?.length > 0;

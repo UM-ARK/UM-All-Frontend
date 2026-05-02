@@ -21,6 +21,7 @@ const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
     const { theme } = useTheme();
     const { baseHost } = useUmehHost();
     const { themeColor, black, secondThemeColor, white, what2reg_color } = theme;
+    const isPreEnroll = courseMode === 'preEnroll';
 
     // 從 item 中提取課程資訊
     const courseCode = item[mode === 'what2Reg' ? 'New_code' : 'Course Code'];
@@ -93,7 +94,7 @@ const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         {renderCourseCode(courseCode)}
                         {/* Pre Enroll標記 */}
-                        {courseMode === 'preEnroll' ? (
+                        {isPreEnroll ? (
                             <Text style={{
                                 ...uiStyle.defaultText,
                                 fontSize: scale(10),
@@ -254,61 +255,65 @@ const CourseCard = memo(({ item, mode, prof_info, courseMode = 'ad' }) => {
                         {t('查', { ns: 'catalog' })} {t('官方', { ns: 'catalog' })}
                     </DropdownMenu.ItemTitle>
                 </DropdownMenu.Item>
-                <DropdownMenu.Item
-                    key="coursesim"
-                    onSelect={() => {
-                        trigger();
-                        navigation.navigate('Tabbar', {
-                            screen: 'CourseSimTab',
-                            params: { check: courseCode },
-                        });
-                        logToFirebase('checkCourse', {
-                            courseCode: courseCode,
-                            action: 'coursesim',
-                        });
-                    }}
-                >
-                    <DropdownMenu.ItemIcon
-                        ios={{
-                            name: 'calendar',
-                            pointSize: scale(18),
-                            hierarchicalColor: {
-                                dark: black.third,
-                                light: black.third,
-                            },
-                        }}
-                        androidIconName="ic_menu_my_calendar"
-                    />
-                    <DropdownMenu.ItemTitle style={{ color: black.third }}>
-                        {t('查', { ns: 'catalog' })} {t('模擬課表', { ns: 'catalog' })}
-                    </DropdownMenu.ItemTitle>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                    key="section"
-                    onSelect={() => {
-                        trigger();
-                        logToFirebase('checkCourse', {
-                            courseCode: courseCode,
-                            action: 'section',
-                        });
-                        navigation.navigate('LocalCourse', courseCode);
-                    }}
-                >
-                    <DropdownMenu.ItemIcon
-                        ios={{
-                            name: 'list.bullet',
-                            pointSize: scale(18),
-                            hierarchicalColor: {
-                                dark: black.third,
-                                light: black.third,
-                            },
-                        }}
-                        androidIconName="ic_menu_agenda"
-                    />
-                    <DropdownMenu.ItemTitle style={{ color: black.third }}>
-                        {t('查', { ns: 'catalog' })} Section
-                    </DropdownMenu.ItemTitle>
-                </DropdownMenu.Item>
+                {!isPreEnroll ? (
+                    <>
+                        <DropdownMenu.Item
+                            key="coursesim"
+                            onSelect={() => {
+                                trigger();
+                                navigation.navigate('Tabbar', {
+                                    screen: 'CourseSimTab',
+                                    params: { check: courseCode },
+                                });
+                                logToFirebase('checkCourse', {
+                                    courseCode: courseCode,
+                                    action: 'coursesim',
+                                });
+                            }}
+                        >
+                            <DropdownMenu.ItemIcon
+                                ios={{
+                                    name: 'calendar',
+                                    pointSize: scale(18),
+                                    hierarchicalColor: {
+                                        dark: black.third,
+                                        light: black.third,
+                                    },
+                                }}
+                                androidIconName="ic_menu_my_calendar"
+                            />
+                            <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                {t('查', { ns: 'catalog' })} {t('模擬課表', { ns: 'catalog' })}
+                            </DropdownMenu.ItemTitle>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                            key="section"
+                            onSelect={() => {
+                                trigger();
+                                logToFirebase('checkCourse', {
+                                    courseCode: courseCode,
+                                    action: 'section',
+                                });
+                                navigation.navigate('LocalCourse', courseCode);
+                            }}
+                        >
+                            <DropdownMenu.ItemIcon
+                                ios={{
+                                    name: 'list.bullet',
+                                    pointSize: scale(18),
+                                    hierarchicalColor: {
+                                        dark: black.third,
+                                        light: black.third,
+                                    },
+                                }}
+                                androidIconName="ic_menu_agenda"
+                            />
+                            <DropdownMenu.ItemTitle style={{ color: black.third }}>
+                                {t('查', { ns: 'catalog' })} Section
+                            </DropdownMenu.ItemTitle>
+                        </DropdownMenu.Item>
+                    </>
+                ) : null}
             </DropdownMenu.Content>
         </DropdownMenu.Root>
     );

@@ -29,6 +29,8 @@ const FilterPanel = ({
     trigger,
 }) => {
     const { themeColor, secondThemeColor, black, white } = theme;
+    const activeColor = courseMode === 'ad' ? themeColor : secondThemeColor;
+    const activeBackgroundColor = `${activeColor}15`;
 
     const classItmStyle = {
         borderRadius: scale(10),
@@ -39,7 +41,7 @@ const FilterPanel = ({
     const classItmTitleTextStyle = {
         ...uiStyle.defaultText,
         fontSize: scale(13),
-        color: themeColor,
+        color: activeColor,
         fontWeight: '600',
         alignSelf: 'center',
         marginLeft: scale(5),
@@ -64,7 +66,7 @@ const FilterPanel = ({
                             paddingHorizontal: scale(5),
                             paddingVertical: verticalScale(2),
                             backgroundColor: courseMode === item
-                                ? (courseMode === 'ad' ? `${themeColor}15` : `${secondThemeColor}15`)
+                                ? activeBackgroundColor
                                 : null,
                         }}
                         onPress={() => {
@@ -77,7 +79,7 @@ const FilterPanel = ({
                         <Text style={{
                             ...uiStyle.defaultText,
                             color: courseMode === item
-                                ? (courseMode === 'ad' ? themeColor : secondThemeColor)
+                                ? activeColor
                                 : black.third,
                             fontWeight: courseMode === item ? '900' : 'normal',
                             fontSize: scale(12),
@@ -108,7 +110,7 @@ const FilterPanel = ({
                         ...classItmStyle,
                         paddingHorizontal: scale(5),
                         paddingVertical: scale(2),
-                        backgroundColor: filterOptions.option === item ? `${themeColor}15` : null,
+                        backgroundColor: filterOptions.option === item ? activeBackgroundColor : null,
                     }}
                     onPress={() => {
                         trigger();
@@ -118,7 +120,7 @@ const FilterPanel = ({
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: filterOptions.option === item ? themeColor : black.third,
+                        color: filterOptions.option === item ? activeColor : black.third,
                         fontWeight: filterOptions.option === item ? '900' : 'normal',
                         fontSize: scale(12),
                     }}>
@@ -149,7 +151,7 @@ const FilterPanel = ({
                 <TouchableScale
                     style={{
                         ...classItmStyle,
-                        backgroundColor: item === filterOptions.facultyName ? `${themeColor}15` : null,
+                        backgroundColor: item === filterOptions.facultyName ? activeBackgroundColor : null,
                         paddingHorizontal: scale(5),
                         paddingVertical: scale(2),
                     }}
@@ -165,7 +167,7 @@ const FilterPanel = ({
                 >
                     <Text style={{
                         ...uiStyle.defaultText,
-                        color: item === filterOptions.facultyName ? themeColor : black.third,
+                        color: item === filterOptions.facultyName ? activeColor : black.third,
                         fontWeight: item === filterOptions.facultyName ? '900' : 'normal',
                         fontSize: scale(12),
                     }}>
@@ -196,7 +198,7 @@ const FilterPanel = ({
                         ...classItmStyle,
                         paddingHorizontal: scale(5),
                         paddingVertical: scale(2),
-                        backgroundColor: filterOptions.depaName === item ? `${themeColor}15` : null,
+                        backgroundColor: filterOptions.depaName === item ? activeBackgroundColor : null,
                     }}
                     onPress={() => {
                         trigger();
@@ -206,7 +208,7 @@ const FilterPanel = ({
                     <Text style={{
                         ...uiStyle.defaultText,
                         alignSelf: 'center',
-                        color: filterOptions.depaName === item ? themeColor : black.third,
+                        color: filterOptions.depaName === item ? activeColor : black.third,
                         fontWeight: filterOptions.depaName === item ? '900' : 'normal',
                         fontSize: scale(12),
                     }}>
@@ -247,7 +249,7 @@ const FilterPanel = ({
                                     ...classItmStyle,
                                     paddingHorizontal: scale(5),
                                     paddingVertical: scale(3),
-                                    backgroundColor: filterOptions.GE === item ? `${themeColor}15` : null,
+                                    backgroundColor: filterOptions.GE === item ? activeBackgroundColor : null,
                                 }}
                                 onPress={() => {
                                     trigger();
@@ -256,7 +258,7 @@ const FilterPanel = ({
                             >
                                 <Text style={{
                                     ...uiStyle.defaultText,
-                                    color: filterOptions.GE === item ? themeColor : black.third,
+                                    color: filterOptions.GE === item ? activeColor : black.third,
                                     fontWeight: filterOptions.GE === item ? '900' : 'normal',
                                     fontSize: scale(12),
                                 }}>
