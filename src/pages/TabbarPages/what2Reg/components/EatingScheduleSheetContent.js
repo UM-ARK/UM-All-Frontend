@@ -25,9 +25,10 @@ const EatingScheduleSheetContent = ({ theme, dayList, courses }) => {
     const currentStatOption = statOptions.find(option => option.key === statMode) ?? statOptions[0];
 
     const currentDay = useMemo(() => dayList[now.isoWeekday() - 1], [dayList, now]);
+    const coursesByDay = useMemo(() => lodash.groupBy(courses, 'Day'), [courses]);
     const visibleDayList = useMemo(
-        () => dayList.filter(day => lodash.filter(courses, { Day: day }).length > 0),
-        [courses, dayList],
+        () => dayList.filter(day => (coursesByDay[day]?.length ?? 0) > 0),
+        [coursesByDay, dayList],
     );
     const currentDayIndex = visibleDayList.indexOf(currentDay);
 
@@ -83,12 +84,8 @@ const EatingScheduleSheetContent = ({ theme, dayList, courses }) => {
                 contentContainerStyle={{ paddingHorizontal: scale(10) }}
                 onContentSizeChange={scrollToCurrentDay}
             >
-                {dayList.map(day => {
-                    const groupByDay = lodash.filter(courses, { Day: day });
-                    if (groupByDay.length === 0) {
-                        return null;
-                    }
-
+                {visibleDayList.map(day => {
+                    const groupByDay = coursesByDay[day] ?? [];
                     const groupedResult = lodash.groupBy(groupByDay, currentStatOption.timeKey);
                     const finalResult = Object.fromEntries(
                         Object.entries(groupedResult)
