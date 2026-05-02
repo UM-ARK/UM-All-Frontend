@@ -17,11 +17,16 @@ import { getFunctionArr } from '../../../features/FeatureList';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics.js';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { debounce } from 'lodash';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import * as OpenCC from 'opencc-js';
 import { useIsFocused } from '@react-navigation/native';
+import { Image } from 'expo-image';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -178,6 +183,20 @@ const SearchBar = ({ navigation }) => {
             width: scale(15),
             alignItems: 'center',
         },
+        featureImageIcon: {
+            width: verticalScale(17),
+            height: verticalScale(17),
+            borderRadius: verticalScale(5),
+            backgroundColor: white,
+        },
+        featureViewIcon: {
+            width: verticalScale(17),
+            height: verticalScale(17),
+            borderRadius: verticalScale(5),
+            backgroundColor: themeColor,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
     });
 
     const [inputText, setInputText] = useState('');
@@ -276,6 +295,41 @@ const SearchBar = ({ navigation }) => {
     // 使用防抖，避免頻繁計算
     const debouncedSearch = useMemo(() => debounce(handleSearch, 100), [flattenFeatures]);
 
+    const renderFeatureIcon = (item) => {
+        const iconSize = verticalScale(16);
+        const imageSize = verticalScale(11);
+
+        if (item.icon_type === 'ionicons') {
+            return <Ionicons name={item.icon_name} size={iconSize} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'MaterialCommunityIcons') {
+            return <MaterialCommunityIcons name={item.icon_name} size={iconSize + scale(2)} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'FontAwesome5') {
+            return <FontAwesome5 name={item.icon_name} size={iconSize - verticalScale(2)} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'MaterialIcons') {
+            return <MaterialIcons name={item.icon_name} size={iconSize - verticalScale(2)} color={themeColor} />;
+        }
+
+        if (item.icon_type === 'img' && item.icon_name) {
+            return <Image source={item.icon_name} style={styles.featureImageIcon} />;
+        }
+
+        if (item.icon_type === 'view') {
+            return (
+                <View style={styles.featureViewIcon}>
+                    <FontAwesome name={item.icon_name || 'plus'} size={imageSize} color={white} />
+                </View>
+            );
+        }
+
+        return <Ionicons name="apps-outline" size={iconSize} color={themeColor} />;
+    };
+
     // 4. 執行跳轉邏輯
     const executeNavigation = (item) => {
         textInputRef.current?.blur();  // ✅ 清除输入框焦点
@@ -330,7 +384,7 @@ const SearchBar = ({ navigation }) => {
                         onPress={() => executeNavigation(item)}
                     >
                         <View style={styles.iconContainer}>
-                            <Ionicons name="apps-outline" size={16} color={themeColor} />
+                            {renderFeatureIcon(item)}
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.resultTitle}>{item.fn_name}</Text>
