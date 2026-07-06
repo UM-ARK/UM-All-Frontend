@@ -638,6 +638,9 @@ function CourseSim({ route, navigation }) {
                         id: 'del-all-sections',
                         title: `${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`,
                         image: 'trash',
+                        // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
+                        // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
+                        imageColor: unread,
                         attributes: { destructive: true },
                     },
                 ]
@@ -646,6 +649,9 @@ function CourseSim({ route, navigation }) {
                 id: 'drop-section',
                 title: `${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`,
                 image: 'trash',
+                // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
+                // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
+                imageColor: unread,
                 attributes: { destructive: true },
             },
         ];
