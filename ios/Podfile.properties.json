@@ -1,8 +1,12 @@
 {
   "expo.jsEngine": "hermes",
   "EX_DEV_CLIENT_NETWORK_INSPECTOR": "true",
+  "expo.inlineModules.watchedDirectories": "[]",
+  "expo.inlineModules.xcodeProjectTargets": "{\"mainTarget\":\"ARKALL\",\"targets\":[]}",
   "expo-image.disable-libdav1d": "false",
   "ios.useFrameworks": "static",
   "ios.forceStaticLinking": "[\"RNFBApp\",\"RNFBAnalytics\"]",
-  "apple.privacyManifestAggregationEnabled": "true"
+  "apple.privacyManifestAggregationEnabled": "true",
+  "ios.buildReactNativeFromSource": "true",
+  "EXPO_USE_PRECOMPILED_MODULES": "true"
 }
