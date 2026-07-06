@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Platform, Text, View } from 'react-native';
+import { Alert, Platform, Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useIsFocused } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -243,18 +243,24 @@ const What2Reg = props => {
     ), [black.third]);
 
     /**
-     * 搜索結果與主列表都使用 FlatList，
-     * 保留 CourseCard 的 flexWrap 佈局需求。
+     * 課程卡片以 flexWrap 容器渲染（非 FlatList）。
+     * CourseCard 內層是原生 MenuView，靠 Host matchContents 量測子內容決定寬度；
+     * 必須放在一般 Yoga 佈局中（FlatList 的 cell 會施加寬度約束導致量測塌陷），
+     * 如此卡片才能依文本長度自適應寬度、彼此保留間距並自動換行。
      */
-    const renderSearchCourseCard = useCallback(({ item }) => (
-        <CourseCard item={item} mode={'json'} courseMode={courseMode} />
+    const renderCourseCards = useCallback(list => (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: scale(5) }}>
+            {list.map((item, index) => (
+                <CourseCard
+                    key={item['Course Code'] || item.New_code || index}
+                    item={item}
+                    mode={'json'}
+                    courseMode={courseMode}
+                />
+            ))}
+        </View>
     ), [courseMode]);
 
-    const renderFilterCourseCard = useCallback(({ item }) => (
-        <CourseCard item={item} mode={'json'} courseMode={courseMode} />
-    ), [courseMode]);
-
-    const keyExtractor = useCallback((item, index) => item.CourseCode || item.New_code || index.toString(), []);
     const hasSearchResult = searchFilterCourse?.length > 0;
 
     return (
@@ -384,14 +390,7 @@ const What2Reg = props => {
                                 拿走不謝
                             </Text>
                         </View>
-                        <FlatList
-                            data={searchFilterCourse}
-                            renderItem={renderSearchCourseCard}
-                            keyExtractor={keyExtractor}
-                            key={`flatList${searchFilterCourse.length}`}
-                            contentContainerStyle={{ paddingHorizontal: scale(5) }}
-                            scrollEnabled={false}   
-                        />
+                        {renderCourseCards(searchFilterCourse)}
                     </View>
                 ) : (
                     <View>
@@ -413,18 +412,9 @@ const What2Reg = props => {
                             trigger={trigger}
                         />
 
-                        {filterCourseList?.length > 0 ? (
-                            <FlatList
-                                data={filterCourseList}
-                                numColumns={filterCourseList.length}
-                                columnWrapperStyle={filterCourseList.length > 1 ? { flexWrap: 'wrap' } : null}
-                                renderItem={renderFilterCourseCard}
-                                contentContainerStyle={{ paddingHorizontal: scale(5) }}
-                                keyExtractor={keyExtractor}
-                                key={`flatList${courseMode}_${filterCourseList.length}`}
-                                scrollEnabled={false}
-                            />
-                        ) : null}
+                        {filterCourseList?.length > 0
+                            ? renderCourseCards(filterCourseList)
+                            : null}
                     </View>
                 )}
 
