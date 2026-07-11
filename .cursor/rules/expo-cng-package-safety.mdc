@@ -1,0 +1,43 @@
+---
+description: Expo CNG 下禁止擅自改 node_modules / 新增 patch
+alwaysApply: true
+---
+
+# Expo CNG：套件與原生修改安全規範
+
+本專案採 **Expo CNG（Continuous Native Generation）prebuild**。原生工程由設定產生，擅自改套件或打 patch 會讓協作者無法復現，屬**高危操作**。
+
+## 絕對禁止（未經使用者明確同意）
+
+- ❌ 直接修改 `node_modules/**` 內任何檔案
+- ❌ 新增 / 更新 / 提交 patch（如 `patch-package`、`patches/`、yarn patch 產物）
+- ❌ 為「先改 node_modules 再打 patch」而執行相關命令
+
+```bash
+# ❌ 禁止自行執行
+npx patch-package some-package
+yarn patch some-package
+# 直接編輯 node_modules/...
+```
+
+## 必須先詢問
+
+遇到套件 bug、原生行為需調整、或覺得「只能改 node_modules / 打 patch」時：
+
+1. **先停止**，向使用者說明問題與為何需要改套件
+2. **等使用者明確同意**後才可動手
+3. 同意後仍需記錄影響範圍與復現步驟，供協作者同步
+
+## 優先替代方案（無需改套件時優先用）
+
+| 需求 | 優先做法 |
+|------|----------|
+| 原生設定 | `app.json` / `app.config.*` |
+| 原生客製 | Expo Config Plugin |
+| 依賴版本 | `package.json` 升級 / 更換套件（仍建議先確認） |
+| JS 層 workaround | 專案內 wrapper / 適配層 |
+
+## 原則
+
+> **可復現性優先於本機捷徑。**  
+> 任何無法透過 `yarn install` + prebuild 還原的改動，都必須先問過使用者。

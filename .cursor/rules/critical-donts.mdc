@@ -16,6 +16,7 @@ alwaysApply: true
 - ❌ **硬編碼顏色值** (如 `'#fff'`, `'rgba(...)'`) - 使用 ThemeContext
 - ❌ **在新程式碼中使用 `TouchableOpacity` 系列** - 統一使用 `Pressable`（存量程式碼重構時遷移）
 - ❌ **新程式碼中使用 `FlatList` / `VirtualizedList` / `ScrollView+map` 渲染長列表** - 統一使用 `FlashList`（`@shopify/flash-list`）
+- ❌ **直接修改 `node_modules` 或新增 patch** - Expo CNG 下屬高危操作，必須先徵得使用者同意（詳見 `expo-cng-package-safety.mdc`）
 
 ## 設定要求
 
