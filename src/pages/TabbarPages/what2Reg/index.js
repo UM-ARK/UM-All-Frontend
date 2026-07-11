@@ -39,6 +39,7 @@ const iconSize = scale(25);
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);
 const COURSE_GRID_HORIZONTAL_PADDING = scale(10);
+const COURSE_GRID_COLUMN_COUNT = 6;
 const SHORT_COURSE_TITLE_MAX_LENGTH = 20;
 const MEDIUM_COURSE_TITLE_MAX_LENGTH = 36;
 
@@ -50,7 +51,7 @@ const getVisualTextLength = text => Array.from(String(text || '')).reduce((lengt
     return length + (/\p{Script=Han}/u.test(character) ? 2 : 1);
 }, 0);
 
-const getCourseCardWidth = (item, availableWidth) => {
+const getCourseCardSpan = item => {
     const titleCandidates = [
         item['Course Title'],
         item['Course Title Chi'],
@@ -63,12 +64,102 @@ const getCourseCardWidth = (item, availableWidth) => {
     );
 
     if (titleLength <= SHORT_COURSE_TITLE_MAX_LENGTH) {
-        return Math.floor((availableWidth - COURSE_CARD_GAP * 2) / 3);
+        return 2;
     }
     if (titleLength <= MEDIUM_COURSE_TITLE_MAX_LENGTH) {
+        return 3;
+    }
+    return COURSE_GRID_COLUMN_COUNT;
+};
+
+const getCourseCardWidth = (span, availableWidth) => {
+    if (span === 2) {
+        return Math.floor((availableWidth - COURSE_CARD_GAP * 2) / 3);
+    }
+    if (span === 3) {
         return Math.floor((availableWidth - COURSE_CARD_GAP) / 2);
     }
     return Math.floor(availableWidth);
+};
+
+/**
+ * 只使用三種欄寬填滿一行：單張升為全寬，兩張升為各 1/2，三張維持各 1/3。
+ * 課名長度仍決定初始分組，這裡只利用分組後確定無法再放卡片的剩餘空間。
+ */
+const fillCourseCardRow = row => {
+    if (row.length === 1) {
+        return row.map(entry => ({...entry, span: COURSE_GRID_COLUMN_COUNT}));
+    }
+    if (row.length === 2 && row.every(entry => entry.span < COURSE_GRID_COLUMN_COUNT)) {
+        return row.map(entry => ({...entry, span: COURSE_GRID_COLUMN_COUNT / 2}));
+    }
+    return row;
+};
+
+const groupCourseCardsByRow = list => {
+    const rows = [];
+    let currentRow = [];
+    let occupiedColumns = 0;
+
+    list.forEach((item, index) => {
+        const span = getCourseCardSpan(item);
+        if (occupiedColumns > 0 && occupiedColumns + span > COURSE_GRID_COLUMN_COUNT) {
+            rows.push(currentRow);
+            currentRow = [];
+            occupiedColumns = 0;
+        }
+
+        currentRow.push({
+            item,
+            span,
+            key: `${item['Course Code'] || item.New_code || 'course'}-${index}`,
+        });
+        occupiedColumns += span;
+
+        if (occupiedColumns === COURSE_GRID_COLUMN_COUNT) {
+            rows.push(currentRow);
+            currentRow = [];
+            occupiedColumns = 0;
+        }
+    });
+
+    if (currentRow.length > 0) {
+        rows.push(currentRow);
+    }
+    return rows.map(fillCourseCardRow);
+};
+
+const CourseCardRow = ({ entries, availableWidth, courseMode }) => {
+    const [measuredHeights, setMeasuredHeights] = useState({});
+    const isRowMeasured = entries.every(entry => measuredHeights[entry.key] > 0);
+    const rowHeight = isRowMeasured
+        ? Math.max(...entries.map(entry => measuredHeights[entry.key]))
+        : undefined;
+
+    const handleMeasureHeight = useCallback((key, height) => {
+        setMeasuredHeights(currentHeights => {
+            if (Math.abs((currentHeights[key] || 0) - height) <= 0.5) {
+                return currentHeights;
+            }
+            return {...currentHeights, [key]: height};
+        });
+    }, []);
+
+    return (
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', columnGap: COURSE_CARD_GAP }}>
+            {entries.map(entry => (
+                <CourseCard
+                    key={entry.key}
+                    item={entry.item}
+                    mode={'json'}
+                    courseMode={courseMode}
+                    cardWidth={getCourseCardWidth(entry.span, availableWidth)}
+                    cardHeight={rowHeight}
+                    onMeasureHeight={height => handleMeasureHeight(entry.key, height)}
+                />
+            ))}
+        </View>
+    );
 };
 
 const What2Reg = props => {
@@ -278,16 +369,13 @@ const What2Reg = props => {
 
     /**
      * 課程卡片以 flexWrap 容器渲染（非 FlatList）。
-     * 先量測一般 Yoga 容器的可用寬度，再按課名視覺長度分配全寬、1/2 或 1/3。
-     * 明確寬度可避免 Expo MenuView 的 matchContents 在 flexWrap 內量測塌陷。
+     * 先按課名視覺長度分配全寬、1/2 或 1/3，再把卡片分組成實際行。
+     * 每行量測所有卡片的自然高度後統一使用最大值，避免 Expo MenuView
+     * 的 SwiftUI Host 無法繼承 React Native Flexbox 拉伸高度。
      */
     const renderCourseCards = useCallback(list => (
         <View
             style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                alignItems: 'stretch',
-                columnGap: COURSE_CARD_GAP,
                 rowGap: COURSE_CARD_GAP,
                 paddingHorizontal: COURSE_GRID_HORIZONTAL_PADDING,
             }}
@@ -300,13 +388,12 @@ const What2Reg = props => {
                 ));
             }}>
             {courseGridWidth > 0
-                ? list.map((item, index) => (
-                    <CourseCard
-                        key={item['Course Code'] || item.New_code || index}
-                        item={item}
-                        mode={'json'}
+                ? groupCourseCardsByRow(list).map(entries => (
+                    <CourseCardRow
+                        key={`${courseMode}-${Math.round(courseGridWidth)}-${entries.map(entry => `${entry.key}:${entry.span}`).join('_')}`}
+                        entries={entries}
+                        availableWidth={courseGridWidth}
                         courseMode={courseMode}
-                        cardWidth={getCourseCardWidth(item, courseGridWidth)}
                     />
                 ))
                 : null}

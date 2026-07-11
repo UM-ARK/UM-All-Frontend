@@ -20,12 +20,12 @@ import { t } from 'i18next';
 
 const styles = StyleSheet.create({
     menuView: {
-        alignSelf: 'stretch',
+        alignSelf: 'flex-start',
     },
 });
 
 const CourseCard = memo(
-    ({ item, mode, prof_info, courseMode = 'ad', cardWidth }) => {
+    ({ item, mode, prof_info, courseMode = 'ad', cardWidth, cardHeight, onMeasureHeight }) => {
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
@@ -227,7 +227,11 @@ const CourseCard = memo(
                 actions={courseActions}
                 onPressAction={handleMenuAction}
                 shouldOpenOnLongPress={false}
-                style={[styles.menuView, cardWidth ? { width: cardWidth } : null]}>
+                style={[
+                    styles.menuView,
+                    cardWidth ? { width: cardWidth } : null,
+                    cardHeight ? { height: cardHeight } : null,
+                ]}>
                 <TouchableScale
                     activeScale={0.96}
                     style={{
@@ -236,82 +240,90 @@ const CourseCard = memo(
                         padding: scale(10),
                         paddingVertical: scale(5),
                         width: cardWidth,
-                        height: '100%',
+                        height: cardHeight,
+                        justifyContent: 'space-between',
+                    }}
+                    onLayout={cardHeight ? undefined : ({ nativeEvent }) => {
+                        onMeasureHeight?.(nativeEvent.layout.height);
                     }}
                     onPress={() => {
                         trigger();
                     }}>
-                    {/* 課程編號與開課標識 */}
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                        }}>
-                        {renderCourseCode(courseCode)}
-                        {/* Pre Enroll標記 */}
-                        {isPreEnroll ? (
+                    <View>
+                        {/* 課程編號與開課標識 */}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}>
+                            {renderCourseCode(courseCode)}
+                            {/* Pre Enroll標記 */}
+                            {isPreEnroll ? (
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(10),
+                                        fontWeight: 'bold',
+                                        marginLeft: scale(5),
+                                        color: secondThemeColor,
+                                    }}>
+                                    PreEnroll
+                                </Text>
+                            ) : null}
+                        </View>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(11),
+                                color: black.second,
+                            }}>
+                            {title}
+                        </Text>
+                        {'courseTitleChi' in item &&
+                            item.courseTitleChi.length > 0 ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(11),
+                                    color: black.second,
+                                }}>
+                                {item.courseTitleChi}
+                            </Text>
+                        ) : null}
+                        {'Course Title Chi' in item &&
+                            item['Course Title Chi'].length > 0 ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(11),
+                                    color: black.second,
+                                }}>
+                                {item['Course Title Chi']}
+                            </Text>
+                        ) : null}
+                    </View>
+                    <View>
+                        {credit ? (
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
                                     fontSize: scale(10),
-                                    fontWeight: 'bold',
-                                    marginLeft: scale(5),
-                                    color: secondThemeColor,
+                                    color: black.third,
                                 }}>
-                                PreEnroll
+                                {credit} Credit
                             </Text>
                         ) : null}
-                    </View>
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(11),
-                            color: black.second,
-                        }}>
-                        {title}
-                    </Text>
-                    {'courseTitleChi' in item &&
-                        item.courseTitleChi.length > 0 ? (
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(11),
-                                color: black.second,
-                            }}>
-                            {item.courseTitleChi}
-                        </Text>
-                    ) : null}
-                    {'Course Title Chi' in item &&
-                        item['Course Title Chi'].length > 0 ? (
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(11),
-                                color: black.second,
-                            }}>
-                            {item['Course Title Chi']}
-                        </Text>
-                    ) : null}
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(10),
-                            color: black.third,
-                        }}>
-                        {offerUnit}
-                        {offerDepa && ' - ' + offerDepa}
-                    </Text>
-                    {credit ? (
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 fontSize: scale(10),
                                 color: black.third,
                             }}>
-                            {credit} Credit
+                            {offerUnit}
+                            {offerDepa && ' - ' + offerDepa}
                         </Text>
-                    ) : null}
+                    </View>
                 </TouchableScale>
             </MenuView>
         );
