@@ -23,10 +23,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import TouchableScale from '../../../components/TouchableScale';
-// 使用 @react-native-menu/menu：trigger 子內容為普通 RN 子視圖，Yoga 可正常量測寬高，
-// 課表格子才能撐滿所屬星期欄位；@expo/ui 的 MenuView 用 SwiftUI Host + matchContents
-// 反向量測，無明確寬度時會塌陷成細條。
-import { MenuView } from '@react-native-menu/menu';
+// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷；
+// 課表格子已有固定欄寬，因此對 MenuView / 卡片傳入明確 width。
+import { MenuView } from '@expo/ui/community/menu';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -66,6 +65,12 @@ import { getCourseData } from '../../../utils/checkCoursesKits';
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
 const iconSize = scale(25);
+/** 課表單一星期欄寬 */
+const DAY_COLUMN_WIDTH = scale(135);
+/** 課程卡片左右邊距 */
+const COURSE_CARD_MARGIN = scale(5);
+/** Expo MenuView 需明確寬度，否則 matchContents 會塌陷 */
+const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
@@ -456,7 +461,7 @@ function CourseSim({ route, navigation }) {
             return (
                 <View
                     style={{
-                        width: scale(135),
+                        width: DAY_COLUMN_WIDTH,
                         marginBottom:
                             dayCourseList.length < 4
                                 ? (4 - dayCourseList.length) * scale(140)
@@ -770,11 +775,17 @@ function CourseSim({ route, navigation }) {
 
                 <MenuView
                     actions={courseMenuActions}
-                    onOpenMenu={handleCourseMenuOpen}
-                    onPressAction={handleCourseMenuAction}>
+                    onPressAction={handleCourseMenuAction}
+                    shouldOpenOnLongPress={false}
+                    style={{
+                        alignSelf: 'center',
+                        width: COURSE_CARD_WIDTH,
+                        margin: COURSE_CARD_MARGIN,
+                    }}>
                     <TouchableScale
+                        activeScale={0.96}
                         style={{
-                            margin: scale(5),
+                            width: COURSE_CARD_WIDTH,
                             backgroundColor: timeWarning
                                 ? unread
                                 : TIME_TABLE_COLOR[
@@ -788,7 +799,6 @@ function CourseSim({ route, navigation }) {
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
-                        activeOpacity={0.8}
                         onPress={handleCourseMenuOpen}>
                         {/* 課號 */}
                         <Text
