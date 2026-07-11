@@ -22,10 +22,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import TouchableScale from '../../../components/TouchableScale';
-// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷；
-// 課表格子已有固定欄寬，因此對 MenuView / 卡片傳入明確 width。
-import { MenuView } from '@expo/ui/community/menu';
+// 課表一次掛多張卡片：不可用 @expo/ui MenuView（SwiftUI Host matchContents
+// 會在 Tab 切換／版面提交時反寫 Fabric ShadowTree 並 abort）。
+// 改用 @react-native-menu/menu（原生 UIButton）；縮放改由 onOpenMenu/onCloseMenu 驅動。
+import { MenuView } from '@react-native-menu/menu';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -69,7 +74,6 @@ const iconSize = scale(25);
 const DAY_COLUMN_WIDTH = scale(135);
 /** 課程卡片左右邊距 */
 const COURSE_CARD_MARGIN = scale(5);
-/** Expo MenuView 需明確寬度，否則 matchContents 會塌陷 */
 const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
@@ -129,6 +133,64 @@ const daySorter = {
 const daySort = objArr => {
     return lodash.sortBy(objArr, item => daySorter[item.Day]);
 };
+
+/** 與 TouchableScale 預設相近的彈簧參數 */
+const COURSE_CARD_SPRING = {
+    damping: 18,
+    stiffness: 280,
+    mass: 0.4,
+};
+
+/**
+ * 課表課程卡片選單（@react-native-menu/menu）。
+ * 原生 UIButton 會吃掉子層 Pressable 的 pressIn，故改以選單開合驅動縮放回饋。
+ */
+function TimetableCourseMenuCard({
+    actions,
+    onPressAction,
+    onPress,
+    backgroundColor,
+    children,
+}) {
+    const cardScale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: cardScale.value }],
+    }));
+
+    return (
+        <MenuView
+            actions={actions}
+            onPressAction={onPressAction}
+            shouldOpenOnLongPress={false}
+            onOpenMenu={() => {
+                cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
+                onPress?.();
+            }}
+            onCloseMenu={() => {
+                cardScale.value = withSpring(1, COURSE_CARD_SPRING);
+            }}
+            style={{
+                alignSelf: 'center',
+                width: COURSE_CARD_WIDTH,
+                margin: COURSE_CARD_MARGIN,
+            }}>
+            <Animated.View
+                style={[
+                    {
+                        width: COURSE_CARD_WIDTH,
+                        backgroundColor,
+                        borderRadius: scale(10),
+                        padding: scale(5),
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    },
+                    animatedStyle,
+                ]}>
+                {children}
+            </Animated.View>
+        </MenuView>
+    );
+}
 
 function CourseSim({ route, navigation }) {
     // state
@@ -769,124 +831,111 @@ function CourseSim({ route, navigation }) {
         };
 
         return (
-            <View>
+            <View
+                key={`${course.Day}-${course['Course Code']}-${course.Section}-${course['Time From']}-${course['Time To']}`}>
                 {afternoonReminder}
                 {timeDiffReminder}
 
-                <MenuView
+                <TimetableCourseMenuCard
                     actions={courseMenuActions}
                     onPressAction={handleCourseMenuAction}
-                    shouldOpenOnLongPress={false}
-                    style={{
-                        alignSelf: 'center',
-                        width: COURSE_CARD_WIDTH,
-                        margin: COURSE_CARD_MARGIN,
-                    }}>
-                    <TouchableScale
-                        activeScale={0.96}
+                    onPress={handleCourseMenuOpen}
+                    backgroundColor={
+                        timeWarning
+                            ? unread
+                            : TIME_TABLE_COLOR[
+                                  lodash.indexOf(
+                                      u_code_list,
+                                      course['Course Code'],
+                                  ) % TIME_TABLE_COLOR.length
+                              ]
+                    }>
+                    {/* 課號 */}
+                    <Text
                         style={{
-                            width: COURSE_CARD_WIDTH,
-                            backgroundColor: timeWarning
-                                ? unread
-                                : TIME_TABLE_COLOR[
-                                lodash.indexOf(
-                                    u_code_list,
-                                    course['Course Code'],
-                                ) % TIME_TABLE_COLOR.length
-                                ],
-                            borderRadius: scale(10),
-                            padding: scale(5),
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                        onPress={handleCourseMenuOpen}>
-                        {/* 課號 */}
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            opacity: 0.7,
+                            fontSize: scale(20),
+                            textAlign: 'center',
+                            fontWeight: '700',
+                        }}>
+                        {course['Course Code'].substring(0, 4) + '\n'}
                         <Text
                             style={{
-                                ...uiStyle.defaultText,
-                                color: black.main,
-                                opacity: 0.7,
                                 fontSize: scale(20),
-                                textAlign: 'center',
-                                fontWeight: '700',
+                                fontWeight: 'bold',
                             }}>
-                            {course['Course Code'].substring(0, 4) + '\n'}
-                            <Text
-                                style={{
-                                    fontSize: scale(20),
-                                    fontWeight: 'bold',
-                                }}>
-                                {course['Course Code'].substring(4, 8)}
-                            </Text>
+                            {course['Course Code'].substring(4, 8)}
                         </Text>
+                    </Text>
 
-                        {/* Section */}
+                    {/* Section */}
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            opacity: 0.8,
+                        }}>
+                        {course.Section}
+                    </Text>
+
+                    {/* 課程名稱 */}
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            textAlign: 'center',
+                            opacity: 0.4,
+                        }}
+                        numberOfLines={4}>
+                        {course['Course Title']}
+                    </Text>
+
+                    {/* 教室 */}
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            fontWeight: 'bold',
+                            opacity: 0.5,
+                        }}>
+                        {course.Classroom}
+                    </Text>
+
+                    {/* 上課時間 */}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignSelf: 'stretch',
+                        }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 color: black.main,
+                                fontWeight: '600',
                                 opacity: 0.8,
                             }}>
-                            {course.Section}
+                            {course['Time From']}
                         </Text>
-
-                        {/* 課程名稱 */}
+                        <Ionicons
+                            name="ellipsis-horizontal"
+                            size={scale(20)}
+                            color={black.main}
+                            style={{ opacity: 0.4 }}
+                        />
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 color: black.main,
-                                textAlign: 'center',
-                                opacity: 0.4,
-                            }}
-                            numberOfLines={4}>
-                            {course['Course Title']}
-                        </Text>
-
-                        {/* 教室 */}
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.main,
-                                fontWeight: 'bold',
-                                opacity: 0.5,
+                                fontWeight: '600',
+                                opacity: 0.8,
                             }}>
-                            {course.Classroom}
+                            {course['Time To']}
                         </Text>
-
-                        {/* 上課時間 */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignSelf: 'stretch',
-                            }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.main,
-                                    fontWeight: '600',
-                                    opacity: 0.8,
-                                }}>
-                                {course['Time From']}
-                            </Text>
-                            <Ionicons
-                                name="ellipsis-horizontal"
-                                size={scale(20)}
-                                color={black.main}
-                                style={{ opacity: 0.4 }}
-                            />
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: black.main,
-                                    fontWeight: '600',
-                                    opacity: 0.8,
-                                }}>
-                                {course['Time To']}
-                            </Text>
-                        </View>
-                    </TouchableScale>
-                </MenuView>
+                    </View>
+                </TimetableCourseMenuCard>
             </View>
         );
     };
