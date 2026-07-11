@@ -1,5 +1,5 @@
 import React, { useContext, memo } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
@@ -14,15 +14,18 @@ import TouchableScale from '../../../../components/TouchableScale';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
-// 使用 @react-native-menu/menu：其 trigger 子內容為普通 RN 子視圖，Yoga 可正常量測，
-// 故卡片能依文本長度自適應寬度並在 flexWrap 容器中換行。
-// （@expo/ui 的 MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度時會塌陷）
-import { MenuView } from '@react-native-menu/menu';
+import { MenuView } from '@expo/ui/community/menu';
 import lodash from 'lodash';
 import { t } from 'i18next';
 
+const styles = StyleSheet.create({
+    menuView: {
+        alignSelf: 'stretch',
+    },
+});
+
 const CourseCard = memo(
-    ({ item, mode, prof_info, courseMode = 'ad' }) => {
+    ({ item, mode, prof_info, courseMode = 'ad', cardWidth }) => {
         // const { item, mode, prof_info, courseMode = 'ad' } = props;
         const navigation = useContext(NavigationContext);
         const { theme } = useTheme();
@@ -222,15 +225,18 @@ const CourseCard = memo(
         return (
             <MenuView
                 actions={courseActions}
-                onOpenMenu={trigger}
-                onPressAction={handleMenuAction}>
+                onPressAction={handleMenuAction}
+                shouldOpenOnLongPress={false}
+                style={[styles.menuView, cardWidth ? { width: cardWidth } : null]}>
                 <TouchableScale
+                    activeScale={0.96}
                     style={{
                         backgroundColor: white,
                         borderRadius: scale(10),
-                        margin: scale(5),
                         padding: scale(10),
                         paddingVertical: scale(5),
+                        width: cardWidth,
+                        height: '100%',
                     }}
                     onPress={() => {
                         trigger();

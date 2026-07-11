@@ -37,6 +37,39 @@ import TouchableScale from '../../../components/TouchableScale';
 
 const iconSize = scale(25);
 const itemHeight = scale(75);
+const COURSE_CARD_GAP = scale(10);
+const COURSE_GRID_HORIZONTAL_PADDING = scale(10);
+const SHORT_COURSE_TITLE_MAX_LENGTH = 20;
+const MEDIUM_COURSE_TITLE_MAX_LENGTH = 36;
+
+/**
+ * 計算課名的視覺長度；漢字按兩個拉丁字元計算。
+ * 此數值只用來選擇三種離散欄寬，實際換行仍交由原生文字排版。
+ */
+const getVisualTextLength = text => Array.from(String(text || '')).reduce((length, character) => {
+    return length + (/\p{Script=Han}/u.test(character) ? 2 : 1);
+}, 0);
+
+const getCourseCardWidth = (item, availableWidth) => {
+    const titleCandidates = [
+        item['Course Title'],
+        item['Course Title Chi'],
+        item.courseTitleEng,
+        item.courseTitleChi,
+    ].filter(Boolean);
+    const titleLength = Math.max(
+        ...titleCandidates.map(getVisualTextLength),
+        0,
+    );
+
+    if (titleLength <= SHORT_COURSE_TITLE_MAX_LENGTH) {
+        return Math.floor((availableWidth - COURSE_CARD_GAP * 2) / 3);
+    }
+    if (titleLength <= MEDIUM_COURSE_TITLE_MAX_LENGTH) {
+        return Math.floor((availableWidth - COURSE_CARD_GAP) / 2);
+    }
+    return Math.floor(availableWidth);
+};
 
 const What2Reg = props => {
     const { theme } = useTheme();
@@ -47,6 +80,7 @@ const What2Reg = props => {
     const [dialogVisible, setDialogVisible] = useState(false);
     const [sheetIndex, setSheetIndex] = useState(-1);
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
+    const [courseGridWidth, setCourseGridWidth] = useState(0);
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
@@ -244,22 +278,40 @@ const What2Reg = props => {
 
     /**
      * 課程卡片以 flexWrap 容器渲染（非 FlatList）。
-     * CourseCard 內層是原生 MenuView，靠 Host matchContents 量測子內容決定寬度；
-     * 必須放在一般 Yoga 佈局中（FlatList 的 cell 會施加寬度約束導致量測塌陷），
-     * 如此卡片才能依文本長度自適應寬度、彼此保留間距並自動換行。
+     * 先量測一般 Yoga 容器的可用寬度，再按課名視覺長度分配全寬、1/2 或 1/3。
+     * 明確寬度可避免 Expo MenuView 的 matchContents 在 flexWrap 內量測塌陷。
      */
     const renderCourseCards = useCallback(list => (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: scale(5) }}>
-            {list.map((item, index) => (
-                <CourseCard
-                    key={item['Course Code'] || item.New_code || index}
-                    item={item}
-                    mode={'json'}
-                    courseMode={courseMode}
-                />
-            ))}
+        <View
+            style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                alignItems: 'stretch',
+                columnGap: COURSE_CARD_GAP,
+                rowGap: COURSE_CARD_GAP,
+                paddingHorizontal: COURSE_GRID_HORIZONTAL_PADDING,
+            }}
+            onLayout={({ nativeEvent }) => {
+                const availableWidth = nativeEvent.layout.width - COURSE_GRID_HORIZONTAL_PADDING * 2;
+                setCourseGridWidth(currentWidth => (
+                    Math.abs(currentWidth - availableWidth) > 0.5
+                        ? availableWidth
+                        : currentWidth
+                ));
+            }}>
+            {courseGridWidth > 0
+                ? list.map((item, index) => (
+                    <CourseCard
+                        key={item['Course Code'] || item.New_code || index}
+                        item={item}
+                        mode={'json'}
+                        courseMode={courseMode}
+                        cardWidth={getCourseCardWidth(item, courseGridWidth)}
+                    />
+                ))
+                : null}
         </View>
-    ), [courseMode]);
+    ), [courseGridWidth, courseMode]);
 
     const hasSearchResult = searchFilterCourse?.length > 0;
 
