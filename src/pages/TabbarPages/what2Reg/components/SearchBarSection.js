@@ -146,7 +146,7 @@ const SearchBarSection = ({
             {inputOK ? (
                 <MenuView
                     actions={searchActions}
-                    onOpenMenu={trigger}
+                    onOpenMenu={() => trigger()}
                     onPressAction={handlePressAction}>
                     <TouchableScale
                         style={searchBtnStyle}

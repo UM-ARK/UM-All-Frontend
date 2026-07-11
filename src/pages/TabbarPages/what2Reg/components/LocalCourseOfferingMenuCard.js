@@ -154,7 +154,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     return (
         <MenuView
             actions={offeringActions}
-            onOpenMenu={trigger}
+            onOpenMenu={() => trigger()}
             onPressAction={handleMenuAction}>
             <TouchableScale
                 style={{

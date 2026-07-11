@@ -295,7 +295,7 @@ function Index({ navigation }) {
                     {/* 左側：反饋 */}
                     <MenuView
                         actions={feedbackActions}
-                        onOpenMenu={trigger}
+                        onOpenMenu={() => trigger()}
                         onPressAction={handleFeedbackAction}>
                         <TouchableScale
                             style={{
