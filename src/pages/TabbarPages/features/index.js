@@ -26,10 +26,12 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
-// 使用 @react-native-menu/menu：trigger 子內容為普通 RN 子視圖，可依內容自適應寬度；
-// @expo/ui 的 MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度時會塌陷。
-import { MenuView } from '@react-native-menu/menu';
+// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
+import { MenuView } from '@expo/ui/community/menu';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+/** 頂欄左右操作鈕固定寬度，避免 MenuView 塌陷，並保持標題視覺置中 */
+const HEADER_ACTION_WIDTH = scale(70);
 
 function Index({ navigation }) {
     const insets = useSafeAreaInsets();
@@ -296,11 +298,15 @@ function Index({ navigation }) {
                     <MenuView
                         actions={feedbackActions}
                         onOpenMenu={() => trigger()}
-                        onPressAction={handleFeedbackAction}>
+                        onPressAction={handleFeedbackAction}
+                        shouldOpenOnLongPress={false}
+                        style={{ width: HEADER_ACTION_WIDTH }}>
                         <TouchableScale
                             style={{
+                                width: HEADER_ACTION_WIDTH,
                                 flexDirection: 'row',
                                 alignItems: 'center',
+                                justifyContent: 'center',
                                 backgroundColor: `${themeColor}15`,
                                 borderRadius: scale(20),
                                 paddingVertical: scale(6),
@@ -340,8 +346,10 @@ function Index({ navigation }) {
                     {/* 右側：設置 (與左側對稱) */}
                     <TouchableScale
                         style={{
+                            width: HEADER_ACTION_WIDTH,
                             flexDirection: 'row',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             backgroundColor: `${themeColor}15`,
                             borderRadius: scale(20),
                             paddingVertical: scale(6),

@@ -18,9 +18,8 @@ import {
     setUmehHostPref,
     refreshUmehHost,
 } from '../../utils/umehHost';
-// 使用 @react-native-menu/menu：trigger 子內容為普通 RN 子視圖，可依內容自適應寬度；
-// @expo/ui 的 MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度時會塌陷。
-import { MenuView } from '@react-native-menu/menu';
+// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
+import { MenuView } from '@expo/ui/community/menu';
 import {
     USUAL_Q,
     USER_AGREE,
@@ -551,11 +550,15 @@ const SettingPage = ({ navigation }) => {
                                     handleUmehHostPrefChange(
                                         event.nativeEvent.event,
                                     )
-                                }>
+                                }
+                                shouldOpenOnLongPress={false}
+                                style={{ width: scale(72) }}>
                                 <Pressable
                                     style={({ pressed }) => ({
+                                        width: scale(72),
                                         flexDirection: 'row',
                                         alignItems: 'center',
+                                        justifyContent: 'center',
                                         backgroundColor: `${'#007AFF'}15`,
                                         borderRadius: scale(8),
                                         paddingHorizontal: scale(10),
