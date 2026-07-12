@@ -16,8 +16,12 @@ import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import TouchableScale from '../../../../components/TouchableScale';
 
-/** 老師分組橫向列表中的卡片固定寬度 */
-const TEACHER_CARD_WIDTH = scale(160);
+/** 與 LocalCourse 列表左右內距一致 */
+const TEACHER_LIST_SIDE_INSET = scale(10);
+/** MenuView / 卡片外圍 margin（左右各一份） */
+const TEACHER_CARD_MARGIN = scale(5);
+/** 橫滑時露出下一張卡的寬度，提示還有更多班別 */
+const TEACHER_NEXT_CARD_PEEK = scale(36);
 
 // Menu 圖標：iOS 用 SF Symbol，Android 用 Material Symbols XML
 const MENU_ICON_BOOK = Icon.select({
@@ -40,11 +44,18 @@ const MENU_ICON_ADD = Icon.select({
 // 單一 offering（section）卡片與長按選單：Section／Teacher 分組共用。
 const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     const { width: windowWidth } = useWindowDimensions();
-    // Section 單卡置中：用螢幕寬扣除左右邊距；Teacher 橫滑：固定卡片寬
+    // Section 單卡置中：用螢幕寬扣除左右邊距
+    // Teacher 橫滑：約兩卡寬 + peek，讓下一張露出一截
+    const teacherCardWidth =
+        (windowWidth -
+            TEACHER_LIST_SIDE_INSET * 2 -
+            TEACHER_NEXT_CARD_PEEK) /
+            2 -
+        TEACHER_CARD_MARGIN * 2;
     const cardWidth =
         variant === 'section'
             ? windowWidth - scale(40)
-            : TEACHER_CARD_WIDTH;
+            : Math.max(scale(130), teacherCardWidth);
     const { theme } = useTheme();
     const { baseHost } = useUmehHost();
     const { themeColor, black, white } = theme;
