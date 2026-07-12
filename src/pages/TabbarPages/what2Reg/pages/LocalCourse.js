@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, ScrollView, FlatList, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import Loading from '../../../../components/Loading';
@@ -37,6 +38,7 @@ const daySort = (objArr) => {
 const LocalCourse = (props) => {
     const { theme } = useTheme();
     const { themeColor, black, bg_color } = theme;
+    const insets = useSafeAreaInsets();
 
     const { navigation } = props;
 
@@ -239,7 +241,13 @@ const LocalCourse = (props) => {
                     <Loading />
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={{ paddingHorizontal: LOCAL_SECTION_HORIZONTAL_PADDING }} contentInsetAdjustmentBehavior="automatic">
+                <ScrollView
+                    contentContainerStyle={{
+                        paddingHorizontal: LOCAL_SECTION_HORIZONTAL_PADDING,
+                        // 避開 Android 系統導航列 / iOS Home Indicator
+                        paddingBottom: insets.bottom + scale(16),
+                    }}
+                    contentInsetAdjustmentBehavior="automatic">
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
                         <View style={{ alignItems: 'center' }}>

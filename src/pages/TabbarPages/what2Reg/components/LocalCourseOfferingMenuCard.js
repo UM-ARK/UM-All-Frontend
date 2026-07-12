@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View, Alert, useWindowDimensions } from 'react-native';
 // @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
-// TODO: Teacher分類時，橫向滑動無法固定寬度，樣式崩潰
+// Teacher 分類橫滑靠固定 cardWidth；時段每行最多兩天，避免多天撐破寬度。
 import { Icon } from '@expo/ui';
 import { MenuView } from '@expo/ui/community/menu';
 import { scale } from 'react-native-size-matters';
@@ -254,19 +254,26 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                     slots.every(
                         item => 'Time From' in item && item['Time From'],
                     ) && (
-                        <View style={{ flexDirection: 'row' }}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                width: '100%',
+                            }}>
                             {slots.map((sameSection, idx) => (
                                 <View
                                     key={
                                         variant === 'teacher'
                                             ? sameSection.Day +
-                                            sameSection.Classroom +
-                                            idx
+                                              sameSection.Classroom +
+                                              idx
                                             : sameSection.Day +
-                                            sameSection.Classroom
+                                              sameSection.Classroom
                                     }
                                     style={{
-                                        margin: scale(5),
+                                        width: '50%',
+                                        paddingVertical: scale(5),
                                         alignItems: 'center',
                                     }}>
                                     <Text
@@ -278,7 +285,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                         {sameSection.Day}
                                     </Text>
                                     {'Classroom' in sameSection &&
-                                        sameSection.Classroom ? (
+                                    sameSection.Classroom ? (
                                         <Text
                                             style={{
                                                 ...uiStyle.defaultText,
@@ -289,13 +296,15 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                                         </Text>
                                     ) : null}
                                     {'Time From' in sameSection &&
-                                        sameSection['Time From'] ? (
+                                    sameSection['Time From'] ? (
                                         <Text
                                             style={{
                                                 ...uiStyle.defaultText,
                                                 fontSize: scale(10),
                                                 color: black.third,
-                                            }}>
+                                            }}
+                                            numberOfLines={1}
+                                            adjustsFontSizeToFit>
                                             {sameSection['Time From']} ~{' '}
                                             {sameSection['Time To']}
                                         </Text>
