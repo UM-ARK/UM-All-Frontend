@@ -14,6 +14,7 @@ import {
     StyleSheet,
     TextInput,
     Keyboard,
+    Platform,
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -670,32 +671,45 @@ function CourseSim({ route, navigation }) {
             lodash.countBy(u_codeSectionList, 'Course Code')[
             course['Course Code']
             ] > 1;
+        // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
         const courseMenuActions = [
             {
                 id: 'wiki',
                 title: `${t('寫', { ns: 'catalog' })} ARK Wiki !!!`,
-                image: 'book',
+                image: Platform.select({
+                    ios: 'book',
+                    android: 'ic_menu_agenda',
+                }),
                 imageColor: themeColor,
                 titleColor: themeColor,
             },
             {
                 id: 'what2reg',
                 title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-                image: 'star',
+                image: Platform.select({
+                    ios: 'star',
+                    android: 'btn_star_big_on',
+                }),
                 imageColor: black.third,
                 titleColor: black.third,
             },
             {
                 id: 'official',
                 title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-                image: 'graduationcap',
+                image: Platform.select({
+                    ios: 'graduationcap',
+                    android: 'ic_menu_info_details',
+                }),
                 imageColor: black.third,
                 titleColor: black.third,
             },
             {
                 id: 'section',
                 title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
-                image: 'list.bullet',
+                image: Platform.select({
+                    ios: 'list.bullet',
+                    android: 'ic_menu_sort_by_size',
+                }),
                 imageColor: black.third,
                 titleColor: black.third,
             },
@@ -704,7 +718,10 @@ function CourseSim({ route, navigation }) {
                     {
                         id: 'del-all-sections',
                         title: `${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`,
-                        image: 'trash',
+                        image: Platform.select({
+                            ios: 'trash',
+                            android: 'ic_menu_delete',
+                        }),
                         // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
                         // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
                         imageColor: unread,
@@ -715,7 +732,10 @@ function CourseSim({ route, navigation }) {
             {
                 id: 'drop-section',
                 title: `${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`,
-                image: 'trash',
+                image: Platform.select({
+                    ios: 'trash',
+                    android: 'ic_menu_delete',
+                }),
                 // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
                 // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
                 imageColor: unread,

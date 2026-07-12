@@ -1,8 +1,9 @@
 import React from 'react';
-import { Text, View, Alert } from 'react-native';
-// 使用 @react-native-menu/menu：trigger 子內容為普通 RN 子視圖，可依內容自適應寬度；
-// @expo/ui 的 MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度時會塌陷。
-import { MenuView } from '@react-native-menu/menu';
+import { Text, View, Alert, useWindowDimensions } from 'react-native';
+// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
+// TODO: Teacher分類時，橫向滑動無法固定寬度，樣式崩潰
+import { Icon } from '@expo/ui';
+import { MenuView } from '@expo/ui/community/menu';
 import { scale } from 'react-native-size-matters';
 import lodash from 'lodash';
 import { t } from 'i18next';
@@ -15,8 +16,35 @@ import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import TouchableScale from '../../../../components/TouchableScale';
 
+/** 老師分組橫向列表中的卡片固定寬度 */
+const TEACHER_CARD_WIDTH = scale(160);
+
+// Menu 圖標：iOS 用 SF Symbol，Android 用 Material Symbols XML
+const MENU_ICON_BOOK = Icon.select({
+    ios: 'book',
+    android: require('@expo/material-symbols/book.xml'),
+});
+const MENU_ICON_STAR = Icon.select({
+    ios: 'star',
+    android: require('@expo/material-symbols/star.xml'),
+});
+const MENU_ICON_CALENDAR = Icon.select({
+    ios: 'calendar',
+    android: require('@expo/material-symbols/calendar_month.xml'),
+});
+const MENU_ICON_ADD = Icon.select({
+    ios: 'plus.circle',
+    android: require('@expo/material-symbols/add_circle.xml'),
+});
+
 // 單一 offering（section）卡片與長按選單：Section／Teacher 分組共用。
 const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
+    const { width: windowWidth } = useWindowDimensions();
+    // Section 單卡置中：用螢幕寬扣除左右邊距；Teacher 橫滑：固定卡片寬
+    const cardWidth =
+        variant === 'section'
+            ? windowWidth - scale(40)
+            : TEACHER_CARD_WIDTH;
     const { theme } = useTheme();
     const { baseHost } = useUmehHost();
     const { themeColor, black, white } = theme;
@@ -37,28 +65,28 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
         {
             id: `${keyPrefix}-wiki`,
             title: `${t('寫', { ns: 'catalog' })} Wiki`,
-            image: 'book',
+            image: MENU_ICON_BOOK,
             imageColor: themeColor,
             titleColor: themeColor,
         },
         {
             id: `${keyPrefix}-what2reg`,
             title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-            image: 'star',
+            image: MENU_ICON_STAR,
             imageColor: black.third,
             titleColor: black.third,
         },
         {
             id: `${keyPrefix}-coursesim`,
             title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
-            image: 'calendar',
+            image: MENU_ICON_CALENDAR,
             imageColor: black.third,
             titleColor: black.third,
         },
         {
             id: `${keyPrefix}-add-coursesim`,
             title: `${t('添加至模擬課表', { ns: 'catalog' })}`,
-            image: 'plus.circle',
+            image: MENU_ICON_ADD,
             imageColor: black.third,
             titleColor: black.third,
         },
@@ -155,17 +183,23 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
         <MenuView
             actions={offeringActions}
             onOpenMenu={() => trigger()}
-            onPressAction={handleMenuAction}>
+            onPressAction={handleMenuAction}
+            shouldOpenOnLongPress={false}
+            style={{
+                width: cardWidth,
+                margin: scale(5),
+                alignSelf: variant === 'section' ? 'center' : 'flex-start',
+            }}>
             <TouchableScale
                 style={{
-                    margin: scale(5),
+                    width: cardWidth,
                     backgroundColor: white,
                     borderRadius: scale(16),
                     paddingVertical: scale(5),
                     paddingHorizontal: scale(8),
                     alignItems: 'center',
                 }}
-                activeOpacity={0.8}
+                activeScale={0.96}
                 onPress={() => {
                     trigger('rigid');
                 }}>
