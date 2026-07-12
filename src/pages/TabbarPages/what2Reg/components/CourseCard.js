@@ -14,9 +14,32 @@ import TouchableScale from '../../../../components/TouchableScale';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
+import { Icon } from '@expo/ui';
 import { MenuView } from '@expo/ui/community/menu';
 import lodash from 'lodash';
 import { t } from 'i18next';
+
+// Menu 圖標：iOS 用 SF Symbol，Android 用 Material Symbols XML
+const MENU_ICON_BOOK = Icon.select({
+    ios: 'book',
+    android: require('@expo/material-symbols/book.xml'),
+});
+const MENU_ICON_STAR = Icon.select({
+    ios: 'star',
+    android: require('@expo/material-symbols/star.xml'),
+});
+const MENU_ICON_SCHOOL = Icon.select({
+    ios: 'graduationcap',
+    android: require('@expo/material-symbols/school.xml'),
+});
+const MENU_ICON_CALENDAR = Icon.select({
+    ios: 'calendar',
+    android: require('@expo/material-symbols/calendar_month.xml'),
+});
+const MENU_ICON_LIST = Icon.select({
+    ios: 'list.bullet',
+    android: require('@expo/material-symbols/format_list_bulleted.xml'),
+});
 
 const styles = StyleSheet.create({
     menuView: {
@@ -104,21 +127,21 @@ const CourseCard = memo(
             {
                 id: 'ark-wiki',
                 title: `${t('寫', { ns: 'catalog' })} Wiki`,
-                image: 'book',
+                image: MENU_ICON_BOOK,
                 imageColor: themeColor,
                 titleColor: themeColor,
             },
             {
                 id: 'what2reg',
                 title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-                image: 'star',
+                image: MENU_ICON_STAR,
                 imageColor: black.third,
                 titleColor: black.third,
             },
             {
                 id: 'official',
                 title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-                image: 'graduationcap',
+                image: MENU_ICON_SCHOOL,
                 imageColor: black.third,
                 titleColor: black.third,
             },
@@ -127,14 +150,14 @@ const CourseCard = memo(
                     {
                         id: 'coursesim',
                         title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
-                        image: 'calendar',
+                        image: MENU_ICON_CALENDAR,
                         imageColor: black.third,
                         titleColor: black.third,
                     },
                     {
                         id: 'section',
                         title: `${t('查', { ns: 'catalog' })} Section`,
-                        image: 'list.bullet',
+                        image: MENU_ICON_LIST,
                         imageColor: black.third,
                         titleColor: black.third,
                     },
