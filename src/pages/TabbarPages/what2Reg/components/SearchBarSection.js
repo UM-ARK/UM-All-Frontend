@@ -1,13 +1,15 @@
 import React from 'react';
 import { Keyboard, Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// 使用 @react-native-menu/menu：trigger 子內容為普通 RN 子視圖，可依內容自適應寬度；
-// @expo/ui 的 MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度時會塌陷。
-import { MenuView } from '@react-native-menu/menu';
+// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
+import { MenuView } from '@expo/ui/community/menu';
 import TouchableScale from '../../../../components/TouchableScale';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../components/ThemeContext';
+
+/** 搜尋按鈕固定寬度（相容「搜索」／「Search」） */
+const SEARCH_BTN_WIDTH = scale(50);
 
 /**
  * 搜尋欄區塊
@@ -56,11 +58,13 @@ const SearchBarSection = ({
     };
 
     const searchBtnStyle = {
+        width: SEARCH_BTN_WIDTH,
         backgroundColor: inputOK ? themeColor : disabled,
         borderRadius: scale(6),
         padding: scale(7),
         paddingHorizontal: scale(8),
         alignItems: 'center',
+        justifyContent: 'center',
     };
 
     const searchBtnLabel = (
@@ -147,7 +151,9 @@ const SearchBarSection = ({
                 <MenuView
                     actions={searchActions}
                     onOpenMenu={() => trigger()}
-                    onPressAction={handlePressAction}>
+                    onPressAction={handlePressAction}
+                    shouldOpenOnLongPress={false}
+                    style={{ width: SEARCH_BTN_WIDTH }}>
                     <TouchableScale
                         style={searchBtnStyle}
                         onPress={onPressSearchButton}>
