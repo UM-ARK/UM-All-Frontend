@@ -7,6 +7,5 @@
   "ios.useFrameworks": "static",
   "ios.forceStaticLinking": "[\"RNFBApp\",\"RNFBAnalytics\"]",
   "apple.privacyManifestAggregationEnabled": "true",
-  "ios.buildReactNativeFromSource": "true",
   "EXPO_USE_PRECOMPILED_MODULES": "true"
 }

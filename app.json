@@ -71,8 +71,7 @@
             "forceStaticLinking": [
               "RNFBApp",
               "RNFBAnalytics"
-            ],
-            "buildReactNativeFromSource": true
+            ]
           }
         }
       ],
