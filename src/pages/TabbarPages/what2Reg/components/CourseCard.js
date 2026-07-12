@@ -245,6 +245,19 @@ const CourseCard = memo(
             }
         };
 
+        // 長按直接進 LocalCourse（預選課模式無 Section 資料則略過）
+        const handleLongPressToLocalCourse = () => {
+            if (isPreEnroll) {
+                return;
+            }
+            trigger('rigid');
+            logToFirebase('checkCourse', {
+                courseCode: courseCode,
+                action: 'section',
+            });
+            navigation.navigate('LocalCourse', courseCode);
+        };
+
         return (
             <MenuView
                 actions={courseActions}
@@ -271,7 +284,9 @@ const CourseCard = memo(
                     }}
                     onPress={() => {
                         trigger();
-                    }}>
+                    }}
+                    onLongPress={handleLongPressToLocalCourse}
+                    delayLongPress={350}>
                     <View>
                         {/* 課程編號與開課標識 */}
                         <View
