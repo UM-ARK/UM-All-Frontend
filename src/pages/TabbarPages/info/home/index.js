@@ -61,6 +61,9 @@ import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TouchableScale from '../../../../components/TouchableScale';
 
+const MIN_REFRESH_DURATION = 800;
+const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
+
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
     require('../../../../static/img/donate/mpay.jpg'),
@@ -146,6 +149,7 @@ const HomeScreen = ({ navigation }) => {
     const [calRefreshKey, setCalRefreshKey] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [showUpdateInfo, setShowUpdateInfo] = useState(false);
     const [app_version, setAppVersion] = useState({ lastest: '', local: '' });
     const [version_info, setVersionInfo] = useState(null);
@@ -162,6 +166,7 @@ const HomeScreen = ({ navigation }) => {
     const toastTimer = useRef(null);
     const appStateListener = useRef(null);
     const bottomSheetRef = useRef(null);
+    const refreshingRef = useRef(false);
 
     const { i18n } = useTranslation();
 
@@ -275,6 +280,27 @@ const HomeScreen = ({ navigation }) => {
 
         getUpcomingCourse();
     }, []);
+
+    const handleRefresh = async () => {
+        if (refreshingRef.current) {
+            return;
+        }
+
+        refreshingRef.current = true;
+        setIsRefreshing(true);
+        onRefresh();
+
+        try {
+            await Promise.allSettled([
+                getAppData(),
+                eventPage.current?.onRefresh(),
+                wait(MIN_REFRESH_DURATION),
+            ]);
+        } finally {
+            refreshingRef.current = false;
+            setIsRefreshing(false);
+        }
+    };
 
     /**
      * 從緩存讀取一個星期的列表，跟現在的時間作比較，找到即將到來的課程。
@@ -504,13 +530,8 @@ const HomeScreen = ({ navigation }) => {
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
-                        refreshing={isLoading}
-                        onRefresh={async () => {
-                            setIsLoading(true);
-                            onRefresh();
-                            getAppData();
-                            await eventPage.current?.onRefresh();
-                        }}
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
                     />
                 }
                 alwaysBounceHorizontal={false}
