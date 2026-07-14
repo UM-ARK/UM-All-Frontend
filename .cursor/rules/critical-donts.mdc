@@ -20,7 +20,7 @@ alwaysApply: true
 
 ## 設定要求
 
-- **iOS**: Xcode 10+，Expo CNG 自動管理 CocoaPods
+- **iOS**: Xcode 15+，Expo CNG 自動管理 CocoaPods
 - **Android**: API 31 或 33 模擬器
 - **Firebase**: 需要 `google-services.json` 和 `GoogleService-Info.plist`
-- **API Token**: 根目錄 `umAPIToken.json` 包含 `{"token":"..."}`
+- **API Token**: 根目錄 `.env` 設定 `EXPO_PUBLIC_UM_API_TOKEN=...`（舊版 `umAPIToken.json` 已不再讀取）

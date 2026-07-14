@@ -9,8 +9,15 @@ alwaysApply: false
 ## 導覽結構
 
 - **主導覽**: `src/Nav.js` (Stack Navigator - `createNativeStackNavigator`)
-- **底部標籤**: `src/Tabbar.js` (6 個主標籤 - `createNativeBottomTabNavigator`)
-- **新頁面必須同時註冊到** `Nav.js` 和 `Tabbar.js`
+- **底部標籤**: `src/Tabbar.js`
+  - iOS：`createNativeBottomTabNavigator`（`@react-navigation/bottom-tabs/unstable`）
+  - Android：`createBottomTabNavigator`
+- **目前主標籤（5 個）**：資訊、揾課、「新想法」捷徑、課表、服務
+  - 全站 Harbor Tab 已註解；`HarborNewTopicTab` 為發帖捷徑（攔截 `tabPress` 後 `openLink`）
+  - Harbor / Wiki 產品方向見根目錄 `JOBS.md`
+- **註冊規則**：
+  - 僅 Stack 頁面 → 註冊到 `Nav.js`
+  - 底部標籤頁 → 同時更新 `Tabbar.js` 的 `tabScreen`／圖示設定
 
 ## 液態玻璃效果（iOS 26+）
 
