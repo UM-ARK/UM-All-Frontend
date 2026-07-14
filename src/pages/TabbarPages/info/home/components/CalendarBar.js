@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, Text, VirtualizedList, LayoutAnimation } from 'react-native';
+import { View, Text, VirtualizedList } from 'react-native';
 import moment from 'moment';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 
 import { useTheme } from '../../../../../components/ThemeContext';
 import { uiStyle, VERSION_EMOJI } from '../../../../../components/ThemeContext';
@@ -11,7 +11,17 @@ import { UMCalendar } from '../../../../../static/UMCalendar/UMCalendar';
 import { trigger } from '../../../../../utils/trigger';
 import TouchableScale from '../../../../../components/TouchableScale';
 
-const calItemWidth = verticalScale(50);
+const calItemWidth = Math.max(scale(40), verticalScale(40));
+const calItemHeight = verticalScale(40);
+const calItemMargin = scale(1);
+const calItemStride = calItemWidth + calItemMargin * 2;
+
+const calendarTextProps = {
+    adjustsFontSizeToFit: true,
+    maxFontSizeMultiplier: 1.2,
+    minimumFontScale: 0.75,
+    numberOfLines: 1,
+};
 
 const getItem = (data, index) => data[index];
 const getItemCount = data => data.length;
@@ -45,7 +55,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
 
         setTimeout(() => {
             calScrollRef?.current?.scrollToOffset({
-                offset: newSelectDay * calItemWidth,
+                offset: newSelectDay * calItemStride,
                 animated: true,
             });
         }, 100);
@@ -71,9 +81,13 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
 
         return (
             <TouchableScale
-                style={{ width: calItemWidth, margin: verticalScale(3) }}
+                style={{
+                    width: calItemWidth,
+                    height: calItemHeight,
+                    margin: calItemMargin,
+                    justifyContent: 'center',
+                }}
                 onPress={() => {
-                    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
                     trigger();
                     setSelectDay(index);
                 }}
@@ -84,20 +98,22 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                         borderRadius: verticalScale(5),
                         paddingHorizontal: scale(5),
                         paddingVertical: verticalScale(2),
-                        borderWidth: isThisDateSelected ? 1 : null,
-                        borderColor: themeColorUltraLight,
+                        height: '100%',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: isThisDateSelected ? themeColorUltraLight : 'transparent',
                     }}
                 >
                     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ ...textStyle, fontSize: verticalScale(8) }}>
+                        <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(8) }}>
                             {momentItm.substring(0, 4)}
                         </Text>
 
-                        <Text style={{ ...textStyle, fontSize: verticalScale(12) }}>
+                        <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(12) }}>
                             {`${momentItm.substring(4, 6)}.${momentItm.substring(6, 8)}`}
                         </Text>
 
-                        <Text style={{ ...textStyle, fontSize: verticalScale(7) }}>
+                        <Text {...calendarTextProps} style={{ ...textStyle, fontSize: moderateScale(7) }}>
                             {getWeek(item.startDate)}
                         </Text>
                     </View>
@@ -130,10 +146,9 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                 windowSize={4}
                 initialScrollIndex={selectDay < cal.length ? selectDay : 0}
                 getItemLayout={(data, index) => {
-                    const layoutSize = calItemWidth;
                     return {
-                        length: layoutSize,
-                        offset: layoutSize * index,
+                        length: calItemStride,
+                        offset: calItemStride * index,
                         index,
                     };
                 }}
@@ -169,7 +184,6 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
 
                     <View
                         style={{
-                            borderRadius: scale(5),
                             paddingVertical: verticalScale(2),
                             paddingHorizontal: scale(5),
                             width: screenWidth * 0.8,
@@ -183,9 +197,9 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                             selectable
                             style={{ ...uiStyle.defaultText, color: themeColor, textAlign: 'center', fontSize: verticalScale(12) }}
                         >
-                            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
+                            {/* <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
                                 {'📅 校曆 Upcoming:' + '\n'}
-                            </Text>
+                            </Text> */}
 
                             <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), fontWeight: 'bold' }}>
                                 {moment(cal[selectDay].endDate).diff(cal[selectDay].startDate, 'day') > 1
