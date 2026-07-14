@@ -556,7 +556,7 @@ const HomeScreen = ({ navigation }) => {
                     alignItems: 'center', justifyContent: 'center',
                     alignSelf: 'center',
                     width: screenWidth * 0.8,
-                    marginTop: verticalScale(3),
+                    marginTop: verticalScale(1),
                 }}>
                     <TouchableScale
                         style={{ width: '100%' }}

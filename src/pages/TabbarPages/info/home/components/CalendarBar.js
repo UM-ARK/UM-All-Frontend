@@ -172,7 +172,6 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                     }}
                 >
                     <Text
-                        selectable
                         style={{
                             ...uiStyle.defaultText,
                             textAlign: 'center',
@@ -188,7 +187,7 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                             paddingHorizontal: scale(5),
                             width: screenWidth * 0.8,
                             backgroundColor: `${themeColor}15`,
-                            borderRadius: scale(10),
+                            borderRadius: scale(5),
                             borderWidth: 1,
                             borderColor: themeColorUltraLight,
                         }}
@@ -214,7 +213,6 @@ const CalendarBar = ({ refreshTrigger = 0 }) => {
                     </View>
 
                     <Text
-                        selectable
                         style={{
                             ...uiStyle.defaultText,
                             textAlign: 'center',
