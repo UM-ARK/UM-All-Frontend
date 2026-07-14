@@ -117,7 +117,6 @@ const UMEventPage = () => {
     // 渲染主要內容
     const renderPage = () => {
         const {black, white, themeColor} = theme;
-        const listFooter = <View style={{marginBottom: scale(60)}} />;
         const listHeader = (
             <View style={{marginTop: verticalScale(8)}}>
                 <Text
@@ -138,11 +137,11 @@ const UMEventPage = () => {
                 <FlashList
                     ref={scrollViewRef}
                     data={data}
+                    contentInsetAdjustmentBehavior="automatic"
                     keyExtractor={item => item._id}
                     renderItem={renderItem}
                     drawDistance={500}
                     ListHeaderComponent={listHeader}
-                    ListFooterComponent={listFooter}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -172,6 +171,7 @@ const UMEventPage = () => {
             }}>
             {isLoading ? (
                 <ScrollView
+                    contentInsetAdjustmentBehavior="automatic"
                     showsVerticalScrollIndicator={true}
                     refreshControl={
                         <RefreshControl

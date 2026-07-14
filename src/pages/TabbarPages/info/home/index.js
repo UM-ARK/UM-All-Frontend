@@ -526,6 +526,7 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
             <ScrollView
+                contentInsetAdjustmentBehavior="automatic"
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}

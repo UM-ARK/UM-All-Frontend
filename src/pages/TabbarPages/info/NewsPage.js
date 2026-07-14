@@ -255,6 +255,7 @@ const NewsPage = () => {
             {isLoading ? (
                 // 渲染Loading時的骨架屏
                 <ScrollView
+                    contentInsetAdjustmentBehavior="automatic"
                     contentContainerStyle={{
                         flexGrow: 1,
                         justifyContent: 'center',
@@ -283,6 +284,7 @@ const NewsPage = () => {
                     data={newsList}
                     ref={virtualizedList}
                     style={{ flex: 1, width: '100%' }}
+                    contentInsetAdjustmentBehavior="automatic"
                     // 初始渲染的元素，設置為剛好覆蓋屏幕
                     initialNumToRender={4}
                     windowSize={8}
@@ -297,10 +299,6 @@ const NewsPage = () => {
                     getItemCount={getItemCount}
                     // 列表頭部渲染的組件 - 頭條新聞
                     ListHeaderComponent={renderTopNews}
-                    // 列表底部渲染，防止Tabbar遮擋
-                    ListFooterComponent={() => (
-                        <View style={{ marginTop: scale(100) }} />
-                    )}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}

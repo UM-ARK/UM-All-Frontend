@@ -231,6 +231,7 @@ function ClubPage() {
             <SectionList
                 ref={sectionListRef}
                 style={{ flex: 1, width: '100%' }}
+                contentInsetAdjustmentBehavior="automatic"
                 sections={sections}
                 keyExtractor={(item, index) => {
                     const firstId = item[0]?._id;
