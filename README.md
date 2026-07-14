@@ -74,7 +74,7 @@
 
 ### 🍎 iOS 環境 [Setup](https://reactnative.dev/docs/environment-setup)
 
-> 基於 Expo SDK 54 + React Native 0.81.5，iOS APP 目前只能在 Mac 開發調試
+> 基於 Expo SDK 57 + React Native 0.86，iOS APP 目前只能在 Mac 開發調試
 
 1. 先安裝`node`包（Node ≥18），方便之後使用指令
 
@@ -284,7 +284,7 @@ yarn android
 
 #### 🍎 iOS 運行
 
-> 項目使用 Expo SDK 54 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
+> 項目使用 Expo SDK 57 與 CNG (Continuous Native Generation)，無需手動管理 CocoaPods
 
 1. 確保已安裝依賴
 
@@ -322,7 +322,7 @@ yarn iosBig       # 運行 iPad Pro 13-inch 模擬器
 -   舊版的項目可以在 `Metro` 的命令窗口中按下 `d` 再在模擬器中選擇 `Debug` 即可直接跳轉瀏覽器查看 log。
 <br>
 
-**react-native@0.81+更新：**
+**react-native@0.86 / Metro 除錯：**
 - 在`Metro`中直接使用`j`調出React DevTools。
 - iOS 模擬器支持最新的 Debugging 方案。
 
@@ -337,7 +337,7 @@ iOS和Android平台：打開 [偵錯事件](https://firebase.google.com/docs/ana
 
 ### 🍎 iOS 打包
 
-> 項目使用 Expo SDK 54 與 CNG，推薦使用 Expo 進行打包
+> 項目使用 Expo SDK 57 與 CNG，推薦使用 Expo 進行打包
 
 #### 方式一：使用 Expo 構建（推薦）
 
