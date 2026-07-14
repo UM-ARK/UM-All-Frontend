@@ -1,4 +1,4 @@
-import { Dimensions, Platform, View } from 'react-native';
+import { Platform, useWindowDimensions, View } from 'react-native';
 
 import { useTheme } from './components/ThemeContext';
 
@@ -6,7 +6,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 
 import { useTranslation } from 'react-i18next';
 
-// 原生 tab bar组件，iOS用下面的，Android用上面的
+// 原生 Tab Bar 元件，iOS 使用下方實作，Android 使用上方實作
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
 
@@ -27,7 +27,7 @@ import { logToFirebase } from './utils/firebaseAnalytics';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
-// 图标描述
+// 圖示說明
 const tabIconDescription = {
     NewsTabbar: '資訊',
     Harbor: '職涯港',
@@ -37,7 +37,7 @@ const tabIconDescription = {
     FeaturesTabbar: '服務',
 };
 
-// 页面组件映射
+// 頁面元件映射
 const tabScreen = {
     NewsTabbar: NewsScreen,
     // Harbor: ARKHarbor,
@@ -47,7 +47,7 @@ const tabScreen = {
     FeaturesTabbar: FeaturesScreen,
 };
 
-// iOS SF Symbols 配置
+// iOS SF Symbols 設定
 const iosTabIconConfig = {
     NewsTabbar: 'newspaper',
     Harbor: 'heart',
@@ -57,7 +57,7 @@ const iosTabIconConfig = {
     FeaturesTabbar: 'square.grid.2x2',
 };
 
-// Android MaterialCommunityIcons 名称映射
+// Android MaterialCommunityIcons 名稱映射
 const androidTabIconConfig = {
     NewsTabbar: 'newspaper-variant',
     Harbor: 'chat-processing',
@@ -66,6 +66,10 @@ const androidTabIconConfig = {
     CourseSimTab: 'calendar-clock',
     FeaturesTabbar: 'view-grid',
 };
+
+// 保持 Navigator 元件穩定，避免視窗縮放時重設目前分頁
+const IOSNativeTabs = createNativeBottomTabNavigator();
+const AndroidBottomTabs = createBottomTabNavigator();
 
 /**
  * 取得 Tab Bar 樣式（iOS 勿硬編碼純白，深色模式下會與主題脫節）
@@ -90,10 +94,10 @@ const getTabBarStyle = theme => {
     };
 };
 
-// iOS TabBar 类
+// iOS Tab Bar 類別
 class IOSTabbar {
-    constructor(t, insets, theme, isLandscape, labelFontSize) {
-        this.Tabs = createNativeBottomTabNavigator();
+    constructor(t, insets, theme, isLandscape, labelFontSize, useSidebar) {
+        this.Tabs = IOSNativeTabs;
         this.getTabbarIcon = (routeName, focused) => {
             let baseName = iosTabIconConfig[routeName] || 'questionmark.circle';
             if (focused) {
@@ -133,8 +137,13 @@ class IOSTabbar {
                         translucent: isLiquidGlassSupported ? true : false,
                         tabBarIcon: ({ focused }) =>
                             this.getTabbarIcon(route.name, focused),
-                        tabBarShowLabel: !isLandscape,
-                        tabBarMinimizeBehavior: 'onScrollDown',
+                        tabBarShowLabel: useSidebar || !isLandscape,
+                        tabBarControllerMode: useSidebar
+                            ? 'tabSidebar'
+                            : 'tabBar',
+                        tabBarMinimizeBehavior: useSidebar
+                            ? undefined
+                            : 'onScrollDown',
                     })}
                     hapticFeedbackEnabled={true}>
                     {Object.keys(tabScreen).map(name =>
@@ -146,10 +155,10 @@ class IOSTabbar {
     }
 }
 
-// Android TabBar 类
+// Android Tab Bar 類別
 class AndroidTabbar {
     constructor(t, insets, theme, isLandscape, labelFontSize) {
-        this.Tabs = createBottomTabNavigator();
+        this.Tabs = AndroidBottomTabs;
 
         this.getTabbarIcon = (routeName, focused, color) => {
             let baseName = androidTabIconConfig[routeName] || 'help-circle';
@@ -229,7 +238,7 @@ class AndroidTabbar {
     }
 }
 
-// 工厂函数
+// 工廠函式
 export const tabbarFactory = (
     platform,
     t,
@@ -237,6 +246,7 @@ export const tabbarFactory = (
     theme,
     isLandscape,
     labelFontSize,
+    useSidebar,
 ) => {
     let tabbarClass = null;
     if (platform === 'ios') {
@@ -251,21 +261,25 @@ export const tabbarFactory = (
         theme,
         isLandscape,
         labelFontSize,
+        useSidebar,
     ).createTabbar();
 };
 
 const Tabbar = () => {
     const { theme } = useTheme();
     const { t } = useTranslation(['common', 'home']);
+    const { width, height } = useWindowDimensions();
 
-    // 判斷是否為橫屏
-    const isLandscape = () => {
-        const { width, height } = Dimensions.get('window');
-        return width > height;
-    };
+    // 跟隨 iPad Stage Manager 與 Mac 視窗大小即時切換導覽模式
+    const isLandscape = width > height;
+    const interfaceIdiom = Platform.constants?.interfaceIdiom;
+    const useSidebar =
+        Platform.OS === 'ios' &&
+        width >= 768 &&
+        (Platform.isPad || Platform.isMacCatalyst || interfaceIdiom === 'mac');
 
     // 字體大小
-    const labelFontSize = isLandscape() ? verticalScale(10) : scale(10);
+    const labelFontSize = isLandscape ? verticalScale(10) : scale(10);
 
     const TabbarComponent = tabbarFactory(
         Platform.OS,
@@ -274,6 +288,7 @@ const Tabbar = () => {
         theme,
         isLandscape,
         labelFontSize,
+        useSidebar,
     );
 
     return TabbarComponent;
