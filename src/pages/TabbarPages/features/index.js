@@ -30,17 +30,36 @@ import { useTranslation } from 'react-i18next';
 import { MenuView } from '@expo/ui/community/menu';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-/** 頂欄左右操作鈕固定寬度，避免 MenuView 塌陷，並保持標題視覺置中 */
-const HEADER_ACTION_WIDTH = scale(70);
-
 function Index({ navigation }) {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, viewShadow } = theme;
+    const { themeColor, white, black, trueWhite, bg_color, viewShadow, tonal } =
+        theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = getFunctionArr(t);
-    const fontSize =
-        i18n.language === 'tc' ? verticalScale(10) : verticalScale(8);
+    const isTc = i18n.language === 'tc';
+    const fontSize = isTc ? verticalScale(10) : verticalScale(8);
+    // MenuView 需明確寬度以免塌陷；英文 Feedback / Setting 比中文長，加寬避免裁切
+    const headerActionWidth = isTc ? scale(70) : scale(98);
+    const headerActionStyle = {
+        width: headerActionWidth,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: tonal.primary15,
+        borderRadius: scale(20),
+        paddingVertical: scale(6),
+        paddingHorizontal: scale(8),
+    };
+    const headerActionTextStyle = {
+        ...uiStyle.defaultText,
+        marginLeft: scale(3),
+        fontSize: isTc ? verticalScale(12) : verticalScale(11),
+        color: themeColor,
+        fontWeight: '600',
+        lineHeight: verticalScale(14),
+        flexShrink: 1,
+    };
 
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
@@ -286,93 +305,67 @@ function Index({ navigation }) {
             <ScrollView
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic">
-                {/* 標題與個功能按鍵 */}
+                {/* 標題與操作按鍵：左右 flex:1 槽位保持標題視覺置中 */}
                 <View
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingHorizontal: scale(10), // 兩側留白增加至 16
+                        paddingHorizontal: scale(10),
                     }}>
                     {/* 左側：反饋 */}
-                    <MenuView
-                        actions={feedbackActions}
-                        onOpenMenu={() => trigger()}
-                        onPressAction={handleFeedbackAction}
-                        shouldOpenOnLongPress={false}
-                        style={{ width: HEADER_ACTION_WIDTH }}>
+                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                        <MenuView
+                            actions={feedbackActions}
+                            onOpenMenu={() => trigger()}
+                            onPressAction={handleFeedbackAction}
+                            shouldOpenOnLongPress={false}
+                            style={{ width: headerActionWidth }}>
+                            <TouchableScale style={headerActionStyle}>
+                                <MaterialIcons
+                                    name={'feedback'}
+                                    size={verticalScale(14)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    style={headerActionTextStyle}
+                                    numberOfLines={1}>
+                                    {t('反饋')}
+                                </Text>
+                            </TouchableScale>
+                        </MenuView>
+                    </View>
+
+                    {/* 中間：標題 */}
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            fontSize: verticalScale(18),
+                            color: black.main,
+                            fontWeight: '700',
+                            textAlign: 'center',
+                            marginHorizontal: scale(4),
+                        }}
+                        numberOfLines={1}>
+                        {t('服務一覽', { ns: 'features' })}
+                    </Text>
+
+                    {/* 右側：設置 */}
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
                         <TouchableScale
-                            style={{
-                                width: HEADER_ACTION_WIDTH,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: `${themeColor}15`,
-                                borderRadius: scale(20),
-                                paddingVertical: scale(6),
-                                paddingHorizontal: scale(10),
-                            }}>
-                            <MaterialIcons
-                                name={'feedback'}
+                            style={headerActionStyle}
+                            onPress={handleSettingsPress}>
+                            <Ionicons
+                                name={'settings-sharp'}
                                 size={verticalScale(14)}
                                 color={themeColor}
                             />
                             <Text
-                                style={{
-                                    marginLeft: scale(4),
-                                    fontSize: verticalScale(12),
-                                    color: themeColor,
-                                    fontWeight: '600',
-                                    lineHeight: verticalScale(14),
-                                }}>
-                                {t('反饋')}
+                                style={headerActionTextStyle}
+                                numberOfLines={1}>
+                                {t('設置')}
                             </Text>
                         </TouchableScale>
-                    </MenuView>
-
-                    {/* 中間：標題 */}
-                    <View
-                        style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text
-                            style={{
-                                fontSize: verticalScale(18),
-                                color: black.main,
-                                fontWeight: '700',
-                            }}>
-                            {t('服務一覽', { ns: 'features' })}
-                        </Text>
                     </View>
-
-                    {/* 右側：設置 (與左側對稱) */}
-                    <TouchableScale
-                        style={{
-                            width: HEADER_ACTION_WIDTH,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: `${themeColor}15`,
-                            borderRadius: scale(20),
-                            paddingVertical: scale(6),
-                            paddingHorizontal: scale(10),
-                        }}
-                        onPress={handleSettingsPress}>
-                        <Ionicons
-                            name={'settings-sharp'}
-                            size={verticalScale(14)}
-                            color={themeColor}
-                        />
-                        {/* 甚至可以不顯示文字，只顯示圖標以簡化 */}
-                        <Text
-                            style={{
-                                marginLeft: scale(4),
-                                fontSize: verticalScale(12),
-                                color: themeColor,
-                                fontWeight: '600',
-                                lineHeight: verticalScale(14),
-                            }}>
-                            {t('設置')}
-                        </Text>
-                    </TouchableScale>
                 </View>
 
                 {functionArr.map(fn_card =>
