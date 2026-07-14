@@ -19,6 +19,7 @@ import {
     Image,
     useWindowDimensions,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
@@ -26,13 +27,11 @@ import {
     BASE_HOST,
     GET,
     ARK_HARBOR_LATEST,
-    ARK_HARBOR_TOPIC,
     ARK_HARBOR_AVATAR,
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
-import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
 import axios from 'axios';
@@ -205,6 +204,7 @@ const fetchHarborTopics = async signal => {
 };
 
 const EventPage = forwardRef((props, ref) => {
+    const navigation = useNavigation();
     const { theme } = useTheme();
     const { black, white, themeColor, viewShadow, bg_color } = theme;
     const s = StyleSheet.create({
@@ -353,6 +353,20 @@ const EventPage = forwardRef((props, ref) => {
         await loadFirstPage();
     }, [loadFirstPage]);
 
+    const handleHarborTopicPress = useCallback(item => {
+        trigger();
+        logToFirebase('clickHarbor', {
+            title: item.title,
+            mode: 'app',
+        });
+
+        // TODO: 日後在此擴充其他 Harbor Card 類型的 App 內跳轉邏輯。
+        navigation.navigate('HarborTopicDetail', {
+            topicId: item.id,
+            topicTitle: item.unicode_title || item.title,
+        });
+    }, [navigation]);
+
     useImperativeHandle(ref, () => ({
         getNoMoreData: () => noMoreData,
         loadMoreData,
@@ -466,29 +480,7 @@ const EventPage = forwardRef((props, ref) => {
                 width: cardWidth,
                 alignItems: 'flex-start', justifyContent: 'center',
             }}
-                onPress={() => {
-                    trigger();
-                    const URL = ARK_HARBOR_TOPIC + item.id;
-                    // 升版後一律外開：不再讀 ARK_Harbor_Setting，避免舊快取 tabbarMode==='webview' 仍呼叫已移除的 Harbor 路由
-                    logToFirebase('clickHarbor', {
-                        title: item.title,
-                        mode: 'openLink',
-                    });
-                    openLink({ URL, mode: 'fullScreen' });
-
-                    // --- 舊邏輯（組件層：useAsyncStorage('ARK_Harbor_Setting')；依 tabbarMode 決定 navigate('Harbor') 或 openLink）---
-                    // const settingStr = await getItem();
-                    // const setting = settingStr ? JSON.parse(settingStr) : null;
-                    // logToFirebase('clickHarbor', {
-                    //     title: item.title,
-                    //     mode: setting ? setting.tabbarMode : 'browser',
-                    // });
-                    // if (setting && setting.tabbarMode == 'webview') {
-                    //     navigation.navigate('Harbor', { url: URL });
-                    // } else {
-                    //     openLink(URL);
-                    // }
-                }}
+                onPress={() => handleHarborTopicPress(item)}
             >
                 {/* 帖子內容 */}
                 {item.excerpt && (

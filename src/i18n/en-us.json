@@ -101,7 +101,22 @@
         "需手動輸入密碼，舊版 Android 可能報錯": "Manual password input required, old Android may report errors",
         "報錯需要自行前往應用商店更新Webview組件": "If errors occur, please update the WebView component in the app store yourself",
         "隨時通過本頁面右下角設置按鈕修改偏好": "You can change your preference anytime via the settings button at the bottom right of this page",
-        "暫不修改，返回": "Not now, go back"
+        "暫不修改，返回": "Not now, go back",
+        "已編輯": "Edited",
+        "回覆樓層": "Reply to #{{postNumber}}",
+        "瀏覽": "views",
+        "帖子": "posts",
+        "讚": "likes",
+        "最後更新": "Last updated",
+        "帖子地址無效": "Invalid topic address",
+        "帖子載入失敗，請檢查網絡後再試": "Unable to load the topic. Check your connection and try again.",
+        "帖子更新失敗，請稍後再試": "Unable to refresh the topic. Try again later.",
+        "暫時無法顯示帖子": "Unable to display this topic",
+        "請稍後再試": "Please try again later",
+        "重新載入": "Reload",
+        "在 Harbor 開啟": "Open in Harbor",
+        "查看互動內容": "View interactive content",
+        "查看 Web 原文": "View original on the web"
     },
     "catalog": {
         "ARK搵課": "ARK Catalog",

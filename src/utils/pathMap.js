@@ -28,6 +28,44 @@ export const ARK_HARBOR_TOP = ARK_HARBOR + '/top.json';
 export const ARK_HARBOR_LATEST = ARK_HARBOR + '/latest.json';
 export const ARK_HARBOR_TOPIC = ARK_HARBOR + '/t/topic/';
 export const ARK_HARBOR_NEW_TOPIC = ARK_HARBOR + '/new-topic';
+
+export function ARK_HARBOR_TOPIC_URL(topicId, postNumber) {
+    const topicPath = `${ARK_HARBOR_TOPIC}${encodeURIComponent(topicId)}`;
+    return postNumber
+        ? `${topicPath}/${encodeURIComponent(postNumber)}`
+        : topicPath;
+}
+
+export function ARK_HARBOR_TOPIC_JSON(topicId) {
+    return ARK_HARBOR + `/t/${encodeURIComponent(topicId)}.json`;
+}
+
+export function ARK_HARBOR_TOPIC_POSTS(topicId) {
+    return ARK_HARBOR + `/t/${encodeURIComponent(topicId)}/posts.json`;
+}
+
+export function ARK_HARBOR_ABSOLUTE_URL(url) {
+    if (!url || typeof url !== 'string') {
+        return '';
+    }
+    if (url.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(url)) {
+        return url;
+    }
+    if (url.startsWith('//')) {
+        return `https:${url}`;
+    }
+    return ARK_HARBOR + (url.startsWith('/') ? url : `/${url}`);
+}
+
+export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
+    if (!avatarTemplate || typeof avatarTemplate !== 'string') {
+        return '';
+    }
+    return ARK_HARBOR_ABSOLUTE_URL(
+        avatarTemplate.replace('{size}', String(size)),
+    );
+}
+
 export function ARK_HARBOR_AVATAR(username) {
     return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
 }

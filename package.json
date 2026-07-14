@@ -82,6 +82,7 @@
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-pager-view": "^8.0.4",
     "react-native-reanimated": "^4.5.1",
+    "react-native-render-html": "^6.3.4",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
     "react-native-share": "^12.2.6",

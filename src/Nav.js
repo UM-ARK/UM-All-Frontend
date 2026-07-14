@@ -16,6 +16,7 @@ import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
 import EventDetail from './pages/TabbarPages/info/club/EventDetail';
 import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
 import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
+import HarborTopicDetail from './pages/TabbarPages/info/home/HarborTopicDetail';
 
 import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 
@@ -118,6 +119,7 @@ const Nav = () => {
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
                     <Stack.Screen name="UMEventDetail" component={UMEventDetail} />
+                    <Stack.Screen name="HarborTopicDetail" component={HarborTopicDetail} />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課 */}
