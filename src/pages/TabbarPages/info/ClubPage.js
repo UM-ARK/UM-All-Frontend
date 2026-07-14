@@ -19,6 +19,8 @@ const CLUB_GRID_HORIZONTAL_PADDING = scale(10);
 const CLUB_COLUMN_GAP = scale(6);
 /** 單欄上限：寬螢幕／橫屏時避免卡片被拉滿，維持約手機三欄視覺並靠左排列 */
 const CLUB_CELL_MAX_WIDTH = scale(122);
+/** 非首個區段標題比首個區段多出的頂部內距 */
+const SECTION_HEADER_EXTRA_TOP_PADDING = scale(12);
 
 const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
 
@@ -62,6 +64,8 @@ function ClubPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isOtherViewVisible, setIsOtherViewVisible] = useState(true);
     const sectionListRef = useRef(null);
+    const firstSectionHeaderHeightRef = useRef(0);
+    const clubRowHeightRef = useRef(0);
 
     const filteredClubs = useMemo(
         () => filterClubsBySearchQuery(allClubs, searchQuery),
@@ -77,6 +81,33 @@ function ClubPage() {
     const handleScrollEnd = useCallback(() => {
         setIsOtherViewVisible(true);
     }, []);
+
+    const scrollToSection = useCallback((sectionIndex) => {
+        if (sectionIndex === 0) {
+            sectionListRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
+            return;
+        }
+
+        const firstHeaderHeight = firstSectionHeaderHeightRef.current;
+        const rowHeight = clubRowHeightRef.current;
+        if (!firstHeaderHeight || !rowHeight) {
+            return;
+        }
+
+        const sectionHeaderHeight = firstHeaderHeight + SECTION_HEADER_EXTRA_TOP_PADDING;
+        const offset = sections
+            .slice(0, sectionIndex)
+            .reduce((total, section, index) => (
+                total +
+                (index === 0 ? firstHeaderHeight : sectionHeaderHeight) +
+                section.data.length * rowHeight
+            ), 0);
+
+        sectionListRef.current?.getScrollResponder()?.scrollTo({
+            y: offset,
+            animated: true,
+        });
+    }, [sections]);
 
     const getData = useCallback(async () => {
         handleScrollStart();
@@ -199,10 +230,7 @@ function ClubPage() {
                                 <TouchableOpacity
                                     onPress={() => {
                                         trigger();
-                                        const sectionIndex = sections.findIndex(sec => sec.title === itm.item);
-                                        if (sectionIndex !== -1) {
-                                            sectionListRef.current?.scrollToLocation({ sectionIndex, itemIndex: 0, viewOffset: 0, animated: true });
-                                        }
+                                        scrollToSection(itm.index);
                                     }}
                                     style={{
                                         padding: scale(5),
@@ -238,10 +266,14 @@ function ClubPage() {
                     return firstId ? `${firstId}-row-${index}` : `row-${index}`;
                 }}
                 renderSectionHeader={({ section }) => {
-                    const sectionIndex = sections.findIndex((s) => s.title === section.title);
-                    const isFirstSection = sectionIndex <= 0;
+                    const isFirstSection = section.title === sections[0]?.title;
                     return (
                         <View
+                            onLayout={({ nativeEvent }) => {
+                                if (isFirstSection) {
+                                    firstSectionHeaderHeightRef.current = nativeEvent.layout.height;
+                                }
+                            }}
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
@@ -275,12 +307,16 @@ function ClubPage() {
                     );
                 }}
                 renderItem={({ item }) => (
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'flex-start',
-                        paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
-                        columnGap: CLUB_COLUMN_GAP,
-                    }}>
+                    <View
+                        onLayout={({ nativeEvent }) => {
+                            clubRowHeightRef.current = nativeEvent.layout.height;
+                        }}
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                            columnGap: CLUB_COLUMN_GAP,
+                        }}>
                         {item.map((club) => (
                             <View key={club._id} style={{ width: cellWidth }}>
                                 <ClubCard data={club} />
