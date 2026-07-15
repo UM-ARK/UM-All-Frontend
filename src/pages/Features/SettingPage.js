@@ -12,7 +12,7 @@ import {
 import { useTheme, uiStyle } from '../../components/ThemeContext';
 import { openLink } from '../../utils/browser';
 import { trigger } from '../../utils/trigger';
-import { getLocalStorage, setLocalStorage } from '../../utils/storageKits';
+import { setLocalStorage } from '../../utils/storageKits';
 import {
     getUmehHostPref,
     setUmehHostPref,
@@ -33,7 +33,6 @@ import {
 } from '../../utils/pathMap';
 import packageInfo from '../../../package.json';
 import { scale, verticalScale } from 'react-native-size-matters';
-import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
 import { useTranslation } from 'react-i18next';
@@ -44,121 +43,6 @@ import {
     isLocalAppOlderThanServer,
     showAppStoreUpdateAlert,
 } from '../../utils/appUpdateKits';
-
-/**
- * 用戶資料卡元件 - 玻璃擬態效果
- * @param {Object} userInfo - 用戶資訊對象
- * @param {string} userInfo.avatar - 頭像網址
- * @param {string} userInfo.name - 用戶名稱
- * @param {string} userInfo.type - 用戶類型（club/student）
- */
-const ProfileCard = ({ userInfo }) => {
-    const { theme } = useTheme();
-    const { themeColor, white, black, glass, viewShadow } = theme;
-    const { t } = useTranslation(['setting']);
-
-    const avatarUrl = userInfo?.avatar;
-    const userName = userInfo?.name || t('setting:Guest');
-    const userType =
-        userInfo?.type === 'club'
-            ? t('setting:Organization')
-            : t('setting:Student');
-
-    return (
-        <View
-            style={{
-                marginHorizontal: scale(15),
-                marginTop: verticalScale(10),
-                marginBottom: verticalScale(10),
-                borderRadius: scale(16),
-                overflow: 'hidden',
-                backgroundColor: themeColor,
-                ...viewShadow,
-            }}>
-            {/* 玻璃擬態效果覆蓋層 */}
-            <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    padding: scale(20),
-                    backgroundColor: glass,
-                    backdropFilter: 'blur(10px)',
-                }}>
-                {/* 頭像 */}
-                <View
-                    style={{
-                        width: scale(60),
-                        height: scale(60),
-                        borderRadius: scale(30),
-                        backgroundColor: white,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        overflow: 'hidden',
-                        borderWidth: 2,
-                        borderColor: white,
-                    }}>
-                    {avatarUrl ? (
-                        <Image
-                            source={{ uri: avatarUrl }}
-                            style={{ width: '100%', height: '100%' }}
-                            contentFit="cover"
-                        />
-                    ) : (
-                        <Ionicons
-                            name="person"
-                            size={scale(30)}
-                            color={themeColor}
-                        />
-                    )}
-                </View>
-
-                {/* 用戶資訊 */}
-                <View style={{ marginLeft: scale(15), flex: 1 }}>
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: scale(18),
-                            fontWeight: '700',
-                            color: white,
-                        }}>
-                        {userName} Still Building...
-                    </Text>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginTop: verticalScale(4),
-                        }}>
-                        <View
-                            style={{
-                                backgroundColor: glass,
-                                paddingHorizontal: scale(8),
-                                paddingVertical: verticalScale(2),
-                                borderRadius: scale(10),
-                            }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    fontSize: scale(10),
-                                    color: white,
-                                    fontWeight: '500',
-                                }}>
-                                {userType}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* 箭頭 */}
-                <Ionicons
-                    name="chevron-forward"
-                    size={scale(20)}
-                    color={white}
-                />
-            </View>
-        </View>
-    );
-};
 
 /**
  * 同一分區內多個設置項的容器：單一圓角卡片；項間分隔與功能頁卡片標題底線相同（bg_color、verticalScale(2)）
@@ -277,11 +161,11 @@ const SettingItem = ({
                 ...(grouped
                     ? {}
                     : {
-                          borderRadius: scale(16),
-                          marginHorizontal: scale(15),
-                          marginBottom: verticalScale(8),
-                          ...viewShadow,
-                      }),
+                        borderRadius: scale(16),
+                        marginHorizontal: scale(15),
+                        marginBottom: verticalScale(8),
+                        ...viewShadow,
+                    }),
             }}
             activeOpacity={0.7}>
             {/* 圖標 */}
@@ -348,24 +232,11 @@ const SettingPage = ({ navigation }) => {
     const { theme, themeMode, setThemeMode } = useTheme();
     const { bg_color, black } = theme;
     const { t, i18n } = useTranslation(['setting', 'about', 'common']);
-    const [userInfo, setUserInfo] = useState({});
     const [umehHostPref, setUmehHostPrefState] = useState('auto');
 
-    // 組件掛載時加載用戶資訊和 host 偏好
     useEffect(() => {
-        loadUserInfo();
         getUmehHostPref().then(setUmehHostPrefState);
     }, []);
-
-    /**
-     * 從本地存儲加載用戶資訊
-     */
-    const loadUserInfo = async () => {
-        const info = await getLocalStorage('userInfo');
-        if (info) {
-            setUserInfo(info);
-        }
-    };
 
     /**
      * 處理主題變更
@@ -460,9 +331,6 @@ const SettingPage = ({ navigation }) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
-                {/* TODO: 用戶資料卡，等做好了賬號系統就加回去 */}
-                {/* <ProfileCard userInfo={userInfo} /> */}
-
                 {/* 外觀設置分區 */}
                 <SettingSection
                     title={t('setting:Appearance')}

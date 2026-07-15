@@ -13,17 +13,11 @@ import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/un
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
 import What2RegTabIndex from './pages/TabbarPages/what2Reg';
-import HarborNewTopicTab, {
-    HARBOR_NEW_TOPIC_TAB,
-    trackLastNonHarborPostTab,
-} from './pages/TabbarPages/HarborNewTopicTab';
 import CourseSim from './pages/TabbarPages/courseSim';
+import MyScreen from './pages/TabbarPages/my';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { trigger } from './utils/trigger';
-import { openLink } from './utils/browser';
-import { ARK_HARBOR_NEW_TOPIC } from './utils/pathMap';
-import { logToFirebase } from './utils/firebaseAnalytics';
 import { uiStyle } from './components/ThemeContext';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
@@ -32,9 +26,9 @@ const tabIconDescription = {
     NewsTabbar: '資訊',
     Harbor: '職涯港',
     What2RegTab: '揾課',
-    [HARBOR_NEW_TOPIC_TAB]: '新想法',
     CourseSimTab: '課表',
     FeaturesTabbar: '服務',
+    MyTabbar: '我的',
 };
 
 // 頁面元件映射
@@ -42,9 +36,9 @@ const tabScreen = {
     NewsTabbar: NewsScreen,
     // Harbor: ARKHarbor,
     What2RegTab: What2RegTabIndex,
-    [HARBOR_NEW_TOPIC_TAB]: HarborNewTopicTab,
     CourseSimTab: CourseSim,
     FeaturesTabbar: FeaturesScreen,
+    MyTabbar: MyScreen,
 };
 
 // iOS SF Symbols 設定
@@ -52,9 +46,9 @@ const iosTabIconConfig = {
     NewsTabbar: 'newspaper',
     Harbor: 'heart',
     What2RegTab: 'magnifyingglass.circle',
-    [HARBOR_NEW_TOPIC_TAB]: 'plus.circle.fill',
     CourseSimTab: 'calendar',
     FeaturesTabbar: 'square.grid.2x2',
+    MyTabbar: 'person.crop.circle',
 };
 
 // Android MaterialCommunityIcons 名稱映射
@@ -62,9 +56,9 @@ const androidTabIconConfig = {
     NewsTabbar: 'newspaper-variant',
     Harbor: 'chat-processing',
     What2RegTab: 'database-search',
-    [HARBOR_NEW_TOPIC_TAB]: 'plus-circle',
     CourseSimTab: 'calendar-clock',
     FeaturesTabbar: 'view-grid',
+    MyTabbar: 'account-circle',
 };
 
 // 保持 Navigator 元件穩定，避免視窗縮放時重設目前分頁
@@ -120,11 +114,6 @@ class IOSTabbar {
         this.createTabbar = () => {
             return (
                 <this.Tabs.Navigator
-                    screenListeners={({ route }) => ({
-                        focus: () => {
-                            trackLastNonHarborPostTab(route.name);
-                        },
-                    })}
                     screenOptions={({ route }) => ({
                         tabBarLabelStyle: {
                             ...uiStyle.defaultText,
@@ -175,22 +164,6 @@ class AndroidTabbar {
         };
 
         this.createTabScreen = name => {
-            const listeners =
-                name === HARBOR_NEW_TOPIC_TAB
-                    ? () => ({
-                        tabPress: e => {
-                            e.preventDefault();
-                            trigger();
-                            logToFirebase('funcUse', {
-                                funcName: 'harbor_new',
-                            });
-                            openLink({
-                                URL: ARK_HARBOR_NEW_TOPIC,
-                                mode: 'fullScreen',
-                            });
-                        },
-                    })
-                    : () => ({ tabPress: () => trigger() });
             return (
                 <this.Tabs.Screen
                     name={name}
@@ -200,7 +173,7 @@ class AndroidTabbar {
                             this.getTabbarIcon(name, focused, color),
                         title: t(tabIconDescription[name]),
                     }}
-                    listeners={listeners}
+                    listeners={() => ({ tabPress: () => trigger() })}
                 />
             );
         };
@@ -211,11 +184,6 @@ class AndroidTabbar {
             return (
                 <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
                     <this.Tabs.Navigator
-                        screenListeners={({ route }) => ({
-                            focus: () => {
-                                trackLastNonHarborPostTab(route.name);
-                            },
-                        })}
                         screenOptions={{
                             headerShown: false,
                             tabBarLabelStyle: {

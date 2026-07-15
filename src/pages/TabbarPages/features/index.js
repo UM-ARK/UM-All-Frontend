@@ -5,11 +5,9 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Linking,
 } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
-import { ARK_HARBOR_FEEDBACK, MAIL } from '../../../utils/pathMap';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
@@ -18,7 +16,6 @@ import { getFunctionArr } from './FeatureList';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FlatGrid } from 'react-native-super-grid';
 import { Image } from 'expo-image';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -26,41 +23,16 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import TouchableScale from '../../../components/TouchableScale';
 import { useTranslation } from 'react-i18next';
-// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
-import { MenuView } from '@expo/ui/community/menu';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function Index({ navigation }) {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, viewShadow, tonal } =
-        theme;
+    const { themeColor, white, black, trueWhite, bg_color, viewShadow } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = getFunctionArr(t);
     const isTc = i18n.language === 'tc';
     const fontSize = isTc ? verticalScale(10) : verticalScale(8);
-    // MenuView 需明確寬度以免塌陷；英文 Feedback / Setting 比中文長，加寬避免裁切
-    const headerActionWidth = isTc ? scale(70) : scale(98);
-    const headerActionStyle = {
-        width: headerActionWidth,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: tonal.primary15,
-        borderRadius: scale(20),
-        paddingVertical: scale(6),
-        paddingHorizontal: scale(8),
-    };
-    const headerActionTextStyle = {
-        ...uiStyle.defaultText,
-        marginLeft: scale(3),
-        fontSize: isTc ? verticalScale(12) : verticalScale(11),
-        color: themeColor,
-        fontWeight: '600',
-        lineHeight: verticalScale(14),
-        flexShrink: 1,
-    };
-
     const [bottomSheetInfo, setBottomSheetInfo] = useState(null);
     const bottomSheetRef = useRef(null);
 
@@ -254,44 +226,6 @@ function Index({ navigation }) {
         );
     };
 
-    const handleSettingsPress = () => {
-        trigger();
-        navigation.navigate('SettingPage');
-    };
-
-    const feedbackActions = [
-        {
-            id: 'harbor',
-            title: 'Harbor ⭐️',
-            image: 'star.fill',
-            imageColor: themeColor,
-            titleColor: themeColor,
-        },
-        {
-            id: 'email',
-            title: 'Email',
-            image: 'envelope',
-            imageColor: themeColor,
-            titleColor: themeColor,
-        },
-    ];
-
-    const handleFeedbackAction = event => {
-        trigger();
-        switch (event.nativeEvent.event) {
-            case 'harbor':
-                openLink(ARK_HARBOR_FEEDBACK);
-                break;
-            case 'email':
-                Clipboard.setString(MAIL);
-                Toast.show(t('已複製Mail到剪貼板！'));
-                Linking.openURL(`mailto:${MAIL}?subject=ARK功能反饋`);
-                break;
-            default:
-                break;
-        }
-    };
-
     // Android 底欄外層不再包 SafeAreaView；此處單獨補頂部狀態列區，避免內容頂到螢幕
     const topInsetAndroid = Platform.OS === 'android' ? insets.top : 0;
 
@@ -305,37 +239,12 @@ function Index({ navigation }) {
             <ScrollView
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic">
-                {/* 標題與操作按鍵：左右 flex:1 槽位保持標題視覺置中 */}
+                {/* 服務頁操作入口已移至「我的」頁 */}
                 <View
                     style={{
-                        flexDirection: 'row',
                         alignItems: 'center',
                         paddingHorizontal: scale(10),
                     }}>
-                    {/* 左側：反饋 */}
-                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                        <MenuView
-                            actions={feedbackActions}
-                            onOpenMenu={() => trigger()}
-                            onPressAction={handleFeedbackAction}
-                            shouldOpenOnLongPress={false}
-                            style={{ width: headerActionWidth }}>
-                            <TouchableScale style={headerActionStyle}>
-                                <MaterialIcons
-                                    name={'feedback'}
-                                    size={verticalScale(14)}
-                                    color={themeColor}
-                                />
-                                <Text
-                                    style={headerActionTextStyle}
-                                    numberOfLines={1}>
-                                    {t('反饋')}
-                                </Text>
-                            </TouchableScale>
-                        </MenuView>
-                    </View>
-
-                    {/* 中間：標題 */}
                     <Text
                         style={{
                             ...uiStyle.defaultText,
@@ -348,24 +257,6 @@ function Index({ navigation }) {
                         numberOfLines={1}>
                         {t('服務一覽', { ns: 'features' })}
                     </Text>
-
-                    {/* 右側：設置 */}
-                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                        <TouchableScale
-                            style={headerActionStyle}
-                            onPress={handleSettingsPress}>
-                            <Ionicons
-                                name={'settings-sharp'}
-                                size={verticalScale(14)}
-                                color={themeColor}
-                            />
-                            <Text
-                                style={headerActionTextStyle}
-                                numberOfLines={1}>
-                                {t('設置')}
-                            </Text>
-                        </TouchableScale>
-                    </View>
                 </View>
 
                 {functionArr.map(fn_card =>
