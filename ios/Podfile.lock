@@ -239,6 +239,8 @@ PODS:
     - ExpoModulesJSI
     - ExpoModulesWorklets
     - RNWorklets
+  - ExpoSecureStore (57.0.1):
+    - ExpoModulesCore
   - ExpoSplashScreen (57.0.2):
     - ExpoModulesCore
   - ExpoSystemUI (57.0.0):
@@ -2899,6 +2901,7 @@ DEPENDENCIES:
   - ExpoModulesJSI (from `../node_modules/expo-modules-jsi/apple`)
   - ExpoModulesWorklets (from `../node_modules/expo-modules-core/ExpoModulesWorklets.podspec`)
   - ExpoModulesWorkletsAdapter (from `../node_modules/expo-modules-core`)
+  - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
@@ -3068,6 +3071,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/expo-modules-core/ExpoModulesWorklets.podspec"
   ExpoModulesWorkletsAdapter:
     :path: "../node_modules/expo-modules-core"
+  ExpoSecureStore:
+    :path: "../node_modules/expo-secure-store/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   ExpoSystemUI:
@@ -3303,6 +3308,7 @@ SPEC CHECKSUMS:
   ExpoModulesJSI: f87a4c062180ad858523df636ecc7bee1261926a
   ExpoModulesWorklets: f6b71b8ddeb8dceb2ce3504544ecfbd708ba79a2
   ExpoModulesWorkletsAdapter: 186d0ad02a6c6b8ffc948ddb16a6fd79858f2015
+  ExpoSecureStore: 94793113049a2d7478dfe1a13aa15081e9f61755
   ExpoSplashScreen: ba6bd4b92a47f5da3cd70d82d33fcd8407be9d70
   ExpoSystemUI: 4f343f83e81951d737b199ac9c0d9db0d577f942
   ExpoUI: 6dfd6c01cc124afb1f729548568f40fb00976f26

@@ -5165,6 +5165,11 @@ expo-modules-jsi@~57.0.1:
   resolved "https://registry.npmjs.org/expo-modules-jsi/-/expo-modules-jsi-57.0.1.tgz#ba622699688d5cbfca9f85b679f825048ae758cc"
   integrity sha512-dECN3pOFv+KrQcGrOhJKEBc1/ob7SBjTTYGRB1bc84zmQ65La0FSrAPxpvnEQf8g9giLB5y9RLqwGxHspjXigQ==
 
+expo-secure-store@~57.0.1:
+  version "57.0.1"
+  resolved "https://registry.npmjs.org/expo-secure-store/-/expo-secure-store-57.0.1.tgz#746892729ca7a78513a1c220b48c1f3f803af413"
+  integrity sha512-tLa1VmSadOq19mA/dwkl99RbHyjLE0T1qqBYMY3/OsguZTI+rlrDy/DDJjupqlVtmr95hD7o1pYqx5aL+B4YMA==
+
 expo-server@^57.0.0:
   version "57.0.0"
   resolved "https://registry.npmjs.org/expo-server/-/expo-server-57.0.0.tgz#5b9d9a126008007dd998ba019a0bf0fa2a0fd387"
