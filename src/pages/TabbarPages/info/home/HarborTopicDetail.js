@@ -42,7 +42,7 @@ import {logToFirebase} from '../../../../utils/firebaseAnalytics';
 import {
     getHarborHtmlAttribute,
     replaceHarborEmojiImages,
-} from '../../../../utils/harborHtml';
+} from '../../../../utils/harbor/harborHtml';
 import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
