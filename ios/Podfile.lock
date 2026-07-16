@@ -1869,6 +1869,8 @@ PODS:
     - ReactNativeDependencies
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
+  - react-native-render-html (6.3.4):
+    - React-Core
   - react-native-safe-area-context (5.7.0):
     - hermes-engine
     - RCTRequired
@@ -2947,6 +2949,7 @@ DEPENDENCIES:
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
+  - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
   - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
@@ -3164,6 +3167,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-menu/menu"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
+  react-native-render-html:
+    :path: "../node_modules/react-native-render-html"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-simple-toast:
@@ -3356,6 +3361,7 @@ SPEC CHECKSUMS:
   react-native-keyboard-controller: 7035cde04633689d349fa197e755ad0111d7c26d
   react-native-menu: 46df909c7c60c4a6cb6757bf2281ea65d612065c
   react-native-pager-view: b346a4b45b0b36bff7e5761a68b53d78353d158b
+  react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   react-native-safe-area-context: ba7283e541a5f57c6b27a7e33f2c40b8977888c0
   react-native-simple-toast: e72b90b79229ed6a2744d1c9b4f23f7c51308e7f
   react-native-vector-icons-material-design-icons: a4b6ec02814573c09203a725ee3767a7e8d5eb77
