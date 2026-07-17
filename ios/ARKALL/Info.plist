@@ -28,6 +28,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>one.umall</string>
+				<string>one.umall</string>
 			</array>
 		</dict>
 		<dict>

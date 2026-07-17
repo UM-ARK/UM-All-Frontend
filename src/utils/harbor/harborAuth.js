@@ -1,0 +1,446 @@
+import {Linking, Platform} from 'react-native';
+
+import * as Crypto from 'expo-crypto';
+import * as WebBrowser from 'expo-web-browser';
+import {
+    Buffer,
+    constants as cryptoConstants,
+    generateKeyPair,
+    privateDecrypt,
+} from 'react-native-quick-crypto';
+
+import {ARK_HARBOR} from '../pathMap';
+import {
+    clearHarborRsaKeyPair,
+    clearPendingHarborAuthorization,
+    loadHarborClientId,
+    loadHarborRsaKeyPair,
+    loadPendingHarborAuthorization,
+    saveHarborClientId,
+    saveHarborCredentials,
+    saveHarborRsaKeyPair,
+    savePendingHarborAuthorization,
+} from './harborAuthStorage';
+import {logHarborAuthError, logHarborAuthEvent} from './harborLogger';
+
+const APPLICATION_NAME = 'ARK ALL';
+const AUTH_PATH = '/user-api-key/new';
+const HTTPS_REDIRECT_URL = 'https://umall.one/auth/discourse';
+const CUSTOM_REDIRECT_URL = 'one.umall://auth/discourse';
+const AUTH_SCOPES = ['read', 'write'];
+const AUTH_TTL_MS = 10 * 60 * 1000;
+const RSA_BITS = 2048;
+const RSA_KEY_VERSION = 1;
+const RSA_AUTH_PADDING = 'oaep';
+const RSA_OAEP_HASH = 'sha1';
+// umall.one 部署 AASA 與 assetlinks.json 後，才可安全切換為 HTTPS callback。
+const HTTPS_AUTH_CALLBACK_ENABLED = false;
+let harborRsaKeyPairPromise = null;
+
+export const HARBOR_AUTH_ERROR = {
+    CANCELLED: 'cancelled',
+    EXPIRED: 'expired',
+    INVALID_CALLBACK: 'invalid_callback',
+    INVALID_PAYLOAD: 'invalid_payload',
+    NO_PENDING_AUTH: 'no_pending_auth',
+};
+
+function createAuthError(code, message) {
+    const error = new Error(message);
+    error.code = code;
+    return error;
+}
+
+export function generateHarborRsaKeyPair() {
+    const startedAt = Date.now();
+    logHarborAuthEvent('rsa.generate.start', {modulusLength: RSA_BITS});
+
+    return new Promise((resolve, reject) => {
+        generateKeyPair(
+            'rsa',
+            {
+                modulusLength: RSA_BITS,
+                publicExponent: 0x10001,
+                publicKeyEncoding: {type: 'spki', format: 'pem'},
+                privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
+            },
+            (error, publicKey, privateKey) => {
+                if (error) {
+                    logHarborAuthError('rsa.generate.failed', error, {
+                        durationMs: Date.now() - startedAt,
+                    });
+                    reject(error);
+                    return;
+                }
+
+                if (
+                    typeof publicKey !== 'string' ||
+                    typeof privateKey !== 'string'
+                ) {
+                    const formatError = new Error('Harbor RSA 金鑰格式無效。');
+                    logHarborAuthError('rsa.generate.failed', formatError, {
+                        durationMs: Date.now() - startedAt,
+                    });
+                    reject(formatError);
+                    return;
+                }
+
+                logHarborAuthEvent('rsa.generate.success', {
+                    durationMs: Date.now() - startedAt,
+                });
+                resolve({publicKey, privateKey});
+            },
+        );
+    });
+}
+
+function isHarborRsaKeyPairUsable(keyPair) {
+    if (!keyPair) {
+        return false;
+    }
+
+    const {publicKey, privateKey} = keyPair;
+    return (
+        typeof publicKey === 'string' &&
+        typeof privateKey === 'string' &&
+        publicKey.startsWith('-----BEGIN PUBLIC KEY-----') &&
+        publicKey.trimEnd().endsWith('-----END PUBLIC KEY-----') &&
+        privateKey.startsWith('-----BEGIN PRIVATE KEY-----') &&
+        privateKey.trimEnd().endsWith('-----END PRIVATE KEY-----')
+    );
+}
+
+export function ensureHarborRsaKeyPair() {
+    if (harborRsaKeyPairPromise) {
+        logHarborAuthEvent('rsa.ensure.await_existing');
+        return harborRsaKeyPairPromise;
+    }
+
+    const startedAt = Date.now();
+    let stage = 'secure_store_load';
+    logHarborAuthEvent('rsa.ensure.start');
+
+    harborRsaKeyPairPromise = (async () => {
+        const storedKeyPair = await loadHarborRsaKeyPair();
+        if (isHarborRsaKeyPairUsable(storedKeyPair)) {
+            logHarborAuthEvent('rsa.ensure.success', {
+                source: 'stored',
+                durationMs: Date.now() - startedAt,
+            });
+            return storedKeyPair;
+        }
+
+        if (storedKeyPair) {
+            stage = 'secure_store_clear_invalid';
+            logHarborAuthEvent('rsa.stored.invalid');
+            await clearHarborRsaKeyPair();
+        }
+
+        stage = 'rsa_generate';
+        const generatedKeyPair = await generateHarborRsaKeyPair();
+        stage = 'rsa_validate';
+        if (!isHarborRsaKeyPairUsable(generatedKeyPair)) {
+            throw new Error('Harbor RSA 金鑰驗證失敗。');
+        }
+
+        logHarborAuthEvent('rsa.validate.success');
+        stage = 'secure_store_save';
+        await saveHarborRsaKeyPair(generatedKeyPair);
+        logHarborAuthEvent('rsa.persist.success');
+        logHarborAuthEvent('rsa.ensure.success', {
+            source: 'generated',
+            durationMs: Date.now() - startedAt,
+        });
+        return generatedKeyPair;
+    })().catch(error => {
+        logHarborAuthError('rsa.ensure.failed', error, {
+            stage,
+            durationMs: Date.now() - startedAt,
+        });
+        // 初始化失敗後允許登入流程再次嘗試，而不是永久快取 rejected Promise。
+        harborRsaKeyPairPromise = null;
+        throw error;
+    });
+
+    return harborRsaKeyPairPromise;
+}
+
+export function generateHarborNonce(byteCount = 32) {
+    return Array.from(Crypto.getRandomBytes(byteCount), byte => {
+        return byte.toString(16).padStart(2, '0');
+    }).join('');
+}
+
+export async function getOrCreateHarborClientId() {
+    const existingClientId = await loadHarborClientId();
+    if (existingClientId) {
+        return existingClientId;
+    }
+
+    const clientId = Crypto.randomUUID();
+    await saveHarborClientId(clientId);
+    return clientId;
+}
+
+function supportsUniversalAuthCallback() {
+    if (!HTTPS_AUTH_CALLBACK_ENABLED) {
+        return false;
+    }
+    if (Platform.OS === 'android') {
+        return true;
+    }
+    if (Platform.OS !== 'ios') {
+        return false;
+    }
+
+    const version = Number.parseFloat(String(Platform.Version));
+    return Number.isFinite(version) && version >= 17.4;
+}
+
+export function getHarborAuthRedirect() {
+    return supportsUniversalAuthCallback()
+        ? HTTPS_REDIRECT_URL
+        : CUSTOM_REDIRECT_URL;
+}
+
+export function buildHarborAuthUrl({clientId, nonce, publicKey, redirectUrl}) {
+    const params = new URLSearchParams({
+        application_name: APPLICATION_NAME,
+        client_id: clientId,
+        auth_redirect: redirectUrl,
+        scopes: AUTH_SCOPES.join(','),
+        nonce,
+        public_key: publicKey,
+        padding: RSA_AUTH_PADDING,
+    });
+
+    return `${ARK_HARBOR}${AUTH_PATH}?${params.toString()}`;
+}
+
+export function isHarborAuthCallback(url) {
+    if (!url) {
+        return false;
+    }
+
+    try {
+        const parsedUrl = new URL(url);
+        const isHttpsCallback =
+            parsedUrl.protocol === 'https:' &&
+            parsedUrl.hostname === 'umall.one' &&
+            parsedUrl.pathname === '/auth/discourse';
+        const isCustomCallback =
+            parsedUrl.protocol === 'one.umall:' &&
+            parsedUrl.hostname === 'auth' &&
+            parsedUrl.pathname === '/discourse';
+
+        return isHttpsCallback || isCustomCallback;
+    } catch (error) {
+        return false;
+    }
+}
+
+export function decryptHarborPayload(payload, privateKey) {
+    try {
+        const normalizedPayload = payload.replace(/ /g, '+');
+        const encryptedBytes = Buffer.from(normalizedPayload, 'base64');
+        const decryptedBytes = privateDecrypt(
+            {
+                key: privateKey,
+                padding: cryptoConstants.RSA_PKCS1_OAEP_PADDING,
+                // Discourse/OpenSSL 的 User API Key OAEP 流程預設使用 SHA-1。
+                oaepHash: RSA_OAEP_HASH,
+            },
+            encryptedBytes,
+        );
+        return JSON.parse(decryptedBytes.toString('utf8'));
+    } catch (error) {
+        logHarborAuthError('callback.decrypt.failed', error);
+        throw createAuthError(
+            HARBOR_AUTH_ERROR.INVALID_PAYLOAD,
+            'Harbor 授權資料無法解密。',
+        );
+    }
+}
+
+export async function completeHarborAuthorization(url) {
+    logHarborAuthEvent('callback.complete.start');
+
+    if (!isHarborAuthCallback(url)) {
+        const callbackError = createAuthError(
+            HARBOR_AUTH_ERROR.INVALID_CALLBACK,
+            'Harbor 授權回調地址無效。',
+        );
+        logHarborAuthError('callback.complete.failed', callbackError, {
+            stage: 'callback_validate',
+        });
+        throw callbackError;
+    }
+
+    const pendingAuthorization = await loadPendingHarborAuthorization();
+    if (!pendingAuthorization) {
+        const pendingError = createAuthError(
+            HARBOR_AUTH_ERROR.NO_PENDING_AUTH,
+            '沒有等待中的 Harbor 授權。',
+        );
+        logHarborAuthError('callback.complete.failed', pendingError, {
+            stage: 'pending_load',
+        });
+        throw pendingError;
+    }
+
+    if (Date.now() - pendingAuthorization.createdAt > AUTH_TTL_MS) {
+        await clearPendingHarborAuthorization();
+        const expiredError = createAuthError(
+            HARBOR_AUTH_ERROR.EXPIRED,
+            'Harbor 授權已逾時，請重新登入。',
+        );
+        logHarborAuthError('callback.complete.failed', expiredError, {
+            stage: 'pending_validate',
+        });
+        throw expiredError;
+    }
+
+    let stage = 'payload_read';
+    try {
+        const callbackUrl = new URL(url);
+        const payload = callbackUrl.searchParams.get('payload');
+        if (!payload) {
+            throw createAuthError(
+                HARBOR_AUTH_ERROR.INVALID_PAYLOAD,
+                'Harbor 授權回調缺少必要資料。',
+            );
+        }
+
+        // 舊版 pending 可能仍攜帶一次性私鑰；新流程則使用長期保存的私鑰。
+        stage = 'rsa_private_key_load';
+        const privateKey = pendingAuthorization.privateKey
+            ? pendingAuthorization.privateKey
+            : (await ensureHarborRsaKeyPair()).privateKey;
+        stage = 'payload_decrypt';
+        const decryptedPayload = decryptHarborPayload(payload, privateKey);
+        stage = 'nonce_validate';
+        if (
+            decryptedPayload?.nonce !== pendingAuthorization.nonce ||
+            typeof decryptedPayload?.key !== 'string' ||
+            !decryptedPayload.key
+        ) {
+            throw createAuthError(
+                HARBOR_AUTH_ERROR.INVALID_PAYLOAD,
+                'Harbor 授權驗證失敗。',
+            );
+        }
+
+        const credentials = {
+            userApiKey: decryptedPayload.key,
+            clientId: pendingAuthorization.clientId,
+            apiVersion: decryptedPayload.api ?? null,
+            scopes: AUTH_SCOPES,
+            createdAt: Date.now(),
+        };
+
+        // 必須先持久化憑證，再清除 pending metadata，避免成功後被終止而遺失登入。
+        stage = 'credentials_save';
+        await saveHarborCredentials(credentials);
+        stage = 'pending_clear';
+        await clearPendingHarborAuthorization();
+        logHarborAuthEvent('callback.complete.success');
+        return credentials;
+    } catch (error) {
+        logHarborAuthError('callback.complete.failed', error, {stage});
+        await clearPendingHarborAuthorization();
+        throw error;
+    }
+}
+
+export async function startHarborAuthorization() {
+    let stage = 'rsa_ensure';
+    logHarborAuthEvent('authorization.start');
+    try {
+        const {publicKey} = await ensureHarborRsaKeyPair();
+        logHarborAuthEvent('authorization.rsa.ready');
+
+        stage = 'pending_clear';
+        await clearPendingHarborAuthorization();
+        stage = 'client_id_prepare';
+        const clientId = await getOrCreateHarborClientId();
+        stage = 'nonce_generate';
+        const nonce = generateHarborNonce();
+        const redirectUrl = getHarborAuthRedirect();
+
+        stage = 'pending_save';
+        await savePendingHarborAuthorization({
+            clientId,
+            nonce,
+            redirectUrl,
+            createdAt: Date.now(),
+            rsaKeyVersion: RSA_KEY_VERSION,
+        });
+        logHarborAuthEvent('authorization.pending.saved');
+
+        stage = 'auth_url_build';
+        const authUrl = buildHarborAuthUrl({
+            clientId,
+            nonce,
+            publicKey,
+            redirectUrl,
+        });
+
+        try {
+            stage = 'browser_open';
+            logHarborAuthEvent('authorization.browser.open', {
+                redirectScheme: new URL(redirectUrl).protocol.replace(':', ''),
+            });
+            const result = await WebBrowser.openAuthSessionAsync(
+                authUrl,
+                redirectUrl,
+                {
+                    preferEphemeralSession: false,
+                    preferUniversalLinks: redirectUrl === HTTPS_REDIRECT_URL,
+                },
+            );
+
+            logHarborAuthEvent('authorization.browser.result', {
+                type: result.type,
+                hasCallbackUrl: Boolean(result.url),
+            });
+
+            if (result.type !== 'success' || !result.url) {
+                throw createAuthError(
+                    HARBOR_AUTH_ERROR.CANCELLED,
+                    '已取消 Harbor 登入。',
+                );
+            }
+
+            stage = 'callback_complete';
+            const credentials = await completeHarborAuthorization(result.url);
+            logHarborAuthEvent('authorization.success');
+            return credentials;
+        } catch (error) {
+            await clearPendingHarborAuthorization();
+            throw error;
+        }
+    } catch (error) {
+        if (error.code === HARBOR_AUTH_ERROR.CANCELLED) {
+            logHarborAuthEvent('authorization.cancelled', {stage});
+        } else {
+            logHarborAuthError('authorization.failed', error, {stage});
+        }
+        throw error;
+    }
+}
+
+export async function completeInitialHarborCallback() {
+    const initialUrl = await Linking.getInitialURL();
+    if (!isHarborAuthCallback(initialUrl)) {
+        const pendingAuthorization = await loadPendingHarborAuthorization();
+        if (
+            pendingAuthorization &&
+            Date.now() - pendingAuthorization.createdAt > AUTH_TTL_MS
+        ) {
+            await clearPendingHarborAuthorization();
+        }
+        return null;
+    }
+
+    return completeHarborAuthorization(initialUrl);
+}

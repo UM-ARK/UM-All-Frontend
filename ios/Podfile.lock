@@ -183,6 +183,8 @@ PODS:
     - ExpoModulesCore
   - ExpoBlur (57.0.0):
     - ExpoModulesCore
+  - ExpoCrypto (57.0.1):
+    - ExpoModulesCore
   - ExpoDevice (57.0.0):
     - ExpoModulesCore
   - ExpoDomWebView (57.0.0):
@@ -355,7 +357,56 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+  - NitroModules (0.33.2):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
+  - OpenSSL-Universal (3.6.2000)
   - PromisesObjC (2.4.1)
+  - QuickCrypto (1.1.6):
+    - hermes-engine
+    - NitroModules
+    - OpenSSL-Universal (~> 3.6.2000)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RCTDeprecation (0.86.0)
   - RCTRequired (0.86.0)
   - RCTSwiftUI (0.86.0)
@@ -1871,6 +1922,28 @@ PODS:
     - ReactNativeDependencies
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
+  - react-native-quick-base64 (3.0.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-render-html (6.3.4):
     - React-Core
   - react-native-safe-area-context (5.7.0):
@@ -2887,6 +2960,7 @@ DEPENDENCIES:
   - expo-dev-menu-interface (from `../node_modules/expo-dev-menu-interface/ios`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
+  - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
   - "ExpoDomWebView (from `../node_modules/@expo/dom-webview/ios`)"
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios/ExpoFileSystem.podspec`)
@@ -2910,6 +2984,8 @@ DEPENDENCIES:
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - "LiquidGlass (from `../node_modules/@callstack/liquid-glass`)"
+  - NitroModules (from `../node_modules/react-native-nitro-modules`)
+  - QuickCrypto (from `../node_modules/react-native-quick-crypto`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
   - RCTSwiftUI (from `../node_modules/react-native/ReactApple/RCTSwiftUI`)
@@ -2952,6 +3028,7 @@ DEPENDENCIES:
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
+  - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
   - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
@@ -3018,6 +3095,7 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleUtilities
     - nanopb
+    - OpenSSL-Universal
     - PromisesObjC
     - SwiftUIIntrospect
     - Toast
@@ -3043,6 +3121,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-asset/ios"
   ExpoBlur:
     :path: "../node_modules/expo-blur/ios"
+  ExpoCrypto:
+    :path: "../node_modules/expo-crypto/ios"
   ExpoDevice:
     :path: "../node_modules/expo-device/ios"
   ExpoDomWebView:
@@ -3090,6 +3170,10 @@ EXTERNAL SOURCES:
     :tag: hermes-v250829098.0.14
   LiquidGlass:
     :path: "../node_modules/@callstack/liquid-glass"
+  NitroModules:
+    :path: "../node_modules/react-native-nitro-modules"
+  QuickCrypto:
+    :path: "../node_modules/react-native-quick-crypto"
   RCTDeprecation:
     :path: "../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation"
   RCTRequired:
@@ -3172,6 +3256,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-menu/menu"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
+  react-native-quick-base64:
+    :path: "../node_modules/react-native-quick-base64"
   react-native-render-html:
     :path: "../node_modules/react-native-render-html"
   react-native-safe-area-context:
@@ -3294,6 +3380,7 @@ SPEC CHECKSUMS:
   expo-dev-menu-interface: 7a59e803916fbfd1b96c75ff91ea8dddac7e722f
   ExpoAsset: 586e89aeaab2e23bfa90b9dce4d7d5e36815c039
   ExpoBlur: 14d0cc31e6a1910b9712dfce1bd8a43d698cd5ae
+  ExpoCrypto: 366380ffafeb22cc9795438cddcbfa299e1aaf42
   ExpoDevice: 090ee05e20e40ca981d39263e3e95c46ed850782
   ExpoDomWebView: 73ba90107a5acc0017a09b06e66d8eb238e089b8
   ExpoFileSystem: ffcd56066188802f263254b6b2e60f74b6a0bdae
@@ -3325,7 +3412,10 @@ SPEC CHECKSUMS:
   hermes-engine: f75e32ceea2ce563256c2778505636b2120f52bf
   LiquidGlass: 3fd4582008eeba28d60c5960953a32df6a65ad0a
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  NitroModules: ebde9b4ad182fedd750622c9596406c25798feb5
+  OpenSSL-Universal: ecee7b138fa75a74ecf00d7ffd248fb584739b9e
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
+  QuickCrypto: a66c5cddf000c17a168f1983e5a266ff8ab4d332
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0
   RCTSwiftUI: 5aaf0b07e747ba749dc6acc94d8bd41eea4b570f
@@ -3367,6 +3457,7 @@ SPEC CHECKSUMS:
   react-native-keyboard-controller: 7035cde04633689d349fa197e755ad0111d7c26d
   react-native-menu: 46df909c7c60c4a6cb6757bf2281ea65d612065c
   react-native-pager-view: b346a4b45b0b36bff7e5761a68b53d78353d158b
+  react-native-quick-base64: e254a406ac7d7f20857c9fbcbfb57fbf91ae21be
   react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   react-native-safe-area-context: ba7283e541a5f57c6b27a7e33f2c40b8977888c0
   react-native-simple-toast: e72b90b79229ed6a2744d1c9b4f23f7c51308e7f
@@ -3425,6 +3516,6 @@ SPEC CHECKSUMS:
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   Yoga: c30c859b7e9b75e547b600b486fe33165f60de00
 
-PODFILE CHECKSUM: ea80975f00938453c53354b0286d6a193f08702c
+PODFILE CHECKSUM: fb8dcd10264ea1ef038b47714438f4e3f7dea184
 
 COCOAPODS: 1.17.0

@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+    ActivityIndicator,
+    Alert,
     Linking,
     Pressable,
     ScrollView,
@@ -22,49 +24,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import TouchableScale from '../../../components/TouchableScale';
+import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
 import {
     ARK_HARBOR,
     ARK_HARBOR_FEEDBACK,
-    ARK_HARBOR_LOGIN,
     MAIL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
-
-// 調試 FLAG：API 接入前可在此手動切換登入／未登入介面。
-const IS_FORUM_LOGGED_IN = true;
-
-// 論壇用戶 Mock：之後可直接以 API 回傳資料替換此物件。
-const FORUM_USER_MOCK = {
-    displayName: 'ARK_ALL_Admin',
-    username: 'ARK_ALL_Admin',
-    role: '管理員',
-    joinedAt: '2025 年 3 月加入',
-    unreadMessages: 2,
-    stats: [
-        { key: 'daysVisited', value: '134', label: '到訪天數' },
-        { key: 'readTime', value: '2 小時', label: '閱讀時間' },
-        { key: 'topicsRead', value: '66', label: '已讀話題' },
-        { key: 'postsRead', value: '74', label: '讀過的帖子' },
-    ],
-    activity: [
-        {
-            id: 'youtube-channel',
-            title: '分享澳大的 YouTube 頻道 😆',
-            meta: '2025 年 7 月 · 獲讚 1',
-        },
-        {
-            id: 'harbor-login',
-            title: 'ARK Harbor 論壇的登錄方式',
-            meta: '2025 年 12 月 · 話題',
-        },
-        {
-            id: 'iframe-map',
-            title: '如何在論壇嵌入高德地圖 iframe？',
-            meta: '2025 年 9 月 · 回覆',
-        },
-    ],
-};
 
 const AVATAR_SOURCE = require('../../../static/img/logo_round.png');
 
@@ -73,9 +40,51 @@ const MyScreen = ({ navigation }) => {
     const { black, bg_color, themeColor, tonal, trueWhite, white, viewShadow } =
         theme;
     const { t } = useTranslation(['common', 'my']);
+    const { status, user, login, logout, error } = useHarborSession();
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(width - scale(28), scale(680));
+    const isAuthorizing = status === 'authorizing';
+    const username = user?.username ?? '';
+    const userStats = user?.stats ?? [];
+    const userActivity = user?.activity ?? [];
+    const lastPresentedError = React.useRef(null);
+
+    const presentHarborError = React.useCallback(
+        sessionError => {
+            if (
+                !sessionError ||
+                lastPresentedError.current === sessionError
+            ) {
+                return;
+            }
+
+            lastPresentedError.current = sessionError;
+            const message = sessionError.code === 'HARBOR_SESSION_EXPIRED'
+                ? t('Harbor 登入已失效，請重新登入。', { ns: 'my' })
+                : t('無法完成 Harbor 操作，請稍後再試。', { ns: 'my' });
+            Alert.alert(
+                t('Harbor 操作失敗', { ns: 'my' }),
+                message,
+                [
+                    {
+                        text: t('確定', { ns: 'my' }),
+                        onPress: () => trigger(),
+                    },
+                ],
+                { cancelable: false },
+            );
+        },
+        [t],
+    );
+
+    React.useEffect(() => {
+        if (error) {
+            presentHarborError(error);
+        } else {
+            lastPresentedError.current = null;
+        }
+    }, [error, presentHarborError]);
 
     const feedbackActions = [
         {
@@ -99,38 +108,38 @@ const MyScreen = ({ navigation }) => {
             key: 'topics',
             label: t('我的話題', { ns: 'my' }),
             icon: 'chatbox-ellipses-outline',
-            path: `/u/${FORUM_USER_MOCK.username}/activity/topics`,
+            path: `/u/${username}/activity/topics`,
         },
         {
             key: 'replies',
             label: t('我的回覆', { ns: 'my' }),
             icon: 'arrow-undo-outline',
-            path: `/u/${FORUM_USER_MOCK.username}/activity/replies`,
+            path: `/u/${username}/activity/replies`,
         },
         {
             key: 'bookmarks',
             label: t('我的收藏', { ns: 'my' }),
             icon: 'bookmark-outline',
-            path: `/u/${FORUM_USER_MOCK.username}/activity/bookmarks`,
+            path: `/u/${username}/activity/bookmarks`,
         },
         {
             key: 'likes',
             label: t('我的讚好', { ns: 'my' }),
             icon: 'heart-outline',
-            path: `/u/${FORUM_USER_MOCK.username}/activity/likes-given`,
+            path: `/u/${username}/activity/likes-given`,
         },
         {
             key: 'messages',
             label: t('站內訊息', { ns: 'my' }),
             icon: 'mail-outline',
-            path: `/u/${FORUM_USER_MOCK.username}/messages`,
-            badge: FORUM_USER_MOCK.unreadMessages,
+            path: `/u/${username}/messages`,
+            badge: user?.unreadMessages,
         },
         {
             key: 'badges',
             label: t('我的徽章', { ns: 'my' }),
             icon: 'ribbon-outline',
-            path: `/u/${FORUM_USER_MOCK.username}/badges`,
+            path: `/u/${username}/badges`,
         },
     ];
 
@@ -181,9 +190,45 @@ const MyScreen = ({ navigation }) => {
         openLink({ URL: `${ARK_HARBOR}${path}`, mode: 'fullScreen' });
     };
 
-    const handleLoginPress = () => {
+    const handleLoginPress = async () => {
         trigger();
-        openLink({ URL: ARK_HARBOR_LOGIN, mode: 'fullScreen' });
+        lastPresentedError.current = null;
+
+        try {
+            await login();
+        } catch (sessionError) {
+            presentHarborError(sessionError);
+        }
+    };
+
+    const handleLogoutPress = () => {
+        trigger();
+        Alert.alert(
+            t('登出 Harbor？', { ns: 'my' }),
+            t('你將從此裝置的 Harbor 帳號登出。', { ns: 'my' }),
+            [
+                {
+                    text: t('取消', { ns: 'my' }),
+                    style: 'cancel',
+                    onPress: () => trigger(),
+                },
+                {
+                    text: t('確認登出', { ns: 'my' }),
+                    style: 'destructive',
+                    onPress: async () => {
+                        trigger();
+                        lastPresentedError.current = null;
+
+                        try {
+                            await logout();
+                        } catch (sessionError) {
+                            presentHarborError(sessionError);
+                        }
+                    },
+                },
+            ],
+            { cancelable: false },
+        );
     };
 
     const renderHeader = () => (
@@ -287,21 +332,36 @@ const MyScreen = ({ navigation }) => {
 
                 <TouchableScale
                     accessibilityRole="button"
-                    accessibilityLabel={t('登入 Harbor', { ns: 'my' })}
+                    accessibilityLabel={t(
+                        isAuthorizing ? '處理中…' : '登入 Harbor',
+                        { ns: 'my' },
+                    )}
+                    accessibilityState={{
+                        busy: isAuthorizing,
+                        disabled: isAuthorizing,
+                    }}
                     activeScale={0.97}
+                    disabled={isAuthorizing}
                     style={[
                         styles.primaryButton,
                         { backgroundColor: themeColor },
+                        isAuthorizing && styles.disabledButton,
                     ]}
                     onPress={handleLoginPress}>
-                    <Ionicons
-                        name="log-in-outline"
-                        size={scale(20)}
-                        color={trueWhite}
-                    />
+                    {isAuthorizing ? (
+                        <ActivityIndicator color={trueWhite} />
+                    ) : (
+                        <Ionicons
+                            name="log-in-outline"
+                            size={scale(20)}
+                            color={trueWhite}
+                        />
+                    )}
                     <Text
                         style={[styles.primaryButtonText, { color: trueWhite }]}>
-                        {t('登入 Harbor', { ns: 'my' })}
+                        {t(isAuthorizing ? '處理中…' : '登入 Harbor', {
+                            ns: 'my',
+                        })}
                     </Text>
                 </TouchableScale>
 
@@ -403,6 +463,20 @@ const MyScreen = ({ navigation }) => {
         </View>
     );
 
+    const renderRestoringScreen = () => (
+        <View
+            style={[
+                styles.restoringCard,
+                { width: contentWidth, backgroundColor: white },
+                viewShadow,
+            ]}>
+            <ActivityIndicator size="large" color={themeColor} />
+            <Text style={[styles.restoringText, { color: black.third }]}>
+                {t('正在恢復 Harbor 登入狀態…', { ns: 'my' })}
+            </Text>
+        </View>
+    );
+
     const renderLoggedInScreen = () => (
         <View style={[styles.screenContent, { width: contentWidth }]}>
             <TouchableScale
@@ -415,7 +489,7 @@ const MyScreen = ({ navigation }) => {
                     viewShadow,
                 ]}
                 onPress={() =>
-                    handleOpenHarbor(`/u/${FORUM_USER_MOCK.username}/summary`)
+                    handleOpenHarbor(username ? `/u/${username}/summary` : '')
                 }>
                 <View style={styles.profileTopRow}>
                     <View
@@ -424,7 +498,11 @@ const MyScreen = ({ navigation }) => {
                             { backgroundColor: tonal.primary30 },
                         ]}>
                         <Image
-                            source={AVATAR_SOURCE}
+                            source={
+                                user?.avatarUrl
+                                    ? { uri: user.avatarUrl }
+                                    : AVATAR_SOURCE
+                            }
                             style={styles.avatar}
                             contentFit="cover"
                         />
@@ -447,7 +525,7 @@ const MyScreen = ({ navigation }) => {
                                     styles.profileName,
                                     { color: black.main },
                                 ]}>
-                                {FORUM_USER_MOCK.displayName}
+                                {user?.displayName}
                             </Text>
                             <Ionicons
                                 name="shield-checkmark"
@@ -460,7 +538,7 @@ const MyScreen = ({ navigation }) => {
                                 styles.profileHandle,
                                 { color: black.third },
                             ]}>
-                            @{FORUM_USER_MOCK.username}
+                            @{username}
                         </Text>
                         <View style={styles.profileMetaRow}>
                             <View
@@ -473,12 +551,16 @@ const MyScreen = ({ navigation }) => {
                                         styles.roleBadgeText,
                                         { color: themeColor },
                                     ]}>
-                                    {t(FORUM_USER_MOCK.role, { ns: 'my' })}
+                                    {user?.role
+                                        ? t(user.role, { ns: 'my' })
+                                        : ''}
                                 </Text>
                             </View>
                             <Text
                                 style={[styles.joinedAt, { color: black.third }]}>
-                                {t(FORUM_USER_MOCK.joinedAt, { ns: 'my' })}
+                                {user?.joinedAt
+                                    ? t(user.joinedAt, { ns: 'my' })
+                                    : ''}
                             </Text>
                         </View>
                     </View>
@@ -518,166 +600,207 @@ const MyScreen = ({ navigation }) => {
                 </View>
             </TouchableScale>
 
-            <View
-                style={[
-                    styles.statsCard,
-                    { backgroundColor: white },
-                    viewShadow,
-                ]}>
-                {FORUM_USER_MOCK.stats.map((stat, index) => (
-                    <View key={stat.key} style={styles.statItem}>
-                        <Text style={[styles.statValue, { color: black.main }]}>
-                            {stat.value}
-                        </Text>
-                        <Text style={[styles.statLabel, { color: black.third }]}>
-                            {t(stat.label, { ns: 'my' })}
-                        </Text>
-                        {index < FORUM_USER_MOCK.stats.length - 1 ? (
-                            <View
-                                style={[
-                                    styles.statDivider,
-                                    {
-                                        backgroundColor:
-                                            theme.themeColorUltraLight,
-                                    },
-                                ]}
-                            />
-                        ) : null}
-                    </View>
-                ))}
-            </View>
-
-            <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionTitle, { color: black.main }]}>
-                    {t('我的 Harbor', { ns: 'my' })}
-                </Text>
-                <Pressable
-                    accessibilityRole="button"
-                    onPress={() =>
-                        handleOpenHarbor(
-                            `/u/${FORUM_USER_MOCK.username}/activity`,
-                        )
-                    }>
-                    <Text style={[styles.sectionLink, { color: themeColor }]}>
-                        {t('全部活動', { ns: 'my' })}
-                    </Text>
-                </Pressable>
-            </View>
-
-            <View
-                style={[
-                    styles.actionsCard,
-                    { backgroundColor: white },
-                    viewShadow,
-                ]}>
-                {accountActions.map(action => (
-                    <TouchableScale
-                        key={action.key}
-                        accessibilityRole="button"
-                        accessibilityLabel={action.label}
-                        activeScale={0.94}
-                        style={styles.actionItem}
-                        onPress={() => handleOpenHarbor(action.path)}>
-                        <View
-                            style={[
-                                styles.actionIcon,
-                                { backgroundColor: tonal.primary15 },
-                            ]}>
-                            <Ionicons
-                                name={action.icon}
-                                size={scale(23)}
-                                color={themeColor}
-                            />
-                            {action.badge ? (
+            {userStats.length > 0 ? (
+                <View
+                    style={[
+                        styles.statsCard,
+                        { backgroundColor: white },
+                        viewShadow,
+                    ]}>
+                    {userStats.map((stat, index) => (
+                        <View key={stat.key} style={styles.statItem}>
+                            <Text style={[styles.statValue, { color: black.main }]}>
+                                {stat.value}
+                            </Text>
+                            <Text style={[styles.statLabel, { color: black.third }]}>
+                                {t(stat.label, { ns: 'my' })}
+                            </Text>
+                            {index < userStats.length - 1 ? (
                                 <View
                                     style={[
-                                        styles.actionBadge,
-                                        { backgroundColor: theme.unread },
-                                    ]}>
-                                    <Text
-                                        style={[
-                                            styles.actionBadgeText,
-                                            { color: trueWhite },
-                                        ]}>
-                                        {action.badge}
-                                    </Text>
-                                </View>
+                                        styles.statDivider,
+                                        {
+                                            backgroundColor:
+                                                theme.themeColorUltraLight,
+                                        },
+                                    ]}
+                                />
                             ) : null}
                         </View>
-                        <Text
-                            numberOfLines={1}
-                            style={[styles.actionLabel, { color: black.second }]}>
-                            {action.label}
+                    ))}
+                </View>
+            ) : null}
+
+            {username ? (
+                <>
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: black.main }]}>
+                            {t('我的 Harbor', { ns: 'my' })}
                         </Text>
-                    </TouchableScale>
-                ))}
-            </View>
+                        <Pressable
+                            accessibilityRole="button"
+                            onPress={() =>
+                                handleOpenHarbor(`/u/${username}/activity`)
+                            }>
+                            <Text
+                                style={[
+                                    styles.sectionLink,
+                                    { color: themeColor },
+                                ]}>
+                                {t('全部活動', { ns: 'my' })}
+                            </Text>
+                        </Pressable>
+                    </View>
 
-            <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionTitle, { color: black.main }]}>
-                    {t('近期活動', { ns: 'my' })}
-                </Text>
-            </View>
+                    <View
+                        style={[
+                            styles.actionsCard,
+                            { backgroundColor: white },
+                            viewShadow,
+                        ]}>
+                        {accountActions.map(action => (
+                            <TouchableScale
+                                key={action.key}
+                                accessibilityRole="button"
+                                accessibilityLabel={action.label}
+                                activeScale={0.94}
+                                style={styles.actionItem}
+                                onPress={() => handleOpenHarbor(action.path)}>
+                                <View
+                                    style={[
+                                        styles.actionIcon,
+                                        { backgroundColor: tonal.primary15 },
+                                    ]}>
+                                    <Ionicons
+                                        name={action.icon}
+                                        size={scale(23)}
+                                        color={themeColor}
+                                    />
+                                    {action.badge ? (
+                                        <View
+                                            style={[
+                                                styles.actionBadge,
+                                                { backgroundColor: theme.unread },
+                                            ]}>
+                                            <Text
+                                                style={[
+                                                    styles.actionBadgeText,
+                                                    { color: trueWhite },
+                                                ]}>
+                                                {action.badge}
+                                            </Text>
+                                        </View>
+                                    ) : null}
+                                </View>
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.actionLabel,
+                                        { color: black.second },
+                                    ]}>
+                                    {action.label}
+                                </Text>
+                            </TouchableScale>
+                        ))}
+                    </View>
+                </>
+            ) : null}
 
-            <View
+            {userActivity.length > 0 ? (
+                <>
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: black.main }]}>
+                            {t('近期活動', { ns: 'my' })}
+                        </Text>
+                    </View>
+
+                    <View
+                        style={[
+                            styles.activityCard,
+                            { backgroundColor: white },
+                            viewShadow,
+                        ]}>
+                        {userActivity.map((activity, index) => (
+                            <Pressable
+                                key={activity.id}
+                                accessibilityRole="button"
+                                style={({ pressed }) => [
+                                    styles.activityRow,
+                                    pressed && {
+                                        backgroundColor: tonal.primary08,
+                                    },
+                                ]}
+                                onPress={() =>
+                                    handleOpenHarbor(
+                                        `/u/${username}/activity`,
+                                    )
+                                }>
+                                <View
+                                    style={[
+                                        styles.activityMarker,
+                                        {
+                                            backgroundColor: tonal.primary15,
+                                        },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name={
+                                            index === 2
+                                                ? 'reply-outline'
+                                                : 'post-outline'
+                                        }
+                                        size={scale(19)}
+                                        color={themeColor}
+                                    />
+                                </View>
+                                <View style={styles.activityTextWrap}>
+                                    <Text
+                                        numberOfLines={2}
+                                        style={[
+                                            styles.activityTitle,
+                                            { color: black.main },
+                                        ]}>
+                                        {activity.title}
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.activityMeta,
+                                            { color: black.third },
+                                        ]}>
+                                        {t(activity.meta, { ns: 'my' })}
+                                    </Text>
+                                </View>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={scale(17)}
+                                    color={black.third}
+                                />
+                            </Pressable>
+                        ))}
+                    </View>
+                </>
+            ) : null}
+
+            <TouchableScale
+                accessibilityRole="button"
+                accessibilityLabel={t('登出 Harbor', { ns: 'my' })}
+                activeScale={0.97}
                 style={[
-                    styles.activityCard,
-                    { backgroundColor: white },
-                    viewShadow,
-                ]}>
-                {FORUM_USER_MOCK.activity.map((activity, index) => (
-                    <Pressable
-                        key={activity.id}
-                        accessibilityRole="button"
-                        style={({ pressed }) => [
-                            styles.activityRow,
-                            pressed && { backgroundColor: tonal.primary08 },
-                        ]}
-                        onPress={() =>
-                            handleOpenHarbor(
-                                `/u/${FORUM_USER_MOCK.username}/activity`,
-                            )
-                        }>
-                        <View
-                            style={[
-                                styles.activityMarker,
-                                { backgroundColor: tonal.primary15 },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name={
-                                    index === 2
-                                        ? 'reply-outline'
-                                        : 'post-outline'
-                                }
-                                size={scale(19)}
-                                color={themeColor}
-                            />
-                        </View>
-                        <View style={styles.activityTextWrap}>
-                            <Text
-                                numberOfLines={2}
-                                style={[
-                                    styles.activityTitle,
-                                    { color: black.main },
-                                ]}>
-                                {activity.title}
-                            </Text>
-                            <Text
-                                style={[
-                                    styles.activityMeta,
-                                    { color: black.third },
-                                ]}>
-                                {t(activity.meta, { ns: 'my' })}
-                            </Text>
-                        </View>
-                        <Ionicons
-                            name="chevron-forward"
-                            size={scale(17)}
-                            color={black.third}
-                        />
-                    </Pressable>
-                ))}
-            </View>
+                    styles.logoutButton,
+                    {
+                        backgroundColor: tonal.primary08,
+                        borderColor: theme.unread,
+                    },
+                ]}
+                onPress={handleLogoutPress}>
+                <Ionicons
+                    name="log-out-outline"
+                    size={scale(19)}
+                    color={theme.unread}
+                />
+                <Text style={[styles.logoutButtonText, { color: theme.unread }]}>
+                    {t('登出 Harbor', { ns: 'my' })}
+                </Text>
+            </TouchableScale>
         </View>
     );
 
@@ -694,9 +817,11 @@ const MyScreen = ({ navigation }) => {
                     },
                 ]}>
                 {renderHeader()}
-                {IS_FORUM_LOGGED_IN
-                    ? renderLoggedInScreen()
-                    : renderGuestScreen()}
+                {status === 'restoring'
+                    ? renderRestoringScreen()
+                    : status === 'signedIn'
+                      ? renderLoggedInScreen()
+                      : renderGuestScreen()}
             </ScrollView>
         </View>
     );
@@ -804,6 +929,9 @@ const styles = StyleSheet.create({
         fontSize: scale(15),
         fontWeight: '700',
     },
+    disabledButton: {
+        opacity: 0.65,
+    },
     secondaryButton: {
         width: '100%',
         minHeight: verticalScale(44),
@@ -885,6 +1013,19 @@ const styles = StyleSheet.create({
     divider: {
         height: StyleSheet.hairlineWidth,
         marginLeft: scale(54),
+    },
+    restoringCard: {
+        minHeight: verticalScale(180),
+        borderRadius: scale(20),
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: verticalScale(14),
+        padding: scale(24),
+    },
+    restoringText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        textAlign: 'center',
     },
     profileCard: {
         borderRadius: scale(22),
@@ -1085,6 +1226,21 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(10),
         marginTop: verticalScale(4),
+    },
+    logoutButton: {
+        minHeight: verticalScale(46),
+        borderRadius: scale(14),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: scale(7),
+        paddingHorizontal: scale(18),
+    },
+    logoutButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(14),
+        fontWeight: '650',
     },
 });
 

@@ -1328,6 +1328,14 @@
   resolved "https://registry.npmjs.org/@callstack/liquid-glass/-/liquid-glass-0.7.1.tgz#54a5d47d12dea52162bb00b4c8c6bdc6ae8ec3c0"
   integrity sha512-N2rzs8g3kneI5G/98AZdVtjc6OUFBBFwPxVGVMoXUEI7QiioB4+aWwbImg5h8Z3Vb/T+fgLYWmmNhi27wHwE4g==
 
+"@craftzdog/react-native-buffer@^6.1.2":
+  version "6.1.2"
+  resolved "https://registry.npmjs.org/@craftzdog/react-native-buffer/-/react-native-buffer-6.1.2.tgz#c4ac28ef7064f77abb7ef597648fdf653011f260"
+  integrity sha512-KV1HitN05FHLLDG7Zb/yftDsa+mKBYBzFMQ0PMldvUicq6vWOtAvz9mDavt7Fzozh+WNqORE+yFDkkdWysZ/SA==
+  dependencies:
+    ieee754 "^1.2.1"
+    react-native-quick-base64 "^3.0.0"
+
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
   resolved "https://registry.npmjs.org/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"
@@ -2321,6 +2329,13 @@
     slash "^3.0.0"
     strip-ansi "^6.0.0"
 
+"@jest/create-cache-key-function@^29.7.0":
+  version "29.7.0"
+  resolved "https://registry.npmjs.org/@jest/create-cache-key-function/-/create-cache-key-function-29.7.0.tgz#793be38148fab78e65f40ae30c36785f4ad859f0"
+  integrity sha512-4QqS3LY5PBmTRHj9sAg1HLoPzqAI0uOX6wI/TRqHIcOxlFidy6YEmCQJk6FSZjNLGCeubDMfmkWL+qaLKhSGQA==
+  dependencies:
+    "@jest/types" "^29.6.3"
+
 "@jest/environment@^29.7.0":
   version "29.7.0"
   resolved "https://registry.npmjs.org/@jest/environment/-/environment-29.7.0.tgz#24d61f54ff1f786f3cd4073b4b94416383baf2a7"
@@ -2967,6 +2982,17 @@
   version "0.86.0"
   resolved "https://registry.npmjs.org/@react-native/gradle-plugin/-/gradle-plugin-0.86.0.tgz#a712a39ac1514e72740764440ecd763a17ef500f"
   integrity sha512-a1RcfaEDqWExCGfCwadIxt4l8FvKYgFqeMf2uzeKyAOnb+vTGNIeCvifFL2MqvgaeYxlER437HbMIajGcuJ1pQ==
+
+"@react-native/jest-preset@0.86.0":
+  version "0.86.0"
+  resolved "https://registry.npmjs.org/@react-native/jest-preset/-/jest-preset-0.86.0.tgz#928a3aeb78816be436cf9831c010258d503a31f3"
+  integrity sha512-KA+xpIP3DvJy7PQJ9c6ZdEKkOPChl+Rk/rV2MhQACEAzfhWU84407KZQv4ccyO3B4caD0gPrFjE96a4P993nsQ==
+  dependencies:
+    "@jest/create-cache-key-function" "^29.7.0"
+    "@react-native/js-polyfills" "0.86.0"
+    babel-jest "^29.7.0"
+    jest-environment-node "^29.7.0"
+    regenerator-runtime "^0.13.2"
 
 "@react-native/js-polyfills@0.83.4":
   version "0.83.4"
@@ -3863,7 +3889,7 @@ balanced-match@^4.0.2:
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz#bfb10662feed8196a2c62e7c68e17720c274179a"
   integrity sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==
 
-base64-js@^1.5.1:
+base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -3949,6 +3975,14 @@ buffer-from@^1.0.0:
   resolved "https://registry.npmjs.org/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
   integrity sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==
 
+buffer@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.npmjs.org/buffer/-/buffer-6.0.3.tgz#2ace578459cc8fbe2a70aaa8f52ee63b6a74c6c6"
+  integrity sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==
+  dependencies:
+    base64-js "^1.3.1"
+    ieee754 "^1.2.1"
+
 bytes@3.1.2:
   version "3.1.2"
   resolved "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz#8b0beeb98605adf1b128fa4386403c009e0221a5"
@@ -3970,6 +4004,16 @@ call-bind@^1.0.7, call-bind@^1.0.8:
     call-bind-apply-helpers "^1.0.0"
     es-define-property "^1.0.0"
     get-intrinsic "^1.2.4"
+    set-function-length "^1.2.2"
+
+call-bind@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.npmjs.org/call-bind/-/call-bind-1.0.9.tgz#39a644700c80bc7d0ca9102fc6d1d43b2fd7eee7"
+  integrity sha512-a/hy+pNsFUTR+Iz8TCJvXudKVLAnz/DyeSUo10I5yvFDQJBFU2s9uqQpoSrJlroHUKoKqzg+epxyP9lqFdzfBQ==
+  dependencies:
+    call-bind-apply-helpers "^1.0.2"
+    es-define-property "^1.0.1"
+    get-intrinsic "^1.3.0"
     set-function-length "^1.2.2"
 
 call-bound@^1.0.2, call-bound@^1.0.3, call-bound@^1.0.4:
@@ -4984,6 +5028,11 @@ eventemitter2@^1.0.0:
   resolved "https://registry.npmjs.org/eventemitter2/-/eventemitter2-1.0.5.tgz#f983610517b1737c0b9dc643beca93893c04df18"
   integrity sha512-EUFhWUYzqqBZlzBMI+dPU8rnKXfQZEUnitnccQuEIAnvWFHCpt3+4fts2+4dpxLtlsiseVXCMFg37KjYChSxpg==
 
+events@3.3.0, events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
 execa@^5.0.0:
   version "5.1.1"
   resolved "https://registry.npmjs.org/execa/-/execa-5.1.1.tgz#f80ad9cbf4298f7bd1d4c9555c21e93741c411dd"
@@ -5043,6 +5092,11 @@ expo-constants@~57.0.3:
   integrity sha512-BghbZlzwFnA22BG0CWv6W29zx8w19FozYPfSeZ3HjMitoy4aAmF1FnFbbjYSmZz6HHXXTWOfqwobOEIaglfzxg==
   dependencies:
     "@expo/env" "~2.4.1"
+
+expo-crypto@~57.0.1:
+  version "57.0.1"
+  resolved "https://registry.npmjs.org/expo-crypto/-/expo-crypto-57.0.1.tgz#78aef14f4e2bf8ce067f7f6dfd54549805e35551"
+  integrity sha512-xwegXQw3ATgeL1ZuqbSNrGzOeG+zNeh6Z6DSJk825Qpa3TEQQ1kG3ioE1p3g/SNF373BAVz2iBKUTSytlIbBRA==
 
 expo-dev-client@~57.0.5:
   version "57.0.5"
@@ -5807,6 +5861,11 @@ idb@7.1.1:
   resolved "https://registry.npmjs.org/idb/-/idb-7.1.1.tgz#d910ded866d32c7ced9befc5bfdf36f572ced72b"
   integrity sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==
 
+ieee754@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
+  integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
+
 ignore@^5.0.5, ignore@^5.2.0, ignore@^5.3.1:
   version "5.3.2"
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.3.2.tgz#3cd40e729f3643fd87cb04e50bf0eb722bc596f5"
@@ -5853,7 +5912,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@^2.0.1, inherits@~2.0.3, inherits@~2.0.4:
+inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.3, inherits@~2.0.4:
   version "2.0.4"
   resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
@@ -5878,6 +5937,14 @@ invariant@*, invariant@2.2.4, invariant@^2.2.4:
   integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
   dependencies:
     loose-envify "^1.0.0"
+
+is-arguments@^1.0.4:
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/is-arguments/-/is-arguments-1.2.0.tgz#ad58c6aecf563b78ef2bf04df540da8f5d7d8e1b"
+  integrity sha512-7bVbi0huj/wrIAOzb8U1aszg9kdi3KN/CyU19CTI7tAoZYEZoL9yCDXpbXN+uPsuWnP02cyug1gleqq+TU+YCA==
+  dependencies:
+    call-bound "^1.0.2"
+    has-tostringtag "^1.0.2"
 
 is-array-buffer@^3.0.4, is-array-buffer@^3.0.5:
   version "3.0.5"
@@ -5980,7 +6047,7 @@ is-generator-fn@^2.0.0:
   resolved "https://registry.npmjs.org/is-generator-fn/-/is-generator-fn-2.1.0.tgz#7d140adc389aaf3011a8f2a2a4cfa6faadffb118"
   integrity sha512-cTIB4yPYL/Grw0EaSzASzg6bBy9gqCofvWN8okThAYIxKJZC+udlRAmGbM0XLeniEJSs8uEgHPGuHSe1XsOLSQ==
 
-is-generator-function@^1.0.10:
+is-generator-function@^1.0.10, is-generator-function@^1.0.7:
   version "1.1.2"
   resolved "https://registry.npmjs.org/is-generator-function/-/is-generator-function-1.1.2.tgz#ae3b61e3d5ea4e4839b90bad22b02335051a17d5"
   integrity sha512-upqt1SkGkODW9tsGNG5mtXTXtECizwtS2kA161M+gJPc1xdb/Ax629af6YrTwcOeQHbewrPNlE5Dx7kzvXTizA==
@@ -6075,7 +6142,7 @@ is-symbol@^1.0.4, is-symbol@^1.1.1:
     has-symbols "^1.1.0"
     safe-regex-test "^1.1.0"
 
-is-typed-array@^1.1.13, is-typed-array@^1.1.14, is-typed-array@^1.1.15:
+is-typed-array@^1.1.13, is-typed-array@^1.1.14, is-typed-array@^1.1.15, is-typed-array@^1.1.3:
   version "1.1.15"
   resolved "https://registry.npmjs.org/is-typed-array/-/is-typed-array-1.1.15.tgz#4bfb4a45b61cee83a5a46fba778e4e8d59c0ce0b"
   integrity sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==
@@ -7802,6 +7869,11 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.npmjs.org/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
+process@^0.11.10:
+  version "0.11.10"
+  resolved "https://registry.npmjs.org/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
+  integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
+
 progress@^2.0.3:
   version "2.0.3"
   resolved "https://registry.npmjs.org/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
@@ -8083,10 +8155,32 @@ react-native-modal@^14.0.0-rc.1:
   dependencies:
     react-native-animatable "1.4.0"
 
+react-native-nitro-modules@0.33.2:
+  version "0.33.2"
+  resolved "https://registry.npmjs.org/react-native-nitro-modules/-/react-native-nitro-modules-0.33.2.tgz#7b1fb3c945779a238e7130448ba415f523a61e9b"
+  integrity sha512-ZlfOe6abODeHv/eZf8PxeSkrxIUhEKha6jaAAA9oXy7I6VPr7Ff4dUsAq3cyF3kX0L6qt2Dh9nzD2NdSsDwGpA==
+
 react-native-pager-view@^8.0.4:
   version "8.0.4"
   resolved "https://registry.npmjs.org/react-native-pager-view/-/react-native-pager-view-8.0.4.tgz#b5cc01b11cd92273b39b656fc138e0e935d464be"
   integrity sha512-9ASQA/gdQv63pESFbzyODgsY07kZoBjLqBRvZ/HNYn+h29XyOX2BICuvVmhemxw/pz3hKGqGEU31DDhDArwaRg==
+
+react-native-quick-base64@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/react-native-quick-base64/-/react-native-quick-base64-3.0.1.tgz#d6eb0e316856aa6f68399729d56aceba38d585cc"
+  integrity sha512-EjUP2U7WqKmlMmoY7XGyHomy8bM0q4+yCDCRg4ZezQ6zedYRwc7yVk4V2O/iSftKaLEzhuW98lpyPMdk1iPHXQ==
+
+react-native-quick-crypto@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.npmjs.org/react-native-quick-crypto/-/react-native-quick-crypto-1.1.6.tgz#8b1e39a08431afe4ad42c339ab9e86698e00da2a"
+  integrity sha512-FPq628/KjdwUCtKEMzbNDXiw+Z1DM6tBcQnUu/qtLtiGsIFNebrCMTpCjry0T3hhDcGbd9IC4acHxprAteh8rA==
+  dependencies:
+    "@craftzdog/react-native-buffer" "^6.1.2"
+    events "3.3.0"
+    readable-stream "4.7.0"
+    safe-buffer "^5.2.1"
+    string_decoder "^1.3.0"
+    util "0.12.5"
 
 react-native-reanimated@^4.5.1:
   version "4.5.1"
@@ -8299,6 +8393,17 @@ react@19.2.3:
   resolved "https://registry.npmjs.org/react/-/react-19.2.3.tgz#d83e5e8e7a258cf6b4fe28640515f99b87cd19b8"
   integrity sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==
 
+readable-stream@4.7.0:
+  version "4.7.0"
+  resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-4.7.0.tgz#cedbd8a1146c13dfff8dab14068028d58c15ac91"
+  integrity sha512-oIGGmcpTLwPga8Bn6/Z75SVaH1z5dUut2ibSyAMVhmUggWpmDn2dapB0n7f8nwaSiRtepAsfJyfXIO5DCVAODg==
+  dependencies:
+    abort-controller "^3.0.0"
+    buffer "^6.0.3"
+    events "^3.3.0"
+    process "^0.11.10"
+    string_decoder "^1.3.0"
+
 readable-stream@^2.0.2:
   version "2.3.8"
   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.8.tgz#91125e8042bba1b9887f49345f6277027ce8be9b"
@@ -8467,7 +8572,7 @@ safe-array-concat@^1.1.3:
     has-symbols "^1.1.0"
     isarray "^2.0.5"
 
-safe-buffer@5.2.1, safe-buffer@>=5.1.0:
+safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.2.1, safe-buffer@~5.2.0:
   version "5.2.1"
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz#1eaf9fa9bdb1fdd4ec75f58f9cdb4e6b7827eec6"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
@@ -8890,6 +8995,13 @@ string.prototype.trimstart@^1.0.8:
     define-properties "^1.2.1"
     es-object-atoms "^1.0.0"
 
+string_decoder@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.3.0.tgz#42f114594a46cf1a8e30b0a84f56c78c3edac21e"
+  integrity sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==
+  dependencies:
+    safe-buffer "~5.2.0"
+
 string_decoder@~1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz#9cf1611ba62685d7030ae9e4ba34149c3af03fc8"
@@ -9261,6 +9373,17 @@ util-deprecate@~1.0.1:
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
+util@0.12.5:
+  version "0.12.5"
+  resolved "https://registry.npmjs.org/util/-/util-0.12.5.tgz#5f17a6059b73db61a875668781a1c2b136bd6fbc"
+  integrity sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==
+  dependencies:
+    inherits "^2.0.3"
+    is-arguments "^1.0.4"
+    is-generator-function "^1.0.7"
+    is-typed-array "^1.1.3"
+    which-typed-array "^1.1.2"
+
 utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
@@ -9402,6 +9525,19 @@ which-typed-array@^1.1.16, which-typed-array@^1.1.19:
   dependencies:
     available-typed-arrays "^1.0.7"
     call-bind "^1.0.8"
+    call-bound "^1.0.4"
+    for-each "^0.3.5"
+    get-proto "^1.0.1"
+    gopd "^1.2.0"
+    has-tostringtag "^1.0.2"
+
+which-typed-array@^1.1.2:
+  version "1.1.22"
+  resolved "https://registry.npmjs.org/which-typed-array/-/which-typed-array-1.1.22.tgz#8f3cc78aefb40b437346dd40a1dbfa5d1da43fe9"
+  integrity sha512-fvO4ExWMFsqyhG3AiPAObMuY1lxaqgYcxbc49CNdWDDECOJNgQyvsOWVwbZc+qf3rzRtxojBK+CMEv0Ld5CYpw==
+  dependencies:
+    available-typed-arrays "^1.0.7"
+    call-bind "^1.0.9"
     call-bound "^1.0.4"
     for-each "^0.3.5"
     get-proto "^1.0.1"

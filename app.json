@@ -2,6 +2,7 @@
   "expo": {
     "name": "ARK ALL",
     "slug": "arkall",
+    "scheme": "one.umall",
     "version": "26.5.0",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
@@ -12,6 +13,9 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
       "buildNumber": "26.5.0",
+      "associatedDomains": [
+        "applinks:umall.one"
+      ],
       "infoPlist": {
         "UIViewControllerBasedStatusBarAppearance": true,
         "LSApplicationCategoryType": "public.app-category.utilities",
@@ -28,6 +32,23 @@
         "backgroundColor": "#E6AB52"
       },
       "icon": "./src/static/img/logo.png",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "umall.one",
+              "pathPrefix": "/auth/discourse"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -89,7 +110,8 @@
       "@react-native-community/datetimepicker",
       "expo-image",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      "react-native-quick-crypto"
     ],
     "extra": {
       "eas": {

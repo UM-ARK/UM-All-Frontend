@@ -17,6 +17,7 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import { getApp } from '@react-native-firebase/app';
 import { getAnalytics, setUserProperty } from '@react-native-firebase/analytics';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { HarborSessionProvider } from './src/contexts/HarborSessionContext';
 
 const { width: PAGE_WIDTH } = Dimensions.get('window');
 const LOGO_WIDTH = PAGE_WIDTH * 0.5;
@@ -220,7 +221,9 @@ const App = () => {
         <SafeAreaProvider>
             <KeyboardProvider>
                 <ThemeProvider>
-                    <Nav />
+                    <HarborSessionProvider>
+                        <Nav />
+                    </HarborSessionProvider>
                 </ThemeProvider>
                 <Toast config={toastConfig} />
             </KeyboardProvider>

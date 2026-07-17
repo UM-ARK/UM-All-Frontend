@@ -72,12 +72,11 @@ export async function setLocalStorage(itemName, data) {
     try {
         const strData = JSON.stringify(data);
         await AsyncStorage.setItem(itemName, strData);
-    } catch (error) {
-        console.log('AsyncStorage Error', error);
-        return error;
-    } finally {
         console.log(itemName, '已存入緩存');
         return 'ok';
+    } catch (error) {
+        console.log(itemName, '存入緩存失敗', error);
+        return error;
     }
 }
 

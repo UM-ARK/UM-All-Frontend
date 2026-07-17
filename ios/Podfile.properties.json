@@ -3,9 +3,10 @@
   "EX_DEV_CLIENT_NETWORK_INSPECTOR": "true",
   "expo.inlineModules.watchedDirectories": "[]",
   "expo.inlineModules.xcodeProjectTargets": "{\"mainTarget\":\"ARKALL\",\"targets\":[]}",
-  "expo-image.disable-libdav1d": "false",
-  "ios.useFrameworks": "static",
+  "ios.deploymentTarget": "16.4",
   "ios.forceStaticLinking": "[\"RNFBApp\",\"RNFBAnalytics\"]",
   "apple.privacyManifestAggregationEnabled": "true",
-  "EXPO_USE_PRECOMPILED_MODULES": "true"
+  "EXPO_USE_PRECOMPILED_MODULES": "true",
+  "expo-image.disable-libdav1d": "false",
+  "ios.useFrameworks": "static"
 }
