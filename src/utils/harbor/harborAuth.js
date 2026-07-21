@@ -34,7 +34,7 @@ const RSA_KEY_VERSION = 1;
 const RSA_AUTH_PADDING = 'oaep';
 const RSA_OAEP_HASH = 'sha1';
 // umall.one 部署 AASA 與 assetlinks.json 後，才可安全切換為 HTTPS callback。
-const HTTPS_AUTH_CALLBACK_ENABLED = false;
+const HTTPS_AUTH_CALLBACK_ENABLED = true;
 let harborRsaKeyPairPromise = null;
 
 export const HARBOR_AUTH_ERROR = {

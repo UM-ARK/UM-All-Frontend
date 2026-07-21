@@ -14,7 +14,8 @@
       "bundleIdentifier": "one.umall",
       "buildNumber": "26.5.0",
       "associatedDomains": [
-        "applinks:umall.one"
+        "applinks:umall.one",
+        "webcredentials:umall.one"
       ],
       "infoPlist": {
         "UIViewControllerBasedStatusBarAppearance": true,
