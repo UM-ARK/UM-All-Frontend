@@ -109,6 +109,14 @@ const getColorDiy = (isLight) => {
         // Harbor頁面配色
         harbor_bg_color: isLight ? '#fbfdff' : '#111111',
 
+        // expo-image 通用圖片佔位（可直接傳給 placeholder prop）
+        // 亮：淺灰；暗：深灰，避免深色模式下出現突兀亮塊
+        imagePlaceholder: {
+            blurhash: isLight
+                ? 'L6PZfSi_.AyE_3t7t7R**0o#DgR4'
+                : 'L1O|oat7fQfQfQfQfQfQfQfQfQ',
+        },
+
         // What2Reg，選咩課配色
         what2reg_color: '#30548b',
 

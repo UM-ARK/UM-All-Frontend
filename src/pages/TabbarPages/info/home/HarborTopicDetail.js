@@ -23,8 +23,10 @@ import moment from 'moment-timezone';
 import RenderHTML, {
     HTMLContentModel,
     HTMLElementModel,
-    IMGElement,
+    IMGElementContainer,
+    IMGElementContentError,
     useIMGElementProps,
+    useIMGElementState,
     useRendererProps,
 } from 'react-native-render-html';
 import Toast from 'react-native-simple-toast';
@@ -181,16 +183,40 @@ const HarborEmojiRenderer = ({tnode}) => {
 };
 
 const HarborImageRenderer = props => {
+    const {theme} = useTheme();
     const imageProps = useIMGElementProps(props);
     const rendererProps = useRendererProps('img');
+    const state = useIMGElementState(imageProps);
     const parentUrl = props.tnode?.parent?.attributes?.href;
     const imageUrl = parentUrl || imageProps.source?.uri;
 
+    if (state.type === 'error') {
+        return (
+            <IMGElementContainer
+                style={state.containerStyle}
+                onPress={() => rendererProps.onPress?.(imageUrl)}>
+                <IMGElementContentError {...state} />
+            </IMGElementContainer>
+        );
+    }
+
     return (
-        <IMGElement
-            {...imageProps}
-            onPress={() => rendererProps.onPress?.(imageUrl)}
-        />
+        <IMGElementContainer
+            style={state.containerStyle}
+            onPress={() => rendererProps.onPress?.(imageUrl)}>
+            <Image
+                source={{uri: state.source?.uri}}
+                style={[
+                    state.dimensions,
+                    state.type === 'success' ? state.imageStyle : null,
+                ]}
+                contentFit="cover"
+                placeholder={theme.imagePlaceholder}
+                placeholderContentFit="cover"
+                transition={300}
+                accessibilityLabel={state.alt || undefined}
+            />
+        </IMGElementContainer>
     );
 };
 
@@ -458,6 +484,9 @@ const HarborPostCard = memo(({
                     source={{uri: avatarUrl}}
                     style={[styles.avatar, {backgroundColor: tonal.primary15}]}
                     contentFit="cover"
+                    placeholder={theme.imagePlaceholder}
+                    placeholderContentFit="cover"
+                    transition={200}
                 />
                 <View style={styles.authorArea}>
                     <Text
