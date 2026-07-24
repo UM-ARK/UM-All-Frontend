@@ -37,7 +37,7 @@ const CLUB_IMAGE_HEIGHT = PAGE_HEIGHT * 0.076;
 
 const EventDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, imagePlaceholder } = theme;
 
     // 統一化卡片樣式（與 ClubDetail 保持一致）
     const styles = StyleSheet.create({
@@ -321,6 +321,9 @@ const EventDetail = (props) => {
                                     marginRight: scale(10),
                                 }}
                                 contentFit="contain"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="contain"
+                                transition={200}
                             />
                             <View>
                                 <Text style={{
@@ -407,6 +410,9 @@ const EventDetail = (props) => {
                                     height: '100%',
                                 }}
                                 contentFit="cover"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="cover"
+                                transition={200}
                             />
                         </TouchableOpacity>
                     ))}
@@ -561,6 +567,10 @@ const EventDetail = (props) => {
                         <Image
                             source={state.coverImgUrl.replace('http:', 'https:')}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
+                            contentFit="cover"
+                            placeholder={imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={300}
                         />
                     )}
                     showsVerticalScrollIndicator={false}

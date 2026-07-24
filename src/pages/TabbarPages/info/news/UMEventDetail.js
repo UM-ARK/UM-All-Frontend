@@ -128,6 +128,8 @@ const HeroSection = React.memo(
         themeColor,
         dynamicStyles,
     }) => {
+        const { theme } = useTheme();
+        const { imagePlaceholder } = theme;
 
         // 視差動畫樣式
         const parallaxStyle = useAnimatedStyle(() => {
@@ -170,6 +172,8 @@ const HeroSection = React.memo(
                             source={imageUrl}
                             style={staticStyles.heroImage}
                             contentFit="cover"
+                            placeholder={imagePlaceholder}
+                            placeholderContentFit="cover"
                             onLoadStart={() => setImgLoading(true)}
                             onLoad={() => setImgLoading(false)}
                             transition={500}

@@ -51,7 +51,7 @@ const CLUB_IMAGE_HEIGHT = verticalScale(55);
 
 const ClubDetail = (props) => {
     const { theme } = useTheme();
-    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite } = theme;
+    const { bg_color, white, black, themeColor, secondThemeColor, viewShadow, success, warning, trueWhite, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         cardContainer: {
             backgroundColor: white,
@@ -234,6 +234,9 @@ const ClubDetail = (props) => {
                                 source={clubData?.logo_url}
                                 style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
                                 contentFit="contain"
+                                placeholder={imagePlaceholder}
+                                placeholderContentFit="contain"
+                                transition={200}
                             />
                         </View>
                     </TouchableWithoutFeedback>
@@ -291,6 +294,10 @@ const ClubDetail = (props) => {
                                             <Image
                                                 source={item}
                                                 style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
+                                                contentFit="cover"
+                                                placeholder={imagePlaceholder}
+                                                placeholderContentFit="cover"
+                                                transition={200}
                                             />
                                         </TouchableOpacity>
                                     );
@@ -434,6 +441,10 @@ const ClubDetail = (props) => {
                         <Image
                             source={clubData?.club_photos_list?.[0] || ARK_LETTER_IMG}
                             style={{ backgroundColor: trueWhite, width: '100%', height: '100%' }}
+                            contentFit="cover"
+                            placeholder={imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={300}
                         />
                     )}
                     showsVerticalScrollIndicator={false}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo, memo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
-import { useTheme, themes, uiStyle } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
@@ -22,7 +22,7 @@ const EventCard = ({ data, cardWidth }) => {
     const navigation = useContext(NavigationContext);
 
     const { theme } = useTheme();
-    const { white, black, viewShadow, bg_color } = theme;
+    const { white, black, viewShadow, imagePlaceholder } = theme;
 
     const imageSize = cardWidth || DEFAULT_IMAGE_SIZE;
 
@@ -157,6 +157,9 @@ const EventCard = ({ data, cardWidth }) => {
                                 opacity: isFinish ? 0.5 : 1,
                             }}
                             contentFit="cover"
+                            placeholder={imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={200}
                             onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
                             onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}
                         />
