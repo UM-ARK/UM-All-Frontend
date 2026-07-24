@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, useMemo, memo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useContext, memo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
@@ -76,7 +76,6 @@ const EventCard = ({ data, cardWidth }) => {
         link: undefined,
         relateImgUrl: undefined,
         type: undefined,
-        imgLoading: true,
         eventData: undefined,
     });
 
@@ -118,9 +117,7 @@ const EventCard = ({ data, cardWidth }) => {
         title,
         clubName,
         finishTimeStamp,
-        startTimeStamp,
         type,
-        imgLoading,
     } = state;
 
     // 當前時刻時間戳
@@ -147,41 +144,19 @@ const EventCard = ({ data, cardWidth }) => {
                         borderRadius: BORDER_RADIUS,
                         overflow: 'hidden',
                     }}>
-                    <View>
-                        <Image
-                            source={coverImgUrl}
-                            style={{
-                                width: imageSize,
-                                height: imageSize,
-                                backgroundColor: white,
-                                opacity: isFinish ? 0.5 : 1,
-                            }}
-                            contentFit="cover"
-                            placeholder={imagePlaceholder}
-                            placeholderContentFit="cover"
-                            transition={200}
-                            onLoadStart={() => setState(prevState => ({ ...prevState, imgLoading: true }))}
-                            onLoad={() => setState(prevState => ({ ...prevState, imgLoading: false }))}
-                        />
-                        {imgLoading && (
-                            <View
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    zIndex: 10,
-                                }}>
-                                <ActivityIndicator
-                                    size={'large'}
-                                    color={theme.themeColor}
-                                />
-                            </View>
-                        )}
-                    </View>
+                    <Image
+                        source={coverImgUrl}
+                        style={{
+                            width: imageSize,
+                            height: imageSize,
+                            backgroundColor: white,
+                            opacity: isFinish ? 0.5 : 1,
+                        }}
+                        contentFit="cover"
+                        placeholder={imagePlaceholder}
+                        placeholderContentFit="cover"
+                        transition={200}
+                    />
 
                     {/* website類型活動展示link圖標 */}
                     {type === 'WEBSITE' && (
