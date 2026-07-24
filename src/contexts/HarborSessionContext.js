@@ -46,11 +46,15 @@ function createFallbackUser() {
         displayName: 'Harbor',
         username: '',
         role: 'Harbor 會員',
+        trustLevel: 0,
         joinedAt: '',
+        unreadNotifications: 0,
         unreadMessages: 0,
         avatarUrl: null,
+        contributions: [],
         stats: [],
         activity: [],
+        badges: [],
     };
 }
 

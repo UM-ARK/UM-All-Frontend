@@ -20,7 +20,6 @@ import {FlashList} from '@shopify/flash-list';
 import axios from 'axios';
 import {Image} from 'expo-image';
 import moment from 'moment-timezone';
-import qs from 'qs';
 import RenderHTML, {
     HTMLContentModel,
     HTMLElementModel,
@@ -43,18 +42,15 @@ import {
     getHarborHtmlAttribute,
     replaceHarborEmojiImages,
 } from '../../../../utils/harbor/harborHtml';
+import {fetchHarborTopic} from '../../../../utils/harbor/harborApi';
 import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
-    ARK_HARBOR_TOPIC_JSON,
-    ARK_HARBOR_TOPIC_POSTS,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../../utils/pathMap';
 import {trigger} from '../../../../utils/trigger';
 
-const REQUEST_TIMEOUT = 12000;
-const POST_BATCH_SIZE = 20;
 const AVATAR_SIZE = 88;
 
 const iframeModel = HTMLElementModel.fromCustomModel({
@@ -116,65 +112,6 @@ const extractPostImages = html => {
     }
 
     return [...new Set(images)];
-};
-
-const mergePosts = posts => {
-    const postMap = new Map();
-    posts.filter(Boolean).forEach(post => {
-        if (post.id != null) {
-            postMap.set(post.id, post);
-        }
-    });
-    return [...postMap.values()].sort((left, right) => {
-        return Number(left.post_number || 0) - Number(right.post_number || 0);
-    });
-};
-
-const fetchHarborTopic = async (topicId, signal) => {
-    const topicResponse = await axios.get(ARK_HARBOR_TOPIC_JSON(topicId), {
-        signal,
-        timeout: REQUEST_TIMEOUT,
-    });
-    const topic = topicResponse.data;
-    const stream = topic?.post_stream?.stream;
-    const initialPosts = topic?.post_stream?.posts;
-
-    if (!topic?.id || !Array.isArray(stream) || !Array.isArray(initialPosts)) {
-        throw new Error('Invalid Harbor topic response');
-    }
-
-    const allPosts = [...initialPosts];
-    const loadedPostIds = new Set(initialPosts.map(post => post?.id));
-    const missingPostIds = stream.filter(postId => !loadedPostIds.has(postId));
-
-    for (let index = 0; index < missingPostIds.length; index += POST_BATCH_SIZE) {
-        if (signal.aborted) {
-            const canceledError = new Error('Request canceled');
-            canceledError.code = 'ERR_CANCELED';
-            throw canceledError;
-        }
-
-        const postIds = missingPostIds.slice(index, index + POST_BATCH_SIZE);
-        const postsResponse = await axios.get(ARK_HARBOR_TOPIC_POSTS(topicId), {
-            params: {post_ids: postIds},
-            paramsSerializer: params => qs.stringify(params, {arrayFormat: 'brackets'}),
-            signal,
-            timeout: REQUEST_TIMEOUT,
-        });
-        const batch = postsResponse.data?.post_stream?.posts;
-        if (!Array.isArray(batch)) {
-            throw new Error('Invalid Harbor posts response');
-        }
-        allPosts.push(...batch);
-    }
-
-    return {
-        ...topic,
-        post_stream: {
-            ...topic.post_stream,
-            posts: mergePosts(allPosts),
-        },
-    };
 };
 
 const getReactionCount = post => {
@@ -755,7 +692,9 @@ const HarborTopicDetail = ({route, navigation}) => {
         }
 
         try {
-            const nextTopic = await fetchHarborTopic(topicId, controller.signal);
+            const nextTopic = await fetchHarborTopic(topicId, {
+                signal: controller.signal,
+            });
             if (
                 controller.signal.aborted ||
                 requestGeneration !== requestGenerationRef.current

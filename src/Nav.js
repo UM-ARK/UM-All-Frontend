@@ -17,6 +17,10 @@ import EventDetail from './pages/TabbarPages/info/club/EventDetail';
 import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
 import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
 import HarborTopicDetail from './pages/TabbarPages/info/home/HarborTopicDetail';
+import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
+import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
+import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
+import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
 
 import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
 
@@ -134,6 +138,10 @@ const Nav = () => {
                 >
                     <Stack.Screen name="Webviewer" component={Webviewer} />
                     <Stack.Screen name="SettingPage" component={SettingPage} options={{ headerTitle: t('設置') }} />
+                    <Stack.Screen name="HarborActivity" component={HarborActivityPage} />
+                    <Stack.Screen name="HarborInbox" component={HarborInboxPage} />
+                    <Stack.Screen name="HarborBadges" component={HarborBadgesPage} />
+                    <Stack.Screen name="HarborAccountSettings" component={HarborAccountSettingsPage} />
                 </Stack.Group>
             </Stack.Navigator>
         </NavigationContainer>
