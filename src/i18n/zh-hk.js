@@ -8,6 +8,7 @@ export default {
         'TOPTAB_EVENT': '活動',
         'TOPTAB_NEWS': '新聞',
         'TOPTAB_ABOUT': '關於',
+        '回到頂部': '回到頂部',
         '來源：UM Open Data': '來源：UM Open Data',
         '資料來自澳門大學開放數據平台，轉載時請確保內容準確。':
             '資料來自澳門大學開放數據平台，轉載時請確保內容準確。',

@@ -1,15 +1,15 @@
-import React, {useCallback, useState} from 'react';
+import React from 'react';
 
-import {trigger} from '../../../utils/trigger';
-import {useTheme} from '../../../components/ThemeContext';
+import { trigger } from '../../../utils/trigger';
+import { useTheme } from '../../../components/ThemeContext';
 import HomePage from './home/index';
 import ClubPage from './ClubPage';
 import CampusPage from './CampusPage';
 
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import {moderateScale} from 'react-native-size-matters';
-import {SafeAreaView} from 'react-native-screens/experimental';
-import {useTranslation} from 'react-i18next';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { moderateScale } from 'react-native-size-matters';
+import { SafeAreaView } from 'react-native-screens/experimental';
+import { useTranslation } from 'react-i18next';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -21,21 +21,12 @@ const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
 const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
 
 export default function NewsScreen() {
-    const {theme} = useTheme();
-    const {bg_color, black, themeColor} = theme;
-    const {t} = useTranslation(['common', 'home']);
-    // 校園頁內有 PagerView 左右滑：聚焦時關閉外層 Top Tab 手勢，避免衝突
-    const [swipeEnabled, setSwipeEnabled] = useState(true);
-
-    const onCampusFocus = useCallback(() => {
-        setSwipeEnabled(false);
-    }, []);
-    const onCampusBlur = useCallback(() => {
-        setSwipeEnabled(true);
-    }, []);
+    const { theme } = useTheme();
+    const { bg_color, black, themeColor } = theme;
+    const { t } = useTranslation(['common', 'home']);
 
     return (
-        <SafeAreaView style={{backgroundColor: bg_color, flex: 1}} edges={{top: true}}>
+        <SafeAreaView style={{ backgroundColor: bg_color, flex: 1 }} edges={{ top: true }}>
             <Tab.Navigator
                 screenOptions={{
                     tabBarLabelStyle: {
@@ -65,13 +56,12 @@ export default function NewsScreen() {
                         marginHorizontal: 'auto',
                     },
                     lazy: true,
-                    swipeEnabled,
                 }}
                 initialRouteName="HomePage">
                 <Tab.Screen
                     name="HomePage"
                     component={HomePage}
-                    options={{title: t('TOPTAB_MAIN')}}
+                    options={{ title: t('TOPTAB_MAIN') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
                     })}
@@ -79,7 +69,7 @@ export default function NewsScreen() {
                 <Tab.Screen
                     name="ClubPage"
                     component={ClubPage}
-                    options={{title: t('TOPTAB_CLUB')}}
+                    options={{ title: t('TOPTAB_CLUB') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
                     })}
@@ -87,11 +77,9 @@ export default function NewsScreen() {
                 <Tab.Screen
                     name="CampusPage"
                     component={CampusPage}
-                    options={{title: t('TOPTAB_CAMPUS')}}
+                    options={{ title: t('TOPTAB_CAMPUS') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
-                        focus: onCampusFocus,
-                        blur: onCampusBlur,
                     })}
                 />
             </Tab.Navigator>

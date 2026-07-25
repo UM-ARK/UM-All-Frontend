@@ -1,4 +1,13 @@
-import React, { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
+import React, {
+    forwardRef,
+    useState,
+    useEffect,
+    useRef,
+    useContext,
+    useCallback,
+    useImperativeHandle,
+    useMemo,
+} from 'react';
 import {
     View,
     Text,
@@ -18,7 +27,6 @@ import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/The
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 import Loading from '../../../components/Loading';
-import ScrollToTopButton from '../../../components/ScrollToTopButton';
 
 // import { Image } from 'expo-image';
 // import Interactable from 'react-native-interactable';
@@ -44,9 +52,13 @@ const getItemCount = data => {
 /**
  * 澳大新聞列表
  * @param {boolean} [hideSourceLabel=false] - 嵌入校園頁時隱藏列表內來源標註
- * @param {boolean} [showScrollToTop=true] - 是否顯示回頂按鈕（Pager 僅當前頁顯示）
+ * @param {number} [contentTopInset=0] - 懸浮頁頭所需的列表頂部間距
+ * @param {(offsetY: number) => void} [onScrollOffsetChange] - 列表滾動位置回調
  */
-const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
+const NewsPage = forwardRef(function NewsPage(
+    { hideSourceLabel = false, contentTopInset = 0, onScrollOffsetChange },
+    ref,
+) {
     const { theme } = useContext(ThemeContext);
     const { white, black, viewShadow, bg_color, themeColor, trueWhite } = theme;
     const styles = StyleSheet.create({
@@ -92,6 +104,27 @@ const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
     // const [imgLoading, setImgLoading] = useState(true);
 
     const progressRef = useRef(0);
+    useImperativeHandle(
+        ref,
+        () => ({
+            scrollToTop: () => {
+                if (virtualizedList.current?.scrollToOffset) {
+                    virtualizedList.current.scrollToOffset({
+                        offset: 0,
+                        animated: true,
+                    });
+                } else {
+                    virtualizedList.current?.scrollTo({
+                        x: 0,
+                        y: 0,
+                        animated: true,
+                    });
+                }
+            },
+        }),
+        [],
+    );
+
     // VirtualizedList 列寬有時不撐滿，外層需固定寬度 NewsCard 內層才能正確留白
     const renderNewsItem = useCallback(
         ({ item }) => (
@@ -100,6 +133,13 @@ const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
             </View>
         ),
         [],
+    );
+
+    const handleScroll = useCallback(
+        e => {
+            onScrollOffsetChange?.(e.nativeEvent.contentOffset.y);
+        },
+        [onScrollOffsetChange],
     );
 
     // 請求澳大新聞API
@@ -120,7 +160,7 @@ const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
                 onDownloadProgress: progressEvent => {
                     const loadedMB = progressEvent.loaded / 1024 / 1024;
                     let progress = loadedMB / totalMB;
-                    if (progress > 1) {progress = 0.95;} // 確保進度不超過1
+                    if (progress > 1) { progress = 0.95; } // 確保進度不超過1
                     progressRef.current = progress;
                 },
             });
@@ -262,11 +302,15 @@ const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
             {isLoading ? (
                 // 渲染Loading時的骨架屏
                 <ScrollView
+                    ref={virtualizedList}
                     contentInsetAdjustmentBehavior="automatic"
                     contentContainerStyle={{
                         flexGrow: 1,
                         justifyContent: 'center',
+                        paddingTop: contentTopInset,
                     }}
+                    onScroll={handleScroll}
+                    scrollEventThrottle={16}
                     refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -288,48 +332,49 @@ const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
             {isLoading ? null : (
                 <View style={{ flex: 1, width: '100%' }}>
                     <VirtualizedList
-                    data={newsList}
-                    ref={virtualizedList}
-                    style={{ flex: 1, width: '100%' }}
-                    contentInsetAdjustmentBehavior="automatic"
-                    // 初始渲染的元素，設置為剛好覆蓋屏幕
-                    initialNumToRender={4}
-                    windowSize={8}
-                    maxToRenderPerBatch={8}
-                    updateCellsBatchingPeriod={50}
-                    renderItem={renderNewsItem}
-                    contentContainerStyle={{ width: '100%' }}
-                    keyExtractor={item => item._id}
-                    // 整理item數據
-                    getItem={getItem}
-                    // 渲染項目數量
-                    getItemCount={getItemCount}
-                    // 列表頭部渲染的組件 - 頭條新聞
-                    ListHeaderComponent={renderTopNews}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={isLoading}
-                            onRefresh={() => {
-                                // 展示Loading標識
-                                setIsLoading(true);
-                                // setImgLoading(true);
-                                getData();
-                            }}
-                        />
-                    }
-                    directionalLockEnabled
-                    alwaysBounceHorizontal={false}
-                    removeClippedSubviews
-                />
-                    <ScrollToTopButton
-                        visible={showScrollToTop}
-                        virtualizedListRef={virtualizedList}
+                        data={newsList}
+                        ref={virtualizedList}
+                        style={{ flex: 1, width: '100%' }}
+                        contentInsetAdjustmentBehavior="automatic"
+                        onScroll={handleScroll}
+                        scrollEventThrottle={16}
+                        // 初始渲染的元素，設置為剛好覆蓋屏幕
+                        initialNumToRender={4}
+                        windowSize={8}
+                        maxToRenderPerBatch={8}
+                        updateCellsBatchingPeriod={50}
+                        renderItem={renderNewsItem}
+                        contentContainerStyle={{
+                            width: '100%',
+                            paddingTop: contentTopInset,
+                        }}
+                        keyExtractor={item => item._id}
+                        // 整理item數據
+                        getItem={getItem}
+                        // 渲染項目數量
+                        getItemCount={getItemCount}
+                        // 列表頭部渲染的組件 - 頭條新聞
+                        ListHeaderComponent={renderTopNews}
+                        refreshControl={
+                            <RefreshControl
+                                colors={[themeColor]}
+                                tintColor={themeColor}
+                                refreshing={isLoading}
+                                onRefresh={() => {
+                                    // 展示Loading標識
+                                    setIsLoading(true);
+                                    // setImgLoading(true);
+                                    getData();
+                                }}
+                            />
+                        }
+                        directionalLockEnabled
+                        alwaysBounceHorizontal={false}
+                        removeClippedSubviews
                     />
                 </View>)}
         </View>
     );
-};
+});
 
 export default NewsPage;
