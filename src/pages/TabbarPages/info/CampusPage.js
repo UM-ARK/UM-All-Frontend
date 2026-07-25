@@ -95,13 +95,13 @@ const CampusPage = () => {
         [headerProgress],
     );
 
-    const syncHeaderWithPage = useCallback(
+    const showHeaderForPage = useCallback(
         index => {
             const scrollState = scrollStatesRef.current[index];
-            setHeaderVisible(
-                scrollState.lastOffset <= TOP_VISIBILITY_THRESHOLD ||
-                scrollState.headerVisible,
-            );
+            scrollState.anchorOffset = scrollState.lastOffset;
+            scrollState.direction = null;
+            scrollState.headerVisible = true;
+            setHeaderVisible(true);
         },
         [setHeaderVisible],
     );
@@ -111,10 +111,10 @@ const CampusPage = () => {
             ensureMounted(index);
             pageIndexRef.current = index;
             setPageIndex(index);
-            syncHeaderWithPage(index);
+            showHeaderForPage(index);
             pagerRef.current?.setPage(index);
         },
-        [ensureMounted, syncHeaderWithPage],
+        [ensureMounted, showHeaderForPage],
     );
 
     const onPageSelected = useCallback(
@@ -123,9 +123,9 @@ const CampusPage = () => {
             ensureMounted(next);
             pageIndexRef.current = next;
             setPageIndex(next);
-            syncHeaderWithPage(next);
+            showHeaderForPage(next);
         },
-        [ensureMounted, syncHeaderWithPage],
+        [ensureMounted, showHeaderForPage],
     );
 
     const onContentScroll = useCallback(
