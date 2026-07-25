@@ -1,4 +1,4 @@
-import React, { useRef, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Dimensions, Pressable } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
@@ -46,7 +46,7 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
 
         // 右上
         { x: screenWidth - scale(20) - buttonRadius, y: verticalScale(80) + buttonRadius },
-        // 右中 - 调整为真正的屏幕中间位置
+        // 右中 - 調整為真正的屏幕中間位置
         { x: screenWidth - scale(20) - buttonRadius, y: screenHeight / 2 },
         // 右下 - 調整位置，避免被底部導航欄遮擋
         { x: screenWidth - scale(20) - buttonRadius, y: screenHeight - verticalScale(160) - buttonRadius },
@@ -54,21 +54,15 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
 
     // 根據傳入的索引設置初始位置，默認為右下位置
     const initialPosition = snapPoints[initialSnapPointIndex];
+    const initialLeft = initialPosition.x - buttonRadius;
+    const initialTop = initialPosition.y - buttonRadius;
 
-    // Reanimated v4 共享值 - 跟蹤按鈕的當前位置（絕對坐標）
-    const translateX = useSharedValue(initialPosition.x - buttonRadius);
-    const translateY = useSharedValue(initialPosition.y - buttonRadius);
-    // 跟蹤按鈕的基準位置（用於累積手勢翻譯值）
-    const baseX = useRef(initialPosition.x - buttonRadius);
-    const baseY = useRef(initialPosition.y - buttonRadius);
-
-    // 添加日誌以調試位置計算
-    // console.log('Screen dimensions:', { width: screenWidth, height: screenHeight });
-    // console.log('Button size:', buttonSize);
-    // console.log('Button radius:', buttonRadius);
-    // console.log('Initial position:', initialPosition);
-    // console.log('Translate X:', initialPosition.x - buttonRadius);
-    // console.log('Translate Y:', initialPosition.y - buttonRadius);
+    // 按鈕當前位置（左上角），必須用 shared value 供 UI thread 手勢讀寫
+    const translateX = useSharedValue(initialLeft);
+    const translateY = useSharedValue(initialTop);
+    // 每次手勢開始時鎖定的基準位置
+    const startX = useSharedValue(initialLeft);
+    const startY = useSharedValue(initialTop);
 
     // 回頂功能
     const handleScrollToTop = () => {
@@ -85,87 +79,62 @@ const ScrollToTopButton = ({ visible = true, onScrollToTop, virtualizedListRef, 
         }
     };
 
-    // 定義拖動手勢
+    const springConfig = {
+        stiffness: 200,
+        damping: 25,
+        mass: 0.5,
+        overshootClamping: true,
+        restDisplacementThreshold: 0.5,
+        restSpeedThreshold: 5,
+    };
+
+    // 定義拖動手勢（回調在 UI thread 執行，不可使用 useRef）
     const panGesture = Gesture.Pan()
+        .onStart(() => {
+            // 從當前實際位置起步，避免第二次拖動仍用過期基準座標
+            startX.value = translateX.value;
+            startY.value = translateY.value;
+        })
         .onUpdate((event) => {
-            try {
-                // 計算當前位置：基準位置 + 手勢翻譯值
-                translateX.value = baseX.current + event.translationX;
-                translateY.value = baseY.current + event.translationY;
-            } catch (error) {
-                console.error('Error in pan gesture onUpdate:', error);
-            }
+            translateX.value = startX.value + event.translationX;
+            translateY.value = startY.value + event.translationY;
         })
         .onEnd((event) => {
             // 手勢結束，吸附到最近的固定點
-            try {
-                // 計算當前絕對位置
-                const currentAbsoluteX = (baseX.current + event.translationX) + buttonRadius;
-                const currentAbsoluteY = (baseY.current + event.translationY) + buttonRadius;
+            const currentAbsoluteX = startX.value + event.translationX + buttonRadius;
+            const currentAbsoluteY = startY.value + event.translationY + buttonRadius;
 
-                // 檢查坐標是否有效
-                if (isNaN(currentAbsoluteX) || isNaN(currentAbsoluteY) || !isFinite(currentAbsoluteX) || !isFinite(currentAbsoluteY)) {
-                    throw new Error('Invalid coordinates');
-                }
-
-                // console.log('最終位置（絕對坐標）:', { x: currentAbsoluteX, y: currentAbsoluteY });
-
-                let nearestPoint = snapPoints[0];
-                let minDistance = Infinity;
-
-                snapPoints.forEach(point => {
-                    const distance = Math.sqrt(
-                        Math.pow(currentAbsoluteX - point.x, 2) + Math.pow(currentAbsoluteY - point.y, 2)
-                    );
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        nearestPoint = point;
-                    }
-                });
-
-                // console.log('最近吸附點（絕對坐標）:', nearestPoint);
-
-                // 計算相對於左上角的偏移量（不包含半徑，因為 style 中的 x/y 已經是左上角）
-                const offsetX = nearestPoint.x - buttonRadius;
-                const offsetY = nearestPoint.y - buttonRadius;
-
-                // 更新基準位置為吸附後的位置
-                baseX.current = offsetX;
-                baseY.current = offsetY;
-
-                // 優化彈簧動畫參數：加速吸附速度，改善跟手效果
-                translateX.value = withSpring(offsetX, {
-                    stiffness: 200,
-                    damping: 25,
-                    mass: 0.5,
-                    overshootClamping: true,
-                    restDisplacementThreshold: 0.5,
-                    restSpeedThreshold: 5,
-                });
-                translateY.value = withSpring(offsetY, {
-                    stiffness: 200,
-                    damping: 25,
-                    mass: 0.5,
-                    overshootClamping: true,
-                    restDisplacementThreshold: 0.5,
-                    restSpeedThreshold: 5,
-                });
-            } catch (error) {
-                console.error('Error in pan gesture onEnd:', error);
-                // 動畫失敗時，重置到初始位置（右中）
-                const offsetX = initialPosition.x - buttonRadius;
-                const offsetY = initialPosition.y - buttonRadius;
-                baseX.current = offsetX;
-                baseY.current = offsetY;
-                translateX.value = withSpring(offsetX, {
-                    damping: 30,
-                    stiffness: 100,
-                });
-                translateY.value = withSpring(offsetY, {
-                    damping: 30,
-                    stiffness: 100,
-                });
+            if (
+                isNaN(currentAbsoluteX) ||
+                isNaN(currentAbsoluteY) ||
+                !isFinite(currentAbsoluteX) ||
+                !isFinite(currentAbsoluteY)
+            ) {
+                translateX.value = withSpring(initialLeft, springConfig);
+                translateY.value = withSpring(initialTop, springConfig);
+                return;
             }
+
+            let nearestPoint = snapPoints[0];
+            let minDistance = Infinity;
+
+            for (let i = 0; i < snapPoints.length; i++) {
+                const point = snapPoints[i];
+                const distance = Math.sqrt(
+                    Math.pow(currentAbsoluteX - point.x, 2) +
+                    Math.pow(currentAbsoluteY - point.y, 2)
+                );
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestPoint = point;
+                }
+            }
+
+            const offsetX = nearestPoint.x - buttonRadius;
+            const offsetY = nearestPoint.y - buttonRadius;
+
+            translateX.value = withSpring(offsetX, springConfig);
+            translateY.value = withSpring(offsetY, springConfig);
         });
 
     // 定義動畫樣式 - 直接使用絕對定位 left 和 top
