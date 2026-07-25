@@ -2,7 +2,8 @@
 export default {
     common: {
         'ABOUT': '關於',
-        'TOPTAB_MAIN': '主頁',
+        'TOPTAB_MAIN': '推薦',
+        'TOPTAB_FORUM': '論壇',
         'TOPTAB_CLUB': '組織',
         'TOPTAB_CAMPUS': '校園',
         'TOPTAB_EVENT': '活動',

@@ -3,6 +3,7 @@ import React from 'react';
 import { trigger } from '../../../utils/trigger';
 import { useTheme } from '../../../components/ThemeContext';
 import HomePage from './home/index';
+import ForumPage from './ForumPage';
 import ClubPage from './ClubPage';
 import CampusPage from './CampusPage';
 
@@ -62,6 +63,14 @@ export default function NewsScreen() {
                     name="HomePage"
                     component={HomePage}
                     options={{ title: t('TOPTAB_MAIN') }}
+                    listeners={() => ({
+                        tabPress: () => trigger(),
+                    })}
+                />
+                <Tab.Screen
+                    name="ForumPage"
+                    component={ForumPage}
+                    options={{ title: t('TOPTAB_FORUM') }}
                     listeners={() => ({
                         tabPress: () => trigger(),
                     })}
