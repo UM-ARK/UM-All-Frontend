@@ -331,17 +331,6 @@ const What2Reg = () => {
         }
     }, [scrollData]);
 
-    const reminderView = useMemo(() => (
-        <View style={{ width: '100%', alignItems: 'center', marginBottom: scale(5) }}>
-            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
-                {t('檢查課表版本!', { ns: 'catalog' })}
-            </Text>
-            <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third, textAlign: 'center' }}>
-                {t('以官網課表Excel為準!', { ns: 'catalog' })}
-            </Text>
-        </View>
-    ), [black.third]);
-
     /**
      * 課程卡片以 flexWrap 容器渲染（非 FlatList）。
      * 先按課名視覺長度分配全寬、1/2 或 1/3，再把卡片分組成實際行。
@@ -411,10 +400,9 @@ const What2Reg = () => {
 
                 {hasSearchResult ? (
                     <View>
-                        {reminderView}
                         <View style={{ alignSelf: 'center' }}>
                             <Text style={{ ...uiStyle.defaultText, fontSize: verticalScale(10), color: black.third }}>
-                                拿走不謝
+                                燕子，答應我，要好好上課
                             </Text>
                         </View>
                         {renderCourseCards(searchFilterCourse)}

@@ -688,12 +688,12 @@ function CourseSim({ route, navigation }) {
                     break;
                 case 'drop-section':
                     Alert.alert(
-                        '',
                         t('刪除Section確認', {
                             ns: 'timetable',
                             code: course['Course Code'],
                             section: course.Section,
                         }),
+                        `還會再見嗎燕子，再見的時候你要PASS！`,
                         [
                             {
                                 text: 'Drop',
