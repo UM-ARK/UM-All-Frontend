@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Alert,
     Keyboard,
@@ -9,31 +9,34 @@ import {
     View,
 } from 'react-native';
 
-import {useHeaderHeight} from '@react-navigation/elements';
-import {useFocusEffect} from '@react-navigation/native';
-import {isLiquidGlassSupported} from '@callstack/liquid-glass';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-controller';
-import {scale, verticalScale} from 'react-native-size-matters';
+import { useHeaderHeight } from '@react-navigation/elements';
+import { useFocusEffect } from '@react-navigation/native';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as OpenCC from 'opencc-js';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import {getFunctionArr} from '../../../features/FeatureList';
+import { getFunctionArr } from '../../../features/FeatureList';
 import FeatureIcon from './components/FeatureIcon';
-import {useTheme, uiStyle} from '../../../../../components/ThemeContext';
-import {openLink} from '../../../../../utils/browser';
-import {logToFirebase} from '../../../../../utils/firebaseAnalytics';
+import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
+import { openLink } from '../../../../../utils/browser';
+import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import {
     addSearchHistory,
     clearSearchHistory,
     getSearchHistory,
     removeSearchHistory,
 } from '../../../../../utils/searchHistory';
-import {trigger} from '../../../../../utils/trigger';
+import { trigger } from '../../../../../utils/trigger';
 
-const converter = OpenCC.Converter({from: 'cn', to: 'tw'});
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
 const MAX_LOCAL_RESULTS = 8;
-const FOCUS_FALLBACK_DELAY_MS = 450;
+// 轉場結束後再短暫延遲，確保鍵盤從底部升起而非跟隨側滑
+const FOCUS_AFTER_TRANSITION_MS = 64;
+// 僅在無 transitionEnd（如無動畫進頁）時作為後備，須明顯長於原生 push 動畫
+const FOCUS_FALLBACK_DELAY_MS = 800;
 const RECOMMENDED_FEATURE_KEYS = [
     '校園巴士',
     '校曆',
@@ -49,8 +52,8 @@ const normalizeSearchText = value =>
             .toLowerCase(),
     );
 
-const SearchScreen = ({navigation}) => {
-    const {theme} = useTheme();
+const SearchScreen = ({ navigation }) => {
+    const { theme } = useTheme();
     const {
         bg_color,
         black,
@@ -60,7 +63,7 @@ const SearchScreen = ({navigation}) => {
         viewShadow,
         white,
     } = theme;
-    const {t} = useTranslation(['common', 'home', 'features']);
+    const { t } = useTranslation(['common', 'home', 'features']);
     const headerHeight = useHeaderHeight();
     const inputRef = useRef(null);
     const [query, setQuery] = useState('');
@@ -128,9 +131,36 @@ const SearchScreen = ({navigation}) => {
     useFocusEffect(
         useCallback(() => {
             let isActive = true;
-            const focusTimer = setTimeout(() => {
+            let hasFocused = false;
+            let afterTransitionTimer = null;
+
+            const focusInput = () => {
+                if (!isActive || hasFocused) {
+                    return;
+                }
+                hasFocused = true;
                 inputRef.current?.focus();
-            }, FOCUS_FALLBACK_DELAY_MS);
+            };
+
+            // 優先等左右 push 轉場結束，避免鍵盤跟隨頁面側滑
+            const unsubscribe = navigation.addListener(
+                'transitionEnd',
+                event => {
+                    if (event.data.closing) {
+                        return;
+                    }
+                    afterTransitionTimer = setTimeout(
+                        focusInput,
+                        FOCUS_AFTER_TRANSITION_MS,
+                    );
+                },
+            );
+
+            // 無轉場事件時的後備（例如無動畫進頁）
+            const fallbackTimer = setTimeout(
+                focusInput,
+                FOCUS_FALLBACK_DELAY_MS,
+            );
 
             getSearchHistory().then(savedHistory => {
                 if (isActive) {
@@ -140,23 +170,17 @@ const SearchScreen = ({navigation}) => {
 
             return () => {
                 isActive = false;
-                clearTimeout(focusTimer);
+                clearTimeout(fallbackTimer);
+                if (afterTransitionTimer) {
+                    clearTimeout(afterTransitionTimer);
+                }
+                unsubscribe();
             };
-        }, []),
+        }, [navigation]),
     );
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('transitionEnd', event => {
-            if (!event.data.closing) {
-                inputRef.current?.focus();
-            }
-        });
-
-        return unsubscribe;
-    }, [navigation]);
-
-    useEffect(() => {
-        logToFirebase('screen_view', {screen_name: 'HomeSearch'});
+        logToFirebase('screen_view', { screen_name: 'HomeSearch' });
     }, []);
 
     const saveHistory = useCallback(async (searchQuery, selectedKey) => {
@@ -183,7 +207,7 @@ const SearchScreen = ({navigation}) => {
             }
 
             if (item.go_where === 'CourseSimTab') {
-                navigation.navigate('Tabbar', {screen: 'CourseSimTab'});
+                navigation.navigate('Tabbar', { screen: 'CourseSimTab' });
                 return;
             }
 
@@ -231,15 +255,15 @@ const SearchScreen = ({navigation}) => {
     const handleClearHistory = useCallback(() => {
         trigger();
         Alert.alert(
-            t('清除搜索歷史？', {ns: 'home'}),
-            t('清除後將無法復原。', {ns: 'home'}),
+            t('清除搜索歷史？', { ns: 'home' }),
+            t('清除後將無法復原。', { ns: 'home' }),
             [
                 {
-                    text: t('取消', {ns: 'common'}),
+                    text: t('取消', { ns: 'common' }),
                     style: 'cancel',
                 },
                 {
-                    text: t('清除', {ns: 'home'}),
+                    text: t('清除', { ns: 'home' }),
                     style: 'destructive',
                     onPress: async () => {
                         trigger();
@@ -263,7 +287,7 @@ const SearchScreen = ({navigation}) => {
                 style={[
                     uiStyle.defaultText,
                     styles.sectionTitle,
-                    {color: black.main},
+                    { color: black.main },
                 ]}>
                 {title}
             </Text>
@@ -286,7 +310,7 @@ const SearchScreen = ({navigation}) => {
                     <View
                         style={[
                             styles.emptyIcon,
-                            {backgroundColor: tonal.primary15},
+                            { backgroundColor: tonal.primary15 },
                         ]}>
                         <Ionicons
                             name="sparkles-outline"
@@ -298,15 +322,15 @@ const SearchScreen = ({navigation}) => {
                         style={[
                             uiStyle.defaultText,
                             styles.emptyTitle,
-                            {color: black.main},
+                            { color: black.main },
                         ]}>
-                        {t('搜索關於澳大的一切', {ns: 'home'})}
+                        {t('搜索關於澳大的一切', { ns: 'home' })}
                     </Text>
                     <Text
                         style={[
                             uiStyle.defaultText,
                             styles.emptyDescription,
-                            {color: black.third},
+                            { color: black.third },
                         ]}>
                         {t('功能、服務與澳大網頁，一次找到。', {
                             ns: 'home',
@@ -319,13 +343,13 @@ const SearchScreen = ({navigation}) => {
         return (
             <>
                 {renderSectionHeader(
-                    t('最近搜索', {ns: 'home'}),
+                    t('最近搜索', { ns: 'home' }),
                     <Pressable
                         onPress={handleClearHistory}
                         hitSlop={scale(8)}
                         accessibilityRole="button"
-                        accessibilityLabel={t('清除全部', {ns: 'home'})}>
-                        {({pressed}) => (
+                        accessibilityLabel={t('清除全部', { ns: 'home' })}>
+                        {({ pressed }) => (
                             <Text
                                 style={[
                                     uiStyle.defaultText,
@@ -335,13 +359,13 @@ const SearchScreen = ({navigation}) => {
                                     },
                                     pressed && styles.pressedAction,
                                 ]}>
-                                {t('清除全部', {ns: 'home'})}
+                                {t('清除全部', { ns: 'home' })}
                             </Text>
                         )}
                     </Pressable>,
                 )}
                 <View
-                    style={[styles.card, {backgroundColor: white}, viewShadow]}>
+                    style={[styles.card, { backgroundColor: white }, viewShadow]}>
                     {history.map((record, index) => {
                         const selectedFeature = record.selectedKey
                             ? featureByKey.get(record.selectedKey)
@@ -352,7 +376,7 @@ const SearchScreen = ({navigation}) => {
                                 <Pressable
                                     onPress={() => handleHistoryPress(record)}
                                     accessibilityRole="button"
-                                    style={({pressed}) => [
+                                    style={({ pressed }) => [
                                         styles.historyRow,
                                         pressed && {
                                             backgroundColor: tonal.primary08,
@@ -378,7 +402,7 @@ const SearchScreen = ({navigation}) => {
                                             style={[
                                                 uiStyle.defaultText,
                                                 styles.rowTitle,
-                                                {color: black.main},
+                                                { color: black.main },
                                             ]}>
                                             {record.query}
                                         </Text>
@@ -388,7 +412,7 @@ const SearchScreen = ({navigation}) => {
                                                 style={[
                                                     uiStyle.defaultText,
                                                     styles.rowDescription,
-                                                    {color: black.third},
+                                                    { color: black.third },
                                                 ]}>
                                                 {selectedFeature.fn_name}
                                             </Text>
@@ -408,7 +432,7 @@ const SearchScreen = ({navigation}) => {
                                                 query: record.query,
                                             },
                                         )}
-                                        style={({pressed}) => [
+                                        style={({ pressed }) => [
                                             styles.removeButton,
                                             pressed && {
                                                 backgroundColor:
@@ -443,14 +467,14 @@ const SearchScreen = ({navigation}) => {
 
     const renderRecommended = () => (
         <View style={styles.recommendedSection}>
-            {renderSectionHeader(t('推薦服務', {ns: 'home'}))}
+            {renderSectionHeader(t('推薦服務', { ns: 'home' }))}
             <View style={styles.chips}>
                 {recommendedFeatures.map(item => (
                     <Pressable
                         key={item.key_name}
                         onPress={() => handleRecommendedPress(item)}
                         accessibilityRole="button"
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.chip,
                             {
                                 backgroundColor: pressed
@@ -468,7 +492,7 @@ const SearchScreen = ({navigation}) => {
                             style={[
                                 uiStyle.defaultText,
                                 styles.chipText,
-                                {color: themeColor},
+                                { color: themeColor },
                             ]}>
                             {item.fn_name}
                         </Text>
@@ -483,9 +507,9 @@ const SearchScreen = ({navigation}) => {
             <Pressable
                 onPress={() => executeFeature(item, query)}
                 accessibilityRole="button"
-                style={({pressed}) => [
+                style={({ pressed }) => [
                     styles.resultRow,
-                    pressed && {backgroundColor: tonal.primary08},
+                    pressed && { backgroundColor: tonal.primary08 },
                 ]}>
                 <FeatureIcon item={item} />
                 <View style={styles.rowText}>
@@ -494,7 +518,7 @@ const SearchScreen = ({navigation}) => {
                         style={[
                             uiStyle.defaultText,
                             styles.resultTitle,
-                            {color: black.main},
+                            { color: black.main },
                         ]}>
                         {item.fn_name}
                     </Text>
@@ -503,7 +527,7 @@ const SearchScreen = ({navigation}) => {
                         style={[
                             uiStyle.defaultText,
                             styles.rowDescription,
-                            {color: black.third},
+                            { color: black.third },
                         ]}>
                         {item.describe}
                     </Text>
@@ -518,7 +542,7 @@ const SearchScreen = ({navigation}) => {
                 <View
                     style={[
                         styles.divider,
-                        {backgroundColor: themeColorUltraLight},
+                        { backgroundColor: themeColorUltraLight },
                     ]}
                 />
             ) : null}
@@ -527,8 +551,8 @@ const SearchScreen = ({navigation}) => {
 
     const renderResults = () => (
         <>
-            {renderSectionHeader(t('相關服務', {ns: 'home'}))}
-            <View style={[styles.card, {backgroundColor: white}, viewShadow]}>
+            {renderSectionHeader(t('相關服務', { ns: 'home' }))}
+            <View style={[styles.card, { backgroundColor: white }, viewShadow]}>
                 {localResults.length > 0 ? (
                     localResults.map(renderResultRow)
                 ) : (
@@ -536,7 +560,7 @@ const SearchScreen = ({navigation}) => {
                         <View
                             style={[
                                 styles.emptyIcon,
-                                {backgroundColor: tonal.primary15},
+                                { backgroundColor: tonal.primary15 },
                             ]}>
                             <Ionicons
                                 name="search-outline"
@@ -548,15 +572,15 @@ const SearchScreen = ({navigation}) => {
                             style={[
                                 uiStyle.defaultText,
                                 styles.noResultsTitle,
-                                {color: black.main},
+                                { color: black.main },
                             ]}>
-                            {t('沒有找到相關服務', {ns: 'home'})}
+                            {t('沒有找到相關服務', { ns: 'home' })}
                         </Text>
                         <Text
                             style={[
                                 uiStyle.defaultText,
                                 styles.emptyDescription,
-                                {color: black.third},
+                                { color: black.third },
                             ]}>
                             {t('試試其他關鍵詞，或搜索澳大網頁。', {
                                 ns: 'home',
@@ -568,7 +592,7 @@ const SearchScreen = ({navigation}) => {
             <Pressable
                 onPress={handleWebSearch}
                 accessibilityRole="button"
-                style={({pressed}) => [
+                style={({ pressed }) => [
                     styles.webSearchButton,
                     {
                         backgroundColor: pressed
@@ -579,7 +603,7 @@ const SearchScreen = ({navigation}) => {
                 <View
                     style={[
                         styles.webSearchIcon,
-                        {backgroundColor: themeColor},
+                        { backgroundColor: themeColor },
                     ]}>
                     <Ionicons
                         name="globe-outline"
@@ -592,7 +616,7 @@ const SearchScreen = ({navigation}) => {
                     style={[
                         uiStyle.defaultText,
                         styles.webSearchText,
-                        {color: themeColor},
+                        { color: themeColor },
                     ]}>
                     {t('在澳大網頁搜索「{{query}}」', {
                         ns: 'home',
@@ -636,17 +660,17 @@ const SearchScreen = ({navigation}) => {
                         value={query}
                         onChangeText={setQuery}
                         onSubmitEditing={handleWebSearch}
-                        placeholder={t('輸入關鍵詞', {ns: 'home'})}
+                        placeholder={t('輸入關鍵詞', { ns: 'home' })}
                         placeholderTextColor={black.third}
                         selectionColor={themeColor}
                         returnKeyType="search"
                         autoCapitalize="none"
                         autoCorrect={false}
-                        accessibilityLabel={t('搜索', {ns: 'common'})}
+                        accessibilityLabel={t('搜索', { ns: 'common' })}
                         style={[
                             uiStyle.defaultText,
                             styles.input,
-                            {color: black.main},
+                            { color: black.main },
                         ]}
                     />
                     {query.length > 0 ? (
@@ -661,7 +685,7 @@ const SearchScreen = ({navigation}) => {
                             accessibilityLabel={t('清除搜索內容', {
                                 ns: 'home',
                             })}
-                            style={({pressed}) => [
+                            style={({ pressed }) => [
                                 styles.clearInputButton,
                                 pressed && {
                                     backgroundColor: tonal.primary15,
