@@ -379,7 +379,7 @@ const FilterPanel = ({
         : [];
 
     const renderRecommendationFilter = () => (
-        <View style={{ width: '100%', alignItems: 'center', }}>
+        <View style={{ width: '100%', alignItems: 'center', marginTop: verticalScale(2) }}>
             <TouchableScale
                 activeScale={0.96}
                 style={{

@@ -4,11 +4,13 @@ import React, {
     useRef,
     useCallback,
     useContext,
+    useMemo,
 } from 'react';
 import {
     View,
     Text,
     TouchableOpacity,
+    Pressable,
     Alert,
     StyleSheet,
     TextInput,
@@ -37,7 +39,9 @@ import {
     BottomSheetTextInput,
     BottomSheetScrollView,
     BottomSheetFlatList,
+    useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
+import { FlashList } from '@shopify/flash-list';
 import { ScrollView } from 'react-native-gesture-handler';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
@@ -61,6 +65,7 @@ import { useCoursePlan } from '../course/context/CoursePlanContext';
 import { getSlotKey } from '../course/hooks/useConflict';
 import { normalizeImportText } from '../course/utils/parseImportData';
 import AddCourseFab from '../course/components/AddCourseFab';
+import { getReplacementCourses } from './utils/replacementCourses';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
@@ -101,14 +106,16 @@ const COURSE_CARD_SPRING = {
 };
 
 /**
- * 課表課程卡片選單（@react-native-menu/menu）。
+ * 共用課程卡片選單（@react-native-menu/menu）。
  * 原生 UIButton 會吃掉子層 Pressable 的 pressIn，故改以選單開合驅動縮放回饋。
  */
-function TimetableCourseMenuCard({
+function CourseActionMenuCard({
     actions,
     onPressAction,
-    onPress,
-    backgroundColor,
+    onOpen,
+    menuStyle,
+    cardStyle,
+    accessibilityLabel,
     children,
 }) {
     const cardScale = useSharedValue(1);
@@ -120,34 +127,51 @@ function TimetableCourseMenuCard({
         <MenuView
             actions={actions}
             onPressAction={onPressAction}
+            accessibilityLabel={accessibilityLabel}
             shouldOpenOnLongPress={false}
             onOpenMenu={() => {
                 cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
-                onPress?.();
+                onOpen?.();
             }}
             onCloseMenu={() => {
                 cardScale.value = withSpring(1, COURSE_CARD_SPRING);
             }}
-            style={{
-                alignSelf: 'center',
-                width: COURSE_CARD_WIDTH,
-                margin: COURSE_CARD_MARGIN,
-            }}>
-            <Animated.View
-                style={[
-                    {
-                        width: COURSE_CARD_WIDTH,
-                        backgroundColor,
-                        borderRadius: scale(10),
-                        padding: scale(5),
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    },
-                    animatedStyle,
-                ]}>
+            style={menuStyle}>
+            <Animated.View style={[cardStyle, animatedStyle]}>
                 {children}
             </Animated.View>
         </MenuView>
+    );
+}
+
+/** 課表欄內使用的固定尺寸課程卡片選單。 */
+function TimetableCourseMenuCard({
+    actions,
+    onPressAction,
+    onPress,
+    backgroundColor,
+    children,
+}) {
+    return (
+        <CourseActionMenuCard
+            actions={actions}
+            onPressAction={onPressAction}
+            onOpen={onPress}
+            menuStyle={{
+                alignSelf: 'center',
+                width: COURSE_CARD_WIDTH,
+                margin: COURSE_CARD_MARGIN,
+            }}
+            cardStyle={{
+                width: COURSE_CARD_WIDTH,
+                backgroundColor,
+                borderRadius: scale(10),
+                padding: scale(5),
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+            {children}
+        </CourseActionMenuCard>
     );
 }
 
@@ -160,6 +184,7 @@ function CourseSim({ route, navigation }) {
         planList,
         planSlots,
         planCourseCodes,
+        commitPlan,
         addCourse,
         addAllSections,
         dropCourse,
@@ -181,11 +206,18 @@ function CourseSim({ route, navigation }) {
     const [showTimePicker, setShowTimePicker] = useState(false);
 
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
+    const [bottomSheetMode, setBottomSheetMode] = useState('search');
+    const [replacementTarget, setReplacementTarget] = useState(null);
+    const [replacementCourseCode, setReplacementCourseCode] = useState(null);
+    const [replacementSearchText, setReplacementSearchText] = useState('');
 
     // ref
     const verScroll = useRef();
     const textSearchRef = useRef();
     const bottomSheetRef = useRef();
+    const replacementListScrollable = useBottomSheetScrollableCreator({
+        focusHook: useFocusEffect,
+    });
 
     const { theme } = useTheme();
     const {
@@ -339,6 +371,23 @@ function CourseSim({ route, navigation }) {
     });
 
     const { i18n } = useTranslation();
+    const replacementResult = useMemo(
+        () =>
+            getReplacementCourses({
+                targetSlot: replacementTarget,
+                planSlots,
+                planList,
+                courseTimeList,
+                coursePlanList,
+            }),
+        [
+            replacementTarget,
+            planSlots,
+            planList,
+            courseTimeList,
+            coursePlanList,
+        ],
+    );
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'courseSim' });
@@ -359,6 +408,9 @@ function CourseSim({ route, navigation }) {
             // 如果有check傳參
             if (route.params?.check) {
                 const { check } = route.params;
+                setBottomSheetMode('search');
+                setReplacementTarget(null);
+                setReplacementCourseCode(null);
                 if (check.length > 0) {
                     setSearchText(check);
                 }
@@ -389,6 +441,101 @@ function CourseSim({ route, navigation }) {
                 section: course.Section,
             }),
         );
+    };
+
+    /** 建立所有課程 Menu 共用的四個查詢選項。 */
+    const getCourseInfoMenuActions = () => [
+        {
+            id: 'wiki',
+            title: `${t('寫', { ns: 'catalog' })} ARK Wiki !!!`,
+            image: Platform.select({
+                ios: 'book',
+                android: 'ic_menu_agenda',
+            }),
+            imageColor: themeColor,
+            titleColor: themeColor,
+        },
+        {
+            id: 'what2reg',
+            title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
+            image: Platform.select({
+                ios: 'star',
+                android: 'btn_star_big_on',
+            }),
+            imageColor: black.third,
+            titleColor: black.third,
+        },
+        {
+            id: 'official',
+            title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
+            image: Platform.select({
+                ios: 'graduationcap',
+                android: 'ic_menu_info_details',
+            }),
+            imageColor: black.third,
+            titleColor: black.third,
+        },
+        {
+            id: 'section',
+            title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
+            image: Platform.select({
+                ios: 'list.bullet',
+                android: 'ic_menu_sort_by_size',
+            }),
+            imageColor: black.third,
+            titleColor: black.third,
+        },
+    ];
+
+    /**
+     * 處理所有課程 Menu 共用的查詢選項。
+     *
+     * @param {string} actionId Menu action id
+     * @param {Object} course 課程或課節資料
+     * @returns {boolean} 是否已處理
+     */
+    const handleCourseInfoMenuAction = (actionId, course) => {
+        const courseCode = course['Course Code'];
+        const profName = course['Teacher Information'];
+
+        switch (actionId) {
+            case 'wiki': {
+                let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
+                if (profName) {
+                    URL = ARK_WIKI_SEARCH + encodeURIComponent(profName);
+                    logToFirebase('checkCourse', {
+                        courseCode,
+                        profName,
+                        action: 'ark-wiki',
+                    });
+                } else {
+                    logToFirebase('checkCourse', {
+                        courseCode,
+                        action: 'ark-wiki',
+                    });
+                }
+                openLink(URL);
+                return true;
+            }
+            case 'what2reg': {
+                const URI =
+                    getCurrentUmehHost() +
+                    '/reviews/' +
+                    encodeURIComponent(courseCode) +
+                    '/' +
+                    encodeURIComponent(lodash.deburr(profName || ''));
+                openLink(URI);
+                return true;
+            }
+            case 'official':
+                openLink(OFFICIAL_COURSE_SEARCH + courseCode);
+                return true;
+            case 'section':
+                navigation.navigate('LocalCourse', courseCode);
+                return true;
+            default:
+                return false;
+        }
     };
 
     // 渲染一列（一天）的課表
@@ -542,47 +689,17 @@ function CourseSim({ route, navigation }) {
 
         const hasDuplicate =
             lodash.countBy(planList, 'Course Code')[course['Course Code']] > 1;
-        // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
         const courseMenuActions = [
+            ...getCourseInfoMenuActions(),
             {
-                id: 'wiki',
-                title: `${t('寫', { ns: 'catalog' })} ARK Wiki !!!`,
+                id: 'replacement',
+                title: t('查看平替', { ns: 'timetable' }),
                 image: Platform.select({
-                    ios: 'book',
-                    android: 'ic_menu_agenda',
+                    ios: 'arrow.triangle.2.circlepath',
+                    android: 'ic_menu_rotate',
                 }),
                 imageColor: themeColor,
                 titleColor: themeColor,
-            },
-            {
-                id: 'what2reg',
-                title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-                image: Platform.select({
-                    ios: 'star',
-                    android: 'btn_star_big_on',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
-            },
-            {
-                id: 'official',
-                title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-                image: Platform.select({
-                    ios: 'graduationcap',
-                    android: 'ic_menu_info_details',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
-            },
-            {
-                id: 'section',
-                title: `${t('查', { ns: 'catalog' })} ${t('Section / 老師', { ns: 'catalog' })}`,
-                image: Platform.select({
-                    ios: 'list.bullet',
-                    android: 'ic_menu_sort_by_size',
-                }),
-                imageColor: black.third,
-                titleColor: black.third,
             },
             ...(hasDuplicate
                 ? [
@@ -623,44 +740,14 @@ function CourseSim({ route, navigation }) {
 
         const handleCourseMenuAction = event => {
             trigger();
-            switch (event.nativeEvent.event) {
-                case 'wiki': {
-                    const courseCode = course['Course Code'];
-                    const profName = course['Teacher Information'];
-                    let URL = ARK_WIKI_SEARCH + encodeURIComponent(courseCode);
-                    if (profName) {
-                        URL = ARK_WIKI_SEARCH + encodeURIComponent(profName);
-                        logToFirebase('checkCourse', {
-                            courseCode,
-                            profName,
-                            action: 'ark-wiki',
-                        });
-                    } else {
-                        logToFirebase('checkCourse', {
-                            courseCode,
-                            action: 'ark-wiki',
-                        });
-                    }
-                    openLink(URL);
-                    break;
-                }
-                case 'what2reg': {
-                    const courseCode = course['Course Code'];
-                    const profName = course['Teacher Information'];
-                    const URI =
-                        getCurrentUmehHost() +
-                        '/reviews/' +
-                        encodeURIComponent(courseCode) +
-                        '/' +
-                        encodeURIComponent(lodash.deburr(profName));
-                    openLink(URI);
-                    break;
-                }
-                case 'official':
-                    openLink(OFFICIAL_COURSE_SEARCH + course['Course Code']);
-                    break;
-                case 'section':
-                    navigation.navigate('LocalCourse', course['Course Code']);
+            const actionId = event.nativeEvent.event;
+            if (handleCourseInfoMenuAction(actionId, course)) {
+                return;
+            }
+
+            switch (actionId) {
+                case 'replacement':
+                    openReplacementSearch(course);
                     break;
                 case 'del-all-sections':
                     Alert.alert(
@@ -828,6 +915,11 @@ function CourseSim({ route, navigation }) {
             Keyboard.dismiss();
         }
 
+        setBottomSheetMode('search');
+        setReplacementTarget(null);
+        setReplacementCourseCode(null);
+        setReplacementSearchText('');
+
         if (planSlots.length > 0) {
             bottomSheetRef.current?.snapToIndex(1);
         } else {
@@ -836,6 +928,27 @@ function CourseSim({ route, navigation }) {
 
         setHasOpenCourseSearch(true);
         verScroll.current?.scrollTo({ y: 0 });
+    };
+
+    /** 從課程卡片開啟平替課程 sheet。 */
+    const openReplacementSearch = course => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+        }
+
+        setBottomSheetMode('replacement');
+        setReplacementTarget(course);
+        setReplacementCourseCode(null);
+        setReplacementSearchText('');
+        setHasOpenCourseSearch(true);
+        bottomSheetRef.current?.snapToIndex(2);
+        verScroll.current?.scrollTo({ y: 0 });
+
+        logToFirebase('checkCourseReplacement', {
+            courseCode: course['Course Code'],
+            section: course.Section,
+            day: course.Day,
+        });
     };
 
     const handleClearPlan = useCallback(() => {
@@ -863,6 +976,75 @@ function CourseSim({ route, navigation }) {
             Keyboard.dismiss();
         }
         bottomSheetRef.current?.close();
+    };
+
+    /**
+     * 確認後以候選 Section 替換原 Section。
+     *
+     * @param {Object} courseOption 候選課程
+     * @param {Object} sectionOption 候選 Section 與完整課節
+     */
+    const confirmReplacement = (courseOption, sectionOption) => {
+        const courseInfo = sectionOption.slots[0];
+        if (!replacementTarget || !courseInfo) {
+            return;
+        }
+
+        Alert.alert(
+            t('替換課程', { ns: 'timetable' }),
+            t('替換課程確認', {
+                ns: 'timetable',
+                fromCode: replacementTarget['Course Code'],
+                fromSection: replacementTarget.Section,
+                toCode: courseOption['Course Code'],
+                toSection: sectionOption.section,
+            }),
+            [
+                {
+                    text: t('取消', { ns: 'timetable' }),
+                    style: 'cancel',
+                },
+                {
+                    text: t('替換', { ns: 'timetable' }),
+                    onPress: () => {
+                        trigger();
+                        commitPlan([
+                            ...lodash.filter(
+                                planList,
+                                item =>
+                                    !(
+                                        item['Course Code'] ===
+                                            replacementTarget['Course Code'] &&
+                                        item.Section ===
+                                            replacementTarget.Section
+                                    ),
+                            ),
+                            {
+                                'Course Code': courseInfo['Course Code'],
+                                Section: courseInfo.Section,
+                            },
+                        ]);
+                        Toast.show(
+                            t('已替換課程', {
+                                ns: 'timetable',
+                                fromCode: replacementTarget['Course Code'],
+                                toCode: courseOption['Course Code'],
+                                section: sectionOption.section,
+                            }),
+                        );
+                        logToFirebase('replaceCourse', {
+                            fromCourseCode:
+                                replacementTarget['Course Code'],
+                            fromSection: replacementTarget.Section,
+                            toCourseCode: courseOption['Course Code'],
+                            toSection: sectionOption.section,
+                        });
+                        bottomSheetRef.current?.close();
+                    },
+                },
+            ],
+            { cancelable: true },
+        );
     };
 
     /**
@@ -1281,6 +1463,472 @@ E11-0000
     };
 
     /**
+     * 一般加課與查看平替共用的 BottomSheet 搜索列。
+     *
+     * @param {Object} options 搜索列設定
+     * @returns {React.ReactElement} 搜索列
+     */
+    const renderBottomSheetSearchBar = ({
+        inputRef,
+        value,
+        onChangeText,
+        placeholder,
+        showBack = false,
+        onBackPress,
+        showClose = true,
+    }) => (
+        <View
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+            }}>
+            <View
+                style={{
+                    flex: 1,
+                    borderColor: themeColor,
+                    backgroundColor: white,
+                    height: verticalScale(35),
+                    borderWidth: scale(1),
+                    borderRadius: scale(5),
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                }}>
+                <Ionicons
+                    name="search"
+                    size={scale(20)}
+                    color={black.third}
+                    style={{
+                        opacity: 0.4,
+                        position: 'absolute',
+                        left: scale(10),
+                    }}
+                />
+                {showBack ? (
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('返回', {
+                            ns: 'timetable',
+                        })}
+                        style={({ pressed }) => ({
+                            borderWidth: scale(1),
+                            borderRadius: scale(5),
+                            borderColor: themeColor,
+                            backgroundColor: pressed
+                                ? tonal.primary30
+                                : white,
+                            padding: scale(3),
+                            position: 'absolute',
+                            left: scale(40),
+                            zIndex: 999,
+                        })}
+                        onPress={() => {
+                            trigger();
+                            onBackPress?.();
+                        }}>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: themeColor,
+                            }}>
+                            {t('返回', { ns: 'timetable' })}
+                        </Text>
+                    </Pressable>
+                ) : null}
+                <BottomSheetTextInput
+                    ref={inputRef}
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.main,
+                        fontSize: scale(13),
+                        padding: scale(5),
+                        height: '100%',
+                        flex: 1,
+                        textAlign: 'center',
+                        textAlignVertical: 'center',
+                    }}
+                    onChangeText={onChangeText}
+                    value={value}
+                    selectTextOnFocus
+                    placeholder={placeholder}
+                    placeholderTextColor={black.third}
+                    returnKeyType="search"
+                    selectionColor={themeColor}
+                    blurOnSubmit
+                    onSubmitEditing={() => Keyboard.dismiss()}
+                    clearButtonMode="always"
+                    autoCapitalize="characters"
+                />
+            </View>
+            {showClose ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('取消', {
+                        ns: 'timetable',
+                    })}
+                    hitSlop={scale(8)}
+                    style={({ pressed }) => ({
+                        marginLeft: scale(8),
+                        backgroundColor: pressed
+                            ? tonal.primary30
+                            : tonal.primary15,
+                        borderRadius: scale(8),
+                        padding: scale(6),
+                    })}
+                    onPress={closeCourseSearch}>
+                    <Ionicons
+                        name="close"
+                        size={scale(18)}
+                        color={themeColor}
+                    />
+                </Pressable>
+            ) : null}
+        </View>
+    );
+
+    /** 渲染由課程卡片開啟的平替課程列表。 */
+    const renderReplacementSearch = () => {
+        const filteredCourses = replacementSearchText.trim()
+            ? replacementResult.courses.filter(course =>
+                courseMatchesSearch(course, replacementSearchText),
+            )
+            : replacementResult.courses;
+        const selectedCourse = replacementResult.courses.find(
+            item => item['Course Code'] === replacementCourseCode,
+        );
+        const listData = selectedCourse
+            ? selectedCourse.sections
+            : filteredCourses;
+
+        const renderReplacementItem = ({ item }) => {
+            if (!selectedCourse) {
+                return (
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`${item['Course Code']} ${t('個可選Section', {
+                            ns: 'timetable',
+                            count: item.sections.length,
+                        })}`}
+                        style={({ pressed }) => [
+                            s.courseCard,
+                            {
+                                marginHorizontal: scale(10),
+                                padding: scale(12),
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            setReplacementCourseCode(item['Course Code']);
+                        }}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <View style={{ flex: 1 }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: themeColor,
+                                        fontSize: scale(16),
+                                        fontWeight: 'bold',
+                                    }}>
+                                    {item['Course Code']}
+                                </Text>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.second,
+                                        fontSize: scale(13),
+                                    }}>
+                                    {item['Course Title']}
+                                </Text>
+                                {item['Course Title Chi'] ? (
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            fontSize: scale(12),
+                                        }}>
+                                        {item['Course Title Chi']}
+                                    </Text>
+                                ) : null}
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: themeColor,
+                                        fontSize: scale(12),
+                                        marginTop: verticalScale(4),
+                                    }}>
+                                    {t('個可選Section', {
+                                        ns: 'timetable',
+                                        count: item.sections.length,
+                                    })}
+                                </Text>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                color={black.third}
+                                size={scale(18)}
+                            />
+                        </View>
+                    </Pressable>
+                );
+            }
+
+            const sortedSlots = daySort(item.slots);
+            const courseInfo = item.slots[0];
+            const replacementMenuActions = [
+                ...getCourseInfoMenuActions(),
+                {
+                    id: 'replace-course',
+                    title: `${t('替換', { ns: 'timetable' })} ${selectedCourse['Course Code']}-${item.section}`,
+                    image: Platform.select({
+                        ios: 'arrow.left.arrow.right',
+                        android: 'ic_menu_rotate',
+                    }),
+                    imageColor: themeColor,
+                    titleColor: themeColor,
+                },
+            ];
+
+            return (
+                <CourseActionMenuCard
+                    accessibilityLabel={`${selectedCourse['Course Code']}-${item.section}`}
+                    actions={replacementMenuActions}
+                    onOpen={() => trigger('rigid')}
+                    onPressAction={event => {
+                        trigger();
+                        const actionId = event.nativeEvent.event;
+                        if (handleCourseInfoMenuAction(actionId, courseInfo)) {
+                            return;
+                        }
+                        if (actionId === 'replace-course') {
+                            confirmReplacement(selectedCourse, item);
+                        }
+                    }}
+                    menuStyle={{
+                        alignSelf: 'stretch',
+                        marginHorizontal: scale(10),
+                        marginVertical: scale(3),
+                    }}
+                    cardStyle={[
+                        s.courseCard,
+                        {
+                            margin: 0,
+                            padding: scale(12),
+                            backgroundColor: tonal.primary15,
+                        },
+                    ]}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                        }}>
+                        <View style={{ flex: 1 }}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: themeColor,
+                                    fontSize: scale(16),
+                                    fontWeight: 'bold',
+                                }}>
+                                {`${selectedCourse['Course Code']}-${item.section}`}
+                            </Text>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontSize: scale(13),
+                                    marginBottom: verticalScale(4),
+                                }}>
+                                {item.slots[0]?.['Teacher Information']}
+                            </Text>
+                            {sortedSlots.map(slot => (
+                                <Text
+                                    key={getSlotKey(slot)}
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color:
+                                            slot.Day ===
+                                                replacementResult.window?.day
+                                                ? themeColor
+                                                : black.third,
+                                        fontSize: scale(12),
+                                        fontWeight:
+                                            slot.Day ===
+                                                replacementResult.window?.day
+                                                ? 'bold'
+                                                : 'normal',
+                                    }}>
+                                    {`${slot.Day} ${slot['Time From']} ~ ${slot['Time To']}`}
+                                </Text>
+                            ))}
+                        </View>
+                        <Ionicons
+                            name="swap-horizontal"
+                            color={themeColor}
+                            size={scale(20)}
+                        />
+                    </View>
+                </CourseActionMenuCard>
+            );
+        };
+
+        return (
+            <View style={{ width: '100%', height: '100%' }}>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingHorizontal: scale(10),
+                        paddingBottom: verticalScale(8),
+                    }}>
+                    {selectedCourse ? (
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('返回平替課程', {
+                                ns: 'timetable',
+                            })}
+                            hitSlop={scale(8)}
+                            style={({ pressed }) => ({
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                                borderRadius: scale(8),
+                                padding: scale(7),
+                            })}
+                            onPress={() => {
+                                trigger();
+                                setReplacementCourseCode(null);
+                            }}>
+                            <Ionicons
+                                name="chevron-back"
+                                size={scale(18)}
+                                color={themeColor}
+                            />
+                        </Pressable>
+                    ) : null}
+
+                    <View
+                        style={{
+                            flex: 1,
+                            alignItems: 'center',
+                            paddingHorizontal: scale(8),
+                        }}>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: black.main,
+                                fontSize: scale(16),
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                            }}>
+                            {selectedCourse
+                                ? selectedCourse['Course Code']
+                                : t('查看平替', { ns: 'timetable' })}
+                        </Text>
+                        {replacementTarget && replacementResult.window ? (
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(11),
+                                    textAlign: 'center',
+                                }}>
+                                {`${replacementTarget['Course Code']}-${replacementTarget.Section} · ${replacementResult.window.day} ${replacementResult.window.from} ~ ${replacementResult.window.to}`}
+                            </Text>
+                        ) : null}
+                    </View>
+
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('取消', {
+                            ns: 'timetable',
+                        })}
+                        hitSlop={scale(8)}
+                        style={({ pressed }) => ({
+                            backgroundColor: pressed
+                                ? tonal.primary30
+                                : tonal.primary15,
+                            borderRadius: scale(8),
+                            padding: scale(7),
+                        })}
+                        onPress={closeCourseSearch}>
+                        <Ionicons
+                            name="close"
+                            size={scale(18)}
+                            color={themeColor}
+                        />
+                    </Pressable>
+                </View>
+
+                {!selectedCourse ? (
+                    <View
+                        style={{
+                            paddingHorizontal: scale(10),
+                            paddingBottom: verticalScale(8),
+                        }}>
+                        {renderBottomSheetSearchBar({
+                            value: replacementSearchText,
+                            onChangeText: setReplacementSearchText,
+                            placeholder: t('搜索平替課程', {
+                                ns: 'timetable',
+                            }),
+                            showClose: false,
+                        })}
+                    </View>
+                ) : null}
+
+                <FlashList
+                    key={
+                        selectedCourse
+                            ? `replacement-${selectedCourse['Course Code']}`
+                            : 'replacement-courses'
+                    }
+                    data={listData}
+                    keyExtractor={item =>
+                        selectedCourse
+                            ? item.section
+                            : item['Course Code']
+                    }
+                    renderItem={renderReplacementItem}
+                    renderScrollComponent={replacementListScrollable}
+                    contentContainerStyle={{
+                        paddingBottom: tabBarHeight + verticalScale(30),
+                    }}
+                    ListEmptyComponent={
+                        <View
+                            style={{
+                                paddingHorizontal: scale(24),
+                                paddingVertical: verticalScale(30),
+                            }}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(13),
+                                    textAlign: 'center',
+                                }}>
+                                {replacementSearchText.trim()
+                                    ? t('沒有符合搜索的平替課程', {
+                                        ns: 'timetable',
+                                    })
+                                    : t('沒有可用的平替課程', {
+                                        ns: 'timetable',
+                                    })}
+                            </Text>
+                        </View>
+                    }
+                />
+            </View>
+        );
+    };
+
+    /**
      * 渲染課程搜索界面
      */
     const renderCourseSearch = () => {
@@ -1306,104 +1954,24 @@ E11-0000
         return (
             <View style={{ width: '100%', padding: scale(10) }}>
                 {/* 搜索列：輸入框 + 右側關閉（FAB 被 sheet 蓋住時的關閉入口） */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                    <View
-                        style={{
-                            flex: 1,
-                            borderColor: themeColor,
-                            backgroundColor: white,
-                            height: verticalScale(35),
-                            borderWidth: scale(1),
-                            borderRadius: scale(5),
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        <Ionicons
-                            name="search"
-                            size={scale(20)}
-                            color={black.third}
-                            style={{
-                                opacity: 0.4,
-                                position: 'absolute',
-                                left: scale(10),
-                            }}
-                        />
-                        {perSearchText && (
-                            <TouchableOpacity
-                                style={{
-                                    borderWidth: scale(1),
-                                    borderRadius: scale(5),
-                                    borderColor: themeColor,
-                                    padding: scale(3),
-                                    position: 'absolute',
-                                    left: scale(40),
-                                    zIndex: 999,
-                                }}
-                                onPress={() => {
-                                    trigger();
-                                    setSearchText(perSearchText);
-                                    setPerSearchText(null);
-                                }}>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: themeColor,
-                                    }}>
-                                    Back
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                        <BottomSheetTextInput
-                            ref={textSearchRef}
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.main,
-                                fontSize: scale(13),
-                                padding: scale(5),
-                                height: '100%',
-                                flex: 1,
-                                textAlign: 'center',
-                                textAlignVertical: 'center',
-                            }}
-                            onChangeText={text => {
-                                setSearchText(text);
-                                if (text.length === 0) {
-                                    setPerSearchText(null);
-                                }
-                            }}
-                            value={searchText}
-                            selectTextOnFocus
-                            placeholder={t('搜索課程：ECE, 電氣, AIM...', {
-                                ns: 'timetable',
-                            })}
-                            placeholderTextColor={black.third}
-                            returnKeyType="search"
-                            selectionColor={themeColor}
-                            blurOnSubmit
-                            onSubmitEditing={() => Keyboard.dismiss()}
-                            clearButtonMode="always"
-                        />
-                    </View>
-                    <TouchableScale
-                        style={{
-                            marginLeft: scale(8),
-                            backgroundColor: tonal.primary15,
-                            borderRadius: scale(8),
-                            padding: scale(6),
-                        }}
-                        onPress={closeCourseSearch}
-                        hitSlop={scale(8)}>
-                        <Ionicons
-                            name="close"
-                            size={scale(18)}
-                            color={themeColor}
-                        />
-                    </TouchableScale>
-                </View>
+                {renderBottomSheetSearchBar({
+                    inputRef: textSearchRef,
+                    value: searchText,
+                    onChangeText: text => {
+                        setSearchText(text);
+                        if (text.length === 0) {
+                            setPerSearchText(null);
+                        }
+                    },
+                    placeholder: t('搜索課程：ECE, 電氣, AIM...', {
+                        ns: 'timetable',
+                    }),
+                    showBack: Boolean(perSearchText),
+                    onBackPress: () => {
+                        setSearchText(perSearchText);
+                        setPerSearchText(null);
+                    },
+                })}
 
                 <BottomSheetScrollView
                     contentContainerStyle={{ paddingBottom: tabBarHeight }}>
@@ -1769,6 +2337,44 @@ E11-0000
     };
 
     /**
+     * 一般加課與平替列表共用的課程文字匹配。
+     *
+     * @param {Object} course 課程摘要
+     * @param {string} inputText 搜索文字
+     * @returns {boolean} 是否符合搜索
+     */
+    function courseMatchesSearch(course, inputText) {
+        const normalizedText = inputText?.trim();
+        if (!normalizedText) {
+            return true;
+        }
+
+        const upperInputText = normalizedText.toUpperCase();
+        const traditionalInputText = converter(normalizedText);
+
+        return (
+            String(course?.['Course Code'] || '')
+                .toUpperCase()
+                .includes(upperInputText) ||
+            String(course?.['Course Title'] || '')
+                .toUpperCase()
+                .includes(upperInputText) ||
+            String(course?.['Course Title Chi'] || '').includes(
+                normalizedText,
+            ) ||
+            String(course?.['Course Title Chi'] || '').includes(
+                traditionalInputText,
+            ) ||
+            String(course?.['Teacher Information'] || '')
+                .toUpperCase()
+                .includes(upperInputText) ||
+            String(course?.['Offering Department'] || '')
+                .toUpperCase()
+                .includes(upperInputText)
+        );
+    }
+
+    /**
      * 返回搜索候選所需的課程列表
      *
      * @param {string} inputText - 用戶輸入的搜索文本
@@ -1776,19 +2382,9 @@ E11-0000
      * @returns {Array} - 符合搜索條件的課程列表
      */
     function handleSearchFilterCourse(inputText) {
-        const upperInputText = inputText?.toUpperCase();
-
-        return lodash.filter(coursePlanList, itm => {
-            return (
-                itm['Course Code'].toUpperCase().includes(upperInputText) ||
-                itm['Course Title'].toUpperCase().includes(upperInputText) ||
-                itm['Course Title Chi'].includes(inputText) ||
-                itm['Course Title Chi'].includes(converter(inputText)) ||
-                itm['Teacher Information'].includes(upperInputText) ||
-                (itm['Offering Department'] &&
-                    itm['Offering Department'].includes(upperInputText))
-            );
-        });
+        return lodash.filter(coursePlanList, course =>
+            courseMatchesSearch(course, inputText),
+        );
     }
 
     const renderReminder = () => {
@@ -1873,8 +2469,11 @@ E11-0000
                     if (hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);
                     }
+                    setReplacementCourseCode(null);
                 }}>
-                {renderCourseSearch()}
+                {bottomSheetMode === 'replacement'
+                    ? renderReplacementSearch()
+                    : renderCourseSearch()}
             </CustomBottomSheet>
         </View>
     );
