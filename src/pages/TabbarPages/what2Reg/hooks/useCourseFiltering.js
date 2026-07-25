@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import lodash from 'lodash';
 import { defaultTimeFilter } from '../constants/options';
+import { getSectionConflicts } from '../../course/hooks/useConflict';
 
 const TIME_STRING_PATTERN = /^(\d{1,2}):(\d{2})(?::\d{2})?$/;
 
@@ -24,6 +25,42 @@ export const parseTimeToMinutes = time => {
 };
 
 /**
+ * 判斷某課程是否至少有一個可安全排入目前課表的 Section。
+ * 已加入的課程，以及時間未完整公佈的 Section，均不列入建議。
+ */
+export const isCourseRecommended = ({
+    courseCode,
+    courseSlots = [],
+    planCourseCodeSet = new Set(),
+    planSlots = [],
+}) => {
+    if (!courseCode || planCourseCodeSet.has(courseCode)) {
+        return false;
+    }
+
+    const slotsBySection = lodash.groupBy(
+        courseSlots.filter(slot => slot.Section),
+        'Section',
+    );
+
+    return Object.values(slotsBySection).some(sectionSlots => {
+        const hasCompleteSchedule = sectionSlots.length > 0 &&
+            sectionSlots.every(slot => {
+                const timeFrom = parseTimeToMinutes(slot['Time From']);
+                const timeTo = parseTimeToMinutes(slot['Time To']);
+
+                return Boolean(slot.Day) &&
+                    timeFrom !== null &&
+                    timeTo !== null &&
+                    timeFrom < timeTo;
+            });
+
+        return hasCompleteSchedule &&
+            getSectionConflicts(sectionSlots, planSlots).length === 0;
+    });
+};
+
+/**
  * 管理課程篩選的衍生資料
  * 注意：此 Hook 僅負責計算，不直接寫入 state。
  */
@@ -34,6 +71,9 @@ const useCourseFiltering = ({
     filterOptions,
     coursePlanTimeData,
     timeFilter = defaultTimeFilter,
+    recommendationOnly = false,
+    planCourseCodes = [],
+    planSlots = [],
 }) => {
     const offerCourseList = useMemo(() => {
         return courseMode === 'ad' ? coursePlanData?.Courses || [] : offerCoursesData?.Courses || [];
@@ -137,7 +177,7 @@ const useCourseFiltering = ({
     // 預選課資料沒有上課時間，故時段篩選只在 Add Drop 模式生效
     const isTimeFilterActive = courseMode === 'ad' && Boolean(timeFilter?.day);
 
-    const filterCourseList = useMemo(() => {
+    const timeFilteredCourseList = useMemo(() => {
         if (!isTimeFilterActive) {
             return scopedCourseList;
         }
@@ -167,6 +207,36 @@ const useCourseFiltering = ({
         });
     }, [isTimeFilterActive, scopedCourseList, slotsByCourseCode, timeFilter]);
 
+    // 加課建議只適用於有 Section 時間資料的 Add Drop 模式
+    const isRecommendationFilterActive = courseMode === 'ad' && recommendationOnly;
+    const planCourseCodeSet = useMemo(
+        () => new Set(planCourseCodes),
+        [planCourseCodes],
+    );
+
+    const filterCourseList = useMemo(() => {
+        if (!isRecommendationFilterActive) {
+            return timeFilteredCourseList;
+        }
+
+        return timeFilteredCourseList.filter(course => {
+            const courseCode = course['Course Code'];
+
+            return isCourseRecommended({
+                courseCode,
+                courseSlots: slotsByCourseCode[courseCode] || [],
+                planCourseCodeSet,
+                planSlots,
+            });
+        });
+    }, [
+        isRecommendationFilterActive,
+        planCourseCodeSet,
+        planSlots,
+        slotsByCourseCode,
+        timeFilteredCourseList,
+    ]);
+
     return {
         offerCourseList,
         offerFacultyList,
@@ -175,6 +245,7 @@ const useCourseFiltering = ({
         normalizedFilterOptions,
         filterCourseList,
         isTimeFilterActive,
+        isRecommendationFilterActive,
     };
 };
 

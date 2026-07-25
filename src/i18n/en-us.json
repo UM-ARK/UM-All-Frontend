@@ -283,7 +283,9 @@
         "檢查課表版本!": "Check timetable version!",
         "以官網課表Excel為準!": "Based on the official timetable Excel!",
         "上課星期與時段": "Class Day & Time",
-        "該時段沒有符合的課程，可調整或清除星期與時段篩選。": "No course matches this time range. Adjust or clear the day and time filter."
+        "該時段沒有符合的課程，可調整或清除星期與時段篩選。": "No course matches this time range. Adjust or clear the day and time filter.",
+        "只看不衝突": "No conflicts only",
+        "目前沒有可排入且不衝突的課程，可調整篩選或已排課表。": "No course currently fits without conflicts. Adjust the filters or your timetable."
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",

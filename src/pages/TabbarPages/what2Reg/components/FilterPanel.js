@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, LayoutAnimation, Text, View } from 'react-native';
+import { Alert, FlatList, LayoutAnimation, Switch, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
@@ -14,6 +14,7 @@ import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../consta
  * - 類型切換：CMRE / GE
  * - 學院 / 學系 / GE 細分
  * - 星期 / 時段（僅 Add Drop，因預選課資料沒有上課時間）
+ * - 加課建議（僅顯示未加入且有不衝突 Section 的課程）
  */
 const FilterPanel = ({
     theme,
@@ -30,8 +31,10 @@ const FilterPanel = ({
     CMGEList,
     dayList,
     timeFilter = defaultTimeFilter,
+    recommendationOnly = false,
     onUpdateFilterOptions,
     onUpdateTimeFilter,
+    onToggleRecommendation,
     onSetCourseMode,
     trigger,
 }) => {
@@ -375,6 +378,53 @@ const FilterPanel = ({
         ? offerFacultyDepaListObj[filterOptions.facultyName]
         : [];
 
+    const renderRecommendationFilter = () => (
+        <View style={{ width: '100%', alignItems: 'center', }}>
+            <TouchableScale
+                activeScale={0.96}
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingHorizontal: scale(10),
+                    paddingVertical: verticalScale(3),
+                    borderRadius: scale(20),
+                    backgroundColor: recommendationOnly ? tonal.primary15 : null,
+                }}
+                onPress={() => {
+                    trigger();
+                    onToggleRecommendation();
+                }}
+                accessibilityRole="switch"
+                accessibilityState={{ checked: recommendationOnly }}
+                accessibilityLabel={t('只看不衝突', { ns: 'catalog' })}
+            >
+                <Text style={{
+                    ...uiStyle.defaultText,
+                    color: recommendationOnly ? themeColor : black.third,
+                    fontWeight: recommendationOnly ? '900' : 'normal',
+                    fontSize: scale(12),
+                    marginRight: scale(8),
+                }}>
+                    {t('只看不衝突', { ns: 'catalog' })}
+                </Text>
+                {/* Switch 僅作狀態指示，點擊由外層膠囊統一處理，避免雙重觸發 */}
+                <Switch
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                    pointerEvents="none"
+                    ios_backgroundColor={tonal.primary15}
+                    trackColor={{
+                        false: tonal.primary15,
+                        true: themeColor,
+                    }}
+                    value={recommendationOnly}
+                    style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
+                />
+            </TouchableScale>
+        </View>
+    );
+
     return (
         <View style={{
             backgroundColor: white,
@@ -445,6 +495,7 @@ const FilterPanel = ({
                     {timeFilter.day ? renderTimeRangeFilter() : null}
                 </View>
             )}
+            {courseMode === 'preEnroll' ? null : renderRecommendationFilter()}
         </View>
     );
 };

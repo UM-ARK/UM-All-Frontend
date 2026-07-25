@@ -2,7 +2,6 @@ import React, {
     useCallback,
     useContext,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -172,6 +171,7 @@ const What2Reg = () => {
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
     // 星期／時段篩選不持久化：若寫入 ARK_Courses_filterOptions，下次開 APP 會殘留看不見的條件而顯示空列表
     const [timeFilter, setTimeFilter] = useState(defaultTimeFilter);
+    const [recommendationOnly, setRecommendationOnly] = useState(false);
     const [courseGridWidth, setCourseGridWidth] = useState(0);
 
     const textInputRef = useRef(null);
@@ -192,6 +192,8 @@ const What2Reg = () => {
         coursePlanData,
         coursePlanTimeData,
         courseVersion,
+        planCourseCodes,
+        planSlots,
     } = useCoursePlan();
 
     const {
@@ -202,6 +204,7 @@ const What2Reg = () => {
         normalizedFilterOptions,
         filterCourseList,
         isTimeFilterActive,
+        isRecommendationFilterActive,
     } = useCourseFiltering({
         courseMode,
         coursePlanData,
@@ -209,6 +212,9 @@ const What2Reg = () => {
         filterOptions,
         coursePlanTimeData,
         timeFilter,
+        recommendationOnly,
+        planCourseCodes,
+        planSlots,
     });
 
     const {
@@ -274,6 +280,7 @@ const What2Reg = () => {
                     ? currentTimeFilter
                     : defaultTimeFilter
             ));
+            setRecommendationOnly(false);
         }
     }, [courseMode]);
 
@@ -424,8 +431,12 @@ const What2Reg = () => {
                             CMGEList={CMGEList}
                             dayList={dayList}
                             timeFilter={timeFilter}
+                            recommendationOnly={recommendationOnly}
                             onUpdateFilterOptions={updateFilterOptions}
                             onUpdateTimeFilter={updateTimeFilter}
+                            onToggleRecommendation={() => {
+                                setRecommendationOnly(currentValue => !currentValue);
+                            }}
                             onSetCourseMode={setCourseMode}
                             trigger={trigger}
                         />
@@ -434,7 +445,8 @@ const What2Reg = () => {
                             ? renderCourseCards(filterCourseList)
                             : null}
 
-                        {isTimeFilterActive && filterCourseList?.length === 0 ? (
+                        {(isTimeFilterActive || isRecommendationFilterActive) &&
+                        filterCourseList?.length === 0 ? (
                             <View style={{ paddingHorizontal: scale(20), paddingVertical: scale(20) }}>
                                 <Text style={{
                                     ...uiStyle.defaultText,
@@ -442,7 +454,9 @@ const What2Reg = () => {
                                     color: black.third,
                                     textAlign: 'center',
                                 }}>
-                                    {t('該時段沒有符合的課程，可調整或清除星期與時段篩選。', { ns: 'catalog' })}
+                                    {isRecommendationFilterActive
+                                        ? t('目前沒有可排入且不衝突的課程，可調整篩選或已排課表。', { ns: 'catalog' })
+                                        : t('該時段沒有符合的課程，可調整或清除星期與時段篩選。', { ns: 'catalog' })}
                                 </Text>
                             </View>
                         ) : null}
