@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Platform, Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useIsFocused } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image } from 'expo-image';
@@ -88,10 +89,10 @@ const getCourseCardWidth = (span, availableWidth) => {
  */
 const fillCourseCardRow = row => {
     if (row.length === 1) {
-        return row.map(entry => ({...entry, span: COURSE_GRID_COLUMN_COUNT}));
+        return row.map(entry => ({ ...entry, span: COURSE_GRID_COLUMN_COUNT }));
     }
     if (row.length === 2 && row.every(entry => entry.span < COURSE_GRID_COLUMN_COUNT)) {
-        return row.map(entry => ({...entry, span: COURSE_GRID_COLUMN_COUNT / 2}));
+        return row.map(entry => ({ ...entry, span: COURSE_GRID_COLUMN_COUNT / 2 }));
     }
     return row;
 };
@@ -141,7 +142,7 @@ const CourseCardRow = ({ entries, availableWidth, courseMode }) => {
             if (Math.abs((currentHeights[key] || 0) - height) <= 0.5) {
                 return currentHeights;
             }
-            return {...currentHeights, [key]: height};
+            return { ...currentHeights, [key]: height };
         });
     }, []);
 
@@ -181,6 +182,9 @@ const What2Reg = props => {
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const headerHeight = useHeaderHeight();
+    // 與課表頁一致：優先讀 Tab Bar 實際高度，否則回退 safe area + 預設高度
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
     // iOS：用 contentInset + contentOffset 避開導航列/狀態列；Android 上該組合常不生效，改由外層 paddingTop
     const stickyTopOffset = headerHeight || insets.top;
     const scrollTopInset = Platform.OS === 'android' ? 0 : stickyTopOffset;
@@ -468,7 +472,8 @@ const What2Reg = props => {
                 style={{ width: '100%', flex: 1 }}
                 contentInset={{ top: scrollTopInset }}
                 contentOffset={{ y: -scrollTopInset }}
-                scrollIndicatorInsets={{ top: scrollTopInset }}
+                scrollIndicatorInsets={{ top: scrollTopInset, bottom: tabBarHeight }}
+                contentContainerStyle={{ paddingBottom: tabBarHeight + verticalScale(10) }}
                 stickyHeaderIndices={[1]}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
