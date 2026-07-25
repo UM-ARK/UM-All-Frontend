@@ -101,6 +101,22 @@ export default {
         'Privacy Policy & User Agreement': '隱私政策 & 用戶協議',
     },
 
+    // 搵課頁
+    catalog: {
+        '上課星期與時段': '上課星期與時段',
+        '該時段沒有符合的課程，可調整或清除星期與時段篩選。':
+            '該時段沒有符合的課程，可調整或清除星期與時段篩選。',
+    },
+
+    // 模擬課表頁。只列出帶插值的鍵：其餘鍵名本身即繁中，交由 fallbackNS 回退
+    timetable: {
+        '已排課程數': '已排 {{num}} 科',
+        '衝突數': '{{num}} 節衝突',
+        '刪除Section確認': '將 {{code}}-{{section}} 移出課表？',
+        '刪除所有Section確認': '將 {{code}} 的所有 Section 移出課表？',
+        '已刪除課程': '已移除 {{code}}-{{section}}',
+    },
+
     club: {
         SEARCH_PLACEHOLDER: '搜尋組織名稱',
         CANCEL: '取消',

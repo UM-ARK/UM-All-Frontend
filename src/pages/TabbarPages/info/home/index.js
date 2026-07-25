@@ -42,6 +42,7 @@ import { trigger } from '../../../../utils/trigger.js';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
+import { navigateToCourseTab } from '../../../../utils/courseNavigation.js';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../courseSim/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
@@ -562,7 +563,9 @@ const HomeScreen = ({ navigation }) => {
                         style={{ width: '100%' }}
                         onPress={() => {
                             trigger();
-                            navigation.navigate('CourseSimTab');
+                            navigateToCourseTab(navigation, {
+                                segment: 'timetable',
+                            });
                         }}>
                         {upcomingCourse ? (
                             <View style={{

@@ -11,6 +11,10 @@ import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
+import {
+    COURSE_TAB_ROUTE,
+    navigateToCourseTab,
+} from '../../../utils/courseNavigation';
 import CustomBottomSheet from '../courseSim/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 
@@ -130,6 +134,14 @@ function Index({ navigation }) {
                                                 go_where === 'Linking'
                                             ) {
                                                 openLink(webview_param.url);
+                                            } else if (
+                                                go_where === COURSE_TAB_ROUTE
+                                            ) {
+                                                // 此入口對應「課表模擬」，需落在選課頁的課表段落
+                                                navigateToCourseTab(
+                                                    navigation,
+                                                    { segment: 'timetable' },
+                                                );
                                             } else {
                                                 navigation.navigate(go_where);
                                             }

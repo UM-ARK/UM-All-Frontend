@@ -1,5 +1,5 @@
 import React, { useContext, memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
@@ -10,36 +10,27 @@ import { useUmehHost } from '../../../../utils/umehHost';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { openLink } from '../../../../utils/browser';
 import { trigger } from '../../../../utils/trigger';
-import TouchableScale from '../../../../components/TouchableScale';
+import { navigateToCourseTab } from '../../../../utils/courseNavigation';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
-import { Icon } from '@expo/ui';
-import { MenuView } from '@expo/ui/community/menu';
+// 不可用 @expo/ui MenuView（SwiftUI Host matchContents 會在 Tab 切換／版面提交時
+// 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
+import { MenuView } from '@react-native-menu/menu';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
 import lodash from 'lodash';
 import { t } from 'i18next';
 
-// Menu 圖標：iOS 用 SF Symbol，Android 用 Material Symbols XML
-const MENU_ICON_BOOK = Icon.select({
-    ios: 'book',
-    android: require('@expo/material-symbols/book.xml'),
-});
-const MENU_ICON_STAR = Icon.select({
-    ios: 'star',
-    android: require('@expo/material-symbols/star.xml'),
-});
-const MENU_ICON_SCHOOL = Icon.select({
-    ios: 'graduationcap',
-    android: require('@expo/material-symbols/school.xml'),
-});
-const MENU_ICON_CALENDAR = Icon.select({
-    ios: 'calendar',
-    android: require('@expo/material-symbols/calendar_month.xml'),
-});
-const MENU_ICON_LIST = Icon.select({
-    ios: 'list.bullet',
-    android: require('@expo/material-symbols/format_list_bulleted.xml'),
-});
+/** 與 TouchableScale 預設相近的彈簧參數 */
+const COURSE_CARD_SPRING = {
+    damping: 18,
+    stiffness: 280,
+    mass: 0.4,
+};
 
 const styles = StyleSheet.create({
     menuView: {
@@ -55,6 +46,12 @@ const CourseCard = memo(
         const { baseHost } = useUmehHost();
         const { themeColor, black, secondThemeColor, white } = theme;
         const isPreEnroll = courseMode === 'preEnroll';
+
+        // 原生 UIButton 會吃掉子層 pressIn，故縮放回饋改由選單開合驅動
+        const cardScale = useSharedValue(1);
+        const animatedStyle = useAnimatedStyle(() => ({
+            transform: [{ scale: cardScale.value }],
+        }));
 
         // 從 item 中提取課程資訊
         const courseCode =
@@ -123,25 +120,35 @@ const CourseCard = memo(
             );
         };
 
+        // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
         const courseActions = [
             {
                 id: 'ark-wiki',
                 title: `${t('寫', { ns: 'catalog' })} Wiki`,
-                image: MENU_ICON_BOOK,
+                image: Platform.select({
+                    ios: 'book',
+                    android: 'ic_menu_agenda',
+                }),
                 imageColor: themeColor,
                 titleColor: themeColor,
             },
             {
                 id: 'what2reg',
                 title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-                image: MENU_ICON_STAR,
+                image: Platform.select({
+                    ios: 'star',
+                    android: 'btn_star_big_on',
+                }),
                 imageColor: black.third,
                 titleColor: black.third,
             },
             {
                 id: 'official',
                 title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-                image: MENU_ICON_SCHOOL,
+                image: Platform.select({
+                    ios: 'graduationcap',
+                    android: 'ic_menu_info_details',
+                }),
                 imageColor: black.third,
                 titleColor: black.third,
             },
@@ -150,14 +157,20 @@ const CourseCard = memo(
                     {
                         id: 'coursesim',
                         title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
-                        image: MENU_ICON_CALENDAR,
+                        image: Platform.select({
+                            ios: 'calendar',
+                            android: 'ic_menu_my_calendar',
+                        }),
                         imageColor: black.third,
                         titleColor: black.third,
                     },
                     {
                         id: 'section',
                         title: `${t('查', { ns: 'catalog' })} Section`,
-                        image: MENU_ICON_LIST,
+                        image: Platform.select({
+                            ios: 'list.bullet',
+                            android: 'ic_menu_sort_by_size',
+                        }),
                         imageColor: black.third,
                         titleColor: black.third,
                     },
@@ -222,9 +235,9 @@ const CourseCard = memo(
                     break;
                 }
                 case 'coursesim': {
-                    navigation.navigate('Tabbar', {
-                        screen: 'CourseSimTab',
-                        params: { check: courseCode },
+                    navigateToCourseTab(navigation, {
+                        segment: 'timetable',
+                        courseCode,
                     });
                     logToFirebase('checkCourse', {
                         courseCode: courseCode,
@@ -245,48 +258,39 @@ const CourseCard = memo(
             }
         };
 
-        // 長按直接進 LocalCourse（預選課模式無 Section 資料則略過）
-        const handleLongPressToLocalCourse = () => {
-            if (isPreEnroll) {
-                return;
-            }
-            trigger('rigid');
-            logToFirebase('checkCourse', {
-                courseCode: courseCode,
-                action: 'section',
-            });
-            navigation.navigate('LocalCourse', courseCode);
-        };
-
         return (
             <MenuView
                 actions={courseActions}
                 onPressAction={handleMenuAction}
                 shouldOpenOnLongPress={false}
+                onOpenMenu={() => {
+                    trigger('rigid');
+                    cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
+                }}
+                onCloseMenu={() => {
+                    cardScale.value = withSpring(1, COURSE_CARD_SPRING);
+                }}
                 style={[
                     styles.menuView,
                     cardWidth ? { width: cardWidth } : null,
                     cardHeight ? { height: cardHeight } : null,
                 ]}>
-                <TouchableScale
-                    activeScale={0.96}
-                    style={{
-                        backgroundColor: white,
-                        borderRadius: scale(10),
-                        padding: scale(10),
-                        paddingVertical: scale(5),
-                        width: cardWidth,
-                        height: cardHeight,
-                        justifyContent: 'space-between',
-                    }}
+                <Animated.View
+                    style={[
+                        {
+                            backgroundColor: white,
+                            borderRadius: scale(10),
+                            padding: scale(10),
+                            paddingVertical: scale(5),
+                            width: cardWidth,
+                            height: cardHeight,
+                            justifyContent: 'space-between',
+                        },
+                        animatedStyle,
+                    ]}
                     onLayout={cardHeight ? undefined : ({ nativeEvent }) => {
                         onMeasureHeight?.(nativeEvent.layout.height);
-                    }}
-                    onPress={() => {
-                        trigger();
-                    }}
-                    onLongPress={handleLongPressToLocalCourse}
-                    delayLongPress={350}>
+                    }}>
                     <View>
                         {/* 課程編號與開課標識 */}
                         <View
@@ -362,7 +366,7 @@ const CourseCard = memo(
                             {offerDepa && ' - ' + offerDepa}
                         </Text>
                     </View>
-                </TouchableScale>
+                </Animated.View>
             </MenuView>
         );
     },

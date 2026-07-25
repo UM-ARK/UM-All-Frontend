@@ -1,15 +1,19 @@
-import React from 'react';
-import { FlatList, LayoutAnimation, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, FlatList, LayoutAnimation, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import moment from 'moment';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
+import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../constants/options';
 
 /**
  * 篩選面板
  * - 模式切換：Add Drop / Pre Enroll
  * - 類型切換：CMRE / GE
  * - 學院 / 學系 / GE 細分
+ * - 星期 / 時段（僅 Add Drop，因預選課資料沒有上課時間）
  */
 const FilterPanel = ({
     theme,
@@ -24,13 +28,19 @@ const FilterPanel = ({
     adpeMap,
     modeENStr,
     CMGEList,
+    dayList,
+    timeFilter = defaultTimeFilter,
     onUpdateFilterOptions,
+    onUpdateTimeFilter,
     onSetCourseMode,
     trigger,
 }) => {
-    const { themeColor, secondThemeColor, black, white } = theme;
+    const { themeColor, secondThemeColor, black, white, tonal } = theme;
     const activeColor = courseMode === 'ad' ? themeColor : secondThemeColor;
     const activeBackgroundColor = `${activeColor}15`;
+
+    const [timePickerMode, setTimePickerMode] = useState('from');
+    const [showTimePicker, setShowTimePicker] = useState(false);
 
     const classItmStyle = {
         borderRadius: scale(10),
@@ -219,6 +229,148 @@ const FilterPanel = ({
         />
     );
 
+    const isTimeRangeDefault = timeFilter.from === DEFAULT_TIME_FROM && timeFilter.to === DEFAULT_TIME_TO;
+
+    const renderDayFilter = () => (
+        <View style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginVertical: verticalScale(5),
+        }}>
+            {dayList.map(day => {
+                const isSelected = day === timeFilter.day;
+
+                return (
+                    <TouchableScale
+                        key={day}
+                        style={{
+                            ...classItmStyle,
+                            paddingHorizontal: scale(5),
+                            paddingVertical: scale(3),
+                            backgroundColor: isSelected ? tonal.primary15 : null,
+                        }}
+                        onPress={() => {
+                            trigger();
+                            LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+                            // 取消星期時一併還原時段，避免留下看不見卻仍在生效的時段條件
+                            onUpdateTimeFilter(isSelected
+                                ? defaultTimeFilter
+                                : { ...timeFilter, day });
+                        }}
+                    >
+                        <Text style={{
+                            ...uiStyle.defaultText,
+                            color: isSelected ? themeColor : black.third,
+                            fontWeight: isSelected ? '900' : 'normal',
+                            fontSize: scale(12),
+                        }}>
+                            {day}
+                        </Text>
+                    </TouchableScale>
+                );
+            })}
+        </View>
+    );
+
+    const renderTimeRangeFilter = () => {
+        const renderTimeButton = mode => {
+            const isDefault = mode === 'from'
+                ? timeFilter.from === DEFAULT_TIME_FROM
+                : timeFilter.to === DEFAULT_TIME_TO;
+
+            return (
+                <TouchableScale
+                    style={{
+                        ...classItmStyle,
+                        paddingHorizontal: scale(8),
+                        paddingVertical: scale(3),
+                        backgroundColor: isDefault ? tonal.primary15 : tonal.primary30,
+                    }}
+                    onPress={() => {
+                        trigger();
+                        setTimePickerMode(mode);
+                        setShowTimePicker(true);
+                    }}
+                >
+                    <Text style={{
+                        ...uiStyle.defaultText,
+                        color: isDefault ? black.third : themeColor,
+                        fontWeight: isDefault ? 'normal' : '900',
+                        fontSize: scale(12),
+                    }}>
+                        {mode === 'from' ? timeFilter.from : timeFilter.to}
+                    </Text>
+                </TouchableScale>
+            );
+        };
+
+        const handleConfirmTime = date => {
+            const pickedTime = moment(date).format('HH:mm');
+
+            if (timePickerMode === 'from') {
+                if (moment(date).isSameOrAfter(moment(timeFilter.to, 'HH:mm'))) {
+                    Alert.alert(t('開始時間不能晚於結束時間！', { ns: 'timetable' }));
+                    return;
+                }
+                onUpdateTimeFilter({ ...timeFilter, from: pickedTime });
+            } else {
+                if (moment(date).isSameOrBefore(moment(timeFilter.from, 'HH:mm'))) {
+                    Alert.alert(t('結束時間不能早於開始時間！', { ns: 'timetable' }));
+                    return;
+                }
+                onUpdateTimeFilter({ ...timeFilter, to: pickedTime });
+            }
+
+            setShowTimePicker(false);
+        };
+
+        return (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                {isTimeRangeDefault ? null : (
+                    <TouchableScale
+                        style={{
+                            ...classItmStyle,
+                            paddingHorizontal: scale(8),
+                            paddingVertical: scale(3),
+                            backgroundColor: tonal.primary15,
+                        }}
+                        onPress={() => {
+                            trigger();
+                            onUpdateTimeFilter({
+                                ...timeFilter,
+                                from: DEFAULT_TIME_FROM,
+                                to: DEFAULT_TIME_TO,
+                            });
+                        }}
+                    >
+                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(12) }}>
+                            {'Clear'}
+                        </Text>
+                    </TouchableScale>
+                )}
+
+                {renderTimeButton('from')}
+                <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
+                    {' - '}
+                </Text>
+                {renderTimeButton('to')}
+
+                <DateTimePickerModal
+                    isVisible={showTimePicker}
+                    mode="time"
+                    date={timePickerMode === 'from'
+                        ? moment(timeFilter.from, 'HH:mm').toDate()
+                        : moment(timeFilter.to, 'HH:mm').toDate()}
+                    minuteInterval={5}
+                    onConfirm={handleConfirmTime}
+                    onCancel={() => setShowTimePicker(false)}
+                />
+            </View>
+        );
+    };
+
     const offerDepaList = filterOptions.option !== 'GE' && filterOptions.facultyName in offerFacultyDepaListObj
         ? offerFacultyDepaListObj[filterOptions.facultyName]
         : [];
@@ -281,6 +433,16 @@ const FilterPanel = ({
                             {renderDepaSwitch(offerDepaList)}
                         </View>
                     ) : null}
+                </View>
+            )}
+
+            {courseMode === 'preEnroll' ? null : (
+                <View style={{ marginTop: scale(5), width: '100%', alignItems: 'center' }}>
+                    <Text style={classItmTitleTextStyle}>
+                        {t('上課星期與時段', { ns: 'catalog' })}
+                    </Text>
+                    {renderDayFilter()}
+                    {timeFilter.day ? renderTimeRangeFilter() : null}
                 </View>
             )}
         </View>

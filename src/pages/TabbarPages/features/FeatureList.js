@@ -584,7 +584,7 @@ export const getFunctionArr = (t) => [
                 icon_name: 'table-clock',
                 fn_name: t('課表模擬', { ns: 'features' }),
                 needLogin: false,
-                go_where: 'CourseSimTab',
+                go_where: 'CourseTab',
                 describe: t('ARK課表模擬功能，選課時不用再對著Excel自己慢慢找啦！', { ns: 'features' }),
                 key_name: '課表模擬',
                 keywords: 'Timetable Simulation, Course Schedule, Planning, 課表, 時間表, 模擬, 選課, 規劃',

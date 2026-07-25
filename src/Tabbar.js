@@ -12,8 +12,7 @@ import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/un
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
-import What2RegTabIndex from './pages/TabbarPages/what2Reg';
-import CourseSim from './pages/TabbarPages/courseSim';
+import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -25,8 +24,7 @@ import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 const tabIconDescription = {
     NewsTabbar: '資訊',
     Harbor: '職涯港',
-    What2RegTab: '揾課',
-    CourseSimTab: '課表',
+    CourseTab: '選課',
     FeaturesTabbar: '服務',
     MyTabbar: '我的',
 };
@@ -35,8 +33,8 @@ const tabIconDescription = {
 const tabScreen = {
     NewsTabbar: NewsScreen,
     // Harbor: ARKHarbor,
-    What2RegTab: What2RegTabIndex,
-    CourseSimTab: CourseSim,
+    // 搵課與課表模擬已合併為 CourseTab 內的兩個段落
+    CourseTab: CourseTab,
     FeaturesTabbar: FeaturesScreen,
     MyTabbar: MyScreen,
 };
@@ -45,8 +43,7 @@ const tabScreen = {
 const iosTabIconConfig = {
     NewsTabbar: 'newspaper',
     Harbor: 'heart',
-    What2RegTab: 'magnifyingglass.circle',
-    CourseSimTab: 'calendar',
+    CourseTab: 'text.book.closed',
     FeaturesTabbar: 'square.grid.2x2',
     MyTabbar: 'person.crop.circle',
 };
@@ -55,8 +52,7 @@ const iosTabIconConfig = {
 const androidTabIconConfig = {
     NewsTabbar: 'newspaper-variant',
     Harbor: 'chat-processing',
-    What2RegTab: 'database-search',
-    CourseSimTab: 'calendar-clock',
+    CourseTab: 'book-open-page-variant',
     FeaturesTabbar: 'view-grid',
     MyTabbar: 'account-circle',
 };

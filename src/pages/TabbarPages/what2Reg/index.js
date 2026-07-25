@@ -1,14 +1,10 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
-import { useIsFocused } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Image } from 'expo-image';
-import ActionSheet from 'react-native-actions-sheet';
-import { Dialog } from '@rneui/themed';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import lodash from 'lodash';
@@ -17,13 +13,14 @@ import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { trigger } from '../../../utils/trigger';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { openLink } from '../../../utils/browser';
-import { setLocalStorage } from '../../../utils/storageKits';
-import { checkCloudCourseVersion } from '../../../utils/checkCoursesKits';
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
+import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
+import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
 import { refreshUmehHost, useUmehHost } from '../../../utils/umehHost';
+import { COURSE_TIMETABLE_SEGMENT } from '../../../utils/courseNavigation';
+import { useCoursePlan } from '../course/context/CoursePlanContext';
+import PlanCapsule from '../course/components/PlanCapsule';
 
 import CourseCard from './components/CourseCard';
-import useCourseData from './hooks/useCourseData';
 import useCourseFiltering from './hooks/useCourseFiltering';
 import useCourseSearch from './hooks/useCourseSearch';
 import useFirstLetterNav from './hooks/useFirstLetterNav';
@@ -31,10 +28,9 @@ import FilterPanel from './components/FilterPanel';
 import SearchBarSection from './components/SearchBarSection';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
-import { adpeMap, CMGEList, defaultFilterOptions, modeENStr } from './constants/options';
+import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
 import TouchableScale from '../../../components/TouchableScale';
 
-const iconSize = scale(25);
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);
 const COURSE_GRID_HORIZONTAL_PADDING = scale(10);
@@ -161,30 +157,32 @@ const CourseCardRow = ({ entries, availableWidth, courseMode }) => {
     );
 };
 
-const What2Reg = props => {
+const What2Reg = () => {
     const { theme } = useTheme();
     const { searchHost } = useUmehHost();
-    const { themeColor, black, white, bg_color } = theme;
-    const styles = useMemo(() => getStyles(themeColor, white), [themeColor, white]);
+    const { themeColor, black, bg_color } = theme;
+    const navigation = useNavigation();
 
-    const [dialogVisible, setDialogVisible] = useState(false);
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
+    // 星期／時段篩選不持久化：若寫入 ARK_Courses_filterOptions，下次開 APP 會殘留看不見的條件而顯示空列表
+    const [timeFilter, setTimeFilter] = useState(defaultTimeFilter);
     const [courseGridWidth, setCourseGridWidth] = useState(0);
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
-    const actionSheetRef = useRef(null);
 
-    const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const headerHeight = useHeaderHeight();
     // 與課表頁一致：優先讀 Tab Bar 實際高度，否則回退 safe area + 預設高度
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
-    // iOS：用 contentInset + contentOffset 避開導航列/狀態列；Android 上該組合常不生效，改由外層 paddingTop
-    const stickyTopOffset = headerHeight || insets.top;
+    // 頂部 insets 由 course/index.js 容器的 SafeAreaView 統一處理，段落不可重複扣一次。
+    // 本段落無自己的導航列時 headerHeight 為 0，等於不額外偏移。
+    const stickyTopOffset = headerHeight;
     const scrollTopInset = Platform.OS === 'android' ? 0 : stickyTopOffset;
 
+    // 課程資料、模擬課表與衝突狀態一律取自容器的 CoursePlanProvider，
+    // 段落不再自行持有 useCourseData，避免與課表段落各自抓一份而不同步
     const {
         courseMode,
         setCourseMode,
@@ -192,9 +190,7 @@ const What2Reg = props => {
         coursePlanData,
         coursePlanTimeData,
         courseVersion,
-        initCourseData,
-        refreshCourseData,
-    } = useCourseData();
+    } = useCoursePlan();
 
     const {
         offerCourseList,
@@ -203,11 +199,14 @@ const What2Reg = props => {
         offerFacultyDepaListObj,
         normalizedFilterOptions,
         filterCourseList,
+        isTimeFilterActive,
     } = useCourseFiltering({
         courseMode,
         coursePlanData,
         offerCoursesData,
         filterOptions,
+        coursePlanTimeData,
+        timeFilter,
     });
 
     const {
@@ -238,33 +237,21 @@ const What2Reg = props => {
         await setLocalStorage('ARK_Courses_filterOptions', nextOptions);
     }, [filterOptions]);
 
-    /**
-     * 初始化頁面資料：
-     * 1) 記錄頁面打點
-     * 2) 載入本地課程與版本資料
-     * 3) 恢復上次篩選選項
-     */
-    const initPageData = useCallback(async () => {
-        try {
-            logToFirebase('openPage', { page: 'chooseCourses' });
-            refreshUmehHost(); // 不 await，背景探測 host
-            const nextFilterOptions = await initCourseData();
-            setFilterOptions(nextFilterOptions);
-        } catch (e) {
-            Alert.alert('ARK Courses error, 請聯繫開發者！', String(e));
-        }
-    }, [initCourseData]);
+    const updateTimeFilter = useCallback(nextTimeFilter => {
+        setTimeFilter(nextTimeFilter);
+    }, []);
 
+    // 課程資料的載入與版本同步已上移到容器，此處只還原本段落自己的篩選條件
     useEffect(() => {
-        initPageData();
-    }, [initPageData]);
+        logToFirebase('openPage', { page: 'chooseCourses' });
+        refreshUmehHost(); // 不 await，背景探測 host
 
-    // 頁面回到前景時同步版本資料
-    useEffect(() => {
-        if (isFocused) {
-            refreshCourseData();
-        }
-    }, [isFocused, refreshCourseData]);
+        getLocalStorage('ARK_Courses_filterOptions').then(storedFilterOptions => {
+            if (storedFilterOptions) {
+                setFilterOptions(storedFilterOptions);
+            }
+        });
+    }, []);
 
     /**
      * 當資料版本更新導致篩選值失效時，
@@ -276,6 +263,17 @@ const What2Reg = props => {
             setLocalStorage('ARK_Courses_filterOptions', normalizedFilterOptions);
         }
     }, [filterOptions, normalizedFilterOptions]);
+
+    // 預選課沒有上課時間資料，切到該模式時清空星期／時段，避免留下不可見卻仍在生效的篩選
+    useEffect(() => {
+        if (courseMode === 'preEnroll') {
+            setTimeFilter(currentTimeFilter => (
+                lodash.isEqual(currentTimeFilter, defaultTimeFilter)
+                    ? currentTimeFilter
+                    : defaultTimeFilter
+            ));
+        }
+    }, [courseMode]);
 
     const onPressSearchAction = useCallback(eventId => {
         trigger();
@@ -313,40 +311,15 @@ const What2Reg = props => {
         trigger();
     }, []);
 
-    const handleDialogClose = useCallback(() => {
-        setDialogVisible(false);
-    }, []);
-
-    const handleUpdatePress = useCallback(() => {
-        trigger();
-        actionSheetRef.current?.show();
-    }, []);
-
     const handleUserAgreePress = useCallback(() => {
         trigger();
         openLink(USER_AGREE);
     }, []);
 
-    const handleManualUpdate = useCallback(() => {
+    const handleOpenTimetable = useCallback(() => {
         trigger();
-        actionSheetRef.current?.hide();
-        setDialogVisible(true);
-        checkCloudCourseVersion()
-            .then(async () => {
-                const nextFilterOptions = await initCourseData();
-                setFilterOptions(nextFilterOptions);
-                handleDialogClose();
-            })
-            .catch(() => {
-                handleDialogClose();
-            });
-    }, [handleDialogClose, initCourseData]);
-
-    const handleOfficialSharePointPress = useCallback(() => {
-        trigger();
-        actionSheetRef.current?.hide();
-        openLink(UM_PRE_ENROLMENT_EXCEL);
-    }, []);
+        navigation.navigate(COURSE_TIMETABLE_SEGMENT);
+    }, [navigation]);
 
     const onScrollToLetter = useCallback(letter => {
         trigger();
@@ -400,6 +373,7 @@ const What2Reg = props => {
         </View>
     ), [courseGridWidth, courseMode]);
 
+    // 搜尋結果不套用星期／時段篩選：此時 FilterPanel 不渲染，使用者既看不到也無法清除該篩選
     const hasSearchResult = searchFilterCourse?.length > 0;
 
     return (
@@ -409,60 +383,8 @@ const What2Reg = props => {
                 backgroundColor: bg_color,
                 alignItems: 'center',
                 justifyContent: 'center',
-                paddingTop: Platform.OS === 'android' ? insets.top : 0,
             }}
         >
-            <ActionSheet
-                ref={actionSheetRef}
-                containerStyle={{
-                    borderRadius: scale(10),
-                    padding: scale(10),
-                    backgroundColor: bg_color,
-                }}
-            >
-                <View style={{ padding: scale(10) }}>
-                    <Text style={{
-                        ...uiStyle.defaultText,
-                        fontSize: scale(14),
-                        color: black.main,
-                        textAlign: 'center',
-                        marginBottom: scale(15),
-                    }}>
-                        {`${t('Add Drop Data Version', { ns: 'about' }) + courseVersion.adddrop.updateTime}\n${courseVersion.adddrop.academicYear} - Sem ${courseVersion.adddrop.sem}\n\n${t('PreEnroll Data Version', { ns: 'about' }) + courseVersion.pre.updateTime}\n${courseVersion.pre.academicYear} - Sem ${courseVersion.pre.sem}\n\n${t('點擊下方按鈕更新！檢查作者是否上傳最新數據~', { ns: 'catalog' })}\n${t('或可附件最新的課表Excel，Email提醒作者更新！', { ns: 'catalog' })}\n\n${t('如日期已更新，課表數據未更新，可重啟APP再試~', { ns: 'catalog' })}`}
-                    </Text>
-                    <TouchableScale style={styles.actionButton(themeColor)} onPress={handleManualUpdate}>
-                        <Text style={styles.actionButtonText}>
-                            {t('手動檢查課表數據更新', { ns: 'catalog' })}
-                        </Text>
-                    </TouchableScale>
-                    <TouchableScale style={styles.actionButton(themeColor)} onPress={handleOfficialSharePointPress}>
-                        <Text style={styles.actionButtonText}>
-                            {t('檢查官方SharePoint版本', { ns: 'catalog' })}
-                        </Text>
-                    </TouchableScale>
-                    <TouchableScale
-                        style={styles.actionButton(black.third)}
-                        onPress={() => {
-                            trigger();
-                            actionSheetRef.current?.hide();
-                        }}
-                    >
-                        <Text style={styles.actionButtonText}>
-                            {t('Cancel')}
-                        </Text>
-                    </TouchableScale>
-                </View>
-            </ActionSheet>
-
-            <Dialog
-                isVisible={dialogVisible}
-                onBackdropPress={handleDialogClose}
-                statusBarTranslucent
-                overlayStyle={{ backgroundColor: bg_color }}
-            >
-                <Dialog.Loading />
-            </Dialog>
-
             <KeyboardAwareScrollView
                 ref={scrollViewRef}
                 style={{ width: '100%', flex: 1 }}
@@ -470,31 +392,11 @@ const What2Reg = props => {
                 contentOffset={{ y: -scrollTopInset }}
                 scrollIndicatorInsets={{ top: scrollTopInset, bottom: tabBarHeight }}
                 contentContainerStyle={{ paddingBottom: tabBarHeight + verticalScale(10) }}
-                stickyHeaderIndices={[1]}
+                stickyHeaderIndices={[0]}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
                 bottomOffset={50}
             >
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: verticalScale(3) }}>
-                    <TouchableScale style={styles.titleRightButton} onPress={handleUpdatePress}>
-                        <Ionicons name={'build'} size={verticalScale(14)} color={themeColor} />
-                        <Text style={styles.titleButtonText}>{t('更新')}</Text>
-                    </TouchableScale>
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <Image
-                            source={require('../../../static/img/logo.png')}
-                            style={{ height: iconSize, width: iconSize, borderRadius: scale(5) }}
-                        />
-                        <View style={{ marginLeft: scale(5) }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(18), color: themeColor, fontWeight: '600' }}>
-                                {t('ARK搵課', { ns: 'catalog' })}
-                            </Text>
-                        </View>
-                    </View>
-
-                </View>
-
                 <SearchBarSection
                     theme={theme}
                     inputText={inputText}
@@ -532,7 +434,10 @@ const What2Reg = props => {
                             adpeMap={adpeMap}
                             modeENStr={modeENStr}
                             CMGEList={CMGEList}
+                            dayList={dayList}
+                            timeFilter={timeFilter}
                             onUpdateFilterOptions={updateFilterOptions}
+                            onUpdateTimeFilter={updateTimeFilter}
                             onSetCourseMode={setCourseMode}
                             trigger={trigger}
                         />
@@ -540,6 +445,19 @@ const What2Reg = props => {
                         {filterCourseList?.length > 0
                             ? renderCourseCards(filterCourseList)
                             : null}
+
+                        {isTimeFilterActive && filterCourseList?.length === 0 ? (
+                            <View style={{ paddingHorizontal: scale(20), paddingVertical: scale(20) }}>
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    fontSize: scale(12),
+                                    color: black.third,
+                                    textAlign: 'center',
+                                }}>
+                                    {t('該時段沒有符合的課程，可調整或清除星期與時段篩選。', { ns: 'catalog' })}
+                                </Text>
+                            </View>
+                        ) : null}
                     </View>
                 )}
 
@@ -580,39 +498,14 @@ const What2Reg = props => {
                 onScrollTo={onScrollToLetter}
             />
 
+            {/* 已排課程數與衝突提示，點擊切到課表段落 */}
+            <PlanCapsule
+                bottom={tabBarHeight + verticalScale(10)}
+                onPress={handleOpenTimetable}
+            />
+
         </View>
     );
 };
-
-const getStyles = (themeColor, white) => ({
-    actionButton: backgroundColor => ({
-        backgroundColor,
-        borderRadius: scale(8),
-        paddingVertical: verticalScale(10),
-        alignItems: 'center',
-        marginBottom: scale(10),
-    }),
-    actionButtonText: {
-        ...uiStyle.defaultText,
-        color: white,
-        fontWeight: 'bold',
-        fontSize: scale(16),
-    },
-    titleRightButton: {
-        position: 'absolute',
-        right: scale(10),
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: `${themeColor}15`,
-        borderRadius: scale(5),
-        padding: scale(5),
-    },
-    titleButtonText: {
-        ...uiStyle.defaultText,
-        color: themeColor,
-        fontWeight: 'bold',
-        lineHeight: verticalScale(14),
-    },
-});
 
 export default What2Reg;

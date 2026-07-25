@@ -2,7 +2,6 @@ import React, {
     useState,
     useEffect,
     useRef,
-    useMemo,
     useCallback,
     useContext,
 } from 'react';
@@ -10,7 +9,6 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Pressable,
     Alert,
     StyleSheet,
     TextInput,
@@ -19,9 +17,8 @@ import {
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
-import { Image } from 'expo-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 // 課表一次掛多張卡片：不可用 @expo/ui MenuView（SwiftUI Host matchContents
@@ -42,36 +39,31 @@ import {
     BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
 import { ScrollView } from 'react-native-gesture-handler';
-import uniq from 'lodash/uniq';
 import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect, useIsFocused } from '@react-navigation/native';
-import {
-    BottomTabBarHeightContext,
-    useBottomTabBarHeight,
-} from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
-import { setLocalStorage } from '../../../utils/storageKits';
-import { useTheme, themes, uiStyle } from '../../../components/ThemeContext';
-import coursePlanTimeFile from '../../../static/UMCourses/coursePlanTime';
-import coursePlanFile from '../../../static/UMCourses/coursePlan';
-import sourceCourseVersion from '../../../static/UMCourses/courseVersion';
+import { useTheme, uiStyle } from '../../../components/ThemeContext';
 import { openLink } from '../../../utils/browser';
 import {
-    UM_ISW,
     ARK_WIKI_SEARCH,
     OFFICIAL_COURSE_SEARCH,
+    UM_ISW,
 } from '../../../utils/pathMap';
 import { getCurrentUmehHost } from '../../../utils/umehHost';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { trigger } from '../../../utils/trigger';
+import TouchableScale from '../../../components/TouchableScale';
 import CustomBottomSheet from './BottomSheet';
-import { getCourseData } from '../../../utils/checkCoursesKits';
+import { useCoursePlan } from '../course/context/CoursePlanContext';
+import { getSlotKey } from '../course/hooks/useConflict';
+import { normalizeImportText } from '../course/utils/parseImportData';
+import AddCourseFab from '../course/components/AddCourseFab';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
-const iconSize = scale(25);
 /** 課表單一星期欄寬 */
 const DAY_COLUMN_WIDTH = scale(135);
 /** 課程卡片左右邊距 */
@@ -80,41 +72,6 @@ const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
-
-function parseImportData(inputText) {
-    let matchRes = inputText.match(
-        /[A-Z]{4}[0-9]{4}((\/[0-9]{4})+)?(\s)?(\([0-9]{3}\))/g,
-    );
-
-    if (matchRes && matchRes.length > 0) {
-        // 去重
-        matchRes = uniq(matchRes);
-
-        return matchRes.map(text => {
-            // Section部份左右括號的index
-            const lbIdx = text.indexOf('(');
-            const rbIdx = text.indexOf(')');
-            // 對於特殊的 GESB1001/1002/1003，記錄 / 從左到右第一次出現的index，不存在 / 時返回 -1
-            const slashIdx = text.indexOf('/');
-
-            // 定位至CourseCode後一位的index
-            // 例：GESB1001/1002，courseCodeBound = 8
-            // 例：GEGA1000(001)，courseCodeBound = 8
-            const courseCodeBound = slashIdx === -1 ? lbIdx : slashIdx;
-
-            // 截取CourseCode的字符
-            const courseCode = text.substring(0, courseCodeBound);
-            const section = text.substring(lbIdx + 1, rbIdx);
-
-            return {
-                'Course Code': courseCode,
-                Section: section,
-            };
-        });
-    } else {
-        return null;
-    }
-}
 
 // 將 HH:mm 時間轉為Date對象，用於排序
 function toDateTime(time) {
@@ -195,10 +152,24 @@ function TimetableCourseMenuCard({
 }
 
 function CourseSim({ route, navigation }) {
+    // 課程資料與排課狀態一律來自 CoursePlanProvider，本段落不再自行持有
+    const {
+        courseVersion,
+        courseTimeList,
+        coursePlanList,
+        planList,
+        planSlots,
+        planCourseCodes,
+        addCourse,
+        addAllSections,
+        dropCourse,
+        dropAllSections,
+        conflictSlotKeys,
+        importFromISW,
+    } = useCoursePlan();
+
     // state
-    const [importTimeTableText, setImportTimeTableText] = useState(null); // 導入課表功能
-    const [u_codeSectionList, setU_codeSectionList] = useState([]); // 用戶自己選擇的課程，唯一性：Course Code, Section
-    const [allCourseAllTime, setAllCourseAllTime] = useState([]); // 用戶一周內所有課程節，唯一性：Course Code, Section, Time
+    const [importTimeTableText, setImportTimeTableText] = useState(''); // 空課表引導的貼上導入
     const [searchText, setSearchText] = useState(null);
     const [perSearchText, setPerSearchText] = useState(null);
 
@@ -208,14 +179,7 @@ function CourseSim({ route, navigation }) {
     const [timePickerMode, setTimePickerMode] = useState('from');
     const [showTimePicker, setShowTimePicker] = useState(false);
 
-    // 這兩個是緩存的該學期所有課程
-    const [s_coursePlanFile, setSCoursePlanFile] = useState(coursePlanFile);
-    const [s_coursePlanTimeFile, setSCoursePlanTimeFile] =
-        useState(coursePlanTimeFile);
-    const [s_courseVersion, setS_courseVersion] = useState(sourceCourseVersion);
-
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
-    const isFocused = useIsFocused();
 
     // ref
     const verScroll = useRef();
@@ -233,10 +197,7 @@ function CourseSim({ route, navigation }) {
         bg_color,
         unread,
         success,
-        trueWhite,
-        barStyle,
         TIME_TABLE_COLOR,
-        disabled,
     } = theme;
 
     const insets = useSafeAreaInsets();
@@ -380,26 +341,7 @@ function CourseSim({ route, navigation }) {
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'courseSim' });
-        refresh();
-
-        // 自己選的課
-        AsyncStorage.getItem('ARK_Timetable_Storage').then(
-            strCourseCodeList => {
-                const list = strCourseCodeList
-                    ? JSON.parse(strCourseCodeList)
-                    : null;
-                if (list && list.length > 0) {
-                    setU_codeSectionList(list);
-                }
-            },
-        );
     }, []);
-
-    useEffect(() => {
-        if (u_codeSectionList && u_codeSectionList.length > 0) {
-            handleCourseList(u_codeSectionList);
-        }
-    }, [u_codeSectionList, s_coursePlanTimeFile]);
 
     // 頁面是否聚焦監聽
     useFocusEffect(
@@ -407,6 +349,7 @@ function CourseSim({ route, navigation }) {
             // 當頁面聚焦時執行，如存在add課傳參
             if (route.params?.add) {
                 const { add } = route.params;
+                trigger();
                 addCourse(add);
                 // 執行任務後，重置參數
                 navigation.setParams({ add: undefined });
@@ -426,88 +369,31 @@ function CourseSim({ route, navigation }) {
 
             // 失焦時自動清理
             return () => { };
-        }, [route, navigation]),
+        }, [route, navigation, addCourse]),
     );
 
-    // 在頁面聚焦時讀取緩存數據，用於同步課程數據
-    useEffect(() => {
-        if (isFocused) {
-            refresh();
-        }
-    }, [isFocused]);
-
-    async function refresh() {
-        // 課程版本
-        getCourseData('version').then(localCourseVersion => {
-            if (!lodash.isEqual(localCourseVersion, s_courseVersion)) {
-                setS_courseVersion(localCourseVersion);
-                getCourseData('adddrop').then(addDropStorageData => {
-                    setSCoursePlanFile(addDropStorageData.adddrop);
-                    setSCoursePlanTimeFile(addDropStorageData.timetable);
-                });
-            }
-        });
-    }
-
     /**
-     * 輸入用戶選擇課程的列表，輸出用戶所有的課程課表。
+     * 從課表移除單一 section，並回饋已刪除的是哪一節。
      *
-     * 輸入：課程列表，唯一性定義：Code, section. 不包含時間。
-     *
-     * 輸出：課程列表，唯一性定義：Code, section, time。
-     *
-     * @param {*} u_codeSectionList 用戶選擇課程。單個課程{"Course Code": string, "Section": string}
+     * @param {Object} course 課節
      */
-    function handleCourseList(tempCourseSecList) {
-        // Key: course code; value: List, 這周內不同時間所有的該Course Code-section的課程。
-        const allCourseAllTime = lodash
-            .chain(tempCourseSecList)
-            .map((codeSection, i) => {
-                const this_courseCode = codeSection['Course Code'];
-                const this_section = codeSection.Section;
+    const handleDropCourse = course => {
+        trigger();
+        dropCourse(course);
 
-                return lodash
-                    .chain(courseTimeList)
-                    .filter(
-                        courseTime =>
-                            courseTime['Course Code'] === this_courseCode &&
-                            courseTime.Section === this_section,
-                    )
-                    .value();
-            })
-            .flatten()
-            .value();
-
-        // 存儲一周的課節課表，用於在首頁展示下節課程。
-        const s_allCourseAllTime = lodash
-            .chain(allCourseAllTime)
-            .groupBy('Day')
-            .mapValues(courses =>
-                lodash
-                    .chain(courses)
-                    .map(courseTime => ({
-                        'Course Code': courseTime['Course Code'],
-                        Section: courseTime.Section,
-                        'Time From': courseTime['Time From'],
-                        color: courseTime.color,
-                    }))
-                    .sortBy(course => moment(course['Time From'], 'HH:mm'))
-                    .value(),
-            )
-            .value();
-        setLocalStorage('ARK_WeekTimetable_Storage', s_allCourseAllTime); // key為 Day，value為該天的所有完整課程數組
-
-        setAllCourseAllTime(allCourseAllTime);
-        setU_codeSectionList(tempCourseSecList);
-        setLocalStorage('ARK_Timetable_Storage', tempCourseSecList); // 數組，僅包含courseCode和Section
-    }
+        Toast.show(
+            t('已刪除課程', {
+                ns: 'timetable',
+                code: course['Course Code'],
+                section: course.Section,
+            }),
+        );
+    };
 
     // 渲染一列（一天）的課表
     const renderDay = day => {
         // 獲取該天所有的課程數據
-        let dayCourseList = allCourseAllTime.filter(
-            course => course.Day === day,
-        );
+        let dayCourseList = planSlots.filter(course => course.Day === day);
 
         if (dayCourseList.length > 0) {
             // 按上課時間Time From排序
@@ -524,6 +410,7 @@ function CourseSim({ route, navigation }) {
 
             return (
                 <View
+                    key={day}
                     style={{
                         width: DAY_COLUMN_WIDTH,
                         marginBottom:
@@ -556,82 +443,62 @@ function CourseSim({ route, navigation }) {
         return null;
     };
 
-    const u_code_list = useMemo(() => {
-        return u_codeSectionList.map(item => item['Course Code']);
-    }, [u_codeSectionList]);
-
     /**
      * 渲染單個課表卡片
      *
      * @param {Object} course 單個課程對象，包含Course Code, Section, Time From, Time To等信息
      *
-     * @param {Array} dayCourseList 當天的所有課程列表，用於計算時間差和提醒
+     * @param {Array} dayCourseList 當天的所有課程列表，用於計算休息時間
      *
      * @param {number} idx 當天課程列表中的索引，用於計算時間差
      */
     const renderCourse = (course, dayCourseList, idx) => {
         let timeDiffReminder = null;
         let afternoonReminder = null;
-        let timeWarning = false;
+        // 衝突判斷交給共享層：同一天兩兩配對比較，能抓到被中間課節隔開的跨越式重疊
+        const timeWarning = conflictSlotKeys.has(getSlotKey(course));
 
-        if (idx > 0) {
-            let lastEnd = moment(dayCourseList[idx - 1]['Time To'], 'HH:mm:ss');
-            let courseBegin = moment(course['Time From'], 'HH:mm:ss');
-            let secDiff = courseBegin.diff(lastEnd, 'seconds');
-            let minuteDiff = secDiff / 60;
-            let hourDiff = (minuteDiff / 60).toFixed(2);
-
-            if (secDiff < 0) {
-                timeWarning = true;
-            }
-
-            if (idx < dayCourseList.length) {
-                // 衝突時只顯示衝突提示，不顯示負數休息時間（無意義）
-                timeDiffReminder = timeWarning ? (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            alignSelf: 'center',
-                            color: unread,
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                        }}>
-                        {'🆘' + t('課程衝突', { ns: 'timetable' }) + '🆘'}
-                    </Text>
-                ) : (
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            alignSelf: 'center',
-                            color: black.third,
-                            textAlign: 'center',
-                        }}>
-                        {t('休息', { ns: 'timetable' })}
-                        <Text
-                            style={{
-                                fontWeight: 'bold',
-                                color: themeColor,
-                            }}>
-                            {hourDiff >= 1 ? `${hourDiff}` : `${minuteDiff}`}
-                        </Text>
-                        {hourDiff >= 1
-                            ? t('小時後', { ns: 'timetable' })
-                            : t('分鐘後', { ns: 'timetable' })}
-                    </Text>
-                );
-            }
-        }
-
-        if (idx === 0 && dayCourseList.length > 1) {
-            let firstEnd = moment(course['Time To'], 'HH:mm:ss');
-            let secondBegin = moment(
-                dayCourseList[idx + 1]['Time From'],
-                'HH:mm:ss',
+        if (timeWarning) {
+            timeDiffReminder = (
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        alignSelf: 'center',
+                        color: unread,
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                    }}>
+                    {'🆘' + t('課程衝突', { ns: 'timetable' }) + '🆘'}
+                </Text>
             );
-            let secDiff = secondBegin.diff(firstEnd, 'seconds');
-            if (secDiff < 0) {
-                timeWarning = true;
-            }
+        } else if (idx > 0) {
+            // 未衝突才有休息時間可言，負數間隔一律由上面的衝突提示接手
+            const lastEnd = moment(dayCourseList[idx - 1]['Time To'], 'HH:mm');
+            const courseBegin = moment(course['Time From'], 'HH:mm');
+            const minuteDiff = courseBegin.diff(lastEnd, 'minutes');
+            const hourDiff = (minuteDiff / 60).toFixed(2);
+
+            timeDiffReminder = (
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        alignSelf: 'center',
+                        color: black.third,
+                        textAlign: 'center',
+                    }}>
+                    {t('休息', { ns: 'timetable' })}
+                    <Text
+                        style={{
+                            fontWeight: 'bold',
+                            color: themeColor,
+                        }}>
+                        {hourDiff >= 1 ? `${hourDiff}` : `${minuteDiff}`}
+                    </Text>
+                    {hourDiff >= 1
+                        ? t('小時後', { ns: 'timetable' })
+                        : t('分鐘後', { ns: 'timetable' })}
+                </Text>
+            );
         }
 
         // 判斷是否下午
@@ -673,9 +540,7 @@ function CourseSim({ route, navigation }) {
         ) : null;
 
         const hasDuplicate =
-            lodash.countBy(u_codeSectionList, 'Course Code')[
-            course['Course Code']
-            ] > 1;
+            lodash.countBy(planList, 'Course Code')[course['Course Code']] > 1;
         // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
         const courseMenuActions = [
             {
@@ -808,13 +673,7 @@ function CourseSim({ route, navigation }) {
                                 text: 'Yes',
                                 onPress: () => {
                                     trigger();
-                                    const tempList = lodash.filter(
-                                        u_codeSectionList,
-                                        i =>
-                                            course['Course Code'] !==
-                                            i['Course Code'],
-                                    );
-                                    handleCourseList(tempList);
+                                    dropAllSections(course['Course Code']);
                                     verScroll.current?.scrollTo({ y: 0 });
                                 },
                                 style: 'destructive',
@@ -837,10 +696,7 @@ function CourseSim({ route, navigation }) {
                         [
                             {
                                 text: 'Drop',
-                                onPress: () => {
-                                    trigger();
-                                    dropCourse(course);
-                                },
+                                onPress: () => handleDropCourse(course),
                                 style: 'destructive',
                             },
                             {
@@ -870,7 +726,7 @@ function CourseSim({ route, navigation }) {
                             ? unread
                             : TIME_TABLE_COLOR[
                             lodash.indexOf(
-                                u_code_list,
+                                planCourseCodes,
                                 course['Course Code'],
                             ) % TIME_TABLE_COLOR.length
                             ]
@@ -965,122 +821,71 @@ function CourseSim({ route, navigation }) {
         );
     };
 
-    // 導入ISW課表數據
-    const importCourseData = () => {
-        trigger(); // 動效或聲音提示
-
-        // 嘗試解析 Timetable 文本
-        const parseRes = parseImportData(importTimeTableText);
-
-        if (parseRes) {
-            // 滾動到頂部
-            verScroll.current?.scrollTo({ y: 0 });
-
-            // 將解析結果導入課表
-            handleCourseList(parseRes);
-        } else {
-            Alert.alert('', t('導入格式錯誤', { ns: 'timetable' }));
+    /** 開啟加課 sheet；空課表時直接展開到最大，讓搜尋結果一次看完 */
+    const openCourseSearch = () => {
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
         }
+
+        if (planSlots.length > 0) {
+            bottomSheetRef.current?.snapToIndex(1);
+        } else {
+            bottomSheetRef.current?.expand();
+        }
+
+        setHasOpenCourseSearch(true);
+        verScroll.current?.scrollTo({ y: 0 });
     };
 
-    const addCourse = course => {
-        trigger(); // 動效或聲音提示
-
-        // 使用 lodash 過濾掉相同 Course Code 的課程，然後添加新課程
-        const tempList = [
-            ...lodash.filter(
-                u_codeSectionList,
-                i => i['Course Code'] !== course['Course Code'],
-            ),
-            {
-                'Course Code': course['Course Code'],
-                Section: course.Section,
-            },
-        ];
-
-        handleCourseList(tempList);
+    const closeCourseSearch = () => {
+        trigger();
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+        }
+        bottomSheetRef.current?.close();
     };
 
-    const addAllSectionCourse = (courseCode, sectionObj) => {
-        // 使用 lodash 過濾掉相同 Course Code 的課程，然後添加所有新的 Section
-        const tempList = [
-            ...lodash.filter(
-                u_codeSectionList,
-                itm => itm['Course Code'] !== courseCode,
-            ),
-            ...lodash.map(Object.keys(sectionObj), key => ({
-                'Course Code': courseCode,
-                Section: key,
-            })),
-        ];
+    /**
+     * 空課表引導的一鍵導入。
+     * 優先用輸入框文字；若為空則自動讀取剪貼簿（方便用戶只複製、不手動貼上）。
+     */
+    const importCourseData = async () => {
+        trigger();
+        Keyboard.dismiss();
 
-        handleCourseList(tempList);
-    };
+        let text = normalizeImportText(importTimeTableText || '').trim();
+        if (!text) {
+            text = normalizeImportText(
+                (await Clipboard.getString()) || '',
+            ).trim();
+        }
 
-    const dropCourse = course => {
-        trigger(); // 動效或聲音提示
+        if (text && text !== importTimeTableText) {
+            // 貼上／剪貼簿若出現編碼亂碼，先還原成可讀文字
+            setImportTimeTableText(text);
+        }
 
-        // 過濾掉指定 Code + Section 的課程
-        const newList = lodash.filter(
-            u_codeSectionList,
-            i =>
-                !(
-                    i['Course Code'] === course['Course Code'] &&
-                    i.Section === course.Section
-                ),
-        );
+        if (!text) {
+            Alert.alert(
+                '',
+                t('↑記得先粘貼課表數據，再點擊導入哦', { ns: 'timetable' }),
+            );
+            return;
+        }
 
-        handleCourseList(newList); // 更新課表清單
+        if (!importFromISW(text)) {
+            Alert.alert('', t('導入格式錯誤', { ns: 'timetable' }));
+            return;
+        }
 
-        Toast.show(
-            t('已刪除課程', {
-                ns: 'timetable',
-                code: course['Course Code'],
-                section: course.Section,
-            }),
-        );
-    };
-
-    const clearCourse = () => {
-        trigger(); // 動效或聲音提示
-
-        // 關閉 BottomSheet
-        bottomSheetRef?.current?.close();
-
-        Alert.alert(
-            '',
-            t('確定清空當前模擬課表？', { ns: 'timetable' }),
-            [
-                {
-                    text: t('確定清空', { ns: 'timetable' }),
-                    onPress: () => {
-                        trigger(); // 再次觸發動效
-
-                        // 清空課表狀態
-                        setAllCourseAllTime([]);
-                        setU_codeSectionList([]);
-                        setImportTimeTableText(null);
-                        setSearchText(null);
-
-                        // 清空本地儲存
-                        setLocalStorage('ARK_Timetable_Storage', []);
-                        setLocalStorage('ARK_WeekTimetable_Storage', []);
-
-                        // 滾動到頂部
-                        verScroll?.current?.scrollTo({ y: 0 });
-                    },
-                    style: 'destructive',
-                },
-                {
-                    text: 'No',
-                },
-            ],
-            { cancelable: true },
-        );
+        setImportTimeTableText('');
+        Toast.show(t('已導入到模擬課表', { ns: 'timetable' }));
     };
 
     // 渲染首次使用引導頁面
     const renderFirstUse = () => {
+        const canImport = importTimeTableText.length > 0;
+
         return (
             <View
                 style={{ paddingHorizontal: scale(16), paddingTop: scale(16) }}>
@@ -1111,12 +916,38 @@ function CourseSim({ route, navigation }) {
                             color={themeColor}
                         />
                         <Text style={s.cardDescription}>
-                            {t('右上角按鈕手動"Add"！', { ns: 'timetable' })}
+                            {t('右下角按鈕手動加課！', { ns: 'timetable' })}
                         </Text>
                     </View>
+
+                    <View style={s.guideDivider} />
+
+                    <TouchableScale
+                        style={s.stepButton}
+                        onPress={() => {
+                            trigger();
+                            openCourseSearch();
+                        }}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <Ionicons
+                                name="add"
+                                size={scale(16)}
+                                color={themeColor}
+                                style={{ marginRight: scale(6) }}
+                            />
+                            <Text style={s.stepButtonText}>
+                                {t('加課', { ns: 'timetable' })}
+                            </Text>
+                        </View>
+                    </TouchableScale>
                 </View>
 
-                {/* 方法二卡片：ISW 導入 */}
+                {/* 方法二卡片：ISW 導入（保留輸入框，讓用戶知道要複製什麼） */}
                 <View style={s.methodCard}>
                     <View
                         style={{
@@ -1146,9 +977,9 @@ function CourseSim({ route, navigation }) {
                         </Text>
                     </View>
 
-                    {/* Step 2.1: 跳轉 ISW 按鈕 */}
-                    {importTimeTableText?.length > 0 ? null : (
-                        <TouchableOpacity
+                    {/* Step 2.1: 跳轉 ISW；已貼上內容時收起，減少干擾 */}
+                    {canImport ? null : (
+                        <TouchableScale
                             style={s.stepButton}
                             onPress={() => {
                                 trigger();
@@ -1170,13 +1001,11 @@ function CourseSim({ route, navigation }) {
                                     {`2.1 ${t('進入舊ISW複製', { ns: 'timetable' })}`}
                                 </Text>
                             </View>
-                        </TouchableOpacity>
+                        </TouchableScale>
                     )}
 
-                    {/* 分隔線 */}
                     <View style={s.guideDivider} />
 
-                    {/* Step 2.2: 輸入框 + 導入按鈕 */}
                     <Text style={s.inputLabel}>
                         {`2.2 ${t('粘貼課表數據', { ns: 'timetable' })}`}
                     </Text>
@@ -1184,7 +1013,9 @@ function CourseSim({ route, navigation }) {
                         selectTextOnFocus
                         multiline
                         numberOfLines={6}
-                        onChangeText={text => setImportTimeTableText(text)}
+                        onChangeText={text =>
+                            setImportTimeTableText(normalizeImportText(text))
+                        }
                         placeholder={`Click here and enter your timetable:
 Example：
 TimeDay  Mon  Tue  Wed  Thur  Fri  Sat  Sun
@@ -1194,12 +1025,9 @@ E11-0000
                         placeholderTextColor={black.third}
                         value={importTimeTableText}
                         style={s.guideTextInput}
-                        returnKeyType={'done'}
-                        blurOnSubmit={true}
-                        onSubmitEditing={() => {
-                            Keyboard.dismiss();
-                            importCourseData();
-                        }}
+                        returnKeyType="done"
+                        blurOnSubmit
+                        onSubmitEditing={importCourseData}
                         clearButtonMode="always"
                     />
 
@@ -1209,16 +1037,15 @@ E11-0000
                         })}
                     </Text>
 
-                    {/* 導入課表按鈕 */}
-                    <TouchableOpacity
+                    {/* 一鍵導入：輸入框有內容直接導入；空則自動讀剪貼簿 */}
+                    <TouchableScale
                         style={{
                             ...s.importButton,
-                            backgroundColor: importTimeTableText
+                            backgroundColor: canImport
                                 ? tonal.success30
-                                : disabled,
+                                : tonal.primary30,
                         }}
-                        onPress={importCourseData}
-                        disabled={!importTimeTableText}>
+                        onPress={importCourseData}>
                         <View
                             style={{
                                 flexDirection: 'row',
@@ -1228,22 +1055,18 @@ E11-0000
                             <Ionicons
                                 name="download-outline"
                                 size={scale(18)}
-                                color={
-                                    importTimeTableText ? success : trueWhite
-                                }
+                                color={canImport ? success : themeColor}
                                 style={{ marginRight: scale(6) }}
                             />
                             <Text
                                 style={{
                                     ...s.importButtonText,
-                                    color: importTimeTableText
-                                        ? success
-                                        : trueWhite,
+                                    color: canImport ? success : themeColor,
                                 }}>
                                 {t('一鍵導入到模擬課表', { ns: 'timetable' })}
                             </Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableScale>
                 </View>
 
                 {/* 聯絡資訊與致敬 */}
@@ -1462,6 +1285,24 @@ E11-0000
 
         return (
             <View style={{ width: '100%', padding: scale(10) }}>
+                {/* sheet 自帶關閉入口：加課按鈕是浮動的，sheet 展開後會蓋住它 */}
+                <TouchableScale
+                    style={{
+                        alignSelf: 'flex-end',
+                        backgroundColor: tonal.secondary15,
+                        borderRadius: scale(8),
+                        padding: scale(6),
+                        marginBottom: scale(5),
+                    }}
+                    onPress={closeCourseSearch}
+                    hitSlop={scale(8)}>
+                    <Ionicons
+                        name="close"
+                        size={scale(18)}
+                        color={secondThemeColor}
+                    />
+                </TouchableScale>
+
                 {/* 搜索輸入框 */}
                 <View
                     style={{
@@ -1670,13 +1511,7 @@ E11-0000
                                         }}
                                         onPress={() => {
                                             trigger();
-                                            const newList = lodash.filter(
-                                                u_codeSectionList,
-                                                itm =>
-                                                    itm['Course Code'] !==
-                                                    i['Course Code'],
-                                            );
-                                            handleCourseList(newList);
+                                            dropAllSections(i['Course Code']);
                                             verScroll.current?.scrollTo({
                                                 y: 0,
                                             });
@@ -1704,7 +1539,7 @@ E11-0000
                                             bottomSheetRef.current?.snapToIndex(
                                                 0,
                                             );
-                                            addAllSectionCourse(
+                                            addAllSections(
                                                 i['Course Code'],
                                                 sectionObj,
                                             );
@@ -1962,132 +1797,13 @@ E11-0000
         );
     };
 
-    const courseTimeList = useMemo(() => {
-        return s_coursePlanTimeFile.Courses;
-    }, [s_coursePlanTimeFile]);
-
-    const coursePlanList = useMemo(() => {
-        return s_coursePlanFile.Courses;
-    }, [s_coursePlanFile]);
-
     return (
+        // 標題列由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
         <View
             style={{
                 flex: 1,
                 backgroundColor: bg_color,
-                paddingTop: insets.top,
             }}>
-            {/* 頁面標題列（固定於 ScrollView 外，不受 iOS 26 BottomSheet/鍵盤推動影響） */}
-            <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingTop: verticalScale(3),
-                    paddingBottom: verticalScale(5),
-                    backgroundColor: bg_color,
-                }}>
-                {/* 清空課表按鈕 */}
-                {allCourseAllTime?.length > 0 && (
-                    <Pressable
-                        style={({ pressed }) => ({
-                            position: 'absolute',
-                            left: scale(10),
-                            backgroundColor: pressed
-                                ? tonal.primary50
-                                : tonal.primary15,
-                            borderRadius: scale(8),
-                            padding: scale(6),
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        })}
-                        onPress={clearCourse}
-                        hitSlop={scale(8)}>
-                        <Ionicons
-                            name="trash-outline"
-                            size={scale(18)}
-                            color={themeColor}
-                        />
-                    </Pressable>
-                )}
-
-                {/* 標題 + Logo */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignSelf: 'center',
-                        alignItems: 'center',
-                    }}>
-                    <Image
-                        source={require('../../../static/img/logo.png')}
-                        style={{
-                            height: iconSize,
-                            width: iconSize,
-                            borderRadius: scale(5),
-                        }}
-                    />
-                    <View style={{ marginLeft: scale(5) }}>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                fontSize: scale(18),
-                                color: themeColor,
-                                fontWeight: '600',
-                            }}>
-                            {t('課表模擬', { ns: 'timetable' })}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* 加課 / 關閉按鈕 */}
-                <Pressable
-                    style={({ pressed }) => ({
-                        position: 'absolute',
-                        right: scale(10),
-                        backgroundColor: hasOpenCourseSearch
-                            ? pressed
-                                ? tonal.secondary50
-                                : tonal.secondary15
-                            : pressed
-                                ? tonal.primary50
-                                : tonal.primary15,
-                        borderRadius: scale(8),
-                        padding: scale(6),
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    })}
-                    onPress={() => {
-                        trigger();
-                        if (Keyboard.isVisible()) {
-                            Keyboard.dismiss();
-                        }
-
-                        if (hasOpenCourseSearch) {
-                            bottomSheetRef.current?.close();
-                        } else {
-                            if (allCourseAllTime?.length > 0) {
-                                bottomSheetRef.current?.snapToIndex(1);
-                            } else {
-                                bottomSheetRef.current?.expand();
-                            }
-                        }
-
-                        setHasOpenCourseSearch(!hasOpenCourseSearch);
-                        verScroll.current?.scrollTo({ y: 0 });
-                    }}
-                    hitSlop={scale(8)}>
-                    <Ionicons
-                        name={hasOpenCourseSearch ? 'close' : 'add'}
-                        size={scale(18)}
-                        color={
-                            hasOpenCourseSearch
-                                ? secondThemeColor
-                                : themeColor
-                        }
-                    />
-                </Pressable>
-            </View>
-
             <ScrollView
                 ref={verScroll}
                 keyboardDismissMode="on-drag"
@@ -2095,7 +1811,7 @@ E11-0000
                 contentContainerStyle={{ paddingBottom: tabBarHeight }}>
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
-                    {allCourseAllTime?.length > 0 ? (
+                    {planSlots.length > 0 ? (
                         <>
                             <ScrollView
                                 horizontal
@@ -2109,6 +1825,14 @@ E11-0000
                     )}
                 </View>
             </ScrollView>
+
+            {/* sheet 展開後會蓋住 FAB，故開啟期間收起，關閉入口改由 sheet 自己提供 */}
+            {hasOpenCourseSearch ? null : (
+                <AddCourseFab
+                    bottom={tabBarHeight + verticalScale(10)}
+                    onPress={openCourseSearch}
+                />
+            )}
 
             <CustomBottomSheet
                 ref={bottomSheetRef}
@@ -2128,9 +1852,9 @@ E11-0000
                             textAlign: 'center',
                         }}>
                         Timetable Version:{' '}
-                        {s_courseVersion.adddrop.updateTime + '\n'}
+                        {courseVersion.adddrop.updateTime + '\n'}
                         {t(
-                            '重啟APP或在搵課頁手動更新版本，取決於開發者是否上傳更新',
+                            '重啟APP或在選課頁手動更新版本，取決於開發者是否上傳更新',
                             { ns: 'timetable' },
                         )}
                     </Text>

@@ -1,8 +1,14 @@
 import React from 'react';
-import { Keyboard, Pressable, Text, TextInput, View } from 'react-native';
+import { Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
-import { MenuView } from '@expo/ui/community/menu';
+// 不可用 @expo/ui MenuView（SwiftUI Host matchContents 會在 Tab 切換／版面提交時
+// 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
+import { MenuView } from '@react-native-menu/menu';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
 import TouchableScale from '../../../../components/TouchableScale';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
@@ -10,6 +16,13 @@ import { uiStyle } from '../../../../components/ThemeContext';
 
 /** 搜尋按鈕固定寬度（相容「搜索」／「Search」） */
 const SEARCH_BTN_WIDTH = scale(50);
+
+/** 與 TouchableScale 預設相近的彈簧參數 */
+const SEARCH_BTN_SPRING = {
+    damping: 18,
+    stiffness: 280,
+    mass: 0.4,
+};
 
 /**
  * 搜尋欄區塊
@@ -26,25 +39,39 @@ const SearchBarSection = ({
     trigger,
 }) => {
     const { themeColor, black, white, disabled } = theme;
+
+    // 原生 UIButton 會吃掉子層的 pressIn，故縮放回饋改由選單開合驅動
+    const searchBtnScale = useSharedValue(1);
+    const searchBtnAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: searchBtnScale.value }],
+    }));
+
+    // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
     const searchActions = [
         {
             id: 'wiki',
             title: `${t('寫', { ns: 'catalog' })} Wiki`,
-            image: 'book',
+            image: Platform.select({ ios: 'book', android: 'ic_menu_agenda' }),
             imageColor: themeColor,
             titleColor: themeColor,
         },
         {
             id: 'what2reg',
             title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-            image: 'star',
+            image: Platform.select({
+                ios: 'star',
+                android: 'btn_star_big_on',
+            }),
             imageColor: black.third,
             titleColor: black.third,
         },
         {
             id: 'official',
             title: `${t('查', { ns: 'catalog' })} ${t('官方', { ns: 'catalog' })}`,
-            image: 'graduationcap',
+            image: Platform.select({
+                ios: 'graduationcap',
+                android: 'ic_menu_info_details',
+            }),
             imageColor: black.third,
             titleColor: black.third,
         },
@@ -150,15 +177,24 @@ const SearchBarSection = ({
             {inputOK ? (
                 <MenuView
                     actions={searchActions}
-                    onOpenMenu={() => trigger()}
+                    onOpenMenu={() => {
+                        searchBtnScale.value = withSpring(
+                            0.9,
+                            SEARCH_BTN_SPRING,
+                        );
+                        trigger();
+                        onPressSearchButton?.();
+                    }}
+                    onCloseMenu={() => {
+                        searchBtnScale.value = withSpring(1, SEARCH_BTN_SPRING);
+                    }}
                     onPressAction={handlePressAction}
                     shouldOpenOnLongPress={false}
                     style={{ width: SEARCH_BTN_WIDTH }}>
-                    <TouchableScale
-                        style={searchBtnStyle}
-                        onPress={onPressSearchButton}>
+                    <Animated.View
+                        style={[searchBtnStyle, searchBtnAnimatedStyle]}>
                         {searchBtnLabel}
-                    </TouchableScale>
+                    </Animated.View>
                 </MenuView>
             ) : (
                 <TouchableScale style={searchBtnStyle} disabled>

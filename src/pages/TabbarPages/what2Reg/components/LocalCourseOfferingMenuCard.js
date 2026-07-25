@@ -1,9 +1,14 @@
 import React from 'react';
-import { Text, View, Alert, useWindowDimensions } from 'react-native';
-// @expo/ui MenuView 用 SwiftUI Host + matchContents 反向量測，無明確寬度會塌陷。
+import { Text, View, Platform, useWindowDimensions } from 'react-native';
+// 不可用 @expo/ui MenuView（SwiftUI Host matchContents 會在 Tab 切換／版面提交時
+// 反寫 Fabric ShadowTree 並 abort）。改用 @react-native-menu/menu（原生 UIButton）。
 // Teacher 分類橫滑靠固定 cardWidth；時段每行最多兩天，避免多天撐破寬度。
-import { Icon } from '@expo/ui';
-import { MenuView } from '@expo/ui/community/menu';
+import { MenuView } from '@react-native-menu/menu';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
 import { scale } from 'react-native-size-matters';
 import lodash from 'lodash';
 import { t } from 'i18next';
@@ -14,7 +19,7 @@ import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
 import { useUmehHost } from '../../../../utils/umehHost';
 import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import TouchableScale from '../../../../components/TouchableScale';
+import { navigateToCourseTab } from '../../../../utils/courseNavigation';
 
 /** 與 LocalCourse 列表左右內距一致 */
 const TEACHER_LIST_SIDE_INSET = scale(10);
@@ -23,23 +28,12 @@ const TEACHER_CARD_MARGIN = scale(5);
 /** 橫滑時露出下一張卡的寬度，提示還有更多班別 */
 const TEACHER_NEXT_CARD_PEEK = scale(36);
 
-// Menu 圖標：iOS 用 SF Symbol，Android 用 Material Symbols XML
-const MENU_ICON_BOOK = Icon.select({
-    ios: 'book',
-    android: require('@expo/material-symbols/book.xml'),
-});
-const MENU_ICON_STAR = Icon.select({
-    ios: 'star',
-    android: require('@expo/material-symbols/star.xml'),
-});
-const MENU_ICON_CALENDAR = Icon.select({
-    ios: 'calendar',
-    android: require('@expo/material-symbols/calendar_month.xml'),
-});
-const MENU_ICON_ADD = Icon.select({
-    ios: 'plus.circle',
-    android: require('@expo/material-symbols/add_circle.xml'),
-});
+/** 與 TouchableScale 預設相近的彈簧參數 */
+const COURSE_CARD_SPRING = {
+    damping: 18,
+    stiffness: 280,
+    mass: 0.4,
+};
 
 // 單一 offering（section）卡片與長按選單：Section／Teacher 分組共用。
 const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
@@ -60,6 +54,13 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     const { baseHost } = useUmehHost();
     const { themeColor, black, white } = theme;
 
+    // 原生 UIButton 會吃掉子層 pressIn，故縮放回饋改由選單開合驅動
+    // hook 必須在 courseRow 提前 return 之前呼叫
+    const cardScale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: cardScale.value }],
+    }));
+
     const courseRow = slots?.[0];
     if (!courseRow) {
         return null;
@@ -72,32 +73,45 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
         variant === 'section' && courseRow['Teacher Information'];
 
     const keyPrefix = variant;
+    // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
     const offeringActions = [
         {
             id: `${keyPrefix}-wiki`,
             title: `${t('寫', { ns: 'catalog' })} Wiki`,
-            image: MENU_ICON_BOOK,
+            image: Platform.select({
+                ios: 'book',
+                android: 'ic_menu_agenda',
+            }),
             imageColor: themeColor,
             titleColor: themeColor,
         },
         {
             id: `${keyPrefix}-what2reg`,
             title: `${t('查', { ns: 'catalog' })} ${t('選咩課', { ns: 'catalog' })}`,
-            image: MENU_ICON_STAR,
+            image: Platform.select({
+                ios: 'star',
+                android: 'btn_star_big_on',
+            }),
             imageColor: black.third,
             titleColor: black.third,
         },
         {
             id: `${keyPrefix}-coursesim`,
             title: `${t('查', { ns: 'catalog' })} ${t('模擬課表', { ns: 'catalog' })}`,
-            image: MENU_ICON_CALENDAR,
+            image: Platform.select({
+                ios: 'calendar',
+                android: 'ic_menu_my_calendar',
+            }),
             imageColor: black.third,
             titleColor: black.third,
         },
         {
             id: `${keyPrefix}-add-coursesim`,
             title: `${t('添加至模擬課表', { ns: 'catalog' })}`,
-            image: MENU_ICON_ADD,
+            image: Platform.select({
+                ios: 'plus.circle',
+                android: 'ic_menu_add',
+            }),
             imageColor: black.third,
             titleColor: black.third,
         },
@@ -159,30 +173,22 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                 });
                 if (navigation.canGoBack()) {
                     navigation.goBack();
-                    navigation.navigate('Tabbar', {
-                        screen: 'CourseSimTab',
-                        params: { check: courseRow['Course Code'] },
-                    });
                 }
+                navigateToCourseTab(navigation, {
+                    segment: 'timetable',
+                    courseCode: courseRow['Course Code'],
+                });
                 break;
             }
             case `${keyPrefix}-add-coursesim`: {
-                Alert.alert('ARK搵課提示', '確定添加此課程到模擬課表嗎？', [
-                    {
-                        text: 'Yes',
-                        onPress: () => {
-                            trigger();
-                            if (navigation.canGoBack()) {
-                                navigation.goBack();
-                                navigation.navigate('Tabbar', {
-                                    screen: 'CourseSimTab',
-                                    params: { add: courseRow },
-                                });
-                            }
-                        },
-                    },
-                    { text: 'No' },
-                ]);
+                // 加課後直接落在課表段落即為可見回饋，故不再多一層 Alert 確認
+                if (navigation.canGoBack()) {
+                    navigation.goBack();
+                }
+                navigateToCourseTab(navigation, {
+                    segment: 'timetable',
+                    add: courseRow,
+                });
                 break;
             }
             default:
@@ -193,27 +199,32 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
     return (
         <MenuView
             actions={offeringActions}
-            onOpenMenu={() => trigger()}
             onPressAction={handleMenuAction}
             shouldOpenOnLongPress={false}
+            onOpenMenu={() => {
+                trigger('rigid');
+                cardScale.value = withSpring(0.96, COURSE_CARD_SPRING);
+            }}
+            onCloseMenu={() => {
+                cardScale.value = withSpring(1, COURSE_CARD_SPRING);
+            }}
             style={{
                 width: cardWidth,
                 margin: scale(5),
                 alignSelf: variant === 'section' ? 'center' : 'flex-start',
             }}>
-            <TouchableScale
-                style={{
-                    width: cardWidth,
-                    backgroundColor: white,
-                    borderRadius: scale(16),
-                    paddingVertical: scale(5),
-                    paddingHorizontal: scale(8),
-                    alignItems: 'center',
-                }}
-                activeScale={0.96}
-                onPress={() => {
-                    trigger('rigid');
-                }}>
+            <Animated.View
+                style={[
+                    {
+                        width: cardWidth,
+                        backgroundColor: white,
+                        borderRadius: scale(16),
+                        paddingVertical: scale(5),
+                        paddingHorizontal: scale(8),
+                        alignItems: 'center',
+                    },
+                    animatedStyle,
+                ]}>
                 {variant !== 'section' && (
                     <View style={{ flexDirection: 'row' }}>
                         <Text
@@ -324,7 +335,7 @@ const LocalCourseOfferingMenuCard = ({ navigation, slots, variant }) => {
                             ))}
                         </View>
                     )}
-            </TouchableScale>
+            </Animated.View>
         </MenuView>
     );
 };

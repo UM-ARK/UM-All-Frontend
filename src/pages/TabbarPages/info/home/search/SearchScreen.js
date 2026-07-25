@@ -30,6 +30,10 @@ import {
     removeSearchHistory,
 } from '../../../../../utils/searchHistory';
 import { trigger } from '../../../../../utils/trigger';
+import {
+    COURSE_TAB_ROUTE,
+    navigateToCourseTab,
+} from '../../../../../utils/courseNavigation';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' });
 const MAX_LOCAL_RESULTS = 8;
@@ -206,8 +210,9 @@ const SearchScreen = ({ navigation }) => {
                 return;
             }
 
-            if (item.go_where === 'CourseSimTab') {
-                navigation.navigate('Tabbar', { screen: 'CourseSimTab' });
+            if (item.go_where === COURSE_TAB_ROUTE) {
+                // 此入口對應「課表模擬」，需落在選課頁的課表段落
+                navigateToCourseTab(navigation, { segment: 'timetable' });
                 return;
             }
 
