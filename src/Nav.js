@@ -42,8 +42,8 @@ const Nav = () => {
     const { black } = theme;
     const { t } = useTranslation(['common', 'features', 'event', 'home']);
     const navigationRef = useNavigationContainerRef();
-    // 冷啟動時導覽尚未就緒，暫存待處理的快捷操作
-    const pendingQuickActionRef = useRef(null);
+    // 冷啟動：首 render 就暫存 initial，避免 onReady 早於 useEffect 而漏導航
+    const pendingQuickActionRef = useRef(QuickActions.initial ?? null);
 
     // 與 ThemeContext 對齊，否則透明標題列下會透出 Navigation 預設淺色底（深色模式頂部出現白條）
     const navigationTheme = useMemo(() => {
@@ -83,6 +83,19 @@ const Nav = () => {
         }
     }, [navigationRef]);
 
+    // 消費暫存的快捷操作（onReady / useEffect 雙邊兜底）
+    const flushPendingQuickAction = useCallback(() => {
+        const pendingAction = pendingQuickActionRef.current;
+        if (!pendingAction || !navigationRef.isReady()) {
+            return;
+        }
+        pendingQuickActionRef.current = null;
+        // 延一幀，確保 Stack 子導覽已掛載
+        requestAnimationFrame(() => {
+            handleQuickAction(pendingAction);
+        });
+    }, [handleQuickAction, navigationRef]);
+
     useEffect(() => {
         const configureQuickActions = async () => {
             const supported = await QuickActions.isSupported();
@@ -96,13 +109,13 @@ const Nav = () => {
                     id: 'bus',
                     title: t('校園巴士'),
                     subtitle: t('查看校巴到站情況'),
-                    ...(Platform.OS === 'ios' ? { icon: 'symbol:bus' } : {}),
+                    ...(Platform.OS === 'ios' ? {icon: 'symbol:bus'} : {}),
                 },
                 {
                     id: 'search',
                     title: t('搜索'),
                     subtitle: t('搜索關於澳大的一切'),
-                    ...(Platform.OS === 'ios' ? { icon: 'search' } : {}),
+                    ...(Platform.OS === 'ios' ? {icon: 'search'} : {}),
                 },
             ]);
         };
@@ -114,27 +127,19 @@ const Nav = () => {
         // App 已開啟或位於背景時觸發
         const subscription = QuickActions.addListener(handleQuickAction);
 
-        // App 被完全關閉時，從快捷操作冷啟動
-        if (QuickActions.initial) {
-            pendingQuickActionRef.current = QuickActions.initial;
-        }
+        // 若 onReady 已先執行，這裡補導一次
+        flushPendingQuickAction();
 
         return () => {
             subscription.remove();
         };
-    }, [handleQuickAction, t]);
+    }, [flushPendingQuickAction, handleQuickAction, t]);
 
     return (
         <NavigationContainer
             ref={navigationRef}
             theme={navigationTheme}
-            onReady={() => {
-                const pendingAction = pendingQuickActionRef.current;
-                if (pendingAction) {
-                    pendingQuickActionRef.current = null;
-                    handleQuickAction(pendingAction);
-                }
-            }}>
+            onReady={flushPendingQuickAction}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{
