@@ -1305,100 +1305,104 @@ E11-0000
 
         return (
             <View style={{ width: '100%', padding: scale(10) }}>
-                {/* sheet 自帶關閉入口：加課按鈕是浮動的，sheet 展開後會蓋住它 */}
-                <TouchableScale
-                    style={{
-                        alignSelf: 'flex-end',
-                        backgroundColor: tonal.secondary15,
-                        borderRadius: scale(8),
-                        padding: scale(6),
-                        marginBottom: scale(5),
-                    }}
-                    onPress={closeCourseSearch}
-                    hitSlop={scale(8)}>
-                    <Ionicons
-                        name="close"
-                        size={scale(18)}
-                        color={secondThemeColor}
-                    />
-                </TouchableScale>
-
-                {/* 搜索輸入框 */}
+                {/* 搜索列：輸入框 + 右側關閉（FAB 被 sheet 蓋住時的關閉入口） */}
                 <View
                     style={{
-                        borderColor: themeColor,
-                        backgroundColor: white,
-                        height: verticalScale(35),
-                        borderWidth: scale(1),
-                        borderRadius: scale(5),
                         flexDirection: 'row',
                         alignItems: 'center',
                     }}>
-                    <Ionicons
-                        name="search"
-                        size={scale(20)}
-                        color={black.third}
+                    <View
                         style={{
-                            opacity: 0.4,
-                            position: 'absolute',
-                            left: scale(10),
-                        }}
-                    />
-                    {perSearchText && (
-                        <TouchableOpacity
-                            style={{
-                                borderWidth: scale(1),
-                                borderRadius: scale(5),
-                                borderColor: themeColor,
-                                padding: scale(3),
-                                position: 'absolute',
-                                left: scale(40),
-                                zIndex: 999,
-                            }}
-                            onPress={() => {
-                                trigger();
-                                setSearchText(perSearchText);
-                                setPerSearchText(null);
-                            }}>
-                            <Text
-                                style={{
-                                    ...uiStyle.defaultText,
-                                    color: themeColor,
-                                }}>
-                                Back
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                    <BottomSheetTextInput
-                        ref={textSearchRef}
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: black.main,
-                            fontSize: scale(13),
-                            padding: scale(5),
-                            height: '100%',
                             flex: 1,
-                            textAlign: 'center',
-                            textAlignVertical: 'center',
+                            borderColor: themeColor,
+                            backgroundColor: white,
+                            height: verticalScale(35),
+                            borderWidth: scale(1),
+                            borderRadius: scale(5),
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Ionicons
+                            name="search"
+                            size={scale(20)}
+                            color={black.third}
+                            style={{
+                                opacity: 0.4,
+                                position: 'absolute',
+                                left: scale(10),
+                            }}
+                        />
+                        {perSearchText && (
+                            <TouchableOpacity
+                                style={{
+                                    borderWidth: scale(1),
+                                    borderRadius: scale(5),
+                                    borderColor: themeColor,
+                                    padding: scale(3),
+                                    position: 'absolute',
+                                    left: scale(40),
+                                    zIndex: 999,
+                                }}
+                                onPress={() => {
+                                    trigger();
+                                    setSearchText(perSearchText);
+                                    setPerSearchText(null);
+                                }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: themeColor,
+                                    }}>
+                                    Back
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                        <BottomSheetTextInput
+                            ref={textSearchRef}
+                            style={{
+                                ...uiStyle.defaultText,
+                                color: black.main,
+                                fontSize: scale(13),
+                                padding: scale(5),
+                                height: '100%',
+                                flex: 1,
+                                textAlign: 'center',
+                                textAlignVertical: 'center',
+                            }}
+                            onChangeText={text => {
+                                setSearchText(text);
+                                if (text.length === 0) {
+                                    setPerSearchText(null);
+                                }
+                            }}
+                            value={searchText}
+                            selectTextOnFocus
+                            placeholder={t('搜索課程：ECE, 電氣, AIM...', {
+                                ns: 'timetable',
+                            })}
+                            placeholderTextColor={black.third}
+                            returnKeyType="search"
+                            selectionColor={themeColor}
+                            blurOnSubmit
+                            onSubmitEditing={() => Keyboard.dismiss()}
+                            clearButtonMode="always"
+                        />
+                    </View>
+                    <TouchableScale
+                        style={{
+                            marginLeft: scale(8),
+                            backgroundColor: tonal.primary15,
+                            borderRadius: scale(8),
+                            padding: scale(6),
                         }}
-                        onChangeText={text => {
-                            setSearchText(text);
-                            if (text.length === 0) {
-                                setPerSearchText(null);
-                            }
-                        }}
-                        value={searchText}
-                        selectTextOnFocus
-                        placeholder={t('搜索課程：ECE, 電氣, AIM...', {
-                            ns: 'timetable',
-                        })}
-                        placeholderTextColor={black.third}
-                        returnKeyType="search"
-                        selectionColor={themeColor}
-                        blurOnSubmit
-                        onSubmitEditing={() => Keyboard.dismiss()}
-                        clearButtonMode="always"
-                    />
+                        onPress={closeCourseSearch}
+                        hitSlop={scale(8)}>
+                        <Ionicons
+                            name="close"
+                            size={scale(18)}
+                            color={themeColor}
+                        />
+                    </TouchableScale>
                 </View>
 
                 <BottomSheetScrollView
@@ -1802,7 +1806,8 @@ E11-0000
                         color: black.third,
                         textAlign: 'center',
                     }}>
-                    {t('檢查課表版本!', { ns: 'catalog' })}
+                    Timetable Version:{' '}
+                    {courseVersion.adddrop.updateTime}
                 </Text>
                 <Text
                     style={{
@@ -1858,30 +1863,12 @@ E11-0000
 
             <CustomBottomSheet
                 ref={bottomSheetRef}
+                page={'courseSim'}
                 setHasOpenFalse={() => {
                     if (hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);
                     }
                 }}>
-                {/* 數據版本顯示 */}
-                {!searchText && (
-                    <Text
-                        style={{
-                            alignSelf: 'center',
-                            ...uiStyle.defaultText,
-                            fontSize: scale(9),
-                            color: black.third,
-                            textAlign: 'center',
-                        }}>
-                        Timetable Version:{' '}
-                        {courseVersion.adddrop.updateTime + '\n'}
-                        {t(
-                            '重啟APP或在選課頁手動更新版本，取決於開發者是否上傳更新',
-                            { ns: 'timetable' },
-                        )}
-                    </Text>
-                )}
-
                 {renderCourseSearch()}
             </CustomBottomSheet>
         </View>

@@ -40,7 +40,7 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             keyboardBlurBehavior="restore"
             android_keyboardInputMode="adjustResize"
             onClose={() => props?.setHasOpenFalse && props.setHasOpenFalse()}
-            enablePanDownToClose={['features', 'home'].includes(props?.page) ? true : false}
+            enablePanDownToClose={['features', 'home', 'courseSim'].includes(props?.page)}
             backgroundStyle={{ backgroundColor: 'transparent' }}
             handleIndicatorStyle={{ backgroundColor: black.third }}
             style={[{
