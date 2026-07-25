@@ -58,12 +58,13 @@ const ViewerChromeButton = ({
 /**
  * GalleryPreview 自訂圖片元件：expo-image + blurhash 模糊加載
  * 需回傳真實寬高給庫，才能正確計算縮放邊界
+ * 白底：透明 PNG / logo 在黑色查看器背景上才看得清
  */
-const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder }) => {
+const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder, trueWhite }) => {
     return (
         <Image
             source={source}
-            style={style}
+            style={[style, {backgroundColor: trueWhite}]}
             contentFit="contain"
             placeholder={imagePlaceholder}
             placeholderContentFit="contain"
@@ -233,13 +234,14 @@ const ARKImageView = forwardRef((props, ref) => {
         trueWhite,
     ]);
 
-    // GalleryPreview 的 ImageComponent 只傳 source/onLoad/style，用閉包帶入 blurhash
+    // GalleryPreview 的 ImageComponent 只傳 source/onLoad/style，用閉包帶入 blurhash / 白底
     const ImageComponent = useCallback((imageProps) => (
         <GalleryExpoImage
             {...imageProps}
             imagePlaceholder={imagePlaceholder}
+            trueWhite={trueWhite}
         />
-    ), [imagePlaceholder]);
+    ), [imagePlaceholder, trueWhite]);
 
     if (processedImages.length === 0) { return null; }
 
