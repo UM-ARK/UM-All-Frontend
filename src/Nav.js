@@ -1,11 +1,12 @@
 // 專門存放路由，其他頁面可使用this.props.navigation.navigate("對應下方創建棧的路由名")進行跳轉
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Platform, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContainer, useNavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import * as QuickActions from 'expo-quick-actions';
 import { trigger } from './utils/trigger';
 import { useTranslation } from 'react-i18next';
 
@@ -39,8 +40,10 @@ const Stack = createNativeStackNavigator();
 const Nav = () => {
     const { theme } = useTheme();
     const { black } = theme;
-    const { t } = useTranslation(['common', 'features', 'event']);
+    const { t } = useTranslation(['common', 'features', 'event', 'home']);
     const navigationRef = useNavigationContainerRef();
+    // 冷啟動時導覽尚未就緒，暫存待處理的快捷操作
+    const pendingQuickActionRef = useRef(null);
 
     // 與 ThemeContext 對齊，否則透明標題列下會透出 Navigation 預設淺色底（深色模式頂部出現白條）
     const navigationTheme = useMemo(() => {
@@ -58,8 +61,80 @@ const Nav = () => {
         };
     }, [theme]);
 
+    const handleQuickAction = useCallback(action => {
+        if (!action) {
+            return;
+        }
+
+        if (!navigationRef.isReady()) {
+            pendingQuickActionRef.current = action;
+            return;
+        }
+
+        switch (action.id) {
+            case 'bus':
+                navigationRef.navigate('Bus');
+                break;
+            case 'search':
+                navigationRef.navigate('Search');
+                break;
+            default:
+                break;
+        }
+    }, [navigationRef]);
+
+    useEffect(() => {
+        const configureQuickActions = async () => {
+            const supported = await QuickActions.isSupported();
+            if (!supported) {
+                return;
+            }
+
+            // 僅配置巴士、搜索；Android 不設 icon（系統會用 App 圖示）
+            await QuickActions.setItems([
+                {
+                    id: 'bus',
+                    title: t('校園巴士'),
+                    subtitle: t('查看校巴到站情況'),
+                    ...(Platform.OS === 'ios' ? { icon: 'symbol:bus' } : {}),
+                },
+                {
+                    id: 'search',
+                    title: t('搜索'),
+                    subtitle: t('搜索關於澳大的一切'),
+                    ...(Platform.OS === 'ios' ? { icon: 'search' } : {}),
+                },
+            ]);
+        };
+
+        configureQuickActions().catch(error => {
+            console.warn('Quick Actions setup failed:', error);
+        });
+
+        // App 已開啟或位於背景時觸發
+        const subscription = QuickActions.addListener(handleQuickAction);
+
+        // App 被完全關閉時，從快捷操作冷啟動
+        if (QuickActions.initial) {
+            pendingQuickActionRef.current = QuickActions.initial;
+        }
+
+        return () => {
+            subscription.remove();
+        };
+    }, [handleQuickAction, t]);
+
     return (
-        <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+        <NavigationContainer
+            ref={navigationRef}
+            theme={navigationTheme}
+            onReady={() => {
+                const pendingAction = pendingQuickActionRef.current;
+                if (pendingAction) {
+                    pendingQuickActionRef.current = null;
+                    handleQuickAction(pendingAction);
+                }
+            }}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{
