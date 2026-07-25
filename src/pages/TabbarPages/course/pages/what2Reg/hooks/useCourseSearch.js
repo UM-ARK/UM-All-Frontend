@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { hasChinese } from '../utils/text';
+import { hasChinese } from '../../../../../../utils/text';
 import { buildSearchResults } from '../utils/search';
 
 /**

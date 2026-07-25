@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { scale } from 'react-native-size-matters';
-import { uiStyle } from '../../../../components/ThemeContext';
+import { uiStyle } from '../../../../../../components/ThemeContext';
 
 /**
  * 側邊首字母快速導航

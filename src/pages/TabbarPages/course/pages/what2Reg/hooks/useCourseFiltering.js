@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import lodash from 'lodash';
 import { defaultTimeFilter } from '../constants/options';
-import { getSectionConflicts } from '../../course/hooks/useConflict';
+import { getSectionConflicts } from '../../../hooks/useConflict';
 
 const TIME_STRING_PATTERN = /^(\d{1,2}):(\d{2})(?::\d{2})?$/;
 

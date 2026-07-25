@@ -24,7 +24,7 @@ import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage'
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
 import HarborInboxPage from './pages/TabbarPages/my/pages/HarborInboxPage';
 
-import LocalCourse from './pages/TabbarPages/what2Reg/pages/LocalCourse';
+import LocalCourse from './pages/TabbarPages/course/pages/what2Reg/pages/LocalCourse';
 
 import Webviewer from './components/Webviewer';
 import AllEvents from './pages/TabbarPages/info/club/AllEvents';

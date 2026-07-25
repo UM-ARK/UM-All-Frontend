@@ -13,13 +13,13 @@ import { scale } from 'react-native-size-matters';
 import lodash from 'lodash';
 import { t } from 'i18next';
 
-import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import { trigger } from '../../../../utils/trigger';
-import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
-import { useUmehHost } from '../../../../utils/umehHost';
-import { openLink } from '../../../../utils/browser';
-import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { navigateToCourseTab } from '../../../../utils/courseNavigation';
+import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
+import { trigger } from '../../../../../../utils/trigger';
+import { ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
+import { useUmehHost } from '../../../../../../utils/umehHost';
+import { openLink } from '../../../../../../utils/browser';
+import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
+import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
 
 /** 與 LocalCourse 列表左右內距一致 */
 const TEACHER_LIST_SIDE_INSET = scale(10);

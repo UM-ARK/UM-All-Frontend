@@ -44,7 +44,7 @@ import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
 import { navigateToCourseTab } from '../../../../utils/courseNavigation.js';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
-import CustomBottomSheet from '../../courseSim/BottomSheet';
+import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
 import SearchBar from './components/SearchBar.js';
 import CalendarBar from './components/CalendarBar';

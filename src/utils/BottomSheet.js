@@ -3,7 +3,7 @@ import React, { forwardRef, useContext, useMemo, useState } from 'react';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
-import { useTheme } from '../../../components/ThemeContext';
+import { useTheme } from '../components/ThemeContext';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAnimatedStyle, withTiming } from 'react-native-reanimated';

@@ -49,22 +49,22 @@ import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
-import { useTheme, uiStyle } from '../../../components/ThemeContext';
-import { openLink } from '../../../utils/browser';
+import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
+import { openLink } from '../../../../../utils/browser';
 import {
     ARK_WIKI_SEARCH,
     OFFICIAL_COURSE_SEARCH,
     UM_ISW,
-} from '../../../utils/pathMap';
-import { getCurrentUmehHost } from '../../../utils/umehHost';
-import { logToFirebase } from '../../../utils/firebaseAnalytics';
-import { trigger } from '../../../utils/trigger';
-import TouchableScale from '../../../components/TouchableScale';
-import CustomBottomSheet from './BottomSheet';
-import { useCoursePlan } from '../course/context/CoursePlanContext';
-import { getSlotKey } from '../course/hooks/useConflict';
-import { normalizeImportText } from '../course/utils/parseImportData';
-import AddCourseFab from '../course/components/AddCourseFab';
+} from '../../../../../utils/pathMap';
+import { getCurrentUmehHost } from '../../../../../utils/umehHost';
+import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
+import { trigger } from '../../../../../utils/trigger';
+import TouchableScale from '../../../../../components/TouchableScale';
+import CustomBottomSheet from '../../../../../utils/BottomSheet';
+import { useCoursePlan } from '../../context/CoursePlanContext';
+import { getSlotKey } from '../../hooks/useConflict';
+import { normalizeImportText } from '../../utils/parseImportData';
+import AddCourseFab from '../../components/AddCourseFab';
 import { getReplacementCourses } from './utils/replacementCourses';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體

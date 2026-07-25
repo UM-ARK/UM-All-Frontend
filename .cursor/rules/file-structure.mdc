@@ -11,8 +11,10 @@ src/
 ├── pages/
 │   ├── TabbarPages/     # 底部標籤對應頁面
 │   │   ├── info/        # 資訊（活動、組織、新聞等）
-│   │   ├── what2Reg/    # 揾課
-│   │   ├── courseSim/   # 課表
+│   │   ├── course/      # 課程 Tab（揾課／課表段落容器）
+│   │   │   └── pages/
+│   │   │       ├── what2Reg/   # 揾課段落
+│   │   │       └── courseSim/  # 課表段落
 │   │   ├── features/    # 服務 Tab 入口
 │   │   ├── arkHarbor/   # Harbor（WebView／相關頁）
 │   │   ├── arkwiki/     # Wiki

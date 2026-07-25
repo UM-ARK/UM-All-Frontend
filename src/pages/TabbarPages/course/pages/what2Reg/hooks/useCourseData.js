@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import offerCourses from '../../../../static/UMCourses/offerCourses';
-import coursePlan from '../../../../static/UMCourses/coursePlan';
-import coursePlanTime from '../../../../static/UMCourses/coursePlanTime';
-import sourceCourseVersion from '../../../../static/UMCourses/courseVersion';
-import { getCourseData } from '../../../../utils/checkCoursesKits';
-import { getLocalStorage } from '../../../../utils/storageKits';
+import offerCourses from '../../../../../../static/UMCourses/offerCourses';
+import coursePlan from '../../../../../../static/UMCourses/coursePlan';
+import coursePlanTime from '../../../../../../static/UMCourses/coursePlanTime';
+import sourceCourseVersion from '../../../../../../static/UMCourses/courseVersion';
+import { getCourseData } from '../../../../../../utils/checkCoursesKits';
+import { getLocalStorage } from '../../../../../../utils/storageKits';
 import { defaultFilterOptions } from '../constants/options';
 import lodash from 'lodash';
 

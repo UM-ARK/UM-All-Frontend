@@ -3,13 +3,13 @@ import { Text, View, ScrollView, FlatList, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme, uiStyle } from '../../../../components/ThemeContext';
-import Loading from '../../../../components/Loading';
-import SegmentControl from '../../../../components/SegmentControl';
-import { ARK_WIKI_SEARCH } from '../../../../utils/pathMap';
-import { openLink } from '../../../../utils/browser';
-import { getCourseData } from '../../../../utils/checkCoursesKits';
-import coursePlanTime from '../../../../static/UMCourses/coursePlanTime';
+import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
+import Loading from '../../../../../../components/Loading';
+import SegmentControl from '../../../../../../components/SegmentControl';
+import { ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
+import { openLink } from '../../../../../../utils/browser';
+import { getCourseData } from '../../../../../../utils/checkCoursesKits';
+import coursePlanTime from '../../../../../../static/UMCourses/coursePlanTime';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import groupBy from 'lodash/groupBy';

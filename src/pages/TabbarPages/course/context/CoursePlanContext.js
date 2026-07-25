@@ -11,7 +11,7 @@ import React, {
 import lodash from 'lodash';
 import moment from 'moment';
 
-import useCourseData from '../../what2Reg/hooks/useCourseData';
+import useCourseData from '../pages/what2Reg/hooks/useCourseData';
 import {
     getSectionConflicts as computeSectionConflicts,
     useConflict,

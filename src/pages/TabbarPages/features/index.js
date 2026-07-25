@@ -15,7 +15,7 @@ import {
     COURSE_TAB_ROUTE,
     navigateToCourseTab,
 } from '../../../utils/courseNavigation';
-import CustomBottomSheet from '../courseSim/BottomSheet';
+import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';

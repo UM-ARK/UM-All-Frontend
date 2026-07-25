@@ -14,16 +14,16 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
 import lodash from 'lodash';
 
-import { useTheme, uiStyle } from '../../../components/ThemeContext';
-import { trigger } from '../../../utils/trigger';
-import { logToFirebase } from '../../../utils/firebaseAnalytics';
-import { openLink } from '../../../utils/browser';
-import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
-import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../utils/pathMap';
-import { refreshUmehHost, useUmehHost } from '../../../utils/umehHost';
-import { COURSE_TIMETABLE_SEGMENT } from '../../../utils/courseNavigation';
-import { useCoursePlan } from '../course/context/CoursePlanContext';
-import PlanCapsule from '../course/components/PlanCapsule';
+import { useTheme, uiStyle } from '../../../../../components/ThemeContext';
+import { trigger } from '../../../../../utils/trigger';
+import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
+import { openLink } from '../../../../../utils/browser';
+import { getLocalStorage, setLocalStorage } from '../../../../../utils/storageKits';
+import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH } from '../../../../../utils/pathMap';
+import { refreshUmehHost, useUmehHost } from '../../../../../utils/umehHost';
+import { COURSE_TIMETABLE_SEGMENT } from '../../../../../utils/courseNavigation';
+import { useCoursePlan } from '../../context/CoursePlanContext';
+import PlanCapsule from '../../components/PlanCapsule';
 
 import CourseCard from './components/CourseCard';
 import useCourseFiltering from './hooks/useCourseFiltering';
@@ -34,7 +34,7 @@ import SearchBarSection from './components/SearchBarSection';
 import FirstLetterNav from './components/FirstLetterNav';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
 import { adpeMap, CMGEList, dayList, defaultFilterOptions, defaultTimeFilter, modeENStr } from './constants/options';
-import TouchableScale from '../../../components/TouchableScale';
+import TouchableScale from '../../../../../components/TouchableScale';
 
 const itemHeight = scale(75);
 const COURSE_CARD_GAP = scale(10);

@@ -9,10 +9,10 @@ import Animated, {
     useSharedValue,
     withSpring,
 } from 'react-native-reanimated';
-import TouchableScale from '../../../../components/TouchableScale';
+import TouchableScale from '../../../../../../components/TouchableScale';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
-import { uiStyle } from '../../../../components/ThemeContext';
+import { uiStyle } from '../../../../../../components/ThemeContext';
 
 /** 搜尋按鈕固定寬度（相容「搜索」／「Search」） */
 const SEARCH_BTN_WIDTH = scale(50);

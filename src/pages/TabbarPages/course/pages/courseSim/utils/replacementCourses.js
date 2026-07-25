@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import {
     getSectionConflicts,
     parseTimeToMinutes,
-} from '../../course/hooks/useConflict';
+} from '../../../hooks/useConflict';
 
 const START_OF_DAY = '00:00';
 const END_OF_DAY = '23:59';

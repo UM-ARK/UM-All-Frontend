@@ -4,8 +4,8 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import { t } from 'i18next';
-import { uiStyle } from '../../../../components/ThemeContext';
-import TouchableScale from '../../../../components/TouchableScale';
+import { uiStyle } from '../../../../../../components/ThemeContext';
+import TouchableScale from '../../../../../../components/TouchableScale';
 import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../constants/options';
 
 /**

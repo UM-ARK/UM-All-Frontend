@@ -19,8 +19,8 @@ import {
     isCourseSegment,
 } from '../../../utils/courseNavigation';
 import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
-import What2Reg from '../what2Reg';
-import CourseSim from '../courseSim';
+import What2Reg from './pages/what2Reg';
+import CourseSim from './pages/courseSim';
 import CourseTabBar from './components/CourseTabBar';
 import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
 import {

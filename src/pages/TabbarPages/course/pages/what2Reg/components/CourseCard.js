@@ -1,16 +1,16 @@
 import React, { useContext, memo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 
-import { useTheme, uiStyle } from '../../../../components/ThemeContext';
+import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import {
     ARK_WIKI_SEARCH,
     OFFICIAL_COURSE_SEARCH,
-} from '../../../../utils/pathMap';
-import { useUmehHost } from '../../../../utils/umehHost';
-import { logToFirebase } from '../../../../utils/firebaseAnalytics';
-import { openLink } from '../../../../utils/browser';
-import { trigger } from '../../../../utils/trigger';
-import { navigateToCourseTab } from '../../../../utils/courseNavigation';
+} from '../../../../../../utils/pathMap';
+import { useUmehHost } from '../../../../../../utils/umehHost';
+import { logToFirebase } from '../../../../../../utils/firebaseAnalytics';
+import { openLink } from '../../../../../../utils/browser';
+import { trigger } from '../../../../../../utils/trigger';
+import { navigateToCourseTab } from '../../../../../../utils/courseNavigation';
 
 import { scale } from 'react-native-size-matters';
 import { NavigationContext } from '@react-navigation/native';
