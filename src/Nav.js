@@ -2,7 +2,12 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Platform, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { NavigationContainer, useNavigationContainerRef, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import {
+    NavigationContainer,
+    useNavigationContainerRef,
+    DefaultTheme,
+    DarkTheme,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
@@ -19,6 +24,11 @@ import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
 import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
 import HarborTopicDetail from './pages/TabbarPages/info/home/HarborTopicDetail';
 import SearchScreen from './pages/TabbarPages/info/home/search/SearchScreen';
+import {
+    HarborCategoryListPage,
+    HarborTagListPage,
+} from './pages/TabbarPages/arkHarbor/HarborDirectoryPage';
+import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPage';
 import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
@@ -61,27 +71,30 @@ const Nav = () => {
         };
     }, [theme]);
 
-    const handleQuickAction = useCallback(action => {
-        if (!action) {
-            return;
-        }
+    const handleQuickAction = useCallback(
+        action => {
+            if (!action) {
+                return;
+            }
 
-        if (!navigationRef.isReady()) {
-            pendingQuickActionRef.current = action;
-            return;
-        }
+            if (!navigationRef.isReady()) {
+                pendingQuickActionRef.current = action;
+                return;
+            }
 
-        switch (action.id) {
-            case 'bus':
-                navigationRef.navigate('Bus');
-                break;
-            case 'search':
-                navigationRef.navigate('Search');
-                break;
-            default:
-                break;
-        }
-    }, [navigationRef]);
+            switch (action.id) {
+                case 'bus':
+                    navigationRef.navigate('Bus');
+                    break;
+                case 'search':
+                    navigationRef.navigate('Search');
+                    break;
+                default:
+                    break;
+            }
+        },
+        [navigationRef],
+    );
 
     // 消費暫存的快捷操作（onReady / useEffect 雙邊兜底）
     const flushPendingQuickAction = useCallback(() => {
@@ -109,13 +122,13 @@ const Nav = () => {
                     id: 'bus',
                     title: t('校園巴士'),
                     subtitle: t('查看校巴到站情況'),
-                    ...(Platform.OS === 'ios' ? {icon: 'symbol:bus'} : {}),
+                    ...(Platform.OS === 'ios' ? { icon: 'symbol:bus' } : {}),
                 },
                 {
                     id: 'search',
                     title: t('搜索'),
                     subtitle: t('搜索關於澳大的一切'),
-                    ...(Platform.OS === 'ios' ? {icon: 'search'} : {}),
+                    ...(Platform.OS === 'ios' ? { icon: 'search' } : {}),
                 },
             ]);
         };
@@ -145,9 +158,13 @@ const Nav = () => {
                 screenOptions={{
                     freezeOnBlur: true,
                     headerTransparent: isLiquidGlassSupported,
-                    headerBlurEffect: isLiquidGlassSupported ? null : 'systemThinMaterial',
+                    headerBlurEffect: isLiquidGlassSupported
+                        ? null
+                        : 'systemThinMaterial',
                     headerStyle: {
-                        backgroundColor: isLiquidGlassSupported ? 'transparent' : theme.bg_color,
+                        backgroundColor: isLiquidGlassSupported
+                            ? 'transparent'
+                            : theme.bg_color,
                         elevation: 0,
                     },
                     contentStyle: { backgroundColor: theme.bg_color },
@@ -158,9 +175,12 @@ const Nav = () => {
                     headerTintColor: black.main,
                     // 與 ThemeContext 一致（自訂淺/深色時勿跟隨系統預設 auto）
                     statusBarStyle: theme.isLight ? 'dark' : 'light',
-                }}
-            >
-                <Stack.Screen name="Tabbar" component={Tabbar} options={{ headerShown: false }} />
+                }}>
+                <Stack.Screen
+                    name="Tabbar"
+                    component={Tabbar}
+                    options={{ headerShown: false }}
+                />
 
                 {/* 服務頁保持原有 Modal 配置 */}
                 <Stack.Group
@@ -170,43 +190,94 @@ const Nav = () => {
                             android: 'card',
                             ios: Platform.isPad ? 'card' : 'modal',
                         }),
-                        headerLeft: (props) => Platform.OS === 'android' ? (
-                            <TouchableOpacity
-                                onPress={() => { trigger(); navigation.goBack(); }}
-                                style={{
-                                    width: 36,
-                                    height: 36,
-                                    borderRadius: 18,
-                                    backgroundColor: theme.black.main + '14',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Ionicons name="chevron-back" size={22} color={black.main} />
-                            </TouchableOpacity>
-                        ) : (
-                            <HeaderBackButton
-                                {...props}
-                                onPress={() => { trigger(); navigation.goBack(); }}
-                                label=''
-                            />
-                        ),
-                    })}
-                >
+                        headerLeft: props =>
+                            Platform.OS === 'android' ? (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        trigger();
+                                        navigation.goBack();
+                                    }}
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        borderRadius: 18,
+                                        backgroundColor:
+                                            theme.black.main + '14',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}>
+                                    <Ionicons
+                                        name="chevron-back"
+                                        size={22}
+                                        color={black.main}
+                                    />
+                                </TouchableOpacity>
+                            ) : (
+                                <HeaderBackButton
+                                    {...props}
+                                    onPress={() => {
+                                        trigger();
+                                        navigation.goBack();
+                                    }}
+                                    label=""
+                                />
+                            ),
+                    })}>
                     {/* 服務頁 */}
-                    <Stack.Screen name="Bus" component={Bus} options={{ headerTitle: t('校園巴士') }} />
-                    <Stack.Screen name="CarPark" component={CarPark} options={{ headerTitle: t('車位') }} />
-                    <Stack.Screen name="EatingSchedule" component={EatingSchedule} options={{ headerTitle: t('幹飯時間') }} />
-                    <Stack.Screen name="UMOrg" component={UMOrg} options={{ headerTitle: t('澳大部門') }} />
-
+                    <Stack.Screen
+                        name="Bus"
+                        component={Bus}
+                        options={{ headerTitle: t('校園巴士') }}
+                    />
+                    <Stack.Screen
+                        name="CarPark"
+                        component={CarPark}
+                        options={{ headerTitle: t('車位') }}
+                    />
+                    <Stack.Screen
+                        name="EatingSchedule"
+                        component={EatingSchedule}
+                        options={{ headerTitle: t('幹飯時間') }}
+                    />
+                    <Stack.Screen
+                        name="UMOrg"
+                        component={UMOrg}
+                        options={{ headerTitle: t('澳大部門') }}
+                    />
 
                     {/* 資訊頁 */}
                     {/* 圖片大標題頁：強制 light 讓狀態列圖示在深色封面圖上可見 */}
-                    <Stack.Screen name="ClubDetail" component={ClubDetail} options={{ statusBarStyle: 'light' }} />
+                    <Stack.Screen
+                        name="ClubDetail"
+                        component={ClubDetail}
+                        options={{ statusBarStyle: 'light' }}
+                    />
                     <Stack.Screen name="EventDetail" component={EventDetail} />
                     <Stack.Screen name="NewsDetail" component={NewsDetail} />
-                    <Stack.Screen name="UMEventDetail" component={UMEventDetail} />
-                    <Stack.Screen name="HarborTopicDetail" component={HarborTopicDetail} />
+                    <Stack.Screen
+                        name="UMEventDetail"
+                        component={UMEventDetail}
+                    />
+                    <Stack.Screen
+                        name="HarborTopicDetail"
+                        component={HarborTopicDetail}
+                    />
+                    <Stack.Screen
+                        name="HarborCategoryList"
+                        component={HarborCategoryListPage}
+                    />
+                    <Stack.Screen
+                        name="HarborCategoryTopics"
+                        component={HarborTopicListPage}
+                    />
+                    <Stack.Screen
+                        name="HarborTagList"
+                        component={HarborTagListPage}
+                    />
+                    <Stack.Screen
+                        name="HarborTagTopics"
+                        component={HarborTopicListPage}
+                    />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 
                     {/* ARK選課 */}
@@ -217,15 +288,34 @@ const Nav = () => {
                 <Stack.Group
                     screenOptions={{
                         headerTitle: '',
-                    }}
-                >
-                    <Stack.Screen name="Search" component={SearchScreen} options={{ headerTitle: t('搜索') }} />
+                    }}>
+                    <Stack.Screen
+                        name="Search"
+                        component={SearchScreen}
+                        options={{ headerTitle: t('搜索') }}
+                    />
                     <Stack.Screen name="Webviewer" component={Webviewer} />
-                    <Stack.Screen name="SettingPage" component={SettingPage} options={{ headerTitle: t('設置') }} />
-                    <Stack.Screen name="HarborActivity" component={HarborActivityPage} />
-                    <Stack.Screen name="HarborInbox" component={HarborInboxPage} />
-                    <Stack.Screen name="HarborBadges" component={HarborBadgesPage} />
-                    <Stack.Screen name="HarborAccountSettings" component={HarborAccountSettingsPage} />
+                    <Stack.Screen
+                        name="SettingPage"
+                        component={SettingPage}
+                        options={{ headerTitle: t('設置') }}
+                    />
+                    <Stack.Screen
+                        name="HarborActivity"
+                        component={HarborActivityPage}
+                    />
+                    <Stack.Screen
+                        name="HarborInbox"
+                        component={HarborInboxPage}
+                    />
+                    <Stack.Screen
+                        name="HarborBadges"
+                        component={HarborBadgesPage}
+                    />
+                    <Stack.Screen
+                        name="HarborAccountSettings"
+                        component={HarborAccountSettingsPage}
+                    />
                 </Stack.Group>
             </Stack.Navigator>
         </NavigationContainer>

@@ -45,6 +45,7 @@ import {
     replaceHarborEmojiImages,
 } from '../../../../utils/harbor/harborHtml';
 import {fetchHarborTopic} from '../../../../utils/harbor/harborApi';
+import {parseHarborUrl} from '../../../../utils/harbor/harborNavigation';
 import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
@@ -73,7 +74,11 @@ const customHTMLElementModels = {
 };
 
 const isCanceledRequest = (error, signal) => {
-    return signal?.aborted || error?.code === 'ERR_CANCELED' || axios.isCancel(error);
+    return (
+        signal?.aborted ||
+        error?.code === 'ERR_CANCELED' ||
+        axios.isCancel(error)
+    );
 };
 
 const normalizeHtmlUrl = url => {
@@ -88,9 +93,10 @@ const extractPostImages = html => {
     }
 
     const images = [];
-    const lightboxTags = html.match(
-        /<a\b[^>]*\bclass=(?:"[^"]*\blightbox\b[^"]*"|'[^']*\blightbox\b[^']*')[^>]*>/gi,
-    ) || [];
+    const lightboxTags =
+        html.match(
+            /<a\b[^>]*\bclass=(?:"[^"]*\blightbox\b[^"]*"|'[^']*\blightbox\b[^']*')[^>]*>/gi,
+        ) || [];
 
     lightboxTags.forEach(tag => {
         const href = normalizeHtmlUrl(getHarborHtmlAttribute(tag, 'href'));
@@ -141,7 +147,10 @@ const HarborIframeRenderer = ({tnode}) => {
     const sourceUrl = normalizeHtmlUrl(tnode?.attributes?.src);
     const requestedHeight = Number(tnode?.attributes?.height);
     const height = Number.isFinite(requestedHeight)
-        ? Math.min(Math.max(requestedHeight, verticalScale(180)), verticalScale(420))
+        ? Math.min(
+              Math.max(requestedHeight, verticalScale(180)),
+              verticalScale(420),
+          )
         : verticalScale(240);
 
     if (!sourceUrl) {
@@ -149,10 +158,11 @@ const HarborIframeRenderer = ({tnode}) => {
     }
 
     return (
-        <View style={[
-            styles.iframeContainer,
-            {height, backgroundColor: theme.white},
-        ]}>
+        <View
+            style={[
+                styles.iframeContainer,
+                {height, backgroundColor: theme.white},
+            ]}>
             <WebView
                 source={{uri: sourceUrl}}
                 style={{backgroundColor: theme.white}}
@@ -226,223 +236,235 @@ const htmlRenderers = {
     img: HarborImageRenderer,
 };
 
-const HarborPostContent = memo(({
-    cooked,
-    contentWidth,
-    imageUrls,
-    onOpenImage,
-    postUrl,
-}) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('harbor');
-    const {black, themeColor, themeColorUltraLight, tonal, white} = theme;
-    const normalizedCooked = useMemo(() => {
-        return replaceHarborEmojiImages(cooked);
-    }, [cooked]);
-    const requiresInteractiveFallback = useMemo(() => {
-        return /<(?:video|audio)\b|class=(?:"[^"]*\bpoll\b[^"]*"|'[^']*\bpoll\b[^']*')/i
-            .test(cooked);
-    }, [cooked]);
+const HarborPostContent = memo(
+    ({cooked, contentWidth, imageUrls, onOpenImage, onPressLink, postUrl}) => {
+        const {theme} = useTheme();
+        const {t} = useTranslation('harbor');
+        const {black, themeColor, themeColorUltraLight, tonal, white} = theme;
+        const normalizedCooked = useMemo(() => {
+            return replaceHarborEmojiImages(cooked);
+        }, [cooked]);
+        const requiresInteractiveFallback = useMemo(() => {
+            return /<(?:video|audio)\b|class=(?:"[^"]*\bpoll\b[^"]*"|'[^']*\bpoll\b[^']*')/i.test(
+                cooked,
+            );
+        }, [cooked]);
 
-    const baseStyle = useMemo(() => ({
-        ...uiStyle.defaultText,
-        color: black.second,
-        fontSize: scale(14),
-        lineHeight: scale(21),
-    }), [black.second]);
+        const baseStyle = useMemo(
+            () => ({
+                ...uiStyle.defaultText,
+                color: black.second,
+                fontSize: scale(14),
+                lineHeight: scale(21),
+            }),
+            [black.second],
+        );
 
-    const tagsStyles = useMemo(() => ({
-        body: {
-            color: black.second,
-        },
-        p: {
-            marginTop: 0,
-            marginBottom: verticalScale(8),
-        },
-        a: {
-            color: themeColor,
-            textDecorationLine: 'underline',
-        },
-        h1: {
-            color: black.main,
-            fontSize: scale(21),
-            lineHeight: scale(28),
-            marginTop: verticalScale(10),
-            marginBottom: verticalScale(8),
-        },
-        h2: {
-            color: black.main,
-            fontSize: scale(18),
-            lineHeight: scale(25),
-            marginTop: verticalScale(9),
-            marginBottom: verticalScale(7),
-        },
-        h3: {
-            color: black.main,
-            fontSize: scale(16),
-            lineHeight: scale(23),
-            marginTop: verticalScale(8),
-            marginBottom: verticalScale(6),
-        },
-        blockquote: {
-            backgroundColor: tonal.primary08,
-            borderLeftColor: themeColor,
-            borderLeftWidth: scale(3),
-            paddingHorizontal: scale(10),
-            paddingVertical: verticalScale(8),
-            marginVertical: verticalScale(8),
-        },
-        pre: {
-            color: black.second,
-            backgroundColor: tonal.primary08,
-            borderColor: themeColorUltraLight,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderRadius: scale(8),
-            padding: scale(10),
-            marginVertical: verticalScale(8),
-        },
-        code: {
-            color: black.second,
-            backgroundColor: tonal.primary15,
-            fontFamily: 'monospace',
-        },
-        img: {
-            borderRadius: scale(8),
-            marginVertical: verticalScale(5),
-        },
-        hr: {
-            backgroundColor: themeColorUltraLight,
-            height: StyleSheet.hairlineWidth,
-            marginVertical: verticalScale(10),
-        },
-        table: {
-            borderColor: themeColorUltraLight,
-            borderWidth: StyleSheet.hairlineWidth,
-            marginVertical: verticalScale(8),
-        },
-        th: {
-            color: black.main,
-            backgroundColor: tonal.primary15,
-            borderColor: themeColorUltraLight,
-            borderWidth: StyleSheet.hairlineWidth,
-            padding: scale(6),
-        },
-        td: {
-            color: black.second,
-            backgroundColor: white,
-            borderColor: themeColorUltraLight,
-            borderWidth: StyleSheet.hairlineWidth,
-            padding: scale(6),
-        },
-    }), [
-        black.main,
-        black.second,
-        themeColor,
-        themeColorUltraLight,
-        tonal.primary08,
-        tonal.primary15,
-        white,
-    ]);
+        const tagsStyles = useMemo(
+            () => ({
+                body: {
+                    color: black.second,
+                },
+                p: {
+                    marginTop: 0,
+                    marginBottom: verticalScale(8),
+                },
+                a: {
+                    color: themeColor,
+                    textDecorationLine: 'underline',
+                },
+                h1: {
+                    color: black.main,
+                    fontSize: scale(21),
+                    lineHeight: scale(28),
+                    marginTop: verticalScale(10),
+                    marginBottom: verticalScale(8),
+                },
+                h2: {
+                    color: black.main,
+                    fontSize: scale(18),
+                    lineHeight: scale(25),
+                    marginTop: verticalScale(9),
+                    marginBottom: verticalScale(7),
+                },
+                h3: {
+                    color: black.main,
+                    fontSize: scale(16),
+                    lineHeight: scale(23),
+                    marginTop: verticalScale(8),
+                    marginBottom: verticalScale(6),
+                },
+                blockquote: {
+                    backgroundColor: tonal.primary08,
+                    borderLeftColor: themeColor,
+                    borderLeftWidth: scale(3),
+                    paddingHorizontal: scale(10),
+                    paddingVertical: verticalScale(8),
+                    marginVertical: verticalScale(8),
+                },
+                pre: {
+                    color: black.second,
+                    backgroundColor: tonal.primary08,
+                    borderColor: themeColorUltraLight,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderRadius: scale(8),
+                    padding: scale(10),
+                    marginVertical: verticalScale(8),
+                },
+                code: {
+                    color: black.second,
+                    backgroundColor: tonal.primary15,
+                    fontFamily: 'monospace',
+                },
+                img: {
+                    borderRadius: scale(8),
+                    marginVertical: verticalScale(5),
+                },
+                hr: {
+                    backgroundColor: themeColorUltraLight,
+                    height: StyleSheet.hairlineWidth,
+                    marginVertical: verticalScale(10),
+                },
+                table: {
+                    borderColor: themeColorUltraLight,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    marginVertical: verticalScale(8),
+                },
+                th: {
+                    color: black.main,
+                    backgroundColor: tonal.primary15,
+                    borderColor: themeColorUltraLight,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    padding: scale(6),
+                },
+                td: {
+                    color: black.second,
+                    backgroundColor: white,
+                    borderColor: themeColorUltraLight,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    padding: scale(6),
+                },
+            }),
+            [
+                black.main,
+                black.second,
+                themeColor,
+                themeColorUltraLight,
+                tonal.primary08,
+                tonal.primary15,
+                white,
+            ],
+        );
 
-    const classesStyles = useMemo(() => ({
-        meta: {display: 'none'},
-        onebox: {
-            backgroundColor: tonal.primary08,
-            borderColor: themeColorUltraLight,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderRadius: scale(10),
-            padding: scale(10),
-            marginVertical: verticalScale(8),
-        },
-        quote: {
-            backgroundColor: tonal.primary08,
-            borderLeftColor: themeColor,
-            borderLeftWidth: scale(3),
-            padding: scale(10),
-            marginVertical: verticalScale(8),
-        },
-    }), [themeColor, themeColorUltraLight, tonal.primary08]);
+        const classesStyles = useMemo(
+            () => ({
+                meta: {display: 'none'},
+                onebox: {
+                    backgroundColor: tonal.primary08,
+                    borderColor: themeColorUltraLight,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderRadius: scale(10),
+                    padding: scale(10),
+                    marginVertical: verticalScale(8),
+                },
+                quote: {
+                    backgroundColor: tonal.primary08,
+                    borderLeftColor: themeColor,
+                    borderLeftWidth: scale(3),
+                    padding: scale(10),
+                    marginVertical: verticalScale(8),
+                },
+            }),
+            [themeColor, themeColorUltraLight, tonal.primary08],
+        );
 
-    const renderersProps = useMemo(() => ({
-        a: {
-            onPress: (event, href) => {
-                trigger();
-                const normalizedUrl = normalizeHtmlUrl(href);
-                const imageIndex = imageUrls.indexOf(normalizedUrl);
-                if (imageIndex >= 0) {
-                    onOpenImage(imageIndex);
-                    return;
-                }
-
-                if (!normalizedUrl || normalizedUrl.startsWith('#')) {
-                    return;
-                }
-
-                // TODO: 優先支援 Harbor `/t/...` 帖子間跳轉，並擴充用戶、分類、標籤等站內連結的 App 內跳轉邏輯。
-                openLink({URL: normalizedUrl, mode: 'fullScreen'});
-            },
-        },
-        img: {
-            enableExperimentalPercentWidth: true,
-            initialDimensions: {
-                width: Math.min(contentWidth, scale(240)),
-                height: verticalScale(160),
-            },
-            onPress: url => {
-                const normalizedUrl = normalizeHtmlUrl(url);
-                const imageIndex = imageUrls.indexOf(normalizedUrl);
-                if (imageIndex >= 0) {
-                    trigger();
-                    onOpenImage(imageIndex);
-                }
-            },
-        },
-    }), [contentWidth, imageUrls, onOpenImage]);
-
-    return (
-        <View>
-            <RenderHTML
-                source={{html: normalizedCooked, baseUrl: ARK_HARBOR}}
-                contentWidth={contentWidth}
-                baseStyle={baseStyle}
-                tagsStyles={tagsStyles}
-                classesStyles={classesStyles}
-                renderers={htmlRenderers}
-                renderersProps={renderersProps}
-                customHTMLElementModels={customHTMLElementModels}
-                ignoredDomTags={['svg']}
-                defaultTextProps={{selectable: true}}
-                enableExperimentalBRCollapsing
-                enableExperimentalGhostLinesPrevention
-                enableExperimentalMarginCollapsing
-            />
-            {requiresInteractiveFallback ? (
-                <Pressable
-                    onPress={() => {
+        const renderersProps = useMemo(
+            () => ({
+                a: {
+                    onPress: (event, href) => {
                         trigger();
-                        openLink({URL: postUrl, mode: 'fullScreen'});
-                    }}
-                    style={({pressed}) => [
-                        styles.interactiveFallback,
-                        {
-                            backgroundColor: pressed
-                                ? tonal.primary30
-                                : tonal.primary15,
-                        },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="open-in-new"
-                        size={scale(15)}
-                        color={themeColor}
-                    />
-                    <Text style={[styles.interactiveFallbackText, {color: themeColor}]}>
-                        {t('查看互動內容')}
-                    </Text>
-                </Pressable>
-            ) : null}
-        </View>
-    );
-});
+                        const normalizedUrl = normalizeHtmlUrl(href);
+                        const imageIndex = imageUrls.indexOf(normalizedUrl);
+                        if (imageIndex >= 0) {
+                            onOpenImage(imageIndex);
+                            return;
+                        }
+
+                        if (!normalizedUrl || normalizedUrl.startsWith('#')) {
+                            return;
+                        }
+
+                        onPressLink(normalizedUrl);
+                    },
+                },
+                img: {
+                    enableExperimentalPercentWidth: true,
+                    initialDimensions: {
+                        width: Math.min(contentWidth, scale(240)),
+                        height: verticalScale(160),
+                    },
+                    onPress: url => {
+                        const normalizedUrl = normalizeHtmlUrl(url);
+                        const imageIndex = imageUrls.indexOf(normalizedUrl);
+                        if (imageIndex >= 0) {
+                            trigger();
+                            onOpenImage(imageIndex);
+                        }
+                    },
+                },
+            }),
+            [contentWidth, imageUrls, onOpenImage, onPressLink],
+        );
+
+        return (
+            <View>
+                <RenderHTML
+                    source={{html: normalizedCooked, baseUrl: ARK_HARBOR}}
+                    contentWidth={contentWidth}
+                    baseStyle={baseStyle}
+                    tagsStyles={tagsStyles}
+                    classesStyles={classesStyles}
+                    renderers={htmlRenderers}
+                    renderersProps={renderersProps}
+                    customHTMLElementModels={customHTMLElementModels}
+                    ignoredDomTags={['svg']}
+                    defaultTextProps={{selectable: true}}
+                    enableExperimentalBRCollapsing
+                    enableExperimentalGhostLinesPrevention
+                    enableExperimentalMarginCollapsing
+                />
+                {requiresInteractiveFallback ? (
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            openLink({URL: postUrl, mode: 'fullScreen'});
+                        }}
+                        style={({pressed}) => [
+                            styles.interactiveFallback,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="open-in-new"
+                            size={scale(15)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.interactiveFallbackText,
+                                {color: themeColor},
+                            ]}>
+                            {t('查看互動內容')}
+                        </Text>
+                    </Pressable>
+                ) : null}
+            </View>
+        );
+    },
+);
 
 const MetaItem = ({icon, value, color}) => {
     if (!value) {
@@ -450,85 +472,316 @@ const MetaItem = ({icon, value, color}) => {
     }
     return (
         <View style={styles.metaItem}>
-            <MaterialCommunityIcons name={icon} size={scale(15)} color={color} />
+            <MaterialCommunityIcons
+                name={icon}
+                size={scale(15)}
+                color={color}
+            />
             <Text style={[styles.metaText, {color}]}>{value}</Text>
         </View>
     );
 };
 
-const HarborPostCard = memo(({
-    post,
-    contentWidth,
-    imageUrls,
-    onOpenImage,
-    onPressReply,
-}) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('harbor');
-    const {black, themeColor, themeColorUltraLight, tonal, white, viewShadow} = theme;
-    const reactionCount = getReactionCount(post);
-    const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(post.avatar_template, AVATAR_SIZE);
-    const displayName = post.name || post.display_username || post.username;
-    const wasEdited = post.updated_at && post.created_at &&
-        moment(post.updated_at).diff(moment(post.created_at), 'seconds') > 60;
-
-    return (
-        <View style={[
-            styles.postCard,
-            {backgroundColor: white, borderColor: themeColorUltraLight},
+const HarborPostCard = memo(
+    ({
+        post,
+        contentWidth,
+        imageUrls,
+        onOpenImage,
+        onPressAuthor,
+        onPressLink,
+        onPressReply,
+    }) => {
+        const {theme} = useTheme();
+        const {t} = useTranslation('harbor');
+        const {
+            black,
+            themeColor,
+            themeColorUltraLight,
+            tonal,
+            white,
             viewShadow,
-        ]}>
-            <View style={styles.postHeader}>
-                {/* TODO: 支援點擊頭像或用戶名後在 App 內開啟 Harbor 用戶頁。 */}
-                <Image
-                    source={{uri: avatarUrl}}
-                    style={[styles.avatar, {backgroundColor: tonal.primary15}]}
-                    contentFit="cover"
-                    placeholder={theme.imagePlaceholder}
-                    placeholderContentFit="cover"
-                    transition={200}
-                />
-                <View style={styles.authorArea}>
-                    <Text
-                        style={[styles.authorName, {color: black.main}]}
-                        numberOfLines={1}>
-                        {displayName}
-                    </Text>
-                    <View style={styles.authorDetails}>
-                        {post.user_title ? (
+        } = theme;
+        const reactionCount = getReactionCount(post);
+        const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(
+            post.avatar_template,
+            AVATAR_SIZE,
+        );
+        const displayName = post.name || post.display_username || post.username;
+        const wasEdited =
+            post.updated_at &&
+            post.created_at &&
+            moment(post.updated_at).diff(moment(post.created_at), 'seconds') >
+                60;
+
+        return (
+            <View
+                style={[
+                    styles.postCard,
+                    {backgroundColor: white, borderColor: themeColorUltraLight},
+                    viewShadow,
+                ]}>
+                <View style={styles.postHeader}>
+                    <Pressable
+                        accessibilityRole="link"
+                        accessibilityLabel={displayName}
+                        onPress={() => {
+                            trigger();
+                            onPressAuthor(post.username);
+                        }}
+                        style={({pressed}) => [
+                            styles.authorLink,
+                            pressed ? styles.pressedLink : null,
+                        ]}>
+                        <Image
+                            source={{uri: avatarUrl}}
+                            style={[
+                                styles.avatar,
+                                {backgroundColor: tonal.primary15},
+                            ]}
+                            contentFit="cover"
+                            placeholder={theme.imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={200}
+                        />
+                        <View style={styles.authorArea}>
                             <Text
-                                style={[styles.userTitle, {color: themeColor}]}
+                                style={[styles.authorName, {color: black.main}]}
                                 numberOfLines={1}>
-                                {post.user_title}
+                                {displayName}
                             </Text>
-                        ) : null}
-                        {post.staff ? (
-                            <Text style={[
-                                styles.staffBadge,
-                                {color: themeColor, backgroundColor: tonal.primary15},
-                            ]}>
-                                Staff
+                            <View style={styles.authorDetails}>
+                                {post.user_title ? (
+                                    <Text
+                                        style={[
+                                            styles.userTitle,
+                                            {color: themeColor},
+                                        ]}
+                                        numberOfLines={1}>
+                                        {post.user_title}
+                                    </Text>
+                                ) : null}
+                                {post.staff ? (
+                                    <Text
+                                        style={[
+                                            styles.staffBadge,
+                                            {
+                                                color: themeColor,
+                                                backgroundColor:
+                                                    tonal.primary15,
+                                            },
+                                        ]}>
+                                        Staff
+                                    </Text>
+                                ) : null}
+                            </View>
+                            <Text
+                                style={[styles.postTime, {color: black.third}]}>
+                                {moment
+                                    .tz(post.created_at, 'Asia/Macau')
+                                    .format('YYYY/MM/DD HH:mm')}
+                                {wasEdited ? ` · ${t('已編輯')}` : ''}
                             </Text>
-                        ) : null}
-                    </View>
-                    <Text style={[styles.postTime, {color: black.third}]}>
-                        {moment.tz(post.created_at, 'Asia/Macau').format('YYYY/MM/DD HH:mm')}
-                        {wasEdited ? ` · ${t('已編輯')}` : ''}
+                        </View>
+                    </Pressable>
+                    <Text style={[styles.postNumber, {color: black.third}]}>
+                        #{post.post_number}
                     </Text>
                 </View>
-                <Text style={[styles.postNumber, {color: black.third}]}>
-                    #{post.post_number}
-                </Text>
-            </View>
 
-            {post.reply_to_post_number ? (
+                {post.reply_to_post_number ? (
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            onPressReply(post.reply_to_post_number);
+                        }}
+                        style={({pressed}) => [
+                            styles.replyBadge,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="reply-outline"
+                            size={scale(14)}
+                            color={themeColor}
+                        />
+                        <Text style={[styles.replyText, {color: themeColor}]}>
+                            {t('回覆樓層', {
+                                postNumber: post.reply_to_post_number,
+                            })}
+                        </Text>
+                    </Pressable>
+                ) : null}
+
+                <View style={styles.postBody}>
+                    <HarborPostContent
+                        cooked={post.cooked}
+                        contentWidth={contentWidth}
+                        imageUrls={imageUrls}
+                        onOpenImage={onOpenImage}
+                        onPressLink={onPressLink}
+                        postUrl={ARK_HARBOR_TOPIC_URL(
+                            post.topic_id,
+                            post.post_number,
+                        )}
+                    />
+                </View>
+
+                <View
+                    style={[
+                        styles.postFooter,
+                        {borderTopColor: themeColorUltraLight},
+                    ]}>
+                    <View style={styles.footerMeta}>
+                        <MetaItem
+                            icon="eye-outline"
+                            value={post.reads}
+                            color={black.third}
+                        />
+                        <MetaItem
+                            icon="comment-outline"
+                            value={post.reply_count}
+                            color={black.third}
+                        />
+                    </View>
+                    <MetaItem
+                        icon="heart-outline"
+                        value={reactionCount}
+                        color={themeColor}
+                    />
+                </View>
+            </View>
+        );
+    },
+);
+
+const HarborTopicHeader = memo(
+    ({topic, onOpenOriginal, onPressCategory, onPressTag}) => {
+        const {theme} = useTheme();
+        const {t} = useTranslation('harbor');
+        const {
+            black,
+            themeColor,
+            themeColorUltraLight,
+            tonal,
+            white,
+            viewShadow,
+        } = theme;
+        const tags = Array.isArray(topic.tags)
+            ? topic.tags.map(getTagLabel).filter(Boolean)
+            : [];
+        const categoryId = Number(topic.category_id);
+        const categorySlug = topic.category_slug || topic.category?.slug;
+        const categoryName = topic.category_name || topic.category?.name;
+
+        return (
+            <View
+                style={[
+                    styles.topicHeader,
+                    {backgroundColor: white, borderColor: themeColorUltraLight},
+                    viewShadow,
+                ]}>
+                <Text
+                    selectable
+                    style={[styles.topicTitle, {color: black.main}]}>
+                    {topic.title}
+                </Text>
+
+                {Number.isInteger(categoryId) && categoryId > 0 ? (
+                    <Pressable
+                        accessibilityRole="link"
+                        onPress={() => {
+                            trigger();
+                            onPressCategory({
+                                categoryId,
+                                categorySlug,
+                                categoryName,
+                            });
+                        }}
+                        style={({pressed}) => [
+                            styles.category,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="folder-outline"
+                            size={scale(13)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[styles.categoryText, {color: themeColor}]}>
+                            {categoryName || `分類 #${categoryId}`}
+                        </Text>
+                    </Pressable>
+                ) : null}
+
+                {tags.length > 0 ? (
+                    <View style={styles.tagRow}>
+                        {tags.map(tag => (
+                            <Pressable
+                                key={tag}
+                                accessibilityRole="link"
+                                onPress={() => {
+                                    trigger();
+                                    onPressTag(tag);
+                                }}
+                                style={({pressed}) => [
+                                    styles.tag,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.tagText,
+                                        {color: themeColor},
+                                    ]}>
+                                    #{tag}
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </View>
+                ) : null}
+
+                <View style={styles.topicMetaRow}>
+                    <MetaItem
+                        icon="eye-outline"
+                        value={`${topic.views || 0} ${t('瀏覽')}`}
+                        color={black.third}
+                    />
+                    <MetaItem
+                        icon="comment-outline"
+                        value={`${topic.posts_count || 0} ${t('帖子')}`}
+                        color={black.third}
+                    />
+                    <MetaItem
+                        icon="heart-outline"
+                        value={`${topic.like_count || 0} ${t('讚')}`}
+                        color={themeColor}
+                    />
+                </View>
+
+                {topic.last_posted_at ? (
+                    <Text style={[styles.lastUpdated, {color: black.third}]}>
+                        {t('最後更新')} ·{' '}
+                        {moment
+                            .tz(topic.last_posted_at, 'Asia/Macau')
+                            .format('YYYY/MM/DD HH:mm')}
+                    </Text>
+                ) : null}
+
                 <Pressable
-                    onPress={() => {
-                        trigger();
-                        onPressReply(post.reply_to_post_number);
-                    }}
+                    onPress={onOpenOriginal}
                     style={({pressed}) => [
-                        styles.replyBadge,
+                        styles.webOriginalButton,
                         {
                             backgroundColor: pressed
                                 ? tonal.primary30
@@ -536,127 +789,23 @@ const HarborPostCard = memo(({
                         },
                     ]}>
                     <MaterialCommunityIcons
-                        name="reply-outline"
+                        name="web"
+                        size={scale(16)}
+                        color={themeColor}
+                    />
+                    <Text style={[styles.webOriginalText, {color: themeColor}]}>
+                        {t('查看 Web 原文')}
+                    </Text>
+                    <MaterialCommunityIcons
+                        name="open-in-new"
                         size={scale(14)}
                         color={themeColor}
                     />
-                    <Text style={[styles.replyText, {color: themeColor}]}>
-                        {t('回覆樓層', {postNumber: post.reply_to_post_number})}
-                    </Text>
                 </Pressable>
-            ) : null}
-
-            <View style={styles.postBody}>
-                <HarborPostContent
-                    cooked={post.cooked}
-                    contentWidth={contentWidth}
-                    imageUrls={imageUrls}
-                    onOpenImage={onOpenImage}
-                    postUrl={ARK_HARBOR_TOPIC_URL(post.topic_id, post.post_number)}
-                />
             </View>
-
-            <View style={[styles.postFooter, {borderTopColor: themeColorUltraLight}]}>
-                <View style={styles.footerMeta}>
-                    <MetaItem icon="eye-outline" value={post.reads} color={black.third} />
-                    <MetaItem
-                        icon="comment-outline"
-                        value={post.reply_count}
-                        color={black.third}
-                    />
-                </View>
-                <MetaItem icon="heart-outline" value={reactionCount} color={themeColor} />
-            </View>
-        </View>
-    );
-});
-
-const HarborTopicHeader = memo(({topic, onOpenOriginal}) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('harbor');
-    const {black, themeColor, themeColorUltraLight, tonal, white, viewShadow} = theme;
-    const tags = Array.isArray(topic.tags)
-        ? topic.tags.map(getTagLabel).filter(Boolean)
-        : [];
-
-    return (
-        <View style={[
-            styles.topicHeader,
-            {backgroundColor: white, borderColor: themeColorUltraLight},
-            viewShadow,
-        ]}>
-            <Text selectable style={[styles.topicTitle, {color: black.main}]}>
-                {topic.title}
-            </Text>
-
-            {tags.length > 0 ? (
-                // TODO: 支援點擊標籤後在 App 內開啟對應的 Harbor 標籤頁。
-                <View style={styles.tagRow}>
-                    {tags.map(tag => (
-                        <View
-                            key={tag}
-                            style={[styles.tag, {backgroundColor: tonal.primary15}]}>
-                            <Text style={[styles.tagText, {color: themeColor}]}>
-                                #{tag}
-                            </Text>
-                        </View>
-                    ))}
-                </View>
-            ) : null}
-
-            <View style={styles.topicMetaRow}>
-                <MetaItem
-                    icon="eye-outline"
-                    value={`${topic.views || 0} ${t('瀏覽')}`}
-                    color={black.third}
-                />
-                <MetaItem
-                    icon="comment-outline"
-                    value={`${topic.posts_count || 0} ${t('帖子')}`}
-                    color={black.third}
-                />
-                <MetaItem
-                    icon="heart-outline"
-                    value={`${topic.like_count || 0} ${t('讚')}`}
-                    color={themeColor}
-                />
-            </View>
-
-            {topic.last_posted_at ? (
-                <Text style={[styles.lastUpdated, {color: black.third}]}>
-                    {t('最後更新')} · {moment
-                        .tz(topic.last_posted_at, 'Asia/Macau')
-                        .format('YYYY/MM/DD HH:mm')}
-                </Text>
-            ) : null}
-
-            <Pressable
-                onPress={onOpenOriginal}
-                style={({pressed}) => [
-                    styles.webOriginalButton,
-                    {
-                        backgroundColor: pressed
-                            ? tonal.primary30
-                            : tonal.primary15,
-                    },
-                ]}>
-                <MaterialCommunityIcons
-                    name="web"
-                    size={scale(16)}
-                    color={themeColor}
-                />
-                <Text style={[styles.webOriginalText, {color: themeColor}]}>
-                    {t('查看 Web 原文')}
-                </Text>
-                <MaterialCommunityIcons
-                    name="open-in-new"
-                    size={scale(14)}
-                    color={themeColor}
-                />
-            </Pressable>
-        </View>
-    );
-});
+        );
+    },
+);
 
 const HarborTopicDetail = ({route, navigation}) => {
     const {theme} = useTheme();
@@ -681,8 +830,12 @@ const HarborTopicDetail = ({route, navigation}) => {
             return [];
         }
         return topicPosts.filter(post => {
-            return !post?.deleted_at && !post?.user_deleted &&
-                typeof post?.cooked === 'string' && post.cooked.trim().length > 0;
+            return (
+                !post?.deleted_at &&
+                !post?.user_deleted &&
+                typeof post?.cooked === 'string' &&
+                post.cooked.trim().length > 0
+            );
         });
     }, [topic]);
 
@@ -699,53 +852,56 @@ const HarborTopicDetail = ({route, navigation}) => {
         });
     }, [initialTopicTitle, navigation, topic?.title]);
 
-    const loadTopic = useCallback(async ({refresh = false} = {}) => {
-        const requestGeneration = ++requestGenerationRef.current;
-        controllerRef.current?.abort();
-        const controller = new AbortController();
-        controllerRef.current = controller;
+    const loadTopic = useCallback(
+        async ({refresh = false} = {}) => {
+            const requestGeneration = ++requestGenerationRef.current;
+            controllerRef.current?.abort();
+            const controller = new AbortController();
+            controllerRef.current = controller;
 
-        if (refresh) {
-            setIsRefreshing(true);
-        } else {
-            setIsLoading(true);
-        }
-        setErrorMessage('');
-
-        if (!Number.isInteger(topicId) || topicId <= 0) {
-            setErrorMessage(t('帖子地址無效'));
-            setIsLoading(false);
-            setIsRefreshing(false);
-            controllerRef.current = null;
-            return;
-        }
-
-        try {
-            const nextTopic = await fetchHarborTopic(topicId, {
-                signal: controller.signal,
-            });
-            if (
-                controller.signal.aborted ||
-                requestGeneration !== requestGenerationRef.current
-            ) {
-                return;
+            if (refresh) {
+                setIsRefreshing(true);
+            } else {
+                setIsLoading(true);
             }
-            setTopic(nextTopic);
-        } catch (error) {
-            if (!isCanceledRequest(error, controller.signal)) {
-                setErrorMessage(t('帖子載入失敗，請檢查網絡後再試'));
-                if (refresh) {
-                    Toast.show(t('帖子更新失敗，請稍後再試'));
-                }
-            }
-        } finally {
-            if (requestGeneration === requestGenerationRef.current) {
+            setErrorMessage('');
+
+            if (!Number.isInteger(topicId) || topicId <= 0) {
+                setErrorMessage(t('帖子地址無效'));
                 setIsLoading(false);
                 setIsRefreshing(false);
                 controllerRef.current = null;
+                return;
             }
-        }
-    }, [t, topicId]);
+
+            try {
+                const nextTopic = await fetchHarborTopic(topicId, {
+                    signal: controller.signal,
+                });
+                if (
+                    controller.signal.aborted ||
+                    requestGeneration !== requestGenerationRef.current
+                ) {
+                    return;
+                }
+                setTopic(nextTopic);
+            } catch (error) {
+                if (!isCanceledRequest(error, controller.signal)) {
+                    setErrorMessage(t('帖子載入失敗，請檢查網絡後再試'));
+                    if (refresh) {
+                        Toast.show(t('帖子更新失敗，請稍後再試'));
+                    }
+                }
+            } finally {
+                if (requestGeneration === requestGenerationRef.current) {
+                    setIsLoading(false);
+                    setIsRefreshing(false);
+                    controllerRef.current = null;
+                }
+            }
+        },
+        [t, topicId],
+    );
 
     useEffect(() => {
         logToFirebase('openPage', {
@@ -760,22 +916,29 @@ const HarborTopicDetail = ({route, navigation}) => {
         };
     }, [loadTopic, topicId]);
 
-    const scrollToPost = useCallback(postNumber => {
-        const postIndex = posts.findIndex(post => {
-            return Number(post.post_number) === Number(postNumber);
-        });
-        if (postIndex < 0) {
-            return;
-        }
-        listRef.current?.scrollToIndex({
-            index: postIndex,
-            animated: true,
-            viewPosition: 0,
-        });
-    }, [posts]);
+    const scrollToPost = useCallback(
+        postNumber => {
+            const postIndex = posts.findIndex(post => {
+                return Number(post.post_number) === Number(postNumber);
+            });
+            if (postIndex < 0) {
+                return;
+            }
+            listRef.current?.scrollToIndex({
+                index: postIndex,
+                animated: true,
+                viewPosition: 0,
+            });
+        },
+        [posts],
+    );
 
     useEffect(() => {
-        if (!topic || !Number.isInteger(initialPostNumber) || initialPostNumber <= 0) {
+        if (
+            !topic ||
+            !Number.isInteger(initialPostNumber) ||
+            initialPostNumber <= 0
+        ) {
             return undefined;
         }
         const timeout = setTimeout(() => {
@@ -788,22 +951,95 @@ const HarborTopicDetail = ({route, navigation}) => {
         imageViewerRef.current?.handleOpenImage(index);
     }, []);
 
-    const renderPost = useCallback(({item}) => (
-        <HarborPostCard
-            post={item}
-            contentWidth={contentWidth}
-            imageUrls={imageUrls}
-            onOpenImage={openImage}
-            onPressReply={scrollToPost}
-        />
-    ), [contentWidth, imageUrls, openImage, scrollToPost]);
+    const openHarborLink = useCallback(
+        url => {
+            const target = parseHarborUrl(url, ARK_HARBOR);
+
+            if (target?.type === 'topic') {
+                navigation.navigate('HarborTopicDetail', {
+                    topicId: target.topicId,
+                    ...(target.postNumber
+                        ? {postNumber: target.postNumber}
+                        : {}),
+                });
+                return;
+            }
+
+            if (target?.type === 'category') {
+                navigation.navigate('HarborCategoryTopics', {
+                    categoryId: target.categoryId,
+                    categorySlug: target.categorySlug,
+                });
+                return;
+            }
+
+            if (target?.type === 'tag') {
+                navigation.navigate('HarborTagTopics', {tag: target.tag});
+                return;
+            }
+
+            openLink({
+                URL: target?.url || url,
+                mode: 'fullScreen',
+            });
+        },
+        [navigation],
+    );
+
+    const openAuthor = useCallback(
+        username => {
+            if (!username) {
+                return;
+            }
+            openHarborLink(`${ARK_HARBOR}/u/${encodeURIComponent(username)}`);
+        },
+        [openHarborLink],
+    );
+
+    const openCategory = useCallback(
+        category => {
+            navigation.navigate('HarborCategoryTopics', category);
+        },
+        [navigation],
+    );
+
+    const openTag = useCallback(
+        tag => {
+            navigation.navigate('HarborTagTopics', {tag});
+        },
+        [navigation],
+    );
+
+    const renderPost = useCallback(
+        ({item}) => (
+            <HarborPostCard
+                post={item}
+                contentWidth={contentWidth}
+                imageUrls={imageUrls}
+                onOpenImage={openImage}
+                onPressAuthor={openAuthor}
+                onPressLink={openHarborLink}
+                onPressReply={scrollToPost}
+            />
+        ),
+        [
+            contentWidth,
+            imageUrls,
+            openAuthor,
+            openHarborLink,
+            openImage,
+            scrollToPost,
+        ],
+    );
 
     const openOriginalTopic = useCallback(() => {
         trigger();
         openLink({
             URL: ARK_HARBOR_TOPIC_URL(
                 topicId,
-                Number.isInteger(initialPostNumber) ? initialPostNumber : undefined,
+                Number.isInteger(initialPostNumber)
+                    ? initialPostNumber
+                    : undefined,
             ),
             mode: 'fullScreen',
         });
@@ -820,9 +1056,13 @@ const HarborTopicDetail = ({route, navigation}) => {
     if (!topic) {
         return (
             <View style={[styles.centeredPage, {backgroundColor: bg_color}]}>
-                <View style={[styles.errorIcon, {backgroundColor: tonal.primary15}]}>
+                <View
+                    style={[
+                        styles.errorIcon,
+                        {backgroundColor: tonal.primary15},
+                    ]}>
                     <MaterialCommunityIcons
-                        name="forum-alert-outline"
+                        name="alert-circle-outline"
                         size={scale(34)}
                         color={themeColor}
                     />
@@ -840,9 +1080,14 @@ const HarborTopicDetail = ({route, navigation}) => {
                     }}
                     style={({pressed}) => [
                         styles.primaryButton,
-                        {backgroundColor: pressed ? tonal.primary50 : themeColor},
+                        {
+                            backgroundColor: pressed
+                                ? tonal.primary50
+                                : themeColor,
+                        },
                     ]}>
-                    <Text style={[styles.primaryButtonText, {color: trueWhite}]}>
+                    <Text
+                        style={[styles.primaryButtonText, {color: trueWhite}]}>
                         {t('重新載入')}
                     </Text>
                 </Pressable>
@@ -851,9 +1096,17 @@ const HarborTopicDetail = ({route, navigation}) => {
                         onPress={openOriginalTopic}
                         style={({pressed}) => [
                             styles.secondaryButton,
-                            {backgroundColor: pressed ? tonal.primary30 : tonal.primary15},
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
                         ]}>
-                        <Text style={[styles.secondaryButtonText, {color: themeColor}]}>
+                        <Text
+                            style={[
+                                styles.secondaryButtonText,
+                                {color: themeColor},
+                            ]}>
                             {t('在 Harbor 開啟')}
                         </Text>
                     </Pressable>
@@ -872,14 +1125,16 @@ const HarborTopicDetail = ({route, navigation}) => {
                 contentInsetAdjustmentBehavior="automatic"
                 showsVerticalScrollIndicator={false}
                 drawDistance={700}
-                ListHeaderComponent={(
+                ListHeaderComponent={
                     <HarborTopicHeader
                         topic={topic}
                         onOpenOriginal={openOriginalTopic}
+                        onPressCategory={openCategory}
+                        onPressTag={openTag}
                     />
-                )}
+                }
                 ListFooterComponent={<View style={styles.listFooter} />}
-                refreshControl={(
+                refreshControl={
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
@@ -889,7 +1144,7 @@ const HarborTopicDetail = ({route, navigation}) => {
                             loadTopic({refresh: true});
                         }}
                     />
-                )}
+                }
             />
 
             <ARKImageView ref={imageViewerRef} imageUrls={imageUrls} />
@@ -932,6 +1187,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         marginTop: verticalScale(8),
+    },
+    category: {
+        alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: scale(7),
+        marginTop: verticalScale(8),
+        paddingHorizontal: scale(8),
+        paddingVertical: verticalScale(4),
+    },
+    categoryText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+        marginLeft: scale(4),
     },
     tag: {
         borderRadius: scale(7),
@@ -977,6 +1247,14 @@ const styles = StyleSheet.create({
     postHeader: {
         flexDirection: 'row',
         alignItems: 'flex-start',
+    },
+    authorLink: {
+        flex: 1,
+        flexDirection: 'row',
+        minWidth: 0,
+    },
+    pressedLink: {
+        opacity: 0.7,
     },
     avatar: {
         width: scale(42),
