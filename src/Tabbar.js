@@ -12,6 +12,7 @@ import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/un
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
+import ForumPage from './pages/TabbarPages/info/ForumPage';
 import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
@@ -23,16 +24,16 @@ import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 // 圖示說明
 const tabIconDescription = {
     NewsTabbar: '資訊',
-    Harbor: '職涯港',
+    ForumTabbar: '論壇',
     CourseTab: '選課',
     FeaturesTabbar: '服務',
     MyTabbar: '我的',
 };
 
-// 頁面元件映射
+// 頁面元件映射（插入順序決定底部 Tab 由左至右排列）
 const tabScreen = {
     NewsTabbar: NewsScreen,
-    // Harbor: ARKHarbor,
+    ForumTabbar: ForumPage,
     // 搵課與課表模擬已合併為 CourseTab 內的兩個段落
     CourseTab: CourseTab,
     FeaturesTabbar: FeaturesScreen,
@@ -42,7 +43,7 @@ const tabScreen = {
 // iOS SF Symbols 設定
 const iosTabIconConfig = {
     NewsTabbar: 'newspaper',
-    Harbor: 'heart',
+    ForumTabbar: 'bubble.left.and.bubble.right',
     CourseTab: 'text.book.closed',
     FeaturesTabbar: 'square.grid.2x2',
     MyTabbar: 'person.crop.circle',
@@ -51,7 +52,7 @@ const iosTabIconConfig = {
 // Android MaterialCommunityIcons 名稱映射
 const androidTabIconConfig = {
     NewsTabbar: 'newspaper-variant',
-    Harbor: 'chat-processing',
+    ForumTabbar: 'forum',
     CourseTab: 'book-open-page-variant',
     FeaturesTabbar: 'view-grid',
     MyTabbar: 'account-circle',
