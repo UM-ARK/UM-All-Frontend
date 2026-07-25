@@ -7,10 +7,21 @@ export const COURSE_TAB_ROUTE = 'CourseTab';
 export const COURSE_SEARCH_SEGMENT = 'CourseSearchSegment';
 export const COURSE_TIMETABLE_SEGMENT = 'CourseTimetableSegment';
 
+/** 記住上次打開的頂欄段落，下次進選課 Tab 還原 */
+export const COURSE_TOP_TAB_STORAGE_KEY = 'ARK_Course_TopTab';
+
 const SEGMENT_ROUTES = {
     search: COURSE_SEARCH_SEGMENT,
     timetable: COURSE_TIMETABLE_SEGMENT,
 };
+
+/**
+ * 是否為合法的選課頂欄段落路由名。
+ * @param {unknown} name
+ * @returns {name is typeof COURSE_SEARCH_SEGMENT | typeof COURSE_TIMETABLE_SEGMENT}
+ */
+export const isCourseSegment = name =>
+    name === COURSE_SEARCH_SEGMENT || name === COURSE_TIMETABLE_SEGMENT;
 
 /**
  * 跳轉到選課 Tab 的指定段落。

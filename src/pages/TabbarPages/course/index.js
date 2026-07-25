@@ -15,7 +15,10 @@ import { UM_PRE_ENROLMENT_EXCEL } from '../../../utils/pathMap';
 import {
     COURSE_SEARCH_SEGMENT,
     COURSE_TIMETABLE_SEGMENT,
+    COURSE_TOP_TAB_STORAGE_KEY,
+    isCourseSegment,
 } from '../../../utils/courseNavigation';
+import { getLocalStorage, setLocalStorage } from '../../../utils/storageKits';
 import What2Reg from '../what2Reg';
 import CourseSim from '../courseSim';
 import CourseTabBar from './components/CourseTabBar';
@@ -86,6 +89,8 @@ const CourseTabContent = () => {
     } = useCoursePlan();
 
     const [isUpdating, setIsUpdating] = useState(false);
+    // null：尚未讀完上次段落；讀完後才掛 Navigator，避免 initialRouteName 失效閃一下
+    const [initialSegment, setInitialSegment] = useState(null);
 
     // 課程資料初始化改由容器負責：段落是 lazy 的，若外部直接跳到課表段落，
     // 搵課段落還沒掛載，資料就永遠停在打包的 JSON
@@ -102,6 +107,24 @@ const CourseTabContent = () => {
         }
     }, [isFocused, refreshCourseData]);
 
+    // 還原上次的頂欄段落（冷啟動後點選課 Tab 仍回到同一段）
+    useEffect(() => {
+        let cancelled = false;
+
+        getLocalStorage(COURSE_TOP_TAB_STORAGE_KEY).then(stored => {
+            if (cancelled) {
+                return;
+            }
+            setInitialSegment(
+                isCourseSegment(stored) ? stored : COURSE_SEARCH_SEGMENT,
+            );
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     const handleManualUpdate = useCallback(async () => {
         setIsUpdating(true);
         try {
@@ -116,6 +139,15 @@ const CourseTabContent = () => {
 
     const handleOpenSharePoint = useCallback(() => {
         openLink(UM_PRE_ENROLMENT_EXCEL);
+    }, []);
+
+    // 切換段落時寫入本地，供下次進選課 Tab 使用
+    const handleTopTabStateChange = useCallback(e => {
+        const state = e.data.state;
+        const routeName = state?.routes?.[state.index]?.name;
+        if (isCourseSegment(routeName)) {
+            setLocalStorage(COURSE_TOP_TAB_STORAGE_KEY, routeName);
+        }
     }, []);
 
     const renderTabBar = useCallback(
@@ -134,60 +166,65 @@ const CourseTabContent = () => {
         <SafeAreaView
             style={{ backgroundColor: bg_color, flex: 1 }}
             edges={{ top: true }}>
-            <Tab.Navigator
-                tabBar={renderTabBar}
-                screenOptions={{
-                    tabBarLabelStyle: {
-                        fontSize: TAB_LABEL_FONT_SIZE,
-                        fontWeight: 'bold',
-                    },
-                    tabBarStyle: {
-                        backgroundColor: bg_color,
-                        height: TAB_BAR_HEIGHT,
-                        overflow: 'hidden',
-                    },
-                    tabBarItemStyle: {
-                        minHeight: TAB_BAR_HEIGHT,
-                        paddingVertical: 0,
-                    },
-                    tabBarContentContainerStyle: {
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    },
-                    tabBarBounces: false,
-                    tabBarActiveTintColor: themeColor,
-                    tabBarInactiveTintColor: black.third,
-                    tabBarPressColor: bg_color,
-                    tabBarIndicatorStyle: {
-                        backgroundColor: themeColor,
-                        width: TAB_INDICATOR_WIDTH,
-                        marginHorizontal: 'auto',
-                    },
-                    lazy: true,
-                    // 課表段落本身要橫向滑動看星期，開啟滑動切換會與它搶手勢
-                    swipeEnabled: false,
-                }}
-                initialRouteName={COURSE_SEARCH_SEGMENT}>
-                <Tab.Screen
-                    name={COURSE_SEARCH_SEGMENT}
-                    component={What2Reg}
-                    options={{ title: t('搵課') }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-                <Tab.Screen
-                    name={COURSE_TIMETABLE_SEGMENT}
-                    component={CourseSim}
-                    options={{
-                        title: t('課表'),
-                        tabBarBadge: renderConflictBadge,
+            {initialSegment ? (
+                <Tab.Navigator
+                    tabBar={renderTabBar}
+                    screenListeners={{
+                        state: handleTopTabStateChange,
                     }}
-                    listeners={() => ({
-                        tabPress: () => trigger(),
-                    })}
-                />
-            </Tab.Navigator>
+                    screenOptions={{
+                        tabBarLabelStyle: {
+                            fontSize: TAB_LABEL_FONT_SIZE,
+                            fontWeight: 'bold',
+                        },
+                        tabBarStyle: {
+                            backgroundColor: bg_color,
+                            height: TAB_BAR_HEIGHT,
+                            overflow: 'hidden',
+                        },
+                        tabBarItemStyle: {
+                            minHeight: TAB_BAR_HEIGHT,
+                            paddingVertical: 0,
+                        },
+                        tabBarContentContainerStyle: {
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        },
+                        tabBarBounces: false,
+                        tabBarActiveTintColor: themeColor,
+                        tabBarInactiveTintColor: black.third,
+                        tabBarPressColor: bg_color,
+                        tabBarIndicatorStyle: {
+                            backgroundColor: themeColor,
+                            width: TAB_INDICATOR_WIDTH,
+                            marginHorizontal: 'auto',
+                        },
+                        lazy: true,
+                        // 課表段落本身要橫向滑動看星期，開啟滑動切換會與它搶手勢
+                        swipeEnabled: false,
+                    }}
+                    initialRouteName={initialSegment}>
+                    <Tab.Screen
+                        name={COURSE_SEARCH_SEGMENT}
+                        component={What2Reg}
+                        options={{ title: t('搵課') }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                    <Tab.Screen
+                        name={COURSE_TIMETABLE_SEGMENT}
+                        component={CourseSim}
+                        options={{
+                            title: t('課表'),
+                            tabBarBadge: renderConflictBadge,
+                        }}
+                        listeners={() => ({
+                            tabPress: () => trigger(),
+                        })}
+                    />
+                </Tab.Navigator>
+            ) : null}
 
             <Dialog
                 isVisible={isUpdating}
