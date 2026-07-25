@@ -391,7 +391,7 @@ const What2Reg = () => {
                 contentInset={{ top: scrollTopInset }}
                 contentOffset={{ y: -scrollTopInset }}
                 scrollIndicatorInsets={{ top: scrollTopInset, bottom: tabBarHeight }}
-                contentContainerStyle={{ paddingBottom: tabBarHeight + verticalScale(10) }}
+                contentContainerStyle={{ paddingBottom: tabBarHeight + verticalScale(50) }}
                 stickyHeaderIndices={[0]}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
