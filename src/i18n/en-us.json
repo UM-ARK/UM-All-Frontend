@@ -288,6 +288,7 @@
     "timetable": {
         "課表模擬": "Timetable Simulation",
         "加課": "Add",
+        "清空": "Clear",
         "已排課程數": "{{num}} course(s) added",
         "衝突數": "{{num}} conflict(s)",
         "晚上": "Evening",

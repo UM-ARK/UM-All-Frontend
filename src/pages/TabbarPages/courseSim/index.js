@@ -166,6 +166,7 @@ function CourseSim({ route, navigation }) {
         dropAllSections,
         conflictSlotKeys,
         importFromISW,
+        clearPlan,
     } = useCoursePlan();
 
     // state
@@ -836,6 +837,25 @@ function CourseSim({ route, navigation }) {
         setHasOpenCourseSearch(true);
         verScroll.current?.scrollTo({ y: 0 });
     };
+
+    const handleClearPlan = useCallback(() => {
+        Alert.alert(
+            '',
+            t('確定清空當前模擬課表？', { ns: 'timetable' }),
+            [
+                {
+                    text: t('確定清空', { ns: 'timetable' }),
+                    onPress: () => {
+                        trigger();
+                        clearPlan();
+                    },
+                    style: 'destructive',
+                },
+                { text: t('取消', { ns: 'timetable' }) },
+            ],
+            { cancelable: true },
+        );
+    }, [clearPlan]);
 
     const closeCourseSearch = () => {
         trigger();
@@ -1798,7 +1818,7 @@ E11-0000
     };
 
     return (
-        // 標題列由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
+        // 頂欄由 course/index.js 容器統一提供；頂部 insets 亦在容器處理，此處不可重複扣一次
         <View
             style={{
                 flex: 1,
@@ -1830,7 +1850,9 @@ E11-0000
             {hasOpenCourseSearch ? null : (
                 <AddCourseFab
                     bottom={tabBarHeight + verticalScale(10)}
-                    onPress={openCourseSearch}
+                    onAddPress={openCourseSearch}
+                    onClearPress={handleClearPlan}
+                    canClear={planList.length > 0}
                 />
             )}
 

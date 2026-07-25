@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Text, View } from 'react-native';
-import { Image } from 'expo-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actions-sheet';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -10,32 +9,24 @@ import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import TouchableScale from '../../../../components/TouchableScale';
 
-const LOGO_SIZE = scale(25);
-
 /**
- * 選課頁的固定標題列。
+ * 選課頁次要操作選單（⋯）。
  *
- * 兩個段落共用同一個 header，且刻意不隨段落變化：合併前「搵課」右上是「更新」、
- * 「課表模擬」左上是垃圾桶右上是「＋」，切頁時按鈕會在兩種佈局間跳動。這裡把所有
- * 次要操作收進單一「⋯」ActionSheet，換段落時 header 完全靜止。
+ * 兩個段落共用同一個入口，且刻意不隨段落變化：合併前「搵課」右上是「更新」、
+ * 「課表模擬」左上是垃圾桶右上是「＋」，切頁時按鈕會在兩種佈局間跳動。這裡把更新
+ * 相關操作收進單一 ActionSheet；清空已遷到課表段落右下 FAB 上方。
  *
- * @param {string} title 標題文字（由容器決定，避免本元件綁定 i18n 鍵）
  * @param {object} courseVersion 課程資料版本，形狀同 static/UMCourses/courseVersion.json
  * @param {Function} onManualUpdate 手動檢查課表數據更新
  * @param {Function} onOpenSharePoint 開啟官方 SharePoint 課表 Excel
- * @param {Function} onClearPlan 清空模擬課表
- * @param {boolean} canClearPlan 是否已有排課（無排課時不顯示清空入口）
  */
-const CourseTabHeader = ({
-    title,
+const CourseMoreMenu = ({
     courseVersion,
     onManualUpdate,
     onOpenSharePoint,
-    onClearPlan,
-    canClearPlan = false,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, tonal, black, unread, bg_color } = theme;
+    const { themeColor, tonal, black, bg_color } = theme;
 
     const actionSheetRef = useRef(null);
     // sheet 關閉動畫結束前不可再開 WebBrowser / 另一個 sheet，否則 iOS modal 競態會卡死
@@ -43,36 +34,14 @@ const CourseTabHeader = ({
 
     const styles = useMemo(
         () => ({
-            container: {
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingTop: verticalScale(3),
-                paddingBottom: verticalScale(5),
-                backgroundColor: bg_color,
-            },
-            titleGroup: {
-                flexDirection: 'row',
-                alignItems: 'center',
-                alignSelf: 'center',
-            },
-            titleText: {
-                ...uiStyle.defaultText,
-                fontSize: scale(18),
-                color: themeColor,
-                fontWeight: '600',
-                marginLeft: scale(5),
-            },
-            // TouchableScale 已提供縮放回饋，故不再額外做 pressed 變色
             moreButton: {
-                position: 'absolute',
-                right: scale(10),
                 backgroundColor: tonal.primary15,
                 borderRadius: scale(8),
                 paddingHorizontal: scale(8),
-                paddingVertical: scale(6),
+                paddingVertical: scale(4),
                 justifyContent: 'center',
                 alignItems: 'center',
+                marginRight: scale(10),
             },
             sheetContainer: {
                 borderRadius: scale(10),
@@ -100,7 +69,7 @@ const CourseTabHeader = ({
                 fontSize: scale(15),
             }),
         }),
-        [bg_color, black.third, themeColor, tonal.primary15],
+        [bg_color, black.third, tonal.primary15],
     );
 
     const versionSummary = useMemo(() => {
@@ -141,26 +110,14 @@ const CourseTabHeader = ({
     }, []);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.titleGroup}>
-                <Image
-                    source={require('../../../../static/img/logo.png')}
-                    style={{
-                        height: LOGO_SIZE,
-                        width: LOGO_SIZE,
-                        borderRadius: scale(5),
-                    }}
-                />
-                <Text style={styles.titleText}>{title}</Text>
-            </View>
-
+        <>
             <TouchableScale
                 style={styles.moreButton}
                 onPress={handleOpenSheet}
                 hitSlop={scale(8)}>
                 <Ionicons
                     name="ellipsis-horizontal"
-                    size={scale(18)}
+                    size={scale(16)}
                     color={themeColor}
                 />
             </TouchableScale>
@@ -190,16 +147,6 @@ const CourseTabHeader = ({
                         </Text>
                     </TouchableScale>
 
-                    {canClearPlan ? (
-                        <TouchableScale
-                            style={styles.actionButton(tonal.unread30)}
-                            onPress={() => runAction(onClearPlan)}>
-                            <Text style={styles.actionButtonText(unread)}>
-                                {t('清空當前模擬課表', { ns: 'timetable' })}
-                            </Text>
-                        </TouchableScale>
-                    ) : null}
-
                     <TouchableScale
                         style={styles.actionButton(tonal.primary08)}
                         onPress={() => {
@@ -213,8 +160,8 @@ const CourseTabHeader = ({
                     </TouchableScale>
                 </View>
             </ActionSheet>
-        </View>
+        </>
     );
 };
 
-export default CourseTabHeader;
+export default CourseMoreMenu;

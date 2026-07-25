@@ -1,8 +1,14 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import { Text, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
-import { useHeaderHeight } from '@react-navigation/elements';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -172,14 +178,10 @@ const What2Reg = () => {
     const scrollViewRef = useRef(null);
 
     const insets = useSafeAreaInsets();
-    const headerHeight = useHeaderHeight();
     // 與課表頁一致：優先讀 Tab Bar 實際高度，否則回退 safe area + 預設高度
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
-    // 頂部 insets 由 course/index.js 容器的 SafeAreaView 統一處理，段落不可重複扣一次。
-    // 本段落無自己的導航列時 headerHeight 為 0，等於不額外偏移。
-    const stickyTopOffset = headerHeight;
-    const scrollTopInset = Platform.OS === 'android' ? 0 : stickyTopOffset;
+    // 頂部 insets 由 course/index.js 容器的 SafeAreaView + 頂欄統一處理，段落不可重複扣一次
 
     // 課程資料、模擬課表與衝突狀態一律取自容器的 CoursePlanProvider，
     // 段落不再自行持有 useCourseData，避免與課表段落各自抓一份而不同步
@@ -388,9 +390,7 @@ const What2Reg = () => {
             <KeyboardAwareScrollView
                 ref={scrollViewRef}
                 style={{ width: '100%', flex: 1 }}
-                contentInset={{ top: scrollTopInset }}
-                contentOffset={{ y: -scrollTopInset }}
-                scrollIndicatorInsets={{ top: scrollTopInset, bottom: tabBarHeight }}
+                scrollIndicatorInsets={{ bottom: tabBarHeight }}
                 contentContainerStyle={{ paddingBottom: tabBarHeight + verticalScale(50) }}
                 stickyHeaderIndices={[0]}
                 keyboardDismissMode="on-drag"

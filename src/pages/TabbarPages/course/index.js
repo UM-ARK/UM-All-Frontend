@@ -4,7 +4,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useIsFocused } from '@react-navigation/native';
 import { Dialog } from '@rneui/themed';
-import { moderateScale, scale } from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme, uiStyle } from '../../../components/ThemeContext';
@@ -18,16 +18,15 @@ import {
 } from '../../../utils/courseNavigation';
 import What2Reg from '../what2Reg';
 import CourseSim from '../courseSim';
-import CourseTabHeader from './components/CourseTabHeader';
+import CourseTabBar from './components/CourseTabBar';
 import { CoursePlanProvider, useCoursePlan } from './context/CoursePlanContext';
+import {
+    TAB_BAR_HEIGHT,
+    TAB_INDICATOR_WIDTH,
+    TAB_LABEL_FONT_SIZE,
+} from './constants';
 
 const Tab = createMaterialTopTabNavigator();
-
-// 與 info/index.js 的頂部 Tab 保持同一組尺寸參數，避免兩個 Tab 頁高度不一致
-const TOP_TAB_SCALE_FACTOR = 0.1;
-const TAB_INDICATOR_WIDTH = moderateScale(25, TOP_TAB_SCALE_FACTOR);
-const TAB_BAR_HEIGHT = moderateScale(30, TOP_TAB_SCALE_FACTOR);
-const TAB_LABEL_FONT_SIZE = moderateScale(11, 0.3);
 
 /**
  * 課表段落 Tab 上的衝突數角標。
@@ -70,9 +69,9 @@ const ConflictBadge = () => {
 const renderConflictBadge = () => <ConflictBadge />;
 
 /**
- * 選課頁內容：固定 header + 兩個段落。
+ * 選課頁內容：頂欄（段落 Tab + ⋯）+ 兩個段落。
  *
- * 必須是 CoursePlanProvider 的子層，因為 header 的清空要動共享排課狀態。
+ * 必須是 CoursePlanProvider 的子層，因為頂欄的版本操作與衝突角標都讀共享排課狀態。
  */
 const CourseTabContent = () => {
     const { theme } = useTheme();
@@ -82,8 +81,6 @@ const CourseTabContent = () => {
 
     const {
         courseVersion,
-        planList,
-        clearPlan,
         initCourseData,
         refreshCourseData,
     } = useCoursePlan();
@@ -121,39 +118,24 @@ const CourseTabContent = () => {
         openLink(UM_PRE_ENROLMENT_EXCEL);
     }, []);
 
-    const handleClearPlan = useCallback(() => {
-        Alert.alert(
-            '',
-            t('確定清空當前模擬課表？', { ns: 'timetable' }),
-            [
-                {
-                    text: t('確定清空', { ns: 'timetable' }),
-                    onPress: () => {
-                        trigger();
-                        clearPlan();
-                    },
-                    style: 'destructive',
-                },
-                { text: t('取消', { ns: 'timetable' }) },
-            ],
-            { cancelable: true },
-        );
-    }, [clearPlan, t]);
+    const renderTabBar = useCallback(
+        props => (
+            <CourseTabBar
+                {...props}
+                courseVersion={courseVersion}
+                onManualUpdate={handleManualUpdate}
+                onOpenSharePoint={handleOpenSharePoint}
+            />
+        ),
+        [courseVersion, handleManualUpdate, handleOpenSharePoint],
+    );
 
     return (
         <SafeAreaView
             style={{ backgroundColor: bg_color, flex: 1 }}
             edges={{ top: true }}>
-            <CourseTabHeader
-                title={t('選課')}
-                courseVersion={courseVersion}
-                onManualUpdate={handleManualUpdate}
-                onOpenSharePoint={handleOpenSharePoint}
-                onClearPlan={handleClearPlan}
-                canClearPlan={planList.length > 0}
-            />
-
             <Tab.Navigator
+                tabBar={renderTabBar}
                 screenOptions={{
                     tabBarLabelStyle: {
                         fontSize: TAB_LABEL_FONT_SIZE,
