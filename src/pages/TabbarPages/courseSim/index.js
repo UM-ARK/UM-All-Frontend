@@ -1851,19 +1851,24 @@ E11-0000
                 </View>
             </ScrollView>
 
-            {/* sheet 展開後會蓋住 FAB，故開啟期間收起，關閉入口改由 sheet 自己提供 */}
-            {hasOpenCourseSearch ? null : (
-                <AddCourseFab
-                    bottom={tabBarHeight + verticalScale(10)}
-                    onAddPress={openCourseSearch}
-                    onClearPress={handleClearPlan}
-                    canClear={planList.length > 0}
-                />
-            )}
+            {/* sheet 展開時淡出 FAB；關閉動畫開始即淡入，避免等 onClose 才突然出現 */}
+            <AddCourseFab
+                bottom={tabBarHeight + verticalScale(10)}
+                visible={!hasOpenCourseSearch}
+                onAddPress={openCourseSearch}
+                onClearPress={handleClearPlan}
+                canClear={planList.length > 0}
+            />
 
             <CustomBottomSheet
                 ref={bottomSheetRef}
                 page={'courseSim'}
+                onAnimate={(fromIndex, toIndex) => {
+                    // 開始關閉時即顯示 FAB，與 sheet 下滑並行淡入
+                    if (toIndex === -1 && hasOpenCourseSearch) {
+                        setHasOpenCourseSearch(false);
+                    }
+                }}
                 setHasOpenFalse={() => {
                     if (hasOpenCourseSearch) {
                         setHasOpenCourseSearch(false);

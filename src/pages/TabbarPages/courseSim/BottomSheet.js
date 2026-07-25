@@ -51,6 +51,9 @@ const CustomBottomSheet = forwardRef((props, ref) => {
                 borderTopLeftRadius: scale(50),
                 borderTopRightRadius: scale(50),
             }}
+            onAnimate={(fromIndex, toIndex) => {
+                props.onAnimate?.(fromIndex, toIndex);
+            }}
             onChange={(idx) => {
                 setIdx(idx);
                 if (props.onSheetIndexChange) {
