@@ -12,7 +12,7 @@ import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/un
 
 import FeaturesScreen from './pages/TabbarPages/features';
 import NewsScreen from './pages/TabbarPages/info';
-import ForumPage from './pages/TabbarPages/info/ForumPage';
+import ForumPage from './pages/TabbarPages/arkHarbor';
 import CourseTab from './pages/TabbarPages/course';
 import MyScreen from './pages/TabbarPages/my';
 
