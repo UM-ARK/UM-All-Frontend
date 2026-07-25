@@ -1323,10 +1323,10 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@callstack/liquid-glass@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.npmjs.org/@callstack/liquid-glass/-/liquid-glass-0.7.1.tgz#54a5d47d12dea52162bb00b4c8c6bdc6ae8ec3c0"
-  integrity sha512-N2rzs8g3kneI5G/98AZdVtjc6OUFBBFwPxVGVMoXUEI7QiioB4+aWwbImg5h8Z3Vb/T+fgLYWmmNhi27wHwE4g==
+"@callstack/liquid-glass@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.npmjs.org/@callstack/liquid-glass/-/liquid-glass-0.8.0.tgz#466b66622b83dee4694be3b413baa459dac52e92"
+  integrity sha512-yRtZamuf0WaNkqgqzjeuM8EpzpxLsjx8o+8yzhmFVqxiIMM5KJ9nYwKpicNHZ7+JTv5mJCxfQ62jSvC3VrUTSA==
 
 "@craftzdog/react-native-buffer@^6.1.2":
   version "6.1.2"

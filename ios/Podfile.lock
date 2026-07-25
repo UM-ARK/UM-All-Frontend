@@ -332,7 +332,7 @@ PODS:
   - hermes-engine (250829098.0.14):
     - hermes-engine/Pre-built (= 250829098.0.14)
   - hermes-engine/Pre-built (250829098.0.14)
-  - LiquidGlass (0.7.1):
+  - LiquidGlass (0.8.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -3416,7 +3416,7 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: a6d37949071d456e9147dac6789c4342e0e7a8c5
   GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   hermes-engine: f75e32ceea2ce563256c2778505636b2120f52bf
-  LiquidGlass: 3fd4582008eeba28d60c5960953a32df6a65ad0a
+  LiquidGlass: e8764f36577a10ce8a658e47ef8c0f36422e7d1e
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   NitroModules: ebde9b4ad182fedd750622c9596406c25798feb5
   OpenSSL-Universal: ecee7b138fa75a74ecf00d7ffd248fb584739b9e
