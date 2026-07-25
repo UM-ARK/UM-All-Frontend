@@ -41,7 +41,12 @@ const getItemCount = data => {
     return data.length;
 };
 
-const NewsPage = () => {
+/**
+ * 澳大新聞列表
+ * @param {boolean} [hideSourceLabel=false] - 嵌入校園頁時隱藏列表內來源標註
+ * @param {boolean} [showScrollToTop=true] - 是否顯示回頂按鈕（Pager 僅當前頁顯示）
+ */
+const NewsPage = ({ hideSourceLabel = false, showScrollToTop = true }) => {
     const { theme } = useContext(ThemeContext);
     const { white, black, viewShadow, bg_color, themeColor, trueWhite } = theme;
     const styles = StyleSheet.create({
@@ -176,9 +181,11 @@ const NewsPage = () => {
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
-                <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center' }}>
-                    Data From: data.um.edu.mo
-                </Text>
+                {hideSourceLabel ? null : (
+                    <Text style={{ ...uiStyle.defaultText, color: black.third, alignSelf: 'center' }}>
+                        Data From: data.um.edu.mo
+                    </Text>
+                )}
                 <View style={styles.topNewsContainer}>
                     <TouchableOpacity
                         activeOpacity={0.8}
@@ -236,7 +243,7 @@ const NewsPage = () => {
                 </View>
             </View >
         );
-    }, [topNews]);
+    }, [topNews, hideSourceLabel, topNewsContent, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, trueWhite]);
 
     return (
         <View style={{
@@ -317,6 +324,7 @@ const NewsPage = () => {
                     removeClippedSubviews
                 />
                     <ScrollToTopButton
+                        visible={showScrollToTop}
                         virtualizedListRef={virtualizedList}
                     />
                 </View>)}

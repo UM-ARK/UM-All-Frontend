@@ -19,7 +19,12 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import {scale, verticalScale} from 'react-native-size-matters';
 
-const UMEventPage = () => {
+/**
+ * 澳大活動列表
+ * @param {boolean} [hideSourceLabel=false] - 嵌入校園頁時隱藏列表內來源標註
+ * @param {boolean} [showScrollToTop=true] - 是否顯示回頂按鈕（Pager 僅當前頁顯示）
+ */
+const UMEventPage = ({hideSourceLabel = false, showScrollToTop = true}) => {
     const scrollViewRef = useRef(null);
     const progressRef = useRef();
     const {theme} = useContext(ThemeContext);
@@ -116,8 +121,8 @@ const UMEventPage = () => {
 
     // 渲染主要內容
     const renderPage = () => {
-        const {black, white, themeColor} = theme;
-        const listHeader = (
+        const {black, themeColor} = theme;
+        const listHeader = hideSourceLabel ? null : (
             <View style={{marginTop: verticalScale(8)}}>
                 <Text
                     style={{
@@ -154,7 +159,10 @@ const UMEventPage = () => {
                         />
                     }
                 />
-                <ScrollToTopButton virtualizedListRef={scrollViewRef} />
+                <ScrollToTopButton
+                    visible={showScrollToTop}
+                    virtualizedListRef={scrollViewRef}
+                />
             </View>
         );
     };

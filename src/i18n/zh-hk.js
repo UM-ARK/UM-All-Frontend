@@ -4,9 +4,15 @@ export default {
         'ABOUT': '關於',
         'TOPTAB_MAIN': '主頁',
         'TOPTAB_CLUB': '組織',
+        'TOPTAB_CAMPUS': '校園',
         'TOPTAB_EVENT': '活動',
         'TOPTAB_NEWS': '新聞',
         'TOPTAB_ABOUT': '關於',
+        '來源：UM Open Data': '來源：UM Open Data',
+        '資料來自澳門大學開放數據平台，轉載時請確保內容準確。':
+            '資料來自澳門大學開放數據平台，轉載時請確保內容準確。',
+        '開啟來源': '開啟來源',
+        '取消': '取消',
     },
     // 設置頁
     setting: {

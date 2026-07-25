@@ -195,6 +195,9 @@ export const UMEH_API = {
     },
 };
 
+// 澳大開放數據平台
+export const UM_OPEN_DATA = 'https://data.um.edu.mo';
+
 // 澳大 - API 車位
 export const UM_API_CAR_PARK =
     'https://api.data.um.edu.mo/service/facilities/car_park_availability/all';
