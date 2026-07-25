@@ -28,6 +28,7 @@ import Webviewer from './components/Webviewer';
 import AllEvents from './pages/TabbarPages/info/club/AllEvents';
 import Bus from './pages/Features/Bus';
 import CarPark from './pages/Features/CarPark';
+import EatingSchedule from './pages/Features/EatingSchedule';
 import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
@@ -114,6 +115,7 @@ const Nav = () => {
                     {/* 服務頁 */}
                     <Stack.Screen name="Bus" component={Bus} options={{ headerTitle: t('校園巴士') }} />
                     <Stack.Screen name="CarPark" component={CarPark} options={{ headerTitle: t('車位') }} />
+                    <Stack.Screen name="EatingSchedule" component={EatingSchedule} options={{ headerTitle: t('幹飯時間') }} />
                     <Stack.Screen name="UMOrg" component={UMOrg} options={{ headerTitle: t('澳大部門') }} />
 
 

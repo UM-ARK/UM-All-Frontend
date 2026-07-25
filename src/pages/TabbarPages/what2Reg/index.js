@@ -23,7 +23,6 @@ import { USER_AGREE, ARK_WIKI_SEARCH, OFFICIAL_COURSE_SEARCH, UM_PRE_ENROLMENT_E
 import { refreshUmehHost, useUmehHost } from '../../../utils/umehHost';
 
 import CourseCard from './components/CourseCard';
-import CustomBottomSheet from '../courseSim/BottomSheet';
 import useCourseData from './hooks/useCourseData';
 import useCourseFiltering from './hooks/useCourseFiltering';
 import useCourseSearch from './hooks/useCourseSearch';
@@ -31,9 +30,8 @@ import useFirstLetterNav from './hooks/useFirstLetterNav';
 import FilterPanel from './components/FilterPanel';
 import SearchBarSection from './components/SearchBarSection';
 import FirstLetterNav from './components/FirstLetterNav';
-import EatingScheduleSheetContent from './components/EatingScheduleSheetContent';
 import { unitMap, depaMap, geClassMap } from './constants/maps';
-import { adpeMap, CMGEList, dayList, defaultFilterOptions, modeENStr } from './constants/options';
+import { adpeMap, CMGEList, defaultFilterOptions, modeENStr } from './constants/options';
 import TouchableScale from '../../../components/TouchableScale';
 
 const iconSize = scale(25);
@@ -170,14 +168,12 @@ const What2Reg = props => {
     const styles = useMemo(() => getStyles(themeColor, white), [themeColor, white]);
 
     const [dialogVisible, setDialogVisible] = useState(false);
-    const [sheetIndex, setSheetIndex] = useState(-1);
     const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
     const [courseGridWidth, setCourseGridWidth] = useState(0);
 
     const textInputRef = useRef(null);
     const scrollViewRef = useRef(null);
     const actionSheetRef = useRef(null);
-    const bottomSheetRef = useRef(null);
 
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
@@ -497,21 +493,6 @@ const What2Reg = props => {
                         </View>
                     </View>
 
-                    <TouchableScale
-                        style={styles.titleLeftButton}
-                        onPress={() => {
-                            trigger();
-                            if (sheetIndex !== -1) {
-                                bottomSheetRef.current?.close();
-                                return;
-                            }
-                            logToFirebase('funcUse', { funcName: 'eating_schedule' });
-                            bottomSheetRef.current?.expand();
-                        }}
-                    >
-                        <Ionicons name={'alarm'} size={verticalScale(14)} color={themeColor} />
-                        <Text style={styles.titleButtonText}>{t('幹飯', { ns: 'catalog' })}</Text>
-                    </TouchableScale>
                 </View>
 
                 <SearchBarSection
@@ -599,15 +580,6 @@ const What2Reg = props => {
                 onScrollTo={onScrollToLetter}
             />
 
-            <CustomBottomSheet ref={bottomSheetRef} page={'home'} onSheetIndexChange={idx => setSheetIndex(idx)}>
-                {sheetIndex !== -1 ? (
-                    <EatingScheduleSheetContent
-                        theme={theme}
-                        dayList={dayList}
-                        courses={coursePlanTimeData?.Courses || []}
-                    />
-                ) : null}
-            </CustomBottomSheet>
         </View>
     );
 };
@@ -629,15 +601,6 @@ const getStyles = (themeColor, white) => ({
     titleRightButton: {
         position: 'absolute',
         right: scale(10),
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: `${themeColor}15`,
-        borderRadius: scale(5),
-        padding: scale(5),
-    },
-    titleLeftButton: {
-        position: 'absolute',
-        left: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: `${themeColor}15`,

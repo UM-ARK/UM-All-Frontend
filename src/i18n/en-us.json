@@ -267,11 +267,7 @@
         "或可附件最新的課表Excel，Email提醒作者更新！": "Or you can attach the latest timetable Excel and email the author to remind them to update!",
         "如日期已更新，課表數據未更新，可重啟APP再試~": "If the date has been updated and the timetable data has not been updated, you can try restarting the APP~",
         "檢查課表版本!": "Check timetable version!",
-        "以官網課表Excel為準!": "Based on the official timetable Excel!",
-        "幹飯": "Eating",
-        "幹飯時間表": "Eating Schedule",
-        "下課Section數": "Number of Sections After Class",
-        "上課Section數": "Number of Sections at Class Start"
+        "以官網課表Excel為準!": "Based on the official timetable Excel!"
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",
@@ -355,6 +351,9 @@
         "職位空缺": "Vacancies",
         "書院餐單": "Menu",
         "飯堂排隊": "Canteen Queue",
+        "幹飯時間": "Eating Times",
+        "下課Section數": "Sections Ending",
+        "上課Section數": "Sections Starting",
         "新生推薦": "Recommended for Freshmen",
         "職涯港": "Harbor",
         "生存指南": "Survival",
@@ -383,6 +382,8 @@
         "查看澳大和其他公司在澳大發佈的招聘": "Check the recruitment posted by UM and other companies in UM",
         "查看澳大書院菜單": "Check the UM college menu",
         "查看LCWC W22飯堂當前排隊人數": "Check the current queue count at LCWC W22 canteen",
+        "依目前本科課表統計各時段上、下課的Section數，以估算校園人流高峰，方便同學安排乾飯或通勤，減少排隊。數字代表Section數，並非實際人數。": "Uses the current undergraduate timetable to count sections starting and ending at each time, helping estimate campus peaks so students can plan meals or commutes and avoid queues. Counts represent sections, not actual people.",
+        "數值越大，預計人流越集中；今日前後30分鐘的時段會高亮顯示。": "Higher counts suggest busier periods. Times within 30 minutes of now are highlighted for today.",
         "查看澳大學生會通告頁": "Check the UM student union announcement page",
         "進入澳大MyUM網頁查看完整功能": "Enter the UM MyUM webpage to view the full functions",
         "進入CMMS報修系統，可以對書院等各種設施的問題下單申請維修": "Enter the CMMS repair system to place an order for repairs to various facilities such as colleges",
