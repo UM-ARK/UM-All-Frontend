@@ -1,6 +1,7 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image as RNImage } from 'react-native';
 import GalleryPreview from 'react-native-gallery-preview';
+import { Image } from 'expo-image';
 import { useTheme } from './ThemeContext';
 import { scale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -55,13 +56,33 @@ const ViewerChromeButton = ({
 };
 
 /**
+ * GalleryPreview 自訂圖片元件：expo-image + blurhash 模糊加載
+ * 需回傳真實寬高給庫，才能正確計算縮放邊界
+ */
+const GalleryExpoImage = ({ source, onLoad, style, imagePlaceholder }) => {
+    return (
+        <Image
+            source={source}
+            style={style}
+            contentFit="contain"
+            placeholder={imagePlaceholder}
+            placeholderContentFit="contain"
+            cachePolicy="memory-disk"
+            onLoad={e => {
+                onLoad(e.source.width, e.source.height);
+            }}
+        />
+    );
+};
+
+/**
  * ARKImageView - 全局圖片查看器組件
- * 基於 react-native-gallery-preview
+ * 基於 react-native-gallery-preview + expo-image
  */
 const ARKImageView = forwardRef((props, ref) => {
     const { imageUrls } = props;
     const { theme } = useTheme();
-    const { trueBlack, trueWhite } = theme;
+    const { trueBlack, trueWhite, imagePlaceholder } = theme;
 
     const [visible, setVisible] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
@@ -82,7 +103,7 @@ const ARKImageView = forwardRef((props, ref) => {
             if (typeof url === 'string') {
                 uri = url;
             } else if (typeof url === 'number') {
-                const assetSource = Image.resolveAssetSource(url);
+                const assetSource = RNImage.resolveAssetSource(url);
                 uri = assetSource?.uri || '';
             } else if (url && typeof url === 'object') {
                 if (url.url) { uri = url.url; }
@@ -120,7 +141,7 @@ const ARKImageView = forwardRef((props, ref) => {
         if (typeof imageUrl === 'string') {
             actualUrl = imageUrl;
         } else if (typeof imageUrl === 'number') {
-            const assetSource = Image.resolveAssetSource(imageUrl);
+            const assetSource = RNImage.resolveAssetSource(imageUrl);
             actualUrl = assetSource?.uri || null;
         } else if (typeof imageUrl === 'object') {
             if (imageUrl.url) { actualUrl = imageUrl.url; }
@@ -212,6 +233,14 @@ const ARKImageView = forwardRef((props, ref) => {
         trueWhite,
     ]);
 
+    // GalleryPreview 的 ImageComponent 只傳 source/onLoad/style，用閉包帶入 blurhash
+    const ImageComponent = useCallback((imageProps) => (
+        <GalleryExpoImage
+            {...imageProps}
+            imagePlaceholder={imagePlaceholder}
+        />
+    ), [imagePlaceholder]);
+
     if (processedImages.length === 0) { return null; }
 
     return (
@@ -221,6 +250,7 @@ const ARKImageView = forwardRef((props, ref) => {
             images={processedImages}
             initialIndex={startIndex}
             OverlayComponent={OverlayComponent}
+            ImageComponent={ImageComponent}
             backgroundColor={trueBlack}
             headerTextColor={trueWhite}
             doubleTabEnabled={true}
