@@ -10,6 +10,7 @@ import {
     View,
     Text,
     TouchableOpacity,
+    Pressable,
     Alert,
     StyleSheet,
     TextInput,
@@ -1044,7 +1045,7 @@ function CourseSim({ route, navigation }) {
 
         Alert.alert(
             '',
-            t('清空確認', { ns: 'timetable' }),
+            t('確定清空當前模擬課表？', { ns: 'timetable' }),
             [
                 {
                     text: t('確定清空', { ns: 'timetable' }),
@@ -1984,25 +1985,26 @@ E11-0000
                 }}>
                 {/* 清空課表按鈕 */}
                 {allCourseAllTime?.length > 0 && (
-                    <TouchableOpacity
-                        style={{
+                    <Pressable
+                        style={({pressed}) => ({
                             position: 'absolute',
                             left: scale(10),
-                            backgroundColor: tonal.primary15,
-                            borderRadius: scale(5),
-                            padding: scale(5),
-                        }}
-                        onPress={clearCourse}>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: themeColor,
-                                fontWeight: 'bold',
-                                lineHeight: verticalScale(14),
-                            }}>
-                            {t('清空', { ns: 'timetable' })}
-                        </Text>
-                    </TouchableOpacity>
+                            backgroundColor: pressed
+                                ? tonal.primary50
+                                : tonal.primary15,
+                            borderRadius: scale(8),
+                            padding: scale(6),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        })}
+                        onPress={clearCourse}
+                        hitSlop={scale(8)}>
+                        <Ionicons
+                            name="trash-outline"
+                            size={scale(18)}
+                            color={themeColor}
+                        />
+                    </Pressable>
                 )}
 
                 {/* 標題 + Logo */}
@@ -2033,17 +2035,23 @@ E11-0000
                     </View>
                 </View>
 
-                {/* Add 課按鈕 */}
-                <TouchableOpacity
-                    style={{
+                {/* 加課 / 關閉按鈕 */}
+                <Pressable
+                    style={({pressed}) => ({
                         position: 'absolute',
                         right: scale(10),
                         backgroundColor: hasOpenCourseSearch
-                            ? tonal.secondary15
-                            : tonal.primary15,
-                        borderRadius: scale(5),
-                        padding: scale(5),
-                    }}
+                            ? pressed
+                                ? tonal.secondary50
+                                : tonal.secondary15
+                            : pressed
+                              ? tonal.primary50
+                              : tonal.primary15,
+                        borderRadius: scale(8),
+                        padding: scale(6),
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    })}
                     onPress={() => {
                         trigger();
                         if (Keyboard.isVisible()) {
@@ -2062,21 +2070,18 @@ E11-0000
 
                         setHasOpenCourseSearch(!hasOpenCourseSearch);
                         verScroll.current?.scrollTo({ y: 0 });
-                    }}>
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            color: hasOpenCourseSearch
+                    }}
+                    hitSlop={scale(8)}>
+                    <Ionicons
+                        name={hasOpenCourseSearch ? 'close' : 'add'}
+                        size={scale(18)}
+                        color={
+                            hasOpenCourseSearch
                                 ? secondThemeColor
-                                : themeColor,
-                            fontWeight: 'bold',
-                            lineHeight: verticalScale(14),
-                        }}>
-                        {hasOpenCourseSearch
-                            ? t('關閉', { ns: 'timetable' })
-                            : t('搵課/加課', { ns: 'timetable' })}
-                    </Text>
-                </TouchableOpacity>
+                                : themeColor
+                        }
+                    />
+                </Pressable>
             </View>
 
             <ScrollView

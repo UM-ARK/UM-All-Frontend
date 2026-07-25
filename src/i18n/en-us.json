@@ -307,7 +307,7 @@
         "分鐘後": "min(s)",
         "課程衝突": "Class Conflict",
         "確定清空": "Clear All",
-        "清空確認": "Clear current timetable?",
+        "確定清空當前模擬課表？": "Clear the current simulated timetable?",
         "刪除Section確認": "Remove {{code}}-{{section}} from timetable?",
         "刪除所有Section確認": "Remove all sections of {{code}} from timetable?",
         "已刪除課程": "Removed {{code}}-{{section}}",
