@@ -251,26 +251,6 @@ function Index({ navigation }) {
             <ScrollView
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic">
-                {/* 服務頁操作入口已移至「我的」頁 */}
-                <View
-                    style={{
-                        alignItems: 'center',
-                        paddingHorizontal: scale(10),
-                    }}>
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: verticalScale(18),
-                            color: black.main,
-                            fontWeight: '700',
-                            textAlign: 'center',
-                            marginHorizontal: scale(4),
-                        }}
-                        numberOfLines={1}>
-                        {t('服務一覽', { ns: 'features' })}
-                    </Text>
-                </View>
-
                 {functionArr.map(fn_card =>
                     GetFunctionCard(fn_card.title, fn_card.fn),
                 )}
