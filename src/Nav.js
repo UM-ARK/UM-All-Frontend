@@ -17,6 +17,7 @@ import EventDetail from './pages/TabbarPages/info/club/EventDetail';
 import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
 import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
 import HarborTopicDetail from './pages/TabbarPages/info/home/HarborTopicDetail';
+import SearchScreen from './pages/TabbarPages/info/home/search/SearchScreen';
 import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
@@ -138,6 +139,7 @@ const Nav = () => {
                         headerTitle: '',
                     }}
                 >
+                    <Stack.Screen name="Search" component={SearchScreen} options={{ headerTitle: t('搜索') }} />
                     <Stack.Screen name="Webviewer" component={Webviewer} />
                     <Stack.Screen name="SettingPage" component={SettingPage} options={{ headerTitle: t('設置') }} />
                     <Stack.Screen name="HarborActivity" component={HarborActivityPage} />
