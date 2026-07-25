@@ -200,8 +200,6 @@ const CourseTabContent = () => {
                             marginHorizontal: 'auto',
                         },
                         lazy: true,
-                        // 課表段落本身要橫向滑動看星期，開啟滑動切換會與它搶手勢
-                        swipeEnabled: false,
                     }}
                     initialRouteName={initialSegment}>
                     <Tab.Screen

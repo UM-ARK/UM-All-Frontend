@@ -1006,6 +1006,9 @@ function CourseSim({ route, navigation }) {
                 },
                 {
                     text: t('替換', { ns: 'timetable' }),
+                    // 主要確認操作：系統藍（對應危險操作用 destructive 顯示紅色）
+                    style: 'default',
+                    isPreferred: true,
                     onPress: () => {
                         trigger();
                         commitPlan([
@@ -1014,9 +1017,9 @@ function CourseSim({ route, navigation }) {
                                 item =>
                                     !(
                                         item['Course Code'] ===
-                                            replacementTarget['Course Code'] &&
+                                        replacementTarget['Course Code'] &&
                                         item.Section ===
-                                            replacementTarget.Section
+                                        replacementTarget.Section
                                     ),
                             ),
                             {
