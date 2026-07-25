@@ -30,12 +30,20 @@ function showPermissionDeniedAlert(title, message) {
     Alert.alert(
         title,
         message,
-        [{
-            text: 'GO NOW', onPress: () => {
-                Linking.openSettings();
+        [
+            {
+                text: 'NO',
+                style: 'cancel',
             },
-        },
-        { text: 'NO' }],
+            {
+                text: 'GO NOW',
+                style: 'default',
+                isPreferred: true,
+                onPress: () => {
+                    Linking.openSettings();
+                },
+            },
+        ],
         { cancelable: false },
     );
 }

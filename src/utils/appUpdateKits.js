@@ -43,15 +43,18 @@ export function showAppStoreUpdateAlert(serverInfo) {
             : '新版有許多新特性，舊版APP可能會在某時刻不可用，現在前往更新嗎？🥺';
     Alert.alert(`ARK ${serverInfo.app_version} 現可更新！！`, message, [
         {
+            text: 'No',
+            style: 'cancel',
+        },
+        {
             text: 'Yes',
+            style: 'default',
+            isPreferred: true,
             onPress: () => {
                 trigger();
                 const url = Platform.OS === 'ios' ? APPSTORE_URL : BASE_HOST;
                 Linking.openURL(url);
             },
-        },
-        {
-            text: 'No',
         },
     ]);
 }

@@ -142,19 +142,20 @@ ${t('課表數據和版本將被還原，你需要再進行手動更新！', { n
 ${t('將清除所有緩存並重啟，您確定繼續嗎？', { ns: 'about' })}`,
                                 [
                                     {
+                                        text: 'No',
+                                        style: 'cancel',
+                                        onPress: () => {
+                                            trigger();
+                                        },
+                                    },
+                                    {
                                         text: 'Yes',
+                                        style: 'destructive',
                                         onPress: async () => {
                                             trigger();
                                             await AsyncStorage.clear();
                                             reloadAppAsync();
                                             Alert.alert('已清除所有緩存');
-                                        },
-                                        style: 'destructive',
-                                    },
-                                    {
-                                        text: 'No',
-                                        onPress: () => {
-                                            trigger();
                                         },
                                     },
                                 ]

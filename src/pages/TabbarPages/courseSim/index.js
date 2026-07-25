@@ -758,6 +758,10 @@ function CourseSim({ route, navigation }) {
                         }),
                         [
                             {
+                                text: 'No',
+                                style: 'cancel',
+                            },
+                            {
                                 text: 'Yes',
                                 onPress: () => {
                                     trigger();
@@ -765,9 +769,6 @@ function CourseSim({ route, navigation }) {
                                     verScroll.current?.scrollTo({ y: 0 });
                                 },
                                 style: 'destructive',
-                            },
-                            {
-                                text: 'No',
                             },
                         ],
                         { cancelable: true },
@@ -783,12 +784,13 @@ function CourseSim({ route, navigation }) {
                         `還會再見嗎燕子，再見的時候你要PASS！`,
                         [
                             {
+                                text: t('取消', { ns: 'timetable' }),
+                                style: 'cancel',
+                            },
+                            {
                                 text: 'Drop',
                                 onPress: () => handleDropCourse(course),
                                 style: 'destructive',
-                            },
-                            {
-                                text: t('取消', { ns: 'timetable' }),
                             },
                         ],
                         { cancelable: true },
@@ -957,6 +959,10 @@ function CourseSim({ route, navigation }) {
             t('確定清空當前模擬課表？', { ns: 'timetable' }),
             [
                 {
+                    text: t('取消', { ns: 'timetable' }),
+                    style: 'cancel',
+                },
+                {
                     text: t('確定清空', { ns: 'timetable' }),
                     onPress: () => {
                         trigger();
@@ -964,7 +970,6 @@ function CourseSim({ route, navigation }) {
                     },
                     style: 'destructive',
                 },
-                { text: t('取消', { ns: 'timetable' }) },
             ],
             { cancelable: true },
         );

@@ -234,6 +234,8 @@ const CampusPage = () => {
                 { text: t('取消'), style: 'cancel' },
                 {
                     text: t('開啟來源'),
+                    style: 'default',
+                    isPreferred: true,
                     onPress: () => openLink(UM_OPEN_DATA),
                 },
             ],
