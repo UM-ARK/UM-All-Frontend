@@ -7,14 +7,13 @@ import React, {
     useCallback,
     useImperativeHandle,
 } from 'react';
-import { Text, View, ScrollView, RefreshControl } from 'react-native';
+import { Text, View, RefreshControl, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
-import Loading from '../../../components/Loading';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -36,7 +35,6 @@ const UMEventPage = forwardRef(function UMEventPage(
     ref,
 ) {
     const scrollViewRef = useRef(null);
-    const progressRef = useRef();
     const { theme } = useContext(ThemeContext);
     const { i18n } = useTranslation();
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
@@ -73,14 +71,6 @@ const UMEventPage = forwardRef(function UMEventPage(
                     headers: {
                         Accept: 'application/json',
                         Authorization: UM_API_TOKEN,
-                    },
-                    onDownloadProgress: progressEvent => {
-                        const loadedMB = progressEvent.loaded / 1024 / 1024;
-                        let progress = loadedMB / 0.1; // 假設API返回數據大小約為2MB
-                        if (progress > 1) {
-                            progress = 0.95;
-                        } // 確保進度不超過1
-                        progressRef.current = progress; // 更新進度條
                     },
                 })
                 .then(res => {
@@ -212,7 +202,7 @@ const UMEventPage = forwardRef(function UMEventPage(
         );
     };
 
-    const { black, white, themeColor, bg_color } = theme;
+    const { themeColor, bg_color } = theme;
 
     return (
         <View
@@ -223,27 +213,7 @@ const UMEventPage = forwardRef(function UMEventPage(
                 backgroundColor: bg_color,
             }}>
             {isLoading ? (
-                <ScrollView
-                    ref={scrollViewRef}
-                    contentInsetAdjustmentBehavior="automatic"
-                    contentContainerStyle={{ paddingTop: contentTopInset }}
-                    showsVerticalScrollIndicator={true}
-                    onScroll={handleScroll}
-                    scrollEventThrottle={16}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={isLoading}
-                            onRefresh={() => {
-                                // 展示Loading標識
-                                setIsLoading(true);
-                                getData();
-                            }}
-                        />
-                    }>
-                    <Loading progress={progressRef.current} />
-                </ScrollView>
+                <ActivityIndicator size="large" color={themeColor} />
             ) : (
                 data != undefined && renderPage()
             )}

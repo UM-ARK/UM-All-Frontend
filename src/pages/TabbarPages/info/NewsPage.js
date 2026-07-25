@@ -12,21 +12,18 @@ import {
     View,
     Text,
     VirtualizedList,
-    ScrollView,
     RefreshControl,
     StyleSheet,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     ActivityIndicator,
     Image,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
 
-import { useTheme, themes, uiStyle, ThemeContext } from '../../../components/ThemeContext';
+import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
-import Loading from '../../../components/Loading';
 
 // import { Image } from 'expo-image';
 // import Interactable from 'react-native-interactable';
@@ -101,12 +98,9 @@ const NewsPage = forwardRef(function NewsPage(
     const virtualizedList = useRef(null);
 
     const [isLoading, setIsLoading] = useState(true);
-    const [isScrollViewLoading, setIsScrollViewLoading] = useState(false);
     const [newsList, setNewsList] = useState([]);
     const [topNews, setTopNews] = useState({});
-    // const [imgLoading, setImgLoading] = useState(true);
 
-    const progressRef = useRef(0);
     useImperativeHandle(
         ref,
         () => ({
@@ -153,18 +147,10 @@ const NewsPage = forwardRef(function NewsPage(
     // 請求澳大api返回新聞數據
     const getData = async () => {
         try {
-            const totalMB = 2;  // TODO: 這裡的2MB是預計API返回的數據大小，實際上可能會更大，需要減小流量
             const res = await axios.get(UM_API_NEWS, {
-                // 請求頭配置
                 headers: {
                     Accept: 'application/json',
                     Authorization: UM_API_TOKEN,
-                },
-                onDownloadProgress: progressEvent => {
-                    const loadedMB = progressEvent.loaded / 1024 / 1024;
-                    let progress = loadedMB / totalMB;
-                    if (progress > 1) { progress = 0.95; } // 確保進度不超過1
-                    progressRef.current = progress;
                 },
             });
             const result = res.data._embedded;
@@ -287,39 +273,16 @@ const NewsPage = forwardRef(function NewsPage(
             {/* 懸浮可拖動按鈕 */}
             {/* {isLoading ? null : renderGoTopButton()} */}
 
-            {/* 新聞列表 */}
-            {/* 判斷是否加載中 */}
             {isLoading ? (
-                // 渲染Loading時的骨架屏
-                <ScrollView
-                    ref={virtualizedList}
-                    contentInsetAdjustmentBehavior="automatic"
-                    contentContainerStyle={{
-                        flexGrow: 1,
+                <View
+                    style={{
+                        flex: 1,
                         justifyContent: 'center',
-                        paddingTop: contentTopInset,
-                    }}
-                    onScroll={handleScroll}
-                    scrollEventThrottle={16}
-                    refreshControl={
-                        <RefreshControl
-                            colors={[themeColor]}
-                            tintColor={themeColor}
-                            refreshing={isScrollViewLoading}
-                            onRefresh={() => {
-                                setIsScrollViewLoading(true);
-                                // setImgLoading(true);
-                                setIsLoading(true);
-                                getData();
-                            }}
-                        />
-                    }>
-                    <Loading progress={progressRef.current} />
-                </ScrollView>
-            ) : null}
-
-            {/* 渲染新聞列表 */}
-            {isLoading ? null : (
+                        alignItems: 'center',
+                    }}>
+                    <ActivityIndicator size="large" color={themeColor} />
+                </View>
+            ) : (
                 <View style={{ flex: 1, width: '100%' }}>
                     <VirtualizedList
                         data={newsList}
@@ -362,7 +325,8 @@ const NewsPage = forwardRef(function NewsPage(
                         alwaysBounceHorizontal={false}
                         removeClippedSubviews
                     />
-                </View>)}
+                </View>
+            )}
         </View>
     );
 });
