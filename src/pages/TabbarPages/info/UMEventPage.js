@@ -18,6 +18,7 @@ import Loading from '../../../components/Loading';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
+import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 
 /**
@@ -37,6 +38,8 @@ const UMEventPage = forwardRef(function UMEventPage(
     const scrollViewRef = useRef(null);
     const progressRef = useRef();
     const { theme } = useContext(ThemeContext);
+    const { i18n } = useTranslation();
+    const currentLanguage = i18n.resolvedLanguage || i18n.language;
 
     const [data, setData] = useState(undefined);
     const [isLoading, setIsLoading] = useState(true);
@@ -145,8 +148,14 @@ const UMEventPage = forwardRef(function UMEventPage(
 
     // 渲染列表 Item
     const renderItem = useCallback(
-        ({ item }) => <NewsCard data={item} type={'event'} />,
-        [],
+        ({ item }) => (
+            <NewsCard
+                data={item}
+                type={'event'}
+                language={currentLanguage}
+            />
+        ),
+        [currentLanguage],
     );
 
     const handleScroll = useCallback(

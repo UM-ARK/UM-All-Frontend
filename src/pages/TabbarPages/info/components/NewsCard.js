@@ -29,7 +29,7 @@ const getDateColor = (
     return black.third;
 };
 
-const NewsCard = ({ data, type = 'news' }) => {
+const NewsCard = ({ data, type = 'news', language = 'en' }) => {
     // NavigationContext 可在非基頁拿到路由資訊
     const navigation = useContext(NavigationContext);
     const { theme } = useTheme();
@@ -59,15 +59,17 @@ const NewsCard = ({ data, type = 'news' }) => {
         newsCardTextColumn: {
             flex: 1,
             minWidth: 0,
+            alignSelf: 'stretch',
+            justifyContent: 'space-between',
             // 與左側內邊距對稱的間隔，使圖片與卡片右緣保持舒適留白
             marginRight: scale(12),
         },
         newsCardImg: {
             width: verticalScale(90),
-            height: verticalScale(126),
+            height: verticalScale(90),
         },
     }),
-        [tonal.primary08, viewShadow],
+        [viewShadow, white],
     );
 
     const beginDate =
@@ -93,19 +95,12 @@ const NewsCard = ({ data, type = 'news' }) => {
         ],
     );
 
-    const { title_en, title_cn, title_pt } = useMemo(() => {
-        const titleState = { title_en: '', title_cn: '', title_pt: '' };
-        data.details.forEach(item => {
-            if (item.locale === 'en_US') {
-                titleState.title_en = item.title;
-            } else if (item.locale === 'pt_PT') {
-                titleState.title_pt = item.title;
-            } else if (item.locale === 'zh_TW') {
-                titleState.title_cn = item.title;
-            }
-        });
-        return titleState;
-    }, [data.details]);
+    const title = useMemo(() => {
+        const titleLocale = language === 'tc' ? 'zh_TW' : 'en_US';
+        return (
+            data.details.find(item => item.locale === titleLocale)?.title || ''
+        );
+    }, [data.details, language]);
 
     const { haveImage, imageUrls } = useMemo(() => {
         if (type === 'event') {
@@ -147,39 +142,16 @@ const NewsCard = ({ data, type = 'news' }) => {
                         styles.newsCardTextColumn,
                         !haveImage && { marginRight: 0 },
                     ]}>
-                    {/* 英文標題 */}
-                    {title_en.length > 0 && (
+                    {title.length > 0 && (
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                fontWeight: 'bold',
                                 color: black.main,
                                 fontSize: verticalScale(14),
                                 lineHeight: verticalScale(20),
                             }}
                             numberOfLines={3}>
-                            {title_en}
-                        </Text>
-                    )}
-                    {/* 中文標題 */}
-                    {title_cn.length > 0 && (
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                fontSize:
-                                    title_en.length > 0
-                                        ? verticalScale(13)
-                                        : verticalScale(15),
-                                color:
-                                    title_en.length > 0
-                                        ? black.second
-                                        : black.main,
-                                lineHeight: verticalScale(18),
-                                marginTop:
-                                    title_en.length > 0 ? verticalScale(4) : 0,
-                            }}
-                            numberOfLines={2}>
-                            {title_cn}
+                            {title}
                         </Text>
                     )}
 

@@ -33,6 +33,7 @@ import Loading from '../../../components/Loading';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { scale, verticalScale } from 'react-native-size-matters';
 import lodash from 'lodash';
 
@@ -60,6 +61,8 @@ const NewsPage = forwardRef(function NewsPage(
     ref,
 ) {
     const { theme } = useContext(ThemeContext);
+    const { t, i18n } = useTranslation('common');
+    const currentLanguage = i18n.resolvedLanguage || i18n.language;
     const { white, black, viewShadow, bg_color, themeColor, trueWhite } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
@@ -129,10 +132,10 @@ const NewsPage = forwardRef(function NewsPage(
     const renderNewsItem = useCallback(
         ({ item }) => (
             <View style={{ width: '100%' }}>
-                <NewsCard data={item} />
+                <NewsCard data={item} language={currentLanguage} />
             </View>
         ),
-        [],
+        [currentLanguage],
     );
 
     const handleScroll = useCallback(
@@ -201,22 +204,17 @@ const NewsPage = forwardRef(function NewsPage(
 
     const topNewsContent = useMemo(() => {
         const imageUrls = topNews.common?.imageUrls || [];
-        const titleState = { title_cn: '', title_en: '', title_pt: '' };
-        topNews.details?.forEach(item => {
-            if (item.locale == 'en_US') {
-                titleState.title_en = item.title;
-            } else if (item.locale == 'pt_PT') {
-                titleState.title_pt = item.title;
-            } else if (item.locale == 'zh_TW') {
-                titleState.title_cn = item.title;
-            }
-        });
-        return { imageUrls, ...titleState };
-    }, [topNews]);
+        const titleLocale = currentLanguage === 'tc' ? 'zh_TW' : 'en_US';
+        const title =
+            topNews.details?.find(item => item.locale === titleLocale)?.title ||
+            '';
+
+        return { imageUrls, title };
+    }, [currentLanguage, topNews]);
 
     // 頭條新聞的渲染
     const renderTopNews = useMemo(() => {
-        const { imageUrls, title_en, title_cn } = topNewsContent;
+        const { imageUrls, title } = topNewsContent;
         const topNewsImage = imageUrls.length > 1 ? lodash.sample(imageUrls) : imageUrls[0];
 
         return (
@@ -250,7 +248,7 @@ const NewsPage = forwardRef(function NewsPage(
                             {/* Top Story字樣 */}
                             <View style={styles.topNewsPosition}>
                                 <Text style={styles.topNewsText}>
-                                    Top Story @ UM
+                                    {t('澳大焦點')}
                                 </Text>
                             </View>
 
@@ -267,15 +265,7 @@ const NewsPage = forwardRef(function NewsPage(
                                     fontSize: verticalScale(18),
                                 }}
                                     numberOfLines={3}>
-                                    {title_en}
-                                </Text>
-                                <Text style={{
-                                    ...uiStyle.defaultText,
-                                    color: trueWhite,
-                                    fontWeight: 'bold',
-                                    fontSize: verticalScale(13),
-                                }}>
-                                    {title_cn}
+                                    {title}
                                 </Text>
                             </View>
                         </View>
@@ -283,7 +273,7 @@ const NewsPage = forwardRef(function NewsPage(
                 </View>
             </View >
         );
-    }, [topNews, hideSourceLabel, topNewsContent, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, trueWhite]);
+    }, [topNews, hideSourceLabel, topNewsContent, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
 
     return (
         <View style={{
