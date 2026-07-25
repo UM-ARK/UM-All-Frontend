@@ -586,33 +586,37 @@ function CourseSim({ route, navigation }) {
             }
 
             if (idx < dayCourseList.length) {
-                timeDiffReminder = (
+                // 衝突時只顯示衝突提示，不顯示負數休息時間（無意義）
+                timeDiffReminder = timeWarning ? (
                     <Text
                         style={{
                             ...uiStyle.defaultText,
                             alignSelf: 'center',
-                            color: timeWarning ? unread : black.third,
-                            fontWeight: timeWarning ? 'bold' : null,
+                            color: unread,
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                        }}>
+                        {'🆘' + t('課程衝突', { ns: 'timetable' }) + '🆘'}
+                    </Text>
+                ) : (
+                    <Text
+                        style={{
+                            ...uiStyle.defaultText,
+                            alignSelf: 'center',
+                            color: black.third,
                             textAlign: 'center',
                         }}>
                         {t('休息', { ns: 'timetable' })}
                         <Text
                             style={{
                                 fontWeight: 'bold',
-                                color: timeWarning ? unread : themeColor,
+                                color: themeColor,
                             }}>
                             {hourDiff >= 1 ? `${hourDiff}` : `${minuteDiff}`}
                         </Text>
                         {hourDiff >= 1
                             ? t('小時後', { ns: 'timetable' })
                             : t('分鐘後', { ns: 'timetable' })}
-                        {timeWarning ? (
-                            <Text>
-                                {'\n🆘' +
-                                    t('課程衝突', { ns: 'timetable' }) +
-                                    '🆘'}
-                            </Text>
-                        ) : null}
                     </Text>
                 );
             }
@@ -865,11 +869,11 @@ function CourseSim({ route, navigation }) {
                         timeWarning
                             ? unread
                             : TIME_TABLE_COLOR[
-                                  lodash.indexOf(
-                                      u_code_list,
-                                      course['Course Code'],
-                                  ) % TIME_TABLE_COLOR.length
-                              ]
+                            lodash.indexOf(
+                                u_code_list,
+                                course['Course Code'],
+                            ) % TIME_TABLE_COLOR.length
+                            ]
                     }>
                     {/* 課號 */}
                     <Text
@@ -1986,7 +1990,7 @@ E11-0000
                 {/* 清空課表按鈕 */}
                 {allCourseAllTime?.length > 0 && (
                     <Pressable
-                        style={({pressed}) => ({
+                        style={({ pressed }) => ({
                             position: 'absolute',
                             left: scale(10),
                             backgroundColor: pressed
@@ -2037,7 +2041,7 @@ E11-0000
 
                 {/* 加課 / 關閉按鈕 */}
                 <Pressable
-                    style={({pressed}) => ({
+                    style={({ pressed }) => ({
                         position: 'absolute',
                         right: scale(10),
                         backgroundColor: hasOpenCourseSearch
@@ -2045,8 +2049,8 @@ E11-0000
                                 ? tonal.secondary50
                                 : tonal.secondary15
                             : pressed
-                              ? tonal.primary50
-                              : tonal.primary15,
+                                ? tonal.primary50
+                                : tonal.primary15,
                         borderRadius: scale(8),
                         padding: scale(6),
                         justifyContent: 'center',
