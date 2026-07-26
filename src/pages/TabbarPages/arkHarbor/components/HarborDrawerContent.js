@@ -26,8 +26,10 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
+import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { fetchHarborCategories } from '../../../../utils/harbor/harborApi';
+import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import { HarborInlineRetry } from './HarborListStates';
 
@@ -308,29 +310,42 @@ const HarborDrawerContent = ({ navigation }) => {
                         styles.drawerHeader,
                         { borderBottomColor: theme.themeColorUltraLight },
                     ]}>
-                    <View style={styles.brandIcon}>
-                        <Image
-                            source={require('../../../../static/img/logo.png')}
-                            style={styles.brandLogo}
-                        />
-                    </View>
-                    <View style={styles.drawerTitleArea}>
-                        <Text
-                            style={[
-                                styles.drawerTitle,
-                                { color: theme.black.main },
-                            ]}>
-                            {t('Harbor 職涯港')}
-                        </Text>
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.drawerSubtitle,
-                                { color: theme.black.third },
-                            ]}>
-                            {t('求職、提問、校友、應有盡有！')}
-                        </Text>
-                    </View>
+                    <Pressable
+                        accessibilityRole="link"
+                        accessibilityLabel={t('Harbor 職涯港')}
+                        onPress={() => {
+                            trigger();
+                            logToFirebase('openPage', { page: 'harbor_web' });
+                            openLink({ URL: ARK_HARBOR, mode: 'fullScreen' });
+                        }}
+                        style={({ pressed }) => [
+                            styles.brandPressable,
+                            pressed && { opacity: 0.7 },
+                        ]}>
+                        <View style={styles.brandIcon}>
+                            <Image
+                                source={require('../../../../static/img/logo.png')}
+                                style={styles.brandLogo}
+                            />
+                        </View>
+                        <View style={styles.drawerTitleArea}>
+                            <Text
+                                style={[
+                                    styles.drawerTitle,
+                                    { color: theme.black.main },
+                                ]}>
+                                {t('Harbor 職涯港')}
+                            </Text>
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.drawerSubtitle,
+                                    { color: theme.black.third },
+                                ]}>
+                                {t('求職、提問、校友、應有盡有！')}
+                            </Text>
+                        </View>
+                    </Pressable>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t('關閉選單')}
@@ -468,6 +483,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(8),
+    },
+    brandPressable: {
+        flex: 1,
+        minWidth: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     brandIcon: {
         width: scale(38),
