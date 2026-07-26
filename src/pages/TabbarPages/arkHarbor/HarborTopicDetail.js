@@ -75,11 +75,30 @@ import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
+    ARK_HARBOR_EMOJI_URL,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 
 const AVATAR_SIZE = 88;
+// 常見 Discourse reaction shortcode → Unicode，優先於遠端圖片以提升清晰度
+const HARBOR_REACTION_UNICODE = Object.freeze({
+    heart: '❤️',
+    '+1': '👍',
+    '-1': '👎',
+    laughing: '😆',
+    open_mouth: '😮',
+    clap: '👏',
+    confetti_ball: '🎊',
+    hugs: '🤗',
+    smile: '😄',
+    tada: '🎉',
+    pray: '🙏',
+    eyes: '👀',
+    rocket: '🚀',
+    heart_eyes: '😍',
+    slightly_smiling_face: '🙂',
+});
 const LIKE_ACTION_ID = 2;
 const TOPIC_POST_BATCH_SIZE = 20;
 const TIMINGS_REPORT_INTERVAL = 10000;
@@ -685,6 +704,61 @@ const HarborPostContent = memo(
     },
 );
 
+const normalizeHarborReactionName = name => {
+    if (!name || typeof name !== 'string') {
+        return '';
+    }
+    return name.replace(/^:|:$/g, '').trim();
+};
+
+const HarborReactionIcon = ({ name, size = scale(24), color }) => {
+    const reactionName = normalizeHarborReactionName(name);
+    const unicode = HARBOR_REACTION_UNICODE[reactionName];
+    if (unicode) {
+        return (
+            <Text
+                allowFontScaling={false}
+                style={[
+                    styles.reactionGlyph,
+                    {
+                        color: color || undefined,
+                        fontSize: size,
+                        lineHeight: size * 1.15,
+                    },
+                ]}>
+                {unicode}
+            </Text>
+        );
+    }
+
+    const emojiUrl = ARK_HARBOR_EMOJI_URL(reactionName);
+    if (emojiUrl) {
+        return (
+            <Image
+                source={{ uri: emojiUrl }}
+                style={{ width: size, height: size }}
+                contentFit="contain"
+                accessibilityLabel={`:${reactionName}:`}
+            />
+        );
+    }
+
+    if (!reactionName) {
+        return null;
+    }
+
+    return (
+        <Text
+            numberOfLines={1}
+            style={[
+                styles.reactionFallbackText,
+                { color: color || undefined, fontSize: size * 0.45 },
+            ]}>
+            :{reactionName}:
+        </Text>
+    );
+};
+
 const MetaItem = ({ icon, value, color }) => {
     if (!value) {
         return null;
@@ -988,6 +1062,11 @@ const HarborPostCard = memo(
                         ]}>
                         {pendingLike || pendingReaction ? (
                             <ActivityIndicator size="small" color={themeColor} />
+                        ) : reactionsEnabled && currentReaction ? (
+                            <HarborReactionIcon
+                                name={currentReaction}
+                                size={scale(16)}
+                            />
                         ) : (
                             <MaterialCommunityIcons
                                 name={
@@ -1008,7 +1087,7 @@ const HarborPostCard = memo(
                                 { color: themeColor },
                             ]}>
                             {reactionsEnabled
-                                ? currentReaction || t('回應')
+                                ? t('回應')
                                 : isLiked
                                     ? t('取消讚好')
                                     : t('讚好')}
@@ -3542,6 +3621,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                                         trigger();
                                         selectPostReaction(reaction);
                                     }}
+                                    accessibilityLabel={`:${reaction}:`}
                                     style={({ pressed }) => [
                                         styles.reactionButton,
                                         {
@@ -3550,14 +3630,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                                                 : tonal.primary15,
                                         },
                                     ]}>
-                                    <Text
-                                        numberOfLines={1}
-                                        style={[
-                                            styles.reactionText,
-                                            { color: themeColor },
-                                        ]}>
-                                        :{reaction}:
-                                    </Text>
+                                    <HarborReactionIcon
+                                        name={reaction}
+                                        size={scale(28)}
+                                    />
                                 </Pressable>
                             ))}
                         </View>
@@ -4221,21 +4297,24 @@ const styles = StyleSheet.create({
     reactionGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        justifyContent: 'center',
         marginHorizontal: scale(-3),
     },
     reactionButton: {
-        minWidth: '30%',
-        flexGrow: 1,
+        width: scale(52),
+        height: scale(52),
         alignItems: 'center',
-        borderRadius: scale(8),
+        justifyContent: 'center',
+        borderRadius: scale(12),
         margin: scale(3),
-        paddingHorizontal: scale(9),
-        paddingVertical: verticalScale(9),
     },
-    reactionText: {
+    reactionGlyph: {
+        textAlign: 'center',
+    },
+    reactionFallbackText: {
         ...uiStyle.defaultText,
-        fontSize: scale(11),
         fontWeight: '600',
+        textAlign: 'center',
     },
     notificationOption: {
         minHeight: verticalScale(54),

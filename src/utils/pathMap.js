@@ -69,6 +69,23 @@ export function ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, size = 96) {
 export function ARK_HARBOR_AVATAR(username) {
     return ARK_HARBOR + `/user_avatar/harbor.umall.one/${username}/16/52_2.png`;
 }
+
+// Discourse 標準 emoji 路徑；name 為 shortcode（如 heart、+1），不含冒號
+export function ARK_HARBOR_EMOJI_URL(name, emojiSet = 'twitter') {
+    if (!name || typeof name !== 'string') {
+        return '';
+    }
+    const emojiName = name.replace(/^:|:$/g, '').trim();
+    if (!emojiName) {
+        return '';
+    }
+    return (
+        ARK_HARBOR +
+        `/images/emoji/${encodeURIComponent(emojiSet)}/` +
+        `${encodeURIComponent(emojiName)}.png`
+    );
+}
+
 export const ARK_HARBOR_FEEDBACK = ARK_HARBOR + '/c/site-feedback/2';
 
 export const ARK_WIKI = 'https://wiki.umall.one';
