@@ -36,8 +36,9 @@ const VIEW_CONFIG = {
     new: { label: '新話題', analytics: 'new' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-// 對齊資訊頁 Top Tab（~30），避免 Harbor 頂欄過高、視覺上不夠貼頂
-const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(36);
+// 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
+const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
+const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(74);
 const Drawer = createDrawerNavigator();
 
 const HarborStickyToolbar = ({
@@ -59,49 +60,16 @@ const HarborStickyToolbar = ({
     return (
         <View
             onLayout={onLayout}
-            style={[styles.stickyToolbar, { backgroundColor: theme.bg_color }]}>
-            <View style={styles.toolbarSide}>
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('開啟選單')}
-                    hitSlop={scale(8)}
-                    onPress={() => {
-                        trigger();
-                        onMenuPress();
-                    }}
-                    style={({ pressed }) => [
-                        styles.toolbarIconButton,
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="menu"
-                        size={scale(20)}
-                        color={theme.themeColor}
-                    />
-                </Pressable>
-            </View>
-
-            <SegmentControl
-                options={segmentOptions}
-                selectedIndex={currentIndex}
-                onChange={onChange}
-                trackBackgroundColor="transparent"
-                selectedBackgroundColor="transparent"
-                compact
-                style={styles.toolbarSegment}
-            />
-
-            <View style={[styles.toolbarSide, styles.toolbarRight]}>
-                <View style={styles.toolbarRightActions}>
+            style={[styles.stickyHeader, { backgroundColor: theme.bg_color }]}>
+            <View style={styles.stickyToolbar}>
+                <View style={styles.toolbarSide}>
                     <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={t('搜索')}
+                        accessibilityLabel={t('開啟選單')}
                         hitSlop={scale(8)}
                         onPress={() => {
                             trigger();
-                            onSearchPress();
+                            onMenuPress();
                         }}
                         style={({ pressed }) => [
                             styles.toolbarIconButton,
@@ -110,65 +78,114 @@ const HarborStickyToolbar = ({
                             },
                         ]}>
                         <MaterialCommunityIcons
-                            name="magnify"
-                            size={scale(20)}
-                            color={theme.themeColor}
-                        />
-                    </Pressable>
-                    {isSignedIn ? null : (
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={sessionLabel}
-                            disabled={
-                                status === 'restoring' ||
-                                status === 'authorizing'
-                            }
-                            onPress={() => {
-                                trigger();
-                                onSessionPress();
-                            }}
-                            style={({ pressed }) => [
-                                styles.sessionButton,
-                                pressed && {
-                                    backgroundColor: theme.tonal.primary15,
-                                },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name="login"
-                                size={scale(14)}
-                                color={theme.themeColor}
-                            />
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.sessionText,
-                                    { color: theme.themeColor },
-                                ]}>
-                                {sessionLabel}
-                            </Text>
-                        </Pressable>
-                    )}
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('建立話題')}
-                        hitSlop={scale(8)}
-                        onPress={() => {
-                            trigger();
-                            onComposePress();
-                        }}
-                        style={({ pressed }) => [
-                            styles.toolbarIconButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="plus"
+                            name="menu"
                             size={scale(20)}
                             color={theme.themeColor}
                         />
                     </Pressable>
                 </View>
+
+                <SegmentControl
+                    options={segmentOptions}
+                    selectedIndex={currentIndex}
+                    onChange={onChange}
+                    trackBackgroundColor="transparent"
+                    selectedBackgroundColor="transparent"
+                    compact
+                    style={styles.toolbarSegment}
+                />
+
+                <View style={[styles.toolbarSide, styles.toolbarRight]}>
+                    <View style={styles.toolbarRightActions}>
+                        {isSignedIn ? null : (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={sessionLabel}
+                                disabled={
+                                    status === 'restoring' ||
+                                    status === 'authorizing'
+                                }
+                                onPress={() => {
+                                    trigger();
+                                    onSessionPress();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.sessionButton,
+                                    pressed && {
+                                        backgroundColor:
+                                            theme.tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="login"
+                                    size={scale(14)}
+                                    color={theme.themeColor}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.sessionText,
+                                        { color: theme.themeColor },
+                                    ]}>
+                                    {sessionLabel}
+                                </Text>
+                            </Pressable>
+                        )}
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('建立話題')}
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                onComposePress();
+                            }}
+                            style={({ pressed }) => [
+                                styles.toolbarIconButton,
+                                pressed && {
+                                    backgroundColor: theme.tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="plus"
+                                size={scale(20)}
+                                color={theme.themeColor}
+                            />
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+            <View style={styles.searchBarRow}>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('搜尋 Harbor')}
+                    onPress={() => {
+                        trigger();
+                        onSearchPress();
+                    }}
+                    style={({ pressed }) => [
+                        styles.searchBar,
+                        {
+                            backgroundColor: theme.white,
+                            borderColor: theme.themeColorUltraLight,
+                        },
+                        pressed && {
+                            backgroundColor: theme.tonal.primary15,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="magnify"
+                        size={scale(16)}
+                        color={theme.black.third}
+                    />
+                    <Text
+                        numberOfLines={1}
+                        style={[
+                            styles.searchBarText,
+                            { color: theme.black.third },
+                        ]}>
+                        {t('搜尋 Harbor')}
+                    </Text>
+                </Pressable>
             </View>
         </View>
     );
@@ -470,13 +487,16 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
     },
-    stickyToolbar: {
+    stickyHeader: {
         minHeight: DEFAULT_STICKY_HEADER_HEIGHT,
+        zIndex: 2,
+    },
+    stickyToolbar: {
+        minHeight: STICKY_TOOLBAR_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: scale(10),
         paddingVertical: 0,
-        zIndex: 2,
     },
     toolbarSide: {
         flex: 1,
@@ -520,6 +540,24 @@ const styles = StyleSheet.create({
     toolbarSegment: {
         flexShrink: 0,
         marginHorizontal: scale(2),
+    },
+    searchBarRow: {
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(4),
+    },
+    searchBar: {
+        minHeight: verticalScale(30),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(9),
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(10),
+    },
+    searchBarText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(12),
+        marginLeft: scale(6),
     },
     sharedHeader: {
         position: 'absolute',
