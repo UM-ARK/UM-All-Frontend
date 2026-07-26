@@ -6,6 +6,7 @@ import {
     View,
 } from 'react-native';
 
+import { useIsFocused } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { verticalScale } from 'react-native-size-matters';
@@ -137,10 +138,13 @@ const HarborTopicList = ({
     onScroll,
     emptyTitle,
     emptyDescription,
+    isActive = true,
 }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const { status, user, login } = useHarborSession();
+    const isScreenFocused = useIsFocused();
+    const isVisible = isActive && isScreenFocused;
     const controllerRef = useRef(null);
     const requestGenerationRef = useRef(0);
     const firstPageLoadingRef = useRef(false);
@@ -475,6 +479,42 @@ const HarborTopicList = ({
             replaceItems,
         ],
     );
+
+    // 滑到此頁且限流已結束時自動重試，免手動點「重試」
+    useEffect(() => {
+        if (!isVisible || !isSessionReady) {
+            return;
+        }
+        if (getActiveRateLimit()) {
+            return;
+        }
+
+        const firstError = firstPageErrorRef.current;
+        if (firstError && isHarborRateLimited(firstError.error)) {
+            loadFirstPage({
+                refresh: itemsRef.current.length > 0,
+                showIndicator: false,
+            });
+            return;
+        }
+
+        const moreError = loadMoreErrorRef.current;
+        if (moreError && isHarborRateLimited(moreError.error)) {
+            if (itemsRef.current.length === 0 || !hasMore || nextPage == null) {
+                loadFirstPage({ refresh: itemsRef.current.length > 0 });
+                return;
+            }
+            loadMore({ manual: true });
+        }
+    }, [
+        getActiveRateLimit,
+        hasMore,
+        isSessionReady,
+        isVisible,
+        loadFirstPage,
+        loadMore,
+        nextPage,
+    ]);
 
     const handleTopicPress = useCallback(
         topic => {

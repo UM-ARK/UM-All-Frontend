@@ -165,6 +165,7 @@ const HarborFeedPane = ({
     isTopicPressAllowed,
     contentContainerStyle,
     refreshProgressViewOffset,
+    isActive,
 }) => {
     const source = useMemo(() => ({ view }), [view]);
 
@@ -177,6 +178,7 @@ const HarborFeedPane = ({
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
                 refreshProgressViewOffset={refreshProgressViewOffset}
+                isActive={isActive}
             />
         </View>
     );
@@ -426,6 +428,7 @@ const ForumPage = ({ navigation }) => {
                                 refreshProgressViewOffset={
                                     refreshProgressViewOffset
                                 }
+                                isActive={enabledViews[currentIndex] === view}
                             />
                         ) : null}
                     </View>
