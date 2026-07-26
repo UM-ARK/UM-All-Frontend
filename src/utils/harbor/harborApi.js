@@ -318,7 +318,10 @@ function fetchPublicHarborCategories() {
 
     const requestGeneration = publicCategoryCacheGeneration;
     const request = harborApi
-        .get('/categories.json', { skipHarborCredentials: true })
+        .get('/categories.json', {
+            params: { include_subcategories: true },
+            skipHarborCredentials: true,
+        })
         .then(response => {
             const categories = normalizeCategories(response.data);
             if (requestGeneration === publicCategoryCacheGeneration) {
@@ -1192,7 +1195,10 @@ export async function fetchHarborSearch({
 }
 
 export async function fetchHarborCategories({ signal } = {}) {
-    const response = await harborApi.get('/categories.json', { signal });
+    const response = await harborApi.get('/categories.json', {
+        params: { include_subcategories: true },
+        signal,
+    });
     const items = normalizeCategories(response.data);
 
     return {
@@ -1416,6 +1422,233 @@ function normalizeHarborMutationId(value, label) {
         throw new TypeError(`Invalid Harbor ${label}`);
     }
     return id;
+}
+
+function normalizeHarborComposerText(value, label) {
+    if (typeof value !== 'string' || !value.trim()) {
+        throw new TypeError(`Invalid Harbor ${label}`);
+    }
+    return value;
+}
+
+function normalizeHarborComposerTags(tags, label) {
+    if (!Array.isArray(tags)) {
+        throw new TypeError(`Invalid Harbor ${label}`);
+    }
+
+    return tags.map(tag => {
+        if (typeof tag === 'string') {
+            const name = tag.trim();
+            if (!name) {
+                throw new TypeError(`Invalid Harbor ${label}`);
+            }
+            return { name };
+        }
+
+        if (!tag || typeof tag !== 'object' || Array.isArray(tag)) {
+            throw new TypeError(`Invalid Harbor ${label}`);
+        }
+
+        const name =
+            typeof tag.name === 'string' ? tag.name.trim() : '';
+        if (!name) {
+            throw new TypeError(`Invalid Harbor ${label}`);
+        }
+
+        if (tag.id == null || tag.id === '') {
+            return { name };
+        }
+
+        return {
+            id: normalizeHarborMutationId(tag.id, 'tag id'),
+            name,
+        };
+    });
+}
+
+export async function createHarborPost({
+    raw,
+    title,
+    categoryId,
+    tags,
+    topicId,
+    replyToPostNumber,
+    draftKey,
+    signal,
+} = {}) {
+    const payload = {
+        raw: normalizeHarborComposerText(raw, 'post raw'),
+    };
+    const hasTopicId = topicId != null;
+
+    if (hasTopicId) {
+        payload.topic_id = normalizeHarborMutationId(topicId, 'topic id');
+    } else {
+        payload.title = normalizeHarborComposerText(title, 'topic title');
+    }
+
+    if (title != null && hasTopicId) {
+        throw new TypeError('Invalid Harbor topic title');
+    }
+    if (categoryId != null) {
+        if (hasTopicId) {
+            throw new TypeError('Invalid Harbor category id');
+        }
+        payload.category = normalizeHarborMutationId(
+            categoryId,
+            'category id',
+        );
+    }
+    if (tags != null) {
+        if (hasTopicId) {
+            throw new TypeError('Invalid Harbor post tags');
+        }
+        const normalizedTags = normalizeHarborComposerTags(tags, 'post tags');
+        if (normalizedTags.length > 0) {
+            payload.tags = normalizedTags;
+        }
+    }
+    if (replyToPostNumber != null) {
+        if (!hasTopicId) {
+            throw new TypeError('Invalid Harbor reply post number');
+        }
+        payload.reply_to_post_number = normalizeHarborMutationId(
+            replyToPostNumber,
+            'reply post number',
+        );
+    }
+    if (draftKey != null) {
+        payload.draft_key = normalizeHarborComposerText(
+            draftKey,
+            'draft key',
+        );
+    }
+
+    const response = await harborApi.post('/posts.json', payload, { signal });
+    return response.data;
+}
+
+export async function fetchHarborPostForEdit(postId, { signal } = {}) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const response = await harborApi.get(`/posts/${id}.json`, { signal });
+    const post = response.data;
+
+    if (typeof post?.raw !== 'string') {
+        throw new Error('Invalid Harbor editable post response: missing raw');
+    }
+
+    return {
+        id: toNumberOrNull(post.id) ?? id,
+        raw: post.raw,
+        topicId: toNumberOrNull(post.topic_id),
+        postNumber: toNumberOrNull(post.post_number),
+        title: post.topic_title || post.title || '',
+        categoryId: toNumberOrNull(post.category_id),
+        tags: Array.isArray(post.tags)
+            ? normalizeHarborComposerTags(post.tags, 'post tags')
+            : null,
+        canEdit: Boolean(post.can_edit),
+    };
+}
+
+export async function updateHarborPost(
+    postId,
+    {
+        raw,
+        originalText,
+        topicId,
+        title,
+        originalTitle,
+        categoryId,
+        tags,
+        originalTags,
+        signal,
+    } = {},
+) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const post = {
+        raw: normalizeHarborComposerText(raw, 'post raw'),
+        original_text: normalizeHarborComposerText(
+            originalText,
+            'original post raw',
+        ),
+    };
+    const hasTopicMetadata =
+        title != null || categoryId != null || tags != null;
+
+    let normalizedTopicId = null;
+    let topic = null;
+
+    if (hasTopicMetadata) {
+        normalizedTopicId = normalizeHarborMutationId(
+            topicId,
+            'topic id',
+        );
+        topic = {};
+
+        if (title != null) {
+            topic.title = normalizeHarborComposerText(title, 'topic title');
+        }
+        if (originalTitle != null) {
+            topic.original_title = normalizeHarborComposerText(
+                originalTitle,
+                'original topic title',
+            );
+        }
+        if (categoryId != null) {
+            topic.category_id = normalizeHarborMutationId(
+                categoryId,
+                'category id',
+            );
+        }
+        if (tags != null) {
+            topic.tags = normalizeHarborComposerTags(tags, 'topic tags');
+        }
+        if (originalTags != null) {
+            topic.original_tags = normalizeHarborComposerTags(
+                originalTags,
+                'original topic tags',
+            );
+        }
+    } else {
+        if (topicId != null) {
+            normalizeHarborMutationId(topicId, 'topic id');
+        }
+        if (originalTitle != null) {
+            normalizeHarborComposerText(
+                originalTitle,
+                'original topic title',
+            );
+        }
+        if (originalTags != null) {
+            normalizeHarborComposerTags(
+                originalTags,
+                'original topic tags',
+            );
+        }
+    }
+
+    const response = await harborApi.put(
+        `/posts/${id}.json`,
+        { post },
+        { signal },
+    );
+
+    if (topic) {
+        try {
+            await harborApi.put(
+                `/t/${normalizedTopicId}.json`,
+                topic,
+                { signal },
+            );
+        } catch (error) {
+            error.harborPostUpdated = true;
+            error.harborUpdatedPost = response.data;
+            throw error;
+        }
+    }
+
+    return response.data;
 }
 
 function normalizeBookmarkFields({ name = '', reminderAt = null } = {}) {

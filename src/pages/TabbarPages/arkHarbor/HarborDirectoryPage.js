@@ -27,6 +27,10 @@ import {
     fetchHarborCategories,
     fetchHarborTags,
 } from '../../../utils/harbor/harborApi';
+import {
+    buildHarborCategoryRows,
+    getHarborCategoryKey,
+} from '../../../utils/harbor/harborCategories';
 import { trigger } from '../../../utils/trigger';
 import {
     HarborFullState,
@@ -35,57 +39,6 @@ import {
 } from './components/HarborListStates';
 
 const SKELETON_ITEMS = ['one', 'two', 'three', 'four'];
-
-const flattenCategories = categories => {
-    const categoriesByParent = new Map();
-    const knownIds = new Set(categories.map(category => category.id));
-    categories.forEach(category => {
-        const parentId = category.parentCategoryId || null;
-        const current = categoriesByParent.get(parentId) || [];
-        current.push(category);
-        categoriesByParent.set(parentId, current);
-    });
-
-    const rows = [];
-    const visited = new Set();
-    const appendCategory = (
-        category,
-        depth,
-        parentLineStates = [],
-        isLastSibling = true,
-    ) => {
-        if (visited.has(category.id)) {
-            return;
-        }
-        visited.add(category.id);
-        rows.push({
-            ...category,
-            depth,
-            parentLineStates,
-            isLastSibling,
-        });
-        const children = categoriesByParent.get(category.id) || [];
-        children.forEach((child, index) => {
-            appendCategory(
-                child,
-                depth + 1,
-                [...parentLineStates, !isLastSibling],
-                index === children.length - 1,
-            );
-        });
-    };
-
-    const rootCategories = categories.filter(
-        category =>
-            !category.parentCategoryId ||
-            !knownIds.has(category.parentCategoryId),
-    );
-    rootCategories.forEach((category, index) =>
-        appendCategory(category, 0, [], index === rootCategories.length - 1),
-    );
-    categories.forEach(category => appendCategory(category, 0));
-    return rows;
-};
 
 const CategoryHierarchy = ({ item, color }) => {
     if (item.depth <= 0) {
@@ -137,7 +90,7 @@ const CategoryHierarchy = ({ item, color }) => {
     );
 };
 
-const CategoryRow = ({ item, onPress, isPressAllowed }) => {
+const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const isSubcategory = item.depth > 0;
@@ -227,6 +180,42 @@ const CategoryRow = ({ item, onPress, isPressAllowed }) => {
                     })}
                 </Text>
             </View>
+            {item.hasChildren ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: item.isExpanded }}
+                    accessibilityLabel={t(
+                        item.isExpanded
+                            ? '收起 {{name}} 的子分類'
+                            : '展開 {{name}} 的子分類',
+                        { name: item.name },
+                    )}
+                    hitSlop={scale(8)}
+                    onPress={event => {
+                        event.stopPropagation?.();
+                        if (isPressAllowed && !isPressAllowed()) {
+                            return;
+                        }
+                        trigger();
+                        onToggle(item);
+                    }}
+                    style={({ pressed }) => [
+                        styles.categoryToggle,
+                        pressed && {
+                            backgroundColor: theme.tonal.primary15,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name={
+                            item.isExpanded
+                                ? 'chevron-up'
+                                : 'chevron-down'
+                        }
+                        size={scale(20)}
+                        color={theme.themeColor}
+                    />
+                </Pressable>
+            ) : null}
             <MaterialCommunityIcons
                 name="chevron-right"
                 size={scale(20)}
@@ -319,6 +308,9 @@ const HarborDirectoryPane = ({
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadError, setLoadError] = useState(null);
+    const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
+        () => new Set(),
+    );
     const isCategory = type === 'category';
 
     const loadDirectory = useCallback(
@@ -346,7 +338,7 @@ const HarborDirectoryPane = ({
                 }
                 setItems(
                     isCategory
-                        ? flattenCategories(result.items)
+                        ? result.items
                         : result.items.filter(tag => !tag.pmOnly),
                 );
             } catch (error) {
@@ -387,12 +379,33 @@ const HarborDirectoryPane = ({
         [isCategory, navigation],
     );
 
+    const visibleItems = useMemo(
+        () =>
+            isCategory
+                ? buildHarborCategoryRows(items, collapsedCategoryIds)
+                : items,
+        [collapsedCategoryIds, isCategory, items],
+    );
+    const handleToggleCategory = useCallback(item => {
+        const categoryKey = getHarborCategoryKey(item);
+        setCollapsedCategoryIds(current => {
+            const next = new Set(current);
+            if (next.has(categoryKey)) {
+                next.delete(categoryKey);
+            } else {
+                next.add(categoryKey);
+            }
+            return next;
+        });
+    }, []);
+
     const renderItem = useCallback(
         ({ item }) =>
             isCategory ? (
                 <CategoryRow
                     item={item}
                     onPress={handlePress}
+                    onToggle={handleToggleCategory}
                     isPressAllowed={isPressAllowed}
                 />
             ) : (
@@ -402,7 +415,7 @@ const HarborDirectoryPane = ({
                     isPressAllowed={isPressAllowed}
                 />
             ),
-        [handlePress, isCategory, isPressAllowed],
+        [handlePress, handleToggleCategory, isCategory, isPressAllowed],
     );
 
     if (isLoading && items.length === 0) {
@@ -425,7 +438,7 @@ const HarborDirectoryPane = ({
     return (
         <View style={[styles.page, { backgroundColor: theme.bg_color }]}>
             <FlashList
-                data={items}
+                data={visibleItems}
                 keyExtractor={item =>
                     `harbor-${isCategory ? 'category' : 'tag'}-${item.id || item.slug}`
                 }
@@ -719,6 +732,14 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '600',
         marginTop: verticalScale(4),
+    },
+    categoryToggle: {
+        alignItems: 'center',
+        borderRadius: scale(9),
+        height: scale(34),
+        justifyContent: 'center',
+        marginRight: scale(2),
+        width: scale(34),
     },
     exploreHeader: {
         borderBottomWidth: StyleSheet.hairlineWidth,

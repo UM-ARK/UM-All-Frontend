@@ -29,6 +29,10 @@ import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { fetchHarborCategories } from '../../../../utils/harbor/harborApi';
+import {
+    buildHarborCategoryRows,
+    getHarborCategoryKey,
+} from '../../../../utils/harbor/harborCategories';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import { HarborInlineRetry } from './HarborListStates';
@@ -38,36 +42,6 @@ const PLACEHOLDER_ITEMS = [
     { key: 'messages', icon: 'inbox-outline', label: '我的訊息' },
     { key: 'more', icon: 'dots-horizontal', label: '更多' },
 ];
-
-const buildCategoryRows = categories => {
-    const categoriesById = new Map(
-        categories.map(category => [category.id, category]),
-    );
-    const childrenByParent = new Map();
-
-    categories.forEach(category => {
-        if (!category.parentCategoryId) {
-            return;
-        }
-        const children = childrenByParent.get(category.parentCategoryId) || [];
-        children.push(category);
-        childrenByParent.set(category.parentCategoryId, children);
-    });
-
-    return categories
-        .filter(
-            category =>
-                !category.parentCategoryId ||
-                !categoriesById.has(category.parentCategoryId),
-        )
-        .flatMap(category => [
-            { ...category, depth: 0 },
-            ...(childrenByParent.get(category.id) || []).map(child => ({
-                ...child,
-                depth: 1,
-            })),
-        ]);
-};
 
 const DrawerMenuItem = ({
     icon,
@@ -133,9 +107,10 @@ const DrawerMenuItem = ({
     );
 };
 
-const CategoryRow = ({ item, onPress }) => {
+const CategoryRow = ({ item, onPress, onToggle }) => {
     const { theme } = useTheme();
-    const isSubcategory = item.depth === 1;
+    const { t } = useTranslation('harbor');
+    const isSubcategory = item.depth > 0;
 
     return (
         <Pressable
@@ -194,6 +169,39 @@ const CategoryRow = ({ item, onPress }) => {
                     color={theme.unread}
                 />
             ) : null}
+            {item.hasChildren ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: item.isExpanded }}
+                    accessibilityLabel={t(
+                        item.isExpanded
+                            ? '收起 {{name}} 的子分類'
+                            : '展開 {{name}} 的子分類',
+                        { name: item.name },
+                    )}
+                    hitSlop={scale(8)}
+                    onPress={event => {
+                        event.stopPropagation?.();
+                        trigger();
+                        onToggle(item);
+                    }}
+                    style={({ pressed }) => [
+                        styles.categoryToggle,
+                        pressed && {
+                            backgroundColor: theme.tonal.primary15,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name={
+                            item.isExpanded
+                                ? 'chevron-up'
+                                : 'chevron-down'
+                        }
+                        size={scale(18)}
+                        color={theme.themeColor}
+                    />
+                </Pressable>
+            ) : null}
             <MaterialCommunityIcons
                 name="chevron-right"
                 size={scale(17)}
@@ -233,6 +241,9 @@ const HarborDrawerContent = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadError, setLoadError] = useState(false);
+    const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
+        () => new Set(),
+    );
 
     const loadCategories = useCallback(async ({ refreshing = false } = {}) => {
         controllerRef.current?.abort();
@@ -270,8 +281,8 @@ const HarborDrawerContent = ({ navigation }) => {
     }, [loadCategories]);
 
     const categoryRows = useMemo(
-        () => buildCategoryRows(categories),
-        [categories],
+        () => buildHarborCategoryRows(categories, collapsedCategoryIds),
+        [categories, collapsedCategoryIds],
     );
 
     const navigateFromDrawer = useCallback(
@@ -297,9 +308,28 @@ const HarborDrawerContent = ({ navigation }) => {
         [navigateFromDrawer],
     );
 
+    const handleToggleCategory = useCallback(category => {
+        const categoryKey = getHarborCategoryKey(category);
+        setCollapsedCategoryIds(current => {
+            const next = new Set(current);
+            if (next.has(categoryKey)) {
+                next.delete(categoryKey);
+            } else {
+                next.add(categoryKey);
+            }
+            return next;
+        });
+    }, []);
+
     const renderCategory = useCallback(
-        ({ item }) => <CategoryRow item={item} onPress={handleCategoryPress} />,
-        [handleCategoryPress],
+        ({ item }) => (
+            <CategoryRow
+                item={item}
+                onPress={handleCategoryPress}
+                onToggle={handleToggleCategory}
+            />
+        ),
+        [handleCategoryPress, handleToggleCategory],
     );
 
     const listHeader = useMemo(
@@ -606,6 +636,14 @@ const styles = StyleSheet.create({
     },
     subcategoryName: {
         fontWeight: '500',
+    },
+    categoryToggle: {
+        alignItems: 'center',
+        borderRadius: scale(8),
+        height: scale(30),
+        justifyContent: 'center',
+        marginRight: scale(1),
+        width: scale(30),
     },
     loadingState: {
         minHeight: verticalScale(90),

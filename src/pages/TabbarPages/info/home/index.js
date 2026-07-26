@@ -27,7 +27,6 @@ import {
     UM_Moodle,
     ARK_HARBOR,
     ARK_HARBOR_LOGIN,
-    ARK_HARBOR_NEW_TOPIC,
     ARK_WIKI_DONATE_RANK,
     AFD_UMACARK,
 } from '../../../../utils/pathMap.js';
@@ -115,7 +114,7 @@ const HomeScreen = ({ navigation }) => {
             func: () => {
                 trigger();
                 logToFirebase('funcUse', { funcName: 'harbor_new' });
-                openLink({ URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen' });
+                navigation.navigate('HarborComposer', { mode: 'newTopic' });
             },
         },
         {

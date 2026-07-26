@@ -230,6 +230,45 @@ const extractPostImages = html => {
     return [...new Set(images)];
 };
 
+const extractPostQuoteText = html => {
+    if (!html || typeof html !== 'string') {
+        return '';
+    }
+
+    return html
+        .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/(?:blockquote|div|h[1-6]|li|p|pre)>/gi, '\n')
+        .replace(/<li\b[^>]*>/gi, '• ')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&hellip;/gi, '…')
+        .replace(/&apos;/gi, "'")
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&#39;/gi, "'")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#x([0-9a-f]+);/gi, (match, entityValue) => {
+            const codePoint = Number.parseInt(entityValue, 16);
+            return Number.isFinite(codePoint) && codePoint <= 0x10ffff
+                ? String.fromCodePoint(codePoint)
+                : match;
+        })
+        .replace(/&#([0-9]+);/g, (match, entityValue) => {
+            const codePoint = Number.parseInt(entityValue, 10);
+            return Number.isFinite(codePoint) && codePoint <= 0x10ffff
+                ? String.fromCodePoint(codePoint)
+                : match;
+        })
+        .replace(/\r\n?/g, '\n')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n[ \t]+/g, '\n')
+        .replace(/[ \t]{2,}/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+};
+
 const getReactionCount = post => {
     if (Number.isFinite(post?.reaction_users_count)) {
         return post.reaction_users_count;
@@ -801,12 +840,16 @@ const HarborPostCard = memo(
         onOpenImage,
         onPressAuthor,
         onPressBookmark,
+        onPressComposeReply,
         onPressCopy,
+        onPressEdit,
         onPressLike,
         onPressLink,
+        onPressQuote,
         onPressReply,
         onPressShare,
         onSelectReaction,
+        canReply,
         pendingBookmark,
         pendingLike,
         pendingReaction,
@@ -867,6 +910,24 @@ const HarborPostCard = memo(
                 };
             });
         }, [currentReaction, pendingLike, pendingReaction, reactions, t]);
+        const composerMenuActions = useMemo(() => {
+            const actions = [];
+            if (canReply) {
+                actions.push({
+                    id: 'quote',
+                    title: t('引用'),
+                    image: 'quote.bubble',
+                });
+            }
+            if (post.can_edit) {
+                actions.push({
+                    id: 'edit',
+                    title: t('編輯'),
+                    image: 'pencil',
+                });
+            }
+            return actions;
+        }, [canReply, post.can_edit, t]);
 
         if (isDeleted || isHidden) {
             return (
@@ -1083,6 +1144,75 @@ const HarborPostCard = memo(
                         color={themeColor}
                     />
                 </View>
+                {canReply || post.can_edit ? (
+                    <View style={styles.composerActionRow}>
+                        {canReply ? (
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    onPressComposeReply(post);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.postActionButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="reply-outline"
+                                    size={scale(15)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.postActionText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('回覆')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        {composerMenuActions.length > 0 ? (
+                            <MenuView
+                                actions={composerMenuActions}
+                                onOpenMenu={() => trigger()}
+                                onPressAction={event => {
+                                    trigger();
+                                    if (event.nativeEvent.event === 'edit') {
+                                        onPressEdit(post);
+                                        return;
+                                    }
+                                    onPressQuote(post);
+                                }}
+                                shouldOpenOnLongPress={false}
+                                style={styles.composerMenuView}>
+                                <View
+                                    style={[
+                                        styles.postActionButton,
+                                        styles.reactionMenuButton,
+                                        { backgroundColor: tonal.primary15 },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name="dots-horizontal"
+                                        size={scale(16)}
+                                        color={themeColor}
+                                    />
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[
+                                            styles.postActionText,
+                                            { color: themeColor },
+                                        ]}>
+                                        {t('更多')}
+                                    </Text>
+                                </View>
+                            </MenuView>
+                        ) : null}
+                    </View>
+                ) : null}
                 <View style={styles.postActionRow}>
                     {reactionsEnabled ? (
                         <MenuView
@@ -1792,6 +1922,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
     } = theme;
     const topicId = Number(route.params?.topicId);
     const initialTopicTitle = route.params?.topicTitle;
+    const requestedPostNumber = Number(route.params?.postNumber);
+    const composerRefreshAt = route.params?.composerRefreshAt;
     const listRef = useRef(null);
     const imageViewerRef = useRef(null);
     const requestGenerationRef = useRef(0);
@@ -1805,6 +1937,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const viewablePostsRef = useRef([]);
     const lastTimingsAtRef = useRef(Date.now());
     const sessionStatusRef = useRef(sessionStatus);
+    const handledPostRequestRef = useRef(null);
     const pendingMutationsRef = useRef(new Set());
     // 主動跳樓後忽略 viewability，避免短帖同屏時被最高可見樓層蓋回
     const ignoreViewabilityFromSeekRef = useRef(false);
@@ -1813,6 +1946,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         verticalScale(120),
     );
     const [topic, setTopic] = useState(null);
+    const [topicSessionStatus, setTopicSessionStatus] = useState(sessionStatus);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isLoadingPrevious, setIsLoadingPrevious] = useState(false);
@@ -1895,6 +2029,13 @@ const HarborTopicDetail = ({ route, navigation }) => {
             posts.length > 1 || Number(topic?.posts_count || 0) > 1
         );
     }, [posts.length, topic?.posts_count]);
+
+    const canReplyToTopic =
+        !topic?.closed &&
+        !topic?.archived &&
+        (topicSessionStatus !== 'signedIn' ||
+            (topic?.can_create_post !== false &&
+                topic?.details?.can_create_post !== false));
 
     const imageUrls = useMemo(() => {
         const urls = posts.flatMap(post => extractPostImages(post?.cooked));
@@ -1987,6 +2128,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             controllerRef.current?.abort();
             const controller = new AbortController();
             controllerRef.current = controller;
+            const requestSessionStatus = sessionStatusRef.current;
 
             if (refresh) {
                 setIsRefreshing(true);
@@ -2020,6 +2162,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 ) {
                     return;
                 }
+                setTopicSessionStatus(requestSessionStatus);
 
                 if (refresh) {
                     const currentTopic = latestTopicRef.current;
@@ -2081,6 +2224,15 @@ const HarborTopicDetail = ({ route, navigation }) => {
         },
         [t, topicId],
     );
+
+    useEffect(() => {
+        if (
+            topic?.id &&
+            topicSessionStatus !== sessionStatus
+        ) {
+            loadTopic({ refresh: true });
+        }
+    }, [loadTopic, sessionStatus, topic?.id, topicSessionStatus]);
 
     useEffect(() => {
         logToFirebase('openPage', {
@@ -2241,6 +2393,37 @@ const HarborTopicDetail = ({ route, navigation }) => {
         },
         [scrollToLoadedPost, t, topicId, updateReadingPost],
     );
+
+    useEffect(() => {
+        if (
+            !topic?.id ||
+            !Number.isInteger(requestedPostNumber) ||
+            requestedPostNumber <= 0
+        ) {
+            return;
+        }
+        const requestKey =
+            `${topicId}:${requestedPostNumber}:${composerRefreshAt || 'route'}`;
+        if (handledPostRequestRef.current === requestKey) {
+            return;
+        }
+        handledPostRequestRef.current = requestKey;
+
+        const revealRequestedPost = async () => {
+            if (composerRefreshAt) {
+                await loadTopic();
+            }
+            await scrollToPost(requestedPostNumber, { animated: false });
+        };
+        revealRequestedPost();
+    }, [
+        composerRefreshAt,
+        loadTopic,
+        requestedPostNumber,
+        scrollToPost,
+        topic?.id,
+        topicId,
+    ]);
 
     // 閱讀進度 Slider：鬆手後只執行一次跳轉，避免多個非同步滾動互相覆蓋
     const seekReadingProgress = useCallback(
@@ -2966,6 +3149,90 @@ const HarborTopicDetail = ({ route, navigation }) => {
         copyPostPermalink({ post_number: currentPostNumber });
     }, [copyPostPermalink, currentPostNumber]);
 
+    const openTopicReplyComposer = useCallback(() => {
+        navigation.navigate('HarborComposer', {
+            mode: 'reply',
+            topicId,
+            topicTitle: topic?.title || initialTopicTitle,
+            categoryId: topic?.category_id,
+        });
+    }, [
+        initialTopicTitle,
+        navigation,
+        topic?.category_id,
+        topic?.title,
+        topicId,
+    ]);
+
+    const openPostReplyComposer = useCallback(
+        post => {
+            navigation.navigate('HarborComposer', {
+                mode: 'reply',
+                topicId,
+                topicTitle: topic?.title || initialTopicTitle,
+                categoryId: topic?.category_id,
+                replyToPostNumber: post.post_number,
+            });
+        },
+        [
+            initialTopicTitle,
+            navigation,
+            topic?.category_id,
+            topic?.title,
+            topicId,
+        ],
+    );
+
+    const openPostQuoteComposer = useCallback(
+        post => {
+            const username = String(
+                post.username || post.display_username || '',
+            ).replace(/["\r\n]/g, '');
+            const quoteText = extractPostQuoteText(post.cooked).replace(
+                /\[\/quote\]/gi,
+                '[／quote]',
+            );
+            const quoteRaw =
+                `[quote="${username}, post:${post.post_number}, topic:${topicId}"]\n` +
+                `${quoteText}\n[/quote]\n\n`;
+            navigation.navigate('HarborComposer', {
+                mode: 'reply',
+                topicId,
+                topicTitle: topic?.title || initialTopicTitle,
+                categoryId: topic?.category_id,
+                replyToPostNumber: post.post_number,
+                quoteRaw,
+            });
+        },
+        [
+            initialTopicTitle,
+            navigation,
+            topic?.category_id,
+            topic?.title,
+            topicId,
+        ],
+    );
+
+    const openPostEditComposer = useCallback(
+        post => {
+            navigation.navigate('HarborComposer', {
+                mode: 'edit',
+                postId: post.id,
+                postNumber: post.post_number,
+                topicId,
+                topicTitle: topic?.title || initialTopicTitle,
+                categoryId: topic?.category_id,
+            });
+        },
+        [
+            initialTopicTitle,
+            navigation,
+            topic?.category_id,
+            topic?.title,
+            topicId,
+        ],
+    );
+
     const openRelatedTopic = useCallback(
         relatedTopic => {
             navigation.push('HarborTopicDetail', {
@@ -3079,12 +3346,16 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onOpenImage={openImage}
                         onPressAuthor={openAuthor}
                         onPressBookmark={openBookmarkEditor}
+                        onPressComposeReply={openPostReplyComposer}
                         onPressCopy={copyPostPermalink}
+                        onPressEdit={openPostEditComposer}
                         onPressLike={togglePostLike}
                         onPressLink={openHarborLink}
+                        onPressQuote={openPostQuoteComposer}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
                         onSelectReaction={selectPostReaction}
+                        canReply={canReplyToTopic}
                         pendingBookmark={
                             pendingMutations[`bookmark:${item.id}`]
                         }
@@ -3099,6 +3370,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             );
         },
         [
+            canReplyToTopic,
             contentWidth,
             imageUrls,
             isLoadingPrevious,
@@ -3112,6 +3384,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openImage,
             openNotificationLevels,
             openOriginalTopic,
+            openPostEditComposer,
+            openPostQuoteComposer,
+            openPostReplyComposer,
             openTag,
             pendingMutations,
             posts,
@@ -3246,6 +3521,34 @@ const HarborTopicDetail = ({ route, navigation }) => {
                                 color={themeColor}
                                 style={styles.edgeLoader}
                             />
+                        ) : null}
+                        {canReplyToTopic ? (
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    openTopicReplyComposer();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.topicReplyButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary50
+                                            : themeColor,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="reply-outline"
+                                    size={scale(18)}
+                                    color={trueWhite}
+                                />
+                                <Text
+                                    style={[
+                                        styles.topicReplyButtonText,
+                                        { color: trueWhite },
+                                    ]}>
+                                    {t('回覆話題')}
+                                </Text>
+                            </Pressable>
                         ) : null}
                         <HarborRelatedTopics
                             topics={topic.suggested_topics}
@@ -4072,6 +4375,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingBottom: verticalScale(10),
     },
+    composerActionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: verticalScale(6),
+    },
+    composerMenuView: {
+        flex: 1,
+    },
     reactionMenuView: {
         flex: 1,
         marginRight: scale(6),
@@ -4137,6 +4448,22 @@ const styles = StyleSheet.create({
     },
     edgeLoader: {
         marginVertical: verticalScale(12),
+    },
+    topicReplyButton: {
+        minHeight: verticalScale(42),
+        borderRadius: scale(11),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: scale(12),
+        marginTop: verticalScale(10),
+        paddingHorizontal: scale(16),
+    },
+    topicReplyButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
+        marginLeft: scale(6),
     },
     relatedTopics: {
         borderWidth: StyleSheet.hairlineWidth,

@@ -15,6 +15,7 @@ const CustomBottomSheet = forwardRef((props, ref) => {
     // 讓 sheet 底部停在 Tab Bar 上方，避免最低檔卡在 Tab 位置
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    const bottomInset = props.bottomInset ?? tabBarHeight;
 
     const styles = StyleSheet.create({
         contentContainer: {
@@ -47,16 +48,15 @@ const CustomBottomSheet = forwardRef((props, ref) => {
             snapPoints={snapPoints}
             enableDynamicSizing={false} // 修復v5無法snapToIndex問題
             topInset={insets.top + verticalScale(10)}
-            bottomInset={tabBarHeight}
+            bottomInset={bottomInset}
             keyboardBehavior={'extend'}
             keyboardBlurBehavior="restore"
             android_keyboardInputMode="adjustResize"
             onClose={() => props?.setHasOpenFalse && props.setHasOpenFalse()}
-            enablePanDownToClose={[
-                'features',
-                'home',
-                'courseSim',
-            ].includes(props?.page)}
+            enablePanDownToClose={
+                props.enablePanDownToClose ??
+                ['features', 'home', 'courseSim'].includes(props?.page)
+            }
             backgroundStyle={{ backgroundColor: 'transparent' }}
             handleIndicatorStyle={{ backgroundColor: black.third }}
             style={[

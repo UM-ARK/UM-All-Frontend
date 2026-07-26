@@ -41,6 +41,10 @@ import {
     fetchHarborTags,
 } from '../../../utils/harbor/harborApi';
 import {
+    buildHarborCategoryRows,
+    getHarborCategoryKey,
+} from '../../../utils/harbor/harborCategories';
+import {
     addHarborSearchHistory,
     buildHarborSearchQuery,
     clearHarborSearchHistory,
@@ -119,15 +123,45 @@ const SearchOptionModal = ({
     options,
     selectedKey,
     emptyLabel,
+    hierarchical = false,
     onSelect,
     onClose,
 }) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
-    const data = useMemo(
-        () => [{key: '', label: emptyLabel, value: null}, ...options],
-        [emptyLabel, options],
+    const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
+        () => new Set(),
     );
+    const visibleOptions = useMemo(
+        () =>
+            hierarchical
+                ? buildHarborCategoryRows(options, collapsedCategoryIds)
+                : options,
+        [collapsedCategoryIds, hierarchical, options],
+    );
+    const data = useMemo(
+        () => [{key: '', label: emptyLabel, value: null}, ...visibleOptions],
+        [emptyLabel, visibleOptions],
+    );
+
+    useEffect(() => {
+        if (visible && hierarchical) {
+            setCollapsedCategoryIds(new Set());
+        }
+    }, [hierarchical, visible]);
+
+    const handleToggleCategory = useCallback(item => {
+        const categoryKey = getHarborCategoryKey(item);
+        setCollapsedCategoryIds(current => {
+            const next = new Set(current);
+            if (next.has(categoryKey)) {
+                next.delete(categoryKey);
+            } else {
+                next.add(categoryKey);
+            }
+            return next;
+        });
+    }, []);
 
     const renderItem = useCallback(
         ({item}) => {
@@ -142,6 +176,13 @@ const SearchOptionModal = ({
                     }}
                     style={({pressed}) => [
                         styles.optionRow,
+                        hierarchical && item.depth > 0
+                            ? {
+                                paddingLeft: scale(
+                                    15 + item.depth * 18,
+                                ),
+                            }
+                            : null,
                         {
                             backgroundColor: pressed
                                 ? theme.tonal.primary15
@@ -163,6 +204,42 @@ const SearchOptionModal = ({
                         ]}>
                         {item.label}
                     </Text>
+                    {hierarchical && item.hasChildren ? (
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityState={{
+                                expanded: item.isExpanded,
+                            }}
+                            accessibilityLabel={t(
+                                item.isExpanded
+                                    ? '收起 {{name}} 的子分類'
+                                    : '展開 {{name}} 的子分類',
+                                {name: item.name},
+                            )}
+                            hitSlop={scale(8)}
+                            onPress={event => {
+                                event.stopPropagation?.();
+                                trigger();
+                                handleToggleCategory(item);
+                            }}
+                            style={({pressed}) => [
+                                styles.optionToggle,
+                                pressed && {
+                                    backgroundColor:
+                                        theme.tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name={
+                                    item.isExpanded
+                                        ? 'chevron-up'
+                                        : 'chevron-down'
+                                }
+                                size={scale(19)}
+                                color={theme.themeColor}
+                            />
+                        </Pressable>
+                    ) : null}
                     {selected ? (
                         <MaterialCommunityIcons
                             name="check"
@@ -173,7 +250,14 @@ const SearchOptionModal = ({
                 </Pressable>
             );
         },
-        [onSelect, selectedKey, theme],
+        [
+            handleToggleCategory,
+            hierarchical,
+            onSelect,
+            selectedKey,
+            t,
+            theme,
+        ],
     );
 
     return (
@@ -914,6 +998,7 @@ const HarborSearchPage = ({route, navigation}) => {
     const categoryOptions = useMemo(
         () =>
             categories.map(item => ({
+                ...item,
                 key: String(item.id ?? item.slug),
                 label: item.name,
                 value: item,
@@ -1518,6 +1603,7 @@ const HarborSearchPage = ({route, navigation}) => {
                 visible={optionModal === 'category'}
                 title={t('選擇分類')}
                 options={categoryOptions}
+                hierarchical
                 selectedKey={category ? String(category.id ?? category.slug) : ''}
                 emptyLabel={t('所有分類')}
                 onSelect={value => {
@@ -1916,6 +2002,14 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: scale(12),
         marginRight: scale(8),
+    },
+    optionToggle: {
+        alignItems: 'center',
+        borderRadius: scale(8),
+        height: scale(30),
+        justifyContent: 'center',
+        marginRight: scale(2),
+        width: scale(30),
     },
 });
 

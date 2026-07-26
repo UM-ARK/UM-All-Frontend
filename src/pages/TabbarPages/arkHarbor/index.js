@@ -48,6 +48,7 @@ const HarborStickyToolbar = ({
     sessionLabel,
     onSessionPress,
     onMenuPress,
+    onComposePress,
     onSearchPress,
     onLayout,
 }) => {
@@ -94,6 +95,26 @@ const HarborStickyToolbar = ({
 
             <View style={[styles.toolbarSide, styles.toolbarRight]}>
                 <View style={styles.toolbarRightActions}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('建立話題')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            onComposePress();
+                        }}
+                        style={({ pressed }) => [
+                            styles.toolbarIconButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="plus"
+                            size={scale(20)}
+                            color={theme.themeColor}
+                        />
+                    </Pressable>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t('搜索')}
@@ -443,6 +464,11 @@ const ForumPage = ({ navigation }) => {
                     sessionLabel={sessionLabel}
                     onSessionPress={handleSessionPress}
                     onMenuPress={() => navigation.openDrawer()}
+                    onComposePress={() =>
+                        navigation.navigate('HarborComposer', {
+                            mode: 'newTopic',
+                        })
+                    }
                     onSearchPress={() => navigation.navigate('HarborSearch')}
                     onLayout={handleStickyHeaderLayout}
                 />

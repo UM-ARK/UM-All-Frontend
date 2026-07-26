@@ -525,7 +525,13 @@ describe('Harbor API 資料正規化', () => {
         );
 
         expect(categoryRequests).toEqual([
-            ['/categories.json', {skipHarborCredentials: true}],
+            [
+                '/categories.json',
+                {
+                    params: {include_subcategories: true},
+                    skipHarborCredentials: true,
+                },
+            ],
         ]);
         expect(latest.items[0].category).toEqual(
             expect.objectContaining({
@@ -579,6 +585,7 @@ describe('Harbor API 資料正規化', () => {
             }),
         );
         expect(getSpy).toHaveBeenNthCalledWith(2, '/categories.json', {
+            params: {include_subcategories: true},
             skipHarborCredentials: true,
         });
     });
