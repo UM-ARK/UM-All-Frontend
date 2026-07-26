@@ -1,4 +1,7 @@
-import {replaceHarborEmojiImages} from '../harborHtml';
+import {
+    replaceHarborEmojiImages,
+    replaceHarborEmojiShortcodes,
+} from '../harborHtml';
 
 describe('replaceHarborEmojiImages', () => {
     it('把 Harbor emoji 圖片轉為行內元素', () => {
@@ -30,5 +33,27 @@ describe('replaceHarborEmojiImages', () => {
         const html = '<img class="emoji" title=":wave:">';
 
         expect(replaceHarborEmojiImages(html)).toBe(':wave:');
+    });
+});
+
+describe('replaceHarborEmojiShortcodes', () => {
+    it('把列表摘要中的 shortcode 轉成 Unicode', () => {
+        expect(
+            replaceHarborEmojiShortcodes(
+                '这个月都没有了:sob:之后还会上吗(T ^ T)',
+            ),
+        ).toBe('这个月都没有了😭之后还会上吗(T ^ T)');
+    });
+
+    it('連續 shortcode 與 Discourse 別名皆可轉換', () => {
+        expect(
+            replaceHarborEmojiShortcodes('錯峰吃飯！:clap::tada: 加價:plus:5'),
+        ).toBe('錯峰吃飯！👏🎉 加價➕5');
+    });
+
+    it('未知 shortcode 原樣保留', () => {
+        expect(replaceHarborEmojiShortcodes('自訂:custom_site_emoji:表情')).toBe(
+            '自訂:custom_site_emoji:表情',
+        );
     });
 });

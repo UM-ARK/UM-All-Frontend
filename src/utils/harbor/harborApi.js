@@ -2,6 +2,10 @@ import axios from 'axios';
 import qs from 'qs';
 
 import { ARK_HARBOR, ARK_HARBOR_AVATAR_TEMPLATE } from '../pathMap';
+import {
+    getHarborHtmlAttribute,
+    replaceHarborEmojiShortcodes,
+} from './harborHtml';
 
 const REQUEST_TIMEOUT = 15000;
 const TOPIC_POST_BATCH_SIZE = 20;
@@ -110,30 +114,44 @@ function stripHtml(value) {
         return '';
     }
 
-    return value
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&hellip;/g, '…')
-        .replace(/&apos;/g, "'")
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&#39;/g, "'")
-        .replace(/&quot;/g, '"')
-        .replace(/&#x([0-9a-f]+);/gi, (match, entityValue) => {
-            const codePoint = Number.parseInt(entityValue, 16);
-            return Number.isFinite(codePoint) && codePoint <= 0x10ffff
-                ? String.fromCodePoint(codePoint)
-                : match;
-        })
-        .replace(/&#([0-9]+);/g, (match, entityValue) => {
-            const codePoint = Number.parseInt(entityValue, 10);
-            return Number.isFinite(codePoint) && codePoint <= 0x10ffff
-                ? String.fromCodePoint(codePoint)
-                : match;
-        })
-        .replace(/\s+/g, ' ')
-        .trim();
+    return replaceHarborEmojiShortcodes(
+        value
+            // emoji 圖片先保留 shortcode，避免整段標籤被清掉後表情消失
+            .replace(/<img\b[^>]*>/gi, tag => {
+                const className = getHarborHtmlAttribute(tag, 'class');
+                if (!className.split(/\s+/).includes('emoji')) {
+                    return ' ';
+                }
+                return (
+                    getHarborHtmlAttribute(tag, 'alt') ||
+                    getHarborHtmlAttribute(tag, 'title') ||
+                    ' '
+                );
+            })
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&hellip;/g, '…')
+            .replace(/&apos;/g, "'")
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .replace(/&#x([0-9a-f]+);/gi, (match, entityValue) => {
+                const codePoint = Number.parseInt(entityValue, 16);
+                return Number.isFinite(codePoint) && codePoint <= 0x10ffff
+                    ? String.fromCodePoint(codePoint)
+                    : match;
+            })
+            .replace(/&#([0-9]+);/g, (match, entityValue) => {
+                const codePoint = Number.parseInt(entityValue, 10);
+                return Number.isFinite(codePoint) && codePoint <= 0x10ffff
+                    ? String.fromCodePoint(codePoint)
+                    : match;
+            })
+            .replace(/\s+/g, ' ')
+            .trim(),
+    );
 }
 
 function hasOwn(value, key) {
