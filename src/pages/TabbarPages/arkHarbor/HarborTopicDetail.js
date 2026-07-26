@@ -748,7 +748,6 @@ const HarborPostCard = memo(
         const isHidden = Boolean(post.hidden);
         const isNotice = Boolean(
             post.action_code ||
-            post.notice ||
             post.small_action ||
             post.post_type === 3,
         );
