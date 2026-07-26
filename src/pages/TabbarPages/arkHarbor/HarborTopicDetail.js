@@ -60,10 +60,6 @@ import {
 } from '../../../utils/harbor/harborApi';
 import { parseHarborUrl } from '../../../utils/harbor/harborNavigation';
 import {
-    getHarborReadingPosition,
-    saveHarborReadingPosition,
-} from '../../../utils/harbor/harborReading';
-import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
@@ -73,7 +69,6 @@ import { trigger } from '../../../utils/trigger';
 
 const AVATAR_SIZE = 88;
 const TOPIC_POST_BATCH_SIZE = 20;
-const READING_SAVE_DELAY = 1200;
 const TIMINGS_REPORT_INTERVAL = 10000;
 const TOPIC_HEADER_ITEM = Object.freeze({
     __harborItemType: 'topicHeader',
@@ -1012,8 +1007,10 @@ const HarborReadingControls = memo(
         onFirst,
         onJump,
         onLatest,
+        onUnread,
         onSeek,
         onLayoutHeight,
+        unreadPostNumber,
     }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
@@ -1129,6 +1126,35 @@ const HarborReadingControls = memo(
                         seekToFloor(targetPostNumber, { scrubbing: false });
                     }}
                 />
+                {unreadPostNumber > 0 ? (
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            onUnread();
+                        }}
+                        style={({ pressed }) => [
+                            styles.controlButton,
+                            styles.unreadButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="email-mark-as-unread"
+                            size={scale(15)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.controlButtonText,
+                                { color: themeColor },
+                            ]}>
+                            {t('跳到未讀')}
+                        </Text>
+                    </Pressable>
+                ) : null}
                 <View style={styles.controlRow}>
                     {controls.map(control => (
                         <Pressable
@@ -1224,7 +1250,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const insets = useSafeAreaInsets();
     const { black, bg_color, themeColor, tonal, trueWhite } = theme;
     const topicId = Number(route.params?.topicId);
-    const initialPostNumber = Number(route.params?.postNumber);
     const initialTopicTitle = route.params?.topicTitle;
     const listRef = useRef(null);
     const imageViewerRef = useRef(null);
@@ -1233,11 +1258,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const latestTopicRef = useRef(null);
     const pendingTopicRef = useRef(null);
     const pendingScrollRef = useRef(null);
-    const hasPerformedInitialScrollRef = useRef(false);
     const adjacentLoadingRef = useRef({ previous: false, next: false });
     const latestVisiblePostRef = useRef(0);
     const viewablePostsRef = useRef([]);
-    const readingSaveTimeoutRef = useRef(null);
     const lastTimingsAtRef = useRef(Date.now());
     const sessionStatusRef = useRef(sessionStatus);
     // 主動跳樓後忽略 viewability，避免短帖同屏時被最高可見樓層蓋回
@@ -1280,6 +1303,34 @@ const HarborTopicDetail = ({ route, navigation }) => {
             ...posts.map(post => Number(post.post_number || 0)),
         );
     }, [posts, topic?.highest_post_number, topic?.posts_count]);
+
+    const firstUnreadPostNumber = useMemo(() => {
+        const unreadCount = Math.max(
+            Number(topic?.unread_posts ?? topic?.new_posts ?? 0),
+            0,
+        );
+        if (unreadCount <= 0) {
+            return 0;
+        }
+        const lastReadPostNumber = Number(
+            topic?.last_read_post_number || 0,
+        );
+        const inferredUnreadPostNumber = Math.max(
+            highestPostNumber - unreadCount + 1,
+            1,
+        );
+        return Math.min(
+            lastReadPostNumber > 0
+                ? lastReadPostNumber + 1
+                : inferredUnreadPostNumber,
+            highestPostNumber,
+        );
+    }, [
+        highestPostNumber,
+        topic?.last_read_post_number,
+        topic?.new_posts,
+        topic?.unread_posts,
+    ]);
 
     // 僅一層樓時無需閱讀進度導航
     const showReadingControls = useMemo(() => {
@@ -1346,20 +1397,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             }
 
             try {
-                const localPostNumber = refresh
-                    ? null
-                    : await getHarborReadingPosition(topicId);
-                const hasRoutePostNumber =
-                    Number.isInteger(initialPostNumber) &&
-                    initialPostNumber > 0;
-                let targetPostNumber =
-                    hasRoutePostNumber
-                        ? initialPostNumber
-                        : localPostNumber;
-                let nextTopic = await fetchHarborTopic(topicId, {
-                    ...(targetPostNumber
-                        ? { postNumber: targetPostNumber }
-                        : {}),
+                const nextTopic = await fetchHarborTopic(topicId, {
                     signal: controller.signal,
                 });
                 if (
@@ -1367,16 +1405,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     requestGeneration !== requestGenerationRef.current
                 ) {
                     return;
-                }
-                if (targetPostNumber) {
-                    targetPostNumber = Math.min(
-                        Math.max(Number(targetPostNumber), 1),
-                        Number(
-                            nextTopic.highest_post_number ||
-                            nextTopic.posts_count ||
-                            targetPostNumber,
-                        ),
-                    );
                 }
 
                 if (refresh) {
@@ -1408,48 +1436,13 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     nextTopic.last_read_post_number || 0,
                 );
                 setUnreadAfterPostNumber(serverLastReadPostNumber);
-                latestTopicRef.current = nextTopic;
-                setTopic(nextTopic);
-                if (!hasRoutePostNumber && serverLastReadPostNumber > 0) {
-                    const serverResumePostNumber = Math.min(
-                        serverLastReadPostNumber +
-                        (Number(nextTopic.unread_posts || 0) > 0 ? 1 : 0),
-                        Number(
-                            nextTopic.highest_post_number ||
-                            nextTopic.posts_count ||
-                            serverLastReadPostNumber,
-                        ),
-                    );
-                    targetPostNumber = Math.max(
-                        Number(targetPostNumber || 0),
-                        serverResumePostNumber,
-                    );
-                    const targetIsLoaded = nextTopic.post_stream.posts.some(
-                        post =>
-                            Number(post.post_number) === targetPostNumber,
-                    );
-                    if (!targetIsLoaded) {
-                        const targetTopic = await fetchHarborTopic(topicId, {
-                            postNumber: targetPostNumber,
-                            signal: controller.signal,
-                        });
-                        nextTopic = mergeTopicWindow(nextTopic, targetTopic);
-                    }
-                }
-
-                // 僅樓層 > 1 才自動跳轉；#1 留在頂部以顯示話題頭與發帖人
-                const resumePostNumber = Number(targetPostNumber);
-                const shouldResumeScroll =
-                    Number.isInteger(resumePostNumber) && resumePostNumber > 1;
-                pendingScrollRef.current = shouldResumeScroll
-                    ? resumePostNumber
-                    : null;
-                latestVisiblePostRef.current = shouldResumeScroll
-                    ? resumePostNumber
-                    : 1;
-                setCurrentPostNumber(
-                    shouldResumeScroll ? resumePostNumber : 1,
-                );
+                listRef.current?.scrollToOffset({
+                    offset: 0,
+                    animated: false,
+                });
+                pendingScrollRef.current = null;
+                latestVisiblePostRef.current = 1;
+                setCurrentPostNumber(1);
                 latestTopicRef.current = nextTopic;
                 setTopic(nextTopic);
             } catch (error) {
@@ -1467,7 +1460,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 }
             }
         },
-        [initialPostNumber, t, topicId],
+        [t, topicId],
     );
 
     useEffect(() => {
@@ -1480,18 +1473,17 @@ const HarborTopicDetail = ({ route, navigation }) => {
         return () => {
             requestGenerationRef.current += 1;
             controllerRef.current?.abort();
-            clearTimeout(readingSaveTimeoutRef.current);
             const lastPostNumber = latestVisiblePostRef.current;
-            if (lastPostNumber > 0) {
-                saveHarborReadingPosition(topicId, lastPostNumber);
-                if (sessionStatusRef.current === 'signedIn') {
-                    const now = Date.now();
-                    saveHarborTopicTimings(topicId, {
-                        postNumber: lastPostNumber,
-                        timeMs: now - lastTimingsAtRef.current,
-                        topicTimeMs: now - lastTimingsAtRef.current,
-                    }).catch(() => { });
-                }
+            if (
+                lastPostNumber > 0 &&
+                sessionStatusRef.current === 'signedIn'
+            ) {
+                const now = Date.now();
+                saveHarborTopicTimings(topicId, {
+                    postNumber: lastPostNumber,
+                    timeMs: now - lastTimingsAtRef.current,
+                    topicTimeMs: now - lastTimingsAtRef.current,
+                }).catch(() => { });
             }
         };
     }, [loadTopic, topicId]);
@@ -1509,22 +1501,18 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
             latestVisiblePostRef.current = normalizedPostNumber;
             setCurrentPostNumber(normalizedPostNumber);
-            clearTimeout(readingSaveTimeoutRef.current);
-            readingSaveTimeoutRef.current = setTimeout(() => {
-                saveHarborReadingPosition(topicId, normalizedPostNumber);
-                const now = Date.now();
-                if (
-                    sessionStatusRef.current === 'signedIn' &&
-                    now - lastTimingsAtRef.current >= TIMINGS_REPORT_INTERVAL
-                ) {
-                    saveHarborTopicTimings(topicId, {
-                        postNumber: normalizedPostNumber,
-                        timeMs: now - lastTimingsAtRef.current,
-                        topicTimeMs: now - lastTimingsAtRef.current,
-                    }).catch(() => { });
-                    lastTimingsAtRef.current = now;
-                }
-            }, READING_SAVE_DELAY);
+            const now = Date.now();
+            if (
+                sessionStatusRef.current === 'signedIn' &&
+                now - lastTimingsAtRef.current >= TIMINGS_REPORT_INTERVAL
+            ) {
+                saveHarborTopicTimings(topicId, {
+                    postNumber: normalizedPostNumber,
+                    timeMs: now - lastTimingsAtRef.current,
+                    topicTimeMs: now - lastTimingsAtRef.current,
+                }).catch(() => { });
+                lastTimingsAtRef.current = now;
+            }
         },
         [topicId],
     );
@@ -1656,11 +1644,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
             if (
                 scrollToLoadedPost(
                     targetPostNumber,
-                    hasPerformedInitialScrollRef.current,
+                    true,
                 )
             ) {
                 pendingScrollRef.current = null;
-                hasPerformedInitialScrollRef.current = true;
             }
         }, 250);
         return () => clearTimeout(timeout);
@@ -1767,9 +1754,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     return (
                         layout &&
                         layout.y +
-                            firstItemOffset +
-                            layout.height >
-                            readingLineOffset
+                        firstItemOffset +
+                        layout.height >
+                        readingLineOffset
                     );
                 }) || visiblePosts[visiblePosts.length - 1];
             updateReadingPost(
@@ -2155,16 +2142,16 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 scrollIndicatorInsets={
                     isLiquidGlassSupported
                         ? {
-                              top: headerHeight,
-                              bottom: showReadingControls
-                                  ? readingControlsDockHeight
-                                  : 0,
-                          }
+                            top: headerHeight,
+                            bottom: showReadingControls
+                                ? readingControlsDockHeight
+                                : 0,
+                        }
                         : {
-                              bottom: showReadingControls
-                                  ? readingControlsDockHeight
-                                  : 0,
-                          }
+                            bottom: showReadingControls
+                                ? readingControlsDockHeight
+                                : 0,
+                        }
                 }
                 showsVerticalScrollIndicator={false}
                 drawDistance={700}
@@ -2229,12 +2216,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
                             setIsJumpVisible(true);
                         }}
                         onLatest={() => scrollToPost(highestPostNumber)}
+                        onUnread={() => scrollToPost(firstUnreadPostNumber)}
                         onSeek={seekReadingProgress}
+                        unreadPostNumber={firstUnreadPostNumber}
                         onLayoutHeight={height => {
                             setReadingControlsDockHeight(
                                 height +
-                                    Math.max(insets.bottom, verticalScale(8)) +
-                                    verticalScale(8),
+                                Math.max(insets.bottom, verticalScale(8)) +
+                                verticalScale(8),
                             );
                         }}
                     />
@@ -2453,6 +2442,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         marginTop: verticalScale(4),
+    },
+    unreadButton: {
+        alignSelf: 'center',
+        marginTop: verticalScale(2),
+        paddingHorizontal: scale(10),
     },
     controlButton: {
         flexDirection: 'row',
