@@ -15,10 +15,10 @@ import {
     FlatList,
     Pressable,
     ActivityIndicator,
-    Image,
     useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Image } from 'expo-image';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
@@ -715,6 +715,7 @@ const EventPage = forwardRef((props, ref) => {
                                     borderRadius: scale(50),
                                     backgroundColor: white,
                                 }}
+                                contentFit="cover"
                             />
                             <Text style={{
                                 marginLeft: scale(2), ...uiStyle.defaultText, color: black.third,
