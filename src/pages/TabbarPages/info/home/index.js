@@ -62,7 +62,24 @@ import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TouchableScale from '../../../../components/TouchableScale';
 
 const MIN_REFRESH_DURATION = 800;
+const DONATE_PROBE_TIMEOUT_MS = 2500;
 const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
+
+const openDonateLink = async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DONATE_PROBE_TIMEOUT_MS);
+    let url = AFD_UMACARK;
+
+    try {
+        await fetch(AFD_UMACARK, { method: 'HEAD', signal: controller.signal });
+    } catch {
+        url = GITHUB_DONATE;
+    } finally {
+        clearTimeout(timer);
+    }
+
+    return openLink({ URL: url, mode: 'fullScreen' });
+};
 
 const paymentArr = [
     require('../../../../static/img/donate/boc.jpg'),
@@ -124,8 +141,8 @@ const HomeScreen = ({ navigation }) => {
             func: () => {
                 trigger();
                 logToFirebase('funcUse', { funcName: 'donate' });
-                // 新版導航至愛發電主頁
-                openLink({ URL: AFD_UMACARK, mode: 'fullScreen' });
+                // 愛發電無法連線時改用 GitHub 捐贈頁
+                openDonateLink();
                 // 舊版打開BottomSheet展示收款碼
                 // if (sheetIndex != -1) {
                 //     logToFirebase('funcUse', { funcName: 'donate' });
