@@ -4,7 +4,6 @@ import {StyleSheet, Text, View} from 'react-native';
 import {MenuView} from '@expo/ui/community/menu';
 import {useTranslation} from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
@@ -55,9 +54,9 @@ const HarborPageHeader = ({onFeedbackAction, onSettingsPress}) => {
                             styles.button,
                             {backgroundColor: theme.tonal.primary15},
                         ]}>
-                        <MaterialIcons
-                            name="feedback"
-                            size={verticalScale(21)}
+                        <Ionicons
+                            name="chatbubble-ellipses-outline"
+                            size={verticalScale(18)}
                             color={theme.themeColor}
                         />
                     </TouchableScale>
@@ -75,7 +74,7 @@ const HarborPageHeader = ({onFeedbackAction, onSettingsPress}) => {
                     }}>
                     <Ionicons
                         name="settings-outline"
-                        size={verticalScale(22)}
+                        size={verticalScale(18)}
                         color={theme.themeColor}
                     />
                 </TouchableScale>
@@ -111,9 +110,9 @@ const styles = StyleSheet.create({
         gap: scale(8),
     },
     button: {
-        width: scale(42),
-        height: scale(42),
-        borderRadius: scale(21),
+        width: scale(34),
+        height: scale(34),
+        borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
     },
