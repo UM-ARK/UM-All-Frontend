@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
+    Image,
     Pressable,
     StyleSheet,
     Text,
@@ -307,15 +308,10 @@ const HarborDrawerContent = ({ navigation }) => {
                         styles.drawerHeader,
                         { borderBottomColor: theme.themeColorUltraLight },
                     ]}>
-                    <View
-                        style={[
-                            styles.brandIcon,
-                            { backgroundColor: theme.tonal.primary15 },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="anchor"
-                            size={scale(21)}
-                            color={theme.themeColor}
+                    <View style={styles.brandIcon}>
+                        <Image
+                            source={require('../../../../static/img/logo.png')}
+                            style={styles.brandLogo}
                         />
                     </View>
                     <View style={styles.drawerTitleArea}>
@@ -324,7 +320,7 @@ const HarborDrawerContent = ({ navigation }) => {
                                 styles.drawerTitle,
                                 { color: theme.black.main },
                             ]}>
-                            Harbor
+                            {t('Harbor 職涯港')}
                         </Text>
                         <Text
                             numberOfLines={1}
@@ -332,7 +328,7 @@ const HarborDrawerContent = ({ navigation }) => {
                                 styles.drawerSubtitle,
                                 { color: theme.black.third },
                             ]}>
-                            {t('討論話題')}
+                            {t('求職、提問、校友、應有盡有！')}
                         </Text>
                     </View>
                     <Pressable
@@ -477,8 +473,13 @@ const styles = StyleSheet.create({
         width: scale(38),
         height: scale(38),
         borderRadius: scale(13),
+        overflow: 'hidden',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    brandLogo: {
+        width: scale(38),
+        height: scale(38),
     },
     drawerTitleArea: {
         flex: 1,
