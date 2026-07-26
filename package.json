@@ -24,6 +24,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/datetimepicker": "9.1.0",
+    "@react-native-community/slider": "5.2.0",
     "@react-native-firebase/analytics": "^25.1.0",
     "@react-native-firebase/app": "^25.1.0",
     "@react-native-menu/menu": "^2.0.0",

@@ -2752,6 +2752,11 @@
   dependencies:
     invariant "^2.2.4"
 
+"@react-native-community/slider@5.2.0":
+  version "5.2.0"
+  resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-5.2.0.tgz#c154ac4ec10537160462d7a9f3e2e43098257302"
+  integrity sha512-484sH8aWEaSjxaZ7HT3YZ8CKDcNes2synko1vdEz5DFEdvKAduxKJTj22L/qBMD7rtIkfbX69DMzWDAGbOAV6w==
+
 "@react-native-firebase/analytics@^25.1.0":
   version "25.1.0"
   resolved "https://registry.npmjs.org/@react-native-firebase/analytics/-/analytics-25.1.0.tgz#86403866033d53b4353f70028dc9aaac811f27cf"
