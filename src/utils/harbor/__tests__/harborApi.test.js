@@ -201,8 +201,33 @@ describe('Harbor API 資料正規化', () => {
                 params: {track_visit: true, forceLoad: true},
             }),
         );
+        expect(getSpy.mock.calls[0][1]).not.toHaveProperty('headers');
         expect(getSpy).toHaveBeenCalledTimes(1);
         expect(topic.post_stream.posts.map(post => post.id)).toEqual([1]);
+    });
+
+    it('僅在指定時為話題首窗請求加入觀看追蹤標頭', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                id: 31,
+                post_stream: {
+                    stream: [1],
+                    posts: [{id: 1, post_number: 1}],
+                },
+            },
+        });
+
+        await fetchHarborTopic(31, {trackPageView: true});
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/t/31.json',
+            expect.objectContaining({
+                headers: {
+                    'Discourse-Track-View': 'true',
+                    'Discourse-Track-View-Topic-Id': '31',
+                },
+            }),
+        );
     });
 
     it('分批載入、去重並排序指定話題貼文', async () => {

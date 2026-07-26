@@ -1256,6 +1256,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const requestGenerationRef = useRef(0);
     const controllerRef = useRef(null);
     const latestTopicRef = useRef(null);
+    const trackedPageViewTopicIdRef = useRef(null);
     const pendingTopicRef = useRef(null);
     const pendingScrollRef = useRef(null);
     const adjacentLoadingRef = useRef({ previous: false, next: false });
@@ -1397,9 +1398,16 @@ const HarborTopicDetail = ({ route, navigation }) => {
             }
 
             try {
+                const shouldTrackPageView =
+                    !refresh &&
+                    trackedPageViewTopicIdRef.current !== topicId;
                 const nextTopic = await fetchHarborTopic(topicId, {
                     signal: controller.signal,
+                    trackPageView: shouldTrackPageView,
                 });
+                if (shouldTrackPageView) {
+                    trackedPageViewTopicIdRef.current = topicId;
+                }
                 if (
                     controller.signal.aborted ||
                     requestGeneration !== requestGenerationRef.current

@@ -1271,7 +1271,7 @@ export async function fetchHarborMessages(username, { signal } = {}) {
 
 export async function fetchHarborTopic(
     topicId,
-    { postNumber, signal } = {},
+    { postNumber, signal, trackPageView = false } = {},
 ) {
     const encodedTopicId = encodeURIComponent(topicId);
     const normalizedPostNumber = Number(postNumber);
@@ -1284,6 +1284,14 @@ export async function fetchHarborTopic(
             track_visit: true,
             forceLoad: true,
         },
+        ...(trackPageView
+            ? {
+                headers: {
+                    'Discourse-Track-View': 'true',
+                    'Discourse-Track-View-Topic-Id': String(topicId),
+                },
+            }
+            : {}),
         signal,
     });
     const topic = topicResponse.data;
