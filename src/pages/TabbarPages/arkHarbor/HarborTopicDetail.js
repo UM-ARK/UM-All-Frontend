@@ -82,8 +82,8 @@ const TOPIC_HEADER_ITEM = Object.freeze({
 // 列表前綴：話題標題
 const LIST_POST_INDEX_OFFSET = 1;
 const TOPIC_VIEWABILITY_CONFIG = {
-    // 較低門檻，方便辨識畫面最上方仍露出的樓層
-    itemVisiblePercentThreshold: 20,
+    // 保留所有仍在畫面的樓層，再以標題下緣判斷目前閱讀樓層
+    itemVisiblePercentThreshold: 1,
     minimumViewTime: 120,
 };
 
@@ -1027,7 +1027,7 @@ const HarborReadingControls = memo(
         const [slidingValue, setSlidingValue] = useState(syncedPostNumber);
         // 鬆手後暫鎖目標樓層，避免列表尚未同步時滑桿被拉回舊值
         const [pendingSeek, setPendingSeek] = useState(null);
-        // 避免同一樓層在拖曳中重複觸發跳轉
+        // 記錄最後跳轉樓層，避免重複觸發
         const lastSeekedRef = useRef(syncedPostNumber);
         const isUserDriving = isSliding || pendingSeek != null;
         const displayPostNumber = isUserDriving
@@ -1119,7 +1119,6 @@ const HarborReadingControls = memo(
                     }}
                     onValueChange={value => {
                         setSlidingValue(value);
-                        seekToFloor(value, { scrubbing: true });
                     }}
                     onSlidingComplete={value => {
                         const targetPostNumber = Math.round(value);
@@ -1237,6 +1236,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const hasPerformedInitialScrollRef = useRef(false);
     const adjacentLoadingRef = useRef({ previous: false, next: false });
     const latestVisiblePostRef = useRef(0);
+    const viewablePostsRef = useRef([]);
     const readingSaveTimeoutRef = useRef(null);
     const lastTimingsAtRef = useRef(Date.now());
     const sessionStatusRef = useRef(sessionStatus);
@@ -1437,9 +1437,19 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     }
                 }
 
-                pendingScrollRef.current = targetPostNumber || 1;
-                latestVisiblePostRef.current = targetPostNumber || 1;
-                setCurrentPostNumber(targetPostNumber || 1);
+                // 僅樓層 > 1 才自動跳轉；#1 留在頂部以顯示話題頭與發帖人
+                const resumePostNumber = Number(targetPostNumber);
+                const shouldResumeScroll =
+                    Number.isInteger(resumePostNumber) && resumePostNumber > 1;
+                pendingScrollRef.current = shouldResumeScroll
+                    ? resumePostNumber
+                    : null;
+                latestVisiblePostRef.current = shouldResumeScroll
+                    ? resumePostNumber
+                    : 1;
+                setCurrentPostNumber(
+                    shouldResumeScroll ? resumePostNumber : 1,
+                );
                 latestTopicRef.current = nextTopic;
                 setTopic(nextTopic);
             } catch (error) {
@@ -1486,11 +1496,44 @@ const HarborTopicDetail = ({ route, navigation }) => {
         };
     }, [loadTopic, topicId]);
 
+    const updateReadingPost = useCallback(
+        postNumber => {
+            const normalizedPostNumber = Number(postNumber);
+            if (
+                !Number.isInteger(normalizedPostNumber) ||
+                normalizedPostNumber <= 0 ||
+                normalizedPostNumber === latestVisiblePostRef.current
+            ) {
+                return;
+            }
+
+            latestVisiblePostRef.current = normalizedPostNumber;
+            setCurrentPostNumber(normalizedPostNumber);
+            clearTimeout(readingSaveTimeoutRef.current);
+            readingSaveTimeoutRef.current = setTimeout(() => {
+                saveHarborReadingPosition(topicId, normalizedPostNumber);
+                const now = Date.now();
+                if (
+                    sessionStatusRef.current === 'signedIn' &&
+                    now - lastTimingsAtRef.current >= TIMINGS_REPORT_INTERVAL
+                ) {
+                    saveHarborTopicTimings(topicId, {
+                        postNumber: normalizedPostNumber,
+                        timeMs: now - lastTimingsAtRef.current,
+                        topicTimeMs: now - lastTimingsAtRef.current,
+                    }).catch(() => { });
+                    lastTimingsAtRef.current = now;
+                }
+            }, READING_SAVE_DELAY);
+        },
+        [topicId],
+    );
+
     const handleScrollToIndexFailed = useCallback(info => {
         const index = Math.max(Number(info?.index || 0), 0);
         const viewOffset = Number(info?.viewOffset || 0);
         listRef.current?.scrollToOffset({
-            offset: Math.max(index * verticalScale(260) - viewOffset, 0),
+            offset: Math.max(index * verticalScale(260) + viewOffset, 0),
             animated: false,
         });
         setTimeout(() => {
@@ -1505,17 +1548,26 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const getPostScrollViewOffset = useCallback(() => {
         // 進度條改為底部懸浮後，頂部只需避開液態玻璃導覽列
-        return isLiquidGlassSupported ? headerHeight : 0;
+        return isLiquidGlassSupported ? -headerHeight : 0;
     }, [headerHeight]);
 
     const scrollToLoadedPost = useCallback(
         (postNumber, animated = true) => {
+            const normalizedPostNumber = Number(postNumber);
+            // 第一層回到列表頂部，保留話題頭卡與發帖人資訊
+            if (normalizedPostNumber === 1) {
+                listRef.current?.scrollToOffset({
+                    offset: 0,
+                    animated,
+                });
+                return true;
+            }
             const loadedPosts =
                 latestTopicRef.current?.post_stream?.posts?.filter(
                     post => post?.id,
                 ) || [];
             const postIndex = loadedPosts.findIndex(post => {
-                return Number(post.post_number) === Number(postNumber);
+                return Number(post.post_number) === normalizedPostNumber;
             });
             if (postIndex < 0) {
                 return false;
@@ -1556,7 +1608,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             }
             // 先鎖定進度到目標樓層，再滾動，避免同屏多樓時立刻被蓋回
             ignoreViewabilityFromSeekRef.current = true;
-            setCurrentPostNumber(normalizedPostNumber);
+            updateReadingPost(normalizedPostNumber);
             if (scrollToLoadedPost(normalizedPostNumber, animated)) {
                 return;
             }
@@ -1580,10 +1632,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 setIsLoadingNext(false);
             }
         },
-        [scrollToLoadedPost, t, topicId],
+        [scrollToLoadedPost, t, topicId, updateReadingPost],
     );
 
-    // 閱讀進度 Slider：拖曳中只滾動已載入樓層，鬆手後再允許網路補抓
+    // 閱讀進度 Slider：鬆手後只執行一次跳轉，避免多個非同步滾動互相覆蓋
     const seekReadingProgress = useCallback(
         (postNumber, options = {}) => {
             const scrubbing = Boolean(options.scrubbing);
@@ -1693,13 +1745,43 @@ const HarborTopicDetail = ({ route, navigation }) => {
         [t, topicId],
     );
 
-    const handleViewableItemsChanged = useCallback(
-        ({ viewableItems }) => {
-            // 主動跳樓期間不跟畫面可見樓層，避免短帖同屏或滾動動畫中途覆寫進度
+    const updateReadingPostFromOffset = useCallback(
+        scrollOffset => {
+            // 主動跳樓期間不跟畫面可見樓層，避免滾動動畫中途覆寫目標
             if (ignoreViewabilityFromSeekRef.current) {
                 return;
             }
-            const visiblePosts = viewableItems
+            const visiblePosts = viewablePostsRef.current;
+            if (visiblePosts.length === 0) {
+                return;
+            }
+            const firstItemOffset =
+                Number(listRef.current?.getFirstItemOffset?.()) || 0;
+            const readingLineOffset =
+                scrollOffset - getPostScrollViewOffset();
+            const readingPost =
+                visiblePosts.find(viewableItem => {
+                    const layout = listRef.current?.getLayout?.(
+                        Number(viewableItem.index),
+                    );
+                    return (
+                        layout &&
+                        layout.y +
+                            firstItemOffset +
+                            layout.height >
+                            readingLineOffset
+                    );
+                }) || visiblePosts[visiblePosts.length - 1];
+            updateReadingPost(
+                Number(readingPost.item.post_number),
+            );
+        },
+        [getPostScrollViewOffset, updateReadingPost],
+    );
+
+    const handleViewableItemsChanged = useCallback(
+        ({ viewableItems }) => {
+            viewablePostsRef.current = viewableItems
                 .filter(viewableItem =>
                     Number.isInteger(Number(viewableItem.item?.post_number)),
                 )
@@ -1707,47 +1789,20 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     (left, right) =>
                         Number(left.index) - Number(right.index),
                 );
-            if (visiblePosts.length === 0) {
-                return;
-            }
-
-            // 閱讀進度：取畫面最上方那層樓（索引最小的可見帖）
-            const topVisiblePostNumber = Number(
-                visiblePosts[0].item.post_number,
+            updateReadingPostFromOffset(
+                Number(listRef.current?.getAbsoluteLastScrollOffset?.()) || 0,
             );
-            setCurrentPostNumber(topVisiblePostNumber);
-
-            // 已讀位置仍用可見範圍內最高樓層，供未讀／進度同步
-            const furthestVisiblePostNumber = Math.max(
-                ...visiblePosts.map(viewableItem =>
-                    Number(viewableItem.item.post_number),
-                ),
-            );
-            if (furthestVisiblePostNumber <= latestVisiblePostRef.current) {
-                return;
-            }
-            latestVisiblePostRef.current = furthestVisiblePostNumber;
-            clearTimeout(readingSaveTimeoutRef.current);
-            readingSaveTimeoutRef.current = setTimeout(() => {
-                saveHarborReadingPosition(
-                    topicId,
-                    furthestVisiblePostNumber,
-                );
-                const now = Date.now();
-                if (
-                    sessionStatusRef.current === 'signedIn' &&
-                    now - lastTimingsAtRef.current >= TIMINGS_REPORT_INTERVAL
-                ) {
-                    saveHarborTopicTimings(topicId, {
-                        postNumber: furthestVisiblePostNumber,
-                        timeMs: now - lastTimingsAtRef.current,
-                        topicTimeMs: now - lastTimingsAtRef.current,
-                    }).catch(() => { });
-                    lastTimingsAtRef.current = now;
-                }
-            }, READING_SAVE_DELAY);
         },
-        [topicId],
+        [updateReadingPostFromOffset],
+    );
+
+    const handleScroll = useCallback(
+        event => {
+            updateReadingPostFromOffset(
+                Number(event.nativeEvent.contentOffset.y || 0),
+            );
+        },
+        [updateReadingPostFromOffset],
     );
 
     const handleScrollBeginDrag = useCallback(() => {
@@ -2134,6 +2189,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 onEndReachedThreshold={0.4}
                 onViewableItemsChanged={handleViewableItemsChanged}
                 viewabilityConfig={TOPIC_VIEWABILITY_CONFIG}
+                onScroll={handleScroll}
+                scrollEventThrottle={80}
                 onScrollBeginDrag={handleScrollBeginDrag}
                 refreshControl={
                     <RefreshControl
