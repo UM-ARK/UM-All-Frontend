@@ -1,10 +1,4 @@
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     RefreshControl,
@@ -15,10 +9,15 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { verticalScale } from 'react-native-size-matters';
+import Toast from 'react-native-toast-message';
 
 import { useTheme } from '../../../../components/ThemeContext';
 import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 import { fetchHarborTopicList } from '../../../../utils/harbor/harborApi';
+import {
+    getHarborRateLimitDelayMs,
+    isHarborRateLimited,
+} from '../../../../utils/harbor/harborRateLimit';
 import { trigger } from '../../../../utils/trigger';
 import {
     HarborFullState,
@@ -28,6 +27,38 @@ import {
 import HarborTopicCard from './HarborTopicCard';
 
 const SKELETON_ITEMS = ['one', 'two', 'three', 'four'];
+const TOPIC_LIST_CACHE_LIMIT = 20;
+const topicListCache = new Map();
+let sharedRateLimit = null;
+
+const getCachedTopicList = cacheKey => {
+    const cachedResult = topicListCache.get(cacheKey);
+    if (!cachedResult) {
+        return null;
+    }
+
+    topicListCache.delete(cacheKey);
+    topicListCache.set(cacheKey, cachedResult);
+    return cachedResult;
+};
+
+const cacheTopicList = (cacheKey, result) => {
+    if (!cacheKey) {
+        return;
+    }
+
+    topicListCache.delete(cacheKey);
+    topicListCache.set(cacheKey, {
+        items: result.items,
+        hasMore: result.hasMore,
+        nextPage: result.nextPage,
+    });
+
+    if (topicListCache.size > TOPIC_LIST_CACHE_LIMIT) {
+        const oldestKey = topicListCache.keys().next().value;
+        topicListCache.delete(oldestKey);
+    }
+};
 
 const getSourceKey = source =>
     [
@@ -57,7 +88,13 @@ const HarborTopicList = ({
     const { status, user, login } = useHarborSession();
     const controllerRef = useRef(null);
     const requestGenerationRef = useRef(0);
+    const firstPageLoadingRef = useRef(false);
+    const firstPageErrorRef = useRef(null);
     const loadingMoreRef = useRef(false);
+    const loadMoreErrorRef = useRef(null);
+    const itemsRef = useRef([]);
+    const activeCacheKeyRef = useRef(null);
+    const rateLimitRef = useRef(null);
     const sourceRef = useRef(source);
     sourceRef.current = source;
     const [items, setItems] = useState([]);
@@ -66,25 +103,88 @@ const HarborTopicList = ({
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(false);
     const [nextPage, setNextPage] = useState(null);
-    const [loadError, setLoadError] = useState(null);
+    const [firstPageError, setFirstPageError] = useState(null);
+    const [loadMoreError, setLoadMoreError] = useState(null);
+    const [rateLimit, setRateLimit] = useState(null);
+    const [clock, setClock] = useState(() => Date.now());
     const sourceKey = getSourceKey(source);
     const sessionIdentity =
         status === 'signedIn' ? user?.username || 'member' : 'guest';
+    const isSessionReady = status !== 'restoring' && status !== 'authorizing';
+    const cacheKey = `${sessionIdentity}:${sourceKey}`;
+
+    const replaceItems = useCallback(nextItems => {
+        itemsRef.current = nextItems;
+        setItems(nextItems);
+    }, []);
+
+    const applyRateLimit = useCallback((error, scope) => {
+        const now = Date.now();
+        const nextRateLimit = {
+            error,
+            scope,
+            until: now + getHarborRateLimitDelayMs(error, now),
+        };
+        sharedRateLimit = nextRateLimit;
+        rateLimitRef.current = nextRateLimit;
+        setClock(now);
+        setRateLimit(nextRateLimit);
+    }, []);
+
+    const clearRateLimit = useCallback(() => {
+        if (sharedRateLimit?.until <= Date.now()) {
+            sharedRateLimit = null;
+        }
+        rateLimitRef.current = null;
+        setRateLimit(null);
+    }, []);
+
+    const getActiveRateLimit = useCallback(() => {
+        const localRateLimit = rateLimitRef.current;
+        const currentRateLimit =
+            (localRateLimit?.until || 0) >= (sharedRateLimit?.until || 0)
+                ? localRateLimit
+                : sharedRateLimit;
+        return currentRateLimit?.until > Date.now() ? currentRateLimit : null;
+    }, []);
 
     const loadFirstPage = useCallback(
-        async ({ refresh = false } = {}) => {
+        async ({ refresh = false, showIndicator = refresh } = {}) => {
+            const errorScope =
+                refresh || itemsRef.current.length > 0 ? 'refresh' : 'initial';
+            const activeRateLimit = getActiveRateLimit();
+            if (activeRateLimit) {
+                rateLimitRef.current = activeRateLimit;
+                setClock(Date.now());
+                setRateLimit(activeRateLimit);
+                const nextError = {
+                    error: activeRateLimit.error,
+                    scope: errorScope,
+                };
+                firstPageErrorRef.current = nextError;
+                setFirstPageError(nextError);
+                setIsLoading(false);
+                setIsRefreshing(false);
+                return;
+            }
+            if (firstPageLoadingRef.current) {
+                return;
+            }
+
+            firstPageLoadingRef.current = true;
             const requestGeneration = ++requestGenerationRef.current;
             controllerRef.current?.abort();
             const controller = new AbortController();
             controllerRef.current = controller;
 
-            if (refresh) {
+            if (showIndicator) {
                 setIsRefreshing(true);
-            } else {
-                setIsLoading(true);
-                setItems([]);
             }
-            setLoadError(null);
+            if (itemsRef.current.length === 0) {
+                setIsLoading(true);
+            }
+            firstPageErrorRef.current = null;
+            setFirstPageError(null);
 
             try {
                 const result = await fetchHarborTopicList({
@@ -98,9 +198,13 @@ const HarborTopicList = ({
                 ) {
                     return;
                 }
-                setItems(result.items);
+                replaceItems(result.items);
                 setHasMore(result.hasMore);
                 setNextPage(result.nextPage);
+                loadMoreErrorRef.current = null;
+                setLoadMoreError(null);
+                cacheTopicList(activeCacheKeyRef.current, result);
+                clearRateLimit();
                 if (Array.isArray(result.capabilities?.topicViews)) {
                     onCapabilities?.(result.capabilities);
                 }
@@ -112,67 +216,186 @@ const HarborTopicList = ({
                         message: error?.message,
                         source: sourceKey,
                     });
-                    setLoadError({
+                    if (itemsRef.current.length === 0) {
+                        setHasMore(false);
+                        setNextPage(null);
+                    }
+                    const nextScope =
+                        itemsRef.current.length > 0 ? 'refresh' : 'initial';
+                    const nextError = {
                         error,
-                        scope: refresh ? 'refresh' : 'initial',
-                    });
+                        scope: nextScope,
+                    };
+                    firstPageErrorRef.current = nextError;
+                    setFirstPageError(nextError);
+                    if (isHarborRateLimited(error)) {
+                        applyRateLimit(error, nextScope);
+                    }
                 }
             } finally {
                 if (requestGeneration === requestGenerationRef.current) {
+                    firstPageLoadingRef.current = false;
                     setIsLoading(false);
                     setIsRefreshing(false);
                     controllerRef.current = null;
                 }
             }
         },
-        [onCapabilities, sourceKey],
+        [
+            applyRateLimit,
+            clearRateLimit,
+            getActiveRateLimit,
+            onCapabilities,
+            replaceItems,
+            sourceKey,
+        ],
     );
 
     useEffect(() => {
-        loadFirstPage();
+        if (!isSessionReady) {
+            return undefined;
+        }
+
+        const cachedResult = getCachedTopicList(cacheKey);
+        activeCacheKeyRef.current = cacheKey;
+        firstPageErrorRef.current = null;
+        setFirstPageError(null);
+        loadMoreErrorRef.current = null;
+        setLoadMoreError(null);
+
+        if (cachedResult) {
+            replaceItems(cachedResult.items);
+            setHasMore(cachedResult.hasMore);
+            setNextPage(cachedResult.nextPage);
+            setIsLoading(false);
+            loadFirstPage({ refresh: true, showIndicator: false });
+        } else {
+            replaceItems([]);
+            setHasMore(false);
+            setNextPage(null);
+            setIsLoading(true);
+            loadFirstPage();
+        }
+
         return () => {
             requestGenerationRef.current += 1;
+            firstPageLoadingRef.current = false;
             controllerRef.current?.abort();
         };
-    }, [loadFirstPage, sessionIdentity, sourceKey]);
+    }, [cacheKey, isSessionReady, loadFirstPage, replaceItems]);
 
-    const loadMore = useCallback(async () => {
-        if (
-            !hasMore ||
-            nextPage == null ||
-            loadingMoreRef.current ||
-            isRefreshing
-        ) {
-            return;
+    useEffect(() => {
+        if (!rateLimit?.until) {
+            return undefined;
         }
 
-        loadingMoreRef.current = true;
-        setIsLoadingMore(true);
-        setLoadError(null);
-        try {
-            const result = await fetchHarborTopicList({
-                ...sourceRef.current,
-                page: nextPage,
-            });
-            setItems(currentItems => {
-                const seenIds = new Set(currentItems.map(item => item.id));
-                return [
-                    ...currentItems,
+        const updateClock = () => {
+            const nextClock = Date.now();
+            setClock(nextClock);
+            if (nextClock >= rateLimit.until) {
+                rateLimitRef.current = null;
+                setRateLimit(null);
+            }
+        };
+        updateClock();
+        const timer = setInterval(updateClock, 1000);
+        return () => clearInterval(timer);
+    }, [rateLimit?.until]);
+
+    const loadMore = useCallback(
+        async ({ manual = false } = {}) => {
+            if (loadMoreErrorRef.current && !manual) {
+                return;
+            }
+            const activeRateLimit = getActiveRateLimit();
+            if (activeRateLimit) {
+                rateLimitRef.current = activeRateLimit;
+                setClock(Date.now());
+                setRateLimit(activeRateLimit);
+                loadMoreErrorRef.current = {
+                    error: activeRateLimit.error,
+                    scope: 'more',
+                };
+                setLoadMoreError(loadMoreErrorRef.current);
+                return;
+            }
+            if (
+                itemsRef.current.length === 0 ||
+                isLoading ||
+                firstPageErrorRef.current ||
+                !hasMore ||
+                nextPage == null ||
+                firstPageLoadingRef.current ||
+                loadingMoreRef.current ||
+                isRefreshing
+            ) {
+                return;
+            }
+
+            loadingMoreRef.current = true;
+            const requestGeneration = requestGenerationRef.current;
+            const requestedCacheKey = activeCacheKeyRef.current;
+            setIsLoadingMore(true);
+            loadMoreErrorRef.current = null;
+            setLoadMoreError(null);
+            try {
+                const result = await fetchHarborTopicList({
+                    ...sourceRef.current,
+                    page: nextPage,
+                });
+                if (
+                    requestGeneration !== requestGenerationRef.current ||
+                    requestedCacheKey !== activeCacheKeyRef.current
+                ) {
+                    return;
+                }
+                const seenIds = new Set(itemsRef.current.map(item => item.id));
+                const nextItems = [
+                    ...itemsRef.current,
                     ...result.items.filter(item => !seenIds.has(item.id)),
                 ];
-            });
-            setHasMore(result.hasMore);
-            setNextPage(result.nextPage);
-            if (Array.isArray(result.capabilities?.topicViews)) {
-                onCapabilities?.(result.capabilities);
+                replaceItems(nextItems);
+                setHasMore(result.hasMore);
+                setNextPage(result.nextPage);
+                cacheTopicList(activeCacheKeyRef.current, {
+                    items: nextItems,
+                    hasMore: result.hasMore,
+                    nextPage: result.nextPage,
+                });
+                clearRateLimit();
+                if (Array.isArray(result.capabilities?.topicViews)) {
+                    onCapabilities?.(result.capabilities);
+                }
+            } catch (error) {
+                if (
+                    requestGeneration !== requestGenerationRef.current ||
+                    requestedCacheKey !== activeCacheKeyRef.current
+                ) {
+                    return;
+                }
+                const nextError = { error, scope: 'more' };
+                loadMoreErrorRef.current = nextError;
+                setLoadMoreError(nextError);
+                if (isHarborRateLimited(error)) {
+                    applyRateLimit(error, 'more');
+                }
+            } finally {
+                loadingMoreRef.current = false;
+                setIsLoadingMore(false);
             }
-        } catch (error) {
-            setLoadError({ error, scope: 'more' });
-        } finally {
-            loadingMoreRef.current = false;
-            setIsLoadingMore(false);
-        }
-    }, [hasMore, isRefreshing, nextPage, onCapabilities]);
+        },
+        [
+            applyRateLimit,
+            clearRateLimit,
+            getActiveRateLimit,
+            hasMore,
+            isLoading,
+            isRefreshing,
+            nextPage,
+            onCapabilities,
+            replaceItems,
+        ],
+    );
 
     const handleTopicPress = useCallback(
         topic => {
@@ -234,35 +457,112 @@ const HarborTopicList = ({
         ],
     );
 
-    const responseStatus = loadError?.error?.response?.status;
+    const cooldownActive = Boolean(rateLimit?.until > clock);
+    const cooldownSeconds = cooldownActive
+        ? Math.max(1, Math.ceil((rateLimit.until - clock) / 1000))
+        : 0;
+    const cooldownActionLabel = cooldownActive
+        ? t('{{count}} 秒後重試', { count: cooldownSeconds })
+        : t('重試');
+    const responseStatus = firstPageError?.error?.response?.status;
     const needsLogin =
         (responseStatus === 401 || responseStatus === 403) &&
         status !== 'signedIn';
     const accessDenied = responseStatus === 403 && status === 'signedIn';
+    const firstPageRateLimited = isHarborRateLimited(firstPageError?.error);
+    const loadMoreRateLimited = isHarborRateLimited(loadMoreError?.error);
+
+    const showRateLimitToast = useCallback(
+        activeRateLimit => {
+            const now = Date.now();
+            rateLimitRef.current = activeRateLimit;
+            setClock(now);
+            setRateLimit(activeRateLimit);
+            const seconds = Math.max(
+                1,
+                Math.ceil((activeRateLimit.until - now) / 1000),
+            );
+            Toast.show({
+                type: 'info',
+                text1: t('請求過於頻繁'),
+                text2: t('{{count}} 秒後可重試', { count: seconds }),
+            });
+        },
+        [t],
+    );
+
+    const handleRefresh = useCallback(() => {
+        trigger();
+        const activeRateLimit = getActiveRateLimit();
+        if (activeRateLimit) {
+            showRateLimitToast(activeRateLimit);
+            return;
+        }
+        loadFirstPage({ refresh: true });
+    }, [getActiveRateLimit, loadFirstPage, showRateLimitToast]);
+
+    const handleLoadMoreRetry = useCallback(() => {
+        const activeRateLimit = getActiveRateLimit();
+        if (activeRateLimit) {
+            showRateLimitToast(activeRateLimit);
+            return;
+        }
+        loadMore({ manual: true });
+    }, [getActiveRateLimit, loadMore, showRateLimitToast]);
 
     const header = useMemo(
         () => (
             <>
                 {ListHeaderComponent}
-                {loadError?.scope === 'refresh' && items.length > 0 ? (
+                {firstPageError?.scope === 'refresh' && items.length > 0 ? (
                     <HarborInlineRetry
-                        message={t('更新失敗，已保留上次載入的話題')}
-                        actionLabel={t('重試')}
+                        message={
+                            firstPageRateLimited
+                                ? cooldownActive
+                                    ? t(
+                                        '更新太頻繁，暫時顯示上次內容。{{count}} 秒後可重試。',
+                                        { count: cooldownSeconds },
+                                    )
+                                    : t('更新太頻繁，暫時顯示上次內容。')
+                                : t('更新失敗，已保留上次載入的話題')
+                        }
+                        actionLabel={cooldownActionLabel}
+                        disabled={firstPageRateLimited && cooldownActive}
                         onRetry={() => loadFirstPage({ refresh: true })}
                     />
                 ) : null}
             </>
         ),
-        [ListHeaderComponent, items.length, loadError?.scope, loadFirstPage, t],
+        [
+            ListHeaderComponent,
+            cooldownActionLabel,
+            cooldownActive,
+            cooldownSeconds,
+            firstPageError?.scope,
+            firstPageRateLimited,
+            items.length,
+            loadFirstPage,
+            t,
+        ],
     );
 
     const footer = useMemo(() => {
-        if (loadError?.scope === 'more') {
+        if (loadMoreError) {
             return (
                 <HarborInlineRetry
-                    message={t('暫時無法載入更多話題')}
-                    actionLabel={t('重試')}
-                    onRetry={loadMore}
+                    message={
+                        loadMoreRateLimited
+                            ? cooldownActive
+                                ? t(
+                                    '載入太頻繁，現有話題仍可瀏覽。{{count}} 秒後可重試。',
+                                    { count: cooldownSeconds },
+                                )
+                                : t('載入太頻繁，現有話題仍可瀏覽。')
+                            : t('暫時無法載入更多話題')
+                    }
+                    actionLabel={cooldownActionLabel}
+                    disabled={loadMoreRateLimited && cooldownActive}
+                    onRetry={handleLoadMoreRetry}
                 />
             );
         }
@@ -275,9 +575,19 @@ const HarborTopicList = ({
             );
         }
         return <View style={styles.footerSpace} />;
-    }, [isLoadingMore, loadError?.scope, loadMore, t, theme.themeColor]);
+    }, [
+        cooldownActionLabel,
+        cooldownActive,
+        cooldownSeconds,
+        handleLoadMoreRetry,
+        isLoadingMore,
+        loadMoreError,
+        loadMoreRateLimited,
+        t,
+        theme.themeColor,
+    ]);
 
-    const emptyState = loadError ? (
+    const emptyState = firstPageError ? (
         <HarborFullState
             icon={needsLogin ? 'account-lock-outline' : 'alert-circle-outline'}
             title={
@@ -285,16 +595,32 @@ const HarborTopicList = ({
                     ? t('登入後查看此內容')
                     : accessDenied
                         ? t('你沒有權限查看此內容')
-                        : t('話題載入失敗')
+                        : firstPageRateLimited
+                            ? t('請求過於頻繁')
+                            : t('話題載入失敗')
             }
             description={
                 needsLogin
                     ? t('這個話題視圖只提供給已登入的 Harbor 會員。')
                     : accessDenied
                         ? t('你的 Harbor 帳號目前沒有這個分類的瀏覽權限。')
-                        : t('請檢查網絡後再試，公開內容仍可在未登入時瀏覽。')
+                        : firstPageRateLimited
+                            ? cooldownActive
+                                ? t(
+                                    'Harbor 暫時限制更新，請於 {{count}} 秒後再試。',
+                                    { count: cooldownSeconds },
+                                )
+                                : t('現在可以重新載入。')
+                            : t('請檢查網絡後再試，公開內容仍可在未登入時瀏覽。')
             }
-            actionLabel={needsLogin ? t('登入 Harbor') : t('重新載入')}
+            actionLabel={
+                needsLogin
+                    ? t('登入 Harbor')
+                    : firstPageRateLimited && cooldownActive
+                        ? cooldownActionLabel
+                        : t('重新載入')
+            }
+            actionDisabled={firstPageRateLimited && cooldownActive}
             onAction={
                 needsLogin
                     ? () => login().catch(() => { })
@@ -347,13 +673,10 @@ const HarborTopicList = ({
                     refreshing={isRefreshing}
                     tintColor={theme.themeColor}
                     colors={[theme.themeColor]}
-                    onRefresh={() => {
-                        trigger();
-                        loadFirstPage({ refresh: true });
-                    }}
+                    onRefresh={handleRefresh}
                 />
             }
-            onEndReached={loadMore}
+            onEndReached={() => loadMore()}
             onEndReachedThreshold={0.35}
             drawDistance={700}
         />

@@ -74,6 +74,7 @@ export const HarborFullState = ({
     description,
     actionLabel,
     onAction,
+    actionDisabled = false,
 }) => {
     const { theme } = useTheme();
 
@@ -105,6 +106,8 @@ export const HarborFullState = ({
             {actionLabel && onAction ? (
                 <Pressable
                     accessibilityRole="button"
+                    accessibilityState={{ disabled: actionDisabled }}
+                    disabled={actionDisabled}
                     onPress={() => {
                         trigger();
                         onAction();
@@ -112,15 +115,21 @@ export const HarborFullState = ({
                     style={({ pressed }) => [
                         styles.stateButton,
                         {
-                            backgroundColor: pressed
-                                ? theme.tonal.primary50
-                                : theme.themeColor,
+                            backgroundColor: actionDisabled
+                                ? theme.tonal.primary30
+                                : pressed
+                                    ? theme.tonal.primary50
+                                    : theme.themeColor,
                         },
                     ]}>
                     <Text
                         style={[
                             styles.stateButtonText,
-                            { color: theme.trueWhite },
+                            {
+                                color: actionDisabled
+                                    ? theme.black.third
+                                    : theme.trueWhite,
+                            },
                         ]}>
                         {actionLabel}
                     </Text>
@@ -130,7 +139,12 @@ export const HarborFullState = ({
     );
 };
 
-export const HarborInlineRetry = ({ message, actionLabel, onRetry }) => {
+export const HarborInlineRetry = ({
+    message,
+    actionLabel,
+    onRetry,
+    disabled = false,
+}) => {
     const { theme } = useTheme();
 
     return (
@@ -154,6 +168,8 @@ export const HarborInlineRetry = ({ message, actionLabel, onRetry }) => {
             </Text>
             <Pressable
                 accessibilityRole="button"
+                accessibilityState={{ disabled }}
+                disabled={disabled}
                 hitSlop={scale(8)}
                 onPress={() => {
                     trigger();
@@ -164,13 +180,19 @@ export const HarborInlineRetry = ({ message, actionLabel, onRetry }) => {
                     {
                         backgroundColor: pressed
                             ? theme.tonal.primary30
-                            : theme.tonal.primary15,
+                            : disabled
+                                ? theme.tonal.primary08
+                                : theme.tonal.primary15,
                     },
                 ]}>
                 <Text
                     style={[
                         styles.inlineRetryButtonText,
-                        { color: theme.themeColor },
+                        {
+                            color: disabled
+                                ? theme.black.third
+                                : theme.themeColor,
+                        },
                     ]}>
                     {actionLabel}
                 </Text>
