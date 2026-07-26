@@ -108,6 +108,56 @@ const DrawerMenuItem = ({
     );
 };
 
+// 與分類列同構，讓「所有分類」入口不突兀
+const AllCategoriesRow = ({ onPress }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('所有分類')}
+            onPress={() => {
+                trigger();
+                onPress?.();
+            }}
+            style={({ pressed }) => [
+                styles.categoryRow,
+                {
+                    backgroundColor: pressed
+                        ? theme.tonal.primary15
+                        : theme.bg_color,
+                },
+            ]}>
+            <View
+                style={[
+                    styles.categoryIcon,
+                    { backgroundColor: theme.tonal.primary15 },
+                ]}>
+                <MaterialCommunityIcons
+                    name="view-grid-outline"
+                    size={scale(17)}
+                    color={theme.themeColor}
+                />
+            </View>
+            <Text
+                numberOfLines={1}
+                style={[
+                    styles.categoryName,
+                    styles.rootCategoryName,
+                    { color: theme.black.main },
+                ]}>
+                {t('所有分類')}
+            </Text>
+            <MaterialCommunityIcons
+                name="chevron-right"
+                size={scale(17)}
+                color={theme.black.third}
+            />
+        </Pressable>
+    );
+};
+
 const CategoryRow = ({ item, onPress, onToggle }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -215,21 +265,100 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
     );
 };
 
-const DrawerSectionTitle = ({ icon, title }) => {
+const DrawerSectionTitle = ({
+    icon,
+    title,
+    expanded,
+    onToggle,
+    count,
+}) => {
     const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const isCollapsible = typeof onToggle === 'function';
+    const isExpanded = expanded !== false;
 
-    return (
-        <View style={styles.sectionTitle}>
+    const content = (
+        <>
             <MaterialCommunityIcons
-                name={icon}
+                name={
+                    isCollapsible
+                        ? isExpanded
+                            ? 'chevron-down'
+                            : 'chevron-right'
+                        : icon
+                }
                 size={scale(17)}
-                color={theme.black.third}
+                color={
+                    isCollapsible && !isExpanded
+                        ? theme.themeColor
+                        : theme.black.third
+                }
             />
             <Text
-                style={[styles.sectionTitleText, { color: theme.black.second }]}>
+                style={[
+                    styles.sectionTitleText,
+                    {
+                        color:
+                            isCollapsible && !isExpanded
+                                ? theme.themeColor
+                                : theme.black.second,
+                    },
+                ]}>
                 {title}
             </Text>
-        </View>
+            {isCollapsible && !isExpanded && count != null ? (
+                <View
+                    style={[
+                        styles.sectionCountBadge,
+                        { backgroundColor: theme.tonal.primary30 },
+                    ]}>
+                    <Text
+                        style={[
+                            styles.sectionCountText,
+                            { color: theme.themeColor },
+                        ]}>
+                        {count}
+                    </Text>
+                </View>
+            ) : null}
+            {isCollapsible && !isExpanded ? (
+                <Text
+                    style={[
+                        styles.sectionExpandHint,
+                        { color: theme.themeColor },
+                    ]}>
+                    {t('展開')}
+                </Text>
+            ) : null}
+        </>
+    );
+
+    if (!isCollapsible) {
+        return <View style={styles.sectionTitle}>{content}</View>;
+    }
+
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: isExpanded }}
+            accessibilityLabel={t(isExpanded ? '收起分類' : '展開分類')}
+            onPress={() => {
+                trigger();
+                onToggle();
+            }}
+            style={({ pressed }) => [
+                styles.sectionTitle,
+                styles.sectionTitleButton,
+                {
+                    backgroundColor: !isExpanded
+                        ? theme.tonal.primary15
+                        : pressed
+                            ? theme.tonal.primary08
+                            : undefined,
+                },
+            ]}>
+            {content}
+        </Pressable>
     );
 };
 
@@ -248,6 +377,8 @@ const HarborDrawerContent = ({ navigation }) => {
     const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
         () => new Set(),
     );
+    // 抽屜「分類」整段預設展開；收起後標題列仍可點擊展開
+    const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(true);
 
     const loadCategories = useCallback(async ({ refreshing = false } = {}) => {
         controllerRef.current?.abort();
@@ -420,17 +551,42 @@ const HarborDrawerContent = ({ navigation }) => {
                     ))}
                 </View>
 
-                <DrawerSectionTitle icon="chevron-down" title={t('分類')} />
-                {loadError ? (
-                    <HarborInlineRetry
-                        message={t('分類載入失敗')}
-                        actionLabel={t('重新載入')}
-                        onRetry={() => loadCategories()}
-                    />
+                <DrawerSectionTitle
+                    title={t('分類')}
+                    expanded={isCategoriesExpanded}
+                    count={categories.length}
+                    onToggle={() =>
+                        setIsCategoriesExpanded(current => !current)
+                    }
+                />
+                {isCategoriesExpanded ? (
+                    <>
+                        <AllCategoriesRow
+                            onPress={() =>
+                                navigateFromDrawer('HarborCategoryList')
+                            }
+                        />
+                        {loadError ? (
+                            <HarborInlineRetry
+                                message={t('分類載入失敗')}
+                                actionLabel={t('重新載入')}
+                                onRetry={() => loadCategories()}
+                            />
+                        ) : null}
+                    </>
                 ) : null}
             </View>
         ),
-        [loadCategories, loadError, navigation, t, theme],
+        [
+            categories.length,
+            isCategoriesExpanded,
+            loadCategories,
+            loadError,
+            navigateFromDrawer,
+            navigation,
+            t,
+            theme,
+        ],
     );
 
     const listEmpty = useMemo(() => {
@@ -461,11 +617,6 @@ const HarborDrawerContent = ({ navigation }) => {
     const listFooter = useMemo(
         () => (
             <View style={styles.drawerFooter}>
-                <DrawerMenuItem
-                    icon="format-list-bulleted"
-                    label={t('所有分類')}
-                    onPress={() => navigateFromDrawer('HarborCategoryList')}
-                />
                 <DrawerSectionTitle icon="chevron-down" title={t('標籤')} />
                 <DrawerMenuItem
                     icon="tag-multiple-outline"
@@ -489,13 +640,15 @@ const HarborDrawerContent = ({ navigation }) => {
             edges={['top']}
             style={[styles.page, { backgroundColor: theme.bg_color }]}>
             <FlashList
-                data={categoryRows}
+                data={isCategoriesExpanded ? categoryRows : []}
                 keyExtractor={item =>
                     `harbor-drawer-category-${item.id ?? item.slug}`
                 }
                 renderItem={renderCategory}
                 ListHeaderComponent={listHeader}
-                ListEmptyComponent={listEmpty}
+                ListEmptyComponent={
+                    isCategoriesExpanded ? listEmpty : null
+                }
                 ListFooterComponent={listFooter}
                 refreshing={isRefreshing}
                 onRefresh={() => loadCategories({ refreshing: true })}
@@ -602,11 +755,38 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(16),
         paddingTop: verticalScale(8),
     },
+    sectionTitleButton: {
+        marginHorizontal: scale(8),
+        marginTop: verticalScale(4),
+        paddingHorizontal: scale(8),
+        paddingTop: verticalScale(6),
+        paddingBottom: verticalScale(6),
+        borderRadius: scale(11),
+    },
     sectionTitleText: {
         ...uiStyle.defaultText,
+        flexShrink: 1,
         fontSize: scale(12),
         fontWeight: '800',
         marginLeft: scale(8),
+    },
+    sectionCountBadge: {
+        borderRadius: scale(8),
+        marginLeft: scale(8),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(2),
+    },
+    sectionCountText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '700',
+    },
+    sectionExpandHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '700',
+        marginLeft: 'auto',
+        paddingLeft: scale(8),
     },
     categoryRow: {
         minHeight: verticalScale(43),
