@@ -109,6 +109,12 @@ const HarborTopicCard = ({
         topic.activityAt || topic.lastPostedAt || topic.createdAt;
     const unreadCount = Number(topic.unreadCount || 0);
     const lastReadPostNumber = Number(topic.lastReadPostNumber || 0);
+    const isNewReply =
+        topic.newContentType === 'reply' ||
+        (!topic.newContentType && unreadCount > 0);
+    const isNewTopic =
+        topic.newContentType === 'topic' ||
+        (!topic.newContentType && topic.isNew);
 
     return (
         <Pressable
@@ -179,7 +185,7 @@ const HarborTopicCard = ({
                             : t('Harbor 話題')}
                     </Text>
                 </View>
-                {topic.isNew ? (
+                {isNewReply ? (
                     <View
                         style={[
                             styles.unreadChip,
@@ -190,23 +196,18 @@ const HarborTopicCard = ({
                                 styles.unreadText,
                                 { color: theme.unread },
                             ]}>
-                            {t('新話題')}
+                            {t('{{count}} 新回覆', { count: unreadCount })}
                         </Text>
                     </View>
-                ) : unreadCount > 0 ? (
+                ) : isNewTopic ? (
                     <View
+                        accessible
+                        accessibilityLabel={t('新話題')}
                         style={[
-                            styles.unreadChip,
-                            { backgroundColor: theme.tonal.unread15 },
-                        ]}>
-                        <Text
-                            style={[
-                                styles.unreadText,
-                                { color: theme.unread },
-                            ]}>
-                            {t('{{count}} 未讀', { count: unreadCount })}
-                        </Text>
-                    </View>
+                            styles.newTopicDot,
+                            { backgroundColor: theme.unread },
+                        ]}
+                    />
                 ) : null}
             </View>
 
@@ -395,6 +396,12 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(10),
         fontWeight: '700',
+    },
+    newTopicDot: {
+        width: scale(8),
+        height: scale(8),
+        borderRadius: scale(4),
+        marginLeft: scale(8),
     },
     title: {
         ...uiStyle.defaultText,

@@ -32,6 +32,7 @@ import HarborTopicList from './components/HarborTopicList';
 const VIEW_CONFIG = {
     latest: { label: '最新', analytics: 'latest' },
     top: { label: '熱門', analytics: 'top' },
+    newContent: { label: '新內容', analytics: 'new_content' },
     new: { label: '新話題', analytics: 'new' },
     unread: { label: '未讀', analytics: 'unread' },
 };
@@ -254,10 +255,19 @@ const ForumPage = ({ navigation }) => {
     }, []);
 
     const enabledViews = useMemo(() => {
-        return getHarborTopicViews(capabilities, {
+        const availableViews = getHarborTopicViews(capabilities, {
             signedIn: status === 'signedIn',
             unavailable: capabilitiesUnavailable,
         });
+        if (
+            availableViews.includes('new') &&
+            availableViews.includes('unread')
+        ) {
+            return availableViews
+                .map(view => (view === 'new' ? 'newContent' : view))
+                .filter(view => view !== 'unread');
+        }
+        return availableViews;
     }, [capabilities, capabilitiesUnavailable, status]);
 
     const segmentOptions = useMemo(
