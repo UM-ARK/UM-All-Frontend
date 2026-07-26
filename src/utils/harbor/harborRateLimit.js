@@ -1,4 +1,5 @@
-const DEFAULT_RATE_LIMIT_DELAY_MS = 30 * 1000;
+// Harbor 429 時，若伺服器未回傳等待秒數，APP 端統一使用此時長
+export const HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS = 10 * 1000;
 
 function getHeader(headers, name) {
     if (typeof headers?.get === 'function') {
@@ -52,5 +53,5 @@ export function getHarborRateLimitDelayMs(error, now = Date.now()) {
         return Math.max(1000, retryDate - now);
     }
 
-    return DEFAULT_RATE_LIMIT_DELAY_MS;
+    return HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS;
 }

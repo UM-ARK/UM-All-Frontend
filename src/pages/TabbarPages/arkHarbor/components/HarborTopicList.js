@@ -388,6 +388,18 @@ const HarborTopicList = ({
             if (loadMoreErrorRef.current && !manual) {
                 return;
             }
+            // 先確認確實能載入更多，再處理限流；避免空列表／首頁錯誤時被 onEndReached 誤設 loadMoreError
+            if (
+                itemsRef.current.length === 0 ||
+                isLoading ||
+                !hasMore ||
+                nextPage == null ||
+                firstPageLoadingRef.current ||
+                loadingMoreRef.current ||
+                isRefreshing
+            ) {
+                return;
+            }
             const activeRateLimit = getActiveRateLimit();
             if (activeRateLimit) {
                 rateLimitRef.current = activeRateLimit;
@@ -398,18 +410,6 @@ const HarborTopicList = ({
                     scope: 'more',
                 };
                 setLoadMoreError(loadMoreErrorRef.current);
-                return;
-            }
-            if (
-                itemsRef.current.length === 0 ||
-                isLoading ||
-                firstPageErrorRef.current ||
-                !hasMore ||
-                nextPage == null ||
-                firstPageLoadingRef.current ||
-                loadingMoreRef.current ||
-                isRefreshing
-            ) {
                 return;
             }
 
@@ -586,8 +586,20 @@ const HarborTopicList = ({
             showRateLimitToast(activeRateLimit);
             return;
         }
+        // 沒有可續載內容時改為重載首頁，避免重試按鈕無反應
+        if (itemsRef.current.length === 0 || !hasMore || nextPage == null) {
+            loadFirstPage({ refresh: itemsRef.current.length > 0 });
+            return;
+        }
         loadMore({ manual: true });
-    }, [getActiveRateLimit, loadMore, showRateLimitToast]);
+    }, [
+        getActiveRateLimit,
+        hasMore,
+        loadFirstPage,
+        loadMore,
+        nextPage,
+        showRateLimitToast,
+    ]);
 
     const header = useMemo(
         () => (
@@ -626,7 +638,8 @@ const HarborTopicList = ({
     );
 
     const footer = useMemo(() => {
-        if (loadMoreError) {
+        // 空列表已由全頁錯誤態處理，避免與底部重試橫幅重複
+        if (loadMoreError && items.length > 0) {
             return (
                 <HarborInlineRetry
                     message={
@@ -660,6 +673,7 @@ const HarborTopicList = ({
         cooldownSeconds,
         handleLoadMoreRetry,
         isLoadingMore,
+        items.length,
         loadMoreError,
         loadMoreRateLimited,
         t,

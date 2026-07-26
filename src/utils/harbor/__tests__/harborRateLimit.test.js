@@ -1,5 +1,6 @@
 import {
     getHarborRateLimitDelayMs,
+    HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS,
     isHarborRateLimited,
 } from '../harborRateLimit';
 
@@ -49,7 +50,7 @@ describe('Harbor rate limit helpers', () => {
 
     it('uses a safe fallback only for rate limited requests', () => {
         expect(getHarborRateLimitDelayMs({response: {status: 429}})).toBe(
-            30000,
+            HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS,
         );
         expect(getHarborRateLimitDelayMs({response: {status: 500}})).toBe(0);
     });
