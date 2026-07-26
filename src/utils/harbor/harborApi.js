@@ -277,6 +277,20 @@ function normalizeCategory(category) {
         readRestricted: Boolean(category.read_restricted),
         notificationLevel: toNumberOrNull(category.notification_level),
         canCreateTopic: Boolean(category.can_create_topic),
+        minimumRequiredTags: toCount(category.minimum_required_tags),
+        allowedTags: Array.isArray(category.allowed_tags)
+            ? category.allowed_tags.filter(tag => typeof tag === 'string')
+            : [],
+        allowedTagGroups: Array.isArray(category.allowed_tag_groups)
+            ? category.allowed_tag_groups
+            : [],
+        requiredTagGroups: Array.isArray(category.required_tag_groups)
+            ? category.required_tag_groups
+            : [],
+        topicTemplate:
+            typeof category.topic_template === 'string'
+                ? category.topic_template
+                : null,
         customFields:
             category.custom_fields && typeof category.custom_fields === 'object'
                 ? category.custom_fields
@@ -1252,6 +1266,32 @@ export async function fetchHarborTags({ signal } = {}) {
         items,
         hasMore: false,
         nextPage: null,
+    };
+}
+
+export async function fetchHarborComposerSettings({ signal } = {}) {
+    const response = await harborApi.get('/site/settings.json', { signal });
+    const settings = response.data?.site_settings || response.data;
+
+    return {
+        minTopicTitleLength:
+            toNumberOrNull(settings?.min_topic_title_length) ?? 1,
+        maxTopicTitleLength:
+            toNumberOrNull(settings?.max_topic_title_length),
+        minPostLength: toNumberOrNull(settings?.min_post_length) ?? 1,
+        minFirstPostLength:
+            toNumberOrNull(settings?.min_first_post_length) ??
+            toNumberOrNull(settings?.min_post_length) ??
+            1,
+        maxPostLength: toNumberOrNull(settings?.max_post_length),
+        maxTagsPerTopic:
+            toNumberOrNull(settings?.max_tags_per_topic),
+        defaultCategoryId: toNumberOrNull(
+            settings?.default_composer_category,
+        ),
+        allowUncategorizedTopics: Boolean(
+            settings?.allow_uncategorized_topics,
+        ),
     };
 }
 

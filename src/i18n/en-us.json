@@ -395,7 +395,13 @@
         "行內程式碼": "Inline Code",
         "Harbor 沒有返回新貼文位置，請重新載入話題確認。": "Harbor did not return the new post location. Reload the topic to confirm.",
         "內容已送交審核，通過後會顯示在 Harbor。": "Your content was submitted for review and will appear on Harbor after approval.",
-        "貼文正文已更新，但話題標題更新失敗，請重新載入確認。": "The post body was updated, but the topic title was not. Reload to confirm."
+        "貼文正文已更新，但話題標題更新失敗，請重新載入確認。": "The post body was updated, but the topic title was not. Reload to confirm.",
+        "話題標題至少需要 {{count}} 個字。": "The topic title must be at least {{count}} characters.",
+        "話題標題最多只能有 {{count}} 個字。": "The topic title can contain at most {{count}} characters.",
+        "此分類至少需要 {{count}} 個標籤。": "This category requires at least {{count}} tags.",
+        "每個話題最多只能選擇 {{count}} 個標籤。": "A topic can have at most {{count}} tags.",
+        "正文至少需要 {{count}} 個字。": "The body must be at least {{count}} characters.",
+        "正文最多只能有 {{count}} 個字。": "The body can contain at most {{count}} characters."
     },
     "my": {
         "個人中心": "Profile",

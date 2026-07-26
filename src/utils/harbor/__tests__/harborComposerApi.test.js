@@ -1,5 +1,7 @@
 import {
     createHarborPost,
+    fetchHarborCategories,
+    fetchHarborComposerSettings,
     fetchHarborPostForEdit,
     harborApi,
     updateHarborPost,
@@ -25,6 +27,73 @@ describe('Harbor Composer API', () => {
         getSpy.mockRestore();
         postSpy.mockRestore();
         putSpy.mockRestore();
+    });
+
+    it('從 Harbor client settings 取得 Composer 發佈要求', async () => {
+        const signal = {aborted: false};
+        getSpy.mockResolvedValue({
+            data: {
+                min_topic_title_length: 4,
+                max_topic_title_length: 255,
+                min_post_length: 3,
+                min_first_post_length: 5,
+                max_post_length: 64000,
+                max_tags_per_topic: 5,
+                default_composer_category: '4',
+                allow_uncategorized_topics: false,
+            },
+        });
+
+        await expect(
+            fetchHarborComposerSettings({signal}),
+        ).resolves.toEqual({
+            minTopicTitleLength: 4,
+            maxTopicTitleLength: 255,
+            minPostLength: 3,
+            minFirstPostLength: 5,
+            maxPostLength: 64000,
+            maxTagsPerTopic: 5,
+            defaultCategoryId: 4,
+            allowUncategorizedTopics: false,
+        });
+        expect(getSpy).toHaveBeenCalledWith('/site/settings.json', {signal});
+    });
+
+    it('保留分類的標籤要求與 Topic template', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                category_list: {
+                    categories: [
+                        {
+                            id: 5,
+                            name: '搵工賺錢',
+                            minimum_required_tags: 1,
+                            allowed_tags: ['校招'],
+                            allowed_tag_groups: ['工作'],
+                            required_tag_groups: [
+                                {name: '工作', min_count: 1},
+                            ],
+                            topic_template: '**職位描述**：',
+                        },
+                    ],
+                },
+            },
+        });
+
+        await expect(fetchHarborCategories()).resolves.toMatchObject({
+            items: [
+                {
+                    id: 5,
+                    minimumRequiredTags: 1,
+                    allowedTags: ['校招'],
+                    allowedTagGroups: ['工作'],
+                    requiredTagGroups: [
+                        {name: '工作', min_count: 1},
+                    ],
+                    topicTemplate: '**職位描述**：',
+                },
+            ],
+        });
     });
 
     it('建立含分類、標籤及草稿 key 的新話題', async () => {

@@ -34,6 +34,7 @@ import CustomBottomSheet from '../../../utils/BottomSheet';
 import {
     createHarborPost,
     fetchHarborCategories,
+    fetchHarborComposerSettings,
     fetchHarborPostForEdit,
     fetchHarborTags,
     updateHarborPost,
@@ -163,7 +164,8 @@ const HarborComposerPage = ({route, navigation}) => {
     });
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
-    const [isLoading, setIsLoading] = useState(isEdit);
+    const [composerSettings, setComposerSettings] = useState(null);
+    const [isLoading, setIsLoading] = useState(isEdit || isNewTopic);
     const [loadError, setLoadError] = useState('');
     const [submitError, setSubmitError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -202,17 +204,37 @@ const HarborComposerPage = ({route, navigation}) => {
 
         try {
             if (isNewTopic) {
-                const [categoryResult, tagResult] = await Promise.all([
+                const [
+                    categoryResult,
+                    tagResult,
+                    settingsResult,
+                ] = await Promise.all([
                     fetchHarborCategories({signal: controller.signal}),
                     fetchHarborTags({signal: controller.signal}),
+                    fetchHarborComposerSettings({
+                        signal: controller.signal,
+                    }),
                 ]);
                 if (controller.signal.aborted) {
                     return;
                 }
-                setCategories(categoryResult.items || []);
+                const categoryItems = categoryResult.items || [];
+                setCategories(categoryItems);
                 setTags(
                     (tagResult.items || []).filter(tag => !tag.pmOnly),
                 );
+                setComposerSettings(settingsResult);
+                setCategoryId(currentCategoryId => {
+                    if (currentCategoryId != null) {
+                        return currentCategoryId;
+                    }
+                    const defaultCategory = categoryItems.find(
+                        category =>
+                            Number(category.id) ===
+                            Number(settingsResult.defaultCategoryId),
+                    );
+                    return defaultCategory?.id ?? null;
+                });
                 return;
             }
 
@@ -281,6 +303,31 @@ const HarborComposerPage = ({route, navigation}) => {
         () => selectedTags.map(tag => tag.name).filter(Boolean),
         [selectedTags],
     );
+    const titleLength = title.trim().length;
+    const rawLength = raw.trim().length;
+    const minimumTitleLength =
+        composerSettings?.minTopicTitleLength ?? 1;
+    const maximumTitleLength =
+        composerSettings?.maxTopicTitleLength;
+    const minimumPostLength = isNewTopic
+        ? composerSettings?.minFirstPostLength ?? 1
+        : composerSettings?.minPostLength ?? 1;
+    const maximumPostLength = composerSettings?.maxPostLength;
+    const maximumTagCount = composerSettings?.maxTagsPerTopic;
+    const minimumTagCount = selectedCategory?.minimumRequiredTags ?? 0;
+    const requiresCategory =
+        composerSettings?.allowUncategorizedTopics !== true;
+    const isTitleLengthValid =
+        titleLength >= minimumTitleLength &&
+        (maximumTitleLength == null ||
+            titleLength <= maximumTitleLength);
+    const isPostLengthValid =
+        rawLength >= minimumPostLength &&
+        (maximumPostLength == null || rawLength <= maximumPostLength);
+    const isTagCountValid =
+        selectedTags.length >= minimumTagCount &&
+        (maximumTagCount == null ||
+            selectedTags.length <= maximumTagCount);
     // iOS 26 液態玻璃透明導覽列：內容需手動避開 header，避免被 Title 遮擋
     const scrollContentStyle = useMemo(
         () => [
@@ -317,23 +364,69 @@ const HarborComposerPage = ({route, navigation}) => {
     }, [login, t]);
 
     const validateForm = useCallback(() => {
-        if ((isNewTopic || isEditingFirstPost) && !title.trim()) {
-            return t('請輸入話題標題。');
+        if (
+            (isNewTopic || isEditingFirstPost) &&
+            titleLength < minimumTitleLength
+        ) {
+            return t('話題標題至少需要 {{count}} 個字。', {
+                count: minimumTitleLength,
+            });
         }
-        if (isNewTopic && categoryId == null) {
+        if (
+            (isNewTopic || isEditingFirstPost) &&
+            maximumTitleLength != null &&
+            titleLength > maximumTitleLength
+        ) {
+            return t('話題標題最多只能有 {{count}} 個字。', {
+                count: maximumTitleLength,
+            });
+        }
+        if (isNewTopic && requiresCategory && categoryId == null) {
             return t('請選擇話題分類。');
         }
-        if (!raw.trim()) {
-            return t('請輸入正文。');
+        if (isNewTopic && selectedTags.length < minimumTagCount) {
+            return t('此分類至少需要 {{count}} 個標籤。', {
+                count: minimumTagCount,
+            });
+        }
+        if (
+            isNewTopic &&
+            maximumTagCount != null &&
+            selectedTags.length > maximumTagCount
+        ) {
+            return t('每個話題最多只能選擇 {{count}} 個標籤。', {
+                count: maximumTagCount,
+            });
+        }
+        if (rawLength < minimumPostLength) {
+            return t('正文至少需要 {{count}} 個字。', {
+                count: minimumPostLength,
+            });
+        }
+        if (
+            maximumPostLength != null &&
+            rawLength > maximumPostLength
+        ) {
+            return t('正文最多只能有 {{count}} 個字。', {
+                count: maximumPostLength,
+            });
         }
         return '';
     }, [
         categoryId,
         isEditingFirstPost,
         isNewTopic,
-        raw,
+        maximumPostLength,
+        maximumTagCount,
+        maximumTitleLength,
+        minimumPostLength,
+        minimumTagCount,
+        minimumTitleLength,
+        rawLength,
+        requiresCategory,
+        selectedTags.length,
         t,
-        title,
+        titleLength,
     ]);
 
     const showTopicResult = useCallback(
@@ -653,13 +746,28 @@ const HarborComposerPage = ({route, navigation}) => {
     );
 
     const handleToggleTag = useCallback(item => {
-        setSelectedTags(current => {
-            const itemName = String(item.name);
-            return current.some(tag => String(tag.name) === itemName)
-                ? current.filter(tag => String(tag.name) !== itemName)
-                : [...current, item];
-        });
-    }, []);
+        const itemName = String(item.name);
+        if (
+            selectedTags.some(tag => String(tag.name) === itemName)
+        ) {
+            setSelectedTags(current =>
+                current.filter(tag => String(tag.name) !== itemName),
+            );
+            return;
+        }
+        if (
+            maximumTagCount != null &&
+            selectedTags.length >= maximumTagCount
+        ) {
+            Toast.show(
+                t('每個話題最多只能選擇 {{count}} 個標籤。', {
+                    count: maximumTagCount,
+                }),
+            );
+            return;
+        }
+        setSelectedTags(current => [...current, item]);
+    }, [maximumTagCount, selectedTags, t]);
 
     const openTagSheet = useCallback(() => {
         trigger();
@@ -937,13 +1045,28 @@ const HarborComposerPage = ({route, navigation}) => {
 
                 {isNewTopic || isEditingFirstPost ? (
                     <View style={styles.fieldGroup}>
-                        <Text
-                            style={[
-                                styles.fieldLabel,
-                                {color: theme.black.second},
-                            ]}>
-                            {t('標題')}
-                        </Text>
+                        <View style={styles.bodyLabelRow}>
+                            <Text
+                                style={[
+                                    styles.fieldLabel,
+                                    {color: theme.black.second},
+                                ]}>
+                                {t('標題')}
+                            </Text>
+                            {composerSettings ? (
+                                <Text
+                                    style={[
+                                        styles.requirementCounter,
+                                        {
+                                            color: isTitleLengthValid
+                                                ? theme.success
+                                                : theme.unread,
+                                        },
+                                    ]}>
+                                    {`${titleLength}/${maximumTitleLength ?? '—'}`}
+                                </Text>
+                            ) : null}
+                        </View>
                         <TextInput
                             accessibilityLabel={t('話題標題')}
                             autoCapitalize="sentences"
@@ -1015,13 +1138,28 @@ const HarborComposerPage = ({route, navigation}) => {
                         </View>
 
                         <View style={styles.fieldGroup}>
-                            <Text
-                                style={[
-                                    styles.fieldLabel,
-                                    {color: theme.black.second},
-                                ]}>
-                                {t('標籤')}
-                            </Text>
+                            <View style={styles.bodyLabelRow}>
+                                <Text
+                                    style={[
+                                        styles.fieldLabel,
+                                        {color: theme.black.second},
+                                    ]}>
+                                    {t('標籤')}
+                                </Text>
+                                {composerSettings ? (
+                                    <Text
+                                        style={[
+                                            styles.requirementCounter,
+                                            {
+                                                color: isTagCountValid
+                                                    ? theme.success
+                                                    : theme.unread,
+                                            },
+                                        ]}>
+                                        {`${selectedTags.length}/${maximumTagCount ?? '—'}`}
+                                    </Text>
+                                ) : null}
+                            </View>
                             <Pressable
                                 accessibilityRole="button"
                                 onPress={openTagSheet}
@@ -1070,13 +1208,28 @@ const HarborComposerPage = ({route, navigation}) => {
                             ]}>
                             {t('正文')}
                         </Text>
-                        <Text
-                            style={[
-                                styles.markdownLabel,
-                                {color: theme.black.third},
-                            ]}>
-                            {t('Markdown')}
-                        </Text>
+                        <View style={styles.fieldMetaRow}>
+                            <Text
+                                style={[
+                                    styles.markdownLabel,
+                                    {color: theme.black.third},
+                                ]}>
+                                {t('Markdown')}
+                            </Text>
+                            {composerSettings ? (
+                                <Text
+                                    style={[
+                                        styles.requirementCounter,
+                                        {
+                                            color: isPostLengthValid
+                                                ? theme.success
+                                                : theme.unread,
+                                        },
+                                    ]}>
+                                    {`${rawLength}/${maximumPostLength ?? '—'}`}
+                                </Text>
+                            ) : null}
+                        </View>
                     </View>
                     <View
                         style={[
@@ -1376,6 +1529,11 @@ const styles = StyleSheet.create({
         fontSize: scale(13),
         fontWeight: '600',
     },
+    fieldMetaRow: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(8),
+    },
     formatButton: {
         alignItems: 'center',
         borderRadius: scale(8),
@@ -1466,6 +1624,10 @@ const styles = StyleSheet.create({
     primaryButtonText: {
         fontSize: scale(14),
         fontWeight: '700',
+    },
+    requirementCounter: {
+        fontSize: scale(11),
+        fontWeight: '600',
     },
     scrollContent: {
         gap: verticalScale(17),
