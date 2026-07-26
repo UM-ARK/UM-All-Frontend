@@ -18,6 +18,7 @@ import {
     getHarborRateLimitDelayMs,
     isHarborRateLimited,
 } from '../../../../utils/harbor/harborRateLimit';
+import { subscribeHarborTopicUpdates } from '../../../../utils/harbor/harborTopicUpdates';
 import { trigger } from '../../../../utils/trigger';
 import {
     HarborFullState,
@@ -285,6 +286,29 @@ const HarborTopicList = ({
             controllerRef.current?.abort();
         };
     }, [cacheKey, isSessionReady, loadFirstPage, replaceItems]);
+
+    useEffect(() => {
+        return subscribeHarborTopicUpdates((topicId, patch) => {
+            const { reloadLists, ...itemPatch } = patch;
+            const updateItems = currentItems =>
+                currentItems.map(item =>
+                    item.id === topicId ? { ...item, ...itemPatch } : item,
+                );
+            replaceItems(updateItems(itemsRef.current));
+            topicListCache.forEach((cachedResult, cachedKey) => {
+                topicListCache.set(cachedKey, {
+                    ...cachedResult,
+                    items: updateItems(cachedResult.items),
+                });
+            });
+            if (
+                reloadLists &&
+                ['new', 'unread'].includes(sourceRef.current?.view)
+            ) {
+                loadFirstPage({ refresh: true, showIndicator: false });
+            }
+        });
+    }, [loadFirstPage, replaceItems]);
 
     useEffect(() => {
         if (!rateLimit?.until) {

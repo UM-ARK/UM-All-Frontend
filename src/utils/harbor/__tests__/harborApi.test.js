@@ -1,5 +1,7 @@
 import {
     clearHarborDiscoveryCache,
+    createHarborPostBookmark,
+    deleteHarborBookmark,
     fetchHarborBadges,
     fetchHarborCategories,
     fetchHarborMessages,
@@ -12,9 +14,16 @@ import {
     fetchHarborTopicPosts,
     fetchHarborUserActions,
     getHarborTopicViews,
+    HARBOR_TOPIC_NOTIFICATION_LEVELS,
     harborApi,
+    likeHarborPost,
+    markHarborTopicUnread,
     markHarborNotificationRead,
     saveHarborTopicTimings,
+    setHarborTopicNotificationLevel,
+    toggleHarborPostReaction,
+    unlikeHarborPost,
+    updateHarborBookmark,
 } from '../harborApi';
 
 jest.mock('../../pathMap', () => ({
@@ -26,18 +35,21 @@ describe('Harbor API 資料正規化', () => {
     let getSpy;
     let postSpy;
     let putSpy;
+    let deleteSpy;
 
     beforeEach(() => {
         clearHarborDiscoveryCache();
         getSpy = jest.spyOn(harborApi, 'get');
         postSpy = jest.spyOn(harborApi, 'post');
         putSpy = jest.spyOn(harborApi, 'put');
+        deleteSpy = jest.spyOn(harborApi, 'delete');
     });
 
     afterEach(() => {
         getSpy.mockRestore();
         postSpy.mockRestore();
         putSpy.mockRestore();
+        deleteSpy.mockRestore();
     });
 
     it('已登入且能力資料尚未恢復時保留會員話題視圖', () => {
@@ -101,6 +113,50 @@ describe('Harbor API 資料正規化', () => {
                 postNumber: 3,
             }),
         ]);
+    });
+
+    it('收藏列表支援分頁、名稱及提醒狀態', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                user_bookmark_list: {
+                    more_bookmarks_url: '/u/ark-user/bookmarks?page=2',
+                    bookmarks: [
+                        {
+                            id: 8,
+                            name: '稍後跟進',
+                            title: 'Harbor 話題',
+                            excerpt: '<p>提醒內容</p>',
+                            topic_id: 42,
+                            linked_post_number: 3,
+                            reminder_at: '2026-07-28T08:00:00Z',
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await fetchHarborUserActions('ark-user', {
+            kind: 'bookmarks',
+            offset: 1,
+        });
+
+        expect(getSpy).toHaveBeenCalledWith('/u/ark-user/bookmarks.json', {
+            params: {page: 1},
+            signal: undefined,
+        });
+        expect(result).toEqual({
+            items: [
+                expect.objectContaining({
+                    id: '8',
+                    title: '稍後跟進',
+                    postNumber: 3,
+                    bookmarkName: '稍後跟進',
+                    reminderAt: '2026-07-28T08:00:00Z',
+                }),
+            ],
+            hasMore: true,
+            nextOffset: 2,
+        });
     });
 
     it('分別正規化通知與私人訊息', async () => {
@@ -302,6 +358,93 @@ describe('Harbor API 資料正規化', () => {
                 7: 1234,
             },
         });
+    });
+
+    it('透過 Discourse Core API 讚好及取消讚好', async () => {
+        postSpy.mockResolvedValue({data: {id: 12, like_count: 3}});
+        deleteSpy.mockResolvedValue({data: {id: 12, like_count: 2}});
+
+        await expect(likeHarborPost(12)).resolves.toEqual({
+            id: 12,
+            like_count: 3,
+        });
+        await expect(unlikeHarborPost(12)).resolves.toEqual({
+            id: 12,
+            like_count: 2,
+        });
+
+        expect(postSpy).toHaveBeenCalledWith('/post_actions.json', {
+            id: 12,
+            post_action_type_id: 2,
+        });
+        expect(deleteSpy).toHaveBeenCalledWith('/post_actions/12.json', {
+            data: {post_action_type_id: 2},
+        });
+    });
+
+    it('僅透過 Reactions 插件端點切換有效 Reaction', async () => {
+        putSpy.mockResolvedValue({
+            data: {id: 12, current_user_reaction: {id: 'heart'}},
+        });
+
+        await toggleHarborPostReaction(12, 'heart');
+
+        expect(putSpy).toHaveBeenCalledWith(
+            '/discourse-reactions/posts/12/custom-reactions/heart/toggle.json',
+        );
+        await expect(toggleHarborPostReaction(12, '')).rejects.toThrow(
+            'Invalid Harbor reaction',
+        );
+    });
+
+    it('建立、更新及刪除含提醒日期的收藏', async () => {
+        postSpy.mockResolvedValue({data: {id: 91}});
+        putSpy.mockResolvedValue({data: {success: 'OK'}});
+        deleteSpy.mockResolvedValue({data: {success: 'OK'}});
+
+        await expect(
+            createHarborPostBookmark(12, {
+                name: ' 稍後閱讀 ',
+                reminderAt: '2026-07-28T08:00:00.000Z',
+            }),
+        ).resolves.toEqual({id: 91});
+        await updateHarborBookmark(91, {
+            name: '',
+            reminderAt: null,
+        });
+        await deleteHarborBookmark(91);
+
+        expect(postSpy).toHaveBeenCalledWith('/bookmarks.json', {
+            bookmarkable_id: 12,
+            bookmarkable_type: 'Post',
+            name: '稍後閱讀',
+            reminder_at: '2026-07-28T08:00:00.000Z',
+        });
+        expect(putSpy).toHaveBeenCalledWith('/bookmarks/91.json', {
+            id: 91,
+            name: null,
+            reminder_at: null,
+        });
+        expect(deleteSpy).toHaveBeenCalledWith('/bookmarks/91.json');
+    });
+
+    it('更新 Topic 通知層級並標為未讀', async () => {
+        postSpy.mockResolvedValue({data: {success: 'OK'}});
+        deleteSpy.mockResolvedValue({data: null});
+
+        await setHarborTopicNotificationLevel(
+            31,
+            HARBOR_TOPIC_NOTIFICATION_LEVELS.watchingFirstPost,
+        );
+        await markHarborTopicUnread(31);
+
+        expect(postSpy).toHaveBeenCalledWith('/t/31/notifications.json', {
+            notification_level: 4,
+        });
+        expect(deleteSpy).toHaveBeenCalledWith('/t/31/timings.json');
+        await expect(
+            setHarborTopicNotificationLevel(31, 9),
+        ).rejects.toThrow('Invalid Harbor topic notification level');
     });
 
     it('公開分類載入失敗時仍返回 id-only 話題分類', async () => {

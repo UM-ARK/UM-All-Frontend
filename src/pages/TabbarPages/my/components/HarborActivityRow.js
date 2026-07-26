@@ -57,6 +57,27 @@ const HarborActivityRow = ({item, onPress, showDivider = false}) => {
                         {item.excerpt}
                     </Text>
                 ) : null}
+                {item.kind === 'bookmark' && item.reminderAt ? (
+                    <View style={styles.reminderRow}>
+                        <Ionicons
+                            name="alarm-outline"
+                            size={scale(12)}
+                            color={theme.themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.reminderText,
+                                {color: theme.themeColor},
+                            ]}>
+                            {t('提醒於 {{time}}', {
+                                time: formatRelativeTime(
+                                    item.reminderAt,
+                                    i18n.language,
+                                ),
+                            })}
+                        </Text>
+                    </View>
+                ) : null}
             </View>
             <Ionicons
                 name="chevron-forward"
@@ -122,6 +143,17 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         lineHeight: verticalScale(16),
         marginTop: verticalScale(3),
+    },
+    reminderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: verticalScale(4),
+    },
+    reminderText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '600',
+        marginLeft: scale(4),
     },
     divider: {
         position: 'absolute',

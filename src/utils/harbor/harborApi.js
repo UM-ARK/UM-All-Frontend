@@ -17,6 +17,14 @@ const USER_ACTION_FILTERS = {
     replies: '5',
 };
 
+export const HARBOR_TOPIC_NOTIFICATION_LEVELS = Object.freeze({
+    muted: 0,
+    normal: 1,
+    tracking: 2,
+    watching: 3,
+    watchingFirstPost: 4,
+});
+
 export const harborApi = axios.create({
     baseURL: ARK_HARBOR,
     timeout: REQUEST_TIMEOUT,
@@ -843,11 +851,15 @@ function normalizeBookmark(bookmark, index) {
     return {
         id: String(bookmark.id || `bookmark-${index}`),
         kind: 'bookmark',
-        title: bookmark.title || bookmark.name || '',
+        title: bookmark.name || bookmark.title || '',
         excerpt: stripHtml(bookmark.excerpt || bookmark.cooked),
         createdAt: bookmark.created_at || bookmark.updated_at || '',
         topicId: Number(bookmark.topic_id) || null,
-        postNumber: Number(bookmark.post_number) || null,
+        postNumber: Number(
+            bookmark.linked_post_number || bookmark.post_number,
+        ) || null,
+        bookmarkName: bookmark.name || '',
+        reminderAt: bookmark.reminder_at || null,
     };
 }
 
@@ -1222,11 +1234,20 @@ export async function fetchHarborUserActions(
     if (kind === 'bookmarks') {
         const response = await harborApi.get(
             `/u/${encodedUsername}/bookmarks.json`,
-            { signal },
+            {
+                params: { page: Math.max(0, Number(offset) || 0) },
+                signal,
+            },
         );
-        const bookmarks = response.data?.user_bookmark_list?.bookmarks || [];
+        const bookmarkList = response.data?.user_bookmark_list || {};
+        const bookmarks = bookmarkList.bookmarks || [];
         const items = bookmarks.map(normalizeBookmark);
-        return { items, hasMore: false, nextOffset: items.length };
+        const hasMore = Boolean(bookmarkList.more_bookmarks_url);
+        return {
+            items,
+            hasMore,
+            nextOffset: hasMore ? Math.max(0, Number(offset) || 0) + 1 : null,
+        };
     }
 
     const response = await harborApi.get('/user_actions.json', {
@@ -1387,6 +1408,96 @@ export async function saveHarborTopicTimings(
             [normalizedPostNumber]: normalizeTime(timeMs),
         },
     });
+}
+
+function normalizeHarborMutationId(value, label) {
+    const id = Number(value);
+    if (!Number.isInteger(id) || id <= 0) {
+        throw new TypeError(`Invalid Harbor ${label}`);
+    }
+    return id;
+}
+
+function normalizeBookmarkFields({ name = '', reminderAt = null } = {}) {
+    return {
+        name: typeof name === 'string' ? name.trim() || null : null,
+        reminder_at: reminderAt || null,
+    };
+}
+
+export async function likeHarborPost(postId) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const response = await harborApi.post('/post_actions.json', {
+        id,
+        post_action_type_id: 2,
+    });
+    return response.data;
+}
+
+export async function unlikeHarborPost(postId) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const response = await harborApi.delete(`/post_actions/${id}.json`, {
+        data: { post_action_type_id: 2 },
+    });
+    return response.data;
+}
+
+export async function toggleHarborPostReaction(postId, reaction) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    if (typeof reaction !== 'string' || !reaction.trim()) {
+        throw new TypeError('Invalid Harbor reaction');
+    }
+    const encodedReaction = encodeURIComponent(reaction.trim());
+    const response = await harborApi.put(
+        `/discourse-reactions/posts/${id}/custom-reactions/${encodedReaction}/toggle.json`,
+    );
+    return response.data;
+}
+
+export async function createHarborPostBookmark(postId, fields = {}) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const response = await harborApi.post('/bookmarks.json', {
+        bookmarkable_id: id,
+        bookmarkable_type: 'Post',
+        ...normalizeBookmarkFields(fields),
+    });
+    return response.data;
+}
+
+export async function updateHarborBookmark(bookmarkId, fields = {}) {
+    const id = normalizeHarborMutationId(bookmarkId, 'bookmark id');
+    const response = await harborApi.put(`/bookmarks/${id}.json`, {
+        id,
+        ...normalizeBookmarkFields(fields),
+    });
+    return response.data;
+}
+
+export async function deleteHarborBookmark(bookmarkId) {
+    const id = normalizeHarborMutationId(bookmarkId, 'bookmark id');
+    const response = await harborApi.delete(`/bookmarks/${id}.json`);
+    return response.data;
+}
+
+export async function setHarborTopicNotificationLevel(topicId, level) {
+    const id = normalizeHarborMutationId(topicId, 'topic id');
+    const notificationLevel = Number(level);
+    if (
+        !Object.values(HARBOR_TOPIC_NOTIFICATION_LEVELS).includes(
+            notificationLevel,
+        )
+    ) {
+        throw new TypeError('Invalid Harbor topic notification level');
+    }
+    const response = await harborApi.post(`/t/${id}/notifications.json`, {
+        notification_level: notificationLevel,
+    });
+    return response.data;
+}
+
+export async function markHarborTopicUnread(topicId) {
+    const id = normalizeHarborMutationId(topicId, 'topic id');
+    await harborApi.delete(`/t/${id}/timings.json`);
 }
 
 export async function fetchHarborBadges(username, { signal } = {}) {

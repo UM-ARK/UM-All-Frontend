@@ -20,6 +20,7 @@ import {
     useWindowDimensions,
 } from 'react-native';
 
+import Clipboard from '@react-native-clipboard/clipboard';
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import Slider from '@react-native-community/slider';
@@ -36,6 +37,7 @@ import RenderHTML, {
     useIMGElementState,
     useRendererProps,
 } from 'react-native-render-html';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WebView } from 'react-native-webview';
@@ -54,11 +56,21 @@ import {
     replaceHarborEmojiImages,
 } from '../../../utils/harbor/harborHtml';
 import {
+    createHarborPostBookmark,
+    deleteHarborBookmark,
     fetchHarborTopic,
     fetchHarborTopicPosts,
+    HARBOR_TOPIC_NOTIFICATION_LEVELS,
+    likeHarborPost,
+    markHarborTopicUnread,
     saveHarborTopicTimings,
+    setHarborTopicNotificationLevel,
+    toggleHarborPostReaction,
+    unlikeHarborPost,
+    updateHarborBookmark,
 } from '../../../utils/harbor/harborApi';
 import { parseHarborUrl } from '../../../utils/harbor/harborNavigation';
+import { publishHarborTopicUpdate } from '../../../utils/harbor/harborTopicUpdates';
 import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
@@ -68,6 +80,7 @@ import {
 import { trigger } from '../../../utils/trigger';
 
 const AVATAR_SIZE = 88;
+const LIKE_ACTION_ID = 2;
 const TOPIC_POST_BATCH_SIZE = 20;
 const TIMINGS_REPORT_INTERVAL = 10000;
 const TOPIC_HEADER_ITEM = Object.freeze({
@@ -81,6 +94,38 @@ const TOPIC_VIEWABILITY_CONFIG = {
     itemVisiblePercentThreshold: 1,
     minimumViewTime: 120,
 };
+const TOPIC_NOTIFICATION_OPTIONS = [
+    {
+        level: HARBOR_TOPIC_NOTIFICATION_LEVELS.normal,
+        label: '一般',
+        description: '只在有人提及或直接回覆你時通知',
+        icon: 'bell-outline',
+    },
+    {
+        level: HARBOR_TOPIC_NOTIFICATION_LEVELS.tracking,
+        label: '追蹤',
+        description: '顯示新回覆數量，但不主動通知',
+        icon: 'bell-badge-outline',
+    },
+    {
+        level: HARBOR_TOPIC_NOTIFICATION_LEVELS.watching,
+        label: '關注',
+        description: '每篇新回覆都會通知你',
+        icon: 'bell-ring-outline',
+    },
+    {
+        level: HARBOR_TOPIC_NOTIFICATION_LEVELS.watchingFirstPost,
+        label: '只關注第一篇',
+        description: '只在這個話題的第一篇有活動時通知',
+        icon: 'bell-check-outline',
+    },
+    {
+        level: HARBOR_TOPIC_NOTIFICATION_LEVELS.muted,
+        label: '靜音',
+        description: '不顯示這個話題的通知與未讀提示',
+        icon: 'bell-off-outline',
+    },
+];
 
 const iframeModel = HTMLElementModel.fromCustomModel({
     tagName: 'iframe',
@@ -159,6 +204,103 @@ const getReactionCount = post => {
     }
     const likeAction = post?.actions_summary?.find(action => action?.id === 2);
     return Number(likeAction?.count || post?.like_count || 0);
+};
+
+const getLikeAction = post => {
+    return post?.actions_summary?.find(action => action?.id === LIKE_ACTION_ID);
+};
+
+const getHarborMutationError = (error, fallback) => {
+    const errors = error?.response?.data?.errors;
+    if (Array.isArray(errors) && errors.length > 0) {
+        return errors.join(' ');
+    }
+    if (typeof errors === 'string' && errors) {
+        return errors;
+    }
+    return error?.response?.data?.error || fallback;
+};
+
+const updateOptimisticLike = (post, liked) => {
+    const currentAction = getLikeAction(post) || { id: LIKE_ACTION_ID };
+    const currentCount = Number(
+        currentAction.count ?? post?.like_count ?? 0,
+    );
+    const nextCount = Math.max(0, currentCount + (liked ? 1 : -1));
+    const nextAction = {
+        ...currentAction,
+        id: LIKE_ACTION_ID,
+        count: nextCount,
+        acted: liked,
+        can_act: !liked,
+        can_undo: liked,
+    };
+    return {
+        ...post,
+        like_count: nextCount,
+        actions_summary: [
+            ...(post.actions_summary || []).filter(
+                action => action?.id !== LIKE_ACTION_ID,
+            ),
+            nextAction,
+        ],
+    };
+};
+
+const updateOptimisticReaction = (post, reactionId) => {
+    const currentReactionId = post?.current_user_reaction?.id || null;
+    const isRemoving = currentReactionId === reactionId;
+    const reactions = (Array.isArray(post?.reactions) ? post.reactions : [])
+        .map(reaction => ({ ...reaction }))
+        .filter(reaction => reaction?.id);
+    const updateCount = (id, delta) => {
+        if (!id) {
+            return;
+        }
+        const existing = reactions.find(reaction => reaction.id === id);
+        if (existing) {
+            existing.count = Math.max(0, Number(existing.count || 0) + delta);
+            return;
+        }
+        if (delta > 0) {
+            reactions.push({ id, type: 'emoji', count: delta });
+        }
+    };
+
+    if (currentReactionId) {
+        updateCount(currentReactionId, -1);
+    }
+    if (!isRemoving) {
+        updateCount(reactionId, 1);
+    }
+
+    return {
+        ...post,
+        reactions: reactions.filter(reaction => reaction.count > 0),
+        current_user_reaction: isRemoving
+            ? null
+            : { id: reactionId, type: 'emoji', can_undo: true },
+        reaction_users_count: Math.max(
+            0,
+            Number(post?.reaction_users_count || 0) +
+                (currentReactionId ? (isRemoving ? -1 : 0) : 1),
+        ),
+    };
+};
+
+const getNotificationLevelLabel = level => {
+    switch (Number(level)) {
+        case HARBOR_TOPIC_NOTIFICATION_LEVELS.muted:
+            return '靜音';
+        case HARBOR_TOPIC_NOTIFICATION_LEVELS.tracking:
+            return '追蹤';
+        case HARBOR_TOPIC_NOTIFICATION_LEVELS.watching:
+            return '關注';
+        case HARBOR_TOPIC_NOTIFICATION_LEVELS.watchingFirstPost:
+            return '只關注第一篇';
+        default:
+            return '一般';
+    }
 };
 
 const getTagLabel = tag => {
@@ -566,8 +708,17 @@ const HarborPostCard = memo(
         imageUrls,
         onOpenImage,
         onPressAuthor,
+        onPressBookmark,
+        onPressCopy,
+        onPressLike,
         onPressLink,
+        onPressReaction,
         onPressReply,
+        onPressShare,
+        pendingBookmark,
+        pendingLike,
+        pendingReaction,
+        reactionsEnabled,
     }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
@@ -580,6 +731,9 @@ const HarborPostCard = memo(
             viewShadow,
         } = theme;
         const reactionCount = getReactionCount(post);
+        const likeAction = getLikeAction(post);
+        const isLiked = Boolean(likeAction?.acted);
+        const currentReaction = post?.current_user_reaction?.id;
         const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(
             post.avatar_template,
             AVATAR_SIZE,
@@ -809,10 +963,132 @@ const HarborPostCard = memo(
                         />
                     </View>
                     <MetaItem
-                        icon="heart-outline"
+                        icon={currentReaction || isLiked ? 'heart' : 'heart-outline'}
                         value={reactionCount}
                         color={themeColor}
                     />
+                </View>
+                <View style={styles.postActionRow}>
+                    <Pressable
+                        disabled={pendingLike || pendingReaction}
+                        onPress={() => {
+                            trigger();
+                            if (reactionsEnabled) {
+                                onPressReaction(post);
+                            } else {
+                                onPressLike(post);
+                            }
+                        }}
+                        style={({ pressed }) => [
+                            styles.postActionButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        {pendingLike || pendingReaction ? (
+                            <ActivityIndicator size="small" color={themeColor} />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name={
+                                    reactionsEnabled
+                                        ? 'emoticon-outline'
+                                        : isLiked
+                                            ? 'heart'
+                                            : 'heart-outline'
+                                }
+                                size={scale(15)}
+                                color={themeColor}
+                            />
+                        )}
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.postActionText,
+                                { color: themeColor },
+                            ]}>
+                            {reactionsEnabled
+                                ? currentReaction || t('回應')
+                                : isLiked
+                                    ? t('取消讚好')
+                                    : t('讚好')}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        disabled={pendingBookmark}
+                        onPress={() => {
+                            trigger();
+                            onPressBookmark(post);
+                        }}
+                        style={({ pressed }) => [
+                            styles.postActionButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        {pendingBookmark ? (
+                            <ActivityIndicator size="small" color={themeColor} />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name={
+                                    post.bookmarked
+                                        ? 'bookmark'
+                                        : 'bookmark-outline'
+                                }
+                                size={scale(15)}
+                                color={themeColor}
+                            />
+                        )}
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.postActionText,
+                                { color: themeColor },
+                            ]}>
+                            {post.bookmarked ? t('已收藏') : t('收藏')}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            onPressCopy(post);
+                        }}
+                        style={({ pressed }) => [
+                            styles.postIconButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="link-variant"
+                            size={scale(16)}
+                            color={themeColor}
+                        />
+                    </Pressable>
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            onPressShare(post);
+                        }}
+                        style={({ pressed }) => [
+                            styles.postIconButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="share-variant-outline"
+                            size={scale(16)}
+                            color={themeColor}
+                        />
+                    </Pressable>
                 </View>
             </View>
         );
@@ -820,7 +1096,18 @@ const HarborPostCard = memo(
 );
 
 const HarborTopicHeader = memo(
-    ({ topic, onOpenOriginal, onShare, onPressCategory, onPressTag }) => {
+    ({
+        topic,
+        onCopy,
+        onMarkUnread,
+        onOpenNotifications,
+        onOpenOriginal,
+        onShare,
+        onPressCategory,
+        onPressTag,
+        pendingMarkUnread,
+        pendingNotification,
+    }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
         const {
@@ -971,6 +1258,32 @@ const HarborTopicHeader = memo(
                     <Pressable
                         onPress={() => {
                             trigger();
+                            onCopy();
+                        }}
+                        style={({ pressed }) => [
+                            styles.webOriginalButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="link-variant"
+                            size={scale(16)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.webOriginalText,
+                                { color: themeColor },
+                            ]}>
+                            {t('複製連結')}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        onPress={() => {
+                            trigger();
                             onShare();
                         }}
                         style={({ pressed }) => [
@@ -992,6 +1305,72 @@ const HarborTopicHeader = memo(
                                 { color: themeColor },
                             ]}>
                             {t('分享')}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        disabled={pendingNotification}
+                        onPress={() => {
+                            trigger();
+                            onOpenNotifications();
+                        }}
+                        style={({ pressed }) => [
+                            styles.webOriginalButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        {pendingNotification ? (
+                            <ActivityIndicator size="small" color={themeColor} />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name="bell-outline"
+                                size={scale(16)}
+                                color={themeColor}
+                            />
+                        )}
+                        <Text
+                            style={[
+                                styles.webOriginalText,
+                                { color: themeColor },
+                            ]}>
+                            {t(
+                                getNotificationLevelLabel(
+                                    topic.details?.notification_level,
+                                ),
+                            )}
+                        </Text>
+                    </Pressable>
+                    <Pressable
+                        disabled={pendingMarkUnread}
+                        onPress={() => {
+                            trigger();
+                            onMarkUnread();
+                        }}
+                        style={({ pressed }) => [
+                            styles.webOriginalButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        {pendingMarkUnread ? (
+                            <ActivityIndicator size="small" color={themeColor} />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name="email-mark-as-unread"
+                                size={scale(16)}
+                                color={themeColor}
+                            />
+                        )}
+                        <Text
+                            style={[
+                                styles.webOriginalText,
+                                { color: themeColor },
+                            ]}>
+                            {t('標為未讀')}
                         </Text>
                     </Pressable>
                 </View>
@@ -1244,11 +1623,18 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { status: sessionStatus } = useHarborSession();
+    const { login, status: sessionStatus } = useHarborSession();
     const { width } = useWindowDimensions();
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
-    const { black, bg_color, themeColor, tonal, trueWhite } = theme;
+    const {
+        black,
+        bg_color,
+        themeColor,
+        themeColorUltraLight,
+        tonal,
+        trueWhite,
+    } = theme;
     const topicId = Number(route.params?.topicId);
     const initialTopicTitle = route.params?.topicTitle;
     const listRef = useRef(null);
@@ -1264,6 +1650,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const viewablePostsRef = useRef([]);
     const lastTimingsAtRef = useRef(Date.now());
     const sessionStatusRef = useRef(sessionStatus);
+    const pendingMutationsRef = useRef(new Set());
     // 主動跳樓後忽略 viewability，避免短帖同屏時被最高可見樓層蓋回
     const ignoreViewabilityFromSeekRef = useRef(false);
     // 底部懸浮閱讀進度高度（含 safe area），供列表底部留白
@@ -1276,10 +1663,16 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const [isLoadingPrevious, setIsLoadingPrevious] = useState(false);
     const [isLoadingNext, setIsLoadingNext] = useState(false);
     const [pendingNewPostIds, setPendingNewPostIds] = useState([]);
-    const [unreadAfterPostNumber, setUnreadAfterPostNumber] = useState(0);
+    const [unreadAfterPostNumber, setUnreadAfterPostNumber] = useState(-1);
     const [currentPostNumber, setCurrentPostNumber] = useState(1);
     const [isJumpVisible, setIsJumpVisible] = useState(false);
     const [jumpPostNumber, setJumpPostNumber] = useState('');
+    const [bookmarkEditor, setBookmarkEditor] = useState(null);
+    const [isBookmarkReminderVisible, setIsBookmarkReminderVisible] =
+        useState(false);
+    const [reactionPostId, setReactionPostId] = useState(null);
+    const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+    const [pendingMutations, setPendingMutations] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
 
     const posts = useMemo(() => {
@@ -1289,6 +1682,15 @@ const HarborTopicDetail = ({ route, navigation }) => {
         }
         return topicPosts.filter(post => post?.id);
     }, [topic]);
+
+    const validReactions = useMemo(() => {
+        return Array.isArray(topic?.valid_reactions)
+            ? topic.valid_reactions.filter(
+                reaction =>
+                    typeof reaction === 'string' && reaction.trim().length > 0,
+            )
+            : [];
+    }, [topic?.valid_reactions]);
 
     const listData = useMemo(() => {
         if (!topic) {
@@ -1369,6 +1771,56 @@ const HarborTopicDetail = ({ route, navigation }) => {
         sessionStatusRef.current = sessionStatus;
     }, [sessionStatus]);
 
+    const beginMutation = useCallback(key => {
+        if (pendingMutationsRef.current.has(key)) {
+            return false;
+        }
+        pendingMutationsRef.current.add(key);
+        setPendingMutations(current => ({ ...current, [key]: true }));
+        return true;
+    }, []);
+
+    const finishMutation = useCallback(key => {
+        pendingMutationsRef.current.delete(key);
+        setPendingMutations(current => {
+            const next = { ...current };
+            delete next[key];
+            return next;
+        });
+    }, []);
+
+    const requireHarborSignIn = useCallback(async () => {
+        if (sessionStatusRef.current === 'signedIn') {
+            return true;
+        }
+        try {
+            await login();
+            return true;
+        } catch (error) {
+            Toast.show(t('需要登入 Harbor 才能完成此操作'));
+            return false;
+        }
+    }, [login, t]);
+
+    const updateTopicPost = useCallback((postId, updater) => {
+        setTopic(current => {
+            if (!current) {
+                return current;
+            }
+            return {
+                ...current,
+                post_stream: {
+                    ...current.post_stream,
+                    posts: (current.post_stream?.posts || []).map(post =>
+                        Number(post.id) === Number(postId)
+                            ? updater(post)
+                            : post,
+                    ),
+                },
+            };
+        });
+    }, []);
+
     useEffect(() => {
         navigation.setOptions({
             headerTitle: topic?.title || initialTopicTitle || 'Harbor',
@@ -1443,7 +1895,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 const serverLastReadPostNumber = Number(
                     nextTopic.last_read_post_number || 0,
                 );
-                setUnreadAfterPostNumber(serverLastReadPostNumber);
+                const serverUnreadCount = Number(
+                    nextTopic.unread_posts ?? nextTopic.new_posts ?? 0,
+                );
+                setUnreadAfterPostNumber(
+                    serverUnreadCount > 0 ? serverLastReadPostNumber : -1,
+                );
                 listRef.current?.scrollToOffset({
                     offset: 0,
                     animated: false,
@@ -1912,6 +2369,439 @@ const HarborTopicDetail = ({ route, navigation }) => {
         }
     }, [isLoadingNext, pendingNewPostIds, t, topicId]);
 
+    const showMutationFailure = useCallback(
+        error => {
+            const reason = getHarborMutationError(
+                error,
+                t('Harbor 暫時無法完成此操作'),
+            );
+            Toast.show(
+                t('{{reason}}，已還原狀態，請重試', {
+                    reason,
+                }),
+            );
+        },
+        [t],
+    );
+
+    const togglePostLike = useCallback(
+        async post => {
+            const key = `like:${post.id}`;
+            const wasSignedIn = sessionStatusRef.current === 'signedIn';
+            if (!(await requireHarborSignIn()) || !beginMutation(key)) {
+                return;
+            }
+
+            const likeAction = getLikeAction(post);
+            const liked = Boolean(likeAction?.acted);
+            if (
+                wasSignedIn &&
+                ((!liked && !likeAction?.can_act) ||
+                    (liked && !likeAction?.can_undo))
+            ) {
+                finishMutation(key);
+                Toast.show(t('你目前沒有權限變更這篇帖子的讚好'));
+                return;
+            }
+
+            const nextLiked = !liked;
+            const previousTopicLikeCount = Number(
+                latestTopicRef.current?.like_count || 0,
+            );
+            const topicLikeDelta = nextLiked ? 1 : -1;
+            updateTopicPost(post.id, current =>
+                updateOptimisticLike(current, nextLiked),
+            );
+            setTopic(current => ({
+                ...current,
+                like_count: Math.max(
+                    0,
+                    Number(current?.like_count || 0) + topicLikeDelta,
+                ),
+            }));
+            publishHarborTopicUpdate(topicId, {
+                likeCount: Math.max(
+                    0,
+                    previousTopicLikeCount + topicLikeDelta,
+                ),
+            });
+
+            try {
+                const updatedPost = nextLiked
+                    ? await likeHarborPost(post.id)
+                    : await unlikeHarborPost(post.id);
+                updateTopicPost(post.id, current => ({
+                    ...current,
+                    ...updatedPost,
+                }));
+            } catch (error) {
+                updateTopicPost(post.id, current => ({
+                    ...current,
+                    like_count: post.like_count,
+                    actions_summary: post.actions_summary,
+                }));
+                setTopic(current => ({
+                    ...current,
+                    like_count: previousTopicLikeCount,
+                }));
+                publishHarborTopicUpdate(topicId, {
+                    likeCount: previousTopicLikeCount,
+                });
+                showMutationFailure(error);
+            } finally {
+                finishMutation(key);
+            }
+        },
+        [
+            beginMutation,
+            finishMutation,
+            requireHarborSignIn,
+            showMutationFailure,
+            t,
+            topicId,
+            updateTopicPost,
+        ],
+    );
+
+    const openReactionPicker = useCallback(
+        async post => {
+            if (!(await requireHarborSignIn())) {
+                return;
+            }
+            if (
+                post?.current_user_reaction &&
+                post.current_user_reaction.can_undo === false
+            ) {
+                Toast.show(t('你目前不能取消這個回應'));
+                return;
+            }
+            setReactionPostId(post.id);
+        },
+        [requireHarborSignIn, t],
+    );
+
+    const selectPostReaction = useCallback(
+        async reactionId => {
+            const post = latestTopicRef.current?.post_stream?.posts?.find(
+                item => Number(item.id) === Number(reactionPostId),
+            );
+            setReactionPostId(null);
+            if (!post) {
+                return;
+            }
+
+            const key = `reaction:${post.id}`;
+            if (!beginMutation(key)) {
+                return;
+            }
+            updateTopicPost(post.id, current =>
+                updateOptimisticReaction(current, reactionId),
+            );
+            try {
+                const updatedPost = await toggleHarborPostReaction(
+                    post.id,
+                    reactionId,
+                );
+                updateTopicPost(post.id, current => ({
+                    ...current,
+                    ...updatedPost,
+                }));
+            } catch (error) {
+                updateTopicPost(post.id, current => ({
+                    ...current,
+                    reactions: post.reactions,
+                    current_user_reaction: post.current_user_reaction,
+                    reaction_users_count: post.reaction_users_count,
+                    like_count: post.like_count,
+                    actions_summary: post.actions_summary,
+                }));
+                showMutationFailure(error);
+            } finally {
+                finishMutation(key);
+            }
+        },
+        [
+            beginMutation,
+            finishMutation,
+            reactionPostId,
+            showMutationFailure,
+            updateTopicPost,
+        ],
+    );
+
+    const openBookmarkEditor = useCallback(
+        async post => {
+            if (!(await requireHarborSignIn())) {
+                return;
+            }
+            setBookmarkEditor({
+                postId: post.id,
+                bookmarkId: post.bookmark_id || null,
+                name: post.bookmark_name || '',
+                reminderAt: post.bookmark_reminder_at || null,
+                previous: {
+                    bookmarked: Boolean(post.bookmarked),
+                    bookmark_id: post.bookmark_id || null,
+                    bookmark_name: post.bookmark_name || null,
+                    bookmark_reminder_at: post.bookmark_reminder_at || null,
+                },
+            });
+        },
+        [requireHarborSignIn],
+    );
+
+    const savePostBookmark = useCallback(async () => {
+        if (!bookmarkEditor) {
+            return;
+        }
+        const editor = bookmarkEditor;
+        const key = `bookmark:${editor.postId}`;
+        if (!beginMutation(key)) {
+            return;
+        }
+        setBookmarkEditor(null);
+        updateTopicPost(editor.postId, current => ({
+            ...current,
+            bookmarked: true,
+            bookmark_id:
+                editor.bookmarkId || `pending-bookmark-${editor.postId}`,
+            bookmark_name: editor.name.trim() || null,
+            bookmark_reminder_at: editor.reminderAt,
+        }));
+
+        try {
+            if (editor.bookmarkId) {
+                await updateHarborBookmark(editor.bookmarkId, {
+                    name: editor.name,
+                    reminderAt: editor.reminderAt,
+                });
+            } else {
+                const result = await createHarborPostBookmark(editor.postId, {
+                    name: editor.name,
+                    reminderAt: editor.reminderAt,
+                });
+                if (!result?.id) {
+                    throw new Error(t('Harbor 沒有返回收藏狀態'));
+                }
+                updateTopicPost(editor.postId, current => ({
+                    ...current,
+                    bookmark_id: result.id,
+                }));
+            }
+            Toast.show(t('收藏已儲存'));
+        } catch (error) {
+            updateTopicPost(editor.postId, current => ({
+                ...current,
+                ...editor.previous,
+            }));
+            showMutationFailure(error);
+        } finally {
+            finishMutation(key);
+        }
+    }, [
+        beginMutation,
+        bookmarkEditor,
+        finishMutation,
+        showMutationFailure,
+        t,
+        updateTopicPost,
+    ]);
+
+    const removePostBookmark = useCallback(async () => {
+        if (!bookmarkEditor?.bookmarkId) {
+            return;
+        }
+        const editor = bookmarkEditor;
+        const key = `bookmark:${editor.postId}`;
+        if (!beginMutation(key)) {
+            return;
+        }
+        setBookmarkEditor(null);
+        updateTopicPost(editor.postId, current => ({
+            ...current,
+            bookmarked: false,
+            bookmark_id: null,
+            bookmark_name: null,
+            bookmark_reminder_at: null,
+        }));
+
+        try {
+            await deleteHarborBookmark(editor.bookmarkId);
+            Toast.show(t('已取消收藏'));
+        } catch (error) {
+            updateTopicPost(editor.postId, current => ({
+                ...current,
+                ...editor.previous,
+            }));
+            showMutationFailure(error);
+        } finally {
+            finishMutation(key);
+        }
+    }, [
+        beginMutation,
+        bookmarkEditor,
+        finishMutation,
+        showMutationFailure,
+        t,
+        updateTopicPost,
+    ]);
+
+    const copyPostPermalink = useCallback(
+        post => {
+            Clipboard.setString(
+                ARK_HARBOR_TOPIC_URL(topicId, post?.post_number),
+            );
+            Toast.show(t('永久連結已複製'));
+        },
+        [t, topicId],
+    );
+
+    const sharePost = useCallback(
+        post => {
+            const url = ARK_HARBOR_TOPIC_URL(topicId, post?.post_number);
+            Share.share({
+                message: `${topic?.title || 'Harbor'}\n${url}`,
+                url,
+            }).catch(() => {
+                Toast.show(t('分享失敗，請稍後再試'));
+            });
+        },
+        [t, topic?.title, topicId],
+    );
+
+    const openNotificationLevels = useCallback(async () => {
+        if (await requireHarborSignIn()) {
+            setIsNotificationVisible(true);
+        }
+    }, [requireHarborSignIn]);
+
+    const changeNotificationLevel = useCallback(
+        async level => {
+            setIsNotificationVisible(false);
+            const key = `notification:${topicId}`;
+            if (!beginMutation(key)) {
+                return;
+            }
+            const previousLevel = Number(
+                latestTopicRef.current?.details?.notification_level ??
+                    HARBOR_TOPIC_NOTIFICATION_LEVELS.normal,
+            );
+            const previousMuted = Boolean(latestTopicRef.current?.muted);
+            const muted = level === HARBOR_TOPIC_NOTIFICATION_LEVELS.muted;
+            setTopic(current => ({
+                ...current,
+                muted,
+                details: {
+                    ...current.details,
+                    notification_level: level,
+                },
+            }));
+            publishHarborTopicUpdate(topicId, {
+                muted,
+                statuses: {
+                    ...(latestTopicRef.current?.statuses || {}),
+                    muted,
+                },
+            });
+
+            try {
+                await setHarborTopicNotificationLevel(topicId, level);
+                Toast.show(t('話題通知設定已更新'));
+            } catch (error) {
+                setTopic(current => ({
+                    ...current,
+                    muted: previousMuted,
+                    details: {
+                        ...current.details,
+                        notification_level: previousLevel,
+                    },
+                }));
+                publishHarborTopicUpdate(topicId, {
+                    muted: previousMuted,
+                    statuses: {
+                        ...(latestTopicRef.current?.statuses || {}),
+                        muted: previousMuted,
+                    },
+                });
+                showMutationFailure(error);
+            } finally {
+                finishMutation(key);
+            }
+        },
+        [
+            beginMutation,
+            finishMutation,
+            showMutationFailure,
+            t,
+            topicId,
+        ],
+    );
+
+    const markTopicUnread = useCallback(async () => {
+        if (!(await requireHarborSignIn())) {
+            return;
+        }
+        const key = `unread:${topicId}`;
+        if (!beginMutation(key)) {
+            return;
+        }
+        const currentTopic = latestTopicRef.current;
+        const previous = {
+            last_read_post_number: currentTopic?.last_read_post_number,
+            unread_posts: currentTopic?.unread_posts,
+            new_posts: currentTopic?.new_posts,
+            unread: currentTopic?.unread,
+        };
+        const previousUnreadAfterPostNumber = unreadAfterPostNumber;
+        setUnreadAfterPostNumber(0);
+        setTopic(current => ({
+            ...current,
+            last_read_post_number: 0,
+            unread_posts: highestPostNumber,
+            unread: true,
+        }));
+        publishHarborTopicUpdate(topicId, {
+            unreadCount: highestPostNumber,
+            lastReadPostNumber: 0,
+            isUnread: true,
+        });
+
+        try {
+            await markHarborTopicUnread(topicId);
+            publishHarborTopicUpdate(topicId, { reloadLists: true });
+            Toast.show(t('話題已標為未讀'));
+        } catch (error) {
+            setUnreadAfterPostNumber(previousUnreadAfterPostNumber);
+            setTopic(current => ({ ...current, ...previous }));
+            publishHarborTopicUpdate(topicId, {
+                unreadCount: Math.max(
+                    Number(previous.unread_posts ?? previous.new_posts ?? 0),
+                    0,
+                ),
+                lastReadPostNumber:
+                    Number(previous.last_read_post_number) || null,
+                isUnread: Boolean(
+                    previous.unread ||
+                        Number(
+                            previous.unread_posts ?? previous.new_posts ?? 0,
+                        ) > 0,
+                ),
+            });
+            showMutationFailure(error);
+        } finally {
+            finishMutation(key);
+        }
+    }, [
+        beginMutation,
+        finishMutation,
+        highestPostNumber,
+        requireHarborSignIn,
+        showMutationFailure,
+        t,
+        topicId,
+        unreadAfterPostNumber,
+    ]);
+
     const shareCurrentPost = useCallback(() => {
         const url = ARK_HARBOR_TOPIC_URL(
             topicId,
@@ -1924,6 +2814,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
             Toast.show(t('分享失敗，請稍後再試'));
         });
     }, [currentPostNumber, t, topic?.title, topicId]);
+
+    const copyCurrentPost = useCallback(() => {
+        copyPostPermalink({ post_number: currentPostNumber });
+    }, [copyPostPermalink, currentPostNumber]);
 
     const openRelatedTopic = useCallback(
         relatedTopic => {
@@ -1970,10 +2864,19 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     <View>
                         <HarborTopicHeader
                             topic={topic}
+                            onCopy={copyCurrentPost}
+                            onMarkUnread={markTopicUnread}
+                            onOpenNotifications={openNotificationLevels}
                             onOpenOriginal={openOriginalTopic}
                             onShare={shareCurrentPost}
                             onPressCategory={openCategory}
                             onPressTag={openTag}
+                            pendingMarkUnread={
+                                pendingMutations[`unread:${topicId}`]
+                            }
+                            pendingNotification={
+                                pendingMutations[`notification:${topicId}`]
+                            }
                         />
                         {isLoadingPrevious ? (
                             <ActivityIndicator
@@ -1992,7 +2895,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     ? Number(posts[postIndex - 1]?.post_number || 0)
                     : 0;
             const showUnreadDivider =
-                unreadAfterPostNumber > 0 &&
+                unreadAfterPostNumber >= 0 &&
                 Number(item.post_number) > unreadAfterPostNumber &&
                 (postIndex === 0 ||
                     previousPostNumber <= unreadAfterPostNumber);
@@ -2028,8 +2931,21 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         imageUrls={imageUrls}
                         onOpenImage={openImage}
                         onPressAuthor={openAuthor}
+                        onPressBookmark={openBookmarkEditor}
+                        onPressCopy={copyPostPermalink}
+                        onPressLike={togglePostLike}
                         onPressLink={openHarborLink}
+                        onPressReaction={openReactionPicker}
                         onPressReply={scrollToPost}
+                        onPressShare={sharePost}
+                        pendingBookmark={
+                            pendingMutations[`bookmark:${item.id}`]
+                        }
+                        pendingLike={pendingMutations[`like:${item.id}`]}
+                        pendingReaction={
+                            pendingMutations[`reaction:${item.id}`]
+                        }
+                        reactionsEnabled={validReactions.length > 0}
                     />
                 </View>
             );
@@ -2038,19 +2954,30 @@ const HarborTopicDetail = ({ route, navigation }) => {
             contentWidth,
             imageUrls,
             isLoadingPrevious,
+            copyCurrentPost,
+            copyPostPermalink,
+            markTopicUnread,
             openAuthor,
+            openBookmarkEditor,
             openCategory,
             openHarborLink,
             openImage,
+            openNotificationLevels,
             openOriginalTopic,
+            openReactionPicker,
             openTag,
+            pendingMutations,
             posts,
             scrollToPost,
+            sharePost,
             shareCurrentPost,
             t,
             themeColor,
+            togglePostLike,
             topic,
+            topicId,
             unreadAfterPostNumber,
+            validReactions.length,
         ],
     );
 
@@ -2380,6 +3307,372 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 </View>
             </Modal>
 
+            <Modal
+                transparent
+                visible={Boolean(bookmarkEditor)}
+                animationType="fade"
+                onRequestClose={() => setBookmarkEditor(null)}>
+                <View style={styles.modalPage}>
+                    <Pressable
+                        style={[
+                            StyleSheet.absoluteFill,
+                            styles.modalBackdrop,
+                            { backgroundColor: theme.trueBlack },
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            setBookmarkEditor(null);
+                        }}
+                    />
+                    <View
+                        style={[
+                            styles.actionDialog,
+                            { backgroundColor: theme.white },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.actionDialogTitle,
+                                { color: black.main },
+                            ]}>
+                            {bookmarkEditor?.bookmarkId
+                                ? t('編輯收藏')
+                                : t('收藏帖子')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.actionDialogLabel,
+                                { color: black.second },
+                            ]}>
+                            {t('收藏名稱')}
+                        </Text>
+                        <TextInput
+                            value={bookmarkEditor?.name || ''}
+                            onChangeText={name =>
+                                setBookmarkEditor(current =>
+                                    current ? { ...current, name } : current,
+                                )
+                            }
+                            maxLength={100}
+                            placeholder={t('選填，方便日後尋找')}
+                            placeholderTextColor={black.third}
+                            style={[
+                                styles.bookmarkNameInput,
+                                {
+                                    color: black.main,
+                                    backgroundColor: tonal.primary08,
+                                    borderColor: themeColor,
+                                },
+                            ]}
+                        />
+                        <Text
+                            style={[
+                                styles.actionDialogLabel,
+                                { color: black.second },
+                            ]}>
+                            {t('提醒日期')}
+                        </Text>
+                        <View style={styles.bookmarkReminderRow}>
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    setBookmarkEditor(current =>
+                                        current
+                                            ? { ...current, reminderAt: null }
+                                            : current,
+                                    );
+                                }}
+                                style={({ pressed }) => [
+                                    styles.reminderButton,
+                                    {
+                                        backgroundColor:
+                                            !bookmarkEditor?.reminderAt || pressed
+                                                ? tonal.primary30
+                                                : tonal.primary15,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.reminderButtonText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('無提醒')}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    setIsBookmarkReminderVisible(true);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.reminderButton,
+                                    styles.reminderDateButton,
+                                    {
+                                        backgroundColor:
+                                            bookmarkEditor?.reminderAt || pressed
+                                                ? tonal.primary30
+                                                : tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="calendar-clock-outline"
+                                    size={scale(15)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.reminderButtonText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {bookmarkEditor?.reminderAt
+                                        ? moment(bookmarkEditor.reminderAt).format(
+                                            'YYYY/MM/DD HH:mm',
+                                        )
+                                        : t('選擇日期')}
+                                </Text>
+                            </Pressable>
+                        </View>
+                        <View style={styles.actionDialogActions}>
+                            {bookmarkEditor?.bookmarkId ? (
+                                <Pressable
+                                    onPress={() => {
+                                        trigger();
+                                        removePostBookmark();
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.actionDialogButton,
+                                        {
+                                            backgroundColor: pressed
+                                                ? tonal.primary30
+                                                : tonal.primary15,
+                                        },
+                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.actionDialogButtonText,
+                                            { color: themeColor },
+                                        ]}>
+                                        {t('取消收藏')}
+                                    </Text>
+                                </Pressable>
+                            ) : null}
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    setBookmarkEditor(null);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.actionDialogButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.actionDialogButtonText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('取消')}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    savePostBookmark();
+                                }}
+                                style={({ pressed }) => [
+                                    styles.actionDialogButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary50
+                                            : themeColor,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.actionDialogButtonText,
+                                        { color: trueWhite },
+                                    ]}>
+                                    {t('儲存')}
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                transparent
+                visible={reactionPostId != null}
+                animationType="fade"
+                onRequestClose={() => setReactionPostId(null)}>
+                <View style={styles.modalPage}>
+                    <Pressable
+                        style={[
+                            StyleSheet.absoluteFill,
+                            styles.modalBackdrop,
+                            { backgroundColor: theme.trueBlack },
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            setReactionPostId(null);
+                        }}
+                    />
+                    <View
+                        style={[
+                            styles.actionDialog,
+                            { backgroundColor: theme.white },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.actionDialogTitle,
+                                { color: black.main },
+                            ]}>
+                            {t('選擇回應')}
+                        </Text>
+                        <View style={styles.reactionGrid}>
+                            {validReactions.map(reaction => (
+                                <Pressable
+                                    key={reaction}
+                                    onPress={() => {
+                                        trigger();
+                                        selectPostReaction(reaction);
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.reactionButton,
+                                        {
+                                            backgroundColor: pressed
+                                                ? tonal.primary30
+                                                : tonal.primary15,
+                                        },
+                                    ]}>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[
+                                            styles.reactionText,
+                                            { color: themeColor },
+                                        ]}>
+                                        :{reaction}:
+                                    </Text>
+                                </Pressable>
+                            ))}
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                transparent
+                visible={isNotificationVisible}
+                animationType="fade"
+                onRequestClose={() => setIsNotificationVisible(false)}>
+                <View style={styles.modalPage}>
+                    <Pressable
+                        style={[
+                            StyleSheet.absoluteFill,
+                            styles.modalBackdrop,
+                            { backgroundColor: theme.trueBlack },
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            setIsNotificationVisible(false);
+                        }}
+                    />
+                    <View
+                        style={[
+                            styles.actionDialog,
+                            { backgroundColor: theme.white },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.actionDialogTitle,
+                                { color: black.main },
+                            ]}>
+                            {t('話題通知')}
+                        </Text>
+                        {TOPIC_NOTIFICATION_OPTIONS.map(option => {
+                            const selected =
+                                Number(topic.details?.notification_level) ===
+                                option.level;
+                            return (
+                                <Pressable
+                                    key={option.level}
+                                    onPress={() => {
+                                        trigger();
+                                        changeNotificationLevel(option.level);
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.notificationOption,
+                                        {
+                                            backgroundColor:
+                                                selected || pressed
+                                                    ? tonal.primary15
+                                                    : theme.white,
+                                            borderTopColor:
+                                                themeColorUltraLight,
+                                        },
+                                    ]}>
+                                    <MaterialCommunityIcons
+                                        name={option.icon}
+                                        size={scale(19)}
+                                        color={themeColor}
+                                    />
+                                    <View style={styles.notificationContent}>
+                                        <Text
+                                            style={[
+                                                styles.notificationLabel,
+                                                { color: black.main },
+                                            ]}>
+                                            {t(option.label)}
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.notificationDescription,
+                                                { color: black.third },
+                                            ]}>
+                                            {t(option.description)}
+                                        </Text>
+                                    </View>
+                                    {selected ? (
+                                        <MaterialCommunityIcons
+                                            name="check"
+                                            size={scale(18)}
+                                            color={themeColor}
+                                        />
+                                    ) : null}
+                                </Pressable>
+                            );
+                        })}
+                    </View>
+                </View>
+            </Modal>
+
+            <DateTimePickerModal
+                isVisible={isBookmarkReminderVisible}
+                mode="datetime"
+                date={
+                    bookmarkEditor?.reminderAt
+                        ? new Date(bookmarkEditor.reminderAt)
+                        : new Date(Date.now() + 60 * 60 * 1000)
+                }
+                minimumDate={new Date()}
+                onConfirm={date => {
+                    trigger();
+                    setIsBookmarkReminderVisible(false);
+                    setBookmarkEditor(current =>
+                        current
+                            ? { ...current, reminderAt: date.toISOString() }
+                            : current,
+                    );
+                }}
+                onCancel={() => {
+                    trigger();
+                    setIsBookmarkReminderVisible(false);
+                }}
+            />
+
             <ARKImageView ref={imageViewerRef} imageUrls={imageUrls} />
         </View>
     );
@@ -2685,6 +3978,37 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: verticalScale(5),
     },
+    postActionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: verticalScale(10),
+    },
+    postActionButton: {
+        minWidth: scale(72),
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: scale(8),
+        marginRight: scale(6),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(7),
+    },
+    postActionText: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(10),
+        fontWeight: '600',
+        marginLeft: scale(4),
+    },
+    postIconButton: {
+        width: scale(34),
+        height: verticalScale(30),
+        borderRadius: scale(8),
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: scale(4),
+    },
     footerMeta: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -2819,6 +4143,120 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(12),
         fontWeight: '700',
+    },
+    actionDialog: {
+        width: '100%',
+        maxHeight: '88%',
+        borderRadius: scale(16),
+        paddingHorizontal: scale(18),
+        paddingVertical: verticalScale(16),
+    },
+    actionDialogTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(17),
+        fontWeight: '700',
+        marginBottom: verticalScale(10),
+    },
+    actionDialogLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+        marginBottom: verticalScale(5),
+    },
+    bookmarkNameInput: {
+        ...uiStyle.defaultText,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(9),
+        fontSize: scale(13),
+        marginBottom: verticalScale(12),
+        paddingHorizontal: scale(11),
+        paddingVertical: verticalScale(8),
+    },
+    bookmarkReminderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    reminderButton: {
+        minHeight: verticalScale(34),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: scale(8),
+        paddingHorizontal: scale(10),
+    },
+    reminderDateButton: {
+        flex: 1,
+        marginLeft: scale(7),
+    },
+    reminderButtonText: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(11),
+        fontWeight: '600',
+        marginLeft: scale(4),
+    },
+    actionDialogActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        flexWrap: 'wrap',
+        marginTop: verticalScale(16),
+    },
+    actionDialogButton: {
+        minWidth: scale(70),
+        alignItems: 'center',
+        borderRadius: scale(8),
+        marginLeft: scale(7),
+        marginTop: verticalScale(5),
+        paddingHorizontal: scale(11),
+        paddingVertical: verticalScale(8),
+    },
+    actionDialogButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
+    },
+    reactionGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginHorizontal: scale(-3),
+    },
+    reactionButton: {
+        minWidth: '30%',
+        flexGrow: 1,
+        alignItems: 'center',
+        borderRadius: scale(8),
+        margin: scale(3),
+        paddingHorizontal: scale(9),
+        paddingVertical: verticalScale(9),
+    },
+    reactionText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+    },
+    notificationOption: {
+        minHeight: verticalScale(54),
+        borderTopWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: scale(8),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(7),
+    },
+    notificationContent: {
+        flex: 1,
+        marginHorizontal: scale(9),
+    },
+    notificationLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '700',
+    },
+    notificationDescription: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: scale(14),
+        marginTop: verticalScale(2),
     },
     errorIcon: {
         width: scale(64),
