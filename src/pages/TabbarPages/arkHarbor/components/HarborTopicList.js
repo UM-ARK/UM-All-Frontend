@@ -780,7 +780,7 @@ const HarborTopicList = ({
                 contentContainerStyle={contentContainerStyle}
                 contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
                 scrollIndicatorInsets={scrollIndicatorInsets}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
             />
@@ -798,7 +798,7 @@ const HarborTopicList = ({
             contentContainerStyle={contentContainerStyle}
             contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
             scrollIndicatorInsets={scrollIndicatorInsets}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
             onScroll={onScroll}
             scrollEventThrottle={16}
             refreshControl={
