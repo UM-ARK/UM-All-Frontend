@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+    Alert,
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+} from 'react-native';
 
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import PagerView from 'react-native-pager-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -13,6 +21,7 @@ import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import { fetchHarborSiteCapabilities } from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
+import HarborDrawerContent from './components/HarborDrawerContent';
 import HarborTopicList from './components/HarborTopicList';
 
 const VIEW_CONFIG = {
@@ -21,61 +30,108 @@ const VIEW_CONFIG = {
     new: { label: '新話題', analytics: 'new' },
     unread: { label: '未讀', analytics: 'unread' },
 };
+const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(50);
+const Drawer = createDrawerNavigator();
 
-const ExploreButton = ({ icon, title, description, onPress }) => {
+const HarborStickyToolbar = ({
+    segmentOptions,
+    currentIndex,
+    onChange,
+    status,
+    sessionLabel,
+    onSessionPress,
+    onMenuPress,
+    onLayout,
+}) => {
     const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const isSignedIn = status === 'signedIn';
 
     return (
-        <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-                trigger();
-                onPress();
-            }}
-            style={({ pressed }) => [
-                styles.exploreButton,
-                {
-                    backgroundColor: pressed
-                        ? theme.tonal.primary30
-                        : theme.tonal.primary15,
-                },
-            ]}>
-            <View
-                style={[
-                    styles.exploreIcon,
-                    { backgroundColor: theme.tonal.primary30 },
-                ]}>
-                <MaterialCommunityIcons
-                    name={icon}
-                    size={scale(19)}
-                    color={theme.themeColor}
-                />
-            </View>
-            <View style={styles.exploreText}>
-                <Text
-                    numberOfLines={1}
-                    style={[styles.exploreTitle, { color: theme.black.main }]}>
-                    {title}
-                </Text>
-                <Text
-                    numberOfLines={1}
-                    style={[
-                        styles.exploreDescription,
-                        { color: theme.black.third },
+        <View
+            onLayout={onLayout}
+            style={[styles.stickyToolbar, { backgroundColor: theme.bg_color }]}>
+            <View style={styles.toolbarSide}>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('開啟選單')}
+                    hitSlop={scale(8)}
+                    onPress={() => {
+                        trigger();
+                        onMenuPress();
+                    }}
+                    style={({ pressed }) => [
+                        styles.toolbarIconButton,
+                        pressed && {
+                            backgroundColor: theme.tonal.primary15,
+                        },
                     ]}>
-                    {description}
-                </Text>
+                    <MaterialCommunityIcons
+                        name="menu"
+                        size={scale(21)}
+                        color={theme.themeColor}
+                    />
+                </Pressable>
             </View>
-            <MaterialCommunityIcons
-                name="chevron-right"
-                size={scale(18)}
-                color={theme.themeColor}
+
+            <SegmentControl
+                options={segmentOptions}
+                selectedIndex={currentIndex}
+                onChange={onChange}
+                trackBackgroundColor="transparent"
+                selectedBackgroundColor="transparent"
+                style={styles.toolbarSegment}
             />
-        </Pressable>
+
+            <View style={[styles.toolbarSide, styles.toolbarRight]}>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                        isSignedIn ? t('已登入') : sessionLabel
+                    }
+                    disabled={
+                        status === 'restoring' || status === 'authorizing'
+                    }
+                    onPress={() => {
+                        trigger();
+                        onSessionPress();
+                    }}
+                    style={({ pressed }) => [
+                        isSignedIn
+                            ? styles.toolbarIconButton
+                            : styles.sessionButton,
+                        pressed && {
+                            backgroundColor: theme.tonal.primary15,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name={isSignedIn ? 'account-check-outline' : 'login'}
+                        size={scale(isSignedIn ? 21 : 14)}
+                        color={theme.themeColor}
+                    />
+                    {isSignedIn ? null : (
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.sessionText,
+                                { color: theme.themeColor },
+                            ]}>
+                            {sessionLabel}
+                        </Text>
+                    )}
+                </Pressable>
+            </View>
+        </View>
     );
 };
 
-const HarborFeedPane = ({ view, navigation, onCapabilities }) => {
+const HarborFeedPane = ({
+    view,
+    navigation,
+    onCapabilities,
+    isTopicPressAllowed,
+    contentContainerStyle,
+}) => {
     const source = useMemo(() => ({ view }), [view]);
 
     return (
@@ -84,21 +140,27 @@ const HarborFeedPane = ({ view, navigation, onCapabilities }) => {
                 source={source}
                 navigation={navigation}
                 onCapabilities={onCapabilities}
+                isTopicPressAllowed={isTopicPressAllowed}
+                contentContainerStyle={contentContainerStyle}
             />
         </View>
     );
 };
 
 /**
- * Harbor 原生首頁：論壇探索入口與多視圖話題列表。
+ * Harbor 原生首頁：多視圖話題列表（分類／標籤入口在側邊抽屜）。
  */
 const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { status, user, login } = useHarborSession();
+    const { status, login } = useHarborSession();
     const pagerRef = useRef(null);
     const currentViewRef = useRef('latest');
+    const blockTopicPressUntilRef = useRef(0);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [stickyHeaderHeight, setStickyHeaderHeight] = useState(
+        DEFAULT_STICKY_HEADER_HEIGHT,
+    );
     const [capabilities, setCapabilities] = useState(null);
     const [mountedViews, setMountedViews] = useState({
         latest: true,
@@ -113,7 +175,7 @@ const ForumPage = ({ navigation }) => {
         const controller = new AbortController();
         fetchHarborSiteCapabilities({ signal: controller.signal })
             .then(setCapabilities)
-            .catch(() => { });
+            .catch(() => {});
         return () => controller.abort();
     }, []);
 
@@ -222,130 +284,77 @@ const ForumPage = ({ navigation }) => {
 
     const sessionLabel =
         status === 'signedIn'
-            ? user?.username || t('已登入')
+            ? t('已登入')
             : status === 'restoring'
-                ? t('正在同步…')
-                : status === 'authorizing'
-                    ? t('登入中…')
-                    : t('登入');
+              ? t('正在同步…')
+              : status === 'authorizing'
+                ? t('登入中…')
+                : t('登入');
+
+    const contentContainerStyle = useMemo(
+        () => ({
+            paddingTop: stickyHeaderHeight + verticalScale(4),
+        }),
+        [stickyHeaderHeight],
+    );
+
+    const handleStickyHeaderLayout = useCallback(event => {
+        const nextHeight = Math.ceil(event.nativeEvent.layout.height);
+        setStickyHeaderHeight(currentHeight =>
+            currentHeight === nextHeight ? currentHeight : nextHeight,
+        );
+    }, []);
+
+    const handlePageScrollStateChanged = useCallback(event => {
+        const pageScrollState = event.nativeEvent.pageScrollState;
+        const guardDuration = pageScrollState === 'idle' ? 180 : 320;
+        blockTopicPressUntilRef.current = Date.now() + guardDuration;
+    }, []);
+
+    const isTopicPressAllowed = useCallback(
+        () => Date.now() >= blockTopicPressUntilRef.current,
+        [],
+    );
 
     return (
         <SafeAreaView
             style={[styles.page, { backgroundColor: theme.bg_color }]}
             edges={{ top: true }}>
-            <View style={styles.header}>
-                <View style={styles.titleRow}>
-                    <View style={styles.brandArea}>
-                        <View
-                            style={[
-                                styles.brandIcon,
-                                { backgroundColor: theme.tonal.primary15 },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name="anchor"
-                                size={scale(24)}
-                                color={theme.themeColor}
-                            />
-                        </View>
-                        <View style={styles.brandText}>
-                            <Text
-                                style={[
-                                    styles.pageTitle,
-                                    { color: theme.black.main },
-                                ]}>
-                                Harbor
-                            </Text>
-                            <Text
-                                numberOfLines={1}
-                                style={[
-                                    styles.pageSubtitle,
-                                    { color: theme.black.third },
-                                ]}>
-                                {t('發現校園話題，與 UM 社群一起交流')}
-                            </Text>
-                        </View>
-                    </View>
-                    <Pressable
-                        accessibilityRole="button"
-                        disabled={
-                            status === 'restoring' || status === 'authorizing'
-                        }
-                        onPress={() => {
-                            trigger();
-                            handleSessionPress();
-                        }}
-                        style={({ pressed }) => [
-                            styles.sessionButton,
-                            {
-                                backgroundColor: pressed
-                                    ? theme.tonal.primary30
-                                    : theme.tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name={
-                                status === 'signedIn'
-                                    ? 'account-check-outline'
-                                    : 'login'
-                            }
-                            size={scale(14)}
-                            color={theme.themeColor}
-                        />
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.sessionText,
-                                { color: theme.themeColor },
-                            ]}>
-                            {sessionLabel}
-                        </Text>
-                    </Pressable>
-                </View>
-
-                <View style={styles.exploreRow}>
-                    <ExploreButton
-                        icon="folder-multiple-outline"
-                        title={t('探索分類')}
-                        description={t('瀏覽主題與子分類')}
-                        onPress={() =>
-                            navigation.navigate('HarborCategoryList')
-                        }
-                    />
-                    <View style={styles.exploreGap} />
-                    <ExploreButton
-                        icon="tag-multiple-outline"
-                        title={t('熱門標籤')}
-                        description={t('按興趣探索話題')}
-                        onPress={() => navigation.navigate('HarborTagList')}
-                    />
-                </View>
-
-                <SegmentControl
-                    options={segmentOptions}
-                    selectedIndex={currentIndex}
-                    onChange={selectView}
-                    trackBackgroundColor={theme.white}
-                    style={styles.segment}
-                />
-            </View>
-
             <PagerView
                 ref={pagerRef}
                 style={styles.pager}
                 initialPage={0}
-                onPageSelected={handlePageSelected}>
+                onPageSelected={handlePageSelected}
+                onPageScrollStateChanged={handlePageScrollStateChanged}>
                 {enabledViews.map(view => (
-                    <View key={view} style={styles.feedPage}>
+                    <View
+                        key={view}
+                        style={styles.feedPage}
+                        collapsable={false}>
                         {mountedViews[view] ? (
                             <HarborFeedPane
                                 view={view}
                                 navigation={navigation}
                                 onCapabilities={handleCapabilities}
+                                isTopicPressAllowed={isTopicPressAllowed}
+                                contentContainerStyle={contentContainerStyle}
                             />
                         ) : null}
                     </View>
                 ))}
             </PagerView>
+            <View pointerEvents="box-none" style={styles.sharedHeader}>
+                <HarborStickyToolbar
+                    segmentOptions={segmentOptions}
+                    currentIndex={currentIndex}
+                    onChange={selectView}
+                    status={status}
+                    sessionLabel={sessionLabel}
+                    onSessionPress={handleSessionPress}
+                    onMenuPress={() => navigation.openDrawer()}
+                    onLayout={handleStickyHeaderLayout}
+                />
+            </View>
         </SafeAreaView>
     );
 };
@@ -354,52 +363,38 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
     },
-    header: {
-        paddingHorizontal: scale(14),
-        paddingTop: verticalScale(5),
-        paddingBottom: verticalScale(7),
-    },
-    titleRow: {
+    stickyToolbar: {
+        minHeight: DEFAULT_STICKY_HEADER_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(5),
+        zIndex: 2,
     },
-    brandArea: {
+    toolbarSide: {
         flex: 1,
         minWidth: 0,
-        flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
     },
-    brandIcon: {
-        width: scale(42),
-        height: scale(42),
-        borderRadius: scale(14),
+    toolbarRight: {
+        alignItems: 'flex-end',
+    },
+    toolbarIconButton: {
+        width: scale(38),
+        height: scale(38),
+        borderRadius: scale(13),
         alignItems: 'center',
         justifyContent: 'center',
     },
-    brandText: {
-        flex: 1,
-        minWidth: 0,
-        marginLeft: scale(9),
-    },
-    pageTitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(21),
-        lineHeight: scale(25),
-        fontWeight: '800',
-    },
-    pageSubtitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        marginTop: verticalScale(2),
-    },
     sessionButton: {
-        maxWidth: scale(108),
+        maxWidth: '100%',
+        minHeight: scale(38),
         borderRadius: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft: scale(8),
-        paddingHorizontal: scale(9),
-        paddingVertical: verticalScale(7),
+        justifyContent: 'flex-end',
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(5),
     },
     sessionText: {
         ...uiStyle.defaultText,
@@ -408,47 +403,16 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginLeft: scale(4),
     },
-    exploreRow: {
-        flexDirection: 'row',
-        marginTop: verticalScale(9),
+    toolbarSegment: {
+        flexShrink: 0,
+        marginHorizontal: scale(4),
     },
-    exploreButton: {
-        flex: 1,
-        minWidth: 0,
-        borderRadius: scale(13),
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(9),
-        paddingVertical: verticalScale(8),
-    },
-    exploreGap: {
-        width: scale(8),
-    },
-    exploreIcon: {
-        width: scale(34),
-        height: scale(34),
-        borderRadius: scale(11),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    exploreText: {
-        flex: 1,
-        minWidth: 0,
-        marginLeft: scale(7),
-    },
-    exploreTitle: {
-        ...uiStyle.defaultText,
-        fontSize: scale(11),
-        fontWeight: '700',
-    },
-    exploreDescription: {
-        ...uiStyle.defaultText,
-        fontSize: scale(9),
-        marginTop: verticalScale(2),
-    },
-    segment: {
-        alignSelf: 'center',
-        marginTop: verticalScale(8),
+    sharedHeader: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        zIndex: 10,
     },
     pager: {
         flex: 1,
@@ -458,4 +422,37 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ForumPage;
+const HarborDrawerNavigator = () => {
+    const { theme } = useTheme();
+    const { width } = useWindowDimensions();
+
+    const renderDrawerContent = useCallback(
+        props => <HarborDrawerContent {...props} />,
+        [],
+    );
+
+    return (
+        <Drawer.Navigator
+            drawerContent={renderDrawerContent}
+            screenOptions={{
+                headerShown: false,
+                drawerType: 'front',
+                drawerStyle: {
+                    width: Math.min(width * 0.88, scale(360)),
+                    backgroundColor: theme.bg_color,
+                },
+                sceneStyle: { backgroundColor: theme.bg_color },
+                swipeEdgeWidth: scale(28),
+                swipeMinDistance: scale(18),
+                drawerHideStatusBarOnOpen: false,
+            }}>
+            <Drawer.Screen
+                name="HarborHome"
+                component={ForumPage}
+                options={{ title: 'Harbor' }}
+            />
+        </Drawer.Navigator>
+    );
+};
+
+export default HarborDrawerNavigator;

@@ -1,13 +1,27 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import {
+    Pressable,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
 
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { FlashList } from '@shopify/flash-list';
+import PagerView from 'react-native-pager-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
+import SegmentControl from '../../../components/SegmentControl';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import {
     fetchHarborCategories,
@@ -34,68 +48,141 @@ const flattenCategories = categories => {
 
     const rows = [];
     const visited = new Set();
-    const appendCategory = (category, depth) => {
+    const appendCategory = (
+        category,
+        depth,
+        parentLineStates = [],
+        isLastSibling = true,
+    ) => {
         if (visited.has(category.id)) {
             return;
         }
         visited.add(category.id);
-        rows.push({ ...category, depth });
-        (categoriesByParent.get(category.id) || []).forEach(child => {
-            appendCategory(child, depth + 1);
+        rows.push({
+            ...category,
+            depth,
+            parentLineStates,
+            isLastSibling,
+        });
+        const children = categoriesByParent.get(category.id) || [];
+        children.forEach((child, index) => {
+            appendCategory(
+                child,
+                depth + 1,
+                [...parentLineStates, !isLastSibling],
+                index === children.length - 1,
+            );
         });
     };
 
-    categories
-        .filter(
-            category =>
-                !category.parentCategoryId ||
-                !knownIds.has(category.parentCategoryId),
-        )
-        .forEach(category => appendCategory(category, 0));
+    const rootCategories = categories.filter(
+        category =>
+            !category.parentCategoryId ||
+            !knownIds.has(category.parentCategoryId),
+    );
+    rootCategories.forEach((category, index) =>
+        appendCategory(category, 0, [], index === rootCategories.length - 1),
+    );
     categories.forEach(category => appendCategory(category, 0));
     return rows;
 };
 
-const CategoryRow = ({ item, onPress }) => {
+const CategoryHierarchy = ({ item, color }) => {
+    if (item.depth <= 0) {
+        return null;
+    }
+
+    return (
+        <View
+            pointerEvents="none"
+            style={[styles.hierarchyGuide, { width: scale(item.depth * 18) }]}>
+            {Array.from({ length: item.depth }, (_, level) => {
+                const isCurrentBranch = level === item.depth - 1;
+                const showAncestorLine =
+                    !isCurrentBranch && item.parentLineStates?.[level];
+                if (!isCurrentBranch && !showAncestorLine) {
+                    return null;
+                }
+
+                const left = scale(level * 18 + 7);
+                return (
+                    <React.Fragment key={`category-guide-${level}`}>
+                        <View
+                            style={[
+                                styles.hierarchyVertical,
+                                isCurrentBranch &&
+                                item.isLastSibling &&
+                                styles.hierarchyVerticalLast,
+                                {
+                                    backgroundColor: color,
+                                    left,
+                                },
+                            ]}
+                        />
+                        {isCurrentBranch ? (
+                            <View
+                                style={[
+                                    styles.hierarchyBranch,
+                                    {
+                                        backgroundColor: color,
+                                        left,
+                                    },
+                                ]}
+                            />
+                        ) : null}
+                    </React.Fragment>
+                );
+            })}
+        </View>
+    );
+};
+
+const CategoryRow = ({ item, onPress, isPressAllowed }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
+    const isSubcategory = item.depth > 0;
 
     return (
         <Pressable
             accessibilityRole="button"
             onPress={() => {
+                if (isPressAllowed && !isPressAllowed()) {
+                    return;
+                }
                 trigger();
                 onPress(item);
             }}
             style={({ pressed }) => [
                 styles.directoryRow,
-                item.depth > 0 && styles.subcategoryRow,
                 {
                     backgroundColor: pressed
-                        ? theme.tonal.primary08
-                        : theme.white,
+                        ? theme.tonal.primary15
+                        : isSubcategory
+                            ? theme.tonal.primary08
+                            : theme.white,
                     borderColor: theme.themeColorUltraLight,
                 },
             ]}>
+            <CategoryHierarchy item={item} color={theme.themeColorUltraLight} />
             <View
                 style={[
                     styles.directoryIcon,
+                    isSubcategory && styles.subcategoryIcon,
                     {
-                        backgroundColor:
-                            item.depth > 0
-                                ? theme.tonal.secondary15
-                                : theme.tonal.primary15,
+                        backgroundColor: isSubcategory
+                            ? theme.tonal.secondary15
+                            : theme.tonal.primary15,
                     },
                 ]}>
                 <MaterialCommunityIcons
                     name={
-                        item.depth > 0
+                        isSubcategory
                             ? 'folder-outline'
                             : 'folder-multiple-outline'
                     }
-                    size={scale(21)}
+                    size={scale(isSubcategory ? 18 : 21)}
                     color={
-                        item.depth > 0
+                        isSubcategory
                             ? theme.secondThemeColor
                             : theme.themeColor
                     }
@@ -130,7 +217,10 @@ const CategoryRow = ({ item, onPress }) => {
                     </Text>
                 ) : null}
                 <Text
-                    style={[styles.directoryCount, { color: theme.themeColor }]}>
+                    style={[
+                        styles.directoryCount,
+                        { color: theme.themeColor },
+                    ]}>
                     {t('{{topics}} 個話題 · {{posts}} 篇貼文', {
                         topics: item.topicCount || 0,
                         posts: item.postCount || 0,
@@ -146,7 +236,7 @@ const CategoryRow = ({ item, onPress }) => {
     );
 };
 
-const TagRow = ({ item, onPress }) => {
+const TagRow = ({ item, onPress, isPressAllowed }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
 
@@ -154,6 +244,9 @@ const TagRow = ({ item, onPress }) => {
         <Pressable
             accessibilityRole="button"
             onPress={() => {
+                if (isPressAllowed && !isPressAllowed()) {
+                    return;
+                }
                 trigger();
                 onPress(item);
             }}
@@ -194,7 +287,10 @@ const TagRow = ({ item, onPress }) => {
                     </Text>
                 ) : null}
                 <Text
-                    style={[styles.directoryCount, { color: theme.themeColor }]}>
+                    style={[
+                        styles.directoryCount,
+                        { color: theme.themeColor },
+                    ]}>
                     {t('{{count}} 個話題', { count: item.topicCount || 0 })}
                 </Text>
             </View>
@@ -207,10 +303,16 @@ const TagRow = ({ item, onPress }) => {
     );
 };
 
-const HarborDirectoryPage = ({ type, navigation }) => {
+const HarborDirectoryPane = ({
+    type,
+    navigation,
+    contentContainerStyle,
+    contentInsetAdjustmentBehavior = 'never',
+    scrollIndicatorInsets,
+    isPressAllowed,
+}) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const headerHeight = useHeaderHeight();
     const controllerRef = useRef(null);
     const requestGenerationRef = useRef(0);
     const [items, setItems] = useState([]);
@@ -263,15 +365,12 @@ const HarborDirectoryPage = ({ type, navigation }) => {
     );
 
     useEffect(() => {
-        navigation.setOptions({
-            headerTitle: isCategory ? t('分類') : t('標籤'),
-        });
         loadDirectory();
         return () => {
             requestGenerationRef.current += 1;
             controllerRef.current?.abort();
         };
-    }, [isCategory, loadDirectory, navigation, t]);
+    }, [loadDirectory]);
 
     const handlePress = useCallback(
         item => {
@@ -291,22 +390,19 @@ const HarborDirectoryPage = ({ type, navigation }) => {
     const renderItem = useCallback(
         ({ item }) =>
             isCategory ? (
-                <CategoryRow item={item} onPress={handlePress} />
+                <CategoryRow
+                    item={item}
+                    onPress={handlePress}
+                    isPressAllowed={isPressAllowed}
+                />
             ) : (
-                <TagRow item={item} onPress={handlePress} />
+                <TagRow
+                    item={item}
+                    onPress={handlePress}
+                    isPressAllowed={isPressAllowed}
+                />
             ),
-        [handlePress, isCategory],
-    );
-
-    const topPadding = isLiquidGlassSupported
-        ? headerHeight + verticalScale(10)
-        : verticalScale(10);
-    const listContentStyle = useMemo(
-        () => ({
-            paddingTop: topPadding,
-            paddingBottom: verticalScale(36),
-        }),
-        [topPadding],
+        [handlePress, isCategory, isPressAllowed],
     );
 
     if (isLoading && items.length === 0) {
@@ -316,13 +412,11 @@ const HarborDirectoryPage = ({ type, navigation }) => {
                     data={SKELETON_ITEMS}
                     keyExtractor={item => `harbor-directory-skeleton-${item}`}
                     renderItem={() => <HarborTopicSkeleton />}
-                    contentContainerStyle={listContentStyle}
+                    contentContainerStyle={contentContainerStyle}
                     contentInsetAdjustmentBehavior={
-                        isLiquidGlassSupported ? 'never' : 'automatic'
+                        contentInsetAdjustmentBehavior
                     }
-                    scrollIndicatorInsets={
-                        isLiquidGlassSupported ? { top: headerHeight } : undefined
-                    }
+                    scrollIndicatorInsets={scrollIndicatorInsets}
                 />
             </View>
         );
@@ -336,13 +430,11 @@ const HarborDirectoryPage = ({ type, navigation }) => {
                     `harbor-${isCategory ? 'category' : 'tag'}-${item.id || item.slug}`
                 }
                 renderItem={renderItem}
-                contentContainerStyle={listContentStyle}
+                contentContainerStyle={contentContainerStyle}
                 contentInsetAdjustmentBehavior={
-                    isLiquidGlassSupported ? 'never' : 'automatic'
+                    contentInsetAdjustmentBehavior
                 }
-                scrollIndicatorInsets={
-                    isLiquidGlassSupported ? { top: headerHeight } : undefined
-                }
+                scrollIndicatorInsets={scrollIndicatorInsets}
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={
                     loadError && items.length > 0 ? (
@@ -389,6 +481,165 @@ const HarborDirectoryPage = ({ type, navigation }) => {
     );
 };
 
+const HarborDirectoryPage = ({ type, navigation }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const headerHeight = useHeaderHeight();
+    const isCategory = type === 'category';
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerTitle: isCategory ? t('分類') : t('標籤'),
+        });
+    }, [isCategory, navigation, t]);
+
+    const contentContainerStyle = useMemo(
+        () => ({
+            paddingTop: isLiquidGlassSupported
+                ? headerHeight + verticalScale(10)
+                : verticalScale(10),
+            paddingBottom: verticalScale(36),
+        }),
+        [headerHeight],
+    );
+
+    return (
+        <View style={[styles.page, { backgroundColor: theme.bg_color }]}>
+            <HarborDirectoryPane
+                type={type}
+                navigation={navigation}
+                contentContainerStyle={contentContainerStyle}
+                contentInsetAdjustmentBehavior={
+                    isLiquidGlassSupported ? 'never' : 'automatic'
+                }
+                scrollIndicatorInsets={
+                    isLiquidGlassSupported ? { top: headerHeight } : undefined
+                }
+            />
+        </View>
+    );
+};
+
+export const HarborExplorePage = ({ navigation }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const headerHeight = useHeaderHeight();
+    const pagerRef = useRef(null);
+    const blockPressUntilRef = useRef(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [mountedPages, setMountedPages] = useState({
+        category: true,
+        tag: false,
+    });
+
+    useEffect(() => {
+        navigation.setOptions({ headerTitle: t('探索') });
+    }, [navigation, t]);
+
+    const options = useMemo(
+        () => [
+            { key: 'category', label: t('分類') },
+            { key: 'tag', label: t('標籤') },
+        ],
+        [t],
+    );
+    const contentContainerStyle = useMemo(
+        () => ({
+            paddingTop: verticalScale(10),
+            paddingBottom: verticalScale(36),
+        }),
+        [],
+    );
+    const headerTopPadding = isLiquidGlassSupported
+        ? headerHeight + verticalScale(8)
+        : verticalScale(8);
+
+    const ensureMounted = useCallback(type => {
+        setMountedPages(current =>
+            current[type] ? current : { ...current, [type]: true },
+        );
+    }, []);
+
+    const selectPage = useCallback(
+        index => {
+            const type = index === 0 ? 'category' : 'tag';
+            ensureMounted(type);
+            setCurrentIndex(index);
+            pagerRef.current?.setPage(index);
+        },
+        [ensureMounted],
+    );
+
+    const handlePageSelected = useCallback(
+        event => {
+            const index = event.nativeEvent.position;
+            ensureMounted(index === 0 ? 'category' : 'tag');
+            setCurrentIndex(index);
+        },
+        [ensureMounted],
+    );
+
+    const handlePageScrollStateChanged = useCallback(event => {
+        const pageScrollState = event.nativeEvent.pageScrollState;
+        const guardDuration = pageScrollState === 'idle' ? 180 : 320;
+        blockPressUntilRef.current = Date.now() + guardDuration;
+    }, []);
+
+    const isPressAllowed = useCallback(
+        () => Date.now() >= blockPressUntilRef.current,
+        [],
+    );
+
+    return (
+        <View style={[styles.page, { backgroundColor: theme.bg_color }]}>
+            <View
+                style={[
+                    styles.exploreHeader,
+                    {
+                        paddingTop: headerTopPadding,
+                        backgroundColor: theme.bg_color,
+                        borderBottomColor: theme.themeColorUltraLight,
+                    },
+                ]}>
+                <SegmentControl
+                    options={options}
+                    selectedIndex={currentIndex}
+                    onChange={selectPage}
+                    trackBackgroundColor={theme.white}
+                    style={styles.segment}
+                />
+            </View>
+            <PagerView
+                ref={pagerRef}
+                style={styles.pager}
+                initialPage={0}
+                onPageSelected={handlePageSelected}
+                onPageScrollStateChanged={handlePageScrollStateChanged}>
+                <View key="category" style={styles.page} collapsable={false}>
+                    {mountedPages.category ? (
+                        <HarborDirectoryPane
+                            type="category"
+                            navigation={navigation}
+                            contentContainerStyle={contentContainerStyle}
+                            isPressAllowed={isPressAllowed}
+                        />
+                    ) : null}
+                </View>
+                <View key="tag" style={styles.page} collapsable={false}>
+                    {mountedPages.tag ? (
+                        <HarborDirectoryPane
+                            type="tag"
+                            navigation={navigation}
+                            contentContainerStyle={contentContainerStyle}
+                            isPressAllowed={isPressAllowed}
+                        />
+                    ) : null}
+                </View>
+            </PagerView>
+        </View>
+    );
+};
+
 export const HarborCategoryListPage = props => (
     <HarborDirectoryPage {...props} type="category" />
 );
@@ -410,8 +661,24 @@ const styles = StyleSheet.create({
         marginBottom: verticalScale(9),
         padding: scale(13),
     },
-    subcategoryRow: {
-        marginLeft: scale(34),
+    hierarchyGuide: {
+        alignSelf: 'stretch',
+        position: 'relative',
+    },
+    hierarchyVertical: {
+        position: 'absolute',
+        top: -verticalScale(10),
+        bottom: -verticalScale(10),
+        width: StyleSheet.hairlineWidth,
+    },
+    hierarchyVerticalLast: {
+        bottom: '50%',
+    },
+    hierarchyBranch: {
+        position: 'absolute',
+        top: '50%',
+        width: scale(11),
+        height: StyleSheet.hairlineWidth,
     },
     directoryIcon: {
         width: scale(42),
@@ -419,6 +686,11 @@ const styles = StyleSheet.create({
         borderRadius: scale(14),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    subcategoryIcon: {
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(12),
     },
     directoryText: {
         flex: 1,
@@ -447,5 +719,16 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontWeight: '600',
         marginTop: verticalScale(4),
+    },
+    exploreHeader: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingHorizontal: scale(14),
+        paddingBottom: verticalScale(8),
+    },
+    segment: {
+        alignSelf: 'center',
+    },
+    pager: {
+        flex: 1,
     },
 });

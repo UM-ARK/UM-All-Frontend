@@ -19,8 +19,11 @@ const STATUS_CONFIG = {
     solved: { icon: 'check-decagram-outline', label: '已解決' },
 };
 
-const stopAndRun = (event, callback) => {
+const stopAndRun = (event, callback, isPressAllowed) => {
     event.stopPropagation?.();
+    if (isPressAllowed && !isPressAllowed()) {
+        return;
+    }
     trigger();
     callback();
 };
@@ -68,7 +71,13 @@ const normalizeTag = tag => {
     };
 };
 
-const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
+const HarborTopicCard = ({
+    topic,
+    onPress,
+    onCategoryPress,
+    onTagPress,
+    isPressAllowed,
+}) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const author = topic.author || {};
@@ -106,6 +115,9 @@ const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
             accessibilityRole="button"
             accessibilityLabel={topic.title}
             onPress={() => {
+                if (isPressAllowed && !isPressAllowed()) {
+                    return;
+                }
                 trigger();
                 onPress(topic);
             }}
@@ -148,7 +160,10 @@ const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
                 <View style={styles.authorText}>
                     <Text
                         numberOfLines={1}
-                        style={[styles.authorName, { color: theme.black.main }]}>
+                        style={[
+                            styles.authorName,
+                            { color: theme.black.main },
+                        ]}>
                         {authorName}
                     </Text>
                     <Text
@@ -171,7 +186,10 @@ const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
                             { backgroundColor: theme.tonal.unread15 },
                         ]}>
                         <Text
-                            style={[styles.unreadText, { color: theme.unread }]}>
+                            style={[
+                                styles.unreadText,
+                                { color: theme.unread },
+                            ]}>
                             {t('新話題')}
                         </Text>
                     </View>
@@ -182,7 +200,10 @@ const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
                             { backgroundColor: theme.tonal.unread15 },
                         ]}>
                         <Text
-                            style={[styles.unreadText, { color: theme.unread }]}>
+                            style={[
+                                styles.unreadText,
+                                { color: theme.unread },
+                            ]}>
                             {t('{{count}} 未讀', { count: unreadCount })}
                         </Text>
                     </View>
@@ -210,8 +231,10 @@ const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
                         <Pressable
                             accessibilityRole="button"
                             onPress={event =>
-                                stopAndRun(event, () =>
-                                    onCategoryPress(category),
+                                stopAndRun(
+                                    event,
+                                    () => onCategoryPress(category),
+                                    isPressAllowed,
                                 )
                             }
                             style={({ pressed }) => [
@@ -242,7 +265,11 @@ const HarborTopicCard = ({ topic, onPress, onCategoryPress, onTagPress }) => {
                             key={tag.slug}
                             accessibilityRole="button"
                             onPress={event =>
-                                stopAndRun(event, () => onTagPress(tag))
+                                stopAndRun(
+                                    event,
+                                    () => onTagPress(tag),
+                                    isPressAllowed,
+                                )
                             }
                             style={({ pressed }) => [
                                 styles.tagChip,

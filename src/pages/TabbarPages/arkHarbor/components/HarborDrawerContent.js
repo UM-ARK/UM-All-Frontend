@@ -1,0 +1,615 @@
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
+
+import { FlashList } from '@shopify/flash-list';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { scale, verticalScale } from 'react-native-size-matters';
+import {
+    SafeAreaView,
+    useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+
+import { uiStyle, useTheme } from '../../../../components/ThemeContext';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import { fetchHarborCategories } from '../../../../utils/harbor/harborApi';
+import { trigger } from '../../../../utils/trigger';
+import { HarborInlineRetry } from './HarborListStates';
+
+const PLACEHOLDER_ITEMS = [
+    { key: 'posts', icon: 'account-outline', label: '我的貼文' },
+    { key: 'messages', icon: 'inbox-outline', label: '我的訊息' },
+    { key: 'review', icon: 'flag-outline', label: '審核' },
+    { key: 'admin', icon: 'wrench-outline', label: '管理員' },
+    { key: 'invite', icon: 'send-outline', label: '邀請' },
+    { key: 'more', icon: 'dots-horizontal', label: '更多' },
+];
+
+const buildCategoryRows = categories => {
+    const categoriesById = new Map(
+        categories.map(category => [category.id, category]),
+    );
+    const childrenByParent = new Map();
+
+    categories.forEach(category => {
+        if (!category.parentCategoryId) {
+            return;
+        }
+        const children = childrenByParent.get(category.parentCategoryId) || [];
+        children.push(category);
+        childrenByParent.set(category.parentCategoryId, children);
+    });
+
+    return categories
+        .filter(
+            category =>
+                !category.parentCategoryId ||
+                !categoriesById.has(category.parentCategoryId),
+        )
+        .flatMap(category => [
+            { ...category, depth: 0 },
+            ...(childrenByParent.get(category.id) || []).map(child => ({
+                ...child,
+                depth: 1,
+            })),
+        ]);
+};
+
+const DrawerMenuItem = ({
+    icon,
+    label,
+    active = false,
+    disabled = false,
+    onPress,
+}) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled, selected: active }}
+            disabled={disabled}
+            onPress={() => {
+                trigger();
+                onPress?.();
+            }}
+            style={({ pressed }) => [
+                styles.menuItem,
+                {
+                    backgroundColor: active
+                        ? theme.tonal.primary15
+                        : pressed
+                            ? theme.tonal.primary08
+                            : theme.bg_color,
+                },
+                disabled && styles.disabledItem,
+            ]}>
+            <MaterialCommunityIcons
+                name={icon}
+                size={scale(20)}
+                color={active ? theme.themeColor : theme.black.third}
+            />
+            <Text
+                numberOfLines={1}
+                style={[
+                    styles.menuLabel,
+                    {
+                        color: active ? theme.black.main : theme.black.second,
+                    },
+                ]}>
+                {label}
+            </Text>
+            {disabled ? (
+                <View
+                    style={[
+                        styles.placeholderBadge,
+                        { backgroundColor: theme.tonal.primary15 },
+                    ]}>
+                    <Text
+                        style={[
+                            styles.placeholderBadgeText,
+                            { color: theme.themeColor },
+                        ]}>
+                        {t('即將推出')}
+                    </Text>
+                </View>
+            ) : null}
+        </Pressable>
+    );
+};
+
+const CategoryRow = ({ item, onPress }) => {
+    const { theme } = useTheme();
+    const isSubcategory = item.depth === 1;
+
+    return (
+        <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+                trigger();
+                onPress(item);
+            }}
+            style={({ pressed }) => [
+                styles.categoryRow,
+                isSubcategory && styles.subcategoryRow,
+                {
+                    backgroundColor: pressed
+                        ? theme.tonal.primary15
+                        : theme.bg_color,
+                },
+            ]}>
+            <View
+                style={[
+                    styles.categoryIcon,
+                    {
+                        backgroundColor: isSubcategory
+                            ? theme.tonal.secondary15
+                            : theme.tonal.primary15,
+                    },
+                ]}>
+                <MaterialCommunityIcons
+                    name={isSubcategory ? 'folder-outline' : 'folder'}
+                    size={scale(isSubcategory ? 15 : 17)}
+                    color={
+                        isSubcategory
+                            ? theme.secondThemeColor
+                            : theme.themeColor
+                    }
+                />
+            </View>
+            <Text
+                numberOfLines={1}
+                style={[
+                    styles.categoryName,
+                    isSubcategory
+                        ? styles.subcategoryName
+                        : styles.rootCategoryName,
+                    {
+                        color: isSubcategory
+                            ? theme.black.second
+                            : theme.black.main,
+                    },
+                ]}>
+                {item.name}
+            </Text>
+            {item.readRestricted ? (
+                <MaterialCommunityIcons
+                    name="lock-outline"
+                    size={scale(13)}
+                    color={theme.unread}
+                />
+            ) : null}
+            <MaterialCommunityIcons
+                name="chevron-right"
+                size={scale(17)}
+                color={theme.black.third}
+            />
+        </Pressable>
+    );
+};
+
+const DrawerSectionTitle = ({ icon, title }) => {
+    const { theme } = useTheme();
+
+    return (
+        <View style={styles.sectionTitle}>
+            <MaterialCommunityIcons
+                name={icon}
+                size={scale(17)}
+                color={theme.black.third}
+            />
+            <Text
+                style={[styles.sectionTitleText, { color: theme.black.second }]}>
+                {title}
+            </Text>
+        </View>
+    );
+};
+
+const HarborDrawerContent = ({ navigation }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const insets = useSafeAreaInsets();
+    // 抽屜在 Tab 內：底部需避開浮動 Tabbar，避免末項被遮擋
+    const tabBarHeight =
+        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    const controllerRef = useRef(null);
+    const [categories, setCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [loadError, setLoadError] = useState(false);
+
+    const loadCategories = useCallback(async ({ refreshing = false } = {}) => {
+        controllerRef.current?.abort();
+        const controller = new AbortController();
+        controllerRef.current = controller;
+        setLoadError(false);
+        if (refreshing) {
+            setIsRefreshing(true);
+        } else {
+            setIsLoading(true);
+        }
+
+        try {
+            const response = await fetchHarborCategories({
+                signal: controller.signal,
+            });
+            if (!controller.signal.aborted) {
+                setCategories(response.items);
+            }
+        } catch {
+            if (!controller.signal.aborted) {
+                setLoadError(true);
+            }
+        } finally {
+            if (!controller.signal.aborted) {
+                setIsLoading(false);
+                setIsRefreshing(false);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        loadCategories();
+        return () => controllerRef.current?.abort();
+    }, [loadCategories]);
+
+    const categoryRows = useMemo(
+        () => buildCategoryRows(categories),
+        [categories],
+    );
+
+    const navigateFromDrawer = useCallback(
+        (routeName, params) => {
+            // 不自動收起抽屜，由用戶自行關閉（關閉鈕 / 手勢）
+            navigation.navigate(routeName, params);
+        },
+        [navigation],
+    );
+
+    const handleCategoryPress = useCallback(
+        category => {
+            logToFirebase('harbor_drawer_category', {
+                category_id: category.id,
+                category_depth: category.depth,
+            });
+            navigateFromDrawer('HarborCategoryTopics', {
+                categoryId: category.id,
+                categorySlug: category.slug,
+                categoryName: category.name,
+            });
+        },
+        [navigateFromDrawer],
+    );
+
+    const renderCategory = useCallback(
+        ({ item }) => <CategoryRow item={item} onPress={handleCategoryPress} />,
+        [handleCategoryPress],
+    );
+
+    const listHeader = useMemo(
+        () => (
+            <View>
+                <View
+                    style={[
+                        styles.drawerHeader,
+                        { borderBottomColor: theme.themeColorUltraLight },
+                    ]}>
+                    <View
+                        style={[
+                            styles.brandIcon,
+                            { backgroundColor: theme.tonal.primary15 },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="anchor"
+                            size={scale(21)}
+                            color={theme.themeColor}
+                        />
+                    </View>
+                    <View style={styles.drawerTitleArea}>
+                        <Text
+                            style={[
+                                styles.drawerTitle,
+                                { color: theme.black.main },
+                            ]}>
+                            Harbor
+                        </Text>
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.drawerSubtitle,
+                                { color: theme.black.third },
+                            ]}>
+                            {t('討論話題')}
+                        </Text>
+                    </View>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('關閉選單')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            navigation.closeDrawer();
+                        }}
+                        style={({ pressed }) => [
+                            styles.closeButton,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.primary30
+                                    : theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="close"
+                            size={scale(19)}
+                            color={theme.themeColor}
+                        />
+                    </Pressable>
+                </View>
+
+                <View style={styles.menuGroup}>
+                    <DrawerMenuItem
+                        icon="layers-triple-outline"
+                        label={t('討論話題')}
+                        active
+                    />
+                    {PLACEHOLDER_ITEMS.map(item => (
+                        <DrawerMenuItem
+                            key={item.key}
+                            icon={item.icon}
+                            label={t(item.label)}
+                            disabled
+                        />
+                    ))}
+                </View>
+
+                <DrawerSectionTitle icon="chevron-down" title={t('分類')} />
+                {loadError ? (
+                    <HarborInlineRetry
+                        message={t('分類載入失敗')}
+                        actionLabel={t('重新載入')}
+                        onRetry={() => loadCategories()}
+                    />
+                ) : null}
+            </View>
+        ),
+        [loadCategories, loadError, navigation, t, theme],
+    );
+
+    const listEmpty = useMemo(() => {
+        if (isLoading) {
+            return (
+                <View style={styles.loadingState}>
+                    <ActivityIndicator size="small" color={theme.themeColor} />
+                    <Text
+                        style={[
+                            styles.loadingText,
+                            { color: theme.black.third },
+                        ]}>
+                        {t('正在載入分類…')}
+                    </Text>
+                </View>
+            );
+        }
+        if (loadError) {
+            return null;
+        }
+        return (
+            <Text style={[styles.emptyText, { color: theme.black.third }]}>
+                {t('暫時沒有可瀏覽的分類')}
+            </Text>
+        );
+    }, [isLoading, loadError, t, theme]);
+
+    const listFooter = useMemo(
+        () => (
+            <View style={styles.drawerFooter}>
+                <DrawerMenuItem
+                    icon="format-list-bulleted"
+                    label={t('所有分類')}
+                    onPress={() => navigateFromDrawer('HarborCategoryList')}
+                />
+                <DrawerSectionTitle icon="chevron-down" title={t('標籤')} />
+                <DrawerMenuItem
+                    icon="tag-multiple-outline"
+                    label={t('熱門標籤')}
+                    onPress={() => navigateFromDrawer('HarborTagList')}
+                />
+            </View>
+        ),
+        [navigateFromDrawer, t],
+    );
+
+    const listContentStyle = useMemo(
+        () => ({
+            paddingBottom: tabBarHeight + verticalScale(18),
+        }),
+        [tabBarHeight],
+    );
+
+    return (
+        <SafeAreaView
+            edges={['top']}
+            style={[styles.page, { backgroundColor: theme.bg_color }]}>
+            <FlashList
+                data={categoryRows}
+                keyExtractor={item =>
+                    `harbor-drawer-category-${item.id ?? item.slug}`
+                }
+                renderItem={renderCategory}
+                ListHeaderComponent={listHeader}
+                ListEmptyComponent={listEmpty}
+                ListFooterComponent={listFooter}
+                refreshing={isRefreshing}
+                onRefresh={() => loadCategories({ refreshing: true })}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={listContentStyle}
+            />
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    page: {
+        flex: 1,
+    },
+    drawerHeader: {
+        minHeight: verticalScale(58),
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(8),
+    },
+    brandIcon: {
+        width: scale(38),
+        height: scale(38),
+        borderRadius: scale(13),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    drawerTitleArea: {
+        flex: 1,
+        minWidth: 0,
+        marginLeft: scale(9),
+    },
+    drawerTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(17),
+        lineHeight: scale(21),
+        fontWeight: '800',
+    },
+    drawerSubtitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginTop: verticalScale(1),
+    },
+    closeButton: {
+        width: scale(34),
+        height: scale(34),
+        borderRadius: scale(12),
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: scale(8),
+    },
+    menuGroup: {
+        paddingHorizontal: scale(8),
+        paddingTop: verticalScale(8),
+    },
+    menuItem: {
+        minHeight: verticalScale(43),
+        borderRadius: scale(11),
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: verticalScale(2),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(7),
+    },
+    disabledItem: {
+        opacity: 0.65,
+    },
+    menuLabel: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        minWidth: 0,
+        fontSize: scale(13),
+        fontWeight: '600',
+        marginLeft: scale(12),
+    },
+    placeholderBadge: {
+        borderRadius: scale(8),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(3),
+        marginLeft: scale(6),
+    },
+    placeholderBadgeText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(8),
+        fontWeight: '700',
+    },
+    sectionTitle: {
+        minHeight: verticalScale(40),
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(16),
+        paddingTop: verticalScale(8),
+    },
+    sectionTitleText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '800',
+        marginLeft: scale(8),
+    },
+    categoryRow: {
+        minHeight: verticalScale(43),
+        borderRadius: scale(11),
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: scale(8),
+        marginBottom: verticalScale(2),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(6),
+    },
+    subcategoryRow: {
+        marginLeft: scale(30),
+    },
+    categoryIcon: {
+        width: scale(31),
+        height: scale(31),
+        borderRadius: scale(10),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    categoryName: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        minWidth: 0,
+        fontSize: scale(12),
+        marginLeft: scale(9),
+    },
+    rootCategoryName: {
+        fontWeight: '700',
+    },
+    subcategoryName: {
+        fontWeight: '500',
+    },
+    loadingState: {
+        minHeight: verticalScale(90),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(18),
+    },
+    loadingText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginTop: verticalScale(8),
+    },
+    emptyText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        textAlign: 'center',
+        paddingHorizontal: scale(18),
+        paddingVertical: verticalScale(22),
+    },
+    drawerFooter: {
+        paddingHorizontal: scale(8),
+        paddingTop: verticalScale(6),
+    },
+});
+
+export default HarborDrawerContent;
