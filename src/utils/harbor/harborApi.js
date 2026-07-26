@@ -1269,9 +1269,17 @@ export async function fetchHarborMessages(username, { signal } = {}) {
     return (response.data?.topic_list?.topics || []).map(normalizeMessage);
 }
 
-export async function fetchHarborTopic(topicId, { signal } = {}) {
+export async function fetchHarborTopic(
+    topicId,
+    { postNumber, signal } = {},
+) {
     const encodedTopicId = encodeURIComponent(topicId);
-    const topicResponse = await harborApi.get(`/t/${encodedTopicId}.json`, {
+    const normalizedPostNumber = Number(postNumber);
+    const topicPath =
+        Number.isInteger(normalizedPostNumber) && normalizedPostNumber > 0
+            ? `/t/${encodedTopicId}/${normalizedPostNumber}.json`
+            : `/t/${encodedTopicId}.json`;
+    const topicResponse = await harborApi.get(topicPath, {
         params: {
             track_visit: true,
             forceLoad: true,
@@ -1286,13 +1294,34 @@ export async function fetchHarborTopic(topicId, { signal } = {}) {
         throw new Error('Invalid Harbor topic response');
     }
 
-    const allPosts = [...initialPosts];
-    const loadedPostIds = new Set(initialPosts.map(post => post?.id));
-    const missingPostIds = stream.filter(postId => !loadedPostIds.has(postId));
+    const category = await resolveTopicCategory(topic);
+    return {
+        ...topic,
+        ...(category ? { category } : {}),
+    };
+}
 
+export async function fetchHarborTopicPosts(
+    topicId,
+    postIds,
+    { signal } = {},
+) {
+    const uniquePostIds = [
+        ...new Set(
+            (Array.isArray(postIds) ? postIds : [])
+                .map(postId => Number(postId))
+                .filter(postId => Number.isInteger(postId) && postId > 0),
+        ),
+    ];
+    if (uniquePostIds.length === 0) {
+        return [];
+    }
+
+    const encodedTopicId = encodeURIComponent(topicId);
+    const posts = [];
     for (
         let index = 0;
-        index < missingPostIds.length;
+        index < uniquePostIds.length;
         index += TOPIC_POST_BATCH_SIZE
     ) {
         if (signal?.aborted) {
@@ -1301,14 +1330,14 @@ export async function fetchHarborTopic(topicId, { signal } = {}) {
             throw canceledError;
         }
 
-        const postIds = missingPostIds.slice(
+        const batchPostIds = uniquePostIds.slice(
             index,
             index + TOPIC_POST_BATCH_SIZE,
         );
         const postsResponse = await harborApi.get(
             `/t/${encodedTopicId}/posts.json`,
             {
-                params: { post_ids: postIds },
+                params: { post_ids: batchPostIds },
                 paramsSerializer: params =>
                     qs.stringify(params, { arrayFormat: 'brackets' }),
                 signal,
@@ -1318,18 +1347,38 @@ export async function fetchHarborTopic(topicId, { signal } = {}) {
         if (!Array.isArray(batch)) {
             throw new Error('Invalid Harbor posts response');
         }
-        allPosts.push(...batch);
+        posts.push(...batch);
     }
 
-    const category = await resolveTopicCategory(topic);
-    return {
-        ...topic,
-        ...(category ? { category } : {}),
-        post_stream: {
-            ...topic.post_stream,
-            posts: mergeTopicPosts(allPosts),
-        },
+    return mergeTopicPosts(posts);
+}
+
+export async function saveHarborTopicTimings(
+    topicId,
+    { postNumber, timeMs = 0, topicTimeMs = 0 } = {},
+) {
+    const normalizedTopicId = Number(topicId);
+    const normalizedPostNumber = Number(postNumber);
+    if (
+        !Number.isInteger(normalizedTopicId) ||
+        normalizedTopicId <= 0 ||
+        !Number.isInteger(normalizedPostNumber) ||
+        normalizedPostNumber <= 0
+    ) {
+        return;
+    }
+
+    const normalizeTime = value => {
+        const number = Number(value);
+        return Number.isFinite(number) ? Math.max(0, Math.floor(number)) : 0;
     };
+    await harborApi.post('/topics/timings', {
+        topic_id: normalizedTopicId,
+        topic_time: normalizeTime(topicTimeMs),
+        timings: {
+            [normalizedPostNumber]: normalizeTime(timeMs),
+        },
+    });
 }
 
 export async function fetchHarborBadges(username, { signal } = {}) {

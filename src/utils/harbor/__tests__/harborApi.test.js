@@ -9,10 +9,12 @@ import {
     fetchHarborTags,
     fetchHarborTopic,
     fetchHarborTopicList,
+    fetchHarborTopicPosts,
     fetchHarborUserActions,
     getHarborTopicViews,
     harborApi,
     markHarborNotificationRead,
+    saveHarborTopicTimings,
 } from '../harborApi';
 
 jest.mock('../../pathMap', () => ({
@@ -22,16 +24,19 @@ jest.mock('../../pathMap', () => ({
 
 describe('Harbor API 資料正規化', () => {
     let getSpy;
+    let postSpy;
     let putSpy;
 
     beforeEach(() => {
         clearHarborDiscoveryCache();
         getSpy = jest.spyOn(harborApi, 'get');
+        postSpy = jest.spyOn(harborApi, 'post');
         putSpy = jest.spyOn(harborApi, 'put');
     });
 
     afterEach(() => {
         getSpy.mockRestore();
+        postSpy.mockRestore();
         putSpy.mockRestore();
     });
 
@@ -177,40 +182,101 @@ describe('Harbor API 資料正規化', () => {
         });
     });
 
-    it('透過已授權 API 載入完整話題內容', async () => {
+    it('透過已授權 API 從指定樓層載入首窗話題內容', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                id: 31,
+                post_stream: {
+                    stream: [1, 2],
+                    posts: [{id: 1, post_number: 1}],
+                },
+            },
+        });
+
+        const topic = await fetchHarborTopic(31, {postNumber: 2});
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/t/31/2.json',
+            expect.objectContaining({
+                params: {track_visit: true, forceLoad: true},
+            }),
+        );
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(topic.post_stream.posts.map(post => post.id)).toEqual([1]);
+    });
+
+    it('分批載入、去重並排序指定話題貼文', async () => {
+        const postIds = Array.from({length: 22}, (value, index) => index + 1);
         getSpy
             .mockResolvedValueOnce({
                 data: {
-                    id: 31,
                     post_stream: {
-                        stream: [1, 2],
-                        posts: [{id: 1, post_number: 1}],
+                        posts: postIds
+                            .slice(0, 20)
+                            .reverse()
+                            .map(id => ({id, post_number: id})),
                     },
                 },
             })
             .mockResolvedValueOnce({
                 data: {
                     post_stream: {
-                        posts: [{id: 2, post_number: 2}],
+                        posts: [
+                            {id: 22, post_number: 22},
+                            {id: 21, post_number: 21},
+                        ],
                     },
                 },
             });
 
-        const topic = await fetchHarborTopic(31);
+        const posts = await fetchHarborTopicPosts(
+            31,
+            [...postIds, 2, 0, -1, 1.5],
+        );
 
         expect(getSpy).toHaveBeenNthCalledWith(
             1,
-            '/t/31.json',
+            '/t/31/posts.json',
             expect.objectContaining({
-                params: {track_visit: true, forceLoad: true},
+                params: {post_ids: postIds.slice(0, 20)},
             }),
         );
         expect(getSpy).toHaveBeenNthCalledWith(
             2,
             '/t/31/posts.json',
-            expect.objectContaining({params: {post_ids: [2]}}),
+            expect.objectContaining({
+                params: {post_ids: [21, 22]},
+            }),
         );
-        expect(topic.post_stream.posts.map(post => post.id)).toEqual([1, 2]);
+        expect(posts.map(post => post.id)).toEqual(postIds);
+    });
+
+    it('指定貼文為空時不發出請求', async () => {
+        await expect(
+            fetchHarborTopicPosts(31, [0, -1, 1.5]),
+        ).resolves.toEqual([]);
+
+        expect(getSpy).not.toHaveBeenCalled();
+    });
+
+    it('儲存話題閱讀時間並忽略無效樓層', async () => {
+        postSpy.mockResolvedValue({data: {success: 'OK'}});
+
+        await saveHarborTopicTimings(31, {
+            postNumber: 7,
+            timeMs: 1234.9,
+            topicTimeMs: -8,
+        });
+        await saveHarborTopicTimings(31, {postNumber: 0});
+
+        expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(postSpy).toHaveBeenCalledWith('/topics/timings', {
+            topic_id: 31,
+            topic_time: 0,
+            timings: {
+                7: 1234,
+            },
+        });
     });
 
     it('公開分類載入失敗時仍返回 id-only 話題分類', async () => {

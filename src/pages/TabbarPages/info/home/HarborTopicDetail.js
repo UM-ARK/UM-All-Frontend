@@ -7,18 +7,22 @@ import React, {
     useState,
 } from 'react';
 import {
+    ActivityIndicator,
     Image as NativeImage,
+    Modal,
     Pressable,
     RefreshControl,
+    Share,
     StyleSheet,
     Text,
+    TextInput,
     View,
     useWindowDimensions,
 } from 'react-native';
 
-import {FlashList} from '@shopify/flash-list';
+import { FlashList } from '@shopify/flash-list';
 import axios from 'axios';
-import {Image} from 'expo-image';
+import { Image } from 'expo-image';
 import moment from 'moment-timezone';
 import RenderHTML, {
     HTMLContentModel,
@@ -31,30 +35,46 @@ import RenderHTML, {
 } from 'react-native-render-html';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {WebView} from 'react-native-webview';
-import {scale, verticalScale} from 'react-native-size-matters';
-import {useTranslation} from 'react-i18next';
+import { WebView } from 'react-native-webview';
+import { scale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
 import ARKImageView from '../../../../components/ARKImageView';
 import Loading from '../../../../components/Loading';
-import {uiStyle, useTheme} from '../../../../components/ThemeContext';
-import {openLink} from '../../../../utils/browser';
-import {logToFirebase} from '../../../../utils/firebaseAnalytics';
+import { uiStyle, useTheme } from '../../../../components/ThemeContext';
+import { useHarborSession } from '../../../../contexts/HarborSessionContext';
+import { openLink } from '../../../../utils/browser';
+import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import {
     getHarborHtmlAttribute,
     replaceHarborEmojiImages,
 } from '../../../../utils/harbor/harborHtml';
-import {fetchHarborTopic} from '../../../../utils/harbor/harborApi';
-import {parseHarborUrl} from '../../../../utils/harbor/harborNavigation';
+import {
+    fetchHarborTopic,
+    fetchHarborTopicPosts,
+    saveHarborTopicTimings,
+} from '../../../../utils/harbor/harborApi';
+import { parseHarborUrl } from '../../../../utils/harbor/harborNavigation';
+import {
+    getHarborReadingPosition,
+    saveHarborReadingPosition,
+} from '../../../../utils/harbor/harborReading';
 import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../../utils/pathMap';
-import {trigger} from '../../../../utils/trigger';
+import { trigger } from '../../../../utils/trigger';
 
 const AVATAR_SIZE = 88;
+const TOPIC_POST_BATCH_SIZE = 20;
+const READING_SAVE_DELAY = 1200;
+const TIMINGS_REPORT_INTERVAL = 10000;
+const TOPIC_VIEWABILITY_CONFIG = {
+    itemVisiblePercentThreshold: 50,
+    minimumViewTime: 750,
+};
 
 const iframeModel = HTMLElementModel.fromCustomModel({
     tagName: 'iframe',
@@ -142,15 +162,66 @@ const getTagLabel = tag => {
     return tag?.name || tag?.id || '';
 };
 
-const HarborIframeRenderer = ({tnode}) => {
-    const {theme} = useTheme();
+const mergeTopicWindow = (currentTopic, nextTopic) => {
+    if (!currentTopic) {
+        return nextTopic;
+    }
+
+    const currentPosts = currentTopic.post_stream?.posts || [];
+    const nextPosts = nextTopic?.post_stream?.posts || [];
+    const stream =
+        nextTopic?.post_stream?.stream || currentTopic.post_stream?.stream || [];
+    const streamIndex = new Map(
+        stream.map((postId, index) => [Number(postId), index]),
+    );
+    const postsById = new Map();
+
+    [...currentPosts, ...nextPosts].forEach(post => {
+        if (post?.id) {
+            postsById.set(Number(post.id), post);
+        }
+    });
+
+    const posts = [...postsById.values()].sort((left, right) => {
+        const leftIndex = streamIndex.get(Number(left.id));
+        const rightIndex = streamIndex.get(Number(right.id));
+        if (leftIndex !== undefined && rightIndex !== undefined) {
+            return leftIndex - rightIndex;
+        }
+        return Number(left.post_number || 0) - Number(right.post_number || 0);
+    });
+
+    return {
+        ...currentTopic,
+        ...nextTopic,
+        post_stream: {
+            ...currentTopic.post_stream,
+            ...nextTopic?.post_stream,
+            stream,
+            posts,
+        },
+    };
+};
+
+const appendTopicPosts = (currentTopic, nextPosts, stream) => {
+    return mergeTopicWindow(currentTopic, {
+        post_stream: {
+            ...currentTopic?.post_stream,
+            ...(stream ? { stream } : {}),
+            posts: nextPosts,
+        },
+    });
+};
+
+const HarborIframeRenderer = ({ tnode }) => {
+    const { theme } = useTheme();
     const sourceUrl = normalizeHtmlUrl(tnode?.attributes?.src);
     const requestedHeight = Number(tnode?.attributes?.height);
     const height = Number.isFinite(requestedHeight)
         ? Math.min(
-              Math.max(requestedHeight, verticalScale(180)),
-              verticalScale(420),
-          )
+            Math.max(requestedHeight, verticalScale(180)),
+            verticalScale(420),
+        )
         : verticalScale(240);
 
     if (!sourceUrl) {
@@ -161,11 +232,11 @@ const HarborIframeRenderer = ({tnode}) => {
         <View
             style={[
                 styles.iframeContainer,
-                {height, backgroundColor: theme.white},
+                { height, backgroundColor: theme.white },
             ]}>
             <WebView
-                source={{uri: sourceUrl}}
-                style={{backgroundColor: theme.white}}
+                source={{ uri: sourceUrl }}
+                style={{ backgroundColor: theme.white }}
                 scrollEnabled={false}
                 allowsInlineMediaPlayback
             />
@@ -173,7 +244,7 @@ const HarborIframeRenderer = ({tnode}) => {
     );
 };
 
-const HarborEmojiRenderer = ({tnode}) => {
+const HarborEmojiRenderer = ({ tnode }) => {
     const sourceUrl = normalizeHtmlUrl(tnode?.attributes?.src);
     const label = tnode?.attributes?.alt || '';
 
@@ -183,7 +254,7 @@ const HarborEmojiRenderer = ({tnode}) => {
 
     return (
         <NativeImage
-            source={{uri: sourceUrl}}
+            source={{ uri: sourceUrl }}
             style={styles.inlineEmoji}
             resizeMode="contain"
             accessible={Boolean(label)}
@@ -193,7 +264,7 @@ const HarborEmojiRenderer = ({tnode}) => {
 };
 
 const HarborImageRenderer = props => {
-    const {theme} = useTheme();
+    const { theme } = useTheme();
     const imageProps = useIMGElementProps(props);
     const rendererProps = useRendererProps('img');
     const state = useIMGElementState(imageProps);
@@ -215,7 +286,7 @@ const HarborImageRenderer = props => {
             style={state.containerStyle}
             onPress={() => rendererProps.onPress?.(imageUrl)}>
             <Image
-                source={{uri: state.source?.uri}}
+                source={{ uri: state.source?.uri }}
                 style={[
                     state.dimensions,
                     state.type === 'success' ? state.imageStyle : null,
@@ -237,12 +308,12 @@ const htmlRenderers = {
 };
 
 const HarborPostContent = memo(
-    ({cooked, contentWidth, imageUrls, onOpenImage, onPressLink, postUrl}) => {
-        const {theme} = useTheme();
-        const {t} = useTranslation('harbor');
-        const {black, themeColor, themeColorUltraLight, tonal, white} = theme;
+    ({ cooked, contentWidth, imageUrls, onOpenImage, onPressLink, postUrl }) => {
+        const { theme } = useTheme();
+        const { t } = useTranslation('harbor');
+        const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
         const normalizedCooked = useMemo(() => {
-            return replaceHarborEmojiImages(cooked);
+            return replaceHarborEmojiImages(cooked || '');
         }, [cooked]);
         const requiresInteractiveFallback = useMemo(() => {
             return /<(?:video|audio)\b|class=(?:"[^"]*\bpoll\b[^"]*"|'[^']*\bpoll\b[^']*')/i.test(
@@ -358,7 +429,7 @@ const HarborPostContent = memo(
 
         const classesStyles = useMemo(
             () => ({
-                meta: {display: 'none'},
+                meta: { display: 'none' },
                 onebox: {
                     backgroundColor: tonal.primary08,
                     borderColor: themeColorUltraLight,
@@ -419,7 +490,7 @@ const HarborPostContent = memo(
         return (
             <View>
                 <RenderHTML
-                    source={{html: normalizedCooked, baseUrl: ARK_HARBOR}}
+                    source={{ html: normalizedCooked, baseUrl: ARK_HARBOR }}
                     contentWidth={contentWidth}
                     baseStyle={baseStyle}
                     tagsStyles={tagsStyles}
@@ -428,7 +499,7 @@ const HarborPostContent = memo(
                     renderersProps={renderersProps}
                     customHTMLElementModels={customHTMLElementModels}
                     ignoredDomTags={['svg']}
-                    defaultTextProps={{selectable: true}}
+                    defaultTextProps={{ selectable: true }}
                     enableExperimentalBRCollapsing
                     enableExperimentalGhostLinesPrevention
                     enableExperimentalMarginCollapsing
@@ -437,9 +508,9 @@ const HarborPostContent = memo(
                     <Pressable
                         onPress={() => {
                             trigger();
-                            openLink({URL: postUrl, mode: 'fullScreen'});
+                            openLink({ URL: postUrl, mode: 'fullScreen' });
                         }}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.interactiveFallback,
                             {
                                 backgroundColor: pressed
@@ -455,7 +526,7 @@ const HarborPostContent = memo(
                         <Text
                             style={[
                                 styles.interactiveFallbackText,
-                                {color: themeColor},
+                                { color: themeColor },
                             ]}>
                             {t('查看互動內容')}
                         </Text>
@@ -466,7 +537,7 @@ const HarborPostContent = memo(
     },
 );
 
-const MetaItem = ({icon, value, color}) => {
+const MetaItem = ({ icon, value, color }) => {
     if (!value) {
         return null;
     }
@@ -477,7 +548,7 @@ const MetaItem = ({icon, value, color}) => {
                 size={scale(15)}
                 color={color}
             />
-            <Text style={[styles.metaText, {color}]}>{value}</Text>
+            <Text style={[styles.metaText, { color }]}>{value}</Text>
         </View>
     );
 };
@@ -492,8 +563,8 @@ const HarborPostCard = memo(
         onPressLink,
         onPressReply,
     }) => {
-        const {theme} = useTheme();
-        const {t} = useTranslation('harbor');
+        const { theme } = useTheme();
+        const { t } = useTranslation('harbor');
         const {
             black,
             themeColor,
@@ -512,13 +583,97 @@ const HarborPostCard = memo(
             post.updated_at &&
             post.created_at &&
             moment(post.updated_at).diff(moment(post.created_at), 'seconds') >
-                60;
+            60;
+        const isDeleted = Boolean(post.deleted_at || post.user_deleted);
+        const isHidden = Boolean(post.hidden);
+        const isNotice = Boolean(
+            post.action_code ||
+            post.notice ||
+            post.small_action ||
+            post.post_type === 3,
+        );
+
+        if (isDeleted || isHidden) {
+            return (
+                <View
+                    style={[
+                        styles.postStateCard,
+                        {
+                            backgroundColor: tonal.primary08,
+                            borderColor: themeColorUltraLight,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name={isHidden ? 'eye-off-outline' : 'delete-outline'}
+                        size={scale(18)}
+                        color={black.third}
+                    />
+                    <Text
+                        style={[styles.postStateText, { color: black.third }]}>
+                        {isHidden
+                            ? t('此帖子已被隱藏')
+                            : t('此帖子已被刪除')}
+                    </Text>
+                    <Text
+                        style={[styles.postStateNumber, { color: black.third }]}>
+                        #{post.post_number}
+                    </Text>
+                </View>
+            );
+        }
+
+        if (isNotice) {
+            return (
+                <View
+                    style={[
+                        styles.postStateCard,
+                        {
+                            backgroundColor: tonal.primary08,
+                            borderColor: themeColorUltraLight,
+                        },
+                    ]}>
+                    <MaterialCommunityIcons
+                        name="information-outline"
+                        size={scale(18)}
+                        color={themeColor}
+                    />
+                    <View style={styles.noticeContent}>
+                        <Text
+                            style={[
+                                styles.noticeTitle,
+                                { color: themeColor },
+                            ]}>
+                            {t('系統提示')}
+                            {post.action_code ? ` · ${post.action_code}` : ''}
+                        </Text>
+                        {typeof post.cooked === 'string' &&
+                            post.cooked.trim().length > 0 ? (
+                            <HarborPostContent
+                                cooked={post.cooked}
+                                contentWidth={contentWidth - scale(38)}
+                                imageUrls={imageUrls}
+                                onOpenImage={onOpenImage}
+                                onPressLink={onPressLink}
+                                postUrl={ARK_HARBOR_TOPIC_URL(
+                                    post.topic_id,
+                                    post.post_number,
+                                )}
+                            />
+                        ) : null}
+                    </View>
+                    <Text
+                        style={[styles.postStateNumber, { color: black.third }]}>
+                        #{post.post_number}
+                    </Text>
+                </View>
+            );
+        }
 
         return (
             <View
                 style={[
                     styles.postCard,
-                    {backgroundColor: white, borderColor: themeColorUltraLight},
+                    { backgroundColor: white, borderColor: themeColorUltraLight },
                     viewShadow,
                 ]}>
                 <View style={styles.postHeader}>
@@ -529,15 +684,15 @@ const HarborPostCard = memo(
                             trigger();
                             onPressAuthor(post.username);
                         }}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.authorLink,
                             pressed ? styles.pressedLink : null,
                         ]}>
                         <Image
-                            source={{uri: avatarUrl}}
+                            source={{ uri: avatarUrl }}
                             style={[
                                 styles.avatar,
-                                {backgroundColor: tonal.primary15},
+                                { backgroundColor: tonal.primary15 },
                             ]}
                             contentFit="cover"
                             placeholder={theme.imagePlaceholder}
@@ -546,7 +701,7 @@ const HarborPostCard = memo(
                         />
                         <View style={styles.authorArea}>
                             <Text
-                                style={[styles.authorName, {color: black.main}]}
+                                style={[styles.authorName, { color: black.main }]}
                                 numberOfLines={1}>
                                 {displayName}
                             </Text>
@@ -555,7 +710,7 @@ const HarborPostCard = memo(
                                     <Text
                                         style={[
                                             styles.userTitle,
-                                            {color: themeColor},
+                                            { color: themeColor },
                                         ]}
                                         numberOfLines={1}>
                                         {post.user_title}
@@ -576,7 +731,7 @@ const HarborPostCard = memo(
                                 ) : null}
                             </View>
                             <Text
-                                style={[styles.postTime, {color: black.third}]}>
+                                style={[styles.postTime, { color: black.third }]}>
                                 {moment
                                     .tz(post.created_at, 'Asia/Macau')
                                     .format('YYYY/MM/DD HH:mm')}
@@ -584,7 +739,7 @@ const HarborPostCard = memo(
                             </Text>
                         </View>
                     </Pressable>
-                    <Text style={[styles.postNumber, {color: black.third}]}>
+                    <Text style={[styles.postNumber, { color: black.third }]}>
                         #{post.post_number}
                     </Text>
                 </View>
@@ -595,7 +750,7 @@ const HarborPostCard = memo(
                             trigger();
                             onPressReply(post.reply_to_post_number);
                         }}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.replyBadge,
                             {
                                 backgroundColor: pressed
@@ -608,7 +763,7 @@ const HarborPostCard = memo(
                             size={scale(14)}
                             color={themeColor}
                         />
-                        <Text style={[styles.replyText, {color: themeColor}]}>
+                        <Text style={[styles.replyText, { color: themeColor }]}>
                             {t('回覆樓層', {
                                 postNumber: post.reply_to_post_number,
                             })}
@@ -633,7 +788,7 @@ const HarborPostCard = memo(
                 <View
                     style={[
                         styles.postFooter,
-                        {borderTopColor: themeColorUltraLight},
+                        { borderTopColor: themeColorUltraLight },
                     ]}>
                     <View style={styles.footerMeta}>
                         <MetaItem
@@ -659,9 +814,9 @@ const HarborPostCard = memo(
 );
 
 const HarborTopicHeader = memo(
-    ({topic, onOpenOriginal, onPressCategory, onPressTag}) => {
-        const {theme} = useTheme();
-        const {t} = useTranslation('harbor');
+    ({ topic, onOpenOriginal, onShare, onPressCategory, onPressTag }) => {
+        const { theme } = useTheme();
+        const { t } = useTranslation('harbor');
         const {
             black,
             themeColor,
@@ -681,12 +836,12 @@ const HarborTopicHeader = memo(
             <View
                 style={[
                     styles.topicHeader,
-                    {backgroundColor: white, borderColor: themeColorUltraLight},
+                    { backgroundColor: white, borderColor: themeColorUltraLight },
                     viewShadow,
                 ]}>
                 <Text
                     selectable
-                    style={[styles.topicTitle, {color: black.main}]}>
+                    style={[styles.topicTitle, { color: black.main }]}>
                     {topic.title}
                 </Text>
 
@@ -701,7 +856,7 @@ const HarborTopicHeader = memo(
                                 categoryName,
                             });
                         }}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.category,
                             {
                                 backgroundColor: pressed
@@ -715,7 +870,7 @@ const HarborTopicHeader = memo(
                             color={themeColor}
                         />
                         <Text
-                            style={[styles.categoryText, {color: themeColor}]}>
+                            style={[styles.categoryText, { color: themeColor }]}>
                             {categoryName || `分類 #${categoryId}`}
                         </Text>
                     </Pressable>
@@ -731,7 +886,7 @@ const HarborTopicHeader = memo(
                                     trigger();
                                     onPressTag(tag);
                                 }}
-                                style={({pressed}) => [
+                                style={({ pressed }) => [
                                     styles.tag,
                                     {
                                         backgroundColor: pressed
@@ -742,7 +897,7 @@ const HarborTopicHeader = memo(
                                 <Text
                                     style={[
                                         styles.tagText,
-                                        {color: themeColor},
+                                        { color: themeColor },
                                     ]}>
                                     #{tag}
                                 </Text>
@@ -770,7 +925,7 @@ const HarborTopicHeader = memo(
                 </View>
 
                 {topic.last_posted_at ? (
-                    <Text style={[styles.lastUpdated, {color: black.third}]}>
+                    <Text style={[styles.lastUpdated, { color: black.third }]}>
                         {t('最後更新')} ·{' '}
                         {moment
                             .tz(topic.last_posted_at, 'Asia/Macau')
@@ -778,40 +933,210 @@ const HarborTopicHeader = memo(
                     </Text>
                 ) : null}
 
-                <Pressable
-                    onPress={onOpenOriginal}
-                    style={({pressed}) => [
-                        styles.webOriginalButton,
-                        {
-                            backgroundColor: pressed
-                                ? tonal.primary30
-                                : tonal.primary15,
-                        },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name="web"
-                        size={scale(16)}
-                        color={themeColor}
-                    />
-                    <Text style={[styles.webOriginalText, {color: themeColor}]}>
-                        {t('查看 Web 原文')}
-                    </Text>
-                    <MaterialCommunityIcons
-                        name="open-in-new"
-                        size={scale(14)}
-                        color={themeColor}
-                    />
-                </Pressable>
+                <View style={styles.webActionRow}>
+                    <Pressable
+                        onPress={onOpenOriginal}
+                        style={({ pressed }) => [
+                            styles.webOriginalButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="web"
+                            size={scale(16)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.webOriginalText,
+                                { color: themeColor },
+                            ]}>
+                            {t('查看 Web 原文')}
+                        </Text>
+                        <MaterialCommunityIcons
+                            name="open-in-new"
+                            size={scale(14)}
+                            color={themeColor}
+                        />
+                    </Pressable>
+                    <Pressable
+                        onPress={() => {
+                            trigger();
+                            onShare();
+                        }}
+                        style={({ pressed }) => [
+                            styles.webOriginalButton,
+                            {
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="share-variant-outline"
+                            size={scale(16)}
+                            color={themeColor}
+                        />
+                        <Text
+                            style={[
+                                styles.webOriginalText,
+                                { color: themeColor },
+                            ]}>
+                            {t('分享')}
+                        </Text>
+                    </Pressable>
+                </View>
             </View>
         );
     },
 );
 
-const HarborTopicDetail = ({route, navigation}) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('harbor');
-    const {width} = useWindowDimensions();
-    const {black, bg_color, themeColor, tonal, trueWhite} = theme;
+const HarborReadingControls = memo(
+    ({
+        currentPostNumber,
+        highestPostNumber,
+        onFirst,
+        onJump,
+        onLatest,
+    }) => {
+        const { theme } = useTheme();
+        const { t } = useTranslation('harbor');
+        const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
+        const progress =
+            highestPostNumber > 0
+                ? Math.min(currentPostNumber / highestPostNumber, 1)
+                : 0;
+        const controls = [
+            { icon: 'page-first', label: t('第一篇'), onPress: onFirst },
+            { icon: 'format-list-numbered', label: t('跳至樓層'), onPress: onJump },
+            { icon: 'page-last', label: t('最新一篇'), onPress: onLatest },
+        ];
+
+        return (
+            <View
+                style={[
+                    styles.readingControls,
+                    { backgroundColor: white, borderColor: themeColorUltraLight },
+                ]}>
+                <View style={styles.progressHeader}>
+                    <Text style={[styles.progressText, { color: black.second }]}>
+                        {t('閱讀進度')} · {currentPostNumber || 1}/
+                        {highestPostNumber || 1}
+                    </Text>
+                    <Text style={[styles.progressPercent, { color: themeColor }]}>
+                        {Math.round(progress * 100)}%
+                    </Text>
+                </View>
+                <View
+                    style={[
+                        styles.progressTrack,
+                        { backgroundColor: tonal.primary15 },
+                    ]}>
+                    <View
+                        style={[
+                            styles.progressFill,
+                            {
+                                backgroundColor: themeColor,
+                                width: `${progress * 100}%`,
+                            },
+                        ]}
+                    />
+                </View>
+                <View style={styles.controlRow}>
+                    {controls.map(control => (
+                        <Pressable
+                            key={control.label}
+                            onPress={() => {
+                                trigger();
+                                control.onPress();
+                            }}
+                            style={({ pressed }) => [
+                                styles.controlButton,
+                                {
+                                    backgroundColor: pressed
+                                        ? tonal.primary30
+                                        : tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name={control.icon}
+                                size={scale(15)}
+                                color={themeColor}
+                            />
+                            <Text
+                                style={[
+                                    styles.controlButtonText,
+                                    { color: themeColor },
+                                ]}>
+                                {control.label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
+            </View>
+        );
+    },
+);
+
+const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
+
+    if (!Array.isArray(topics) || topics.length === 0) {
+        return <View style={styles.listFooter} />;
+    }
+
+    return (
+        <View
+            style={[
+                styles.relatedTopics,
+                { backgroundColor: white, borderColor: themeColorUltraLight },
+            ]}>
+            <Text style={[styles.relatedTitle, { color: black.main }]}>
+                {t('相關話題')}
+            </Text>
+            {topics.map(relatedTopic => (
+                <Pressable
+                    key={relatedTopic.id}
+                    onPress={() => {
+                        trigger();
+                        onPressTopic(relatedTopic);
+                    }}
+                    style={({ pressed }) => [
+                        styles.relatedTopic,
+                        {
+                            backgroundColor: pressed
+                                ? tonal.primary15
+                                : white,
+                            borderTopColor: themeColorUltraLight,
+                        },
+                    ]}>
+                    <Text
+                        style={[styles.relatedTopicTitle, { color: black.second }]}
+                        numberOfLines={2}>
+                        {relatedTopic.title}
+                    </Text>
+                    <MaterialCommunityIcons
+                        name="chevron-right"
+                        size={scale(18)}
+                        color={themeColor}
+                    />
+                </Pressable>
+            ))}
+        </View>
+    );
+});
+
+const HarborTopicDetail = ({ route, navigation }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('harbor');
+    const { status: sessionStatus } = useHarborSession();
+    const { width } = useWindowDimensions();
+    const { black, bg_color, themeColor, tonal, trueWhite } = theme;
     const topicId = Number(route.params?.topicId);
     const initialPostNumber = Number(route.params?.postNumber);
     const initialTopicTitle = route.params?.topicTitle;
@@ -819,9 +1144,25 @@ const HarborTopicDetail = ({route, navigation}) => {
     const imageViewerRef = useRef(null);
     const requestGenerationRef = useRef(0);
     const controllerRef = useRef(null);
+    const latestTopicRef = useRef(null);
+    const pendingTopicRef = useRef(null);
+    const pendingScrollRef = useRef(null);
+    const hasPerformedInitialScrollRef = useRef(false);
+    const adjacentLoadingRef = useRef({ previous: false, next: false });
+    const latestVisiblePostRef = useRef(0);
+    const readingSaveTimeoutRef = useRef(null);
+    const lastTimingsAtRef = useRef(Date.now());
+    const sessionStatusRef = useRef(sessionStatus);
     const [topic, setTopic] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isLoadingPrevious, setIsLoadingPrevious] = useState(false);
+    const [isLoadingNext, setIsLoadingNext] = useState(false);
+    const [pendingNewPostIds, setPendingNewPostIds] = useState([]);
+    const [unreadAfterPostNumber, setUnreadAfterPostNumber] = useState(0);
+    const [currentPostNumber, setCurrentPostNumber] = useState(1);
+    const [isJumpVisible, setIsJumpVisible] = useState(false);
+    const [jumpPostNumber, setJumpPostNumber] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
     const posts = useMemo(() => {
@@ -829,22 +1170,31 @@ const HarborTopicDetail = ({route, navigation}) => {
         if (!Array.isArray(topicPosts)) {
             return [];
         }
-        return topicPosts.filter(post => {
-            return (
-                !post?.deleted_at &&
-                !post?.user_deleted &&
-                typeof post?.cooked === 'string' &&
-                post.cooked.trim().length > 0
-            );
-        });
+        return topicPosts.filter(post => post?.id);
     }, [topic]);
 
+    const highestPostNumber = useMemo(() => {
+        return Math.max(
+            Number(topic?.highest_post_number || 0),
+            Number(topic?.posts_count || 0),
+            ...posts.map(post => Number(post.post_number || 0)),
+        );
+    }, [posts, topic?.highest_post_number, topic?.posts_count]);
+
     const imageUrls = useMemo(() => {
-        const urls = posts.flatMap(post => extractPostImages(post.cooked));
+        const urls = posts.flatMap(post => extractPostImages(post?.cooked));
         return [...new Set(urls)];
     }, [posts]);
 
     const contentWidth = Math.max(width - scale(48), scale(220));
+
+    useEffect(() => {
+        latestTopicRef.current = topic;
+    }, [topic]);
+
+    useEffect(() => {
+        sessionStatusRef.current = sessionStatus;
+    }, [sessionStatus]);
 
     useEffect(() => {
         navigation.setOptions({
@@ -853,7 +1203,7 @@ const HarborTopicDetail = ({route, navigation}) => {
     }, [initialTopicTitle, navigation, topic?.title]);
 
     const loadTopic = useCallback(
-        async ({refresh = false} = {}) => {
+        async ({ refresh = false } = {}) => {
             const requestGeneration = ++requestGenerationRef.current;
             controllerRef.current?.abort();
             const controller = new AbortController();
@@ -875,7 +1225,20 @@ const HarborTopicDetail = ({route, navigation}) => {
             }
 
             try {
-                const nextTopic = await fetchHarborTopic(topicId, {
+                const localPostNumber = refresh
+                    ? null
+                    : await getHarborReadingPosition(topicId);
+                const hasRoutePostNumber =
+                    Number.isInteger(initialPostNumber) &&
+                    initialPostNumber > 0;
+                let targetPostNumber =
+                    hasRoutePostNumber
+                        ? initialPostNumber
+                        : localPostNumber;
+                let nextTopic = await fetchHarborTopic(topicId, {
+                    ...(targetPostNumber
+                        ? { postNumber: targetPostNumber }
+                        : {}),
                     signal: controller.signal,
                 });
                 if (
@@ -884,6 +1247,79 @@ const HarborTopicDetail = ({route, navigation}) => {
                 ) {
                     return;
                 }
+                if (targetPostNumber) {
+                    targetPostNumber = Math.min(
+                        Math.max(Number(targetPostNumber), 1),
+                        Number(
+                            nextTopic.highest_post_number ||
+                            nextTopic.posts_count ||
+                            targetPostNumber,
+                        ),
+                    );
+                }
+
+                if (refresh) {
+                    const currentTopic = latestTopicRef.current;
+                    const currentStream = currentTopic?.post_stream?.stream || [];
+                    const currentIds = new Set(currentStream.map(Number));
+                    const nextStream = nextTopic.post_stream?.stream || [];
+                    const newPostIds = nextStream.filter(postId => {
+                        return !currentIds.has(Number(postId));
+                    });
+
+                    if (newPostIds.length > 0) {
+                        pendingTopicRef.current = nextTopic;
+                        setPendingNewPostIds(newPostIds);
+                        setTopic(current => ({
+                            ...current,
+                            ...nextTopic,
+                            post_stream: current.post_stream,
+                        }));
+                    } else {
+                        setTopic(current =>
+                            mergeTopicWindow(current, nextTopic),
+                        );
+                    }
+                    return;
+                }
+
+                const serverLastReadPostNumber = Number(
+                    nextTopic.last_read_post_number || 0,
+                );
+                setUnreadAfterPostNumber(serverLastReadPostNumber);
+                latestTopicRef.current = nextTopic;
+                setTopic(nextTopic);
+                if (!hasRoutePostNumber && serverLastReadPostNumber > 0) {
+                    const serverResumePostNumber = Math.min(
+                        serverLastReadPostNumber +
+                        (Number(nextTopic.unread_posts || 0) > 0 ? 1 : 0),
+                        Number(
+                            nextTopic.highest_post_number ||
+                            nextTopic.posts_count ||
+                            serverLastReadPostNumber,
+                        ),
+                    );
+                    targetPostNumber = Math.max(
+                        Number(targetPostNumber || 0),
+                        serverResumePostNumber,
+                    );
+                    const targetIsLoaded = nextTopic.post_stream.posts.some(
+                        post =>
+                            Number(post.post_number) === targetPostNumber,
+                    );
+                    if (!targetIsLoaded) {
+                        const targetTopic = await fetchHarborTopic(topicId, {
+                            postNumber: targetPostNumber,
+                            signal: controller.signal,
+                        });
+                        nextTopic = mergeTopicWindow(nextTopic, targetTopic);
+                    }
+                }
+
+                pendingScrollRef.current = targetPostNumber || 1;
+                latestVisiblePostRef.current = targetPostNumber || 1;
+                setCurrentPostNumber(targetPostNumber || 1);
+                latestTopicRef.current = nextTopic;
                 setTopic(nextTopic);
             } catch (error) {
                 if (!isCanceledRequest(error, controller.signal)) {
@@ -900,7 +1336,7 @@ const HarborTopicDetail = ({route, navigation}) => {
                 }
             }
         },
-        [t, topicId],
+        [initialPostNumber, t, topicId],
     );
 
     useEffect(() => {
@@ -913,39 +1349,234 @@ const HarborTopicDetail = ({route, navigation}) => {
         return () => {
             requestGenerationRef.current += 1;
             controllerRef.current?.abort();
+            clearTimeout(readingSaveTimeoutRef.current);
+            const lastPostNumber = latestVisiblePostRef.current;
+            if (lastPostNumber > 0) {
+                saveHarborReadingPosition(topicId, lastPostNumber);
+                if (sessionStatusRef.current === 'signedIn') {
+                    const now = Date.now();
+                    saveHarborTopicTimings(topicId, {
+                        postNumber: lastPostNumber,
+                        timeMs: now - lastTimingsAtRef.current,
+                        topicTimeMs: now - lastTimingsAtRef.current,
+                    }).catch(() => { });
+                }
+            }
         };
     }, [loadTopic, topicId]);
 
-    const scrollToPost = useCallback(
-        postNumber => {
-            const postIndex = posts.findIndex(post => {
-                return Number(post.post_number) === Number(postNumber);
-            });
-            if (postIndex < 0) {
-                return;
-            }
+    const handleScrollToIndexFailed = useCallback(info => {
+        const index = Math.max(Number(info?.index || 0), 0);
+        listRef.current?.scrollToOffset({
+            offset: index * verticalScale(260),
+            animated: false,
+        });
+        setTimeout(() => {
             listRef.current?.scrollToIndex({
-                index: postIndex,
+                index,
                 animated: true,
                 viewPosition: 0,
             });
+        }, 250);
+    }, []);
+
+    const scrollToLoadedPost = useCallback(
+        (postNumber, animated = true) => {
+            const loadedPosts =
+                latestTopicRef.current?.post_stream?.posts?.filter(
+                    post => post?.id,
+                ) || [];
+            const postIndex = loadedPosts.findIndex(post => {
+                return Number(post.post_number) === Number(postNumber);
+            });
+            if (postIndex < 0) {
+                return false;
+            }
+            try {
+                listRef.current?.scrollToIndex({
+                    index: postIndex,
+                    animated,
+                    viewPosition: 0,
+                });
+            } catch (error) {
+                handleScrollToIndexFailed({ index: postIndex });
+            }
+            return true;
         },
-        [posts],
+        [handleScrollToIndexFailed],
+    );
+
+    const scrollToPost = useCallback(
+        async postNumber => {
+            const normalizedPostNumber = Math.min(
+                Math.max(Number(postNumber), 1),
+                Number(
+                    latestTopicRef.current?.highest_post_number ||
+                    latestTopicRef.current?.posts_count ||
+                    postNumber,
+                ),
+            );
+            if (!Number.isInteger(normalizedPostNumber)) {
+                return;
+            }
+            if (scrollToLoadedPost(normalizedPostNumber)) {
+                return;
+            }
+
+            pendingScrollRef.current = normalizedPostNumber;
+            setIsLoadingNext(true);
+            try {
+                const targetTopic = await fetchHarborTopic(topicId, {
+                    postNumber: normalizedPostNumber,
+                });
+                setTopic(current => mergeTopicWindow(current, targetTopic));
+            } catch (error) {
+                if (!isCanceledRequest(error)) {
+                    Toast.show(t('樓層載入失敗，請稍後再試'));
+                    pendingScrollRef.current = null;
+                }
+            } finally {
+                setIsLoadingNext(false);
+            }
+        },
+        [scrollToLoadedPost, t, topicId],
     );
 
     useEffect(() => {
-        if (
-            !topic ||
-            !Number.isInteger(initialPostNumber) ||
-            initialPostNumber <= 0
-        ) {
+        const targetPostNumber = pendingScrollRef.current;
+        if (!targetPostNumber || posts.length === 0) {
             return undefined;
         }
         const timeout = setTimeout(() => {
-            scrollToPost(initialPostNumber);
-        }, 350);
+            if (
+                scrollToLoadedPost(
+                    targetPostNumber,
+                    hasPerformedInitialScrollRef.current,
+                )
+            ) {
+                pendingScrollRef.current = null;
+                hasPerformedInitialScrollRef.current = true;
+            }
+        }, 250);
         return () => clearTimeout(timeout);
-    }, [initialPostNumber, scrollToPost, topic]);
+    }, [posts, scrollToLoadedPost]);
+
+    const loadAdjacentPosts = useCallback(
+        async direction => {
+            if (adjacentLoadingRef.current[direction]) {
+                return;
+            }
+            const currentTopic = latestTopicRef.current;
+            const stream = currentTopic?.post_stream?.stream || [];
+            const loadedPosts = currentTopic?.post_stream?.posts || [];
+            const streamIndex = new Map(
+                stream.map((postId, index) => [Number(postId), index]),
+            );
+            const loadedIndexes = loadedPosts
+                .map(post => streamIndex.get(Number(post.id)))
+                .filter(Number.isInteger)
+                .sort((left, right) => left - right);
+            if (loadedIndexes.length === 0) {
+                return;
+            }
+
+            let postIds = [];
+            if (direction === 'previous') {
+                const firstLoadedIndex = loadedIndexes[0];
+                postIds = stream.slice(
+                    Math.max(firstLoadedIndex - TOPIC_POST_BATCH_SIZE, 0),
+                    firstLoadedIndex,
+                );
+            } else {
+                const loadedIndexSet = new Set(loadedIndexes);
+                let firstMissingIndex = loadedIndexes[loadedIndexes.length - 1] + 1;
+                for (
+                    let index = loadedIndexes[0];
+                    index <= loadedIndexes[loadedIndexes.length - 1];
+                    index += 1
+                ) {
+                    if (!loadedIndexSet.has(index)) {
+                        firstMissingIndex = index;
+                        break;
+                    }
+                }
+                postIds = stream.slice(
+                    firstMissingIndex,
+                    firstMissingIndex + TOPIC_POST_BATCH_SIZE,
+                );
+            }
+
+            const loadedIds = new Set(loadedPosts.map(post => Number(post.id)));
+            postIds = postIds.filter(postId => !loadedIds.has(Number(postId)));
+            if (postIds.length === 0) {
+                return;
+            }
+
+            adjacentLoadingRef.current[direction] = true;
+            if (direction === 'previous') {
+                setIsLoadingPrevious(true);
+            } else {
+                setIsLoadingNext(true);
+            }
+            try {
+                const nextPosts = await fetchHarborTopicPosts(
+                    topicId,
+                    postIds,
+                );
+                setTopic(current => appendTopicPosts(current, nextPosts));
+            } catch (error) {
+                if (!isCanceledRequest(error)) {
+                    Toast.show(t('帖子載入失敗，請稍後再試'));
+                }
+            } finally {
+                adjacentLoadingRef.current[direction] = false;
+                if (direction === 'previous') {
+                    setIsLoadingPrevious(false);
+                } else {
+                    setIsLoadingNext(false);
+                }
+            }
+        },
+        [t, topicId],
+    );
+
+    const handleViewableItemsChanged = useCallback(
+        ({ viewableItems }) => {
+            const visiblePostNumbers = viewableItems
+                .map(viewableItem => Number(viewableItem.item?.post_number))
+                .filter(Number.isInteger);
+            if (visiblePostNumbers.length === 0) {
+                return;
+            }
+
+            const highestVisiblePostNumber = Math.max(...visiblePostNumbers);
+            setCurrentPostNumber(highestVisiblePostNumber);
+            if (highestVisiblePostNumber <= latestVisiblePostRef.current) {
+                return;
+            }
+            latestVisiblePostRef.current = highestVisiblePostNumber;
+            clearTimeout(readingSaveTimeoutRef.current);
+            readingSaveTimeoutRef.current = setTimeout(() => {
+                saveHarborReadingPosition(
+                    topicId,
+                    highestVisiblePostNumber,
+                );
+                const now = Date.now();
+                if (
+                    sessionStatusRef.current === 'signedIn' &&
+                    now - lastTimingsAtRef.current >= TIMINGS_REPORT_INTERVAL
+                ) {
+                    saveHarborTopicTimings(topicId, {
+                        postNumber: highestVisiblePostNumber,
+                        timeMs: now - lastTimingsAtRef.current,
+                        topicTimeMs: now - lastTimingsAtRef.current,
+                    }).catch(() => { });
+                    lastTimingsAtRef.current = now;
+                }
+            }, READING_SAVE_DELAY);
+        },
+        [topicId],
+    );
 
     const openImage = useCallback(index => {
         imageViewerRef.current?.handleOpenImage(index);
@@ -959,7 +1590,7 @@ const HarborTopicDetail = ({route, navigation}) => {
                 navigation.navigate('HarborTopicDetail', {
                     topicId: target.topicId,
                     ...(target.postNumber
-                        ? {postNumber: target.postNumber}
+                        ? { postNumber: target.postNumber }
                         : {}),
                 });
                 return;
@@ -974,12 +1605,12 @@ const HarborTopicDetail = ({route, navigation}) => {
             }
 
             if (target?.type === 'tag') {
-                navigation.navigate('HarborTagTopics', {tag: target.tag});
+                navigation.navigate('HarborTagTopics', { tag: target.tag });
                 return;
             }
 
             if (target?.type === 'search') {
-                navigation.navigate('HarborSearch', {query: target.query});
+                navigation.navigate('HarborSearch', { query: target.query });
                 return;
             }
 
@@ -1010,30 +1641,147 @@ const HarborTopicDetail = ({route, navigation}) => {
 
     const openTag = useCallback(
         tag => {
-            navigation.navigate('HarborTagTopics', {tag});
+            navigation.navigate('HarborTagTopics', { tag });
         },
         [navigation],
     );
 
+    const loadNewReplies = useCallback(async () => {
+        if (pendingNewPostIds.length === 0 || isLoadingNext) {
+            return;
+        }
+        setIsLoadingNext(true);
+        try {
+            const nextPosts = await fetchHarborTopicPosts(
+                topicId,
+                pendingNewPostIds,
+            );
+            const pendingTopic = pendingTopicRef.current;
+            setTopic(current =>
+                mergeTopicWindow(current, {
+                    ...pendingTopic,
+                    post_stream: {
+                        ...pendingTopic?.post_stream,
+                        posts: [
+                            ...(pendingTopic?.post_stream?.posts || []),
+                            ...nextPosts,
+                        ],
+                    },
+                }),
+            );
+            pendingTopicRef.current = null;
+            setPendingNewPostIds([]);
+            const latestPostNumber = Math.max(
+                ...nextPosts.map(post => Number(post.post_number || 0)),
+            );
+            if (latestPostNumber > 0) {
+                pendingScrollRef.current = latestPostNumber;
+            }
+        } catch (error) {
+            if (!isCanceledRequest(error)) {
+                Toast.show(t('新回覆載入失敗，請稍後再試'));
+            }
+        } finally {
+            setIsLoadingNext(false);
+        }
+    }, [isLoadingNext, pendingNewPostIds, t, topicId]);
+
+    const shareCurrentPost = useCallback(() => {
+        const url = ARK_HARBOR_TOPIC_URL(
+            topicId,
+            currentPostNumber > 0 ? currentPostNumber : undefined,
+        );
+        Share.share({
+            message: `${topic?.title || 'Harbor'}\n${url}`,
+            url,
+        }).catch(() => {
+            Toast.show(t('分享失敗，請稍後再試'));
+        });
+    }, [currentPostNumber, t, topic?.title, topicId]);
+
+    const openRelatedTopic = useCallback(
+        relatedTopic => {
+            navigation.push('HarborTopicDetail', {
+                topicId: relatedTopic.id,
+                topicTitle: relatedTopic.title,
+            });
+        },
+        [navigation],
+    );
+
+    const submitPostJump = useCallback(() => {
+        const nextPostNumber = Number(jumpPostNumber);
+        if (
+            !Number.isInteger(nextPostNumber) ||
+            nextPostNumber <= 0 ||
+            nextPostNumber > highestPostNumber
+        ) {
+            Toast.show(t('請輸入有效樓層'));
+            return;
+        }
+        trigger();
+        setIsJumpVisible(false);
+        scrollToPost(nextPostNumber);
+    }, [highestPostNumber, jumpPostNumber, scrollToPost, t]);
+
     const renderPost = useCallback(
-        ({item}) => (
-            <HarborPostCard
-                post={item}
-                contentWidth={contentWidth}
-                imageUrls={imageUrls}
-                onOpenImage={openImage}
-                onPressAuthor={openAuthor}
-                onPressLink={openHarborLink}
-                onPressReply={scrollToPost}
-            />
-        ),
+        ({ item, index }) => {
+            const previousPostNumber =
+                index > 0 ? Number(posts[index - 1]?.post_number || 0) : 0;
+            const showUnreadDivider =
+                unreadAfterPostNumber > 0 &&
+                Number(item.post_number) > unreadAfterPostNumber &&
+                (index === 0 ||
+                    previousPostNumber <= unreadAfterPostNumber);
+
+            return (
+                <View>
+                    {showUnreadDivider ? (
+                        <View style={styles.unreadDivider}>
+                            <View
+                                style={[
+                                    styles.unreadDividerLine,
+                                    { backgroundColor: themeColor },
+                                ]}
+                            />
+                            <Text
+                                style={[
+                                    styles.unreadDividerText,
+                                    { color: themeColor },
+                                ]}>
+                                {t('未讀回覆')}
+                            </Text>
+                            <View
+                                style={[
+                                    styles.unreadDividerLine,
+                                    { backgroundColor: themeColor },
+                                ]}
+                            />
+                        </View>
+                    ) : null}
+                    <HarborPostCard
+                        post={item}
+                        contentWidth={contentWidth}
+                        imageUrls={imageUrls}
+                        onOpenImage={openImage}
+                        onPressAuthor={openAuthor}
+                        onPressLink={openHarborLink}
+                        onPressReply={scrollToPost}
+                    />
+                </View>
+            );
+        },
         [
             contentWidth,
             imageUrls,
             openAuthor,
             openHarborLink,
             openImage,
+            posts,
             scrollToPost,
+            t,
+            themeColor,
+            unreadAfterPostNumber,
         ],
     );
 
@@ -1042,17 +1790,17 @@ const HarborTopicDetail = ({route, navigation}) => {
         openLink({
             URL: ARK_HARBOR_TOPIC_URL(
                 topicId,
-                Number.isInteger(initialPostNumber)
-                    ? initialPostNumber
+                currentPostNumber > 0
+                    ? currentPostNumber
                     : undefined,
             ),
             mode: 'fullScreen',
         });
-    }, [initialPostNumber, topicId]);
+    }, [currentPostNumber, topicId]);
 
     if (isLoading && !topic) {
         return (
-            <View style={[styles.centeredPage, {backgroundColor: bg_color}]}>
+            <View style={[styles.centeredPage, { backgroundColor: bg_color }]}>
                 <Loading />
             </View>
         );
@@ -1060,11 +1808,11 @@ const HarborTopicDetail = ({route, navigation}) => {
 
     if (!topic) {
         return (
-            <View style={[styles.centeredPage, {backgroundColor: bg_color}]}>
+            <View style={[styles.centeredPage, { backgroundColor: bg_color }]}>
                 <View
                     style={[
                         styles.errorIcon,
-                        {backgroundColor: tonal.primary15},
+                        { backgroundColor: tonal.primary15 },
                     ]}>
                     <MaterialCommunityIcons
                         name="alert-circle-outline"
@@ -1072,10 +1820,10 @@ const HarborTopicDetail = ({route, navigation}) => {
                         color={themeColor}
                     />
                 </View>
-                <Text style={[styles.errorTitle, {color: black.main}]}>
+                <Text style={[styles.errorTitle, { color: black.main }]}>
                     {t('暫時無法顯示帖子')}
                 </Text>
-                <Text style={[styles.errorDescription, {color: black.third}]}>
+                <Text style={[styles.errorDescription, { color: black.third }]}>
                     {errorMessage || t('請稍後再試')}
                 </Text>
                 <Pressable
@@ -1083,7 +1831,7 @@ const HarborTopicDetail = ({route, navigation}) => {
                         trigger();
                         loadTopic();
                     }}
-                    style={({pressed}) => [
+                    style={({ pressed }) => [
                         styles.primaryButton,
                         {
                             backgroundColor: pressed
@@ -1092,14 +1840,14 @@ const HarborTopicDetail = ({route, navigation}) => {
                         },
                     ]}>
                     <Text
-                        style={[styles.primaryButtonText, {color: trueWhite}]}>
+                        style={[styles.primaryButtonText, { color: trueWhite }]}>
                         {t('重新載入')}
                     </Text>
                 </Pressable>
                 {Number.isInteger(topicId) && topicId > 0 ? (
                     <Pressable
                         onPress={openOriginalTopic}
-                        style={({pressed}) => [
+                        style={({ pressed }) => [
                             styles.secondaryButton,
                             {
                                 backgroundColor: pressed
@@ -1110,7 +1858,7 @@ const HarborTopicDetail = ({route, navigation}) => {
                         <Text
                             style={[
                                 styles.secondaryButtonText,
-                                {color: themeColor},
+                                { color: themeColor },
                             ]}>
                             {t('在 Harbor 開啟')}
                         </Text>
@@ -1121,7 +1869,7 @@ const HarborTopicDetail = ({route, navigation}) => {
     }
 
     return (
-        <View style={[styles.page, {backgroundColor: bg_color}]}>
+        <View style={[styles.page, { backgroundColor: bg_color }]}>
             <FlashList
                 ref={listRef}
                 data={posts}
@@ -1131,14 +1879,58 @@ const HarborTopicDetail = ({route, navigation}) => {
                 showsVerticalScrollIndicator={false}
                 drawDistance={700}
                 ListHeaderComponent={
-                    <HarborTopicHeader
-                        topic={topic}
-                        onOpenOriginal={openOriginalTopic}
-                        onPressCategory={openCategory}
-                        onPressTag={openTag}
-                    />
+                    <View>
+                        <HarborTopicHeader
+                            topic={topic}
+                            onOpenOriginal={openOriginalTopic}
+                            onShare={shareCurrentPost}
+                            onPressCategory={openCategory}
+                            onPressTag={openTag}
+                        />
+                        <HarborReadingControls
+                            currentPostNumber={currentPostNumber}
+                            highestPostNumber={highestPostNumber}
+                            onFirst={() => scrollToPost(1)}
+                            onJump={() => {
+                                setJumpPostNumber(
+                                    String(currentPostNumber || 1),
+                                );
+                                setIsJumpVisible(true);
+                            }}
+                            onLatest={() =>
+                                scrollToPost(highestPostNumber)
+                            }
+                        />
+                        {isLoadingPrevious ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={themeColor}
+                                style={styles.edgeLoader}
+                            />
+                        ) : null}
+                    </View>
                 }
-                ListFooterComponent={<View style={styles.listFooter} />}
+                ListFooterComponent={
+                    <View>
+                        {isLoadingNext ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={themeColor}
+                                style={styles.edgeLoader}
+                            />
+                        ) : null}
+                        <HarborRelatedTopics
+                            topics={topic.suggested_topics}
+                            onPressTopic={openRelatedTopic}
+                        />
+                    </View>
+                }
+                onStartReached={() => loadAdjacentPosts('previous')}
+                onStartReachedThreshold={0.25}
+                onEndReached={() => loadAdjacentPosts('next')}
+                onEndReachedThreshold={0.4}
+                onViewableItemsChanged={handleViewableItemsChanged}
+                viewabilityConfig={TOPIC_VIEWABILITY_CONFIG}
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}
@@ -1146,11 +1938,150 @@ const HarborTopicDetail = ({route, navigation}) => {
                         refreshing={isRefreshing}
                         onRefresh={() => {
                             trigger();
-                            loadTopic({refresh: true});
+                            loadTopic({ refresh: true });
                         }}
                     />
                 }
             />
+
+            {pendingNewPostIds.length > 0 ? (
+                <Pressable
+                    onPress={() => {
+                        trigger();
+                        loadNewReplies();
+                    }}
+                    style={({ pressed }) => [
+                        styles.newRepliesButton,
+                        {
+                            backgroundColor: pressed
+                                ? tonal.primary50
+                                : themeColor,
+                        },
+                    ]}>
+                    {isLoadingNext ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={trueWhite}
+                        />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name="arrow-down-circle-outline"
+                            size={scale(18)}
+                            color={trueWhite}
+                        />
+                    )}
+                    <Text
+                        style={[
+                            styles.newRepliesButtonText,
+                            { color: trueWhite },
+                        ]}>
+                        {t('{{count}} 個新回覆', {
+                            count: pendingNewPostIds.length,
+                        })}
+                    </Text>
+                </Pressable>
+            ) : null}
+
+            <Modal
+                transparent
+                visible={isJumpVisible}
+                animationType="fade"
+                onRequestClose={() => setIsJumpVisible(false)}>
+                <View style={styles.modalPage}>
+                    <Pressable
+                        style={[
+                            StyleSheet.absoluteFill,
+                            styles.modalBackdrop,
+                            { backgroundColor: theme.trueBlack },
+                        ]}
+                        onPress={() => {
+                            trigger();
+                            setIsJumpVisible(false);
+                        }}
+                    />
+                    <View
+                        style={[
+                            styles.jumpDialog,
+                            { backgroundColor: theme.white },
+                        ]}>
+                        <Text
+                            style={[
+                                styles.jumpDialogTitle,
+                                { color: black.main },
+                            ]}>
+                            {t('跳至樓層')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.jumpDialogHint,
+                                { color: black.third },
+                            ]}>
+                            {t('樓層範圍：{{first}}–{{last}}', {
+                                first: 1,
+                                last: highestPostNumber,
+                            })}
+                        </Text>
+                        <TextInput
+                            value={jumpPostNumber}
+                            onChangeText={setJumpPostNumber}
+                            keyboardType="number-pad"
+                            returnKeyType="go"
+                            onSubmitEditing={submitPostJump}
+                            autoFocus
+                            selectTextOnFocus
+                            style={[
+                                styles.jumpInput,
+                                {
+                                    color: black.main,
+                                    backgroundColor: tonal.primary08,
+                                    borderColor: themeColor,
+                                },
+                            ]}
+                        />
+                        <View style={styles.jumpDialogActions}>
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    setIsJumpVisible(false);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.jumpDialogButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.jumpDialogButtonText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('取消')}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={submitPostJump}
+                                style={({ pressed }) => [
+                                    styles.jumpDialogButton,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary50
+                                            : themeColor,
+                                    },
+                                ]}>
+                                <Text
+                                    style={[
+                                        styles.jumpDialogButtonText,
+                                        { color: trueWhite },
+                                    ]}>
+                                    {t('前往')}
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             <ARKImageView ref={imageViewerRef} imageUrls={imageUrls} />
         </View>
@@ -1181,6 +2112,59 @@ const styles = StyleSheet.create({
         fontSize: scale(22),
         lineHeight: scale(29),
         fontWeight: '700',
+    },
+    readingControls: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(14),
+        marginHorizontal: scale(12),
+        marginBottom: verticalScale(8),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(10),
+    },
+    progressHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    progressText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+    },
+    progressPercent: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
+    },
+    progressTrack: {
+        height: verticalScale(4),
+        borderRadius: scale(2),
+        marginTop: verticalScale(7),
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: '100%',
+        borderRadius: scale(2),
+    },
+    controlRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: verticalScale(8),
+    },
+    controlButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: scale(7),
+        paddingHorizontal: scale(7),
+        paddingVertical: verticalScale(5),
+    },
+    controlButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(9),
+        fontWeight: '600',
+        marginLeft: scale(3),
     },
     topicMetaRow: {
         flexDirection: 'row',
@@ -1225,12 +2209,19 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         marginTop: verticalScale(7),
     },
+    webActionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        marginTop: verticalScale(11),
+    },
     webOriginalButton: {
         alignSelf: 'flex-start',
         flexDirection: 'row',
         alignItems: 'center',
         borderRadius: scale(9),
-        marginTop: verticalScale(11),
+        marginRight: scale(6),
+        marginBottom: verticalScale(4),
         paddingHorizontal: scale(10),
         paddingVertical: verticalScale(7),
     },
@@ -1248,6 +2239,37 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(12),
         paddingTop: verticalScale(12),
         overflow: 'hidden',
+    },
+    postStateCard: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(12),
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginHorizontal: scale(12),
+        marginVertical: verticalScale(6),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(12),
+    },
+    postStateText: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(12),
+        marginLeft: scale(7),
+    },
+    postStateNumber: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginLeft: scale(7),
+    },
+    noticeContent: {
+        flex: 1,
+        marginLeft: scale(7),
+    },
+    noticeTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '700',
+        marginBottom: verticalScale(3),
     },
     postHeader: {
         flexDirection: 'row',
@@ -1373,8 +2395,126 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         marginLeft: scale(3),
     },
+    unreadDivider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: scale(16),
+        marginVertical: verticalScale(7),
+    },
+    unreadDividerLine: {
+        flex: 1,
+        height: StyleSheet.hairlineWidth,
+    },
+    unreadDividerText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        fontWeight: '700',
+        marginHorizontal: scale(8),
+    },
+    edgeLoader: {
+        marginVertical: verticalScale(12),
+    },
+    relatedTopics: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(14),
+        marginHorizontal: scale(12),
+        marginTop: verticalScale(10),
+        marginBottom: verticalScale(50),
+        overflow: 'hidden',
+    },
+    relatedTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(15),
+        fontWeight: '700',
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(11),
+    },
+    relatedTopic: {
+        minHeight: verticalScale(42),
+        borderTopWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(8),
+    },
+    relatedTopicTitle: {
+        ...uiStyle.defaultText,
+        flex: 1,
+        fontSize: scale(12),
+        lineHeight: scale(17),
+    },
     listFooter: {
         height: verticalScale(50),
+    },
+    newRepliesButton: {
+        position: 'absolute',
+        left: scale(28),
+        right: scale(28),
+        bottom: verticalScale(18),
+        minHeight: verticalScale(42),
+        borderRadius: scale(21),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(16),
+    },
+    newRepliesButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(13),
+        fontWeight: '700',
+        marginLeft: scale(6),
+    },
+    modalPage: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(28),
+    },
+    modalBackdrop: {
+        opacity: 0.55,
+    },
+    jumpDialog: {
+        width: '100%',
+        borderRadius: scale(16),
+        paddingHorizontal: scale(18),
+        paddingVertical: verticalScale(16),
+    },
+    jumpDialogTitle: {
+        ...uiStyle.defaultText,
+        fontSize: scale(17),
+        fontWeight: '700',
+    },
+    jumpDialogHint: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        marginTop: verticalScale(4),
+    },
+    jumpInput: {
+        ...uiStyle.defaultText,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(9),
+        fontSize: scale(16),
+        marginTop: verticalScale(12),
+        paddingHorizontal: scale(11),
+        paddingVertical: verticalScale(8),
+    },
+    jumpDialogActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: verticalScale(12),
+    },
+    jumpDialogButton: {
+        minWidth: scale(72),
+        alignItems: 'center',
+        borderRadius: scale(8),
+        marginLeft: scale(8),
+        paddingHorizontal: scale(12),
+        paddingVertical: verticalScale(8),
+    },
+    jumpDialogButtonText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        fontWeight: '700',
     },
     errorIcon: {
         width: scale(64),
