@@ -22,7 +22,7 @@ import ClubDetail from './pages/TabbarPages/info/club/ClubDetail';
 import EventDetail from './pages/TabbarPages/info/club/EventDetail';
 import NewsDetail from './pages/TabbarPages/info/news/NewsDetail';
 import UMEventDetail from './pages/TabbarPages/info/news/UMEventDetail';
-import HarborTopicDetail from './pages/TabbarPages/info/home/HarborTopicDetail';
+import HarborTopicDetail from './pages/TabbarPages/arkHarbor/HarborTopicDetail';
 import SearchScreen from './pages/TabbarPages/info/home/search/SearchScreen';
 import {
     HarborCategoryListPage,

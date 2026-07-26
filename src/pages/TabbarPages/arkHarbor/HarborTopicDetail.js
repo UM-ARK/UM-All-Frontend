@@ -43,33 +43,33 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import ARKImageView from '../../../../components/ARKImageView';
-import Loading from '../../../../components/Loading';
-import { uiStyle, useTheme } from '../../../../components/ThemeContext';
-import { useHarborSession } from '../../../../contexts/HarborSessionContext';
-import { openLink } from '../../../../utils/browser';
-import { logToFirebase } from '../../../../utils/firebaseAnalytics';
+import ARKImageView from '../../../components/ARKImageView';
+import Loading from '../../../components/Loading';
+import { uiStyle, useTheme } from '../../../components/ThemeContext';
+import { useHarborSession } from '../../../contexts/HarborSessionContext';
+import { openLink } from '../../../utils/browser';
+import { logToFirebase } from '../../../utils/firebaseAnalytics';
 import {
     getHarborHtmlAttribute,
     replaceHarborEmojiImages,
-} from '../../../../utils/harbor/harborHtml';
+} from '../../../utils/harbor/harborHtml';
 import {
     fetchHarborTopic,
     fetchHarborTopicPosts,
     saveHarborTopicTimings,
-} from '../../../../utils/harbor/harborApi';
-import { parseHarborUrl } from '../../../../utils/harbor/harborNavigation';
+} from '../../../utils/harbor/harborApi';
+import { parseHarborUrl } from '../../../utils/harbor/harborNavigation';
 import {
     getHarborReadingPosition,
     saveHarborReadingPosition,
-} from '../../../../utils/harbor/harborReading';
+} from '../../../utils/harbor/harborReading';
 import {
     ARK_HARBOR,
     ARK_HARBOR_ABSOLUTE_URL,
     ARK_HARBOR_AVATAR_TEMPLATE,
     ARK_HARBOR_TOPIC_URL,
-} from '../../../../utils/pathMap';
-import { trigger } from '../../../../utils/trigger';
+} from '../../../utils/pathMap';
+import { trigger } from '../../../utils/trigger';
 
 const AVATAR_SIZE = 88;
 const TOPIC_POST_BATCH_SIZE = 20;
