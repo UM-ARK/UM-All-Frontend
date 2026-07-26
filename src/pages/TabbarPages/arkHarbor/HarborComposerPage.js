@@ -18,7 +18,12 @@ import {
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useHeaderHeight} from '@react-navigation/elements';
+import {File} from 'expo-file-system';
 import {Image} from 'expo-image';
+import {
+    ImageManipulator,
+    SaveFormat,
+} from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import {
     KeyboardAwareScrollView,
@@ -62,6 +67,40 @@ import {
 import HarborCategoryIcon from './components/HarborCategoryIcon';
 
 const COMPOSER_MODES = new Set(['newTopic', 'reply', 'edit']);
+const MAX_IMAGES_PER_POST = 6;
+const MAX_CONCURRENT_IMAGE_UPLOADS = 3;
+const MAX_COMPRESSED_IMAGE_DIMENSION = 2048;
+const IMAGE_COMPRESSION_QUALITY = 0.82;
+
+async function compressComposerImage(asset, imageId) {
+    const context = ImageManipulator.manipulate(asset.uri);
+    const width = Number(asset.width) || 0;
+    const height = Number(asset.height) || 0;
+
+    if (Math.max(width, height) > MAX_COMPRESSED_IMAGE_DIMENSION) {
+        context.resize(
+            width >= height
+                ? {width: MAX_COMPRESSED_IMAGE_DIMENSION}
+                : {height: MAX_COMPRESSED_IMAGE_DIMENSION},
+        );
+    }
+
+    const renderedImage = await context.renderAsync();
+    const compressedImage = await renderedImage.saveAsync({
+        compress: IMAGE_COMPRESSION_QUALITY,
+        format: SaveFormat.JPEG,
+    });
+    const compressedFile = new File(compressedImage.uri);
+    const originalName = asset.fileName || `image_${imageId}`;
+    const fileName = originalName.replace(/\.[^.]+$/, '') + '.jpg';
+
+    return {
+        localUri: compressedImage.uri,
+        fileName,
+        mimeType: 'image/jpeg',
+        fileSize: compressedFile.size,
+    };
+}
 
 function getServerErrorMessage(error) {
     const data = error?.response?.data;
@@ -154,12 +193,16 @@ const HarborComposerPage = ({route, navigation}) => {
     const tagSheetRef = useRef(null);
     const loadControllerRef = useRef(null);
     const uploadControllersRef = useRef(new Map());
+    const uploadQueueRef = useRef([]);
+    const activeUploadCountRef = useRef(0);
+    const drainUploadQueueRef = useRef(null);
     const submittingRef = useRef(false);
     const routeMode = route.params?.mode;
     const mode = COMPOSER_MODES.has(routeMode) ? routeMode : 'newTopic';
     const isNewTopic = mode === 'newTopic';
     const isReply = mode === 'reply';
     const isEdit = mode === 'edit';
+    const supportsImages = isNewTopic || isReply;
     const routePostNumber = Number(route.params?.postNumber);
     const routeQuoteRaw = route.params?.quoteRaw;
     const initialRaw = routeQuoteRaw
@@ -178,10 +221,13 @@ const HarborComposerPage = ({route, navigation}) => {
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
     const [composerSettings, setComposerSettings] = useState(null);
-    const [isLoading, setIsLoading] = useState(isEdit || isNewTopic);
+    const [isLoading, setIsLoading] = useState(
+        isEdit || supportsImages,
+    );
     const [loadError, setLoadError] = useState('');
     const [submitError, setSubmitError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isPreparingImages, setIsPreparingImages] = useState(false);
     const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
         () => new Set(),
     );
@@ -251,6 +297,18 @@ const HarborComposerPage = ({route, navigation}) => {
                 return;
             }
 
+            if (isReply) {
+                const settingsResult =
+                    await fetchHarborComposerSettings({
+                        signal: controller.signal,
+                    });
+                if (controller.signal.aborted) {
+                    return;
+                }
+                setComposerSettings(settingsResult);
+                return;
+            }
+
             if (isEdit) {
                 const result = await fetchHarborPostForEdit(
                     route.params?.postId,
@@ -287,6 +345,7 @@ const HarborComposerPage = ({route, navigation}) => {
     }, [
         isEdit,
         isNewTopic,
+        isReply,
         route.params?.postId,
         route.params?.topicTitle,
         sessionStatus,
@@ -303,6 +362,8 @@ const HarborComposerPage = ({route, navigation}) => {
     useEffect(() => {
         const uploadControllers = uploadControllersRef.current;
         return () => {
+            uploadQueueRef.current = [];
+            drainUploadQueueRef.current = null;
             uploadControllers.forEach(controller => controller.abort());
             uploadControllers.clear();
         };
@@ -321,7 +382,7 @@ const HarborComposerPage = ({route, navigation}) => {
         [selectedTags],
     );
     const titleLength = title.trim().length;
-    const composedRaw = isNewTopic
+    const composedRaw = supportsImages
         ? buildHarborComposerRaw(raw, images)
         : raw;
     const rawLength = composedRaw.trim().length;
@@ -338,6 +399,14 @@ const HarborComposerPage = ({route, navigation}) => {
     const minimumTagCount = selectedCategory?.minimumRequiredTags ?? 0;
     const requiresCategory =
         composerSettings?.allowUncategorizedTopics !== true;
+    const maximumConcurrentUploads = Math.max(
+        1,
+        Math.min(
+            MAX_CONCURRENT_IMAGE_UPLOADS,
+            composerSettings?.simultaneousUploads ??
+                MAX_CONCURRENT_IMAGE_UPLOADS,
+        ),
+    );
     const hasUnreadyImages = images.some(
         image => image.status !== 'uploaded',
     );
@@ -346,6 +415,8 @@ const HarborComposerPage = ({route, navigation}) => {
             image.status === 'pending' ||
             image.status === 'uploading',
     );
+    const hasReachedImageLimit =
+        images.length >= MAX_IMAGES_PER_POST;
     const isTitleLengthValid =
         titleLength >= minimumTitleLength &&
         (maximumTitleLength == null ||
@@ -443,9 +514,73 @@ const HarborComposerPage = ({route, navigation}) => {
         }
     }, [t]);
 
+    const drainUploadQueue = useCallback(() => {
+        while (
+            activeUploadCountRef.current <
+                maximumConcurrentUploads &&
+            uploadQueueRef.current.length > 0
+        ) {
+            const image = uploadQueueRef.current.shift();
+            activeUploadCountRef.current += 1;
+            uploadImage(image).finally(() => {
+                activeUploadCountRef.current = Math.max(
+                    0,
+                    activeUploadCountRef.current - 1,
+                );
+                drainUploadQueueRef.current?.();
+            });
+        }
+    }, [maximumConcurrentUploads, uploadImage]);
+
+    useEffect(() => {
+        drainUploadQueueRef.current = drainUploadQueue;
+        drainUploadQueue();
+        return () => {
+            drainUploadQueueRef.current = null;
+        };
+    }, [drainUploadQueue]);
+
+    const enqueueImages = useCallback(nextImages => {
+        const queuedIds = new Set(
+            uploadQueueRef.current.map(image => image.id),
+        );
+        const imagesToQueue = nextImages.filter(
+            image =>
+                !queuedIds.has(image.id) &&
+                !uploadControllersRef.current.has(image.id),
+        );
+        if (imagesToQueue.length === 0) {
+            return;
+        }
+
+        setImages(current =>
+            current.map(image =>
+                imagesToQueue.some(item => item.id === image.id)
+                    ? {
+                        ...image,
+                        progress: 0,
+                        status: 'pending',
+                        error: '',
+                    }
+                    : image,
+            ),
+        );
+        uploadQueueRef.current.push(...imagesToQueue);
+        drainUploadQueue();
+    }, [drainUploadQueue]);
+
     const handleAddImages = useCallback(async () => {
         trigger();
         Keyboard.dismiss();
+
+        if (hasReachedImageLimit) {
+            Toast.show(
+                t('每篇貼文最多只能加入 {{count}} 張圖片。', {
+                    count: MAX_IMAGES_PER_POST,
+                }),
+            );
+            return;
+        }
 
         try {
             const permission =
@@ -461,10 +596,8 @@ const HarborComposerPage = ({route, navigation}) => {
                 return;
             }
 
-            const selectionLimit = Math.max(
-                1,
-                composerSettings?.simultaneousUploads ?? 15,
-            );
+            const selectionLimit =
+                MAX_IMAGES_PER_POST - images.length;
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
                 allowsEditing: false,
@@ -477,32 +610,61 @@ const HarborComposerPage = ({route, navigation}) => {
                 return;
             }
 
+            setIsPreparingImages(true);
             const maxImageBytes = composerSettings?.maxImageSizeKb == null
                 ? null
                 : composerSettings.maxImageSizeKb * 1024;
             const selectedAt = Date.now();
-            const oversizedImages = result.assets.filter(
-                asset =>
-                    maxImageBytes != null &&
-                    asset.fileSize != null &&
-                    asset.fileSize > maxImageBytes,
+            const selectedAssets = result.assets.slice(
+                0,
+                selectionLimit,
             );
-            const nextImages = result.assets
-                .filter(asset => !oversizedImages.includes(asset))
-                .map((asset, index) => ({
-                    id: `${selectedAt}-${index}`,
-                    localUri: asset.uri,
-                    fileName:
-                        asset.fileName || `image_${selectedAt}_${index}.jpg`,
-                    mimeType: asset.mimeType || 'image/jpeg',
-                    progress: 0,
-                    status: 'pending',
-                }));
+            const nextImages = [];
+            let oversizedImageCount = 0;
+            let compressionFailureCount = 0;
 
-            if (oversizedImages.length > 0) {
+            for (let index = 0; index < selectedAssets.length; index += 1) {
+                const asset = selectedAssets[index];
+                const imageId = `${selectedAt}-${index}`;
+                try {
+                    const compressedImage =
+                        await compressComposerImage(asset, imageId);
+                    if (
+                        maxImageBytes != null &&
+                        compressedImage.fileSize > maxImageBytes
+                    ) {
+                        oversizedImageCount += 1;
+                        continue;
+                    }
+                    nextImages.push({
+                        id: imageId,
+                        ...compressedImage,
+                        progress: 0,
+                        status: 'pending',
+                    });
+                } catch {
+                    compressionFailureCount += 1;
+                }
+            }
+
+            if (result.assets.length > selectionLimit) {
+                Toast.show(
+                    t('每篇貼文最多只能加入 {{count}} 張圖片。', {
+                        count: MAX_IMAGES_PER_POST,
+                    }),
+                );
+            }
+            if (oversizedImageCount > 0) {
                 Toast.show(
                     t('{{count}} 張圖片超過 Harbor 的大小限制。', {
-                        count: oversizedImages.length,
+                        count: oversizedImageCount,
+                    }),
+                );
+            }
+            if (compressionFailureCount > 0) {
+                Toast.show(
+                    t('{{count}} 張圖片處理失敗，請重新選擇。', {
+                        count: compressionFailureCount,
                     }),
                 );
             }
@@ -511,14 +673,25 @@ const HarborComposerPage = ({route, navigation}) => {
             }
 
             setImages(current => [...current, ...nextImages]);
-            nextImages.forEach(uploadImage);
+            enqueueImages(nextImages);
         } catch {
             Toast.show(t('無法開啟相片圖庫，請稍後再試。'));
+        } finally {
+            setIsPreparingImages(false);
         }
-    }, [composerSettings, t, uploadImage]);
+    }, [
+        composerSettings,
+        enqueueImages,
+        hasReachedImageLimit,
+        images.length,
+        t,
+    ]);
 
     const handleRemoveImage = useCallback(imageId => {
         trigger();
+        uploadQueueRef.current = uploadQueueRef.current.filter(
+            image => image.id !== imageId,
+        );
         uploadControllersRef.current.get(imageId)?.abort();
         uploadControllersRef.current.delete(imageId);
         setImages(current =>
@@ -528,8 +701,8 @@ const HarborComposerPage = ({route, navigation}) => {
 
     const handleRetryImage = useCallback(image => {
         trigger();
-        uploadImage(image);
-    }, [uploadImage]);
+        enqueueImages([image]);
+    }, [enqueueImages]);
 
     const handleOpenWebComposer = useCallback(() => {
         trigger();
@@ -557,7 +730,7 @@ const HarborComposerPage = ({route, navigation}) => {
     }, [login, t]);
 
     const validateForm = useCallback(() => {
-        if (isNewTopic && hasUnreadyImages) {
+        if (supportsImages && hasUnreadyImages) {
             return t('請等待圖片上傳完成，或移除上傳失敗的圖片。');
         }
         if (
@@ -622,6 +795,7 @@ const HarborComposerPage = ({route, navigation}) => {
         rawLength,
         requiresCategory,
         selectedTags.length,
+        supportsImages,
         t,
         titleLength,
     ]);
@@ -1442,7 +1616,7 @@ const HarborComposerPage = ({route, navigation}) => {
                                             : theme.unread,
                                     },
                                 ]}>
-                                {`${isNewTopic ? visibleTextLength : rawLength}/${maximumPostLength ?? '—'}`}
+                                {`${supportsImages ? visibleTextLength : rawLength}/${maximumPostLength ?? '—'}`}
                             </Text>
                         ) : null}
                     </View>
@@ -1466,7 +1640,7 @@ const HarborComposerPage = ({route, navigation}) => {
                     />
                 </View>
 
-                {isNewTopic ? (
+                {supportsImages ? (
                     <View style={styles.fieldGroup}>
                         <View style={styles.bodyLabelRow}>
                             <Text
@@ -1482,9 +1656,7 @@ const HarborComposerPage = ({route, navigation}) => {
                                         styles.requirementCounter,
                                         {color: theme.black.third},
                                     ]}>
-                                    {t('{{count}} 張', {
-                                        count: images.length,
-                                    })}
+                                    {`${images.length}/${MAX_IMAGES_PER_POST}`}
                                 </Text>
                             ) : null}
                         </View>
@@ -1527,7 +1699,10 @@ const HarborComposerPage = ({route, navigation}) => {
                                                     ? t('已上傳')
                                                     : image.status === 'failed'
                                                         ? image.error
-                                                        : t('正在上傳…')}
+                                                        : image.status ===
+                                                            'pending'
+                                                            ? t('等待上傳…')
+                                                            : t('正在上傳…')}
                                             </Text>
                                             {image.status === 'uploading' ? (
                                                 <SimpleProgressBar
@@ -1594,16 +1769,25 @@ const HarborComposerPage = ({route, navigation}) => {
                         <Pressable
                             accessibilityRole="button"
                             accessibilityState={{
-                                disabled: isUploadingImages,
+                                disabled:
+                                    isPreparingImages ||
+                                    isUploadingImages ||
+                                    hasReachedImageLimit,
                             }}
-                            disabled={isUploadingImages}
+                            disabled={
+                                isPreparingImages ||
+                                isUploadingImages ||
+                                hasReachedImageLimit
+                            }
                             onPress={handleAddImages}
                             style={({pressed}) => [
                                 styles.addImageButton,
                                 {
                                     backgroundColor: pressed
                                         ? theme.tonal.primary15
-                                        : isUploadingImages
+                                        : isPreparingImages ||
+                                            isUploadingImages ||
+                                            hasReachedImageLimit
                                             ? theme.disabled
                                             : theme.white,
                                     borderColor:
@@ -1620,32 +1804,38 @@ const HarborComposerPage = ({route, navigation}) => {
                                     styles.addImageText,
                                     {color: theme.themeColor},
                                 ]}>
-                                {t('新增圖片')}
+                                {isPreparingImages
+                                    ? t('正在處理圖片…')
+                                    : hasReachedImageLimit
+                                        ? t('已達 6 張上限')
+                                        : t('新增圖片')}
                             </Text>
                         </Pressable>
-                        <Pressable
-                            accessibilityRole="link"
-                            onPress={handleOpenWebComposer}
-                            style={({pressed}) => [
-                                styles.webComposerButton,
-                                pressed && {
-                                    backgroundColor:
-                                        theme.tonal.primary08,
-                                },
-                            ]}>
-                            <MaterialCommunityIcons
-                                name="open-in-new"
-                                size={scale(17)}
-                                color={theme.black.third}
-                            />
-                            <Text
-                                style={[
-                                    styles.webComposerText,
-                                    {color: theme.black.third},
+                        {isNewTopic ? (
+                            <Pressable
+                                accessibilityRole="link"
+                                onPress={handleOpenWebComposer}
+                                style={({pressed}) => [
+                                    styles.webComposerButton,
+                                    pressed && {
+                                        backgroundColor:
+                                            theme.tonal.primary08,
+                                    },
                                 ]}>
-                                {t('需要進階排版？前往 Harbor 網頁版')}
-                            </Text>
-                        </Pressable>
+                                <MaterialCommunityIcons
+                                    name="open-in-new"
+                                    size={scale(17)}
+                                    color={theme.black.third}
+                                />
+                                <Text
+                                    style={[
+                                        styles.webComposerText,
+                                        {color: theme.black.third},
+                                    ]}>
+                                    {t('需要進階排版？前往 Harbor 網頁版')}
+                                </Text>
+                            </Pressable>
+                        ) : null}
                     </View>
                 ) : null}
 
@@ -1676,15 +1866,24 @@ const HarborComposerPage = ({route, navigation}) => {
                 <Pressable
                     accessibilityRole="button"
                     accessibilityState={{
-                        disabled: isSubmitting || isUploadingImages,
+                        disabled:
+                            isSubmitting ||
+                            isPreparingImages ||
+                            isUploadingImages,
                     }}
-                    disabled={isSubmitting || isUploadingImages}
+                    disabled={
+                        isSubmitting ||
+                        isPreparingImages ||
+                        isUploadingImages
+                    }
                     onPress={handleSubmit}
                     style={({pressed}) => [
                         styles.submitButton,
                         {
                             backgroundColor:
-                                isSubmitting || isUploadingImages
+                                isSubmitting ||
+                                isPreparingImages ||
+                                isUploadingImages
                                     ? theme.disabled
                                     : pressed
                                         ? theme.themeColorLight
@@ -1710,8 +1909,10 @@ const HarborComposerPage = ({route, navigation}) => {
                         ]}>
                         {isSubmitting
                             ? t('正在提交…')
-                            : isUploadingImages
-                                ? t('正在上傳圖片…')
+                            : isPreparingImages
+                                ? t('正在處理圖片…')
+                                : isUploadingImages
+                                    ? t('正在上傳圖片…')
                                 : isEdit
                                     ? t('儲存修改')
                                     : isReply

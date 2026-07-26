@@ -195,6 +195,8 @@ PODS:
     - ExpoModulesCore
   - ExpoImage (57.0.1):
     - ExpoModulesCore
+  - ExpoImageManipulator (57.0.6):
+    - ExpoModulesCore
   - ExpoImagePicker (57.0.6):
     - ExpoModulesCore
   - ExpoKeepAwake (57.0.1):
@@ -3013,6 +3015,7 @@ DEPENDENCIES:
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios/ExpoFileSystem.podspec`)
   - ExpoFont (from `../node_modules/expo-font/ios/ExpoFont.podspec`)
   - ExpoImage (from `../node_modules/expo-image/ios/ExpoImage.podspec`)
+  - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios/ExpoImageManipulator.podspec`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
@@ -3182,6 +3185,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/expo-font/ios/ExpoFont.podspec"
   ExpoImage:
     :podspec: "../node_modules/expo-image/ios/ExpoImage.podspec"
+  ExpoImageManipulator:
+    :podspec: "../node_modules/expo-image-manipulator/ios/ExpoImageManipulator.podspec"
   ExpoImagePicker:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
@@ -3439,6 +3444,7 @@ SPEC CHECKSUMS:
   ExpoFileSystem: e441dae0ae671fc451640517550973d9e024fdf0
   ExpoFont: 59e1faf66ba9bcd232ae1e2ce58d202a48b6f65e
   ExpoImage: 4c1e7634db6033185a98959fb028d8d4b1c89695
+  ExpoImageManipulator: d3c962dabd86b331980f8ec6794c6073b3cb541a
   ExpoImagePicker: 8edc8d1215d9c8c95c44101e42d577f8beb898c9
   ExpoKeepAwake: c26f14275017370cc8a4b7b43a0e23361f2053a5
   ExpoLinearGradient: 903b3f5fe566c666ff78b2599add51d094483613

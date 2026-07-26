@@ -5179,6 +5179,13 @@ expo-image-loader@~57.0.1:
   resolved "https://registry.npmjs.org/expo-image-loader/-/expo-image-loader-57.0.1.tgz#b031dc3e62ac09004f3e436d7081487236791f53"
   integrity sha512-uhrZKLT/cTl2mXyR28kPpVkS5O+PK9N1QA/07IFM4f5T4g0lTW1JHT3NEWwEEsGFldPmVX4j7LwUVVZxE+woug==
 
+expo-image-manipulator@~57.0.6:
+  version "57.0.6"
+  resolved "https://registry.npmjs.org/expo-image-manipulator/-/expo-image-manipulator-57.0.6.tgz#59ef2c64dcde7aafd75fbfaab3ef0b4cd448ca62"
+  integrity sha512-9eg0nTC0LRwnPgLajs27FoZvlvj1uSmn9dtADzR9RmnrsGLn345llMqm29IbN+WSbdHJF7E3GlengThLdKAQLg==
+  dependencies:
+    expo-image-loader "~57.0.1"
+
 expo-image-picker@~57.0.6:
   version "57.0.6"
   resolved "https://registry.npmjs.org/expo-image-picker/-/expo-image-picker-57.0.6.tgz#f6a71acb4fe668d7723ab162271064825cf356c5"

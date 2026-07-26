@@ -25,6 +25,17 @@ describe('buildHarborComposerRaw', () => {
             ]),
         ).toBe('![圖片](upload://ready.jpeg)');
     });
+
+    it('在回覆引用末尾加入已上傳圖片', () => {
+        expect(
+            buildHarborComposerRaw('> 引用內容\n\n回覆文字', [
+                {shortUrl: 'upload://reply.jpeg'},
+            ]),
+        ).toBe(
+            '> 引用內容\n\n回覆文字\n\n' +
+            '![圖片](upload://reply.jpeg)',
+        );
+    });
 });
 
 describe('getHarborComposerResult', () => {
