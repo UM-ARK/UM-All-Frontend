@@ -86,40 +86,66 @@ const HarborStickyToolbar = ({
             />
 
             <View style={[styles.toolbarSide, styles.toolbarRight]}>
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={isSignedIn ? t('已登入') : sessionLabel}
-                    disabled={
-                        status === 'restoring' || status === 'authorizing'
-                    }
-                    onPress={() => {
-                        trigger();
-                        onSessionPress();
-                    }}
-                    style={({ pressed }) => [
-                        isSignedIn
-                            ? styles.toolbarIconButton
-                            : styles.sessionButton,
-                        pressed && {
-                            backgroundColor: theme.tonal.primary15,
-                        },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name={isSignedIn ? 'account-check-outline' : 'login'}
-                        size={scale(isSignedIn ? 20 : 14)}
-                        color={theme.themeColor}
-                    />
-                    {isSignedIn ? null : (
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.sessionText,
-                                { color: theme.themeColor },
-                            ]}>
-                            {sessionLabel}
-                        </Text>
-                    )}
-                </Pressable>
+                <View style={styles.toolbarRightActions}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('搜索')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            // TODO: 接入 Harbor 搜索功能
+                        }}
+                        style={({ pressed }) => [
+                            styles.toolbarIconButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="magnify"
+                            size={scale(20)}
+                            color={theme.themeColor}
+                        />
+                    </Pressable>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                            isSignedIn ? t('已登入') : sessionLabel
+                        }
+                        disabled={
+                            status === 'restoring' || status === 'authorizing'
+                        }
+                        onPress={() => {
+                            trigger();
+                            onSessionPress();
+                        }}
+                        style={({ pressed }) => [
+                            isSignedIn
+                                ? styles.toolbarIconButton
+                                : styles.sessionButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name={
+                                isSignedIn ? 'account-check-outline' : 'login'
+                            }
+                            size={scale(isSignedIn ? 20 : 14)}
+                            color={theme.themeColor}
+                        />
+                        {isSignedIn ? null : (
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.sessionText,
+                                    { color: theme.themeColor },
+                                ]}>
+                                {sessionLabel}
+                            </Text>
+                        )}
+                    </Pressable>
+                </View>
             </View>
         </View>
     );
@@ -384,6 +410,13 @@ const styles = StyleSheet.create({
     },
     toolbarRight: {
         alignItems: 'flex-end',
+    },
+    toolbarRightActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: scale(2),
+        maxWidth: '100%',
     },
     toolbarIconButton: {
         width: scale(30),
