@@ -29,6 +29,7 @@
     "@react-native-menu/menu": "^2.0.0",
     "@react-native-vector-icons/material-design-icons": "^13.1.2",
     "@react-navigation/bottom-tabs": "^7.18.14",
+    "@react-navigation/drawer": "^7.13.5",
     "@react-navigation/elements": "^2.9.36",
     "@react-navigation/material-top-tabs": "^7.6.13",
     "@react-navigation/native": "^7.3.14",

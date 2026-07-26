@@ -3050,6 +3050,16 @@
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
+"@react-navigation/drawer@^7.13.5":
+  version "7.13.5"
+  resolved "https://registry.npmjs.org/@react-navigation/drawer/-/drawer-7.13.5.tgz#54c5fc4065fd12cf9687b0407f4d8145dc2c9e92"
+  integrity sha512-e1WdwyXeCS/tUDFSTIlNLgOWyUdz4hZnxQrAF7Ia1jY8F6gLNgo+Q04kxbUvTqS4wXZYfG2DSW94WnJogR3oSQ==
+  dependencies:
+    "@react-navigation/elements" "^2.9.36"
+    color "^4.2.3"
+    react-native-drawer-layout "^4.2.9"
+    use-latest-callback "^0.2.4"
+
 "@react-navigation/elements@^2.9.36":
   version "2.9.36"
   resolved "https://registry.npmjs.org/@react-navigation/elements/-/elements-2.9.36.tgz#b060502ed97768f719b604dc9b652031babded1a"
@@ -8085,6 +8095,14 @@ react-native-countdown-circle-timer@^3.2.1:
   version "3.2.1"
   resolved "https://registry.npmjs.org/react-native-countdown-circle-timer/-/react-native-countdown-circle-timer-3.2.1.tgz#077548e943fcf24b47c7e5ce2f12c1dfa35833c2"
   integrity sha512-iHiOgipG0hMprerswqUCUfjGo9hL0UhKNS0BGh4o6yY9Lu7f3VXQ7EJt757Obwn74AiF5MOHURIdqldoGnVrDw==
+
+react-native-drawer-layout@^4.2.9:
+  version "4.2.9"
+  resolved "https://registry.npmjs.org/react-native-drawer-layout/-/react-native-drawer-layout-4.2.9.tgz#848d36cdd5f4d92c95257ae8121ad998a567398b"
+  integrity sha512-ETOxvlhhb4LmuuG3RN7A3qwt9jr9AZ2it+1G2kNE4g2fTyxxay7QQkPm1HfKi/JzmMSWC5+YTepGSgZNpJIDGg==
+  dependencies:
+    color "^4.2.3"
+    use-latest-callback "^0.2.4"
 
 react-native-easy-toast@^2.3.0:
   version "2.3.0"
