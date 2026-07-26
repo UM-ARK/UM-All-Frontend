@@ -4,6 +4,7 @@ import {
     fetchHarborCategories,
     fetchHarborMessages,
     fetchHarborNotifications,
+    fetchHarborSearch,
     fetchHarborSiteCapabilities,
     fetchHarborTags,
     fetchHarborTopic,
@@ -458,6 +459,143 @@ describe('Harbor API 資料正規化', () => {
                 muted: true,
                 solved: true,
                 capabilities: {solved: true},
+            }),
+        );
+    });
+
+    it('正規化 Harbor Topic、Post、User 搜尋結果及指定樓層', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    posts: [
+                        {
+                            id: 51,
+                            username: 'topic-author',
+                            avatar_template: '/author/{size}.png',
+                            created_at: '2026-07-20T08:00:00Z',
+                            like_count: 2,
+                            blurb: '<p>命中 &amp; 摘要</p>',
+                            post_number: 3,
+                            topic_id: 42,
+                        },
+                    ],
+                    topics: [
+                        {
+                            id: 42,
+                            title: 'Harbor 搜尋',
+                            slug: 'harbor-search',
+                            category_id: 4,
+                            tags: ['原生'],
+                        },
+                    ],
+                    users: [],
+                    categories: [
+                        {
+                            id: 4,
+                            name: '吹水台',
+                            slug: 'general',
+                        },
+                    ],
+                    grouped_search_result: {
+                        more_full_page_results: true,
+                        search_log_id: 9,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    users: [
+                        {
+                            id: 7,
+                            username: 'harbor-user',
+                            avatar_template: '/user/{size}.png',
+                        },
+                    ],
+                },
+            });
+
+        const result = await fetchHarborSearch({
+            query: 'Harbor category:general',
+            userQuery: 'Harbor',
+        });
+
+        expect(getSpy).toHaveBeenNthCalledWith(1, '/search.json', {
+            params: {
+                q: 'Harbor category:general',
+                page: 0,
+            },
+            signal: undefined,
+        });
+        expect(getSpy).toHaveBeenNthCalledWith(2, '/search/query.json', {
+            params: {
+                term: 'Harbor',
+                include_blurbs: true,
+            },
+            signal: undefined,
+        });
+        expect(result).toEqual(
+            expect.objectContaining({
+                hasMore: true,
+                nextPage: 1,
+                searchLogId: 9,
+            }),
+        );
+        expect(result.items).toEqual([
+            expect.objectContaining({
+                id: 'post-51',
+                kind: 'post',
+                topicId: 42,
+                postNumber: 3,
+                title: 'Harbor 搜尋',
+                excerpt: '命中 & 摘要',
+                author: expect.objectContaining({
+                    username: 'topic-author',
+                }),
+                category: expect.objectContaining({
+                    id: 4,
+                    name: '吹水台',
+                }),
+            }),
+            expect.objectContaining({
+                kind: 'user',
+                user: expect.objectContaining({
+                    id: 7,
+                    username: 'harbor-user',
+                }),
+            }),
+        ]);
+    });
+
+    it('分頁搜尋不再額外請求 User suggestion', async () => {
+        getSpy.mockResolvedValue({
+            data: {
+                posts: [],
+                topics: [],
+                users: [],
+                grouped_search_result: {
+                    more_posts: null,
+                },
+            },
+        });
+
+        const result = await fetchHarborSearch({
+            query: 'Harbor',
+            page: 2,
+        });
+
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith('/search.json', {
+            params: {
+                q: 'Harbor',
+                page: 2,
+            },
+            signal: undefined,
+        });
+        expect(result).toEqual(
+            expect.objectContaining({
+                items: [],
+                hasMore: false,
+                nextPage: null,
             }),
         );
     });

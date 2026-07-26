@@ -498,6 +498,122 @@ function normalizeTopicSummary(topic, context) {
     };
 }
 
+function normalizeSearchResult(data, page, additionalUsers = []) {
+    const rawPosts = Array.isArray(data?.posts) ? data.posts : [];
+    const rawTopics = Array.isArray(data?.topics) ? data.topics : [];
+    const rawUsers = [
+        ...(Array.isArray(data?.users) ? data.users : []),
+        ...additionalUsers,
+    ];
+    const categories = normalizeCategories(data);
+    const categoriesById = new Map(
+        categories.map(category => [category.id, category]),
+    );
+    const users = getTopicUsers({...data, users: rawUsers});
+    const topicsById = new Map(
+        rawTopics.map(topic => [toNumberOrNull(topic?.id), topic]),
+    );
+    const matchedTopicIds = new Set();
+    const items = rawPosts
+        .map((post, index) => {
+            const topicId = toNumberOrNull(post?.topic_id);
+            const postNumber = toNumberOrNull(post?.post_number);
+            const rawTopic = topicsById.get(topicId);
+            if (topicId == null || !rawTopic) {
+                return null;
+            }
+
+            matchedTopicIds.add(topicId);
+            const topic = normalizeTopicSummary(rawTopic, {
+                categoriesById,
+                users,
+            });
+            const author =
+                users.usersByUsername.get(post?.username) ||
+                normalizeUser({
+                    username: post?.username,
+                    avatar_template: post?.avatar_template,
+                }) ||
+                topic.author;
+
+            return {
+                id: `post-${post?.id ?? `${topicId}-${postNumber}-${index}`}`,
+                kind: postNumber === 1 ? 'topic' : 'post',
+                topicId,
+                postId: toNumberOrNull(post?.id),
+                postNumber,
+                title: topic.title,
+                excerpt: stripHtml(post?.blurb || topic.excerpt),
+                author,
+                createdAt: post?.created_at || topic.createdAt,
+                likeCount: toCount(post?.like_count),
+                category: topic.category,
+                tags: topic.tags,
+                topic,
+            };
+        })
+        .filter(Boolean);
+
+    rawTopics.forEach((rawTopic, index) => {
+        const topicId = toNumberOrNull(rawTopic?.id);
+        if (topicId == null || matchedTopicIds.has(topicId)) {
+            return;
+        }
+        const topic = normalizeTopicSummary(rawTopic, {
+            categoriesById,
+            users,
+        });
+        items.push({
+            id: `topic-${topicId}-${index}`,
+            kind: 'topic',
+            topicId,
+            postId: null,
+            postNumber: 1,
+            title: topic.title,
+            excerpt: topic.excerpt,
+            author: topic.author,
+            createdAt: topic.createdAt,
+            likeCount: topic.likeCount,
+            category: topic.category,
+            tags: topic.tags,
+            topic,
+        });
+    });
+
+    const seenUserIds = new Set();
+    rawUsers.forEach((rawUser, index) => {
+        const user = normalizeUser(rawUser);
+        if (!user) {
+            return;
+        }
+        const userKey =
+            user.id == null
+                ? `username:${user.username.toLowerCase()}`
+                : `id:${user.id}`;
+        if (seenUserIds.has(userKey)) {
+            return;
+        }
+        seenUserIds.add(userKey);
+        items.push({
+            id: `user-${user.id ?? user.username}-${index}`,
+            kind: 'user',
+            user,
+        });
+    });
+
+    const groupedResult = data?.grouped_search_result || {};
+    const hasMore = Boolean(
+        groupedResult.more_full_page_results || groupedResult.more_posts,
+    );
+
+    return {
+        items,
+        hasMore,
+        nextPage: hasMore ? page + 1 : null,
+        searchLogId: toNumberOrNull(groupedResult.search_log_id),
+    };
+}
+
 function getTopicPageInfo(topicList, page, itemCount) {
     const moreTopicsUrl = topicList?.more_topics_url;
     const nextPageMatch =
@@ -964,6 +1080,83 @@ export async function fetchHarborTopicList({
             solved: items.some(topic => topic.capabilities.solved),
         },
     };
+}
+
+export async function fetchHarborSearch({
+    query,
+    userQuery = query,
+    page = 0,
+    signal,
+} = {}) {
+    const normalizedQuery = typeof query === 'string' ? query.trim() : '';
+    if (!normalizedQuery) {
+        return {
+            items: [],
+            hasMore: false,
+            nextPage: null,
+            searchLogId: null,
+        };
+    }
+
+    const normalizedPage = Math.max(0, Math.floor(Number(page) || 0));
+    const response = await harborApi.get('/search.json', {
+        params: {
+            q: normalizedQuery,
+            page: normalizedPage,
+        },
+        signal,
+    });
+    const data = response.data;
+    if (!data?.grouped_search_result || !Array.isArray(data?.posts)) {
+        throw new Error('Invalid Harbor search response');
+    }
+    if (data.grouped_search_result.error) {
+        const searchError = new Error('Harbor search query rejected');
+        searchError.code = 'INVALID_HARBOR_SEARCH_QUERY';
+        throw searchError;
+    }
+
+    let additionalUsers = [];
+    const normalizedUserQuery =
+        typeof userQuery === 'string' ? userQuery.trim() : '';
+    if (normalizedPage === 0 && normalizedUserQuery) {
+        try {
+            const userResponse = await harborApi.get('/search/query.json', {
+                params: {
+                    term: normalizedUserQuery,
+                    include_blurbs: true,
+                },
+                signal,
+            });
+            additionalUsers = Array.isArray(userResponse.data?.users)
+                ? userResponse.data.users
+                : [];
+        } catch (error) {
+            if (signal?.aborted || error?.code === 'ERR_CANCELED') {
+                throw error;
+            }
+        }
+    }
+
+    let categories = normalizeCategories(data);
+    if (data.topics?.length > 0 && categories.length === 0) {
+        try {
+            categories = await fetchPublicHarborCategories();
+        } catch {
+            categories = [];
+        }
+    }
+
+    return normalizeSearchResult(
+        categories.length > 0
+            ? {
+                ...data,
+                categories,
+            }
+            : data,
+        normalizedPage,
+        additionalUsers,
+    );
 }
 
 export async function fetchHarborCategories({ signal } = {}) {

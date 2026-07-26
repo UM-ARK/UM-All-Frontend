@@ -42,6 +42,7 @@ const HarborStickyToolbar = ({
     sessionLabel,
     onSessionPress,
     onMenuPress,
+    onSearchPress,
     onLayout,
 }) => {
     const { theme } = useTheme();
@@ -93,7 +94,7 @@ const HarborStickyToolbar = ({
                         hitSlop={scale(8)}
                         onPress={() => {
                             trigger();
-                            // TODO: 接入 Harbor 搜索功能
+                            onSearchPress();
                         }}
                         style={({ pressed }) => [
                             styles.toolbarIconButton,
@@ -384,6 +385,7 @@ const ForumPage = ({ navigation }) => {
                     sessionLabel={sessionLabel}
                     onSessionPress={handleSessionPress}
                     onMenuPress={() => navigation.openDrawer()}
+                    onSearchPress={() => navigation.navigate('HarborSearch')}
                     onLayout={handleStickyHeaderLayout}
                 />
             </View>

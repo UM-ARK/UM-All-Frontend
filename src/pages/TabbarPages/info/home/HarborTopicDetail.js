@@ -978,6 +978,11 @@ const HarborTopicDetail = ({route, navigation}) => {
                 return;
             }
 
+            if (target?.type === 'search') {
+                navigation.navigate('HarborSearch', {query: target.query});
+                return;
+            }
+
             openLink({
                 URL: target?.url || url,
                 mode: 'fullScreen',

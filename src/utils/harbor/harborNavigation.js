@@ -81,6 +81,13 @@ export const parseHarborUrl = (url, harborBaseUrl) => {
         };
     }
 
+    if (section === 'search') {
+        return {
+            type: 'search',
+            query: harborUrl.searchParams.get('q') || '',
+        };
+    }
+
     if (section === 'u' && segments[1]) {
         return {
             type: 'user',

@@ -42,10 +42,17 @@ describe('parseHarborUrl', () => {
         });
     });
 
-    it('讓尚未原生支援的 Harbor 頁面使用 Web fallback', () => {
+    it('辨識並解碼 Harbor 搜尋連結', () => {
         expect(parseHarborUrl('/search?q=harbor', HARBOR_BASE_URL)).toEqual({
+            type: 'search',
+            query: 'harbor',
+        });
+    });
+
+    it('讓尚未原生支援的 Harbor 頁面使用 Web fallback', () => {
+        expect(parseHarborUrl('/badges', HARBOR_BASE_URL)).toEqual({
             type: 'web',
-            url: 'https://harbor.umall.one/search?q=harbor',
+            url: 'https://harbor.umall.one/badges',
         });
     });
 
