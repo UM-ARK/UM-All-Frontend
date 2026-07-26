@@ -30,7 +30,8 @@ const VIEW_CONFIG = {
     new: { label: '新話題', analytics: 'new' },
     unread: { label: '未讀', analytics: 'unread' },
 };
-const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(50);
+// 對齊資訊頁 Top Tab（~30），避免 Harbor 頂欄過高、視覺上不夠貼頂
+const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(36);
 const Drawer = createDrawerNavigator();
 
 const HarborStickyToolbar = ({
@@ -68,7 +69,7 @@ const HarborStickyToolbar = ({
                     ]}>
                     <MaterialCommunityIcons
                         name="menu"
-                        size={scale(21)}
+                        size={scale(20)}
                         color={theme.themeColor}
                     />
                 </Pressable>
@@ -80,6 +81,7 @@ const HarborStickyToolbar = ({
                 onChange={onChange}
                 trackBackgroundColor="transparent"
                 selectedBackgroundColor="transparent"
+                compact
                 style={styles.toolbarSegment}
             />
 
@@ -106,7 +108,7 @@ const HarborStickyToolbar = ({
                     ]}>
                     <MaterialCommunityIcons
                         name={isSignedIn ? 'account-check-outline' : 'login'}
-                        size={scale(isSignedIn ? 21 : 14)}
+                        size={scale(isSignedIn ? 20 : 14)}
                         color={theme.themeColor}
                     />
                     {isSignedIn ? null : (
@@ -175,7 +177,7 @@ const ForumPage = ({ navigation }) => {
         const controller = new AbortController();
         fetchHarborSiteCapabilities({ signal: controller.signal })
             .then(setCapabilities)
-            .catch(() => {});
+            .catch(() => { });
         return () => controller.abort();
     }, []);
 
@@ -286,10 +288,10 @@ const ForumPage = ({ navigation }) => {
         status === 'signedIn'
             ? t('已登入')
             : status === 'restoring'
-              ? t('正在同步…')
-              : status === 'authorizing'
-                ? t('登入中…')
-                : t('登入');
+                ? t('正在同步…')
+                : status === 'authorizing'
+                    ? t('登入中…')
+                    : t('登入');
 
     const contentContainerStyle = useMemo(
         () => ({
@@ -367,8 +369,8 @@ const styles = StyleSheet.create({
         minHeight: DEFAULT_STICKY_HEADER_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(5),
+        paddingHorizontal: scale(10),
+        paddingVertical: 0,
         zIndex: 2,
     },
     toolbarSide: {
@@ -380,21 +382,21 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     toolbarIconButton: {
-        width: scale(38),
-        height: scale(38),
-        borderRadius: scale(13),
+        width: scale(30),
+        height: scale(30),
+        borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
     },
     sessionButton: {
         maxWidth: '100%',
-        minHeight: scale(38),
-        borderRadius: scale(10),
+        minHeight: scale(30),
+        borderRadius: scale(8),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(5),
+        paddingHorizontal: scale(6),
+        paddingVertical: verticalScale(2),
     },
     sessionText: {
         ...uiStyle.defaultText,
@@ -405,7 +407,7 @@ const styles = StyleSheet.create({
     },
     toolbarSegment: {
         flexShrink: 0,
-        marginHorizontal: scale(4),
+        marginHorizontal: scale(2),
     },
     sharedHeader: {
         position: 'absolute',

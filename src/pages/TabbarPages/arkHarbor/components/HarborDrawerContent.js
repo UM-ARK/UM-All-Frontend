@@ -33,9 +33,6 @@ import { HarborInlineRetry } from './HarborListStates';
 const PLACEHOLDER_ITEMS = [
     { key: 'posts', icon: 'account-outline', label: '我的貼文' },
     { key: 'messages', icon: 'inbox-outline', label: '我的訊息' },
-    { key: 'review', icon: 'flag-outline', label: '審核' },
-    { key: 'admin', icon: 'wrench-outline', label: '管理員' },
-    { key: 'invite', icon: 'send-outline', label: '邀請' },
     { key: 'more', icon: 'dots-horizontal', label: '更多' },
 ];
 

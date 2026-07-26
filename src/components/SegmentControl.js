@@ -28,6 +28,7 @@ const getLabelStyle = (isSelected, accent, inactive) => ({
  * @param {string} [inactiveLabelColor] - 未選中文字色（預設 theme.black.third）
  * @param {number} [fontSize] - 標籤字級（預設 scale(11)）
  * @param {boolean} [wrap] - 是否允許換行（多選項窄螢幕）
+ * @param {boolean} [compact] - 緊湊模式（頂欄等需貼頂的場景）
  */
 const SegmentControl = ({
     options,
@@ -40,6 +41,7 @@ const SegmentControl = ({
     inactiveLabelColor,
     fontSize,
     wrap,
+    compact,
 }) => {
     const { theme } = useTheme();
     const { themeColor, bg_color, black } = theme;
@@ -53,6 +55,7 @@ const SegmentControl = ({
         <View
             style={[
                 styles.track,
+                compact && styles.compactTrack,
                 wrap ? styles.wrappedTrack : styles.singleLineTrack,
                 getTrackStyle(track),
                 style,
@@ -69,6 +72,7 @@ const SegmentControl = ({
                         }}
                         style={[
                             styles.option,
+                            compact && styles.compactOption,
                             getOptionStyle(isSelected, selectedBackground),
                         ]}>
                         <Text
@@ -93,6 +97,9 @@ const styles = StyleSheet.create({
         padding: scale(3),
         overflow: 'hidden',
     },
+    compactTrack: {
+        padding: 0,
+    },
     wrappedTrack: {
         flexWrap: 'wrap',
         justifyContent: 'center',
@@ -104,6 +111,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(5),
         borderRadius: scale(999),
+    },
+    compactOption: {
+        paddingHorizontal: scale(8),
+        paddingVertical: verticalScale(3),
     },
     label: {
         ...uiStyle.defaultText,
