@@ -15,11 +15,10 @@ import {
     FlatList,
     Pressable,
     ActivityIndicator,
-    Dimensions,
     Image,
     useWindowDimensions,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
 import {
@@ -30,7 +29,6 @@ import {
     ARK_HARBOR_AVATAR,
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
-import Loading from '../../../../components/Loading';
 import EventCard from '../components/EventCard';
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 
@@ -46,6 +44,161 @@ const PAGE_SIZE = 10;
 const REQUEST_TIMEOUT = 8000;
 const RETRY_DELAY = 600;
 const MIN_LOADING_DURATION = 500;
+const SKELETON_BORDER_RADIUS = scale(8);
+
+// 各欄骨架卡配置，模擬活動卡與 Harbor 卡交錯的瀑布流高度
+const SKELETON_COLUMN_VARIANTS = [
+    [
+        { kind: 'event', imageRatio: 1, titleWidth: '88%' },
+        { kind: 'harbor', excerptHeight: verticalScale(72) },
+        { kind: 'event', imageRatio: 0.78, titleWidth: '72%' },
+    ],
+    [
+        { kind: 'harbor', excerptHeight: verticalScale(56) },
+        { kind: 'event', imageRatio: 1, titleWidth: '84%' },
+        { kind: 'event', imageRatio: 0.9, titleWidth: '64%' },
+    ],
+    [
+        { kind: 'event', imageRatio: 0.86, titleWidth: '80%' },
+        { kind: 'harbor', excerptHeight: verticalScale(84) },
+        { kind: 'event', imageRatio: 1, titleWidth: '70%' },
+    ],
+];
+
+const EventSkeletonCard = ({ cardWidth, imageRatio, titleWidth }) => {
+    const { theme } = useTheme();
+    const { white, tonal } = theme;
+    const imageHeight = cardWidth * imageRatio;
+
+    return (
+        <View
+            style={{
+                backgroundColor: white,
+                borderRadius: SKELETON_BORDER_RADIUS,
+                margin: scale(5),
+                width: cardWidth,
+                overflow: 'hidden',
+            }}>
+            <View
+                style={{
+                    width: cardWidth,
+                    height: imageHeight,
+                    backgroundColor: tonal.primary15,
+                }}
+            />
+            <View style={{ padding: scale(8) }}>
+                <View
+                    style={{
+                        height: verticalScale(11),
+                        width: titleWidth,
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary15,
+                    }}
+                />
+                <View
+                    style={{
+                        marginTop: verticalScale(6),
+                        height: verticalScale(11),
+                        width: '62%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary08,
+                    }}
+                />
+                <View
+                    style={{
+                        marginTop: verticalScale(10),
+                        height: verticalScale(9),
+                        width: '38%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary08,
+                    }}
+                />
+            </View>
+        </View>
+    );
+};
+
+const HarborSkeletonCard = ({ cardWidth, excerptHeight }) => {
+    const { theme } = useTheme();
+    const { white, tonal } = theme;
+
+    return (
+        <View
+            style={{
+                backgroundColor: tonal.primary15,
+                borderRadius: SKELETON_BORDER_RADIUS,
+                margin: scale(5),
+                width: cardWidth,
+                overflow: 'hidden',
+            }}>
+            <View
+                style={{
+                    marginTop: verticalScale(13),
+                    marginHorizontal: scale(8),
+                    marginBottom: verticalScale(8),
+                }}>
+                <View
+                    style={{
+                        height: excerptHeight,
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary08,
+                    }}
+                />
+            </View>
+            <View
+                style={{
+                    backgroundColor: white,
+                    paddingTop: verticalScale(8),
+                    paddingBottom: verticalScale(10),
+                    paddingHorizontal: scale(8),
+                    borderBottomStartRadius: SKELETON_BORDER_RADIUS,
+                    borderBottomEndRadius: SKELETON_BORDER_RADIUS,
+                }}>
+                <View
+                    style={{
+                        height: verticalScale(11),
+                        width: '86%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary15,
+                    }}
+                />
+                <View
+                    style={{
+                        marginTop: verticalScale(6),
+                        height: verticalScale(11),
+                        width: '58%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary08,
+                    }}
+                />
+                <View
+                    style={{
+                        marginTop: verticalScale(10),
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}>
+                    <View
+                        style={{
+                            width: verticalScale(12),
+                            height: verticalScale(12),
+                            borderRadius: scale(50),
+                            backgroundColor: tonal.primary15,
+                        }}
+                    />
+                    <View
+                        style={{
+                            height: verticalScale(8),
+                            width: '28%',
+                            borderRadius: scale(4),
+                            backgroundColor: tonal.primary08,
+                        }}
+                    />
+                </View>
+            </View>
+        </View>
+    );
+};
 
 const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -455,6 +608,39 @@ const EventPage = forwardRef((props, ref) => {
         );
     };
 
+    // 首頁載入骨架：模擬活動卡與 Harbor 卡交錯的瀑布流
+    const renderSkeletonPage = () => (
+        <View style={s.waterFlowContainer}>
+            {Array.from({ length: numColumns }, (_, columnIndex) => {
+                const variants =
+                    SKELETON_COLUMN_VARIANTS[columnIndex] ||
+                    SKELETON_COLUMN_VARIANTS[0];
+                return (
+                    <View
+                        key={`skeleton-col-${columnIndex}`}
+                        style={{ flex: 1, alignItems: 'center' }}>
+                        {variants.map((item, itemIndex) =>
+                            item.kind === 'harbor' ? (
+                                <HarborSkeletonCard
+                                    key={`skeleton-harbor-${columnIndex}-${itemIndex}`}
+                                    cardWidth={cardWidth}
+                                    excerptHeight={item.excerptHeight}
+                                />
+                            ) : (
+                                <EventSkeletonCard
+                                    key={`skeleton-event-${columnIndex}-${itemIndex}`}
+                                    cardWidth={cardWidth}
+                                    imageRatio={item.imageRatio}
+                                    titleWidth={item.titleWidth}
+                                />
+                            ),
+                        )}
+                    </View>
+                );
+            })}
+        </View>
+    );
+
     // 渲染harbor的消息
     const renderHarborMessage = (item) => {
         // unicode_title    直接返回對應的Emoji
@@ -590,12 +776,7 @@ const EventPage = forwardRef((props, ref) => {
     return (
         <View style={{ ...props.style }}>
             {isLoading ? (
-                <View style={{
-                    flex: 1,
-                    marginBottom: Dimensions.get('window').height,
-                }}>
-                    <Loading />
-                </View>
+                renderSkeletonPage()
             ) : columnsData.some(col => col.length > 0) ? (
                 <View>
                     {renderPage()}

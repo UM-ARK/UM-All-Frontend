@@ -15,11 +15,11 @@ import {
     RefreshControl,
     StyleSheet,
     TouchableOpacity,
-    ActivityIndicator,
     Image,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
+import NewsListSkeleton from './components/NewsListSkeleton';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
@@ -274,14 +274,10 @@ const NewsPage = forwardRef(function NewsPage(
             {/* {isLoading ? null : renderGoTopButton()} */}
 
             {isLoading ? (
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                    <ActivityIndicator size="large" color={themeColor} />
-                </View>
+                <NewsListSkeleton
+                    showTopNews
+                    contentTopInset={contentTopInset}
+                />
             ) : (
                 <View style={{ flex: 1, width: '100%' }}>
                     <VirtualizedList

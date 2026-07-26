@@ -7,13 +7,14 @@ import React, {
     useCallback,
     useImperativeHandle,
 } from 'react';
-import { Text, View, RefreshControl, ActivityIndicator } from 'react-native';
+import { Text, View, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 
 import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_EVENT, UM_API_TOKEN } from '../../../utils/pathMap';
 
 import NewsCard from './components/NewsCard';
+import NewsListSkeleton from './components/NewsListSkeleton';
 
 import axios from 'axios';
 import moment from 'moment-timezone';
@@ -202,7 +203,7 @@ const UMEventPage = forwardRef(function UMEventPage(
         );
     };
 
-    const { themeColor, bg_color } = theme;
+    const { bg_color } = theme;
 
     return (
         <View
@@ -213,7 +214,7 @@ const UMEventPage = forwardRef(function UMEventPage(
                 backgroundColor: bg_color,
             }}>
             {isLoading ? (
-                <ActivityIndicator size="large" color={themeColor} />
+                <NewsListSkeleton contentTopInset={contentTopInset} />
             ) : (
                 data != undefined && renderPage()
             )}

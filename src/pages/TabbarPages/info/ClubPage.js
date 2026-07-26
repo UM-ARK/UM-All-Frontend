@@ -6,7 +6,6 @@ import { BASE_URI, BASE_HOST, GET, USUAL_Q } from '../../../utils/pathMap';
 import { clubTagList, clubTagMap } from '../../../utils/clubMap';
 import { openLink } from '../../../utils/browser';
 import { trigger } from '../../../utils/trigger';
-import Loading from '../../../components/Loading';
 import ClubCard from './components/ClubCard';
 import ClubSearchBar from './components/ClubSearchBar';
 import { filterClubsBySearchQuery } from './utils/clubSearchFilter';
@@ -21,6 +20,43 @@ const CLUB_COLUMN_GAP = scale(6);
 const CLUB_CELL_MAX_WIDTH = scale(122);
 /** 非首個區段標題比首個區段多出的頂部內距 */
 const SECTION_HEADER_EXTRA_TOP_PADDING = scale(12);
+const CLUB_SKELETON_LOGO_SIZE = verticalScale(45);
+/** 各區段列數，模擬 ARK／學生會／學會等分組 */
+const SKELETON_SECTION_ROWS = [2, 2, 3];
+const SKELETON_TITLE_WIDTHS = ['22%', '34%', '28%'];
+
+const ClubSkeletonCard = ({ cellWidth, white, tonal }) => (
+    <View style={{ width: cellWidth }}>
+        <View
+            style={{
+                borderRadius: scale(10),
+                backgroundColor: white,
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                paddingVertical: scale(8),
+                margin: scale(3),
+                width: '100%',
+            }}>
+            <View
+                style={{
+                    width: CLUB_SKELETON_LOGO_SIZE,
+                    height: CLUB_SKELETON_LOGO_SIZE,
+                    borderRadius: scale(50),
+                    backgroundColor: tonal.primary15,
+                }}
+            />
+            <View
+                style={{
+                    marginTop: scale(5),
+                    height: verticalScale(10),
+                    width: '70%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary08,
+                }}
+            />
+        </View>
+    </View>
+);
 
 const clubFilter = (clubDataList, tag) => clubDataList.filter(a => a.tag === tag);
 
@@ -194,6 +230,65 @@ function ClubPage() {
         ITEMS_PER_ROW;
     const cellWidth = Math.min(rawCellWidth, CLUB_CELL_MAX_WIDTH);
 
+    // 組織列表骨架：區段標題 + 三欄圓形 Logo 卡
+    const renderClubSkeleton = useCallback(() => {
+        const { white, tonal, themeColor, bg_color } = theme;
+        return (
+            <View style={{ paddingBottom: scale(40) }}>
+                {SKELETON_SECTION_ROWS.map((rowCount, sectionIndex) => (
+                    <View key={`club-skeleton-section-${sectionIndex}`}>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                                paddingTop: sectionIndex === 0 ? scale(6) : scale(18),
+                                paddingBottom: scale(8),
+                                backgroundColor: bg_color,
+                            }}>
+                            <View
+                                style={{
+                                    width: scale(3),
+                                    height: verticalScale(15),
+                                    borderRadius: scale(2),
+                                    backgroundColor: themeColor,
+                                    marginRight: scale(10),
+                                }}
+                            />
+                            <View
+                                style={{
+                                    height: verticalScale(14),
+                                    width: SKELETON_TITLE_WIDTHS[sectionIndex],
+                                    borderRadius: scale(4),
+                                    backgroundColor: tonal.primary15,
+                                }}
+                            />
+                        </View>
+                        {Array.from({ length: rowCount }, (_, rowIndex) => (
+                            <View
+                                key={`club-skeleton-row-${sectionIndex}-${rowIndex}`}
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-start',
+                                    paddingHorizontal: CLUB_GRID_HORIZONTAL_PADDING,
+                                    columnGap: CLUB_COLUMN_GAP,
+                                }}>
+                                {Array.from({ length: ITEMS_PER_ROW }, (_, itemIndex) => (
+                                    <ClubSkeletonCard
+                                        key={`club-skeleton-card-${sectionIndex}-${rowIndex}-${itemIndex}`}
+                                        cellWidth={cellWidth}
+                                        white={white}
+                                        tonal={tonal}
+                                    />
+                                ))}
+                            </View>
+                        ))}
+                    </View>
+                ))}
+            </View>
+        );
+    }, [cellWidth, theme]);
+
     return (
         <View style={{ flex: 1, backgroundColor: theme.bg_color }}>
             <ClubSearchBar
@@ -337,7 +432,7 @@ function ClubPage() {
                 }
                 onScrollBeginDrag={handleScrollStart}
                 onMomentumScrollEnd={handleScrollEnd}
-                ListEmptyComponent={isLoading ? <Loading /> : null}
+                ListEmptyComponent={isLoading ? renderClubSkeleton() : null}
                 ListFooterComponent={!isLoading ? renderBottomInfo : null}
                 showsVerticalScrollIndicator={false}
                 stickySectionHeadersEnabled
