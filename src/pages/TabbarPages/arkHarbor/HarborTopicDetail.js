@@ -22,6 +22,7 @@ import {
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import { FlashList } from '@shopify/flash-list';
+import { MenuView } from '@react-native-menu/menu';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import Slider from '@react-native-community/slider';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -98,6 +99,23 @@ const HARBOR_REACTION_UNICODE = Object.freeze({
     rocket: '🚀',
     heart_eyes: '😍',
     slightly_smiling_face: '🙂',
+});
+const HARBOR_REACTION_LABEL = Object.freeze({
+    heart: '愛心',
+    '+1': '讚同',
+    '-1': '不讚同',
+    laughing: '好笑',
+    open_mouth: '驚訝',
+    clap: '拍手',
+    confetti_ball: '慶祝',
+    hugs: '擁抱',
+    smile: '微笑',
+    tada: '太棒了',
+    pray: '祈禱',
+    eyes: '留意',
+    rocket: '火箭',
+    heart_eyes: '喜愛',
+    slightly_smiling_face: '淡淡微笑',
 });
 const LIKE_ACTION_ID = 2;
 const TOPIC_POST_BATCH_SIZE = 20;
@@ -786,12 +804,13 @@ const HarborPostCard = memo(
         onPressCopy,
         onPressLike,
         onPressLink,
-        onPressReaction,
         onPressReply,
         onPressShare,
+        onSelectReaction,
         pendingBookmark,
         pendingLike,
         pendingReaction,
+        reactions,
         reactionsEnabled,
     }) => {
         const { theme } = useTheme();
@@ -825,6 +844,29 @@ const HarborPostCard = memo(
             post.small_action ||
             post.post_type === 3,
         );
+        const reactionMenuActions = useMemo(() => {
+            return reactions.map(reaction => {
+                const reactionName = normalizeHarborReactionName(reaction);
+                const unicode = HARBOR_REACTION_UNICODE[reactionName];
+                const label = t(
+                    HARBOR_REACTION_LABEL[reactionName] ||
+                        reactionName.replace(/_/g, ' '),
+                );
+                return {
+                    id: reaction,
+                    title: unicode
+                        ? `${unicode}  ${label}`
+                        : label,
+                    state:
+                        currentReaction === reaction
+                            ? 'on'
+                            : 'off',
+                    attributes: {
+                        disabled: Boolean(pendingLike || pendingReaction),
+                    },
+                };
+            });
+        }, [currentReaction, pendingLike, pendingReaction, reactions, t]);
 
         if (isDeleted || isHidden) {
             return (
@@ -1042,57 +1084,89 @@ const HarborPostCard = memo(
                     />
                 </View>
                 <View style={styles.postActionRow}>
-                    <Pressable
-                        disabled={pendingLike || pendingReaction}
-                        onPress={() => {
-                            trigger();
-                            if (reactionsEnabled) {
-                                onPressReaction(post);
-                            } else {
+                    {reactionsEnabled ? (
+                        <MenuView
+                            actions={reactionMenuActions}
+                            onOpenMenu={() => trigger()}
+                            onPressAction={event => {
+                                trigger();
+                                onSelectReaction(
+                                    post.id,
+                                    event.nativeEvent.event,
+                                );
+                            }}
+                            shouldOpenOnLongPress={false}
+                            style={styles.reactionMenuView}>
+                            <View
+                                style={[
+                                    styles.postActionButton,
+                                    styles.reactionMenuButton,
+                                    { backgroundColor: tonal.primary15 },
+                                ]}>
+                                {pendingReaction ? (
+                                    <ActivityIndicator
+                                        size="small"
+                                        color={themeColor}
+                                    />
+                                ) : currentReaction ? (
+                                    <HarborReactionIcon
+                                        name={currentReaction}
+                                        size={scale(16)}
+                                    />
+                                ) : (
+                                    <MaterialCommunityIcons
+                                        name="emoticon-outline"
+                                        size={scale(15)}
+                                        color={themeColor}
+                                    />
+                                )}
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.postActionText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('回應')}
+                                </Text>
+                            </View>
+                        </MenuView>
+                    ) : (
+                        <Pressable
+                            disabled={pendingLike}
+                            onPress={() => {
+                                trigger();
                                 onPressLike(post);
-                            }
-                        }}
-                        style={({ pressed }) => [
-                            styles.postActionButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        {pendingLike || pendingReaction ? (
-                            <ActivityIndicator size="small" color={themeColor} />
-                        ) : reactionsEnabled && currentReaction ? (
-                            <HarborReactionIcon
-                                name={currentReaction}
-                                size={scale(16)}
-                            />
-                        ) : (
-                            <MaterialCommunityIcons
-                                name={
-                                    reactionsEnabled
-                                        ? 'emoticon-outline'
-                                        : isLiked
-                                            ? 'heart'
-                                            : 'heart-outline'
-                                }
-                                size={scale(15)}
-                                color={themeColor}
-                            />
-                        )}
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.postActionText,
-                                { color: themeColor },
+                            }}
+                            style={({ pressed }) => [
+                                styles.postActionButton,
+                                {
+                                    backgroundColor: pressed
+                                        ? tonal.primary30
+                                        : tonal.primary15,
+                                },
                             ]}>
-                            {reactionsEnabled
-                                ? t('回應')
-                                : isLiked
-                                    ? t('取消讚好')
-                                    : t('讚好')}
-                        </Text>
-                    </Pressable>
+                            {pendingLike ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color={themeColor}
+                                />
+                            ) : (
+                                <MaterialCommunityIcons
+                                    name={isLiked ? 'heart' : 'heart-outline'}
+                                    size={scale(15)}
+                                    color={themeColor}
+                                />
+                            )}
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.postActionText,
+                                    { color: themeColor },
+                                ]}>
+                                {isLiked ? t('取消讚好') : t('讚好')}
+                            </Text>
+                        </Pressable>
+                    )}
                     <Pressable
                         disabled={pendingBookmark}
                         onPress={() => {
@@ -1751,7 +1825,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const [bookmarkEditor, setBookmarkEditor] = useState(null);
     const [isBookmarkReminderVisible, setIsBookmarkReminderVisible] =
         useState(false);
-    const [reactionPostId, setReactionPostId] = useState(null);
     const [isNotificationVisible, setIsNotificationVisible] = useState(false);
     const [pendingMutations, setPendingMutations] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
@@ -2544,8 +2617,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
         ],
     );
 
-    const openReactionPicker = useCallback(
-        async post => {
+    const selectPostReaction = useCallback(
+        async (postId, reactionId) => {
+            const post = latestTopicRef.current?.post_stream?.posts?.find(
+                item => Number(item.id) === Number(postId),
+            );
+            if (!post) {
+                return;
+            }
             if (!(await requireHarborSignIn())) {
                 return;
             }
@@ -2554,20 +2633,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 post.current_user_reaction.can_undo === false
             ) {
                 Toast.show(t('你目前不能取消這個回應'));
-                return;
-            }
-            setReactionPostId(post.id);
-        },
-        [requireHarborSignIn, t],
-    );
-
-    const selectPostReaction = useCallback(
-        async reactionId => {
-            const post = latestTopicRef.current?.post_stream?.posts?.find(
-                item => Number(item.id) === Number(reactionPostId),
-            );
-            setReactionPostId(null);
-            if (!post) {
                 return;
             }
 
@@ -2604,8 +2669,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
         [
             beginMutation,
             finishMutation,
-            reactionPostId,
+            requireHarborSignIn,
             showMutationFailure,
+            t,
             updateTopicPost,
         ],
     );
@@ -3016,9 +3082,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressCopy={copyPostPermalink}
                         onPressLike={togglePostLike}
                         onPressLink={openHarborLink}
-                        onPressReaction={openReactionPicker}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
+                        onSelectReaction={selectPostReaction}
                         pendingBookmark={
                             pendingMutations[`bookmark:${item.id}`]
                         }
@@ -3026,6 +3092,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         pendingReaction={
                             pendingMutations[`reaction:${item.id}`]
                         }
+                        reactions={validReactions}
                         reactionsEnabled={validReactions.length > 0}
                     />
                 </View>
@@ -3045,11 +3112,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openImage,
             openNotificationLevels,
             openOriginalTopic,
-            openReactionPicker,
             openTag,
             pendingMutations,
             posts,
             scrollToPost,
+            selectPostReaction,
             sharePost,
             shareCurrentPost,
             t,
@@ -3058,7 +3125,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             topic,
             topicId,
             unreadAfterPostNumber,
-            validReactions.length,
+            validReactions,
         ],
     );
 
@@ -3586,63 +3653,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
             <Modal
                 transparent
-                visible={reactionPostId != null}
-                animationType="fade"
-                onRequestClose={() => setReactionPostId(null)}>
-                <View style={styles.modalPage}>
-                    <Pressable
-                        style={[
-                            StyleSheet.absoluteFill,
-                            styles.modalBackdrop,
-                            { backgroundColor: theme.trueBlack },
-                        ]}
-                        onPress={() => {
-                            trigger();
-                            setReactionPostId(null);
-                        }}
-                    />
-                    <View
-                        style={[
-                            styles.actionDialog,
-                            { backgroundColor: theme.white },
-                        ]}>
-                        <Text
-                            style={[
-                                styles.actionDialogTitle,
-                                { color: black.main },
-                            ]}>
-                            {t('選擇回應')}
-                        </Text>
-                        <View style={styles.reactionGrid}>
-                            {validReactions.map(reaction => (
-                                <Pressable
-                                    key={reaction}
-                                    onPress={() => {
-                                        trigger();
-                                        selectPostReaction(reaction);
-                                    }}
-                                    accessibilityLabel={`:${reaction}:`}
-                                    style={({ pressed }) => [
-                                        styles.reactionButton,
-                                        {
-                                            backgroundColor: pressed
-                                                ? tonal.primary30
-                                                : tonal.primary15,
-                                        },
-                                    ]}>
-                                    <HarborReactionIcon
-                                        name={reaction}
-                                        size={scale(28)}
-                                    />
-                                </Pressable>
-                            ))}
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            <Modal
-                transparent
                 visible={isNotificationVisible}
                 animationType="fade"
                 onRequestClose={() => setIsNotificationVisible(false)}>
@@ -4062,6 +4072,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingBottom: verticalScale(10),
     },
+    reactionMenuView: {
+        flex: 1,
+        marginRight: scale(6),
+    },
+    reactionMenuButton: {
+        marginRight: 0,
+    },
     postActionButton: {
         minWidth: scale(72),
         flex: 1,
@@ -4293,20 +4310,6 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(11),
         fontWeight: '700',
-    },
-    reactionGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        marginHorizontal: scale(-3),
-    },
-    reactionButton: {
-        width: scale(52),
-        height: scale(52),
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: scale(12),
-        margin: scale(3),
     },
     reactionGlyph: {
         textAlign: 'center',
