@@ -544,7 +544,7 @@ function normalizeTopicSummary(topic, context) {
         author: people.author,
         lastPoster: people.lastPoster,
         postCount,
-        replyCount: toCount(topic?.reply_count, Math.max(0, postCount - 1)),
+        replyCount: Math.max(toCount(topic?.reply_count), postCount - 1, 0),
         viewCount: toCount(topic?.views),
         likeCount: toCount(topic?.like_count),
         createdAt: topic?.created_at || '',

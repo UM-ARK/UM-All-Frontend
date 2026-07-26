@@ -20,6 +20,12 @@ const STATUS_CONFIG = {
     solved: { icon: 'check-decagram-outline', label: '已解決' },
 };
 
+// 頭像高度對齊「ID + 第二行」兩行文字
+const AUTHOR_NAME_LINE_HEIGHT = scale(14);
+const META_LINE_HEIGHT = scale(11);
+const META_GAP = verticalScale(1);
+const AVATAR_SIZE = AUTHOR_NAME_LINE_HEIGHT + META_GAP + META_LINE_HEIGHT;
+
 const stopAndRun = (event, callback, isPressAllowed) => {
     event.stopPropagation?.();
     if (isPressAllowed && !isPressAllowed()) {
@@ -27,6 +33,42 @@ const stopAndRun = (event, callback, isPressAllowed) => {
     }
     trigger();
     callback();
+};
+
+const formatTopicDateLabel = (iso, t) => {
+    if (!iso) {
+        return '';
+    }
+    const activity = moment.tz(iso, 'Asia/Macau');
+    if (!activity.isValid()) {
+        return '';
+    }
+    const today = moment.tz('Asia/Macau').startOf('day');
+    const activityDay = activity.clone().startOf('day');
+    const dayDiff = today.diff(activityDay, 'days');
+    if (dayDiff === 0) {
+        return t('今天');
+    }
+    if (dayDiff === 1) {
+        return t('昨天');
+    }
+    if (dayDiff === 2) {
+        return t('前天');
+    }
+    if (activity.year() === today.year()) {
+        return activity.format('MM-DD');
+    }
+    return activity.format('YYYY-MM-DD');
+};
+
+const resolveUserId = (user, fallback) => {
+    return (
+        user?.username ||
+        user?.name ||
+        user?.displayName ||
+        fallback ||
+        ''
+    );
 };
 
 const Metric = ({ icon, value, color }) => (
@@ -82,11 +124,9 @@ const HarborTopicCard = ({
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const author = topic.author || {};
-    const authorName =
-        author.name ||
-        author.displayName ||
-        author.username ||
-        t('Harbor 會員');
+    const lastPoster = topic.lastPoster || null;
+    const authorId = resolveUserId(author, t('Harbor 會員'));
+    const lastPosterId = resolveUserId(lastPoster);
     const avatarTemplate = author.avatarTemplate || author.avatar_template;
     const avatarUrl =
         author.avatarUrl ||
@@ -108,14 +148,23 @@ const HarborTopicCard = ({
     });
     const activityAt =
         topic.activityAt || topic.lastPostedAt || topic.createdAt;
+    const dateLabel = formatTopicDateLabel(activityAt, t) || t('Harbor 話題');
     const unreadCount = Number(topic.unreadCount || 0);
     const lastReadPostNumber = Number(topic.lastReadPostNumber || 0);
+    const replyCount = Number(topic.replyCount || 0);
+    const showLastPosterTeaser = Boolean(lastPosterId) && replyCount > 0;
     const isNewReply =
         topic.newContentType === 'reply' ||
         (!topic.newContentType && unreadCount > 0);
     const isNewTopic =
         topic.newContentType === 'topic' ||
         (!topic.newContentType && topic.isNew);
+    const avatarStyle = {
+        width: AVATAR_SIZE,
+        height: AVATAR_SIZE,
+        borderRadius: AVATAR_SIZE / 2,
+        backgroundColor: theme.tonal.primary15,
+    };
 
     return (
         <Pressable
@@ -142,24 +191,17 @@ const HarborTopicCard = ({
                 {avatarUrl ? (
                     <Image
                         source={{ uri: avatarUrl }}
-                        style={[
-                            styles.avatar,
-                            { backgroundColor: theme.tonal.primary15 },
-                        ]}
+                        style={avatarStyle}
                         contentFit="cover"
                         placeholder={theme.imagePlaceholder}
                         placeholderContentFit="cover"
                         transition={180}
                     />
                 ) : (
-                    <View
-                        style={[
-                            styles.avatarFallback,
-                            { backgroundColor: theme.tonal.primary15 },
-                        ]}>
+                    <View style={[styles.avatarFallback, avatarStyle]}>
                         <MaterialCommunityIcons
                             name="account-outline"
-                            size={scale(18)}
+                            size={scale(14)}
                             color={theme.themeColor}
                         />
                     </View>
@@ -169,21 +211,24 @@ const HarborTopicCard = ({
                         numberOfLines={1}
                         style={[
                             styles.authorName,
-                            { color: theme.black.main },
+                            {
+                                color: theme.black.third,
+                                lineHeight: AUTHOR_NAME_LINE_HEIGHT,
+                            },
                         ]}>
-                        {authorName}
+                        {authorId}
                     </Text>
                     <Text
                         numberOfLines={1}
                         style={[
                             styles.activityTime,
-                            { color: theme.black.third },
+                            {
+                                color: theme.black.third,
+                                lineHeight: META_LINE_HEIGHT,
+                                marginTop: META_GAP,
+                            },
                         ]}>
-                        {activityAt
-                            ? `${t('最後活動')} · ${moment
-                                .tz(activityAt, 'Asia/Macau')
-                                .format('MM/DD HH:mm')}`
-                            : t('Harbor 話題')}
+                        {dateLabel}
                     </Text>
                 </View>
                 {isNewReply ? (
@@ -302,6 +347,31 @@ const HarborTopicCard = ({
                 </View>
             ) : null}
 
+            {showLastPosterTeaser ? (
+                <View
+                    style={[
+                        styles.lastPosterBox,
+                        { backgroundColor: theme.bg_color },
+                    ]}>
+                    <Text numberOfLines={2} style={styles.lastPosterLine}>
+                        <Text
+                            style={[
+                                styles.lastPosterId,
+                                { color: theme.black.second },
+                            ]}>
+                            {`${lastPosterId}: `}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.lastPosterTeaser,
+                                { color: theme.black.third },
+                            ]}>
+                            ...
+                        </Text>
+                    </Text>
+                </View>
+            ) : null}
+
             <View
                 style={[
                     styles.footer,
@@ -310,7 +380,7 @@ const HarborTopicCard = ({
                 <View style={styles.metrics}>
                     <Metric
                         icon="comment-outline"
-                        value={topic.replyCount || 0}
+                        value={replyCount}
                         color={theme.black.third}
                     />
                     <Metric
@@ -349,43 +419,35 @@ const HarborTopicCard = ({
 const styles = StyleSheet.create({
     card: {
         borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(16),
-        marginHorizontal: scale(14),
-        marginBottom: verticalScale(10),
-        paddingHorizontal: scale(14),
-        paddingTop: verticalScale(13),
+        borderRadius: scale(12),
+        marginHorizontal: scale(6),
+        marginBottom: verticalScale(4),
+        paddingHorizontal: scale(12),
+        paddingTop: verticalScale(11),
         overflow: 'hidden',
     },
     authorRow: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    avatar: {
-        width: scale(34),
-        height: scale(34),
-        borderRadius: scale(17),
-    },
     avatarFallback: {
-        width: scale(34),
-        height: scale(34),
-        borderRadius: scale(17),
         alignItems: 'center',
         justifyContent: 'center',
     },
     authorText: {
         flex: 1,
         minWidth: 0,
-        marginLeft: scale(9),
+        marginLeft: scale(8),
+        justifyContent: 'center',
     },
     authorName: {
         ...uiStyle.defaultText,
-        fontSize: scale(12),
+        fontSize: scale(11),
         fontWeight: '600',
     },
     activityTime: {
         ...uiStyle.defaultText,
-        fontSize: scale(10),
-        marginTop: verticalScale(2),
+        fontSize: scale(9),
     },
     unreadChip: {
         borderRadius: scale(8),
@@ -406,16 +468,36 @@ const styles = StyleSheet.create({
     },
     title: {
         ...uiStyle.defaultText,
-        fontSize: scale(17),
-        lineHeight: scale(23),
+        fontSize: scale(14),
+        lineHeight: scale(19),
         fontWeight: '700',
-        marginTop: verticalScale(11),
+        marginTop: verticalScale(9),
     },
     excerpt: {
         ...uiStyle.defaultText,
         fontSize: scale(11),
         lineHeight: scale(17),
         marginTop: verticalScale(5),
+    },
+    lastPosterBox: {
+        borderRadius: scale(8),
+        marginTop: verticalScale(8),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(8),
+    },
+    lastPosterLine: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        lineHeight: scale(16),
+    },
+    lastPosterId: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+    },
+    lastPosterTeaser: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
     },
     taxonomyRow: {
         flexDirection: 'row',
