@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     ActivityIndicator,
-    Alert,
     RefreshControl,
     StyleSheet,
     Text,
@@ -21,6 +20,7 @@ import {uiStyle, useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {fetchHarborBadges} from '../../../../utils/harbor/harborApi';
 import {trigger} from '../../../../utils/trigger';
+import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborEmptyState from '../components/HarborEmptyState';
 
 const ListSeparator = () => <View style={styles.separator} />;
@@ -34,6 +34,8 @@ const HarborBadgesPage = ({navigation}) => {
     const [badges, setBadges] = React.useState(user?.badges || []);
     const [isLoading, setIsLoading] = React.useState(!user?.badges?.length);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [loadError, setLoadError] = React.useState(false);
+    const hasInitialBadgesRef = React.useRef(Boolean(user?.badges?.length));
     const controllerRef = React.useRef(null);
 
     React.useEffect(() => {
@@ -47,9 +49,10 @@ const HarborBadgesPage = ({navigation}) => {
             controllerRef.current = controller;
             if (refresh) {
                 setIsRefreshing(true);
-            } else {
+            } else if (!hasInitialBadgesRef.current) {
                 setIsLoading(true);
             }
+            setLoadError(false);
 
             try {
                 const nextBadges = await fetchHarborBadges(username, {
@@ -60,11 +63,7 @@ const HarborBadgesPage = ({navigation}) => {
                 }
             } catch (error) {
                 if (!controller.signal.aborted) {
-                    Alert.alert(
-                        t('徽章載入失敗'),
-                        t('無法取得 Harbor 徽章，請檢查網絡後再試。'),
-                        [{text: t('確定'), onPress: () => trigger()}],
-                    );
+                    setLoadError(true);
                 }
             } finally {
                 if (!controller.signal.aborted) {
@@ -74,7 +73,7 @@ const HarborBadgesPage = ({navigation}) => {
                 }
             }
         },
-        [t, username],
+        [username],
     );
 
     React.useEffect(() => {
@@ -197,11 +196,42 @@ const HarborBadgesPage = ({navigation}) => {
                     </View>
                 )}
                 ItemSeparatorComponent={ListSeparator}
+                ListHeaderComponent={
+                    loadError && badges.length > 0 ? (
+                        <HarborInlineRetry
+                            message={t(
+                                '無法取得 Harbor 徽章，請檢查網絡後再試。',
+                            )}
+                            actionLabel={t('重試')}
+                            onRetry={() => loadBadges({refresh: true})}
+                        />
+                    ) : null
+                }
                 ListEmptyComponent={
                     <HarborEmptyState
-                        icon="ribbon-outline"
-                        title={t('還沒有獲得徽章')}
-                        description={t('繼續分享、回覆與參與 Harbor 社群吧。')}
+                        icon={
+                            loadError
+                                ? 'cloud-offline-outline'
+                                : 'ribbon-outline'
+                        }
+                        title={
+                            loadError
+                                ? t('徽章載入失敗')
+                                : t('還沒有獲得徽章')
+                        }
+                        description={
+                            loadError
+                                ? t(
+                                    '無法取得 Harbor 徽章，請檢查網絡後再試。',
+                                )
+                                : t(
+                                    '繼續分享、回覆與參與 Harbor 社群吧。',
+                                )
+                        }
+                        actionLabel={loadError ? t('重試') : undefined}
+                        onAction={
+                            loadError ? () => loadBadges() : undefined
+                        }
                     />
                 }
                 refreshControl={

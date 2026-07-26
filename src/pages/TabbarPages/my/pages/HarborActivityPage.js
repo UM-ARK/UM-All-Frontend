@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     ActivityIndicator,
-    Alert,
     RefreshControl,
     StyleSheet,
     View,
@@ -17,6 +16,7 @@ import {useTheme} from '../../../../components/ThemeContext';
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {fetchHarborUserActions} from '../../../../utils/harbor/harborApi';
 import {trigger} from '../../../../utils/trigger';
+import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborActivityRow from '../components/HarborActivityRow';
 import HarborEmptyState from '../components/HarborEmptyState';
 
@@ -35,20 +35,15 @@ const HarborActivityPage = ({route, navigation}) => {
     const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [isLoadingMore, setIsLoadingMore] = React.useState(false);
     const [hasMore, setHasMore] = React.useState(false);
     const [nextOffset, setNextOffset] = React.useState(0);
+    const [loadError, setLoadError] = React.useState(false);
+    const [loadMoreError, setLoadMoreError] = React.useState(false);
 
     React.useEffect(() => {
         navigation.setOptions({headerTitle: title});
     }, [navigation, title]);
-
-    const showLoadError = React.useCallback(() => {
-        Alert.alert(
-            t('活動載入失敗'),
-            t('無法取得 Harbor 活動，請檢查網絡後再試。'),
-            [{text: t('確定'), onPress: () => trigger()}],
-        );
-    }, [t]);
 
     const loadFirstPage = React.useCallback(
         async ({refresh = false} = {}) => {
@@ -60,6 +55,7 @@ const HarborActivityPage = ({route, navigation}) => {
             } else {
                 setIsLoading(true);
             }
+            setLoadError(false);
 
             try {
                 const result = await fetchHarborUserActions(username, {
@@ -73,9 +69,10 @@ const HarborActivityPage = ({route, navigation}) => {
                 setItems(result.items);
                 setHasMore(result.hasMore);
                 setNextOffset(result.nextOffset);
+                setLoadMoreError(false);
             } catch (error) {
                 if (!controller.signal.aborted) {
-                    showLoadError();
+                    setLoadError(true);
                 }
             } finally {
                 if (!controller.signal.aborted) {
@@ -85,7 +82,7 @@ const HarborActivityPage = ({route, navigation}) => {
                 }
             }
         },
-        [kind, showLoadError, username],
+        [kind, username],
     );
 
     React.useEffect(() => {
@@ -97,11 +94,18 @@ const HarborActivityPage = ({route, navigation}) => {
         return () => controllerRef.current?.abort();
     }, [loadFirstPage, navigation, username]);
 
-    const loadMore = React.useCallback(async () => {
-        if (!hasMore || loadingMoreRef.current || !username) {
+    const loadMore = React.useCallback(async ({force = false} = {}) => {
+        if (
+            !hasMore ||
+            loadingMoreRef.current ||
+            !username ||
+            (loadMoreError && !force)
+        ) {
             return;
         }
         loadingMoreRef.current = true;
+        setIsLoadingMore(true);
+        setLoadMoreError(false);
         try {
             const result = await fetchHarborUserActions(username, {
                 kind,
@@ -117,11 +121,12 @@ const HarborActivityPage = ({route, navigation}) => {
             setHasMore(result.hasMore);
             setNextOffset(result.nextOffset);
         } catch (error) {
-            showLoadError();
+            setLoadMoreError(true);
         } finally {
             loadingMoreRef.current = false;
+            setIsLoadingMore(false);
         }
-    }, [hasMore, kind, nextOffset, showLoadError, username]);
+    }, [hasMore, kind, loadMoreError, nextOffset, username]);
 
     const handleItemPress = React.useCallback(
         item => {
@@ -177,15 +182,52 @@ const HarborActivityPage = ({route, navigation}) => {
                     </View>
                 )}
                 ItemSeparatorComponent={ListSeparator}
+                ListHeaderComponent={
+                    loadError && items.length > 0 ? (
+                        <HarborInlineRetry
+                            message={t(
+                                '無法取得 Harbor 活動，請檢查網絡後再試。',
+                            )}
+                            actionLabel={t('重試')}
+                            onRetry={() => loadFirstPage({refresh: true})}
+                        />
+                    ) : null
+                }
                 ListEmptyComponent={
                     <HarborEmptyState
-                        icon="sparkles-outline"
-                        title={t('這裡暫時沒有內容')}
-                        description={t('你在 Harbor 的新活動會顯示在這裡。')}
+                        icon={
+                            loadError
+                                ? 'cloud-offline-outline'
+                                : 'sparkles-outline'
+                        }
+                        title={
+                            loadError
+                                ? t('活動載入失敗')
+                                : t('這裡暫時沒有內容')
+                        }
+                        description={
+                            loadError
+                                ? t(
+                                    '無法取得 Harbor 活動，請檢查網絡後再試。',
+                                )
+                                : t(
+                                    '你在 Harbor 的新活動會顯示在這裡。',
+                                )
+                        }
+                        actionLabel={loadError ? t('重試') : undefined}
+                        onAction={loadError ? () => loadFirstPage() : undefined}
                     />
                 }
                 ListFooterComponent={
-                    hasMore ? (
+                    loadMoreError ? (
+                        <HarborInlineRetry
+                            message={t(
+                                '無法取得 Harbor 活動，請檢查網絡後再試。',
+                            )}
+                            actionLabel={t('重試')}
+                            onRetry={() => loadMore({force: true})}
+                        />
+                    ) : isLoadingMore ? (
                         <ActivityIndicator
                             style={styles.footer}
                             color={theme.themeColor}

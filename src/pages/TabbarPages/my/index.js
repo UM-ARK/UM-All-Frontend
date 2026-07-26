@@ -5,6 +5,7 @@ import {
     RefreshControl,
     ScrollView,
     StyleSheet,
+    Text,
     View,
     useWindowDimensions,
 } from 'react-native';
@@ -15,7 +16,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../../components/ThemeContext';
+import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
 import { ARK_HARBOR_FEEDBACK, MAIL } from '../../../utils/pathMap';
@@ -32,16 +33,15 @@ const MyScreen = ({ navigation }) => {
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
     const contentWidth = Math.min(width - scale(28), scale(680));
+    const contentTopInset = insets.top + verticalScale(8);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
-    const lastPresentedError = React.useRef(null);
 
     const presentHarborError = React.useCallback(
         sessionError => {
-            if (!sessionError || lastPresentedError.current === sessionError) {
+            if (!sessionError) {
                 return;
             }
 
-            lastPresentedError.current = sessionError;
             const message =
                 sessionError.code === 'HARBOR_SESSION_EXPIRED'
                     ? t('Harbor 登入已失效，請重新登入。', { ns: 'my' })
@@ -61,14 +61,6 @@ const MyScreen = ({ navigation }) => {
         [t],
     );
 
-    React.useEffect(() => {
-        if (error) {
-            presentHarborError(error);
-        } else {
-            lastPresentedError.current = null;
-        }
-    }, [error, presentHarborError]);
-
     const handleFeedbackAction = event => {
         trigger();
         switch (event.nativeEvent.event) {
@@ -86,7 +78,6 @@ const MyScreen = ({ navigation }) => {
     };
 
     const handleLogin = async () => {
-        lastPresentedError.current = null;
         try {
             await login();
         } catch (sessionError) {
@@ -101,7 +92,6 @@ const MyScreen = ({ navigation }) => {
     const handleRefresh = async () => {
         trigger();
         setIsRefreshing(true);
-        lastPresentedError.current = null;
         try {
             await refresh();
         } catch (sessionError) {
@@ -119,7 +109,7 @@ const MyScreen = ({ navigation }) => {
                 contentContainerStyle={[
                     styles.scrollContent,
                     {
-                        paddingTop: insets.top + verticalScale(8),
+                        paddingTop: contentTopInset,
                         paddingBottom: insets.bottom + verticalScale(92),
                     },
                 ]}
@@ -129,6 +119,7 @@ const MyScreen = ({ navigation }) => {
                             refreshing={isRefreshing}
                             tintColor={theme.themeColor}
                             colors={[theme.themeColor]}
+                            progressViewOffset={contentTopInset}
                             onRefresh={handleRefresh}
                         />
                     ) : undefined
@@ -140,6 +131,31 @@ const MyScreen = ({ navigation }) => {
                             navigation.navigate('SettingPage')
                         }
                     />
+                    {error ? (
+                        <View
+                            style={[
+                                styles.harborError,
+                                {
+                                    backgroundColor: theme.tonal.unread15,
+                                    borderColor: theme.tonal.unread30,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    styles.harborErrorText,
+                                    { color: theme.black.second },
+                                ]}>
+                                {error.code === 'HARBOR_SESSION_EXPIRED'
+                                    ? t('Harbor 登入已失效，請重新登入。', {
+                                        ns: 'my',
+                                    })
+                                    : t(
+                                        '無法完成 Harbor 操作，請稍後再試。',
+                                        { ns: 'my' },
+                                    )}
+                            </Text>
+                        </View>
+                    ) : null}
                     {status === 'restoring' ? (
                         <HarborRestoringState />
                     ) : status === 'signedIn' && user ? (
@@ -164,6 +180,18 @@ const styles = StyleSheet.create({
     scrollContent: {
         alignItems: 'center',
         paddingHorizontal: scale(14),
+    },
+    harborError: {
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: scale(12),
+        marginBottom: verticalScale(12),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(10),
+    },
+    harborErrorText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(12),
+        lineHeight: verticalScale(18),
     },
 });
 

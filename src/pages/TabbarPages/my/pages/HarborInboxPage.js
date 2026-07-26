@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     ActivityIndicator,
-    Alert,
     Pressable,
     RefreshControl,
     StyleSheet,
@@ -25,6 +24,7 @@ import {
     markHarborNotificationRead,
 } from '../../../../utils/harbor/harborApi';
 import {trigger} from '../../../../utils/trigger';
+import {HarborInlineRetry} from '../../arkHarbor/components/HarborListStates';
 import HarborEmptyState from '../components/HarborEmptyState';
 import {formatRelativeTime} from '../utils/harborUi';
 
@@ -41,6 +41,7 @@ const HarborInboxPage = ({route, navigation}) => {
     const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [loadError, setLoadError] = React.useState(false);
     const controllerRef = React.useRef(null);
     const options = [
         {key: 'notifications', label: t('通知')},
@@ -50,14 +51,6 @@ const HarborInboxPage = ({route, navigation}) => {
     React.useEffect(() => {
         navigation.setOptions({headerTitle: t('Harbor 收件匣')});
     }, [navigation, t]);
-
-    const showLoadError = React.useCallback(() => {
-        Alert.alert(
-            t('收件匣載入失敗'),
-            t('無法取得 Harbor 消息，請檢查網絡後再試。'),
-            [{text: t('確定'), onPress: () => trigger()}],
-        );
-    }, [t]);
 
     const loadItems = React.useCallback(
         async ({refresh = false} = {}) => {
@@ -69,6 +62,7 @@ const HarborInboxPage = ({route, navigation}) => {
             } else {
                 setIsLoading(true);
             }
+            setLoadError(false);
 
             try {
                 const nextItems =
@@ -84,7 +78,7 @@ const HarborInboxPage = ({route, navigation}) => {
                 }
             } catch (error) {
                 if (!controller.signal.aborted) {
-                    showLoadError();
+                    setLoadError(true);
                 }
             } finally {
                 if (!controller.signal.aborted) {
@@ -94,7 +88,7 @@ const HarborInboxPage = ({route, navigation}) => {
                 }
             }
         },
-        [selectedIndex, showLoadError, username],
+        [selectedIndex, username],
     );
 
     React.useEffect(() => {
@@ -254,17 +248,44 @@ const HarborInboxPage = ({route, navigation}) => {
                     showsVerticalScrollIndicator={false}
                     renderItem={renderItem}
                     ItemSeparatorComponent={ListSeparator}
+                    ListHeaderComponent={
+                        loadError && items.length > 0 ? (
+                            <HarborInlineRetry
+                                message={t(
+                                    '無法取得 Harbor 消息，請檢查網絡後再試。',
+                                )}
+                                actionLabel={t('重試')}
+                                onRetry={() => loadItems({refresh: true})}
+                            />
+                        ) : null
+                    }
                     ListEmptyComponent={
                         <HarborEmptyState
                             icon={
-                                selectedIndex === 0
+                                loadError
+                                    ? 'cloud-offline-outline'
+                                    : selectedIndex === 0
                                     ? 'notifications-off-outline'
                                     : 'mail-open-outline'
                             }
-                            title={t('目前沒有新消息')}
-                            description={t(
-                                'Harbor 的通知與站內訊息會集中顯示在這裡。',
-                            )}
+                            title={
+                                loadError
+                                    ? t('收件匣載入失敗')
+                                    : t('目前沒有新消息')
+                            }
+                            description={
+                                loadError
+                                    ? t(
+                                        '無法取得 Harbor 消息，請檢查網絡後再試。',
+                                    )
+                                    : t(
+                                        'Harbor 的通知與站內訊息會集中顯示在這裡。',
+                                    )
+                            }
+                            actionLabel={loadError ? t('重試') : undefined}
+                            onAction={
+                                loadError ? () => loadItems() : undefined
+                            }
                         />
                     }
                     refreshControl={

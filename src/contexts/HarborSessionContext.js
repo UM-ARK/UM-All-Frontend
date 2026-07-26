@@ -38,6 +38,7 @@ import {
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
+const PROFILE_VALIDATION_INTERVAL = 5 * 60 * 1000;
 
 const HarborSessionContext = createContext(null);
 
@@ -72,12 +73,16 @@ export const HarborSessionProvider = ({ children }) => {
     const credentialsRef = useRef(null);
     const mountedRef = useRef(true);
     const lastValidationRef = useRef(0);
+    const lastValidationAttemptRef = useRef(0);
+    const validationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
 
     const applySignedOutState = useCallback((nextStatus = 'signedOut') => {
         sessionGenerationRef.current += 1;
         credentialsRef.current = null;
         lastValidationRef.current = 0;
+        lastValidationAttemptRef.current = 0;
+        validationInFlightRef.current = null;
         setActiveHarborCredentials(null);
         if (mountedRef.current) {
             setUser(null);
@@ -89,6 +94,8 @@ export const HarborSessionProvider = ({ children }) => {
         sessionGenerationRef.current += 1;
         credentialsRef.current = credentials;
         lastValidationRef.current = 0;
+        lastValidationAttemptRef.current = 0;
+        validationInFlightRef.current = null;
         setActiveHarborCredentials(credentials);
         return sessionGenerationRef.current;
     }, []);
@@ -126,6 +133,7 @@ export const HarborSessionProvider = ({ children }) => {
     const refreshProfile = useCallback(
         async (credentials, generation = sessionGenerationRef.current) => {
             const startedAt = Date.now();
+            lastValidationAttemptRef.current = startedAt;
             logHarborAuthEvent('profile.refresh.start');
             const credentialCacheId = await getCredentialCacheId(credentials);
 
@@ -291,15 +299,27 @@ export const HarborSessionProvider = ({ children }) => {
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextState => {
             const credentials = credentialsRef.current;
+            const lastValidationTime = Math.max(
+                lastValidationRef.current,
+                lastValidationAttemptRef.current,
+            );
             const shouldValidate =
                 nextState === 'active' &&
                 credentials &&
-                Date.now() - lastValidationRef.current > 5 * 60 * 1000;
+                !validationInFlightRef.current &&
+                Date.now() - lastValidationTime > PROFILE_VALIDATION_INTERVAL;
 
             if (shouldValidate) {
-                refreshProfile(credentials, sessionGenerationRef.current).catch(
-                    () => { },
-                );
+                const validationRequest = refreshProfile(
+                    credentials,
+                    sessionGenerationRef.current,
+                ).catch(() => { });
+                validationInFlightRef.current = validationRequest;
+                validationRequest.finally(() => {
+                    if (validationInFlightRef.current === validationRequest) {
+                        validationInFlightRef.current = null;
+                    }
+                });
             }
         });
 
