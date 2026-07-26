@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
         marginLeft: scale(3),
     },
     footer: {
-        minHeight: verticalScale(40),
+        paddingVertical: verticalScale(6),
         borderTopWidth: StyleSheet.hairlineWidth,
         flexDirection: 'row',
         alignItems: 'center',

@@ -39,8 +39,6 @@ import { HarborInlineRetry } from './HarborListStates';
 import HarborCategoryIcon from './HarborCategoryIcon';
 
 const PLACEHOLDER_ITEMS = [
-    { key: 'posts', icon: 'account-outline', label: '我的貼文' },
-    { key: 'messages', icon: 'inbox-outline', label: '我的訊息' },
     { key: 'more', icon: 'dots-horizontal', label: '更多' },
 ];
 
@@ -428,6 +426,13 @@ const HarborDrawerContent = ({ navigation }) => {
         [navigation],
     );
 
+    // 切到底部「我的」Tab 時關閉抽屜，避免跨 Tab 後抽屜殘留
+    const handleMyPress = useCallback(() => {
+        logToFirebase('harbor_drawer_my', {});
+        navigation.closeDrawer();
+        navigation.navigate('MyTabbar');
+    }, [navigation]);
+
     const handleCategoryPress = useCallback(
         category => {
             logToFirebase('harbor_drawer_category', {
@@ -541,6 +546,11 @@ const HarborDrawerContent = ({ navigation }) => {
                         label={t('討論話題')}
                         active
                     />
+                    <DrawerMenuItem
+                        icon="account-outline"
+                        label={t('個人中心')}
+                        onPress={handleMyPress}
+                    />
                     {PLACEHOLDER_ITEMS.map(item => (
                         <DrawerMenuItem
                             key={item.key}
@@ -579,6 +589,7 @@ const HarborDrawerContent = ({ navigation }) => {
         ),
         [
             categories.length,
+            handleMyPress,
             isCategoriesExpanded,
             loadCategories,
             loadError,

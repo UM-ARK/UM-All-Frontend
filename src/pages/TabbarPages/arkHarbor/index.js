@@ -97,26 +97,6 @@ const HarborStickyToolbar = ({
                 <View style={styles.toolbarRightActions}>
                     <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={t('建立話題')}
-                        hitSlop={scale(8)}
-                        onPress={() => {
-                            trigger();
-                            onComposePress();
-                        }}
-                        style={({ pressed }) => [
-                            styles.toolbarIconButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="plus"
-                            size={scale(20)}
-                            color={theme.themeColor}
-                        />
-                    </Pressable>
-                    <Pressable
-                        accessibilityRole="button"
                         accessibilityLabel={t('搜索')}
                         hitSlop={scale(8)}
                         onPress={() => {
@@ -135,34 +115,29 @@ const HarborStickyToolbar = ({
                             color={theme.themeColor}
                         />
                     </Pressable>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={
-                            isSignedIn ? t('已登入') : sessionLabel
-                        }
-                        disabled={
-                            status === 'restoring' || status === 'authorizing'
-                        }
-                        onPress={() => {
-                            trigger();
-                            onSessionPress();
-                        }}
-                        style={({ pressed }) => [
-                            isSignedIn
-                                ? styles.toolbarIconButton
-                                : styles.sessionButton,
-                            pressed && {
-                                backgroundColor: theme.tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name={
-                                isSignedIn ? 'account-check-outline' : 'login'
+                    {isSignedIn ? null : (
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={sessionLabel}
+                            disabled={
+                                status === 'restoring' ||
+                                status === 'authorizing'
                             }
-                            size={scale(isSignedIn ? 20 : 14)}
-                            color={theme.themeColor}
-                        />
-                        {isSignedIn ? null : (
+                            onPress={() => {
+                                trigger();
+                                onSessionPress();
+                            }}
+                            style={({ pressed }) => [
+                                styles.sessionButton,
+                                pressed && {
+                                    backgroundColor: theme.tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="login"
+                                size={scale(14)}
+                                color={theme.themeColor}
+                            />
                             <Text
                                 numberOfLines={1}
                                 style={[
@@ -171,7 +146,27 @@ const HarborStickyToolbar = ({
                                 ]}>
                                 {sessionLabel}
                             </Text>
-                        )}
+                        </Pressable>
+                    )}
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('建立話題')}
+                        hitSlop={scale(8)}
+                        onPress={() => {
+                            trigger();
+                            onComposePress();
+                        }}
+                        style={({ pressed }) => [
+                            styles.toolbarIconButton,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name="plus"
+                            size={scale(20)}
+                            color={theme.themeColor}
+                        />
                     </Pressable>
                 </View>
             </View>
@@ -371,10 +366,6 @@ const ForumPage = ({ navigation }) => {
     }, [currentIndex, enabledViews]);
 
     const handleSessionPress = useCallback(async () => {
-        if (status === 'signedIn') {
-            navigation.navigate('MyTabbar');
-            return;
-        }
         if (status === 'restoring' || status === 'authorizing') {
             return;
         }
@@ -387,16 +378,14 @@ const ForumPage = ({ navigation }) => {
                 [{ text: t('確定'), onPress: () => trigger() }],
             );
         }
-    }, [login, navigation, status, t]);
+    }, [login, status, t]);
 
     const sessionLabel =
-        status === 'signedIn'
-            ? t('已登入')
-            : status === 'restoring'
-                ? t('正在同步…')
-                : status === 'authorizing'
-                    ? t('登入中…')
-                    : t('登入');
+        status === 'restoring'
+            ? t('正在同步…')
+            : status === 'authorizing'
+                ? t('登入中…')
+                : t('登入');
 
     const contentContainerStyle = useMemo(
         () => ({
