@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     },
     card: {
         marginTop: verticalScale(6),
-        marginHorizontal: scale(16),
+        marginHorizontal: scale(8),
         borderRadius: scale(16),
         alignSelf: 'stretch',
     },
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     topNews: {
         borderRadius: scale(10),
         overflow: 'hidden',
-        marginHorizontal: scale(10),
+        marginHorizontal: scale(8),
         marginVertical: verticalScale(5),
         height: verticalScale(200),
     },

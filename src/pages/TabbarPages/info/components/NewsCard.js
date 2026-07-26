@@ -43,7 +43,7 @@ const NewsCard = ({ data, type = 'news', language = 'en' }) => {
         newsCardContainer: {
             backgroundColor: white,
             marginTop: verticalScale(6),
-            marginHorizontal: scale(16),
+            marginHorizontal: scale(8),
             borderRadius: scale(16),
             // 在 VirtualizedList 等父層未給定寬度時，仍撐滿可視列寬，供內層水平 flex 正確分配
             alignSelf: 'stretch',

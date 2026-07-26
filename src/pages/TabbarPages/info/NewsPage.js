@@ -62,7 +62,7 @@ const NewsPage = forwardRef(function NewsPage(
         topNewsContainer: {
             borderRadius: scale(10),
             overflow: 'hidden',
-            marginHorizontal: scale(10),
+            marginHorizontal: scale(8),
             marginVertical: verticalScale(5),
             height: verticalScale(200),
             backgroundColor: white,
