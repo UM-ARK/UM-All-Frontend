@@ -21,6 +21,9 @@ import {
 } from 'react-native';
 
 import { FlashList } from '@shopify/flash-list';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
+import Slider from '@react-native-community/slider';
+import { useHeaderHeight } from '@react-navigation/elements';
 import axios from 'axios';
 import { Image } from 'expo-image';
 import moment from 'moment-timezone';
@@ -37,6 +40,7 @@ import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WebView } from 'react-native-webview';
 import { scale, verticalScale } from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import ARKImageView from '../../../../components/ARKImageView';
@@ -71,9 +75,16 @@ const AVATAR_SIZE = 88;
 const TOPIC_POST_BATCH_SIZE = 20;
 const READING_SAVE_DELAY = 1200;
 const TIMINGS_REPORT_INTERVAL = 10000;
+const TOPIC_HEADER_ITEM = Object.freeze({
+    __harborItemType: 'topicHeader',
+    id: 'topic-header',
+});
+// 列表前綴：話題標題
+const LIST_POST_INDEX_OFFSET = 1;
 const TOPIC_VIEWABILITY_CONFIG = {
-    itemVisiblePercentThreshold: 50,
-    minimumViewTime: 750,
+    // 較低門檻，方便辨識畫面最上方仍露出的樓層
+    itemVisiblePercentThreshold: 20,
+    minimumViewTime: 120,
 };
 
 const iframeModel = HTMLElementModel.fromCustomModel({
@@ -1001,13 +1012,35 @@ const HarborReadingControls = memo(
         onFirst,
         onJump,
         onLatest,
+        onSeek,
+        onLayoutHeight,
     }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
         const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
+        const maxPostNumber = Math.max(Number(highestPostNumber) || 1, 1);
+        const syncedPostNumber = Math.min(
+            Math.max(Number(currentPostNumber) || 1, 1),
+            maxPostNumber,
+        );
+        const [isSliding, setIsSliding] = useState(false);
+        const [slidingValue, setSlidingValue] = useState(syncedPostNumber);
+        // 鬆手後暫鎖目標樓層，避免列表尚未同步時滑桿被拉回舊值
+        const [pendingSeek, setPendingSeek] = useState(null);
+        // 避免同一樓層在拖曳中重複觸發跳轉
+        const lastSeekedRef = useRef(syncedPostNumber);
+        const isUserDriving = isSliding || pendingSeek != null;
+        const displayPostNumber = isUserDriving
+            ? Math.round(isSliding ? slidingValue : pendingSeek)
+            : syncedPostNumber;
+        const sliderValue = isUserDriving
+            ? isSliding
+                ? slidingValue
+                : Number(pendingSeek)
+            : syncedPostNumber;
         const progress =
-            highestPostNumber > 0
-                ? Math.min(currentPostNumber / highestPostNumber, 1)
+            maxPostNumber > 0
+                ? Math.min(displayPostNumber / maxPostNumber, 1)
                 : 0;
         const controls = [
             { icon: 'page-first', label: t('第一篇'), onPress: onFirst },
@@ -1015,36 +1048,88 @@ const HarborReadingControls = memo(
             { icon: 'page-last', label: t('最新一篇'), onPress: onLatest },
         ];
 
+        useEffect(() => {
+            if (isSliding) {
+                return;
+            }
+            if (pendingSeek != null) {
+                if (syncedPostNumber === pendingSeek) {
+                    setPendingSeek(null);
+                    setSlidingValue(syncedPostNumber);
+                    lastSeekedRef.current = syncedPostNumber;
+                }
+                return;
+            }
+            setSlidingValue(syncedPostNumber);
+            lastSeekedRef.current = syncedPostNumber;
+        }, [isSliding, pendingSeek, syncedPostNumber]);
+
+        const seekToFloor = useCallback(
+            (value, { scrubbing } = {}) => {
+                const targetPostNumber = Math.round(value);
+                if (
+                    scrubbing &&
+                    targetPostNumber === lastSeekedRef.current
+                ) {
+                    return;
+                }
+                lastSeekedRef.current = targetPostNumber;
+                onSeek?.(targetPostNumber, { scrubbing: Boolean(scrubbing) });
+            },
+            [onSeek],
+        );
+
         return (
             <View
+                onLayout={event => {
+                    const nextHeight = event.nativeEvent.layout.height;
+                    if (nextHeight > 0) {
+                        onLayoutHeight?.(nextHeight);
+                    }
+                }}
                 style={[
                     styles.readingControls,
+                    theme.viewShadow,
                     { backgroundColor: white, borderColor: themeColorUltraLight },
                 ]}>
                 <View style={styles.progressHeader}>
                     <Text style={[styles.progressText, { color: black.second }]}>
-                        {t('閱讀進度')} · {currentPostNumber || 1}/
-                        {highestPostNumber || 1}
+                        {t('閱讀進度')} · {displayPostNumber}/{maxPostNumber}
                     </Text>
                     <Text style={[styles.progressPercent, { color: themeColor }]}>
                         {Math.round(progress * 100)}%
                     </Text>
                 </View>
-                <View
-                    style={[
-                        styles.progressTrack,
-                        { backgroundColor: tonal.primary15 },
-                    ]}>
-                    <View
-                        style={[
-                            styles.progressFill,
-                            {
-                                backgroundColor: themeColor,
-                                width: `${progress * 100}%`,
-                            },
-                        ]}
-                    />
-                </View>
+                <Slider
+                    style={styles.progressSlider}
+                    minimumValue={1}
+                    maximumValue={maxPostNumber}
+                    step={1}
+                    value={sliderValue}
+                    disabled={maxPostNumber <= 1}
+                    // iOS：點擊軌道即可跳轉；Android 原生已支援點擊
+                    tapToSeek={true}
+                    minimumTrackTintColor={themeColor}
+                    maximumTrackTintColor={tonal.primary15}
+                    thumbTintColor={themeColor}
+                    onSlidingStart={value => {
+                        setPendingSeek(null);
+                        setIsSliding(true);
+                        lastSeekedRef.current = Math.round(value);
+                    }}
+                    onValueChange={value => {
+                        setSlidingValue(value);
+                        seekToFloor(value, { scrubbing: true });
+                    }}
+                    onSlidingComplete={value => {
+                        const targetPostNumber = Math.round(value);
+                        setSlidingValue(targetPostNumber);
+                        setPendingSeek(targetPostNumber);
+                        setIsSliding(false);
+                        trigger();
+                        seekToFloor(targetPostNumber, { scrubbing: false });
+                    }}
+                />
                 <View style={styles.controlRow}>
                     {controls.map(control => (
                         <Pressable
@@ -1136,6 +1221,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const { t } = useTranslation('harbor');
     const { status: sessionStatus } = useHarborSession();
     const { width } = useWindowDimensions();
+    const headerHeight = useHeaderHeight();
+    const insets = useSafeAreaInsets();
     const { black, bg_color, themeColor, tonal, trueWhite } = theme;
     const topicId = Number(route.params?.topicId);
     const initialPostNumber = Number(route.params?.postNumber);
@@ -1153,6 +1240,12 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const readingSaveTimeoutRef = useRef(null);
     const lastTimingsAtRef = useRef(Date.now());
     const sessionStatusRef = useRef(sessionStatus);
+    // 主動跳樓後忽略 viewability，避免短帖同屏時被最高可見樓層蓋回
+    const ignoreViewabilityFromSeekRef = useRef(false);
+    // 底部懸浮閱讀進度高度（含 safe area），供列表底部留白
+    const [readingControlsDockHeight, setReadingControlsDockHeight] = useState(
+        verticalScale(120),
+    );
     const [topic, setTopic] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -1173,6 +1266,13 @@ const HarborTopicDetail = ({ route, navigation }) => {
         return topicPosts.filter(post => post?.id);
     }, [topic]);
 
+    const listData = useMemo(() => {
+        if (!topic) {
+            return [];
+        }
+        return [TOPIC_HEADER_ITEM, ...posts];
+    }, [posts, topic]);
+
     const highestPostNumber = useMemo(() => {
         return Math.max(
             Number(topic?.highest_post_number || 0),
@@ -1181,12 +1281,33 @@ const HarborTopicDetail = ({ route, navigation }) => {
         );
     }, [posts, topic?.highest_post_number, topic?.posts_count]);
 
+    // 僅一層樓時無需閱讀進度導航
+    const showReadingControls = useMemo(() => {
+        return (
+            posts.length > 1 || Number(topic?.posts_count || 0) > 1
+        );
+    }, [posts.length, topic?.posts_count]);
+
     const imageUrls = useMemo(() => {
         const urls = posts.flatMap(post => extractPostImages(post?.cooked));
         return [...new Set(urls)];
     }, [posts]);
 
     const contentWidth = Math.max(width - scale(48), scale(220));
+
+    const listBottomInset = showReadingControls
+        ? readingControlsDockHeight + verticalScale(8)
+        : verticalScale(12);
+
+    const listContentContainerStyle = useMemo(
+        () => ({
+            // 液態玻璃透明導覽列下的頂部留白
+            paddingTop: isLiquidGlassSupported ? headerHeight : 0,
+            // 有進度條時預留底部懸浮高度；單層樓僅保留小間距
+            paddingBottom: listBottomInset,
+        }),
+        [headerHeight, listBottomInset],
+    );
 
     useEffect(() => {
         latestTopicRef.current = topic;
@@ -1367,8 +1488,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const handleScrollToIndexFailed = useCallback(info => {
         const index = Math.max(Number(info?.index || 0), 0);
+        const viewOffset = Number(info?.viewOffset || 0);
         listRef.current?.scrollToOffset({
-            offset: index * verticalScale(260),
+            offset: Math.max(index * verticalScale(260) - viewOffset, 0),
             animated: false,
         });
         setTimeout(() => {
@@ -1376,9 +1498,15 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 index,
                 animated: true,
                 viewPosition: 0,
+                viewOffset,
             });
         }, 250);
     }, []);
+
+    const getPostScrollViewOffset = useCallback(() => {
+        // 進度條改為底部懸浮後，頂部只需避開液態玻璃導覽列
+        return isLiquidGlassSupported ? headerHeight : 0;
+    }, [headerHeight]);
 
     const scrollToLoadedPost = useCallback(
         (postNumber, animated = true) => {
@@ -1392,22 +1520,29 @@ const HarborTopicDetail = ({ route, navigation }) => {
             if (postIndex < 0) {
                 return false;
             }
+            // 列表前綴為話題標題，帖子索引需偏移
+            const listIndex = postIndex + LIST_POST_INDEX_OFFSET;
+            // 預留頂部導覽列高度，讓目標樓層出現在可見區域上方
+            const viewOffset = getPostScrollViewOffset();
             try {
                 listRef.current?.scrollToIndex({
-                    index: postIndex,
+                    index: listIndex,
                     animated,
                     viewPosition: 0,
+                    viewOffset,
                 });
             } catch (error) {
-                handleScrollToIndexFailed({ index: postIndex });
+                handleScrollToIndexFailed({ index: listIndex, viewOffset });
             }
             return true;
         },
-        [handleScrollToIndexFailed],
+        [getPostScrollViewOffset, handleScrollToIndexFailed],
     );
 
     const scrollToPost = useCallback(
-        async postNumber => {
+        async (postNumber, options = {}) => {
+            const animated = options.animated !== false;
+            const allowFetch = options.allowFetch !== false;
             const normalizedPostNumber = Math.min(
                 Math.max(Number(postNumber), 1),
                 Number(
@@ -1419,7 +1554,13 @@ const HarborTopicDetail = ({ route, navigation }) => {
             if (!Number.isInteger(normalizedPostNumber)) {
                 return;
             }
-            if (scrollToLoadedPost(normalizedPostNumber)) {
+            // 先鎖定進度到目標樓層，再滾動，避免同屏多樓時立刻被蓋回
+            ignoreViewabilityFromSeekRef.current = true;
+            setCurrentPostNumber(normalizedPostNumber);
+            if (scrollToLoadedPost(normalizedPostNumber, animated)) {
+                return;
+            }
+            if (!allowFetch) {
                 return;
             }
 
@@ -1440,6 +1581,18 @@ const HarborTopicDetail = ({ route, navigation }) => {
             }
         },
         [scrollToLoadedPost, t, topicId],
+    );
+
+    // 閱讀進度 Slider：拖曳中只滾動已載入樓層，鬆手後再允許網路補抓
+    const seekReadingProgress = useCallback(
+        (postNumber, options = {}) => {
+            const scrubbing = Boolean(options.scrubbing);
+            return scrollToPost(postNumber, {
+                animated: !scrubbing,
+                allowFetch: !scrubbing,
+            });
+        },
+        [scrollToPost],
     );
 
     useEffect(() => {
@@ -1542,24 +1695,43 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const handleViewableItemsChanged = useCallback(
         ({ viewableItems }) => {
-            const visiblePostNumbers = viewableItems
-                .map(viewableItem => Number(viewableItem.item?.post_number))
-                .filter(Number.isInteger);
-            if (visiblePostNumbers.length === 0) {
+            // 主動跳樓期間不跟畫面可見樓層，避免短帖同屏或滾動動畫中途覆寫進度
+            if (ignoreViewabilityFromSeekRef.current) {
+                return;
+            }
+            const visiblePosts = viewableItems
+                .filter(viewableItem =>
+                    Number.isInteger(Number(viewableItem.item?.post_number)),
+                )
+                .sort(
+                    (left, right) =>
+                        Number(left.index) - Number(right.index),
+                );
+            if (visiblePosts.length === 0) {
                 return;
             }
 
-            const highestVisiblePostNumber = Math.max(...visiblePostNumbers);
-            setCurrentPostNumber(highestVisiblePostNumber);
-            if (highestVisiblePostNumber <= latestVisiblePostRef.current) {
+            // 閱讀進度：取畫面最上方那層樓（索引最小的可見帖）
+            const topVisiblePostNumber = Number(
+                visiblePosts[0].item.post_number,
+            );
+            setCurrentPostNumber(topVisiblePostNumber);
+
+            // 已讀位置仍用可見範圍內最高樓層，供未讀／進度同步
+            const furthestVisiblePostNumber = Math.max(
+                ...visiblePosts.map(viewableItem =>
+                    Number(viewableItem.item.post_number),
+                ),
+            );
+            if (furthestVisiblePostNumber <= latestVisiblePostRef.current) {
                 return;
             }
-            latestVisiblePostRef.current = highestVisiblePostNumber;
+            latestVisiblePostRef.current = furthestVisiblePostNumber;
             clearTimeout(readingSaveTimeoutRef.current);
             readingSaveTimeoutRef.current = setTimeout(() => {
                 saveHarborReadingPosition(
                     topicId,
-                    highestVisiblePostNumber,
+                    furthestVisiblePostNumber,
                 );
                 const now = Date.now();
                 if (
@@ -1567,7 +1739,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     now - lastTimingsAtRef.current >= TIMINGS_REPORT_INTERVAL
                 ) {
                     saveHarborTopicTimings(topicId, {
-                        postNumber: highestVisiblePostNumber,
+                        postNumber: furthestVisiblePostNumber,
                         timeMs: now - lastTimingsAtRef.current,
                         topicTimeMs: now - lastTimingsAtRef.current,
                     }).catch(() => { });
@@ -1577,6 +1749,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
         },
         [topicId],
     );
+
+    const handleScrollBeginDrag = useCallback(() => {
+        ignoreViewabilityFromSeekRef.current = false;
+    }, []);
 
     const openImage = useCallback(index => {
         imageViewerRef.current?.handleOpenImage(index);
@@ -1724,14 +1900,51 @@ const HarborTopicDetail = ({ route, navigation }) => {
         scrollToPost(nextPostNumber);
     }, [highestPostNumber, jumpPostNumber, scrollToPost, t]);
 
+    const openOriginalTopic = useCallback(() => {
+        trigger();
+        openLink({
+            URL: ARK_HARBOR_TOPIC_URL(
+                topicId,
+                currentPostNumber > 0
+                    ? currentPostNumber
+                    : undefined,
+            ),
+            mode: 'fullScreen',
+        });
+    }, [currentPostNumber, topicId]);
+
     const renderPost = useCallback(
         ({ item, index }) => {
+            if (item?.__harborItemType === 'topicHeader') {
+                return (
+                    <View>
+                        <HarborTopicHeader
+                            topic={topic}
+                            onOpenOriginal={openOriginalTopic}
+                            onShare={shareCurrentPost}
+                            onPressCategory={openCategory}
+                            onPressTag={openTag}
+                        />
+                        {isLoadingPrevious ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={themeColor}
+                                style={styles.edgeLoader}
+                            />
+                        ) : null}
+                    </View>
+                );
+            }
+
+            const postIndex = index - LIST_POST_INDEX_OFFSET;
             const previousPostNumber =
-                index > 0 ? Number(posts[index - 1]?.post_number || 0) : 0;
+                postIndex > 0
+                    ? Number(posts[postIndex - 1]?.post_number || 0)
+                    : 0;
             const showUnreadDivider =
                 unreadAfterPostNumber > 0 &&
                 Number(item.post_number) > unreadAfterPostNumber &&
-                (index === 0 ||
+                (postIndex === 0 ||
                     previousPostNumber <= unreadAfterPostNumber);
 
             return (
@@ -1774,29 +1987,22 @@ const HarborTopicDetail = ({ route, navigation }) => {
         [
             contentWidth,
             imageUrls,
+            isLoadingPrevious,
             openAuthor,
+            openCategory,
             openHarborLink,
             openImage,
+            openOriginalTopic,
+            openTag,
             posts,
             scrollToPost,
+            shareCurrentPost,
             t,
             themeColor,
+            topic,
             unreadAfterPostNumber,
         ],
     );
-
-    const openOriginalTopic = useCallback(() => {
-        trigger();
-        openLink({
-            URL: ARK_HARBOR_TOPIC_URL(
-                topicId,
-                currentPostNumber > 0
-                    ? currentPostNumber
-                    : undefined,
-            ),
-            mode: 'fullScreen',
-        });
-    }, [currentPostNumber, topicId]);
 
     if (isLoading && !topic) {
         return (
@@ -1872,44 +2078,41 @@ const HarborTopicDetail = ({ route, navigation }) => {
         <View style={[styles.page, { backgroundColor: bg_color }]}>
             <FlashList
                 ref={listRef}
-                data={posts}
+                data={listData}
                 renderItem={renderPost}
-                keyExtractor={item => `harbor-post-${item.id}`}
-                contentInsetAdjustmentBehavior="automatic"
+                keyExtractor={item => {
+                    if (item?.__harborItemType === 'topicHeader') {
+                        return 'harbor-topic-header';
+                    }
+                    return `harbor-post-${item.id}`;
+                }}
+                getItemType={item => {
+                    if (item?.__harborItemType === 'topicHeader') {
+                        return 'topicHeader';
+                    }
+                    return 'post';
+                }}
+                contentContainerStyle={listContentContainerStyle}
+                extraData={currentPostNumber}
+                contentInsetAdjustmentBehavior={
+                    isLiquidGlassSupported ? 'never' : 'automatic'
+                }
+                scrollIndicatorInsets={
+                    isLiquidGlassSupported
+                        ? {
+                              top: headerHeight,
+                              bottom: showReadingControls
+                                  ? readingControlsDockHeight
+                                  : 0,
+                          }
+                        : {
+                              bottom: showReadingControls
+                                  ? readingControlsDockHeight
+                                  : 0,
+                          }
+                }
                 showsVerticalScrollIndicator={false}
                 drawDistance={700}
-                ListHeaderComponent={
-                    <View>
-                        <HarborTopicHeader
-                            topic={topic}
-                            onOpenOriginal={openOriginalTopic}
-                            onShare={shareCurrentPost}
-                            onPressCategory={openCategory}
-                            onPressTag={openTag}
-                        />
-                        <HarborReadingControls
-                            currentPostNumber={currentPostNumber}
-                            highestPostNumber={highestPostNumber}
-                            onFirst={() => scrollToPost(1)}
-                            onJump={() => {
-                                setJumpPostNumber(
-                                    String(currentPostNumber || 1),
-                                );
-                                setIsJumpVisible(true);
-                            }}
-                            onLatest={() =>
-                                scrollToPost(highestPostNumber)
-                            }
-                        />
-                        {isLoadingPrevious ? (
-                            <ActivityIndicator
-                                size="small"
-                                color={themeColor}
-                                style={styles.edgeLoader}
-                            />
-                        ) : null}
-                    </View>
-                }
                 ListFooterComponent={
                     <View>
                         {isLoadingNext ? (
@@ -1931,10 +2134,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 onEndReachedThreshold={0.4}
                 onViewableItemsChanged={handleViewableItemsChanged}
                 viewabilityConfig={TOPIC_VIEWABILITY_CONFIG}
+                onScrollBeginDrag={handleScrollBeginDrag}
                 refreshControl={
                     <RefreshControl
                         colors={[themeColor]}
                         tintColor={themeColor}
+                        progressViewOffset={
+                            isLiquidGlassSupported ? headerHeight : undefined
+                        }
                         refreshing={isRefreshing}
                         onRefresh={() => {
                             trigger();
@@ -1943,6 +2150,39 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     />
                 }
             />
+
+            {showReadingControls ? (
+                <View
+                    pointerEvents="box-none"
+                    style={[
+                        styles.readingControlsDock,
+                        {
+                            paddingBottom: Math.max(
+                                insets.bottom,
+                                verticalScale(8),
+                            ),
+                        },
+                    ]}>
+                    <HarborReadingControls
+                        currentPostNumber={currentPostNumber}
+                        highestPostNumber={highestPostNumber}
+                        onFirst={() => scrollToPost(1)}
+                        onJump={() => {
+                            setJumpPostNumber(String(currentPostNumber || 1));
+                            setIsJumpVisible(true);
+                        }}
+                        onLatest={() => scrollToPost(highestPostNumber)}
+                        onSeek={seekReadingProgress}
+                        onLayoutHeight={height => {
+                            setReadingControlsDockHeight(
+                                height +
+                                    Math.max(insets.bottom, verticalScale(8)) +
+                                    verticalScale(8),
+                            );
+                        }}
+                    />
+                </View>
+            ) : null}
 
             {pendingNewPostIds.length > 0 ? (
                 <Pressable
@@ -1953,6 +2193,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     style={({ pressed }) => [
                         styles.newRepliesButton,
                         {
+                            bottom: showReadingControls
+                                ? readingControlsDockHeight + verticalScale(10)
+                                : Math.max(insets.bottom, verticalScale(18)),
                             backgroundColor: pressed
                                 ? tonal.primary50
                                 : themeColor,
@@ -2103,7 +2346,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(16),
         marginHorizontal: scale(12),
         marginTop: verticalScale(12),
-        marginBottom: verticalScale(8),
+        marginBottom: verticalScale(0),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(14),
     },
@@ -2113,11 +2356,18 @@ const styles = StyleSheet.create({
         lineHeight: scale(29),
         fontWeight: '700',
     },
+    readingControlsDock: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 20,
+    },
     readingControls: {
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: scale(14),
         marginHorizontal: scale(12),
-        marginBottom: verticalScale(8),
+        marginTop: verticalScale(8),
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(10),
     },
@@ -2136,21 +2386,16 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
         fontWeight: '700',
     },
-    progressTrack: {
-        height: verticalScale(4),
-        borderRadius: scale(2),
-        marginTop: verticalScale(7),
-        overflow: 'hidden',
-    },
-    progressFill: {
-        height: '100%',
-        borderRadius: scale(2),
+    progressSlider: {
+        width: '100%',
+        height: verticalScale(28),
+        marginTop: verticalScale(2),
     },
     controlRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: verticalScale(8),
+        marginTop: verticalScale(4),
     },
     controlButton: {
         flexDirection: 'row',
@@ -2419,7 +2664,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(14),
         marginHorizontal: scale(12),
         marginTop: verticalScale(10),
-        marginBottom: verticalScale(50),
+        marginBottom: verticalScale(10),
         overflow: 'hidden',
     },
     relatedTitle: {
@@ -2444,19 +2689,19 @@ const styles = StyleSheet.create({
         lineHeight: scale(17),
     },
     listFooter: {
-        height: verticalScale(50),
+        height: verticalScale(12),
     },
     newRepliesButton: {
         position: 'absolute',
         left: scale(28),
         right: scale(28),
-        bottom: verticalScale(18),
         minHeight: verticalScale(42),
         borderRadius: scale(21),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: scale(16),
+        zIndex: 21,
     },
     newRepliesButtonText: {
         ...uiStyle.defaultText,
