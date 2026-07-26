@@ -15,7 +15,6 @@ import {
     RefreshControl,
     StyleSheet,
     TouchableOpacity,
-    Image,
 } from 'react-native';
 
 import NewsCard from './components/NewsCard';
@@ -25,9 +24,7 @@ import { uiStyle, ThemeContext } from '../../../components/ThemeContext';
 import { UM_API_NEWS, UM_API_TOKEN } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
 
-// import { Image } from 'expo-image';
-// import Interactable from 'react-native-interactable';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image } from 'expo-image';
 import { NavigationContext } from '@react-navigation/native';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +57,7 @@ const NewsPage = forwardRef(function NewsPage(
     const { theme } = useContext(ThemeContext);
     const { t, i18n } = useTranslation('common');
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
-    const { white, black, viewShadow, bg_color, themeColor, trueWhite } = theme;
+    const { white, black, viewShadow, bg_color, themeColor, trueWhite, imagePlaceholder } = theme;
     const styles = StyleSheet.create({
         topNewsContainer: {
             borderRadius: scale(10),
@@ -189,19 +186,30 @@ const NewsPage = forwardRef(function NewsPage(
     };
 
     const topNewsContent = useMemo(() => {
-        const imageUrls = topNews.common?.imageUrls || [];
         const titleLocale = currentLanguage === 'tc' ? 'zh_TW' : 'en_US';
         const title =
             topNews.details?.find(item => item.locale === titleLocale)?.title ||
             '';
 
-        return { imageUrls, title };
+        return { title };
     }, [currentLanguage, topNews]);
+
+    // 多圖時隨機取一張；依頭條 id 固定，避免語言切換或重渲染時換圖
+    const topNewsImage = useMemo(() => {
+        const imageUrls = topNews.common?.imageUrls || [];
+        if (imageUrls.length === 0) {
+            return null;
+        }
+        const picked =
+            imageUrls.length > 1 ? lodash.sample(imageUrls) : imageUrls[0];
+        return typeof picked === 'string'
+            ? picked.replace('http:', 'https:')
+            : null;
+    }, [topNews?._id, topNews.common?.imageUrls]);
 
     // 頭條新聞的渲染
     const renderTopNews = useMemo(() => {
-        const { imageUrls, title } = topNewsContent;
-        const topNewsImage = imageUrls.length > 1 ? lodash.sample(imageUrls) : imageUrls[0];
+        const { title } = topNewsContent;
 
         return (
             <View style={{ marginTop: verticalScale(5) }}>
@@ -219,15 +227,15 @@ const NewsPage = forwardRef(function NewsPage(
                             navigation.navigate('NewsDetail', { data: topNews });
                         }}>
                         <Image
-                            source={{ uri: topNewsImage }}
+                            source={topNewsImage ? { uri: topNewsImage } : null}
                             style={{ width: '100%', height: '100%' }}
-                            // source={imageUrls[0].replace('http:', 'https:')}
-                            // contentFit="cover"
-                            // cachePolicy="memory-disk"
-                            // recyclingKey={topNews?._id || 'top-news'}
-                            // transition={0}
-                            // onLoadEnd={() => setImgLoading(false)}
-                            resizeMode="cover"
+                            contentFit="cover"
+                            cachePolicy="memory-disk"
+                            recyclingKey={topNews?._id || 'top-news'}
+                            placeholder={imagePlaceholder}
+                            placeholderContentFit="cover"
+                            transition={200}
+                            priority="high"
                         />
                         {/* 塗上50%透明度的黑，讓白色字體能看清 */}
                         <View style={styles.topNewsOverlay}>
@@ -259,7 +267,7 @@ const NewsPage = forwardRef(function NewsPage(
                 </View>
             </View >
         );
-    }, [topNews, hideSourceLabel, topNewsContent, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
+    }, [topNews, hideSourceLabel, topNewsContent, topNewsImage, imagePlaceholder, black.third, navigation, styles.topNewsContainer, styles.topNewsOverlay, styles.topNewsPosition, styles.topNewsText, t, trueWhite]);
 
     return (
         <View style={{
