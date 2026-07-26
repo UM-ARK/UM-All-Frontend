@@ -1138,39 +1138,42 @@ const HarborTopicHeader = memo(
                     {topic.title}
                 </Text>
 
-                {Number.isInteger(categoryId) && categoryId > 0 ? (
-                    <Pressable
-                        accessibilityRole="link"
-                        onPress={() => {
-                            trigger();
-                            onPressCategory({
-                                categoryId,
-                                categorySlug,
-                                categoryName,
-                            });
-                        }}
-                        style={({ pressed }) => [
-                            styles.category,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="folder-outline"
-                            size={scale(13)}
-                            color={themeColor}
-                        />
-                        <Text
-                            style={[styles.categoryText, { color: themeColor }]}>
-                            {categoryName || `分類 #${categoryId}`}
-                        </Text>
-                    </Pressable>
-                ) : null}
-
-                {tags.length > 0 ? (
+                {(Number.isInteger(categoryId) && categoryId > 0) ||
+                tags.length > 0 ? (
                     <View style={styles.tagRow}>
+                        {Number.isInteger(categoryId) && categoryId > 0 ? (
+                            <Pressable
+                                accessibilityRole="link"
+                                onPress={() => {
+                                    trigger();
+                                    onPressCategory({
+                                        categoryId,
+                                        categorySlug,
+                                        categoryName,
+                                    });
+                                }}
+                                style={({ pressed }) => [
+                                    styles.category,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="folder-outline"
+                                    size={scale(13)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    style={[
+                                        styles.categoryText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {categoryName || `分類 #${categoryId}`}
+                                </Text>
+                            </Pressable>
+                        ) : null}
                         {tags.map(tag => (
                             <Pressable
                                 key={tag}
@@ -3772,16 +3775,17 @@ const styles = StyleSheet.create({
     tagRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        alignItems: 'center',
         marginTop: verticalScale(8),
     },
     category: {
-        alignSelf: 'flex-start',
         flexDirection: 'row',
         alignItems: 'center',
         borderRadius: scale(7),
-        marginTop: verticalScale(8),
         paddingHorizontal: scale(8),
         paddingVertical: verticalScale(4),
+        marginRight: scale(6),
+        marginBottom: verticalScale(5),
     },
     categoryText: {
         ...uiStyle.defaultText,
