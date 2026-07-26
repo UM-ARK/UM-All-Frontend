@@ -88,9 +88,7 @@ const HarborStickyToolbar = ({
             <View style={[styles.toolbarSide, styles.toolbarRight]}>
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={
-                        isSignedIn ? t('已登入') : sessionLabel
-                    }
+                    accessibilityLabel={isSignedIn ? t('已登入') : sessionLabel}
                     disabled={
                         status === 'restoring' || status === 'authorizing'
                     }
@@ -133,6 +131,7 @@ const HarborFeedPane = ({
     onCapabilities,
     isTopicPressAllowed,
     contentContainerStyle,
+    refreshProgressViewOffset,
 }) => {
     const source = useMemo(() => ({ view }), [view]);
 
@@ -144,6 +143,7 @@ const HarborFeedPane = ({
                 onCapabilities={onCapabilities}
                 isTopicPressAllowed={isTopicPressAllowed}
                 contentContainerStyle={contentContainerStyle}
+                refreshProgressViewOffset={refreshProgressViewOffset}
             />
         </View>
     );
@@ -299,6 +299,7 @@ const ForumPage = ({ navigation }) => {
         }),
         [stickyHeaderHeight],
     );
+    const refreshProgressViewOffset = stickyHeaderHeight + verticalScale(8);
 
     const handleStickyHeaderLayout = useCallback(event => {
         const nextHeight = Math.ceil(event.nativeEvent.layout.height);
@@ -340,6 +341,9 @@ const ForumPage = ({ navigation }) => {
                                 onCapabilities={handleCapabilities}
                                 isTopicPressAllowed={isTopicPressAllowed}
                                 contentContainerStyle={contentContainerStyle}
+                                refreshProgressViewOffset={
+                                    refreshProgressViewOffset
+                                }
                             />
                         ) : null}
                     </View>

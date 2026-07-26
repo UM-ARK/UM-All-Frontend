@@ -77,6 +77,7 @@ const HarborTopicList = ({
     contentContainerStyle,
     contentInsetAdjustmentBehavior = 'never',
     scrollIndicatorInsets,
+    refreshProgressViewOffset = 0,
     onCapabilities,
     isTopicPressAllowed,
     onScroll,
@@ -168,6 +169,9 @@ const HarborTopicList = ({
                 return;
             }
             if (firstPageLoadingRef.current) {
+                if (showIndicator) {
+                    setIsRefreshing(true);
+                }
                 return;
             }
 
@@ -673,6 +677,7 @@ const HarborTopicList = ({
                     refreshing={isRefreshing}
                     tintColor={theme.themeColor}
                     colors={[theme.themeColor]}
+                    progressViewOffset={refreshProgressViewOffset}
                     onRefresh={handleRefresh}
                 />
             }

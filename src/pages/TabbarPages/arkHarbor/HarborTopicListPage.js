@@ -60,6 +60,9 @@ const HarborTopicListPage = ({ route, navigation }) => {
                 scrollIndicatorInsets={
                     isLiquidGlassSupported ? { top: headerHeight } : undefined
                 }
+                refreshProgressViewOffset={
+                    isLiquidGlassSupported ? headerHeight + verticalScale(8) : 0
+                }
                 emptyTitle={
                     isTagPage
                         ? t('這個標籤暫時沒有話題')
