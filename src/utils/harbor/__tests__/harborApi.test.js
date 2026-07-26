@@ -1014,6 +1014,8 @@ describe('Harbor API 資料正規化', () => {
                                 post_count: 46,
                                 position: 2,
                                 read_restricted: false,
+                                emoji: 'blue_book',
+                                style_type: 'emoji',
                                 subcategory_ids: [11],
                                 subcategory_list: [
                                     {
@@ -1023,6 +1025,8 @@ describe('Harbor API 資料正規化', () => {
                                         parent_category_id: 4,
                                         position: 3,
                                         read_restricted: true,
+                                        emoji: 'handshake',
+                                        style_type: 'emoji',
                                     },
                                 ],
                             },
@@ -1062,6 +1066,8 @@ describe('Harbor API 資料正規化', () => {
             expect.objectContaining({
                 id: 4,
                 description: '日常交流 & 校園生活',
+                emoji: 'blue_book',
+                styleType: 'emoji',
                 subcategoryIds: [11],
                 topicCount: 30,
                 postCount: 46,
@@ -1069,6 +1075,8 @@ describe('Harbor API 資料正規化', () => {
             expect.objectContaining({
                 id: 11,
                 parentCategoryId: 4,
+                emoji: 'handshake',
+                styleType: 'emoji',
                 readRestricted: true,
             }),
         ]);

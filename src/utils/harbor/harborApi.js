@@ -234,6 +234,17 @@ function normalizeCategory(category) {
             .filter(categoryId => categoryId != null)
         : [];
 
+    const uploadedLogo =
+        category.uploaded_logo ||
+        category.uploaded_logo_dark ||
+        category.logo;
+    const logoUrl =
+        typeof uploadedLogo === 'string'
+            ? uploadedLogo
+            : typeof uploadedLogo?.url === 'string'
+                ? uploadedLogo.url
+                : null;
+
     return {
         id,
         name: category.name || category.category_name || '',
@@ -245,6 +256,19 @@ function normalizeCategory(category) {
         ),
         color: category.color || null,
         textColor: category.text_color || null,
+        emoji:
+            typeof category.emoji === 'string' && category.emoji.trim()
+                ? category.emoji.trim()
+                : null,
+        icon:
+            typeof category.icon === 'string' && category.icon.trim()
+                ? category.icon.trim()
+                : null,
+        styleType:
+            typeof category.style_type === 'string' && category.style_type.trim()
+                ? category.style_type.trim()
+                : null,
+        logoUrl,
         parentCategoryId: toNumberOrNull(category.parent_category_id),
         subcategoryIds,
         topicCount: toCount(category.topic_count ?? category.topics_all_time),
@@ -352,19 +376,24 @@ async function resolveTopicCategory(topic) {
             }
             : null),
     );
-    if (categoryId == null || inlineCategory?.name || inlineCategory?.slug) {
+    if (categoryId == null) {
         return inlineCategory;
     }
 
     try {
         const categories = await fetchPublicHarborCategories();
-        return (
-            categories.find(category => category.id === categoryId) ||
-            inlineCategory
-        );
+        const cached = categories.find(category => category.id === categoryId);
+        if (cached) {
+            return {
+                ...cached,
+                name: cached.name || inlineCategory?.name || '',
+                slug: cached.slug || inlineCategory?.slug || '',
+            };
+        }
     } catch {
-        return inlineCategory;
+        // 公開分類快取失敗時退回 topic 內嵌資料
     }
+    return inlineCategory;
 }
 
 function getTopicUsers(data) {

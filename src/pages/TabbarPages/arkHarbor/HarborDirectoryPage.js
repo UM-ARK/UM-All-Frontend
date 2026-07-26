@@ -37,6 +37,7 @@ import {
     HarborInlineRetry,
     HarborTopicSkeleton,
 } from './components/HarborListStates';
+import HarborCategoryIcon from './components/HarborCategoryIcon';
 
 const SKELETON_ITEMS = ['one', 'two', 'three', 'four'];
 
@@ -127,18 +128,19 @@ const CategoryRow = ({ item, onPress, onToggle, isPressAllowed }) => {
                             : theme.tonal.primary15,
                     },
                 ]}>
-                <MaterialCommunityIcons
-                    name={
-                        isSubcategory
-                            ? 'folder-outline'
-                            : 'folder-multiple-outline'
-                    }
-                    size={scale(isSubcategory ? 18 : 21)}
+                <HarborCategoryIcon
+                    category={item}
                     color={
                         isSubcategory
                             ? theme.secondThemeColor
                             : theme.themeColor
                     }
+                    fallbackIcon={
+                        isSubcategory
+                            ? 'folder-outline'
+                            : 'folder-multiple-outline'
+                    }
+                    size={scale(isSubcategory ? 18 : 21)}
                 />
             </View>
             <View style={styles.directoryText}>

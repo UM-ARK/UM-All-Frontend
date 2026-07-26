@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { ARK_HARBOR_AVATAR_TEMPLATE } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
+import HarborCategoryIcon from './HarborCategoryIcon';
 
 const STATUS_CONFIG = {
     pinned: { icon: 'pin-outline', label: '置頂' },
@@ -246,10 +247,10 @@ const HarborTopicCard = ({
                                         : theme.tonal.secondary15,
                                 },
                             ]}>
-                            <MaterialCommunityIcons
-                                name="folder-outline"
-                                size={scale(12)}
+                            <HarborCategoryIcon
+                                category={category}
                                 color={theme.secondThemeColor}
+                                size={scale(12)}
                             />
                             <Text
                                 numberOfLines={1}
@@ -427,6 +428,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(7),
         flexDirection: 'row',
         alignItems: 'center',
+        gap: scale(4),
         marginRight: scale(6),
         marginBottom: verticalScale(5),
         paddingHorizontal: scale(7),

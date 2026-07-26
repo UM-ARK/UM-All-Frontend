@@ -57,6 +57,7 @@ import {
     HarborFullState,
     HarborInlineRetry,
 } from './components/HarborListStates';
+import HarborCategoryIcon from './components/HarborCategoryIcon';
 
 const TIME_OPTIONS = [
     {key: 'all', label: '不限時間'},
@@ -192,6 +193,18 @@ const SearchOptionModal = ({
                             borderBottomColor: theme.themeColorUltraLight,
                         },
                     ]}>
+                    {hierarchical && item.key !== '' ? (
+                        <HarborCategoryIcon
+                            category={item}
+                            color={
+                                selected
+                                    ? theme.themeColor
+                                    : theme.black.second
+                            }
+                            size={scale(16)}
+                            style={styles.optionCategoryIcon}
+                        />
+                    ) : null}
                     <Text
                         numberOfLines={2}
                         style={[
@@ -534,6 +547,11 @@ const HarborSearchResultCard = memo(
                                             : theme.tonal.secondary15,
                                     },
                                 ]}>
+                                <HarborCategoryIcon
+                                    category={item.category}
+                                    color={theme.secondThemeColor}
+                                    size={scale(13)}
+                                />
                                 <Text
                                     numberOfLines={1}
                                     style={[
@@ -1924,6 +1942,9 @@ const styles = StyleSheet.create({
     taxonomyChip: {
         maxWidth: scale(130),
         borderRadius: scale(7),
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(4),
         marginRight: scale(6),
         marginTop: verticalScale(4),
         paddingHorizontal: scale(7),
@@ -2001,6 +2022,9 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         flex: 1,
         fontSize: scale(12),
+        marginRight: scale(8),
+    },
+    optionCategoryIcon: {
         marginRight: scale(8),
     },
     optionToggle: {

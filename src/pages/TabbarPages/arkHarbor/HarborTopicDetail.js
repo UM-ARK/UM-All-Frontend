@@ -80,6 +80,7 @@ import {
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
+import HarborCategoryIcon from './components/HarborCategoryIcon';
 
 const AVATAR_SIZE = 88;
 // 常見 Discourse reaction shortcode → Unicode，優先於遠端圖片以提升清晰度
@@ -1442,10 +1443,16 @@ const HarborTopicHeader = memo(
                                             : tonal.primary15,
                                     },
                                 ]}>
-                                <MaterialCommunityIcons
-                                    name="folder-outline"
-                                    size={scale(13)}
+                                <HarborCategoryIcon
+                                    category={
+                                        topic.category || {
+                                            id: categoryId,
+                                            name: categoryName,
+                                            slug: categorySlug,
+                                        }
+                                    }
                                     color={themeColor}
+                                    size={scale(13)}
                                 />
                                 <Text
                                     style={[

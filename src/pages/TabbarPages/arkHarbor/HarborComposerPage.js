@@ -49,6 +49,7 @@ import {
     applyHarborComposerFormat,
     getHarborComposerResult,
 } from './harborComposerText';
+import HarborCategoryIcon from './components/HarborCategoryIcon';
 
 const COMPOSER_MODES = new Set(['newTopic', 'reply', 'edit']);
 
@@ -574,6 +575,16 @@ const HarborComposerPage = ({route, navigation}) => {
                                 theme.themeColorUltraLight,
                         },
                     ]}>
+                    <HarborCategoryIcon
+                        category={item}
+                        color={
+                            selected
+                                ? theme.themeColor
+                                : theme.black.second
+                        }
+                        size={scale(18)}
+                        style={styles.optionCategoryIcon}
+                    />
                     <Text
                         numberOfLines={2}
                         style={[
@@ -975,6 +986,14 @@ const HarborComposerPage = ({route, navigation}) => {
                                             theme.themeColorUltraLight,
                                     },
                                 ]}>
+                                {selectedCategory ? (
+                                    <HarborCategoryIcon
+                                        category={selectedCategory}
+                                        color={theme.themeColor}
+                                        size={scale(18)}
+                                        style={styles.selectorCategoryIcon}
+                                    />
+                                ) : null}
                                 <Text
                                     style={[
                                         styles.selectorText,
@@ -1419,6 +1438,9 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: scale(14),
     },
+    optionCategoryIcon: {
+        marginRight: scale(10),
+    },
     optionRow: {
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -1473,6 +1495,9 @@ const styles = StyleSheet.create({
         minHeight: verticalScale(48),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(10),
+    },
+    selectorCategoryIcon: {
+        marginRight: scale(2),
     },
     selectorText: {
         flex: 1,

@@ -36,6 +36,7 @@ import {
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import { HarborInlineRetry } from './HarborListStates';
+import HarborCategoryIcon from './HarborCategoryIcon';
 
 const PLACEHOLDER_ITEMS = [
     { key: 'posts', icon: 'account-outline', label: '我的貼文' },
@@ -137,14 +138,17 @@ const CategoryRow = ({ item, onPress, onToggle }) => {
                             : theme.tonal.primary15,
                     },
                 ]}>
-                <MaterialCommunityIcons
-                    name={isSubcategory ? 'folder-outline' : 'folder'}
-                    size={scale(isSubcategory ? 15 : 17)}
+                <HarborCategoryIcon
+                    category={item}
                     color={
                         isSubcategory
                             ? theme.secondThemeColor
                             : theme.themeColor
                     }
+                    fallbackIcon={
+                        isSubcategory ? 'folder-outline' : 'folder'
+                    }
+                    size={scale(isSubcategory ? 15 : 17)}
                 />
             </View>
             <Text
