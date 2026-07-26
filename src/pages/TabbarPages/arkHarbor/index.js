@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Alert,
+    AppState,
     Pressable,
     StyleSheet,
     Text,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -19,7 +21,10 @@ import SegmentControl from '../../../components/SegmentControl';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
-import { fetchHarborSiteCapabilities } from '../../../utils/harbor/harborApi';
+import {
+    fetchHarborSiteCapabilities,
+    getHarborTopicViews,
+} from '../../../utils/harbor/harborApi';
 import { trigger } from '../../../utils/trigger';
 import HarborDrawerContent from './components/HarborDrawerContent';
 import HarborTopicList from './components/HarborTopicList';
@@ -183,14 +188,18 @@ const ForumPage = ({ navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
     const { status, login } = useHarborSession();
+    const isFocused = useIsFocused();
     const pagerRef = useRef(null);
     const currentViewRef = useRef('latest');
     const blockTopicPressUntilRef = useRef(0);
+    const capabilitiesRef = useRef(null);
+    const capabilitiesControllerRef = useRef(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [stickyHeaderHeight, setStickyHeaderHeight] = useState(
         DEFAULT_STICKY_HEADER_HEIGHT,
     );
     const [capabilities, setCapabilities] = useState(null);
+    const [capabilitiesUnavailable, setCapabilitiesUnavailable] = useState(false);
     const [mountedViews, setMountedViews] = useState({
         latest: true,
         top: false,
@@ -200,29 +209,56 @@ const ForumPage = ({ navigation }) => {
         logToFirebase('openPage', { page: 'HarborNativeHome' });
     }, []);
 
-    useEffect(() => {
+    const loadCapabilities = useCallback(() => {
+        capabilitiesControllerRef.current?.abort();
         const controller = new AbortController();
+        capabilitiesControllerRef.current = controller;
         fetchHarborSiteCapabilities({ signal: controller.signal })
-            .then(setCapabilities)
-            .catch(() => { });
-        return () => controller.abort();
+            .then(nextCapabilities => {
+                if (!controller.signal.aborted) {
+                    capabilitiesRef.current = nextCapabilities;
+                    setCapabilities(nextCapabilities);
+                    setCapabilitiesUnavailable(false);
+                }
+            })
+            .catch(() => {
+                if (!controller.signal.aborted) {
+                    capabilitiesRef.current = null;
+                    setCapabilitiesUnavailable(true);
+                }
+            })
+            .finally(() => {
+                if (capabilitiesControllerRef.current === controller) {
+                    capabilitiesControllerRef.current = null;
+                }
+            });
+    }, []);
+
+    useEffect(() => {
+        if (isFocused) {
+            loadCapabilities();
+        }
+    }, [isFocused, loadCapabilities, status]);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextState => {
+            if (nextState === 'active' && isFocused) {
+                loadCapabilities();
+            }
+        });
+        return () => subscription.remove();
+    }, [isFocused, loadCapabilities]);
+
+    useEffect(() => {
+        return () => capabilitiesControllerRef.current?.abort();
     }, []);
 
     const enabledViews = useMemo(() => {
-        const fallbackViews = ['latest', 'top'];
-        if (!capabilities) {
-            return fallbackViews;
-        }
-
-        const available =
-            status === 'signedIn'
-                ? capabilities.topicViews
-                : capabilities.anonymousTopicViews;
-        const supportedViews = Array.isArray(available)
-            ? available.filter(view => VIEW_CONFIG[view])
-            : fallbackViews;
-        return supportedViews.length > 0 ? supportedViews : fallbackViews;
-    }, [capabilities, status]);
+        return getHarborTopicViews(capabilities, {
+            signedIn: status === 'signedIn',
+            unavailable: capabilitiesUnavailable,
+        });
+    }, [capabilities, capabilitiesUnavailable, status]);
 
     const segmentOptions = useMemo(
         () =>
@@ -239,9 +275,18 @@ const ForumPage = ({ navigation }) => {
         );
     }, []);
 
-    const handleCapabilities = useCallback(nextCapabilities => {
-        setCapabilities(nextCapabilities);
-    }, []);
+    const handleCapabilities = useCallback(
+        nextCapabilities => {
+            if (Array.isArray(nextCapabilities?.topicViews)) {
+                capabilitiesRef.current = nextCapabilities;
+                setCapabilities(nextCapabilities);
+                setCapabilitiesUnavailable(false);
+            } else if (!capabilitiesRef.current) {
+                loadCapabilities();
+            }
+        },
+        [loadCapabilities],
+    );
 
     const selectView = useCallback(
         index => {

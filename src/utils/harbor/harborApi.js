@@ -77,6 +77,26 @@ export function isHarborCredentialRejected(error, validationRequest = false) {
     return status === 401 || (validationRequest && status === 403);
 }
 
+export function getHarborTopicViews(
+    capabilities,
+    { signedIn = false, unavailable = false } = {},
+) {
+    const fallbackViews = signedIn ? TOPIC_VIEWS : PUBLIC_TOPIC_VIEWS;
+    if (!capabilities || unavailable) {
+        return [...fallbackViews];
+    }
+
+    const available = signedIn
+        ? capabilities.topicViews
+        : capabilities.anonymousTopicViews;
+    const supportedViews = Array.isArray(available)
+        ? available.filter(view => TOPIC_VIEWS.includes(view))
+        : fallbackViews;
+    return supportedViews.length > 0
+        ? supportedViews
+        : [...fallbackViews];
+}
+
 function stripHtml(value) {
     if (typeof value !== 'string') {
         return '';

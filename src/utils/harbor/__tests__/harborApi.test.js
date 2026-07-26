@@ -10,6 +10,7 @@ import {
     fetchHarborTopic,
     fetchHarborTopicList,
     fetchHarborUserActions,
+    getHarborTopicViews,
     harborApi,
     markHarborNotificationRead,
 } from '../harborApi';
@@ -32,6 +33,27 @@ describe('Harbor API 資料正規化', () => {
     afterEach(() => {
         getSpy.mockRestore();
         putSpy.mockRestore();
+    });
+
+    it('已登入且能力資料尚未恢復時保留會員話題視圖', () => {
+        expect(
+            getHarborTopicViews(
+                { topicViews: ['latest', 'top'] },
+                {
+                    signedIn: true,
+                    unavailable: true,
+                },
+            ),
+        ).toEqual(['latest', 'top', 'new', 'unread']);
+    });
+
+    it('未登入且能力資料尚未恢復時只顯示公開話題視圖', () => {
+        expect(
+            getHarborTopicViews(null, {
+                signedIn: false,
+                unavailable: true,
+            }),
+        ).toEqual(['latest', 'top']);
     });
 
     it('將 User Actions 轉為 App 活動項目', async () => {

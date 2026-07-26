@@ -209,9 +209,7 @@ const HarborTopicList = ({
                 setLoadMoreError(null);
                 cacheTopicList(activeCacheKeyRef.current, result);
                 clearRateLimit();
-                if (Array.isArray(result.capabilities?.topicViews)) {
-                    onCapabilities?.(result.capabilities);
-                }
+                onCapabilities?.(result.capabilities);
             } catch (error) {
                 if (!controller.signal.aborted) {
                     console.warn('Harbor topic list request failed', {
@@ -367,9 +365,7 @@ const HarborTopicList = ({
                     nextPage: result.nextPage,
                 });
                 clearRateLimit();
-                if (Array.isArray(result.capabilities?.topicViews)) {
-                    onCapabilities?.(result.capabilities);
-                }
+                onCapabilities?.(result.capabilities);
             } catch (error) {
                 if (
                     requestGeneration !== requestGenerationRef.current ||
