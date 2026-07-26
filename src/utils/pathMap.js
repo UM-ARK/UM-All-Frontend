@@ -19,6 +19,8 @@ export const GITHUB_UPDATE_PLAN = GITHUB_FRONT_BASE + 'issues';
 
 export const GITHUB_ACTIVITY = GITHUB_FRONT_BASE + 'activity';
 
+export const MARKDOWN_BASIC_SYNTAX_URL = 'https://markdown.com.cn/basic-syntax/headings.html';
+
 // 組織賬號登入
 export const ARK_WEB_CLUB_SIGNIN = BASE_HOST + '/clubsignin';
 

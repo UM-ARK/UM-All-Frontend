@@ -1292,6 +1292,10 @@ export async function fetchHarborComposerSettings({ signal } = {}) {
         allowUncategorizedTopics: Boolean(
             settings?.allow_uncategorized_topics,
         ),
+        simultaneousUploads:
+            toNumberOrNull(settings?.simultaneous_uploads) ?? 15,
+        maxImageSizeKb:
+            toNumberOrNull(settings?.max_image_size_kb),
     };
 }
 
@@ -1595,6 +1599,45 @@ export async function createHarborPost({
 
     const response = await harborApi.post('/posts.json', payload, { signal });
     return response.data;
+}
+
+export async function uploadHarborComposerImage(
+    image,
+    { signal, onUploadProgress } = {},
+) {
+    if (
+        !image ||
+        typeof image.uri !== 'string' ||
+        !image.uri.trim()
+    ) {
+        throw new TypeError('Invalid Harbor upload image');
+    }
+
+    const data = new FormData();
+    data.append('upload_type', 'composer');
+    data.append('synchronous', 'true');
+    data.append('file', {
+        uri: image.uri,
+        name: image.fileName || 'image.jpg',
+        type: image.mimeType || 'image/jpeg',
+    });
+
+    const response = await harborApi.post('/uploads.json', data, {
+        headers: {'Content-Type': 'multipart/form-data'},
+        onUploadProgress,
+        signal,
+    });
+    const upload = response.data?.upload || response.data;
+    const shortUrl = upload?.short_url || upload?.shortUrl;
+
+    if (typeof shortUrl !== 'string' || !shortUrl.trim()) {
+        throw new Error('Invalid Harbor upload response');
+    }
+
+    return {
+        id: toNumberOrNull(upload.id),
+        shortUrl: shortUrl.trim(),
+    };
 }
 
 export async function fetchHarborPostForEdit(postId, { signal } = {}) {

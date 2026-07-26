@@ -4,6 +4,7 @@ import {
     fetchHarborComposerSettings,
     fetchHarborPostForEdit,
     harborApi,
+    uploadHarborComposerImage,
     updateHarborPost,
 } from '../harborApi';
 
@@ -41,6 +42,8 @@ describe('Harbor Composer API', () => {
                 max_tags_per_topic: 5,
                 default_composer_category: '4',
                 allow_uncategorized_topics: false,
+                simultaneous_uploads: 4,
+                max_image_size_kb: 5120,
             },
         });
 
@@ -55,6 +58,8 @@ describe('Harbor Composer API', () => {
             maxTagsPerTopic: 5,
             defaultCategoryId: 4,
             allowUncategorizedTopics: false,
+            simultaneousUploads: 4,
+            maxImageSizeKb: 5120,
         });
         expect(getSpy).toHaveBeenCalledWith('/site/settings.json', {signal});
     });
@@ -174,6 +179,38 @@ describe('Harbor Composer API', () => {
                 title: '新話題',
             },
             {signal: undefined},
+        );
+    });
+
+    it('上傳 Composer 圖片並正規化 short URL', async () => {
+        const signal = {aborted: false};
+        const onUploadProgress = jest.fn();
+        postSpy.mockResolvedValue({
+            data: {id: '91', short_url: 'upload://abc123.jpeg'},
+        });
+
+        await expect(
+            uploadHarborComposerImage(
+                {
+                    uri: 'file:///photo.jpeg',
+                    fileName: 'photo.jpeg',
+                    mimeType: 'image/jpeg',
+                },
+                {signal, onUploadProgress},
+            ),
+        ).resolves.toEqual({
+            id: 91,
+            shortUrl: 'upload://abc123.jpeg',
+        });
+
+        expect(postSpy).toHaveBeenCalledWith(
+            '/uploads.json',
+            expect.any(FormData),
+            {
+                headers: {'Content-Type': 'multipart/form-data'},
+                onUploadProgress,
+                signal,
+            },
         );
     });
 

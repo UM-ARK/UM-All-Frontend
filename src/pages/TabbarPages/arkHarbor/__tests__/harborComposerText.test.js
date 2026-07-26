@@ -1,98 +1,29 @@
 import {
-    applyHarborComposerFormat,
+    buildHarborComposerRaw,
     getHarborComposerResult,
 } from '../harborComposerText';
 
-describe('applyHarborComposerFormat', () => {
-    it('wraps selected text and keeps it selected', () => {
+describe('buildHarborComposerRaw', () => {
+    it('把圖片統一接在純文字正文末尾', () => {
         expect(
-            applyHarborComposerFormat(
-                'Harbor text',
-                {start: 0, end: 6},
-                'bold',
-            ),
-        ).toEqual({
-            text: '**Harbor** text',
-            selection: {start: 2, end: 8},
-        });
+            buildHarborComposerRaw('  分享活動。  ', [
+                {shortUrl: 'upload://first.jpeg'},
+                {shortUrl: 'upload://second.png'},
+            ]),
+        ).toBe(
+            '分享活動。\n\n' +
+            '![圖片](upload://first.jpeg)\n\n' +
+            '![圖片](upload://second.png)',
+        );
     });
 
-    it('inserts paired markers at a collapsed cursor', () => {
+    it('忽略尚未上傳成功的圖片', () => {
         expect(
-            applyHarborComposerFormat(
-                'Harbor',
-                {start: 6, end: 6},
-                'italic',
-            ),
-        ).toEqual({
-            text: 'Harbor**',
-            selection: {start: 7, end: 7},
-        });
-    });
-
-    it('uses the selected text as a link label and selects the URL', () => {
-        expect(
-            applyHarborComposerFormat(
-                'Harbor',
-                {start: 0, end: 6},
-                'link',
-            ),
-        ).toEqual({
-            text: '[Harbor](https://)',
-            selection: {start: 9, end: 17},
-        });
-    });
-
-    it('quotes every selected line', () => {
-        expect(
-            applyHarborComposerFormat(
-                'first\nsecond',
-                {start: 0, end: 12},
-                'quote',
-            ),
-        ).toEqual({
-            text: '> first\n> second',
-            selection: {start: 0, end: 16},
-        });
-    });
-
-    it('quotes the whole logical line from a collapsed mid-line cursor', () => {
-        expect(
-            applyHarborComposerFormat(
-                'before\nmiddle text\nafter',
-                {start: 13, end: 13},
-                'quote',
-            ),
-        ).toEqual({
-            text: 'before\n> middle text\nafter',
-            selection: {start: 15, end: 15},
-        });
-    });
-
-    it('quotes complete logical lines for a partial selection', () => {
-        expect(
-            applyHarborComposerFormat(
-                'before\nfirst line\nsecond line\nafter',
-                {start: 10, end: 27},
-                'quote',
-            ),
-        ).toEqual({
-            text: 'before\n> first line\n> second line\nafter',
-            selection: {start: 7, end: 33},
-        });
-    });
-
-    it('clamps invalid selections before applying inline code', () => {
-        expect(
-            applyHarborComposerFormat(
-                'Harbor',
-                {start: -2, end: 99},
-                'code',
-            ),
-        ).toEqual({
-            text: '`Harbor`',
-            selection: {start: 1, end: 7},
-        });
+            buildHarborComposerRaw('', [
+                {shortUrl: 'upload://ready.jpeg'},
+                {status: 'failed'},
+            ]),
+        ).toBe('![圖片](upload://ready.jpeg)');
     });
 });
 

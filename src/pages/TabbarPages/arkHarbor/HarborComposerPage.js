@@ -18,6 +18,8 @@ import {
 import {isLiquidGlassSupported} from '@callstack/liquid-glass';
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useHeaderHeight} from '@react-navigation/elements';
+import {Image} from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import {
     KeyboardAwareScrollView,
     KeyboardToolbar,
@@ -29,8 +31,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 
 import {useTheme} from '../../../components/ThemeContext';
+import SimpleProgressBar from '../../../components/SimpleProgressBar';
 import {useHarborSession} from '../../../contexts/HarborSessionContext';
 import CustomBottomSheet from '../../../utils/BottomSheet';
+import {openLink} from '../../../utils/browser';
 import {
     createHarborPost,
     fetchHarborCategories,
@@ -38,6 +42,7 @@ import {
     fetchHarborPostForEdit,
     fetchHarborTags,
     updateHarborPost,
+    uploadHarborComposerImage,
 } from '../../../utils/harbor/harborApi';
 import {
     buildHarborCategoryRows,
@@ -45,22 +50,18 @@ import {
 } from '../../../utils/harbor/harborCategories';
 import {getHarborRateLimitDelayMs} from '../../../utils/harbor/harborRateLimit';
 import {publishHarborTopicUpdate} from '../../../utils/harbor/harborTopicUpdates';
+import {
+    ARK_HARBOR_NEW_TOPIC,
+    MARKDOWN_BASIC_SYNTAX_URL,
+} from '../../../utils/pathMap';
 import {trigger} from '../../../utils/trigger';
 import {
-    applyHarborComposerFormat,
+    buildHarborComposerRaw,
     getHarborComposerResult,
 } from './harborComposerText';
 import HarborCategoryIcon from './components/HarborCategoryIcon';
 
 const COMPOSER_MODES = new Set(['newTopic', 'reply', 'edit']);
-
-const FORMAT_ACTIONS = [
-    {key: 'bold', icon: 'format-bold', label: '粗體'},
-    {key: 'italic', icon: 'format-italic', label: '斜體'},
-    {key: 'link', icon: 'link-variant', label: '連結'},
-    {key: 'quote', icon: 'format-quote-close', label: '引用'},
-    {key: 'code', icon: 'code-tags', label: '行內程式碼'},
-];
 
 function getServerErrorMessage(error) {
     const data = error?.response?.data;
@@ -128,16 +129,31 @@ function getEditPost(result) {
     return result?.post || result?.data?.post || result?.data || result || {};
 }
 
+function getUploadErrorMessage(error, t) {
+    const serverMessage = getServerErrorMessage(error);
+
+    if (error?.response?.status === 413) {
+        return t('圖片檔案太大，請選擇較小的圖片。');
+    }
+    if (error?.response?.status === 422) {
+        return serverMessage || t('Harbor 無法接受這張圖片。');
+    }
+    if (!error?.response) {
+        return t('圖片上傳失敗，請檢查網絡後重試。');
+    }
+    return serverMessage || t('圖片上傳失敗，請稍後再試。');
+}
+
 const HarborComposerPage = ({route, navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
     const {login, status: sessionStatus} = useHarborSession();
-    const inputRef = useRef(null);
     const categorySheetRef = useRef(null);
     const tagSheetRef = useRef(null);
     const loadControllerRef = useRef(null);
+    const uploadControllersRef = useRef(new Map());
     const submittingRef = useRef(false);
     const routeMode = route.params?.mode;
     const mode = COMPOSER_MODES.has(routeMode) ? routeMode : 'newTopic';
@@ -157,11 +173,8 @@ const HarborComposerPage = ({route, navigation}) => {
     );
     const [selectedTags, setSelectedTags] = useState([]);
     const [raw, setRaw] = useState(initialRaw);
+    const [images, setImages] = useState([]);
     const [originalText, setOriginalText] = useState('');
-    const [selection, setSelection] = useState({
-        start: initialRaw.length,
-        end: initialRaw.length,
-    });
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
     const [composerSettings, setComposerSettings] = useState(null);
@@ -260,10 +273,6 @@ const HarborComposerPage = ({route, navigation}) => {
                 );
                 setTitle(post.title || route.params?.topicTitle || '');
                 setEditMetadata(post);
-                setSelection({
-                    start: postRaw.length,
-                    end: postRaw.length,
-                });
             }
         } catch (error) {
             if (!controller.signal.aborted) {
@@ -291,6 +300,14 @@ const HarborComposerPage = ({route, navigation}) => {
         };
     }, [loadComposerData]);
 
+    useEffect(() => {
+        const uploadControllers = uploadControllersRef.current;
+        return () => {
+            uploadControllers.forEach(controller => controller.abort());
+            uploadControllers.clear();
+        };
+    }, []);
+
     const selectedCategory = useMemo(
         () => categories.find(item => Number(item.id) === Number(categoryId)),
         [categories, categoryId],
@@ -304,7 +321,11 @@ const HarborComposerPage = ({route, navigation}) => {
         [selectedTags],
     );
     const titleLength = title.trim().length;
-    const rawLength = raw.trim().length;
+    const composedRaw = isNewTopic
+        ? buildHarborComposerRaw(raw, images)
+        : raw;
+    const rawLength = composedRaw.trim().length;
+    const visibleTextLength = raw.trim().length;
     const minimumTitleLength =
         composerSettings?.minTopicTitleLength ?? 1;
     const maximumTitleLength =
@@ -317,6 +338,14 @@ const HarborComposerPage = ({route, navigation}) => {
     const minimumTagCount = selectedCategory?.minimumRequiredTags ?? 0;
     const requiresCategory =
         composerSettings?.allowUncategorizedTopics !== true;
+    const hasUnreadyImages = images.some(
+        image => image.status !== 'uploaded',
+    );
+    const isUploadingImages = images.some(
+        image =>
+            image.status === 'pending' ||
+            image.status === 'uploading',
+    );
     const isTitleLengthValid =
         titleLength >= minimumTitleLength &&
         (maximumTitleLength == null ||
@@ -339,17 +368,181 @@ const HarborComposerPage = ({route, navigation}) => {
         [headerHeight],
     );
 
-    const applyFormat = useCallback(format => {
-        const result = applyHarborComposerFormat(
-            raw,
-            selection,
-            format,
-            {linkLabel: t('連結文字')},
+    const uploadImage = useCallback(async image => {
+        if (uploadControllersRef.current.has(image.id)) {
+            return;
+        }
+        const controller = new AbortController();
+        uploadControllersRef.current.set(image.id, controller);
+        setImages(current =>
+            current.map(item =>
+                item.id === image.id
+                    ? {
+                        ...item,
+                        progress: 0,
+                        status: 'uploading',
+                        error: '',
+                    }
+                    : item,
+            ),
         );
-        setRaw(result.text);
-        setSelection(result.selection);
-        inputRef.current?.focus();
-    }, [raw, selection, t]);
+
+        try {
+            const upload = await uploadHarborComposerImage(
+                {
+                    uri: image.localUri,
+                    fileName: image.fileName,
+                    mimeType: image.mimeType,
+                },
+                {
+                    signal: controller.signal,
+                    onUploadProgress: event => {
+                        const progress = event.total
+                            ? event.loaded / event.total
+                            : 0;
+                        setImages(current =>
+                            current.map(item =>
+                                item.id === image.id
+                                    ? {...item, progress}
+                                    : item,
+                            ),
+                        );
+                    },
+                },
+            );
+            setImages(current =>
+                current.map(item =>
+                    item.id === image.id
+                        ? {
+                            ...item,
+                            uploadId: upload.id,
+                            shortUrl: upload.shortUrl,
+                            progress: 1,
+                            status: 'uploaded',
+                        }
+                        : item,
+                ),
+            );
+        } catch (error) {
+            if (controller.signal.aborted) {
+                return;
+            }
+            setImages(current =>
+                current.map(item =>
+                    item.id === image.id
+                        ? {
+                            ...item,
+                            status: 'failed',
+                            error: getUploadErrorMessage(error, t),
+                        }
+                        : item,
+                ),
+            );
+        } finally {
+            uploadControllersRef.current.delete(image.id);
+        }
+    }, [t]);
+
+    const handleAddImages = useCallback(async () => {
+        trigger();
+        Keyboard.dismiss();
+
+        try {
+            const permission =
+                await ImagePicker.getMediaLibraryPermissionsAsync();
+            let permissionStatus = permission.status;
+            if (permissionStatus !== 'granted') {
+                const result =
+                    await ImagePicker.requestMediaLibraryPermissionsAsync();
+                permissionStatus = result.status;
+            }
+            if (permissionStatus !== 'granted') {
+                Toast.show(t('請允許相片權限後再新增圖片。'));
+                return;
+            }
+
+            const selectionLimit = Math.max(
+                1,
+                composerSettings?.simultaneousUploads ?? 15,
+            );
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: false,
+                allowsMultipleSelection: true,
+                orderedSelection: true,
+                quality: 1,
+                selectionLimit,
+            });
+            if (result.canceled) {
+                return;
+            }
+
+            const maxImageBytes = composerSettings?.maxImageSizeKb == null
+                ? null
+                : composerSettings.maxImageSizeKb * 1024;
+            const selectedAt = Date.now();
+            const oversizedImages = result.assets.filter(
+                asset =>
+                    maxImageBytes != null &&
+                    asset.fileSize != null &&
+                    asset.fileSize > maxImageBytes,
+            );
+            const nextImages = result.assets
+                .filter(asset => !oversizedImages.includes(asset))
+                .map((asset, index) => ({
+                    id: `${selectedAt}-${index}`,
+                    localUri: asset.uri,
+                    fileName:
+                        asset.fileName || `image_${selectedAt}_${index}.jpg`,
+                    mimeType: asset.mimeType || 'image/jpeg',
+                    progress: 0,
+                    status: 'pending',
+                }));
+
+            if (oversizedImages.length > 0) {
+                Toast.show(
+                    t('{{count}} 張圖片超過 Harbor 的大小限制。', {
+                        count: oversizedImages.length,
+                    }),
+                );
+            }
+            if (nextImages.length === 0) {
+                return;
+            }
+
+            setImages(current => [...current, ...nextImages]);
+            nextImages.forEach(uploadImage);
+        } catch {
+            Toast.show(t('無法開啟相片圖庫，請稍後再試。'));
+        }
+    }, [composerSettings, t, uploadImage]);
+
+    const handleRemoveImage = useCallback(imageId => {
+        trigger();
+        uploadControllersRef.current.get(imageId)?.abort();
+        uploadControllersRef.current.delete(imageId);
+        setImages(current =>
+            current.filter(image => image.id !== imageId),
+        );
+    }, []);
+
+    const handleRetryImage = useCallback(image => {
+        trigger();
+        uploadImage(image);
+    }, [uploadImage]);
+
+    const handleOpenWebComposer = useCallback(() => {
+        trigger();
+        openLink({URL: ARK_HARBOR_NEW_TOPIC, mode: 'fullScreen'});
+    }, []);
+
+    const handleOpenMarkdownGuide = useCallback(() => {
+        trigger();
+        openLink({
+            URL: MARKDOWN_BASIC_SYNTAX_URL,
+            mode: 'fullScreen',
+        });
+    }, []);
 
     const handleLogin = useCallback(async () => {
         trigger();
@@ -364,6 +557,9 @@ const HarborComposerPage = ({route, navigation}) => {
     }, [login, t]);
 
     const validateForm = useCallback(() => {
+        if (isNewTopic && hasUnreadyImages) {
+            return t('請等待圖片上傳完成，或移除上傳失敗的圖片。');
+        }
         if (
             (isNewTopic || isEditingFirstPost) &&
             titleLength < minimumTitleLength
@@ -414,6 +610,7 @@ const HarborComposerPage = ({route, navigation}) => {
         return '';
     }, [
         categoryId,
+        hasUnreadyImages,
         isEditingFirstPost,
         isNewTopic,
         maximumPostLength,
@@ -498,7 +695,7 @@ const HarborComposerPage = ({route, navigation}) => {
                         : {}),
                 })
                 : await createHarborPost({
-                    raw,
+                    raw: composedRaw,
                     ...(isNewTopic
                         ? {
                             title: title.trim(),
@@ -595,6 +792,7 @@ const HarborComposerPage = ({route, navigation}) => {
         }
     }, [
         categoryId,
+        composedRaw,
         editMetadata,
         handleLogin,
         isEdit,
@@ -1201,80 +1399,60 @@ const HarborComposerPage = ({route, navigation}) => {
 
                 <View style={styles.fieldGroup}>
                     <View style={styles.bodyLabelRow}>
-                        <Text
-                            style={[
-                                styles.fieldLabel,
-                                {color: theme.black.second},
-                            ]}>
-                            {t('正文')}
-                        </Text>
-                        <View style={styles.fieldMetaRow}>
+                        <View style={styles.fieldLabelRow}>
                             <Text
                                 style={[
-                                    styles.markdownLabel,
-                                    {color: theme.black.third},
+                                    styles.fieldLabel,
+                                    {color: theme.black.second},
                                 ]}>
-                                {t('Markdown')}
+                                {t('內容')}
                             </Text>
-                            {composerSettings ? (
+                            <Pressable
+                                accessibilityLabel={t(
+                                    '查看 Markdown 基本語法',
+                                )}
+                                accessibilityRole="link"
+                                hitSlop={scale(6)}
+                                onPress={handleOpenMarkdownGuide}
+                                style={({pressed}) => [
+                                    styles.markdownHelpButton,
+                                    pressed && {opacity: 0.7},
+                                ]}>
                                 <Text
                                     style={[
-                                        styles.requirementCounter,
-                                        {
-                                            color: isPostLengthValid
-                                                ? theme.success
-                                                : theme.unread,
-                                        },
+                                        styles.markdownHelpText,
+                                        {color: theme.black.third},
                                     ]}>
-                                    {`${rawLength}/${maximumPostLength ?? '—'}`}
+                                    {t('支援 Markdown')}
                                 </Text>
-                            ) : null}
-                        </View>
-                    </View>
-                    <View
-                        style={[
-                            styles.formatToolbar,
-                            {
-                                backgroundColor: theme.tonal.primary08,
-                                borderColor: theme.themeColorUltraLight,
-                            },
-                        ]}>
-                        {FORMAT_ACTIONS.map(action => (
-                            <Pressable
-                                accessibilityLabel={t(action.label)}
-                                accessibilityRole="button"
-                                key={action.key}
-                                onPress={() => {
-                                    trigger();
-                                    applyFormat(action.key);
-                                }}
-                                style={({pressed}) => [
-                                    styles.formatButton,
-                                    pressed && {
-                                        backgroundColor:
-                                            theme.tonal.primary30,
-                                    },
-                                ]}>
                                 <MaterialCommunityIcons
-                                    name={action.icon}
-                                    size={scale(20)}
-                                    color={theme.themeColor}
+                                    name="information-outline"
+                                    size={scale(15)}
+                                    color={theme.black.third}
                                 />
                             </Pressable>
-                        ))}
+                        </View>
+                        {composerSettings ? (
+                            <Text
+                                style={[
+                                    styles.requirementCounter,
+                                    {
+                                        color: isPostLengthValid
+                                            ? theme.success
+                                            : theme.unread,
+                                    },
+                                ]}>
+                                {`${isNewTopic ? visibleTextLength : rawLength}/${maximumPostLength ?? '—'}`}
+                            </Text>
+                        ) : null}
                     </View>
                     <TextInput
-                        accessibilityLabel={t('正文')}
+                        accessibilityLabel={t('內容')}
                         autoCapitalize="sentences"
                         multiline
                         onChangeText={setRaw}
-                        onSelectionChange={event =>
-                            setSelection(event.nativeEvent.selection)
-                        }
-                        placeholder={t('使用 Markdown 輸入正文…')}
+                        placeholder={t('分享你的想法…')}
                         placeholderTextColor={theme.black.third}
-                        ref={inputRef}
-                        selection={selection}
                         style={[
                             styles.bodyInput,
                             {
@@ -1287,6 +1465,189 @@ const HarborComposerPage = ({route, navigation}) => {
                         value={raw}
                     />
                 </View>
+
+                {isNewTopic ? (
+                    <View style={styles.fieldGroup}>
+                        <View style={styles.bodyLabelRow}>
+                            <Text
+                                style={[
+                                    styles.fieldLabel,
+                                    {color: theme.black.second},
+                                ]}>
+                                {t('圖片')}
+                            </Text>
+                            {images.length > 0 ? (
+                                <Text
+                                    style={[
+                                        styles.requirementCounter,
+                                        {color: theme.black.third},
+                                    ]}>
+                                    {t('{{count}} 張', {
+                                        count: images.length,
+                                    })}
+                                </Text>
+                            ) : null}
+                        </View>
+                        {images.length > 0 ? (
+                            <View style={styles.imageList}>
+                                {images.map(image => (
+                                    <View
+                                        key={image.id}
+                                        style={[
+                                            styles.imageCard,
+                                            {
+                                                backgroundColor: theme.white,
+                                                borderColor:
+                                                    image.status === 'failed'
+                                                        ? theme.unread
+                                                        : theme
+                                                            .themeColorUltraLight,
+                                            },
+                                        ]}>
+                                        <Image
+                                            contentFit="cover"
+                                            source={{uri: image.localUri}}
+                                            style={styles.imageThumbnail}
+                                        />
+                                        <View style={styles.imageDetails}>
+                                            <Text
+                                                numberOfLines={1}
+                                                style={[
+                                                    styles.imageStatus,
+                                                    {
+                                                        color:
+                                                            image.status ===
+                                                            'failed'
+                                                                ? theme.unread
+                                                                : theme.black
+                                                                    .second,
+                                                    },
+                                                ]}>
+                                                {image.status === 'uploaded'
+                                                    ? t('已上傳')
+                                                    : image.status === 'failed'
+                                                        ? image.error
+                                                        : t('正在上傳…')}
+                                            </Text>
+                                            {image.status === 'uploading' ? (
+                                                <SimpleProgressBar
+                                                    height={verticalScale(4)}
+                                                    progress={image.progress}
+                                                    width="100%"
+                                                />
+                                            ) : null}
+                                            {image.status === 'failed' ? (
+                                                <Pressable
+                                                    accessibilityRole="button"
+                                                    onPress={() =>
+                                                        handleRetryImage(image)
+                                                    }
+                                                    style={({pressed}) => [
+                                                        styles.imageRetryButton,
+                                                        {
+                                                            backgroundColor:
+                                                                pressed
+                                                                    ? theme.tonal
+                                                                        .primary30
+                                                                    : theme.tonal
+                                                                        .primary15,
+                                                        },
+                                                    ]}>
+                                                    <Text
+                                                        style={[
+                                                            styles.imageRetryText,
+                                                            {
+                                                                color:
+                                                                    theme
+                                                                        .themeColor,
+                                                            },
+                                                        ]}>
+                                                        {t('重試')}
+                                                    </Text>
+                                                </Pressable>
+                                            ) : null}
+                                        </View>
+                                        <Pressable
+                                            accessibilityLabel={t('移除圖片')}
+                                            accessibilityRole="button"
+                                            hitSlop={scale(8)}
+                                            onPress={() =>
+                                                handleRemoveImage(image.id)
+                                            }
+                                            style={({pressed}) => [
+                                                styles.imageRemoveButton,
+                                                pressed && {
+                                                    backgroundColor:
+                                                        theme.tonal.unread15,
+                                                },
+                                            ]}>
+                                            <MaterialCommunityIcons
+                                                name="close"
+                                                size={scale(19)}
+                                                color={theme.unread}
+                                            />
+                                        </Pressable>
+                                    </View>
+                                ))}
+                            </View>
+                        ) : null}
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityState={{
+                                disabled: isUploadingImages,
+                            }}
+                            disabled={isUploadingImages}
+                            onPress={handleAddImages}
+                            style={({pressed}) => [
+                                styles.addImageButton,
+                                {
+                                    backgroundColor: pressed
+                                        ? theme.tonal.primary15
+                                        : isUploadingImages
+                                            ? theme.disabled
+                                            : theme.white,
+                                    borderColor:
+                                        theme.themeColorUltraLight,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="image-plus-outline"
+                                size={scale(21)}
+                                color={theme.themeColor}
+                            />
+                            <Text
+                                style={[
+                                    styles.addImageText,
+                                    {color: theme.themeColor},
+                                ]}>
+                                {t('新增圖片')}
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            accessibilityRole="link"
+                            onPress={handleOpenWebComposer}
+                            style={({pressed}) => [
+                                styles.webComposerButton,
+                                pressed && {
+                                    backgroundColor:
+                                        theme.tonal.primary08,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="open-in-new"
+                                size={scale(17)}
+                                color={theme.black.third}
+                            />
+                            <Text
+                                style={[
+                                    styles.webComposerText,
+                                    {color: theme.black.third},
+                                ]}>
+                                {t('需要進階排版？前往 Harbor 網頁版')}
+                            </Text>
+                        </Pressable>
+                    </View>
+                ) : null}
 
                 {submitError ? (
                     <View
@@ -1314,17 +1675,20 @@ const HarborComposerPage = ({route, navigation}) => {
 
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityState={{disabled: isSubmitting}}
-                    disabled={isSubmitting}
+                    accessibilityState={{
+                        disabled: isSubmitting || isUploadingImages,
+                    }}
+                    disabled={isSubmitting || isUploadingImages}
                     onPress={handleSubmit}
                     style={({pressed}) => [
                         styles.submitButton,
                         {
-                            backgroundColor: isSubmitting
-                                ? theme.disabled
-                                : pressed
-                                    ? theme.themeColorLight
-                                    : theme.themeColor,
+                            backgroundColor:
+                                isSubmitting || isUploadingImages
+                                    ? theme.disabled
+                                    : pressed
+                                        ? theme.themeColorLight
+                                        : theme.themeColor,
                         },
                     ]}>
                     {isSubmitting ? (
@@ -1346,11 +1710,13 @@ const HarborComposerPage = ({route, navigation}) => {
                         ]}>
                         {isSubmitting
                             ? t('正在提交…')
-                            : isEdit
-                                ? t('儲存修改')
-                                : isReply
-                                    ? t('發布回覆')
-                                    : t('建立話題')}
+                            : isUploadingImages
+                                ? t('正在上傳圖片…')
+                                : isEdit
+                                    ? t('儲存修改')
+                                    : isReply
+                                        ? t('發布回覆')
+                                        : t('建立話題')}
                     </Text>
                 </Pressable>
             </KeyboardAwareScrollView>
@@ -1483,6 +1849,21 @@ const HarborComposerPage = ({route, navigation}) => {
 };
 
 const styles = StyleSheet.create({
+    addImageButton: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        gap: scale(8),
+        justifyContent: 'center',
+        minHeight: verticalScale(46),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(10),
+    },
+    addImageText: {
+        fontSize: scale(14),
+        fontWeight: '600',
+    },
     bodyInput: {
         borderRadius: scale(12),
         borderWidth: StyleSheet.hairlineWidth,
@@ -1529,25 +1910,10 @@ const styles = StyleSheet.create({
         fontSize: scale(13),
         fontWeight: '600',
     },
-    fieldMetaRow: {
+    fieldLabelRow: {
         alignItems: 'center',
         flexDirection: 'row',
         gap: scale(8),
-    },
-    formatButton: {
-        alignItems: 'center',
-        borderRadius: scale(8),
-        height: scale(36),
-        justifyContent: 'center',
-        width: scale(42),
-    },
-    formatToolbar: {
-        borderRadius: scale(10),
-        borderWidth: StyleSheet.hairlineWidth,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingHorizontal: scale(4),
-        paddingVertical: verticalScale(4),
     },
     inlineError: {
         alignItems: 'flex-start',
@@ -1563,7 +1929,53 @@ const styles = StyleSheet.create({
         lineHeight: scale(18),
         textAlign: 'center',
     },
-    markdownLabel: {
+    imageCard: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        gap: scale(10),
+        padding: scale(8),
+    },
+    imageDetails: {
+        flex: 1,
+        gap: verticalScale(7),
+    },
+    imageList: {
+        gap: verticalScale(8),
+    },
+    imageRemoveButton: {
+        alignItems: 'center',
+        borderRadius: scale(16),
+        height: scale(30),
+        justifyContent: 'center',
+        width: scale(30),
+    },
+    imageRetryButton: {
+        alignSelf: 'flex-start',
+        borderRadius: scale(7),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(5),
+    },
+    imageRetryText: {
+        fontSize: scale(12),
+        fontWeight: '600',
+    },
+    imageStatus: {
+        fontSize: scale(12),
+        lineHeight: scale(17),
+    },
+    imageThumbnail: {
+        borderRadius: scale(8),
+        height: scale(62),
+        width: scale(72),
+    },
+    markdownHelpButton: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: scale(3),
+    },
+    markdownHelpText: {
         fontSize: scale(11),
     },
     modalDoneButton: {
@@ -1699,6 +2111,18 @@ const styles = StyleSheet.create({
     submitButtonText: {
         fontSize: scale(15),
         fontWeight: '700',
+    },
+    webComposerButton: {
+        alignItems: 'center',
+        alignSelf: 'center',
+        borderRadius: scale(8),
+        flexDirection: 'row',
+        gap: scale(6),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(7),
+    },
+    webComposerText: {
+        fontSize: scale(12),
     },
 });
 
