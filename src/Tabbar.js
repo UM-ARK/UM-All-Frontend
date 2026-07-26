@@ -43,7 +43,7 @@ const tabScreen = {
 // iOS SF Symbols 設定
 const iosTabIconConfig = {
     NewsTabbar: 'newspaper',
-    ForumTabbar: 'bubble.left.and.bubble.right',
+    ForumTabbar: 'ellipsis.bubble',
     CourseTab: 'text.book.closed',
     FeaturesTabbar: 'square.grid.2x2',
     MyTabbar: 'person.crop.circle',
@@ -52,7 +52,7 @@ const iosTabIconConfig = {
 // Android MaterialCommunityIcons 名稱映射
 const androidTabIconConfig = {
     NewsTabbar: 'newspaper-variant',
-    ForumTabbar: 'forum',
+    ForumTabbar: 'message',
     CourseTab: 'book-open-page-variant',
     FeaturesTabbar: 'view-grid',
     MyTabbar: 'account-circle',
