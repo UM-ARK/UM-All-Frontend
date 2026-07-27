@@ -8,8 +8,9 @@ import {
     View,
 } from 'react-native';
 
-import moment from 'moment-timezone';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+// TODO: 暫時關閉收藏提醒日期選擇，待收藏提醒通知完整後再開啟
+// import moment from 'moment-timezone';
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -210,6 +211,7 @@ const HarborTopicDetailOverlays = ({
                                 },
                             ]}
                         />
+                        {/* TODO: 暫時關閉收藏提醒日期選擇，待收藏提醒通知完整後再開啟
                         <Text
                             style={[
                                 styles.actionDialogLabel,
@@ -278,6 +280,7 @@ const HarborTopicDetailOverlays = ({
                                 </Text>
                             </Pressable>
                         </View>
+                        */}
                         <View style={styles.actionDialogActions}>
                             {bookmarkEditor?.bookmarkId ? (
                                 <Pressable
@@ -435,6 +438,7 @@ const HarborTopicDetailOverlays = ({
                 </View>
             </Modal>
 
+            {/* TODO: 暫時關閉收藏提醒日期選擇，待收藏提醒通知完整後再開啟
             <DateTimePickerModal
                 isVisible={isBookmarkReminderVisible}
                 mode="datetime"
@@ -458,6 +462,7 @@ const HarborTopicDetailOverlays = ({
                     setIsBookmarkReminderVisible(false);
                 }}
             />
+            */}
 
             <ARKImageView ref={imageViewerRef} imageUrls={imageUrls} />
         </>
