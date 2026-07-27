@@ -311,6 +311,20 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginLeft: scale(3),
     },
+    nestedRepliesButton: {
+        alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        minHeight: verticalScale(30),
+        marginBottom: verticalScale(6),
+        paddingHorizontal: scale(4),
+    },
+    nestedRepliesText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '600',
+        marginLeft: scale(5),
+    },
     postBody: {
         marginTop: verticalScale(8),
     },

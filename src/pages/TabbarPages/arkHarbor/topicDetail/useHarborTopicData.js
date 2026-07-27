@@ -10,14 +10,20 @@ import Toast from 'react-native-simple-toast';
 
 import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import {
+    fetchHarborNestedPostChildren,
+    fetchHarborNestedTopicRoots,
     fetchHarborTopic,
     fetchHarborTopicPosts,
 } from '../../../../utils/harbor/harborApi';
 import {
     appendTopicPosts,
+    collectNestedPosts,
     extractPostImages,
+    flattenNestedPosts,
     isCanceledRequest,
     mergeTopicWindow,
+    NESTED_REPLY_BATCH_SIZE,
+    updateNestedPostTree,
 } from './harborTopicModels';
 
 const TOPIC_POST_BATCH_SIZE = 20;
@@ -47,16 +53,29 @@ const useHarborTopicData = ({
     const [isLoadingPrevious, setIsLoadingPrevious] = useState(false);
     const [isLoadingNext, setIsLoadingNext] = useState(false);
     const [pendingNewPostIds, setPendingNewPostIds] = useState([]);
+    const [nestedReplyLimits, setNestedReplyLimits] = useState(new Map());
+    const [pendingNestedPostNumbers, setPendingNestedPostNumbers] =
+        useState([]);
     const [unreadAfterPostNumber, setUnreadAfterPostNumber] = useState(-1);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const posts = useMemo(() => {
-        const topicPosts = topic?.post_stream?.posts;
-        if (!Array.isArray(topicPosts)) {
+    const topicPosts = useMemo(() => {
+        const rawPosts = topic?.post_stream?.posts;
+        if (!Array.isArray(rawPosts)) {
             return [];
         }
-        return topicPosts.filter(post => post?.id);
+        return rawPosts.filter(post => post?.id);
     }, [topic]);
+
+    const posts = useMemo(() => {
+        if (!topic?.is_nested_view) {
+            return topicPosts;
+        }
+        return flattenNestedPosts(
+            topicPosts,
+            nestedReplyLimits,
+        );
+    }, [nestedReplyLimits, topic?.is_nested_view, topicPosts]);
 
     const validReactions = useMemo(() => {
         return Array.isArray(topic?.valid_reactions)
@@ -112,10 +131,13 @@ const useHarborTopicData = ({
 
     // 僅一層樓時無需閱讀進度導航
     const showReadingControls = useMemo(() => {
+        if (topic?.is_nested_view) {
+            return false;
+        }
         return (
             posts.length > 1 || Number(topic?.posts_count || 0) > 1
         );
-    }, [posts.length, topic?.posts_count]);
+    }, [posts.length, topic?.is_nested_view, topic?.posts_count]);
 
     const canReplyToTopic =
         !topic?.closed &&
@@ -125,9 +147,14 @@ const useHarborTopicData = ({
                 topic?.details?.can_create_post !== false));
 
     const imageUrls = useMemo(() => {
-        const urls = posts.flatMap(post => extractPostImages(post?.cooked));
+        const imagePosts = topic?.is_nested_view
+            ? collectNestedPosts(topicPosts)
+            : posts;
+        const urls = imagePosts.flatMap(post =>
+            extractPostImages(post?.cooked),
+        );
         return [...new Set(urls)];
-    }, [posts]);
+    }, [posts, topic?.is_nested_view, topicPosts]);
 
     useEffect(() => {
         latestTopicRef.current = topic;
@@ -146,11 +173,17 @@ const useHarborTopicData = ({
                 ...current,
                 post_stream: {
                     ...current.post_stream,
-                    posts: (current.post_stream?.posts || []).map(post =>
-                        Number(post.id) === Number(postId)
-                            ? updater(post)
-                            : post,
-                    ),
+                    posts: current.is_nested_view
+                        ? updateNestedPostTree(
+                            current.post_stream?.posts,
+                            postId,
+                            updater,
+                        )
+                        : (current.post_stream?.posts || []).map(post =>
+                            Number(post.id) === Number(postId)
+                                ? updater(post)
+                                : post,
+                        ),
                 },
             };
         });
@@ -199,6 +232,12 @@ const useHarborTopicData = ({
                 setTopicSessionStatus(requestSessionStatus);
 
                 if (refresh) {
+                    if (nextTopic.is_nested_view) {
+                        pendingTopicRef.current = null;
+                        setPendingNewPostIds([]);
+                        setTopic(nextTopic);
+                        return;
+                    }
                     const currentTopic = latestTopicRef.current;
                     const currentStream = currentTopic?.post_stream?.stream || [];
                     const currentIds = new Set(currentStream.map(Number));
@@ -254,6 +293,11 @@ const useHarborTopicData = ({
     );
 
     useEffect(() => {
+        setNestedReplyLimits(new Map());
+        setPendingNestedPostNumbers([]);
+    }, [topicId]);
+
+    useEffect(() => {
         if (
             topic?.id &&
             topicSessionStatus !== sessionStatus
@@ -281,6 +325,70 @@ const useHarborTopicData = ({
                 return;
             }
             const currentTopic = latestTopicRef.current;
+            if (currentTopic?.is_nested_view) {
+                if (
+                    direction === 'previous' ||
+                    !currentTopic.nested_has_more_roots
+                ) {
+                    return;
+                }
+                adjacentLoadingRef.current[direction] = true;
+                setIsLoadingNext(true);
+                try {
+                    const nextPage = Number(
+                        currentTopic.nested_page || 0,
+                    ) + 1;
+                    const nextRoots = await fetchHarborNestedTopicRoots(
+                        topicId,
+                        {
+                            page: nextPage,
+                            sort: currentTopic.nested_sort || 'old',
+                        },
+                    );
+                    setTopic(current => {
+                        if (!current?.is_nested_view) {
+                            return current;
+                        }
+                        const currentPosts =
+                            current.post_stream?.posts || [];
+                        const currentIds = new Set(
+                            currentPosts.map(post => Number(post.id)),
+                        );
+                        const roots = nextRoots.roots.filter(post => {
+                            return !currentIds.has(Number(post.id));
+                        });
+                        const nestedPosts = [...currentPosts, ...roots];
+                        return {
+                            ...current,
+                            nested_has_more_roots: Boolean(
+                                nextRoots.has_more_roots,
+                            ),
+                            nested_page: Number(
+                                nextRoots.page || nextPage,
+                            ),
+                            post_stream: {
+                                ...current.post_stream,
+                                stream: nestedPosts.map(post => post.id),
+                                posts: nestedPosts,
+                            },
+                            ...(nextRoots.suggested_topics
+                                ? {
+                                    suggested_topics:
+                                        nextRoots.suggested_topics,
+                                }
+                                : {}),
+                        };
+                    });
+                } catch (error) {
+                    if (!isCanceledRequest(error)) {
+                        Toast.show(t('帖子載入失敗，請稍後再試'));
+                    }
+                } finally {
+                    adjacentLoadingRef.current[direction] = false;
+                    setIsLoadingNext(false);
+                }
+                return;
+            }
             const stream = currentTopic?.post_stream?.stream || [];
             const loadedPosts = currentTopic?.post_stream?.posts || [];
             const streamIndex = new Map(
@@ -354,6 +462,121 @@ const useHarborTopicData = ({
         [t, topicId],
     );
 
+    const toggleNestedReplies = useCallback(
+        async post => {
+            const postNumber = Number(post?.post_number);
+            const nestedReplyCount = Number(
+                post?.__harborNestedReplyCount || 0,
+            );
+            if (
+                !Number.isInteger(postNumber) ||
+                postNumber <= 1 ||
+                nestedReplyCount <= 0
+            ) {
+                return;
+            }
+            const visibleReplyCount = Number(
+                post.__harborNestedVisibleReplyCount || 0,
+            );
+            const currentReplyLimit = Number(
+                nestedReplyLimits.get(postNumber) || 0,
+            );
+            if (
+                visibleReplyCount > 0 &&
+                visibleReplyCount >= nestedReplyCount
+            ) {
+                setNestedReplyLimits(current => {
+                    const next = new Map(current);
+                    next.delete(postNumber);
+                    return next;
+                });
+                return;
+            }
+
+            const nextReplyLimit = Math.min(
+                currentReplyLimit + NESTED_REPLY_BATCH_SIZE,
+                nestedReplyCount,
+            );
+            const revealReplies = () => {
+                setNestedReplyLimits(current => {
+                    const next = new Map(current);
+                    next.set(postNumber, nextReplyLimit);
+                    return next;
+                });
+            };
+            if (
+                post.__harborNestedChildrenFetched ||
+                pendingNestedPostNumbers.includes(postNumber)
+            ) {
+                revealReplies();
+                return;
+            }
+
+            setPendingNestedPostNumbers(current => [
+                ...current,
+                postNumber,
+            ]);
+            try {
+                const response = await fetchHarborNestedPostChildren(
+                    topicId,
+                    postNumber,
+                    {
+                        depth: Number(post.__harborNestedDepth || 0) + 1,
+                        sort:
+                            latestTopicRef.current?.nested_sort || 'old',
+                    },
+                );
+                setTopic(current => {
+                    if (!current?.is_nested_view) {
+                        return current;
+                    }
+                    return {
+                        ...current,
+                        post_stream: {
+                            ...current.post_stream,
+                            posts: updateNestedPostTree(
+                                current.post_stream?.posts,
+                                post.id,
+                                currentPost => ({
+                                    ...currentPost,
+                                    __harborNestedChildrenFetched: true,
+                                    __harborNestedHasMoreChildren: Boolean(
+                                        response.has_more,
+                                    ),
+                                    children: response.children,
+                                }),
+                            ),
+                        },
+                    };
+                });
+                revealReplies();
+            } catch (error) {
+                if (isCanceledRequest(error)) {
+                    return;
+                }
+                if (
+                    !Array.isArray(post.children) ||
+                    post.children.length === 0
+                ) {
+                    Toast.show(t('回覆載入失敗，請稍後再試'));
+                } else {
+                    revealReplies();
+                }
+            } finally {
+                setPendingNestedPostNumbers(current =>
+                    current.filter(value => value !== postNumber),
+                );
+            }
+        },
+        [
+            latestTopicRef,
+            nestedReplyLimits,
+            pendingNestedPostNumbers,
+            t,
+            topicId,
+        ],
+    );
+
     const loadNewReplies = useCallback(async () => {
         if (pendingNewPostIds.length === 0 || isLoadingNext) {
             return;
@@ -415,6 +638,7 @@ const useHarborTopicData = ({
         loadAdjacentPosts,
         loadNewReplies,
         loadTopic,
+        pendingNestedPostNumbers,
         pendingNewPostIds,
         posts,
         setIsLoadingNext,
@@ -422,6 +646,7 @@ const useHarborTopicData = ({
         setUnreadAfterPostNumber,
         showReadingControls,
         topic,
+        toggleNestedReplies,
         unreadAfterPostNumber,
         updateTopicPost,
         validReactions,

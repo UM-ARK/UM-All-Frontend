@@ -212,6 +212,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         loadAdjacentPosts,
         loadNewReplies,
         loadTopic,
+        pendingNestedPostNumbers,
         pendingNewPostIds,
         posts,
         setIsLoadingNext,
@@ -219,6 +220,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         setUnreadAfterPostNumber,
         showReadingControls,
         topic,
+        toggleNestedReplies,
         unreadAfterPostNumber,
         updateTopicPost,
         validReactions,
@@ -606,6 +608,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     ? Number(posts[postIndex - 1]?.post_number || 0)
                     : 0;
             const showUnreadDivider =
+                !topic?.is_nested_view &&
                 unreadAfterPostNumber >= 0 &&
                 Number(item.post_number) > unreadAfterPostNumber &&
                 (postIndex === 0 ||
@@ -638,7 +641,14 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     ) : null}
                     <HarborPostCard
                         post={item}
-                        contentWidth={contentWidth}
+                        contentWidth={
+                            contentWidth -
+                            Math.min(
+                                Number(item.__harborNestedDepth || 0),
+                                3,
+                            ) *
+                            scale(14)
+                        }
                         imageUrls={imageUrls}
                         onOpenImage={openImage}
                         onPressAuthor={openAuthor}
@@ -651,11 +661,35 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressQuote={openPostQuoteComposer}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
+                        onToggleNestedReplies={toggleNestedReplies}
                         onPressDisabledReaction={
                             explainPostReactionDisabled
                         }
                         onSelectReaction={selectPostReaction}
                         canReply={canReplyToTopic}
+                        nestedDepth={item.__harborNestedDepth}
+                        nestedRepliesExpanded={
+                            Number(
+                                item.__harborNestedVisibleReplyCount || 0,
+                            ) > 0
+                        }
+                        nestedRepliesAllVisible={
+                            Number(item.__harborNestedReplyCount || 0) > 0 &&
+                            Number(
+                                item.__harborNestedVisibleReplyCount || 0,
+                            ) >= Number(item.__harborNestedReplyCount || 0)
+                        }
+                        nestedRepliesLoading={
+                            pendingNestedPostNumbers.includes(
+                                Number(item.post_number),
+                            )
+                        }
+                        nestedReplyCount={
+                            item.__harborNestedReplyCount || 0
+                        }
+                        nestedVisibleReplyCount={
+                            item.__harborNestedVisibleReplyCount || 0
+                        }
                         pendingBookmark={
                             pendingMutations[`bookmark:${item.id}`]
                         }
@@ -693,6 +727,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             openPostReplyComposer,
             openTag,
             pendingMutations,
+            pendingNestedPostNumbers,
             posts,
             scrollToPost,
             selectPostReaction,
@@ -703,6 +738,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             togglePostLike,
             topic,
             topicId,
+            toggleNestedReplies,
             unreadAfterPostNumber,
             validReactions,
         ],

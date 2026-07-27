@@ -151,10 +151,7 @@ const useHarborTopicReading = ({
                 });
                 return true;
             }
-            const loadedPosts =
-                latestTopicRef.current?.post_stream?.posts?.filter(
-                    post => post?.id,
-                ) || [];
+            const loadedPosts = posts.filter(post => post?.id);
             const postIndex = loadedPosts.findIndex(post => {
                 return Number(post.post_number) === normalizedPostNumber;
             });
@@ -180,8 +177,8 @@ const useHarborTopicReading = ({
         [
             getPostScrollViewOffset,
             handleScrollToIndexFailed,
-            latestTopicRef,
             listRef,
+            posts,
         ],
     );
 

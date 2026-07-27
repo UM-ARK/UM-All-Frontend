@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     Platform,
     Pressable,
+    StyleSheet,
     Text,
     View,
 } from 'react-native';
@@ -30,6 +31,7 @@ import HarborPostEventCard from './HarborPostEventCard';
 import {
     getLikeAction,
     getReactionCount,
+    NESTED_REPLY_BATCH_SIZE,
 } from './harborTopicModels';
 import styles from './styles';
 
@@ -187,7 +189,14 @@ const HarborPostCard = memo(
         onPressReply,
         onPressShare,
         onSelectReaction,
+        onToggleNestedReplies,
         canReply,
+        nestedDepth,
+        nestedRepliesAllVisible,
+        nestedRepliesExpanded,
+        nestedRepliesLoading,
+        nestedReplyCount,
+        nestedVisibleReplyCount,
         pendingBookmark,
         pendingLike,
         pendingReaction,
@@ -204,6 +213,26 @@ const HarborPostCard = memo(
             tonal,
             white,
         } = theme;
+        const nestedIndent = Math.min(
+            Math.max(Number(nestedDepth || 0), 0),
+            3,
+        ) * scale(14);
+        const nestedContainerStyle =
+            nestedIndent > 0
+                ? {
+                    borderColor: themeColorUltraLight,
+                    borderLeftWidth: StyleSheet.hairlineWidth,
+                    marginLeft: nestedIndent,
+                }
+                : null;
+        const nestedReplyBatchCount = Math.min(
+            NESTED_REPLY_BATCH_SIZE,
+            Math.max(
+                Number(nestedReplyCount || 0) -
+                    Number(nestedVisibleReplyCount || 0),
+                0,
+            ),
+        );
         const reactionCount = getReactionCount(post);
         const reactionSummary = (
             Array.isArray(post?.reactions) ? post.reactions : []
@@ -366,32 +395,94 @@ const HarborPostCard = memo(
                 </Text>
             </View>
         );
+        const nestedRepliesButton =
+            nestedReplyCount > 0 ? (
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{
+                        expanded: nestedRepliesExpanded,
+                    }}
+                    disabled={nestedRepliesLoading}
+                    onPress={() => {
+                        trigger();
+                        onToggleNestedReplies(post);
+                    }}
+                    style={({ pressed }) => [
+                        styles.nestedRepliesButton,
+                        pressed ? styles.pressedLink : null,
+                    ]}>
+                    {nestedRepliesLoading ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={themeColor}
+                        />
+                    ) : (
+                        <MaterialCommunityIcons
+                            name={
+                                nestedRepliesAllVisible
+                                    ? 'minus'
+                                    : 'plus'
+                            }
+                            size={scale(14)}
+                            color={themeColor}
+                        />
+                    )}
+                    <Text
+                        style={[
+                            styles.nestedRepliesText,
+                            { color: themeColor },
+                        ]}>
+                        {nestedRepliesAllVisible
+                            ? t('收合回覆')
+                            : nestedRepliesExpanded
+                                ? t('再展開 {{count}} 則回覆', {
+                                    count: nestedReplyBatchCount,
+                                })
+                                : t('展開 {{count}} 則回覆', {
+                                    count: nestedReplyBatchCount,
+                                })}
+                    </Text>
+                </Pressable>
+            ) : null;
 
         if (isDeleted || isHidden) {
             return (
-                <View
-                    style={[
-                        styles.postStateCard,
-                        {
-                            backgroundColor: tonal.primary08,
-                            borderColor: themeColorUltraLight,
-                        },
-                    ]}>
-                    <MaterialCommunityIcons
-                        name={isHidden ? 'eye-off-outline' : 'delete-outline'}
-                        size={scale(18)}
-                        color={black.third}
-                    />
-                    <Text
-                        style={[styles.postStateText, { color: black.third }]}>
-                        {isHidden
-                            ? t('此帖子已被隱藏')
-                            : t('此帖子已被刪除')}
-                    </Text>
-                    <Text
-                        style={[styles.postStateNumber, { color: black.third }]}>
-                        #{post.post_number}
-                    </Text>
+                <View style={nestedContainerStyle}>
+                    <View
+                        style={[
+                            styles.postStateCard,
+                            {
+                                backgroundColor: tonal.primary08,
+                                borderColor: themeColorUltraLight,
+                            },
+                        ]}>
+                        <MaterialCommunityIcons
+                            name={
+                                isHidden
+                                    ? 'eye-off-outline'
+                                    : 'delete-outline'
+                            }
+                            size={scale(18)}
+                            color={black.third}
+                        />
+                        <Text
+                            style={[
+                                styles.postStateText,
+                                { color: black.third },
+                            ]}>
+                            {isHidden
+                                ? t('此帖子已被隱藏')
+                                : t('此帖子已被刪除')}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.postStateNumber,
+                                { color: black.third },
+                            ]}>
+                            #{post.post_number}
+                        </Text>
+                    </View>
+                    {nestedRepliesButton}
                 </View>
             );
         }
@@ -456,6 +547,7 @@ const HarborPostCard = memo(
             <View
                 style={[
                     styles.postCard,
+                    nestedContainerStyle,
                     { backgroundColor: white, borderColor: themeColorUltraLight },
                 ]}>
                 <View style={styles.postHeader}>
@@ -768,6 +860,7 @@ const HarborPostCard = memo(
                         </View>
                     </MenuView>
                 </View>
+                {nestedRepliesButton}
             </View>
         );
     },

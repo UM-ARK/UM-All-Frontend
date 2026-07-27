@@ -7,6 +7,7 @@ import {
 import { ARK_HARBOR_ABSOLUTE_URL } from '../../../../utils/pathMap';
 
 const LIKE_ACTION_ID = 2;
+const NESTED_REPLY_BATCH_SIZE = 5;
 
 const isCanceledRequest = (error, signal) => {
     return (
@@ -271,20 +272,130 @@ const appendTopicPosts = (currentTopic, nextPosts, stream) => {
     });
 };
 
+const getNestedReplyCount = post => {
+    if (Number(post?.post_number) === 1) {
+        return 0;
+    }
+    return Math.max(
+        Number(post?.total_descendant_count || 0),
+        Number(post?.direct_reply_count || 0),
+        Array.isArray(post?.children) ? post.children.length : 0,
+    );
+};
+
+const collectNestedPosts = posts => {
+    const collected = [];
+    const appendPosts = nestedPosts => {
+        (Array.isArray(nestedPosts) ? nestedPosts : []).forEach(post => {
+            if (!post?.id) {
+                return;
+            }
+            collected.push(post);
+            appendPosts(post.children);
+        });
+    };
+    appendPosts(posts);
+    return collected;
+};
+
+const flattenNestedPosts = (posts, nestedReplyLimits) => {
+    const flattened = [];
+    const collectDescendants = (nestedPosts, depth, descendants) => {
+        (Array.isArray(nestedPosts) ? nestedPosts : []).forEach(post => {
+            if (!post?.id) {
+                return;
+            }
+            descendants.push({
+                depth,
+                post,
+            });
+            collectDescendants(post.children, depth + 1, descendants);
+        });
+    };
+    (Array.isArray(posts) ? posts : []).forEach(post => {
+        if (!post?.id) {
+            return;
+        }
+        const nestedReplyCount = getNestedReplyCount(post);
+        const requestedReplyLimit =
+            Number(post.post_number) === 1
+                ? 0
+                : Math.max(
+                    Number(
+                        nestedReplyLimits?.get(
+                            Number(post.post_number),
+                        ) || 0,
+                    ),
+                    0,
+                );
+        const descendants = [];
+        collectDescendants(post.children, 1, descendants);
+        const visibleDescendants = descendants.slice(
+            0,
+            requestedReplyLimit,
+        );
+        flattened.push({
+            ...post,
+            __harborNestedDepth: 0,
+            __harborNestedReplyCount: nestedReplyCount,
+            __harborNestedVisibleReplyCount: visibleDescendants.length,
+        });
+        visibleDescendants.forEach(descendant => {
+            flattened.push({
+                ...descendant.post,
+                __harborNestedDepth: descendant.depth,
+                __harborNestedReplyCount: 0,
+                __harborNestedVisibleReplyCount: 0,
+            });
+        });
+    });
+    return flattened;
+};
+
+const updateNestedPostTree = (posts, postId, updater) => {
+    return (Array.isArray(posts) ? posts : []).map(post => {
+        if (Number(post?.id) === Number(postId)) {
+            return updater(post);
+        }
+        if (!Array.isArray(post?.children) || post.children.length === 0) {
+            return post;
+        }
+        const children = updateNestedPostTree(
+            post.children,
+            postId,
+            updater,
+        );
+        if (
+            children.every((child, index) => child === post.children[index])
+        ) {
+            return post;
+        }
+        return {
+            ...post,
+            children,
+        };
+    });
+};
+
 
 export {
     appendTopicPosts,
     canUpdatePostReaction,
+    collectNestedPosts,
     extractPostImages,
     extractPostQuoteText,
+    flattenNestedPosts,
     getHarborMutationError,
     getLikeAction,
+    getNestedReplyCount,
     getNotificationLevelLabel,
     getReactionCount,
     getTagLabel,
     isCanceledRequest,
     mergeTopicWindow,
+    NESTED_REPLY_BATCH_SIZE,
     normalizeHtmlUrl,
     updateOptimisticLike,
     updateOptimisticReaction,
+    updateNestedPostTree,
 };

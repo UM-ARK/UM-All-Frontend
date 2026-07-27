@@ -5,6 +5,7 @@ import {
     fetchHarborBadges,
     fetchHarborCategories,
     fetchHarborMessages,
+    fetchHarborNestedPostChildren,
     fetchHarborNotifications,
     fetchHarborSearch,
     fetchHarborSiteCapabilities,
@@ -369,6 +370,79 @@ describe('Harbor API 資料正規化', () => {
                 },
             }),
         );
+    });
+
+    it('話題啟用 Nested Replies 時改讀官方根回覆樹', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    id: 31,
+                    is_nested_view: true,
+                    highest_post_number: 8,
+                    post_stream: {
+                        stream: [1, 2, 3],
+                        posts: [{id: 1, post_number: 1}],
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    topic: {
+                        id: 31,
+                        is_nested_view: true,
+                        highest_post_number: null,
+                    },
+                    op_post: {id: 1, post_number: 1},
+                    roots: [
+                        {
+                            id: 2,
+                            post_number: 2,
+                            direct_reply_count: 1,
+                            total_descendant_count: 2,
+                            children: [],
+                        },
+                    ],
+                    has_more_roots: true,
+                    page: 0,
+                    sort: 'old',
+                    effective_sort: 'old',
+                },
+            });
+
+        const topic = await fetchHarborTopic(31);
+
+        expect(getSpy).toHaveBeenNthCalledWith(
+            2,
+            '/n/-/31.json',
+            expect.objectContaining({
+                params: {page: 0, sort: 'old', track_visit: true},
+            }),
+        );
+        expect(topic.highest_post_number).toBe(8);
+        expect(topic.nested_has_more_roots).toBe(true);
+        expect(topic.post_stream.posts.map(post => post.id)).toEqual([1, 2]);
+    });
+
+    it('依父樓層與深度載入官方 Nested Replies 子樹', async () => {
+        getSpy.mockResolvedValueOnce({
+            data: {
+                children: [{id: 3, post_number: 3, children: []}],
+                has_more: false,
+                page: 0,
+            },
+        });
+
+        const response = await fetchHarborNestedPostChildren(31, 2, {
+            depth: 2,
+        });
+
+        expect(getSpy).toHaveBeenCalledWith(
+            '/n/-/31/children/2.json',
+            expect.objectContaining({
+                params: {depth: 2, page: 0, sort: 'old'},
+            }),
+        );
+        expect(response.children.map(post => post.id)).toEqual([3]);
     });
 
     it('分批載入、去重並排序指定話題貼文', async () => {

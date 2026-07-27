@@ -1587,7 +1587,7 @@ export async function fetchHarborTopic(
             : {}),
         signal,
     });
-    const topic = topicResponse.data;
+    let topic = topicResponse.data;
     const stream = topic?.post_stream?.stream;
     const initialPosts = topic?.post_stream?.posts;
 
@@ -1595,11 +1595,104 @@ export async function fetchHarborTopic(
         throw new Error('Invalid Harbor topic response');
     }
 
+    if (topic.is_nested_view) {
+        const nestedResponse = await fetchHarborNestedTopicRoots(topicId, {
+            signal,
+            trackVisit: true,
+        });
+        const nestedTopic = nestedResponse.topic;
+        const opPost = nestedResponse.op_post;
+        const roots = nestedResponse.roots;
+        if (!nestedTopic?.id || !opPost?.id || !Array.isArray(roots)) {
+            throw new Error('Invalid Harbor nested topic response');
+        }
+        topic = {
+            ...topic,
+            ...nestedTopic,
+            highest_post_number:
+                topic.highest_post_number ??
+                nestedTopic.highest_post_number,
+            last_read_post_number:
+                topic.last_read_post_number ??
+                nestedTopic.last_read_post_number,
+            new_posts: topic.new_posts ?? nestedTopic.new_posts,
+            unread_posts: topic.unread_posts ?? nestedTopic.unread_posts,
+            is_nested_view: true,
+            nested_has_more_roots: Boolean(
+                nestedResponse.has_more_roots,
+            ),
+            nested_page: Number(nestedResponse.page || 0),
+            nested_sort:
+                nestedResponse.effective_sort ||
+                nestedResponse.sort ||
+                'old',
+            post_stream: {
+                ...topic.post_stream,
+                stream: [opPost, ...roots].map(post => post.id),
+                posts: [opPost, ...roots],
+            },
+            ...(nestedResponse.suggested_topics
+                ? { suggested_topics: nestedResponse.suggested_topics }
+                : {}),
+            ...(nestedResponse.related_topics
+                ? { related_topics: nestedResponse.related_topics }
+                : {}),
+        };
+    }
+
     const category = await resolveTopicCategory(topic);
     return {
         ...topic,
         ...(category ? { category } : {}),
     };
+}
+
+export async function fetchHarborNestedTopicRoots(
+    topicId,
+    { page = 0, signal, sort = 'old', trackVisit = false } = {},
+) {
+    const encodedTopicId = encodeURIComponent(topicId);
+    const response = await harborApi.get(
+        `/n/-/${encodedTopicId}.json`,
+        {
+            params: {
+                page,
+                sort,
+                ...(trackVisit ? { track_visit: true } : {}),
+            },
+            signal,
+        },
+    );
+    if (!Array.isArray(response.data?.roots)) {
+        throw new Error('Invalid Harbor nested roots response');
+    }
+    return response.data;
+}
+
+export async function fetchHarborNestedPostChildren(
+    topicId,
+    postNumber,
+    { depth = 1, page = 0, signal, sort = 'old' } = {},
+) {
+    const encodedTopicId = encodeURIComponent(topicId);
+    const normalizedPostNumber = Number(postNumber);
+    if (
+        !Number.isInteger(normalizedPostNumber) ||
+        normalizedPostNumber <= 0
+    ) {
+        throw new Error('Invalid Harbor nested parent post');
+    }
+    const response = await harborApi.get(
+        `/n/-/${encodedTopicId}/children/${normalizedPostNumber}.json`,
+        {
+            params: { depth, page, sort },
+            signal,
+        },
+    );
+    if (!Array.isArray(response.data?.children)) {
+        throw new Error('Invalid Harbor nested children response');
+    }
+    return response.data;
 }
 
 export async function fetchHarborTopicPosts(
