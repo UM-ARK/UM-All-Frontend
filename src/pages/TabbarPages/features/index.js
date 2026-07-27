@@ -32,7 +32,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 function Index({ navigation }) {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
-    const { themeColor, white, black, trueWhite, bg_color, viewShadow } = theme;
+    const { themeColor, white, black, trueWhite, bg_color } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = getFunctionArr(t);
     const isTc = i18n.language === 'tc';
@@ -50,22 +50,21 @@ function Index({ navigation }) {
                     borderRadius: scale(10),
                     marginHorizontal: scale(10),
                     marginTop: verticalScale(10),
-                    ...viewShadow,
                 }}>
                 <View
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        paddingHorizontal: scale(12),
-                        paddingTop: verticalScale(16),
-                        paddingBottom: verticalScale(12),
+                        paddingHorizontal: scale(10),
+                        paddingTop: verticalScale(10),
+                        paddingBottom: verticalScale(8),
                         borderBottomWidth: verticalScale(2),
                         borderBottomColor: bg_color,
                     }}>
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            fontSize: verticalScale(15),
+                            fontSize: verticalScale(13),
                             color: black.main,
                             fontWeight: '500',
                         }}>
@@ -181,7 +180,6 @@ function Index({ navigation }) {
             navigation,
             themeColor,
             trueWhite,
-            viewShadow,
         ],
     );
 
