@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
+    Platform,
     Pressable,
     Text,
     View,
@@ -261,24 +262,75 @@ const HarborPostCard = memo(
                 };
             });
         }, [currentReaction, pendingLike, pendingReaction, reactions, t]);
-        const composerMenuActions = useMemo(() => {
+        const moreMenuActions = useMemo(() => {
+            // @react-native-menu/menu：iOS 用 SF Symbol；Android 用系統 drawable 名稱
             const actions = [];
             if (canReply) {
                 actions.push({
                     id: 'quote',
                     title: t('引用'),
-                    image: 'quote.bubble',
+                    image: Platform.select({
+                        ios: 'quote.bubble',
+                        android: 'ic_menu_revert',
+                    }),
+                    imageColor: black.third,
+                    titleColor: black.third,
                 });
             }
             if (post.can_edit) {
                 actions.push({
                     id: 'edit',
                     title: t('編輯'),
-                    image: 'pencil',
+                    image: Platform.select({
+                        ios: 'pencil',
+                        android: 'ic_menu_edit',
+                    }),
+                    imageColor: black.third,
+                    titleColor: black.third,
                 });
             }
+            actions.push({
+                id: 'bookmark',
+                title: post.bookmarked ? t('已收藏') : t('收藏'),
+                image: Platform.select({
+                    ios: post.bookmarked ? 'bookmark.fill' : 'bookmark',
+                    android: 'ic_menu_save',
+                }),
+                imageColor: black.third,
+                titleColor: black.third,
+                attributes: {
+                    disabled: Boolean(pendingBookmark),
+                },
+            });
+            actions.push({
+                id: 'copy',
+                title: t('複製連結'),
+                image: Platform.select({
+                    ios: 'link',
+                    android: 'ic_menu_agenda',
+                }),
+                imageColor: black.third,
+                titleColor: black.third,
+            });
+            actions.push({
+                id: 'share',
+                title: t('分享'),
+                image: Platform.select({
+                    ios: 'square.and.arrow.up',
+                    android: 'ic_menu_share',
+                }),
+                imageColor: black.third,
+                titleColor: black.third,
+            });
             return actions;
-        }, [canReply, post.can_edit, t]);
+        }, [
+            black.third,
+            canReply,
+            pendingBookmark,
+            post.bookmarked,
+            post.can_edit,
+            t,
+        ]);
         const reactionButton = (
             <View
                 style={[
@@ -569,73 +621,36 @@ const HarborPostCard = memo(
                         ) : null}
                     </View>
                 </View>
-                {canReply || post.can_edit ? (
+                {canReply ? (
                     <View style={styles.composerActionRow}>
-                        {canReply ? (
-                            <Pressable
-                                onPress={() => {
-                                    trigger();
-                                    onPressComposeReply(post);
-                                }}
-                                style={({ pressed }) => [
-                                    styles.postActionButton,
-                                    {
-                                        backgroundColor: pressed
-                                            ? tonal.primary30
-                                            : tonal.primary15,
-                                    },
+                        <Pressable
+                            onPress={() => {
+                                trigger();
+                                onPressComposeReply(post);
+                            }}
+                            style={({ pressed }) => [
+                                styles.postActionButton,
+                                styles.reactionMenuButton,
+                                {
+                                    backgroundColor: pressed
+                                        ? tonal.primary30
+                                        : tonal.primary15,
+                                },
+                            ]}>
+                            <MaterialCommunityIcons
+                                name="reply-outline"
+                                size={scale(15)}
+                                color={themeColor}
+                            />
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.postActionText,
+                                    { color: themeColor },
                                 ]}>
-                                <MaterialCommunityIcons
-                                    name="reply-outline"
-                                    size={scale(15)}
-                                    color={themeColor}
-                                />
-                                <Text
-                                    numberOfLines={1}
-                                    style={[
-                                        styles.postActionText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {t('回覆')}
-                                </Text>
-                            </Pressable>
-                        ) : null}
-                        {composerMenuActions.length > 0 ? (
-                            <MenuView
-                                actions={composerMenuActions}
-                                onOpenMenu={() => trigger()}
-                                onPressAction={event => {
-                                    trigger();
-                                    if (event.nativeEvent.event === 'edit') {
-                                        onPressEdit(post);
-                                        return;
-                                    }
-                                    onPressQuote(post);
-                                }}
-                                shouldOpenOnLongPress={false}
-                                style={styles.composerMenuView}>
-                                <View
-                                    style={[
-                                        styles.postActionButton,
-                                        styles.reactionMenuButton,
-                                        { backgroundColor: tonal.primary15 },
-                                    ]}>
-                                    <MaterialCommunityIcons
-                                        name="dots-horizontal"
-                                        size={scale(16)}
-                                        color={themeColor}
-                                    />
-                                    <Text
-                                        numberOfLines={1}
-                                        style={[
-                                            styles.postActionText,
-                                            { color: themeColor },
-                                        ]}>
-                                        {t('更多')}
-                                    </Text>
-                                </View>
-                            </MenuView>
-                        ) : null}
+                                {t('回覆')}
+                            </Text>
+                        </Pressable>
                     </View>
                 ) : null}
                 <View style={styles.postActionRow}>
@@ -674,6 +689,7 @@ const HarborPostCard = memo(
                             }}
                             style={({ pressed }) => [
                                 styles.postActionButton,
+                                styles.reactionMenuView,
                                 {
                                     backgroundColor: pressed
                                         ? tonal.primary30
@@ -702,80 +718,55 @@ const HarborPostCard = memo(
                             </Text>
                         </Pressable>
                     )}
-                    <Pressable
-                        disabled={pendingBookmark}
-                        onPress={() => {
+                    <MenuView
+                        actions={moreMenuActions}
+                        onOpenMenu={() => trigger()}
+                        onPressAction={event => {
                             trigger();
-                            onPressBookmark(post);
+                            const actionId = event.nativeEvent.event;
+                            if (actionId === 'edit') {
+                                onPressEdit(post);
+                                return;
+                            }
+                            if (actionId === 'quote') {
+                                onPressQuote(post);
+                                return;
+                            }
+                            if (actionId === 'bookmark') {
+                                onPressBookmark(post);
+                                return;
+                            }
+                            if (actionId === 'copy') {
+                                onPressCopy(post);
+                                return;
+                            }
+                            if (actionId === 'share') {
+                                onPressShare(post);
+                            }
                         }}
-                        style={({ pressed }) => [
-                            styles.postActionButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        {pendingBookmark ? (
-                            <ActivityIndicator size="small" color={themeColor} />
-                        ) : (
+                        shouldOpenOnLongPress={false}
+                        style={styles.composerMenuView}>
+                        <View
+                            style={[
+                                styles.postActionButton,
+                                styles.reactionMenuButton,
+                                { backgroundColor: tonal.primary15 },
+                            ]}>
                             <MaterialCommunityIcons
-                                name={
-                                    post.bookmarked
-                                        ? 'bookmark'
-                                        : 'bookmark-outline'
-                                }
-                                size={scale(15)}
+                                name="dots-horizontal"
+                                size={scale(16)}
                                 color={themeColor}
                             />
-                        )}
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.postActionText,
-                                { color: themeColor },
-                            ]}>
-                            {post.bookmarked ? t('已收藏') : t('收藏')}
-                        </Text>
-                    </Pressable>
-                    <Pressable
-                        onPress={() => {
-                            trigger();
-                            onPressCopy(post);
-                        }}
-                        style={({ pressed }) => [
-                            styles.postIconButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="link-variant"
-                            size={scale(16)}
-                            color={themeColor}
-                        />
-                    </Pressable>
-                    <Pressable
-                        onPress={() => {
-                            trigger();
-                            onPressShare(post);
-                        }}
-                        style={({ pressed }) => [
-                            styles.postIconButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="share-variant-outline"
-                            size={scale(16)}
-                            color={themeColor}
-                        />
-                    </Pressable>
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.postActionText,
+                                    { color: themeColor },
+                                ]}>
+                                {t('更多')}
+                            </Text>
+                        </View>
+                    </MenuView>
                 </View>
             </View>
         );

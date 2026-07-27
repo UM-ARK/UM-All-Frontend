@@ -73,7 +73,19 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
             <View style={styles.composerActionRow}>
                 <HarborSkeletonBlock
                     color={tonal.primary15}
-                    style={styles.skeletonPostActionWide}
+                    style={[
+                        styles.skeletonPostAction,
+                        styles.reactionMenuButton,
+                    ]}
+                />
+            </View>
+            <View style={styles.postActionRow}>
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={[
+                        styles.skeletonPostActionWide,
+                        styles.reactionMenuView,
+                    ]}
                 />
                 <HarborSkeletonBlock
                     color={tonal.primary15}
