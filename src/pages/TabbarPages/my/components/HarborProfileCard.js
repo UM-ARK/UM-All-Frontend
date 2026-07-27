@@ -27,7 +27,6 @@ const HarborProfileCard = ({user, onPress}) => {
             style={[
                 styles.container,
                 {backgroundColor: theme.white},
-                theme.viewShadow,
             ]}
             onPress={() => {
                 trigger();
@@ -128,7 +127,7 @@ const HarborProfileCard = ({user, onPress}) => {
 const styles = StyleSheet.create({
     container: {
         minHeight: verticalScale(112),
-        borderRadius: scale(22),
+        borderRadius: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: scale(17),
@@ -137,7 +136,7 @@ const styles = StyleSheet.create({
     avatarRing: {
         width: scale(66),
         height: scale(66),
-        borderRadius: scale(22),
+        borderRadius: scale(12),
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: scale(13),
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
     avatar: {
         width: scale(58),
         height: scale(58),
-        borderRadius: scale(19),
+        borderRadius: scale(10),
     },
     connectedDot: {
         position: 'absolute',

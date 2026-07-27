@@ -35,7 +35,7 @@ const MyScreen = ({ navigation }) => {
     const { status, user, login, error, refresh } = useHarborSession();
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
-    const contentWidth = Math.min(width - scale(28), scale(680));
+    const contentWidth = Math.min(width - scale(20), scale(680));
     const contentTopInset = insets.top + verticalScale(8);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
 
@@ -231,12 +231,12 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingHorizontal: scale(14),
+        paddingHorizontal: scale(10),
     },
     harborError: {
         borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(12),
-        marginBottom: verticalScale(12),
+        borderRadius: scale(10),
+        marginBottom: verticalScale(10),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(10),
     },

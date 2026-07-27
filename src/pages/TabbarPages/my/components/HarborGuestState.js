@@ -47,7 +47,6 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                 style={[
                     styles.hero,
                     {backgroundColor: theme.white},
-                    theme.viewShadow,
                 ]}>
                 <View
                     style={[
@@ -161,13 +160,12 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
                 </View>
             </View>
 
-            <HarborSectionHeader title={t('登入後可使用')} />
             <View
                 style={[
                     styles.featureCard,
                     {backgroundColor: theme.white},
-                    theme.viewShadow,
                 ]}>
+                <HarborSectionHeader title={t('登入後可使用')} />
                 {features.map((feature, index) => (
                     <View key={feature.key}>
                         <View style={styles.featureRow}>
@@ -221,11 +219,11 @@ const HarborGuestState = ({isAuthorizing, onLogin, onBrowse}) => {
 
 const styles = StyleSheet.create({
     container: {
-        gap: verticalScale(12),
+        gap: verticalScale(8),
     },
     hero: {
         alignItems: 'center',
-        borderRadius: scale(24),
+        borderRadius: scale(10),
         paddingHorizontal: scale(22),
         paddingTop: verticalScale(27),
         paddingBottom: verticalScale(21),
@@ -233,7 +231,7 @@ const styles = StyleSheet.create({
     heroIcon: {
         width: scale(82),
         height: scale(82),
-        borderRadius: scale(28),
+        borderRadius: scale(16),
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: verticalScale(14),
@@ -270,7 +268,7 @@ const styles = StyleSheet.create({
     primaryButton: {
         width: '100%',
         minHeight: verticalScale(48),
-        borderRadius: scale(15),
+        borderRadius: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -288,7 +286,7 @@ const styles = StyleSheet.create({
     secondaryButton: {
         width: '100%',
         minHeight: verticalScale(44),
-        borderRadius: scale(14),
+        borderRadius: scale(10),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -313,20 +311,20 @@ const styles = StyleSheet.create({
         fontSize: scale(11),
     },
     featureCard: {
-        borderRadius: scale(20),
-        paddingHorizontal: scale(16),
-        paddingVertical: verticalScale(4),
+        borderRadius: scale(10),
+        paddingBottom: verticalScale(4),
     },
     featureRow: {
         minHeight: verticalScale(72),
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(12),
+        paddingHorizontal: scale(16),
     },
     featureIcon: {
         width: scale(42),
         height: scale(42),
-        borderRadius: scale(13),
+        borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -346,7 +344,8 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: StyleSheet.hairlineWidth,
-        marginLeft: scale(54),
+        marginLeft: scale(70),
+        marginRight: scale(16),
     },
 });
 

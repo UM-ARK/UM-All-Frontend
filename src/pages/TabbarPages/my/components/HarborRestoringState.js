@@ -15,7 +15,6 @@ const HarborRestoringState = () => {
             style={[
                 styles.container,
                 {backgroundColor: theme.white},
-                theme.viewShadow,
             ]}>
             <ActivityIndicator size="large" color={theme.themeColor} />
             <Text style={[styles.text, {color: theme.black.third}]}>
@@ -28,7 +27,7 @@ const HarborRestoringState = () => {
 const styles = StyleSheet.create({
     container: {
         minHeight: verticalScale(180),
-        borderRadius: scale(20),
+        borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
         gap: verticalScale(14),

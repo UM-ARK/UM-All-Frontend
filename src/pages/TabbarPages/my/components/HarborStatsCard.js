@@ -5,8 +5,9 @@ import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 
 import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import HarborSectionHeader from './HarborSectionHeader';
 
-const HarborStatsCard = ({items}) => {
+const HarborStatsCard = ({title, items}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('my');
 
@@ -19,39 +20,44 @@ const HarborStatsCard = ({items}) => {
             style={[
                 styles.container,
                 {backgroundColor: theme.white},
-                theme.viewShadow,
             ]}>
-            {items.map((item, index) => (
-                <View key={item.key} style={styles.item}>
-                    <Text style={[styles.value, {color: theme.black.main}]}>
-                        {item.value}
-                    </Text>
-                    <Text style={[styles.label, {color: theme.black.third}]}>
-                        {t(item.label)}
-                    </Text>
-                    {index < items.length - 1 ? (
-                        <View
-                            style={[
-                                styles.divider,
-                                {
-                                    backgroundColor: theme.themeColorUltraLight,
-                                },
-                            ]}
-                        />
-                    ) : null}
-                </View>
-            ))}
+            {title ? <HarborSectionHeader title={title} /> : null}
+            <View style={styles.statsRow}>
+                {items.map((item, index) => (
+                    <View key={item.key} style={styles.item}>
+                        <Text style={[styles.value, {color: theme.black.main}]}>
+                            {item.value}
+                        </Text>
+                        <Text style={[styles.label, {color: theme.black.third}]}>
+                            {t(item.label)}
+                        </Text>
+                        {index < items.length - 1 ? (
+                            <View
+                                style={[
+                                    styles.divider,
+                                    {
+                                        backgroundColor:
+                                            theme.themeColorUltraLight,
+                                    },
+                                ]}
+                            />
+                        ) : null}
+                    </View>
+                ))}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        minHeight: verticalScale(78),
-        borderRadius: scale(20),
+        borderRadius: scale(10),
+        paddingBottom: verticalScale(12),
+    },
+    statsRow: {
+        minHeight: verticalScale(66),
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: verticalScale(12),
     },
     item: {
         flex: 1,

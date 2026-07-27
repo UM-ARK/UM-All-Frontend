@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: verticalScale(16),
+        marginBottom: verticalScale(12),
     },
     eyebrow: {
         ...uiStyle.defaultText,

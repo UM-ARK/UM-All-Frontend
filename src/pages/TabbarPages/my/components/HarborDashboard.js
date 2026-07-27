@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Image } from 'expo-image';
 import { useFocusEffect } from '@react-navigation/native';
@@ -189,78 +189,78 @@ const HarborDashboard = ({ user, navigation }) => {
                 </View>
             ) : null}
 
-            <HarborSectionHeader title={t('我的 Harbor')} />
             <View
                 style={[
                     styles.actionsCard,
                     { backgroundColor: theme.white },
-                    theme.viewShadow,
                 ]}>
-                {actions.map(action => (
-                    <TouchableScale
-                        key={action.key}
-                        accessibilityRole="button"
-                        accessibilityLabel={
-                            action.badge
-                                ? `${action.badge} ${action.label}`
-                                : action.label
-                        }
-                        activeScale={0.94}
-                        style={styles.actionItem}
-                        onPress={() => handleActionPress(action)}>
-                        <View
-                            style={[
-                                styles.actionIcon,
-                                { backgroundColor: theme.tonal.primary15 },
-                            ]}>
-                            <Ionicons
-                                name={action.icon}
-                                size={scale(23)}
-                                color={theme.themeColor}
-                            />
-                            {action.badge ? (
-                                <View
-                                    style={[
-                                        styles.actionBadge,
-                                        { backgroundColor: theme.unread },
-                                    ]}>
-                                    <Text
+                <HarborSectionHeader title={t('我的 Harbor')} />
+                <View style={styles.actionsGrid}>
+                    {actions.map(action => (
+                        <TouchableScale
+                            key={action.key}
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                                action.badge
+                                    ? `${action.badge} ${action.label}`
+                                    : action.label
+                            }
+                            activeScale={0.94}
+                            style={styles.actionItem}
+                            onPress={() => handleActionPress(action)}>
+                            <View
+                                style={[
+                                    styles.actionIcon,
+                                    { backgroundColor: theme.tonal.primary15 },
+                                ]}>
+                                <Ionicons
+                                    name={action.icon}
+                                    size={scale(23)}
+                                    color={theme.themeColor}
+                                />
+                                {action.badge ? (
+                                    <View
                                         style={[
-                                            styles.actionBadgeText,
-                                            { color: theme.trueWhite },
+                                            styles.actionBadge,
+                                            { backgroundColor: theme.unread },
                                         ]}>
-                                        {action.badge > 99
-                                            ? '99+'
-                                            : action.badge}
-                                    </Text>
-                                </View>
-                            ) : null}
-                        </View>
-                        <Text
-                            numberOfLines={1}
-                            style={[
-                                styles.actionLabel,
-                                { color: theme.black.second },
-                            ]}>
-                            {action.label}
-                        </Text>
-                    </TouchableScale>
-                ))}
+                                        <Text
+                                            style={[
+                                                styles.actionBadgeText,
+                                                { color: theme.trueWhite },
+                                            ]}>
+                                            {action.badge > 99
+                                                ? '99+'
+                                                : action.badge}
+                                        </Text>
+                                    </View>
+                                ) : null}
+                            </View>
+                            <Text
+                                numberOfLines={1}
+                                style={[
+                                    styles.actionLabel,
+                                    { color: theme.black.second },
+                                ]}>
+                                {action.label}
+                            </Text>
+                        </TouchableScale>
+                    ))}
+                </View>
             </View>
 
-            <HarborSectionHeader
-                title={t('最近活動')}
-                actionLabel={t('全部')}
-                onAction={() =>
-                    navigation.navigate('HarborActivity', { kind: 'all' })
-                }
-            />
             <View
                 style={[
                     styles.activityCard,
                     { backgroundColor: theme.white },
-                    theme.viewShadow,
                 ]}>
+                <HarborSectionHeader
+                    title={t('最近活動')}
+                    actionLabel={t('全部')}
+                    onAction={() =>
+                        navigation.navigate('HarborActivity', { kind: 'all' })
+                    }
+                />
                 {user.activity?.length ? (
                     user.activity.map((activity, index) => (
                         <HarborActivityRow
@@ -283,91 +283,87 @@ const HarborDashboard = ({ user, navigation }) => {
                 )}
             </View>
 
-            <HarborSectionHeader title={t('我的貢獻')} />
-            <HarborStatsCard items={user.contributions} />
-
-            <HarborSectionHeader
-                title={t('社群成就')}
-                actionLabel={t('查看全部')}
-                onAction={() => navigation.navigate('HarborBadges')}
+            <HarborStatsCard
+                title={t('我的貢獻')}
+                items={user.contributions}
             />
-            <Pressable
-                accessibilityRole="button"
-                style={({ pressed }) => [
+
+            <View
+                style={[
                     styles.badgesCard,
                     { backgroundColor: theme.white },
-                    theme.viewShadow,
-                    pressed && { backgroundColor: theme.tonal.primary08 },
-                ]}
-                onPress={() => {
-                    trigger();
-                    navigation.navigate('HarborBadges');
-                }}>
-                {user.badges?.length ? (
-                    user.badges.slice(0, 3).map(badge => (
-                        <View key={badge.id} style={styles.badgeItem}>
-                            <View
-                                style={[
-                                    styles.badgeIcon,
-                                    {
-                                        backgroundColor:
-                                            theme.tonal.secondary15,
-                                    },
-                                ]}>
-                                {badge.imageUrl ? (
-                                    <Image
-                                        source={{ uri: badge.imageUrl }}
-                                        style={styles.badgeImage}
-                                        contentFit="contain"
-                                    />
-                                ) : (
-                                    <MaterialCommunityIcons
-                                        name="medal-outline"
-                                        size={scale(23)}
-                                        color={theme.secondThemeColor}
-                                    />
-                                )}
+                ]}>
+                <HarborSectionHeader
+                    title={t('社群成就')}
+                    actionLabel={t('查看全部')}
+                    onAction={() => navigation.navigate('HarborBadges')}
+                />
+                <View style={styles.badgesRow}>
+                    {user.badges?.length ? (
+                        user.badges.slice(0, 3).map(badge => (
+                            <View key={badge.id} style={styles.badgeItem}>
+                                <View
+                                    style={[
+                                        styles.badgeIcon,
+                                        {
+                                            backgroundColor:
+                                                theme.tonal.secondary15,
+                                        },
+                                    ]}>
+                                    {badge.imageUrl ? (
+                                        <Image
+                                            source={{ uri: badge.imageUrl }}
+                                            style={styles.badgeImage}
+                                            contentFit="contain"
+                                        />
+                                    ) : (
+                                        <MaterialCommunityIcons
+                                            name="medal-outline"
+                                            size={scale(23)}
+                                            color={theme.secondThemeColor}
+                                        />
+                                    )}
+                                </View>
+                                <Text
+                                    numberOfLines={2}
+                                    style={[
+                                        styles.badgeName,
+                                        { color: theme.black.second },
+                                    ]}>
+                                    {badge.name}
+                                </Text>
                             </View>
+                        ))
+                    ) : (
+                        <View style={styles.badgeEmpty}>
+                            <MaterialCommunityIcons
+                                name="medal-outline"
+                                size={scale(22)}
+                                color={theme.black.third}
+                            />
                             <Text
-                                numberOfLines={2}
                                 style={[
-                                    styles.badgeName,
-                                    { color: theme.black.second },
+                                    styles.compactEmptyText,
+                                    { color: theme.black.third },
                                 ]}>
-                                {badge.name}
+                                {t('繼續參與社群即可解鎖徽章')}
                             </Text>
                         </View>
-                    ))
-                ) : (
-                    <View style={styles.badgeEmpty}>
-                        <MaterialCommunityIcons
-                            name="medal-outline"
-                            size={scale(22)}
-                            color={theme.black.third}
-                        />
-                        <Text
-                            style={[
-                                styles.compactEmptyText,
-                                { color: theme.black.third },
-                            ]}>
-                            {t('繼續參與社群即可解鎖徽章')}
-                        </Text>
-                    </View>
-                )}
-            </Pressable>
+                    )}
+                </View>
+            </View>
 
-            <HarborSectionHeader title={t('閱讀概況')} />
-            <HarborStatsCard items={user.stats} />
+            <HarborStatsCard title={t('閱讀概況')} items={user.stats} />
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        gap: verticalScale(12),
+        gap: verticalScale(8),
     },
     partialProfile: {
-        borderRadius: scale(12),
+        borderRadius: scale(10),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(9),
     },
@@ -378,11 +374,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     actionsCard: {
-        borderRadius: scale(20),
+        borderRadius: scale(10),
+        paddingBottom: verticalScale(3),
+    },
+    actionsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        paddingTop: verticalScale(16),
-        paddingBottom: verticalScale(3),
+        paddingTop: verticalScale(8),
     },
     actionItem: {
         width: '33.333%',
@@ -393,7 +391,7 @@ const styles = StyleSheet.create({
     actionIcon: {
         width: scale(48),
         height: scale(48),
-        borderRadius: scale(16),
+        borderRadius: scale(12),
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: verticalScale(7),
@@ -421,7 +419,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     activityCard: {
-        borderRadius: scale(20),
+        borderRadius: scale(10),
         overflow: 'hidden',
     },
     compactEmpty: {
@@ -436,12 +434,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     badgesCard: {
-        minHeight: verticalScale(112),
-        borderRadius: scale(20),
+        borderRadius: scale(10),
+        paddingBottom: verticalScale(16),
+    },
+    badgesRow: {
+        minHeight: verticalScale(96),
         flexDirection: 'row',
         alignItems: 'flex-start',
         paddingHorizontal: scale(12),
-        paddingVertical: verticalScale(16),
+        paddingTop: verticalScale(8),
     },
     badgeItem: {
         flex: 1,
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     badgeIcon: {
         width: scale(46),
         height: scale(46),
-        borderRadius: scale(15),
+        borderRadius: scale(10),
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: verticalScale(7),
