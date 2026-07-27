@@ -18,8 +18,8 @@ import { trigger } from '../../../../utils/trigger';
 import ModalBottom from '../../../../components/ModalBottom';
 import ARKImageView from '../../../../components/ARKImageView';
 import DialogDIY from '../../../../components/DialogDIY';
-import Loading from '../../../../components/Loading';
 import HyperlinkText from '../../../../components/HyperlinkText';
+import { EventDetailSkeleton } from '../components/DetailPageSkeleton';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -554,8 +554,8 @@ const EventDetail = (props) => {
                 }}
             />
 
-            {/* 渲染主要內容 */}
-            {!state.isLoading && state.eventData ? (
+            {/* 有資料顯示詳情；首屏載入中改為骨架屏 */}
+            {state.eventData ? (
                 <ImageHeaderScrollView
                     maxOverlayOpacity={0.6}
                     minOverlayOpacity={0.3}
@@ -582,12 +582,7 @@ const EventDetail = (props) => {
                     <View style={{ height: verticalScale(50) }} />
                 </ImageHeaderScrollView>
             ) : (
-                // Loading屏幕
-                <View style={{ flex: 1, backgroundColor: bg_color }}>
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <Loading />
-                    </View>
-                </View>
+                <EventDetailSkeleton />
             )}
         </View>
     );

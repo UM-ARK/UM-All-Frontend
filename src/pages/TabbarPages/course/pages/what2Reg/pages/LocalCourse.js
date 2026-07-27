@@ -4,7 +4,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
-import Loading from '../../../../../../components/Loading';
 import SegmentControl from '../../../../../../components/SegmentControl';
 import { ARK_WIKI_SEARCH } from '../../../../../../utils/pathMap';
 import { openLink } from '../../../../../../utils/browser';
@@ -19,6 +18,192 @@ import LocalCourseOfferingMenuCard from '../components/LocalCourseOfferingMenuCa
 
 /** 與 ClubPage Section 標題列對齊的左右內距 */
 const LOCAL_SECTION_HORIZONTAL_PADDING = scale(10);
+
+/** 載入骨架重複班別卡數量，填滿首屏 */
+const LOCAL_COURSE_SKELETON_SECTION_COUNT = 3;
+
+/** 單條課表時段佔位（日／教室／時間） */
+const LocalCourseSkeletonScheduleCol = ({ tonal }) => (
+    <View style={{ width: '50%', paddingVertical: scale(5), alignItems: 'center' }}>
+        <View
+            style={{
+                height: verticalScale(10),
+                width: '42%',
+                borderRadius: scale(4),
+                backgroundColor: tonal.primary08,
+                marginBottom: verticalScale(4),
+            }}
+        />
+        <View
+            style={{
+                height: verticalScale(10),
+                width: '58%',
+                borderRadius: scale(4),
+                backgroundColor: tonal.primary08,
+                marginBottom: verticalScale(4),
+            }}
+        />
+        <View
+            style={{
+                height: verticalScale(10),
+                width: '72%',
+                borderRadius: scale(4),
+                backgroundColor: tonal.primary08,
+            }}
+        />
+    </View>
+);
+
+/** 單一班別：Section 標題列 + offering 卡片骨架 */
+const LocalCourseSkeletonSection = ({ themeColor, white, tonal, isFirst }) => (
+    <View>
+        <View
+            style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingTop: isFirst ? scale(6) : scale(18),
+                paddingBottom: scale(8),
+            }}>
+            <View
+                style={{
+                    width: scale(3),
+                    height: verticalScale(15),
+                    borderRadius: scale(2),
+                    backgroundColor: themeColor,
+                    marginRight: scale(10),
+                }}
+            />
+            <View
+                style={{
+                    height: verticalScale(14),
+                    width: '48%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary15,
+                }}
+            />
+        </View>
+        <View style={{ alignItems: 'center' }}>
+            <View
+                style={{
+                    width: '100%',
+                    backgroundColor: white,
+                    borderRadius: scale(16),
+                    paddingVertical: scale(8),
+                    paddingHorizontal: scale(8),
+                    alignItems: 'center',
+                    marginVertical: scale(5),
+                }}>
+                <View
+                    style={{
+                        height: verticalScale(13),
+                        width: '36%',
+                        borderRadius: scale(4),
+                        backgroundColor: tonal.primary15,
+                        marginBottom: scale(4),
+                    }}
+                />
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        width: '100%',
+                    }}>
+                    <LocalCourseSkeletonScheduleCol tonal={tonal} />
+                    <LocalCourseSkeletonScheduleCol tonal={tonal} />
+                </View>
+            </View>
+        </View>
+    </View>
+);
+
+/** 本地課程頁載入骨架：標題、Group By、班別列表 */
+const LocalCourseSkeleton = ({ bg_color, white, tonal, themeColor, insets }) => (
+    <ScrollView
+        style={{ flex: 1, backgroundColor: bg_color }}
+        contentContainerStyle={{
+            paddingHorizontal: LOCAL_SECTION_HORIZONTAL_PADDING,
+            paddingBottom: insets.bottom + scale(16),
+        }}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={false}>
+        {/* 課程標題與 metadata */}
+        <View style={{ alignItems: 'center', paddingTop: scale(4) }}>
+            <View
+                style={{
+                    height: verticalScale(13),
+                    width: '78%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary15,
+                    marginBottom: verticalScale(6),
+                }}
+            />
+            <View
+                style={{
+                    height: verticalScale(13),
+                    width: '62%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary08,
+                    marginBottom: verticalScale(6),
+                }}
+            />
+            <View
+                style={{
+                    height: verticalScale(10),
+                    width: '28%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary08,
+                    marginBottom: verticalScale(4),
+                }}
+            />
+            <View
+                style={{
+                    height: verticalScale(10),
+                    width: '22%',
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary08,
+                }}
+            />
+        </View>
+
+        {/* Group By 分段控制 */}
+        <View
+            style={{
+                alignSelf: 'center',
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: scale(12),
+            }}>
+            <View
+                style={{
+                    height: verticalScale(12),
+                    width: scale(56),
+                    borderRadius: scale(4),
+                    backgroundColor: tonal.primary08,
+                    marginRight: scale(10),
+                }}
+            />
+            <View
+                style={{
+                    height: verticalScale(28),
+                    width: scale(160),
+                    borderRadius: scale(20),
+                    backgroundColor: tonal.primary08,
+                }}
+            />
+        </View>
+
+        {Array.from({ length: LOCAL_COURSE_SKELETON_SECTION_COUNT }).map((_, index) => (
+            <LocalCourseSkeletonSection
+                key={`local-course-skel-${index}`}
+                themeColor={themeColor}
+                white={white}
+                tonal={tonal}
+                isFirst={index === 0}
+            />
+        ))}
+    </ScrollView>
+);
 
 const daySorter = {
     'MON': 1,
@@ -37,7 +222,7 @@ const daySort = (objArr) => {
 
 const LocalCourse = (props) => {
     const { theme } = useTheme();
-    const { themeColor, black, bg_color } = theme;
+    const { themeColor, black, bg_color, white, tonal } = theme;
     const insets = useSafeAreaInsets();
 
     const { navigation } = props;
@@ -237,9 +422,13 @@ const LocalCourse = (props) => {
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
             {isLoading ? (
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <Loading />
-                </View>
+                <LocalCourseSkeleton
+                    bg_color={bg_color}
+                    white={white}
+                    tonal={tonal}
+                    themeColor={themeColor}
+                    insets={insets}
+                />
             ) : (
                 <ScrollView
                     contentContainerStyle={{

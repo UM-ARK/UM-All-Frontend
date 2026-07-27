@@ -17,7 +17,6 @@ import {
     verticalScale,
 } from 'react-native-size-matters';
 
-import Loading from '../../components/Loading';
 import SegmentControl from '../../components/SegmentControl';
 import {uiStyle, useTheme} from '../../components/ThemeContext';
 import {UM_API_CAR_PARK, UM_API_TOKEN} from '../../utils/pathMap';
@@ -26,6 +25,7 @@ import {trigger} from '../../utils/trigger';
 const CAR_PARK_SORT_VALUES = ['All', 'Staff', 'Monthly Pass', 'Visitor'];
 const CAR_PARK_TYPE_VALUES = ['All', 'Light Vehicle', 'Motorcycle'];
 const TIGHT_SPACE_THRESHOLD = 10;
+const SKELETON_RECORD_COUNTS = [3, 2];
 
 const CAR_PARK_LOCATIONS = {
     P6: 'S1–S2 研究生宿舍及 S8 薈萃坊',
@@ -37,6 +37,86 @@ const CAR_PARK_LOCATIONS = {
 
 const getVehicleIcon = vehicleType =>
     vehicleType === 'Motorcycle' ? 'motorbike' : 'car-outline';
+
+const CarParkSkeleton = ({styles}) => (
+    <View style={styles.container}>
+        <ScrollView
+            contentContainerStyle={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior="automatic"
+            scrollEnabled={false}>
+            <View style={styles.updateCard}>
+                <View style={styles.updateIcon} />
+                <View style={styles.updateContent}>
+                    <View style={[styles.skeletonUpdateBlock, styles.skeletonUpdateTitle]} />
+                    <View style={[styles.skeletonUpdateBlock, styles.skeletonUpdateTime]} />
+                    <View style={[styles.skeletonUpdateBlock, styles.skeletonUpdateSource]} />
+                </View>
+            </View>
+
+            <View style={styles.filterCard}>
+                <View style={styles.filterHeading}>
+                    <View style={[styles.skeletonBlock, styles.skeletonFilterIcon]} />
+                    <View style={[styles.skeletonBlock, styles.skeletonFilterTitle]} />
+                </View>
+                <View style={[styles.skeletonBlock, styles.skeletonFilterLabel]} />
+                <View style={styles.skeletonSegmentControl}>
+                    <View style={styles.skeletonSegmentSelected} />
+                    <View style={styles.skeletonSegmentItem} />
+                    <View style={styles.skeletonSegmentItemWide} />
+                    <View style={styles.skeletonSegmentItem} />
+                </View>
+                <View style={[styles.skeletonBlock, styles.skeletonFilterLabel]} />
+                <View style={styles.skeletonSegmentControl}>
+                    <View style={styles.skeletonSegmentSelectedSecondary} />
+                    <View style={styles.skeletonSegmentItemWide} />
+                    <View style={styles.skeletonSegmentItemWide} />
+                </View>
+            </View>
+
+            {SKELETON_RECORD_COUNTS.map((recordCount, cardIndex) => (
+                <View
+                    key={`car-park-skeleton-${cardIndex}`}
+                    style={styles.carParkCard}>
+                    <View style={styles.carParkHeader}>
+                        <View style={styles.carParkCodeBadge}>
+                            <View style={[styles.skeletonUpdateBlock, styles.skeletonParkIcon]} />
+                            <View style={[styles.skeletonUpdateBlock, styles.skeletonParkCode]} />
+                        </View>
+                        <View style={styles.locationContent}>
+                            <View style={[styles.skeletonBlock, styles.skeletonLocationLabel]} />
+                            <View style={[styles.skeletonBlock, styles.skeletonLocationTitle]} />
+                            <View style={[styles.skeletonBlock, styles.skeletonLocationTitleShort]} />
+                        </View>
+                    </View>
+                    <View style={styles.recordsContainer}>
+                        {Array.from({length: recordCount}, (_, recordIndex) => (
+                            <View
+                                key={`car-park-skeleton-${cardIndex}-record-${recordIndex}`}
+                                style={[
+                                    styles.recordRow,
+                                    recordIndex < recordCount - 1 &&
+                                        styles.recordDivider,
+                                ]}>
+                                <View style={styles.recordIdentity}>
+                                    <View style={styles.vehicleIcon} />
+                                    <View style={styles.recordLabels}>
+                                        <View style={[styles.skeletonBlock, styles.skeletonRecordTitle]} />
+                                        <View style={[styles.skeletonBlock, styles.skeletonRecordSubtitle]} />
+                                    </View>
+                                </View>
+                                <View style={styles.availability}>
+                                    <View style={[styles.skeletonBlock, styles.skeletonAvailableCount]} />
+                                    <View style={[styles.skeletonBlock, styles.skeletonStatusBadge]} />
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+            ))}
+        </ScrollView>
+    </View>
+);
 
 const CarPark = () => {
     const {theme} = useTheme();
@@ -193,11 +273,7 @@ const CarPark = () => {
     };
 
     if (isLoading) {
-        return (
-            <View style={[styles.container, styles.loadingContainer]}>
-                <Loading />
-            </View>
-        );
+        return <CarParkSkeleton styles={styles} />;
     }
 
     return (
@@ -350,10 +426,6 @@ const getStyles = theme =>
         container: {
             flex: 1,
             backgroundColor: theme.bg_color,
-        },
-        loadingContainer: {
-            alignItems: 'center',
-            justifyContent: 'center',
         },
         contentContainer: {
             paddingHorizontal: scale(14),
@@ -591,6 +663,123 @@ const getStyles = theme =>
             fontSize: moderateScale(10.5),
             lineHeight: moderateScale(16),
             textAlign: 'center',
+            marginTop: verticalScale(5),
+        },
+        skeletonBlock: {
+            backgroundColor: theme.tonal.primary15,
+            borderRadius: scale(4),
+        },
+        skeletonUpdateBlock: {
+            backgroundColor: theme.tonal.primary30,
+            borderRadius: scale(4),
+        },
+        skeletonUpdateTitle: {
+            width: '46%',
+            height: verticalScale(13),
+            marginBottom: verticalScale(5),
+        },
+        skeletonUpdateTime: {
+            width: '68%',
+            height: verticalScale(10),
+            marginBottom: verticalScale(5),
+        },
+        skeletonUpdateSource: {
+            width: '52%',
+            height: verticalScale(8),
+        },
+        skeletonFilterIcon: {
+            width: scale(19),
+            height: scale(13),
+        },
+        skeletonFilterTitle: {
+            width: '28%',
+            height: verticalScale(13),
+            marginLeft: scale(6),
+        },
+        skeletonFilterLabel: {
+            width: '18%',
+            height: verticalScale(9),
+            marginBottom: verticalScale(6),
+            marginLeft: scale(3),
+        },
+        skeletonSegmentControl: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: verticalScale(34),
+            borderRadius: scale(18),
+            backgroundColor: theme.bg_color,
+            paddingHorizontal: scale(5),
+            marginBottom: verticalScale(9),
+        },
+        skeletonSegmentSelected: {
+            flex: 1,
+            height: verticalScale(26),
+            borderRadius: scale(14),
+            backgroundColor: theme.tonal.primary15,
+            marginHorizontal: scale(3),
+        },
+        skeletonSegmentSelectedSecondary: {
+            flex: 1,
+            height: verticalScale(26),
+            borderRadius: scale(14),
+            backgroundColor: theme.tonal.secondary15,
+            marginHorizontal: scale(3),
+        },
+        skeletonSegmentItem: {
+            flex: 1,
+            height: verticalScale(9),
+            borderRadius: scale(4),
+            backgroundColor: theme.tonal.primary08,
+            marginHorizontal: scale(8),
+        },
+        skeletonSegmentItemWide: {
+            flex: 1.5,
+            height: verticalScale(9),
+            borderRadius: scale(4),
+            backgroundColor: theme.tonal.primary08,
+            marginHorizontal: scale(8),
+        },
+        skeletonParkIcon: {
+            width: scale(22),
+            height: scale(22),
+            borderRadius: scale(11),
+        },
+        skeletonParkCode: {
+            width: '48%',
+            height: verticalScale(18),
+            marginTop: verticalScale(6),
+        },
+        skeletonLocationLabel: {
+            width: '34%',
+            height: verticalScale(9),
+            marginBottom: verticalScale(7),
+        },
+        skeletonLocationTitle: {
+            width: '88%',
+            height: verticalScale(11),
+            marginBottom: verticalScale(5),
+        },
+        skeletonLocationTitleShort: {
+            width: '62%',
+            height: verticalScale(11),
+        },
+        skeletonRecordTitle: {
+            width: '62%',
+            height: verticalScale(11),
+        },
+        skeletonRecordSubtitle: {
+            width: '46%',
+            height: verticalScale(9),
+            marginTop: verticalScale(5),
+        },
+        skeletonAvailableCount: {
+            width: scale(38),
+            height: verticalScale(20),
+        },
+        skeletonStatusBadge: {
+            width: scale(58),
+            height: verticalScale(14),
+            borderRadius: scale(999),
             marginTop: verticalScale(5),
         },
     });

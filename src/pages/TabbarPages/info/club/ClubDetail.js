@@ -24,10 +24,10 @@ import { handleLogout } from '../../../../utils/storageKits';
 import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
+import { ClubDetailSkeleton } from '../components/DetailPageSkeleton';
 import ARKImageView from '../../../../components/ARKImageView';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
-import Loading from '../../../../components/Loading';
 import { updateUserInfo } from '../../../../utils/storageKits';
 import { versionStringCompare } from '../../../../utils/versionKits';
 import { trigger } from '../../../../utils/trigger';
@@ -429,7 +429,8 @@ const ClubDetail = (props) => {
 
     return (
         <View style={{ flex: 1, backgroundColor: bg_color }}>
-            {!isLoading && clubData ? (
+            {/* 有資料顯示詳情；首屏載入中改為骨架屏 */}
+            {clubData ? (
                 <ImageHeaderScrollView
                     maxOverlayOpacity={0.6}
                     minOverlayOpacity={0.3}
@@ -463,9 +464,7 @@ const ClubDetail = (props) => {
                     {renderMainContent()}
                 </ImageHeaderScrollView>
             ) : (
-                <View style={{ flex: 1, backgroundColor: bg_color, alignItems: 'center', justifyContent: 'center' }}>
-                    <Loading />
-                </View>
+                <ClubDetailSkeleton />
             )}
 
             <ARKImageView ref={imageScrollViewer} imageUrls={imageUrls} />

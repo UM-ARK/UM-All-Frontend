@@ -47,7 +47,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import ARKImageView from '../../../components/ARKImageView';
-import Loading from '../../../components/Loading';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { openLink } from '../../../utils/browser';
@@ -1912,6 +1911,237 @@ const HarborRelatedTopics = memo(({ topics, onPressTopic }) => {
     );
 });
 
+const HarborSkeletonBlock = ({ color, style }) => (
+    <View style={[styles.skeletonBlock, { backgroundColor: color }, style]} />
+);
+
+const HarborPostSkeleton = ({ theme, compact = false }) => {
+    const { themeColorUltraLight, tonal, white, viewShadow } = theme;
+
+    return (
+        <View
+            style={[
+                styles.postCard,
+                { backgroundColor: white, borderColor: themeColorUltraLight },
+                viewShadow,
+            ]}>
+            <View style={styles.postHeader}>
+                <HarborSkeletonBlock
+                    color={tonal.primary30}
+                    style={styles.skeletonAvatar}
+                />
+                <View style={styles.skeletonAuthorArea}>
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonAuthorName}
+                    />
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonAuthorBadge}
+                    />
+                    <HarborSkeletonBlock
+                        color={tonal.primary08}
+                        style={styles.skeletonPostTime}
+                    />
+                </View>
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={styles.skeletonPostNumber}
+                />
+            </View>
+            <View style={styles.skeletonPostBody}>
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={styles.skeletonBodyLine}
+                />
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={styles.skeletonBodyLineMedium}
+                />
+                {!compact ? (
+                    <HarborSkeletonBlock
+                        color={tonal.primary08}
+                        style={styles.skeletonBodyLineShort}
+                    />
+                ) : null}
+            </View>
+            <View
+                style={[
+                    styles.postFooter,
+                    { borderTopColor: themeColorUltraLight },
+                ]}>
+                <View style={styles.skeletonFooterMeta}>
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonMetaItem}
+                    />
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonMetaItem}
+                    />
+                </View>
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={styles.skeletonMetaItem}
+                />
+            </View>
+            <View style={styles.composerActionRow}>
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={styles.skeletonPostActionWide}
+                />
+                <HarborSkeletonBlock
+                    color={tonal.primary15}
+                    style={styles.skeletonPostAction}
+                />
+            </View>
+        </View>
+    );
+};
+
+const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
+    const {
+        bg_color,
+        themeColorUltraLight,
+        tonal,
+        white,
+        viewShadow,
+    } = theme;
+    const contentInsetStyle = {
+        paddingTop: isLiquidGlassSupported ? headerHeight : 0,
+    };
+
+    return (
+        <View style={[styles.page, { backgroundColor: bg_color }]}>
+            <View
+                style={[
+                    styles.skeletonContent,
+                    contentInsetStyle,
+                ]}>
+                <View
+                    style={[
+                        styles.topicHeader,
+                        {
+                            backgroundColor: white,
+                            borderColor: themeColorUltraLight,
+                        },
+                        viewShadow,
+                    ]}>
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonTopicTitle}
+                    />
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonTopicTitleShort}
+                    />
+                    <HarborSkeletonBlock
+                        color={tonal.primary15}
+                        style={styles.skeletonCategory}
+                    />
+                    <View style={styles.skeletonTopicMeta}>
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonTopicMetaItem}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonTopicMetaItem}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonTopicMetaItem}
+                        />
+                    </View>
+                    <HarborSkeletonBlock
+                        color={tonal.primary08}
+                        style={styles.skeletonLastUpdated}
+                    />
+                    <View style={styles.skeletonWebActions}>
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonWebActionWide}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonWebAction}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonWebAction}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonWebAction}
+                        />
+                    </View>
+                </View>
+
+                <HarborPostSkeleton theme={theme} />
+                <HarborPostSkeleton theme={theme} compact />
+            </View>
+
+            <View
+                style={[
+                    styles.readingControlsDock,
+                    {
+                        paddingBottom: Math.max(
+                            insets.bottom,
+                            verticalScale(8),
+                        ),
+                    },
+                ]}>
+                <View
+                    style={[
+                        styles.readingControls,
+                        viewShadow,
+                        {
+                            backgroundColor: white,
+                            borderColor: themeColorUltraLight,
+                        },
+                    ]}>
+                    <View style={styles.progressHeader}>
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonProgressLabel}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonProgressPercent}
+                        />
+                    </View>
+                    <View
+                        style={[
+                            styles.skeletonProgressTrack,
+                            { backgroundColor: tonal.primary15 },
+                        ]}>
+                        <View
+                            style={[
+                                styles.skeletonProgressFill,
+                                { backgroundColor: tonal.primary30 },
+                            ]}
+                        />
+                    </View>
+                    <View style={styles.controlRow}>
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonControlButton}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonControlButton}
+                        />
+                        <HarborSkeletonBlock
+                            color={tonal.primary15}
+                            style={styles.skeletonControlButton}
+                        />
+                    </View>
+                </View>
+            </View>
+        </View>
+    );
+};
+
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -3413,9 +3643,11 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     if (isLoading && !topic) {
         return (
-            <View style={[styles.centeredPage, { backgroundColor: bg_color }]}>
-                <Loading />
-            </View>
+            <HarborTopicDetailSkeleton
+                headerHeight={headerHeight}
+                insets={insets}
+                theme={theme}
+            />
         );
     }
 
@@ -4436,6 +4668,152 @@ const styles = StyleSheet.create({
         ...uiStyle.defaultText,
         fontSize: scale(10),
         marginLeft: scale(3),
+    },
+    skeletonBlock: {
+        borderRadius: scale(4),
+    },
+    skeletonContent: {
+        flex: 1,
+        overflow: 'hidden',
+    },
+    skeletonTopicTitle: {
+        width: '78%',
+        height: scale(22),
+    },
+    skeletonTopicTitleShort: {
+        width: '48%',
+        height: scale(22),
+        marginTop: verticalScale(7),
+    },
+    skeletonCategory: {
+        width: '26%',
+        height: verticalScale(27),
+        borderRadius: scale(7),
+        marginTop: verticalScale(12),
+    },
+    skeletonTopicMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: verticalScale(13),
+    },
+    skeletonTopicMetaItem: {
+        width: scale(52),
+        height: verticalScale(10),
+        marginRight: scale(12),
+    },
+    skeletonLastUpdated: {
+        width: '48%',
+        height: verticalScale(10),
+        marginTop: verticalScale(10),
+    },
+    skeletonWebActions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: verticalScale(12),
+    },
+    skeletonWebAction: {
+        width: '24%',
+        height: verticalScale(34),
+        borderRadius: scale(9),
+        marginRight: scale(6),
+        marginBottom: verticalScale(6),
+    },
+    skeletonWebActionWide: {
+        width: '38%',
+        height: verticalScale(34),
+        borderRadius: scale(9),
+        marginRight: scale(6),
+        marginBottom: verticalScale(6),
+    },
+    skeletonAvatar: {
+        width: scale(42),
+        height: scale(42),
+        borderRadius: scale(21),
+    },
+    skeletonAuthorArea: {
+        flex: 1,
+        marginLeft: scale(9),
+    },
+    skeletonAuthorName: {
+        width: '44%',
+        height: verticalScale(13),
+    },
+    skeletonAuthorBadge: {
+        width: '22%',
+        height: verticalScale(10),
+        marginTop: verticalScale(5),
+    },
+    skeletonPostTime: {
+        width: '38%',
+        height: verticalScale(9),
+        marginTop: verticalScale(5),
+    },
+    skeletonPostNumber: {
+        width: scale(20),
+        height: verticalScale(10),
+        marginLeft: scale(8),
+    },
+    skeletonPostBody: {
+        marginTop: verticalScale(16),
+        marginBottom: verticalScale(11),
+    },
+    skeletonBodyLine: {
+        width: '94%',
+        height: verticalScale(12),
+    },
+    skeletonBodyLineMedium: {
+        width: '76%',
+        height: verticalScale(12),
+        marginTop: verticalScale(7),
+    },
+    skeletonBodyLineShort: {
+        width: '52%',
+        height: verticalScale(12),
+        marginTop: verticalScale(7),
+    },
+    skeletonFooterMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    skeletonMetaItem: {
+        width: scale(34),
+        height: verticalScale(10),
+        marginRight: scale(12),
+    },
+    skeletonPostAction: {
+        flex: 1,
+        height: verticalScale(32),
+        borderRadius: scale(8),
+    },
+    skeletonPostActionWide: {
+        flex: 1.6,
+        height: verticalScale(32),
+        borderRadius: scale(8),
+        marginRight: scale(6),
+    },
+    skeletonProgressLabel: {
+        width: '28%',
+        height: verticalScale(11),
+    },
+    skeletonProgressPercent: {
+        width: '10%',
+        height: verticalScale(11),
+    },
+    skeletonProgressTrack: {
+        height: verticalScale(8),
+        borderRadius: scale(999),
+        marginTop: verticalScale(12),
+        overflow: 'hidden',
+    },
+    skeletonProgressFill: {
+        width: '34%',
+        height: '100%',
+        borderRadius: scale(999),
+    },
+    skeletonControlButton: {
+        width: '29%',
+        height: verticalScale(30),
+        borderRadius: scale(8),
     },
     unreadDivider: {
         flexDirection: 'row',

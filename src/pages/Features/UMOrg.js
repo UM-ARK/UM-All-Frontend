@@ -7,7 +7,6 @@ import { UM_API_TOKEN, UM_ORG } from '../../utils/pathMap';
 import { openLink } from '../../utils/browser';
 import { logToFirebase } from '../../utils/firebaseAnalytics';
 import { trigger } from '../../utils/trigger';
-import Loading from '../../components/Loading';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -18,6 +17,62 @@ import lodash from 'lodash';
 import * as OpenCC from 'opencc-js';
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
 
+const SKELETON_CARDS = [
+    { titleWidth: '72%', subtitleWidth: '88%', subUnitWidths: ['92%', '62%', '76%'] },
+    { titleWidth: '58%', subtitleWidth: '66%', subUnitWidths: ['78%', '68%'] },
+    { titleWidth: '64%', subtitleWidth: '74%', subUnitWidths: ['54%', '72%', '60%'] },
+    { titleWidth: '52%', subtitleWidth: '82%', subUnitWidths: ['84%', '64%'] },
+];
+
+const UMOrgSkeleton = () => {
+    const { theme } = useTheme();
+    const { white, tonal } = theme;
+
+    return (
+        <ScrollView
+            style={styles.skeletonList}
+            contentContainerStyle={styles.skeletonListContent}
+            contentInsetAdjustmentBehavior="automatic"
+            showsVerticalScrollIndicator={false}>
+            {SKELETON_CARDS.map((card, cardIndex) => (
+                <View
+                    key={`org-skeleton-${cardIndex}`}
+                    style={[styles.skeletonCard, { backgroundColor: white }]}>
+                    <View style={styles.skeletonHeader}>
+                        <View style={styles.skeletonTitleContainer}>
+                            <View style={[
+                                styles.skeletonTitle,
+                                { width: card.titleWidth, backgroundColor: tonal.primary15 },
+                            ]} />
+                            <View style={[
+                                styles.skeletonSubtitle,
+                                { width: card.subtitleWidth, backgroundColor: tonal.primary08 },
+                            ]} />
+                        </View>
+                        <View style={[styles.skeletonSearchButton, { backgroundColor: tonal.primary15 }]} />
+                    </View>
+                    {card.subUnitWidths.map((width, subUnitIndex) => (
+                        <View
+                            key={`org-skeleton-${cardIndex}-subunit-${subUnitIndex}`}
+                            style={[
+                                styles.skeletonSubUnit,
+                                { width, backgroundColor: tonal.primary08 },
+                            ]}>
+                            <View style={[
+                                styles.skeletonSubUnitTitle,
+                                { backgroundColor: tonal.primary15 },
+                            ]} />
+                            <View style={[
+                                styles.skeletonSubUnitSubtitle,
+                                { backgroundColor: tonal.primary15 },
+                            ]} />
+                        </View>
+                    ))}
+                </View>
+            ))}
+        </ScrollView>
+    );
+};
 
 const OrgInfo = (props) => {
     const { orgData } = props;
@@ -215,7 +270,7 @@ const UMOrg = ({ navigation }) => {
                     })}
                 </ScrollView>
             ) : (<View style={{ alignItems: 'center' }}>
-                {loading ? (<View><Loading /></View>) : (
+                {loading ? (<UMOrgSkeleton />) : (
                     <ScrollView refreshControl={
                         <RefreshControl
                             colors={[themeColor]}
@@ -238,5 +293,61 @@ const UMOrg = ({ navigation }) => {
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    skeletonList: {
+        alignSelf: 'stretch',
+    },
+    skeletonListContent: {
+        paddingBottom: verticalScale(16),
+    },
+    skeletonCard: {
+        marginBottom: verticalScale(16),
+        paddingHorizontal: scale(10),
+        paddingVertical: verticalScale(10),
+        borderRadius: scale(8),
+    },
+    skeletonHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        paddingBottom: verticalScale(10),
+    },
+    skeletonTitleContainer: {
+        flex: 1,
+        paddingTop: verticalScale(2),
+        marginRight: scale(12),
+    },
+    skeletonTitle: {
+        height: verticalScale(16),
+        borderRadius: scale(4),
+    },
+    skeletonSubtitle: {
+        height: verticalScale(11),
+        marginTop: verticalScale(6),
+        borderRadius: scale(4),
+    },
+    skeletonSearchButton: {
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(50),
+    },
+    skeletonSubUnit: {
+        marginBottom: verticalScale(8),
+        padding: scale(5),
+        borderRadius: scale(5),
+    },
+    skeletonSubUnitTitle: {
+        width: '82%',
+        height: verticalScale(11),
+        borderRadius: scale(3),
+    },
+    skeletonSubUnitSubtitle: {
+        width: '68%',
+        height: verticalScale(9),
+        marginTop: verticalScale(4),
+        borderRadius: scale(3),
+    },
+});
 
 export default UMOrg;
