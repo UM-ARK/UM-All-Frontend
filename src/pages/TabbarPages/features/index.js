@@ -23,11 +23,9 @@ import {
 import CustomBottomSheet from '../../../utils/BottomSheet';
 import { getFunctionArr } from './FeatureList';
 import SearchBar from '../info/home/components/SearchBar';
+import FeatureIcon from '../info/home/search/components/FeatureIcon';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { FlatGrid } from 'react-native-super-grid';
-import { Image } from 'expo-image';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Toast from 'react-native-simple-toast';
@@ -39,13 +37,7 @@ import { useFocusEffect } from '@react-navigation/native';
 function Index({ navigation }) {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
-    const {
-        themeColor,
-        white,
-        black,
-        trueWhite,
-        bg_color,
-    } = theme;
+    const { themeColor, white, black, bg_color } = theme;
     const { t, i18n } = useTranslation(['common', 'home', 'features']);
     const functionArr = useMemo(() => getFunctionArr(t), [t]);
     const isTc = i18n.language === 'tc';
@@ -117,86 +109,49 @@ function Index({ navigation }) {
         [navigation],
     );
 
-    const renderFeatureIcon = useCallback(
-        (item, iconSize = verticalScale(30)) => {
-            if (item.icon_type === 'ionicons') {
-                return (
-                    <Ionicons
-                        name={item.icon_name}
-                        size={iconSize}
-                        color={themeColor}
-                    />
-                );
-            }
-            if (item.icon_type === 'MaterialCommunityIcons') {
-                return (
-                    <MaterialCommunityIcons
-                        name={item.icon_name}
-                        size={iconSize}
-                        color={themeColor}
-                    />
-                );
-            }
-            if (item.icon_type === 'img') {
-                return (
-                    <Image
-                        source={item.icon_name}
-                        style={{
-                            backgroundColor: trueWhite,
-                            height: scale(60),
-                            width: scale(60),
-                        }}
-                    />
-                );
-            }
-            return null;
-        },
-        [themeColor, trueWhite],
-    );
-
     const renderFeatureItem = useCallback(
-        (item, options = {}) => {
-            const { iconSize, labelFontSize = fontSize } = options;
-            return (
-                <TouchableScale
+        item => (
+            <TouchableScale
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+                activeOpacity={0.7}
+                onPress={() => handleFeaturePress(item)}
+                onLongPress={() => {
+                    trigger();
+                    setBottomSheetInfo(item);
+                    bottomSheetRef.current?.snapToIndex(1);
+                }}
+                key={item.key_name || item.fn_name}>
+                <FeatureIcon item={item} size={scale(22)} />
+                <Text
                     style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                    activeOpacity={0.7}
-                    onPress={() => handleFeaturePress(item)}
-                    onLongPress={() => {
-                        trigger();
-                        setBottomSheetInfo(item);
-                        bottomSheetRef.current?.snapToIndex(1);
-                    }}
-                    key={item.key_name || item.fn_name}>
-                    {renderFeatureIcon(item, iconSize)}
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            fontSize: labelFontSize,
-                            color: black.second,
-                            textAlign: 'center',
-                        }}>
-                        {item.fn_name}
-                    </Text>
-                </TouchableScale>
-            );
-        },
-        [black.second, fontSize, handleFeaturePress, renderFeatureIcon],
+                        ...uiStyle.defaultText,
+                        fontSize: fontSize,
+                        color: black.second,
+                        textAlign: 'center',
+                        marginTop: verticalScale(4),
+                    }}>
+                    {item.fn_name}
+                </Text>
+            </TouchableScale>
+        ),
+        [black.second, fontSize, handleFeaturePress],
     );
 
     // 功能卡片渲染，useCallback避免不必要的重渲染
     const GetFunctionCard = useCallback(
-        (title, fn_list) => (
+        (title, fn_list, options = {}) => {
+            const { marginTop = verticalScale(10) } = options;
+            return (
             <View
                 key={title}
                 style={{
                     backgroundColor: white,
                     borderRadius: scale(10),
                     marginHorizontal: scale(10),
-                    marginTop: verticalScale(10),
+                    marginTop,
                 }}>
                 <View
                     style={{
@@ -233,7 +188,8 @@ function Index({ navigation }) {
                     scrollEnabled={false}
                 />
             </View>
-        ),
+            );
+        },
         [white, bg_color, black.main, renderFeatureItem],
     );
 
@@ -336,6 +292,7 @@ function Index({ navigation }) {
                             maxItemsPerRow={4}
                             itemDimension={scale(50)}
                             spacing={scale(10)}
+                            style={{ marginBottom: verticalScale(-6) }}
                             itemContainerStyle={{
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -348,8 +305,11 @@ function Index({ navigation }) {
                     </View>
                 ) : null}
 
-                {functionArr.map(fn_card =>
-                    GetFunctionCard(fn_card.title, fn_card.fn),
+                {functionArr.map((fn_card, index) =>
+                    GetFunctionCard(fn_card.title, fn_card.fn, {
+                        // 第一張分類卡貼近上方常用服務
+                        marginTop: index === 0 ? verticalScale(2) : verticalScale(10),
+                    }),
                 )}
                 <View
                     style={{
