@@ -17,6 +17,7 @@ import { scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../../../components/ThemeContext';
+import { parseHarborPostEvent } from '../../../../utils/harbor/harborPostEvent';
 import {
     ARK_HARBOR_AVATAR_TEMPLATE,
     ARK_HARBOR_EMOJI_URL,
@@ -24,6 +25,7 @@ import {
 } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import HarborPostContent from './HarborPostContent';
+import HarborPostEventCard from './HarborPostEventCard';
 import {
     getLikeAction,
     getReactionCount,
@@ -175,6 +177,11 @@ const HarborPostCard = memo(
         const likeAction = getLikeAction(post);
         const isLiked = Boolean(likeAction?.acted);
         const currentReaction = post?.current_user_reaction?.id;
+        const postEvent = useMemo(() => parseHarborPostEvent(post), [post]);
+        const postUrl = ARK_HARBOR_TOPIC_URL(
+            post.topic_id,
+            post.post_number,
+        );
         const avatarUrl = ARK_HARBOR_AVATAR_TEMPLATE(
             post.avatar_template,
             AVATAR_SIZE,
@@ -295,10 +302,19 @@ const HarborPostCard = memo(
                                 imageUrls={imageUrls}
                                 onOpenImage={onOpenImage}
                                 onPressLink={onPressLink}
-                                postUrl={ARK_HARBOR_TOPIC_URL(
-                                    post.topic_id,
-                                    post.post_number,
-                                )}
+                                postUrl={postUrl}
+                                forceInteractiveFallback={Boolean(postEvent)}>
+                                {postEvent ? (
+                                    <HarborPostEventCard
+                                        event={postEvent}
+                                        postUrl={postUrl}
+                                    />
+                                ) : null}
+                            </HarborPostContent>
+                        ) : postEvent ? (
+                            <HarborPostEventCard
+                                event={postEvent}
+                                postUrl={postUrl}
                             />
                         ) : null}
                     </View>
@@ -419,11 +435,15 @@ const HarborPostCard = memo(
                         imageUrls={imageUrls}
                         onOpenImage={onOpenImage}
                         onPressLink={onPressLink}
-                        postUrl={ARK_HARBOR_TOPIC_URL(
-                            post.topic_id,
-                            post.post_number,
-                        )}
-                    />
+                        postUrl={postUrl}
+                        forceInteractiveFallback={Boolean(postEvent)}>
+                        {postEvent ? (
+                            <HarborPostEventCard
+                                event={postEvent}
+                                postUrl={postUrl}
+                            />
+                        ) : null}
+                    </HarborPostContent>
                 </View>
 
                 <View

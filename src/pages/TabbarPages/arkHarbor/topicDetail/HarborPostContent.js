@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import { openLink } from '../../../../utils/browser';
 import { replaceHarborEmojiImages } from '../../../../utils/harbor/harborHtml';
+import { hasHarborInteractiveContent } from '../../../../utils/harbor/harborPostEvent';
 import { ARK_HARBOR } from '../../../../utils/pathMap';
 import { trigger } from '../../../../utils/trigger';
 import { normalizeHtmlUrl } from './harborTopicModels';
@@ -145,7 +146,16 @@ const htmlRenderers = {
 };
 
 const HarborPostContent = memo(
-    ({ cooked, contentWidth, imageUrls, onOpenImage, onPressLink, postUrl }) => {
+    ({
+        cooked,
+        contentWidth,
+        imageUrls,
+        onOpenImage,
+        onPressLink,
+        postUrl,
+        forceInteractiveFallback = false,
+        children,
+    }) => {
         const { theme } = useTheme();
         const { t } = useTranslation('harbor');
         const { black, themeColor, themeColorUltraLight, tonal, white } = theme;
@@ -153,10 +163,10 @@ const HarborPostContent = memo(
             return replaceHarborEmojiImages(cooked || '');
         }, [cooked]);
         const requiresInteractiveFallback = useMemo(() => {
-            return /<(?:video|audio)\b|class=(?:"[^"]*\bpoll\b[^"]*"|'[^']*\bpoll\b[^']*')/i.test(
-                cooked,
+            return (
+                forceInteractiveFallback || hasHarborInteractiveContent(cooked)
             );
-        }, [cooked]);
+        }, [cooked, forceInteractiveFallback]);
 
         const baseStyle = useMemo(
             () => ({
@@ -341,6 +351,7 @@ const HarborPostContent = memo(
                     enableExperimentalGhostLinesPrevention
                     enableExperimentalMarginCollapsing
                 />
+                {children}
                 {requiresInteractiveFallback ? (
                     <Pressable
                         onPress={() => {
@@ -365,7 +376,7 @@ const HarborPostContent = memo(
                                 styles.interactiveFallbackText,
                                 { color: themeColor },
                             ]}>
-                            {t('查看互動內容')}
+                            {t('在 Web 查看完整詳情')}
                         </Text>
                     </Pressable>
                 ) : null}
