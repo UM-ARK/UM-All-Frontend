@@ -32,14 +32,6 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
                         color={tonal.primary15}
                         style={styles.skeletonAuthorName}
                     />
-                    <HarborSkeletonBlock
-                        color={tonal.primary15}
-                        style={styles.skeletonAuthorBadge}
-                    />
-                    <HarborSkeletonBlock
-                        color={tonal.primary08}
-                        style={styles.skeletonPostTime}
-                    />
                 </View>
                 <HarborSkeletonBlock
                     color={tonal.primary15}
@@ -62,6 +54,10 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
                     />
                 ) : null}
             </View>
+            <HarborSkeletonBlock
+                color={tonal.primary08}
+                style={styles.skeletonPostTime}
+            />
             <View
                 style={[
                     styles.postFooter,

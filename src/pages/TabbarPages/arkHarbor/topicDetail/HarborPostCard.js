@@ -32,7 +32,36 @@ import {
 } from './harborTopicModels';
 import styles from './styles';
 
-const AVATAR_SIZE = 88;
+const AVATAR_SIZE = 60;
+// 24 小時內顯示相對時間（分鐘／小時前）
+const RECENT_POST_HOURS = 24;
+
+const formatHarborPostTime = (iso, language) => {
+    if (!iso) {
+        return '';
+    }
+    const created = moment.tz(iso, 'Asia/Macau');
+    if (!created.isValid()) {
+        return '';
+    }
+    const now = moment.tz('Asia/Macau');
+    const diffMinutes = now.diff(created, 'minutes');
+    if (diffMinutes >= 0 && diffMinutes < RECENT_POST_HOURS * 60) {
+        if (diffMinutes < 1) {
+            return language === 'en' ? 'just now' : '剛剛';
+        }
+        if (diffMinutes < 60) {
+            return language === 'en'
+                ? `${diffMinutes}m ago`
+                : `${diffMinutes} 分鐘前`;
+        }
+        const hours = Math.max(1, Math.floor(diffMinutes / 60));
+        return language === 'en'
+            ? `${hours}h ago`
+            : `${hours} 小時前`;
+    }
+    return created.format('YYYY/MM/DD HH:mm');
+};
 // 常見 Discourse reaction shortcode → Unicode，優先於遠端圖片以提升清晰度
 const HARBOR_REACTION_UNICODE = Object.freeze({
     heart: '❤️',
@@ -166,7 +195,7 @@ const HarborPostCard = memo(
         reactionsEnabled,
     }) => {
         const { theme } = useTheme();
-        const { t } = useTranslation('harbor');
+        const { t, i18n } = useTranslation('harbor');
         const {
             black,
             themeColor,
@@ -401,12 +430,15 @@ const HarborPostCard = memo(
                             transition={200}
                         />
                         <View style={styles.authorArea}>
-                            <Text
-                                style={[styles.authorName, { color: black.main }]}
-                                numberOfLines={1}>
-                                {displayName}
-                            </Text>
-                            <View style={styles.authorDetails}>
+                            <View style={styles.authorNameRow}>
+                                <Text
+                                    style={[
+                                        styles.authorName,
+                                        { color: black.third },
+                                    ]}
+                                    numberOfLines={1}>
+                                    {displayName}
+                                </Text>
                                 {post.user_title ? (
                                     <Text
                                         style={[
@@ -431,46 +463,45 @@ const HarborPostCard = memo(
                                     </Text>
                                 ) : null}
                             </View>
-                            <Text
-                                style={[styles.postTime, { color: black.third }]}>
-                                {moment
-                                    .tz(post.created_at, 'Asia/Macau')
-                                    .format('YYYY/MM/DD HH:mm')}
-                                {wasEdited ? ` · ${t('已編輯')}` : ''}
-                            </Text>
                         </View>
                     </Pressable>
-                    <Text style={[styles.postNumber, { color: black.third }]}>
-                        #{post.post_number}
-                    </Text>
-                </View>
-
-                {post.reply_to_post_number ? (
-                    <Pressable
-                        onPress={() => {
-                            trigger();
-                            onPressReply(post.reply_to_post_number);
-                        }}
-                        style={({ pressed }) => [
-                            styles.replyBadge,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="reply-outline"
-                            size={scale(14)}
-                            color={themeColor}
-                        />
-                        <Text style={[styles.replyText, { color: themeColor }]}>
-                            {t('回覆樓層', {
-                                postNumber: post.reply_to_post_number,
-                            })}
+                    <View style={styles.headerMeta}>
+                        {post.reply_to_post_number ? (
+                            <Pressable
+                                onPress={() => {
+                                    trigger();
+                                    onPressReply(post.reply_to_post_number);
+                                }}
+                                style={({ pressed }) => [
+                                    styles.replyBadge,
+                                    {
+                                        backgroundColor: pressed
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    },
+                                ]}>
+                                <MaterialCommunityIcons
+                                    name="reply-outline"
+                                    size={scale(12)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    style={[
+                                        styles.replyText,
+                                        { color: themeColor },
+                                    ]}>
+                                    {t('回覆樓層', {
+                                        postNumber: post.reply_to_post_number,
+                                    })}
+                                </Text>
+                            </Pressable>
+                        ) : null}
+                        <Text
+                            style={[styles.postNumber, { color: black.third }]}>
+                            #{post.post_number}
                         </Text>
-                    </Pressable>
-                ) : null}
+                    </View>
+                </View>
 
                 <View style={styles.postBody}>
                     <HarborPostContent
@@ -489,6 +520,11 @@ const HarborPostCard = memo(
                         ) : null}
                     </HarborPostContent>
                 </View>
+
+                <Text style={[styles.postTime, { color: black.third }]}>
+                    {formatHarborPostTime(post.created_at, i18n.language)}
+                    {wasEdited ? ` · ${t('已編輯')}` : ''}
+                </Text>
 
                 <View
                     style={[
