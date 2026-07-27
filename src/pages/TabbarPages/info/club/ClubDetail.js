@@ -21,7 +21,6 @@ import { logToFirebase } from '../../../../utils/firebaseAnalytics';
 import { BASE_URI, BASE_HOST, GET, ARK_LETTER_IMG, POST, MAIL } from '../../../../utils/pathMap';
 import HyperlinkText from '../../../../components/HyperlinkText';
 import { handleLogout } from '../../../../utils/storageKits';
-import packageInfo from '../../../../../package.json';
 
 import EventCard from '../components/EventCard';
 import { ClubDetailSkeleton } from '../components/DetailPageSkeleton';
@@ -29,7 +28,6 @@ import ARKImageView from '../../../../components/ARKImageView';
 import ModalBottom from '../../../../components/ModalBottom';
 import DialogDIY from '../../../../components/DialogDIY';
 import { updateUserInfo } from '../../../../utils/storageKits';
-import { versionStringCompare } from '../../../../utils/versionKits';
 import { trigger } from '../../../../utils/trigger';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';

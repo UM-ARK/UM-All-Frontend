@@ -16,7 +16,7 @@ import {
     GITHUB_ACTIVITY,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
-import packageInfo from '../../../../package.json';
+import { getLocalAppVersion } from '../../../utils/appUpdateKits';
 
 import { scale, verticalScale } from 'react-native-size-matters';
 import { Image } from 'expo-image';
@@ -85,7 +85,7 @@ const AboutPage = ({ navigation }) => {
                     {/* 應用版本號 */}
                     <Text style={{ ...s.bodyText }}>
                         {t('APP Version', { ns: 'about' })}
-                        <Text style={{ ...s.highlightText }}>{packageInfo.version}</Text>
+                        <Text style={{ ...s.highlightText }}>{getLocalAppVersion()}</Text>
                     </Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>

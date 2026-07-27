@@ -33,8 +33,7 @@ import {
 import EventPage from './EventPage.js';
 import ModalBottom from '../../../../components/ModalBottom.js';
 import { setAPPInfo, handleLogout } from '../../../../utils/storageKits.js';
-import { isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
-import packageInfo from '../../../../../package.json';
+import { getLocalAppVersion, isLocalAppOlderThanServer, showAppStoreUpdateAlert } from '../../../../utils/appUpdateKits.js';
 import HomeCard from './components/HomeCard.js';
 import { screenWidth } from '../../../../utils/stylesKits.js';
 import { trigger } from '../../../../utils/trigger.js';
@@ -266,7 +265,7 @@ const HomeScreen = ({ navigation }) => {
                 setShowUpdateInfo(true);
                 setAppVersion({
                     lastest: serverInfo.app_version,
-                    local: packageInfo.version,
+                    local: getLocalAppVersion(),
                 });
                 showAppStoreUpdateAlert(serverInfo);
                 if ('version_info' in serverInfo) {

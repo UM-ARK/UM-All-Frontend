@@ -5089,6 +5089,11 @@ expect@^29.0.0, expect@^29.7.0:
     jest-message-util "^29.7.0"
     jest-util "^29.7.0"
 
+expo-application@~57.0.2:
+  version "57.0.2"
+  resolved "https://registry.npmjs.org/expo-application/-/expo-application-57.0.2.tgz#0c0abb9a82c365f4bd5d3ad8d81420072c46c827"
+  integrity sha512-q31YwcXyymviAmdrtDfAg3Dld4VMxLCNAfgMHip7vZpPX4lzF/AfwsywqBJUAjQnJknzaNAkzqvMVjO5XmKYDA==
+
 expo-asset@~57.0.7:
   version "57.0.7"
   resolved "https://registry.npmjs.org/expo-asset/-/expo-asset-57.0.7.tgz#7b674547a3f07f663eb0bdd18d92ba1f1037a280"

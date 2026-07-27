@@ -1,9 +1,17 @@
 import { Alert, Linking, Platform } from 'react-native';
 import axios from 'axios';
-import packageInfo from '../../package.json';
+import * as Application from 'expo-application';
 import { APPSTORE_URL, BASE_HOST, BASE_URI, GET } from './pathMap';
 import { versionStringCompare } from './versionKits';
 import { trigger } from './trigger';
+
+/**
+ * 裝置上實際安裝的 APP 版本（iOS CFBundleShortVersionString / Android versionName）
+ * @returns {string}
+ */
+export function getLocalAppVersion() {
+    return Application.nativeApplicationVersion ?? '';
+}
 
 /**
  * 向伺服器取得 APP 資訊（與首頁 getAppData 相同端點）
@@ -30,7 +38,11 @@ export function isLocalAppOlderThanServer(serverInfo) {
     if (!serverInfo?.app_version) {
         return false;
     }
-    return versionStringCompare(packageInfo.version, serverInfo.app_version) === -1;
+    const localVersion = getLocalAppVersion();
+    if (!localVersion) {
+        return false;
+    }
+    return versionStringCompare(localVersion, serverInfo.app_version) === -1;
 }
 
 /**

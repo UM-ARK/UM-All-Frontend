@@ -1,4 +1,6 @@
 PODS:
+  - EXApplication (57.0.2):
+    - ExpoModulesCore
   - EXConstants (57.0.7):
     - ExpoModulesCore
   - EXJSONUtils (57.0.1)
@@ -2999,6 +3001,7 @@ PODS:
   - Yoga (0.0.0)
 
 DEPENDENCIES:
+  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
@@ -3153,6 +3156,8 @@ SPEC REPOS:
     - Toast
 
 EXTERNAL SOURCES:
+  EXApplication:
+    :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXJSONUtils:
@@ -3428,6 +3433,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  EXApplication: bbd517d50878ca1d121fb3843392beb210181e28
   EXConstants: fa5647482320b7bde855057f8b86580456d4b9f0
   EXJSONUtils: 7a1683cfa2cbe6d11fca97097d51a496755b0287
   EXManifests: f9888c0bf5aaa6ddb7e3d4b224d6d54ac4ca84a4

@@ -31,7 +31,6 @@ import {
     ARK_WIKI_ABOUT_ARK,
     GITHUB_ACTIVITY,
 } from '../../utils/pathMap';
-import packageInfo from '../../../package.json';
 import { scale, verticalScale } from 'react-native-size-matters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { reloadAppAsync } from 'expo';
@@ -40,6 +39,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SegmentControl from '../../components/SegmentControl';
 import {
     fetchAppInfoFromServer,
+    getLocalAppVersion,
     isLocalAppOlderThanServer,
     showAppStoreUpdateAlert,
 } from '../../utils/appUpdateKits';
@@ -392,7 +392,7 @@ const SettingPage = ({ navigation }) => {
                         icon="cloud-download"
                         iconColor="#34C759"
                         title={t('setting:Check Update')}
-                        subtitle={`v${packageInfo.version}`}
+                        subtitle={`v${getLocalAppVersion()}`}
                         onPress={handleCheckUpdate}
                     />
                     <SettingItem
@@ -470,7 +470,7 @@ const SettingPage = ({ navigation }) => {
                         }
                         iconColor={black.main}
                         title={t('setting:Version')}
-                        subtitle={`v${packageInfo.version}`}
+                        subtitle={`v${getLocalAppVersion()}`}
                         showArrow={false}
                     />
                     <SettingItem

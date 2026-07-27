@@ -1,6 +1,5 @@
 {
   "name": "umall",
-  "version": "26.5.0",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -40,6 +39,7 @@
     "@shopify/flash-list": "2.3.2",
     "axios": "^1.18.1",
     "expo": "^57.0.8",
+    "expo-application": "~57.0.2",
     "expo-blur": "~57.0.2",
     "expo-build-properties": "~57.0.7",
     "expo-crypto": "~57.0.1",
