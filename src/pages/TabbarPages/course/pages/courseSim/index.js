@@ -16,6 +16,7 @@ import {
     TextInput,
     Keyboard,
     Platform,
+    useWindowDimensions,
 } from 'react-native';
 
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -75,6 +76,10 @@ const DAY_COLUMN_WIDTH = scale(135);
 /** 課程卡片左右邊距 */
 const COURSE_CARD_MARGIN = scale(5);
 const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
+/** 概覽模式的時間欄寬 */
+const OVERVIEW_TIME_COLUMN_WIDTH = scale(40);
+/** 開始時間相差不超過 30 分鐘的課節對齊到同一列 */
+const OVERVIEW_ALIGNMENT_MINUTES = 30;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
@@ -83,6 +88,19 @@ const timeTo = '23:59';
 function toDateTime(time) {
     var [hours, minutes] = time.split(':');
     return new Date(0, 0, 0, hours, minutes); // 使用一个固定的日期
+}
+
+/** 將 HH:mm 轉成當日分鐘數。 */
+function toMinutes(time) {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+}
+
+/** 將當日分鐘數格式化為 HH:mm。 */
+function formatMinutes(minutes) {
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(
+        minutes % 60,
+    ).padStart(2, '0')}`;
 }
 
 const daySorter = {
@@ -205,6 +223,7 @@ function CourseSim({ route, navigation }) {
     const [timeFilterTo, setTimeFilterTo] = useState(timeTo);
     const [timePickerMode, setTimePickerMode] = useState('from');
     const [showTimePicker, setShowTimePicker] = useState(false);
+    const [timetableView, setTimetableView] = useState('detail');
 
     const [hasOpenCourseSearch, setHasOpenCourseSearch] = useState(false);
     const [bottomSheetMode, setBottomSheetMode] = useState('search');
@@ -235,6 +254,7 @@ function CourseSim({ route, navigation }) {
     } = theme;
 
     const insets = useSafeAreaInsets();
+    const { width: windowWidth } = useWindowDimensions();
     const tabBarHeight =
         useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
 
@@ -356,6 +376,24 @@ function CourseSim({ route, navigation }) {
             borderRadius: verticalScale(5),
             marginHorizontal: scale(2.5),
         },
+        viewSwitcher: {
+            alignSelf: 'center',
+            flexDirection: 'row',
+            backgroundColor: tonal.primary15,
+            borderRadius: scale(10),
+            padding: scale(3),
+            marginVertical: verticalScale(6),
+        },
+        viewSwitcherButton: {
+            paddingHorizontal: scale(18),
+            paddingVertical: verticalScale(6),
+            borderRadius: scale(8),
+        },
+        viewSwitcherText: {
+            ...uiStyle.defaultText,
+            fontSize: scale(14),
+            fontWeight: '600',
+        },
         searchResultText: {
             ...uiStyle.defaultText,
             color: black.third,
@@ -389,6 +427,44 @@ function CourseSim({ route, navigation }) {
             coursePlanList,
         ],
     );
+    const overviewRows = useMemo(() => {
+        const rows = [];
+        lodash
+            .sortBy(planSlots, course => toMinutes(course['Time From']))
+            .forEach(course => {
+                const start = toMinutes(course['Time From']);
+                const currentRow = rows[rows.length - 1];
+
+                if (
+                    !currentRow ||
+                    start - currentRow.start > OVERVIEW_ALIGNMENT_MINUTES
+                ) {
+                    rows.push({
+                        start,
+                        end: start,
+                        courses: [course],
+                    });
+                    return;
+                }
+
+                currentRow.end = start;
+                currentRow.courses.push(course);
+            });
+
+        return rows.map(row => ({
+            start: row.start,
+            end: row.end,
+            coursesByDay: lodash.groupBy(row.courses, 'Day'),
+        }));
+    }, [planSlots]);
+    const overviewDays = useMemo(() => {
+        const lastCourseDayIndex = lodash.max(
+            planSlots.map(course => daySorter[course.Day] - 1),
+        );
+        return dayList.slice(0, Math.max(lastCourseDayIndex ?? 4, 4) + 1);
+    }, [planSlots]);
+    const overviewDayColumnWidth =
+        (windowWidth - OVERVIEW_TIME_COLUMN_WIDTH) / overviewDays.length;
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'courseSim' });
@@ -592,6 +668,127 @@ function CourseSim({ route, navigation }) {
         return null;
     };
 
+    /** 建立具體與概覽課程卡片共用的選單互動。 */
+    const getTimetableCourseMenuProps = course => {
+        const hasDuplicate =
+            lodash.countBy(planList, 'Course Code')[course['Course Code']] > 1;
+        const actions = [
+            ...getCourseInfoMenuActions(),
+            {
+                id: 'replacement',
+                title: t('查看平替', { ns: 'timetable' }),
+                image: Platform.select({
+                    ios: 'arrow.triangle.2.circlepath',
+                    android: 'ic_menu_rotate',
+                }),
+                imageColor: themeColor,
+                titleColor: themeColor,
+            },
+            ...(hasDuplicate
+                ? [
+                    {
+                        id: 'del-all-sections',
+                        title: `${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`,
+                        image: Platform.select({
+                            ios: 'trash',
+                            android: 'ic_menu_delete',
+                        }),
+                        // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
+                        // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
+                        imageColor: unread,
+                        attributes: { destructive: true },
+                    },
+                ]
+                : []),
+            {
+                id: 'drop-section',
+                title: `${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`,
+                image: Platform.select({
+                    ios: 'trash',
+                    android: 'ic_menu_delete',
+                }),
+                // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
+                // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
+                imageColor: unread,
+                attributes: { destructive: true },
+            },
+        ];
+
+        return {
+            actions,
+            onOpen: () => {
+                trigger('rigid');
+                if (hasOpenCourseSearch) {
+                    bottomSheetRef?.current?.snapToIndex(0);
+                }
+            },
+            onPressAction: event => {
+                trigger();
+                const actionId = event.nativeEvent.event;
+                if (handleCourseInfoMenuAction(actionId, course)) {
+                    return;
+                }
+
+                switch (actionId) {
+                    case 'replacement':
+                        openReplacementSearch(course);
+                        break;
+                    case 'del-all-sections':
+                        Alert.alert(
+                            '',
+                            t('刪除所有Section確認', {
+                                ns: 'timetable',
+                                code: course['Course Code'],
+                            }),
+                            [
+                                {
+                                    text: 'No',
+                                    style: 'cancel',
+                                },
+                                {
+                                    text: 'Yes',
+                                    onPress: () => {
+                                        trigger();
+                                        dropAllSections(
+                                            course['Course Code'],
+                                        );
+                                        verScroll.current?.scrollTo({ y: 0 });
+                                    },
+                                    style: 'destructive',
+                                },
+                            ],
+                            { cancelable: true },
+                        );
+                        break;
+                    case 'drop-section':
+                        Alert.alert(
+                            t('刪除Section確認', {
+                                ns: 'timetable',
+                                code: course['Course Code'],
+                                section: course.Section,
+                            }),
+                            `還會再見嗎燕子，再見的時候你要PASS！`,
+                            [
+                                {
+                                    text: t('取消', { ns: 'timetable' }),
+                                    style: 'cancel',
+                                },
+                                {
+                                    text: 'Drop',
+                                    onPress: () => handleDropCourse(course),
+                                    style: 'destructive',
+                                },
+                            ],
+                            { cancelable: true },
+                        );
+                        break;
+                    default:
+                        break;
+                }
+            },
+        };
+    };
+
     /**
      * 渲染單個課表卡片
      *
@@ -688,119 +885,7 @@ function CourseSim({ route, navigation }) {
             </Text>
         ) : null;
 
-        const hasDuplicate =
-            lodash.countBy(planList, 'Course Code')[course['Course Code']] > 1;
-        const courseMenuActions = [
-            ...getCourseInfoMenuActions(),
-            {
-                id: 'replacement',
-                title: t('查看平替', { ns: 'timetable' }),
-                image: Platform.select({
-                    ios: 'arrow.triangle.2.circlepath',
-                    android: 'ic_menu_rotate',
-                }),
-                imageColor: themeColor,
-                titleColor: themeColor,
-            },
-            ...(hasDuplicate
-                ? [
-                    {
-                        id: 'del-all-sections',
-                        title: `${t('刪除所有', { ns: 'timetable' })} ${course['Course Code']}`,
-                        image: Platform.select({
-                            ios: 'trash',
-                            android: 'ic_menu_delete',
-                        }),
-                        // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
-                        // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
-                        imageColor: unread,
-                        attributes: { destructive: true },
-                    },
-                ]
-                : []),
-            {
-                id: 'drop-section',
-                title: `${t('刪除', { ns: 'timetable' })} ${course['Course Code']}-${course.Section}`,
-                image: Platform.select({
-                    ios: 'trash',
-                    android: 'ic_menu_delete',
-                }),
-                // iOS 26 液態玻璃選單中，destructive 項的模板圖示不會自動渲染，
-                // 故顯式指定紅色 imageColor 以 alwaysOriginal 模式強制顯示垃圾桶。
-                imageColor: unread,
-                attributes: { destructive: true },
-            },
-        ];
-
-        const handleCourseMenuOpen = () => {
-            trigger('rigid');
-            if (hasOpenCourseSearch) {
-                bottomSheetRef?.current?.snapToIndex(0);
-            }
-        };
-
-        const handleCourseMenuAction = event => {
-            trigger();
-            const actionId = event.nativeEvent.event;
-            if (handleCourseInfoMenuAction(actionId, course)) {
-                return;
-            }
-
-            switch (actionId) {
-                case 'replacement':
-                    openReplacementSearch(course);
-                    break;
-                case 'del-all-sections':
-                    Alert.alert(
-                        '',
-                        t('刪除所有Section確認', {
-                            ns: 'timetable',
-                            code: course['Course Code'],
-                        }),
-                        [
-                            {
-                                text: 'No',
-                                style: 'cancel',
-                            },
-                            {
-                                text: 'Yes',
-                                onPress: () => {
-                                    trigger();
-                                    dropAllSections(course['Course Code']);
-                                    verScroll.current?.scrollTo({ y: 0 });
-                                },
-                                style: 'destructive',
-                            },
-                        ],
-                        { cancelable: true },
-                    );
-                    break;
-                case 'drop-section':
-                    Alert.alert(
-                        t('刪除Section確認', {
-                            ns: 'timetable',
-                            code: course['Course Code'],
-                            section: course.Section,
-                        }),
-                        `還會再見嗎燕子，再見的時候你要PASS！`,
-                        [
-                            {
-                                text: t('取消', { ns: 'timetable' }),
-                                style: 'cancel',
-                            },
-                            {
-                                text: 'Drop',
-                                onPress: () => handleDropCourse(course),
-                                style: 'destructive',
-                            },
-                        ],
-                        { cancelable: true },
-                    );
-                    break;
-                default:
-                    break;
-            }
-        };
+        const courseMenuProps = getTimetableCourseMenuProps(course);
 
         return (
             <View
@@ -809,9 +894,9 @@ function CourseSim({ route, navigation }) {
                 {timeDiffReminder}
 
                 <TimetableCourseMenuCard
-                    actions={courseMenuActions}
-                    onPressAction={handleCourseMenuAction}
-                    onPress={handleCourseMenuOpen}
+                    actions={courseMenuProps.actions}
+                    onPressAction={courseMenuProps.onPressAction}
+                    onPress={courseMenuProps.onOpen}
                     backgroundColor={
                         timeWarning
                             ? unread
@@ -2396,6 +2481,204 @@ E11-0000
         );
     }
 
+    const renderViewSwitcher = () => {
+        const viewOptions = [
+            { key: 'detail', label: t('具體', { ns: 'timetable' }) },
+            { key: 'overview', label: t('概覽', { ns: 'timetable' }) },
+        ];
+
+        return (
+            <View style={s.viewSwitcher}>
+                {viewOptions.map(option => {
+                    const isSelected = timetableView === option.key;
+
+                    return (
+                        <Pressable
+                            key={option.key}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: isSelected }}
+                            onPress={() => {
+                                trigger();
+                                setTimetableView(option.key);
+                            }}
+                            style={({ pressed }) => [
+                                s.viewSwitcherButton,
+                                {
+                                    backgroundColor: isSelected
+                                        ? white
+                                        : pressed
+                                            ? tonal.primary30
+                                            : null,
+                                },
+                            ]}>
+                            <Text
+                                style={[
+                                    s.viewSwitcherText,
+                                    {
+                                        color: isSelected
+                                            ? themeColor
+                                            : black.third,
+                                    },
+                                ]}>
+                                {option.label}
+                            </Text>
+                        </Pressable>
+                    );
+                })}
+            </View>
+        );
+    };
+
+    /** 渲染概覽模式的精簡課程卡片。 */
+    const renderOverviewCourse = course => {
+        const timeWarning = conflictSlotKeys.has(getSlotKey(course));
+        const courseMenuProps = getTimetableCourseMenuProps(course);
+
+        return (
+            <CourseActionMenuCard
+                key={getSlotKey(course)}
+                accessibilityLabel={`${course['Course Code']}-${course.Section}`}
+                actions={courseMenuProps.actions}
+                onOpen={courseMenuProps.onOpen}
+                onPressAction={courseMenuProps.onPressAction}
+                menuStyle={{
+                    alignSelf: 'stretch',
+                    margin: scale(2),
+                }}
+                cardStyle={{
+                    backgroundColor: timeWarning
+                        ? unread
+                        : TIME_TABLE_COLOR[
+                        lodash.indexOf(
+                            planCourseCodes,
+                            course['Course Code'],
+                        ) % TIME_TABLE_COLOR.length
+                        ],
+                    borderRadius: scale(7),
+                    paddingHorizontal: scale(4),
+                    paddingVertical: verticalScale(5),
+                    minHeight: verticalScale(52),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.main,
+                        opacity: 0.75,
+                        fontSize: scale(11),
+                        lineHeight: scale(12),
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                    }}>
+                    {course['Course Code'].substring(0, 4)}
+                    {'\n'}
+                    {course['Course Code'].substring(4, 8)}
+                </Text>
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.main,
+                        opacity: 0.65,
+                        fontSize: scale(8),
+                    }}>
+                    {course.Section}
+                </Text>
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: black.main,
+                        opacity: 0.75,
+                        fontSize: scale(7),
+                        lineHeight: scale(8),
+                        textAlign: 'center',
+                        fontWeight: '600',
+                    }}>
+                    {`${course['Time From']}\n${course['Time To']}`}
+                </Text>
+            </CourseActionMenuCard>
+        );
+    };
+
+    /** 將開始時間相差不超過 30 分鐘的各天課節排成共用時間列。 */
+    const renderOverview = () => {
+        const todayText = moment()
+            .format('dddd')
+            .substring(0, 3)
+            .toUpperCase();
+
+        return (
+            <View>
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={{ width: OVERVIEW_TIME_COLUMN_WIDTH }} />
+                        {overviewDays.map(day => (
+                            <Text
+                                key={day}
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    width: overviewDayColumnWidth,
+                                    paddingVertical: verticalScale(5),
+                                    color:
+                                        todayText === day
+                                            ? themeColor
+                                            : black.third,
+                                    fontSize: scale(11),
+                                    fontWeight: 'bold',
+                                    textAlign: 'center',
+                                }}>
+                                {day}
+                            </Text>
+                        ))}
+                    </View>
+                    {overviewRows.map(row => (
+                        <View
+                            key={row.start}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'stretch',
+                            }}>
+                            <View
+                                style={{
+                                    width: OVERVIEW_TIME_COLUMN_WIDTH,
+                                    paddingTop: verticalScale(7),
+                                    borderTopWidth: StyleSheet.hairlineWidth,
+                                    borderColor: themeColorUltraLight,
+                                }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: black.third,
+                                        fontSize: scale(8),
+                                        textAlign: 'center',
+                                    }}>
+                                    {row.start === row.end
+                                        ? formatMinutes(row.start)
+                                        : `${formatMinutes(row.start)}\n–${formatMinutes(row.end)}`}
+                                </Text>
+                            </View>
+                            {overviewDays.map(day => (
+                                <View
+                                    key={day}
+                                    style={{
+                                        width: overviewDayColumnWidth,
+                                        minHeight: verticalScale(62),
+                                        borderTopWidth:
+                                            StyleSheet.hairlineWidth,
+                                        borderLeftWidth:
+                                            StyleSheet.hairlineWidth,
+                                        borderColor: themeColorUltraLight,
+                                    }}>
+                                    {(row.coursesByDay[day] || []).map(course =>
+                                        renderOverviewCourse(course),
+                                    )}
+                                </View>
+                            ))}
+                        </View>
+                    ))}
+            </View>
+        );
+    };
+
     const renderReminder = () => {
         return (
             <View
@@ -2443,11 +2726,16 @@ E11-0000
                 <View style={{ flex: 1 }}>
                     {planSlots.length > 0 ? (
                         <>
-                            <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}>
-                                {dayList.map(day => renderDay(day))}
-                            </ScrollView>
+                            {renderViewSwitcher()}
+                            {timetableView === 'overview' ? (
+                                renderOverview()
+                            ) : (
+                                <ScrollView
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}>
+                                    {dayList.map(day => renderDay(day))}
+                                </ScrollView>
+                            )}
                             {renderReminder()}
                         </>
                     ) : (

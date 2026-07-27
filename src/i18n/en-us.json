@@ -605,6 +605,8 @@
     },
     "timetable": {
         "課表模擬": "Timetable Simulation",
+        "具體": "Detail",
+        "概覽": "Overview",
         "加課": "Add",
         "清空": "Clear",
         "已排課程數": "{{num}} course(s) added",
