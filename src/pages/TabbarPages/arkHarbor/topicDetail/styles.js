@@ -272,9 +272,25 @@ const styles = StyleSheet.create({
     },
     postTime: {
         ...uiStyle.defaultText,
+        flexShrink: 1,
         fontSize: scale(10),
+        marginRight: scale(8),
+    },
+    postMetaRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         marginTop: verticalScale(8),
         marginBottom: verticalScale(2),
+    },
+    postMetaStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 0,
+    },
+    postMetaComment: {
+        marginRight: 0,
+        marginLeft: scale(8),
     },
     postNumber: {
         ...uiStyle.defaultText,
@@ -461,10 +477,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     reactionSummary: {
-        maxWidth: '68%',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-end',
         flexWrap: 'wrap',
     },
     reactionSummaryItem: {
@@ -561,8 +575,8 @@ const styles = StyleSheet.create({
     skeletonPostTime: {
         width: '38%',
         height: verticalScale(9),
-        marginTop: verticalScale(8),
-        marginBottom: verticalScale(2),
+        flexShrink: 1,
+        marginRight: scale(8),
     },
     skeletonPostNumber: {
         width: scale(20),
@@ -593,7 +607,7 @@ const styles = StyleSheet.create({
     skeletonMetaItem: {
         width: scale(34),
         height: verticalScale(10),
-        marginRight: scale(12),
+        marginLeft: scale(8),
     },
     skeletonPostAction: {
         flex: 1,

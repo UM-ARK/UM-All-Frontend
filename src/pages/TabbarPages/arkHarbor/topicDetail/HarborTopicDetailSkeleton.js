@@ -54,16 +54,12 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
                     />
                 ) : null}
             </View>
-            <HarborSkeletonBlock
-                color={tonal.primary08}
-                style={styles.skeletonPostTime}
-            />
-            <View
-                style={[
-                    styles.postFooter,
-                    { borderTopColor: themeColorUltraLight },
-                ]}>
-                <View style={styles.skeletonFooterMeta}>
+            <View style={styles.postMetaRow}>
+                <HarborSkeletonBlock
+                    color={tonal.primary08}
+                    style={styles.skeletonPostTime}
+                />
+                <View style={styles.postMetaStats}>
                     <HarborSkeletonBlock
                         color={tonal.primary15}
                         style={styles.skeletonMetaItem}
@@ -73,10 +69,6 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
                         style={styles.skeletonMetaItem}
                     />
                 </View>
-                <HarborSkeletonBlock
-                    color={tonal.primary15}
-                    style={styles.skeletonMetaItem}
-                />
             </View>
             <View style={styles.composerActionRow}>
                 <HarborSkeletonBlock

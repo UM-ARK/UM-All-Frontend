@@ -152,12 +152,12 @@ const HarborReactionIcon = ({ name, size = scale(24), color }) => {
     );
 };
 
-const MetaItem = ({ icon, value, color }) => {
+const MetaItem = ({ icon, value, color, style }) => {
     if (!value) {
         return null;
     }
     return (
-        <View style={styles.metaItem}>
+        <View style={[styles.metaItem, style]}>
             <MaterialCommunityIcons
                 name={icon}
                 size={scale(15)}
@@ -521,60 +521,53 @@ const HarborPostCard = memo(
                     </HarborPostContent>
                 </View>
 
-                <Text style={[styles.postTime, { color: black.third }]}>
-                    {formatHarborPostTime(post.created_at, i18n.language)}
-                    {wasEdited ? ` · ${t('已編輯')}` : ''}
-                </Text>
-
-                <View
-                    style={[
-                        styles.postFooter,
-                        { borderTopColor: themeColorUltraLight },
-                    ]}>
-                    <View style={styles.footerMeta}>
-                        <MetaItem
-                            icon="eye-outline"
-                            value={post.reads}
-                            color={black.third}
-                        />
+                <View style={styles.postMetaRow}>
+                    <Text
+                        style={[styles.postTime, { color: black.third }]}
+                        numberOfLines={1}>
+                        {formatHarborPostTime(post.created_at, i18n.language)}
+                        {wasEdited ? ` · ${t('已編輯')}` : ''}
+                    </Text>
+                    <View style={styles.postMetaStats}>
                         <MetaItem
                             icon="comment-outline"
                             value={post.reply_count}
                             color={black.third}
+                            style={styles.postMetaComment}
                         />
+                        {displayedReactions.length > 0 ? (
+                            <View style={styles.reactionSummary}>
+                                {displayedReactions.map(reaction => (
+                                    <View
+                                        key={reaction.id}
+                                        accessible
+                                        accessibilityLabel={`${t(
+                                            HARBOR_REACTION_LABEL[
+                                                normalizeHarborReactionName(
+                                                    reaction.id,
+                                                )
+                                            ] ||
+                                                normalizeHarborReactionName(
+                                                    reaction.id,
+                                                ).replace(/_/g, ' '),
+                                        )} ${reaction.count}`}
+                                        style={styles.reactionSummaryItem}>
+                                        <HarborReactionIcon
+                                            name={reaction.id}
+                                            size={scale(14)}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.reactionSummaryText,
+                                                { color: themeColor },
+                                            ]}>
+                                            {reaction.count}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        ) : null}
                     </View>
-                    {displayedReactions.length > 0 ? (
-                        <View style={styles.reactionSummary}>
-                            {displayedReactions.map(reaction => (
-                                <View
-                                    key={reaction.id}
-                                    accessible
-                                    accessibilityLabel={`${t(
-                                        HARBOR_REACTION_LABEL[
-                                            normalizeHarborReactionName(
-                                                reaction.id,
-                                            )
-                                        ] ||
-                                            normalizeHarborReactionName(
-                                                reaction.id,
-                                            ).replace(/_/g, ' '),
-                                    )} ${reaction.count}`}
-                                    style={styles.reactionSummaryItem}>
-                                    <HarborReactionIcon
-                                        name={reaction.id}
-                                        size={scale(14)}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.reactionSummaryText,
-                                            { color: themeColor },
-                                        ]}>
-                                        {reaction.count}
-                                    </Text>
-                                </View>
-                            ))}
-                        </View>
-                    ) : null}
                 </View>
                 {canReply || post.can_edit ? (
                     <View style={styles.composerActionRow}>
