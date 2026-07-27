@@ -175,6 +175,15 @@ const HarborPostCard = memo(
             white,
         } = theme;
         const reactionCount = getReactionCount(post);
+        const reactionSummary = (
+            Array.isArray(post?.reactions) ? post.reactions : []
+        ).filter(reaction => reaction?.id && Number(reaction?.count) > 0);
+        const displayedReactions =
+            reactionSummary.length > 0
+                ? reactionSummary
+                : !reactionsEnabled && reactionCount > 0
+                    ? [{ id: 'heart', count: reactionCount }]
+                    : [];
         const likeAction = getLikeAction(post);
         const isLiked = Boolean(likeAction?.acted);
         const currentReaction = post?.current_user_reaction?.id;
@@ -498,11 +507,38 @@ const HarborPostCard = memo(
                             color={black.third}
                         />
                     </View>
-                    <MetaItem
-                        icon={currentReaction || isLiked ? 'heart' : 'heart-outline'}
-                        value={reactionCount}
-                        color={themeColor}
-                    />
+                    {displayedReactions.length > 0 ? (
+                        <View style={styles.reactionSummary}>
+                            {displayedReactions.map(reaction => (
+                                <View
+                                    key={reaction.id}
+                                    accessible
+                                    accessibilityLabel={`${t(
+                                        HARBOR_REACTION_LABEL[
+                                            normalizeHarborReactionName(
+                                                reaction.id,
+                                            )
+                                        ] ||
+                                            normalizeHarborReactionName(
+                                                reaction.id,
+                                            ).replace(/_/g, ' '),
+                                    )} ${reaction.count}`}
+                                    style={styles.reactionSummaryItem}>
+                                    <HarborReactionIcon
+                                        name={reaction.id}
+                                        size={scale(14)}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.reactionSummaryText,
+                                            { color: themeColor },
+                                        ]}>
+                                        {reaction.count}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    ) : null}
                 </View>
                 {canReply || post.can_edit ? (
                     <View style={styles.composerActionRow}>

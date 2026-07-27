@@ -452,6 +452,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    reactionSummary: {
+        maxWidth: '68%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        flexWrap: 'wrap',
+    },
+    reactionSummaryItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: scale(8),
+        paddingVertical: verticalScale(2),
+    },
+    reactionSummaryText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        marginLeft: scale(2),
+    },
     metaItem: {
         flexDirection: 'row',
         alignItems: 'center',
