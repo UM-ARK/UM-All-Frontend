@@ -47,7 +47,10 @@ import HarborRelatedTopics from './topicDetail/HarborRelatedTopics';
 import HarborTopicDetailOverlays from './topicDetail/HarborTopicDetailOverlays';
 import HarborTopicDetailSkeleton from './topicDetail/HarborTopicDetailSkeleton';
 import HarborTopicHeader from './topicDetail/HarborTopicHeader';
-import { extractPostQuoteText } from './topicDetail/harborTopicModels';
+import {
+    canUpdatePostReaction,
+    extractPostQuoteText,
+} from './topicDetail/harborTopicModels';
 import styles from './topicDetail/styles';
 import useHarborTopicActions from './topicDetail/useHarborTopicActions';
 import useHarborTopicReading from './topicDetail/useHarborTopicReading';
@@ -136,8 +139,6 @@ const HarborTopicShareButton = ({
     accessibilityLabel,
     onPress,
     themeColor,
-    tonalPrimary15,
-    tonalPrimary30,
 }) => (
     <Pressable
         accessibilityRole="button"
@@ -146,14 +147,7 @@ const HarborTopicShareButton = ({
             trigger();
             onPress();
         }}
-        style={({ pressed }) => [
-            styles.headerShareButton,
-            {
-                backgroundColor: pressed
-                    ? tonalPrimary30
-                    : tonalPrimary15,
-            },
-        ]}>
+        style={styles.headerShareButton}>
         <MaterialCommunityIcons
             name="share-variant-outline"
             size={scale(20)}
@@ -173,7 +167,11 @@ const createHarborTopicShareButton = props => () => (
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
-    const { login, status: sessionStatus } = useHarborSession();
+    const {
+        login,
+        status: sessionStatus,
+        user: harborUser,
+    } = useHarborSession();
     const { width } = useWindowDimensions();
     const headerHeight = useHeaderHeight();
     const insets = useSafeAreaInsets();
@@ -289,6 +287,8 @@ const HarborTopicDetail = ({ route, navigation }) => {
         setIsNotificationVisible,
         togglePostLike,
     } = useHarborTopicActions({
+        currentTrustLevel: harborUser?.trustLevel,
+        currentUsername: harborUser?.username,
         highestPostNumber,
         latestTopicRef,
         login,
@@ -448,8 +448,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                 accessibilityLabel: t('分享'),
                 onPress: shareCurrentPost,
                 themeColor,
-                tonalPrimary15: tonal.primary15,
-                tonalPrimary30: tonal.primary30,
             }),
         });
     }, [
@@ -462,12 +460,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         theme.imagePlaceholder,
         themeColor,
         tonal.primary15,
-        tonal.primary30,
     ]);
-
-    const copyCurrentPost = useCallback(() => {
-        copyPostPermalink({ post_number: currentPostNumber });
-    }, [copyPostPermalink, currentPostNumber]);
 
     const openTopicReplyComposer = useCallback(() => {
         openHarborComposer(navigation, {
@@ -583,7 +576,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                     <View>
                         <HarborTopicHeader
                             topic={topic}
-                            onCopy={copyCurrentPost}
                             onMarkUnread={markTopicUnread}
                             onOpenNotifications={openNotificationLevels}
                             onOpenOriginal={openOriginalTopic}
@@ -667,6 +659,10 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         pendingReaction={
                             pendingMutations[`reaction:${item.id}`]
                         }
+                        reactionDisabled={
+                            sessionStatus === 'signedIn' &&
+                            !canUpdatePostReaction(item)
+                        }
                         reactions={validReactions}
                         reactionsEnabled={validReactions.length > 0}
                     />
@@ -678,7 +674,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
             contentWidth,
             imageUrls,
             isLoadingPrevious,
-            copyCurrentPost,
             copyPostPermalink,
             markTopicUnread,
             openAuthor,
@@ -696,6 +691,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             posts,
             scrollToPost,
             selectPostReaction,
+            sessionStatus,
             sharePost,
             t,
             themeColor,

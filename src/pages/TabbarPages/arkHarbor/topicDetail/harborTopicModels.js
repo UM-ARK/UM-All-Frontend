@@ -113,6 +113,13 @@ const getLikeAction = post => {
     return post?.actions_summary?.find(action => action?.id === LIKE_ACTION_ID);
 };
 
+const canUpdatePostReaction = post => {
+    if (post?.current_user_reaction) {
+        return post.current_user_reaction.can_undo !== false;
+    }
+    return Boolean(getLikeAction(post)?.can_act);
+};
+
 const getHarborMutationError = (error, fallback) => {
     const errors = error?.response?.data?.errors;
     if (Array.isArray(errors) && errors.length > 0) {
@@ -267,6 +274,7 @@ const appendTopicPosts = (currentTopic, nextPosts, stream) => {
 
 export {
     appendTopicPosts,
+    canUpdatePostReaction,
     extractPostImages,
     extractPostQuoteText,
     getHarborMutationError,

@@ -16,16 +16,78 @@ import {
     toggleHarborPostReaction,
     unlikeHarborPost,
     updateHarborBookmark,
+    validateActiveHarborSession,
 } from '../../../../utils/harbor/harborApi';
 import { publishHarborTopicUpdate } from '../../../../utils/harbor/harborTopicUpdates';
 import {
+    canUpdatePostReaction,
     getHarborMutationError,
     getLikeAction,
     updateOptimisticLike,
     updateOptimisticReaction,
 } from './harborTopicModels';
 
+const getPostActionDiagnostics = (
+    post,
+    currentUsername,
+    currentTrustLevel,
+) => {
+    const likeAction = getLikeAction(post);
+    const normalizedCurrentUsername =
+        typeof currentUsername === 'string'
+            ? currentUsername.toLowerCase()
+            : '';
+    const normalizedPostUsername =
+        typeof post?.username === 'string'
+            ? post.username.toLowerCase()
+            : '';
+    return {
+        topicId: post?.topic_id ?? null,
+        postId: post?.id ?? null,
+        postNumber: post?.post_number ?? null,
+        isOwnPost: Boolean(
+            normalizedCurrentUsername &&
+            normalizedPostUsername &&
+            normalizedCurrentUsername === normalizedPostUsername,
+        ),
+        currentTrustLevel: currentTrustLevel ?? null,
+        likeAction: likeAction
+            ? {
+                acted: Boolean(likeAction.acted),
+                canAct: likeAction.can_act ?? null,
+                canUndo: likeAction.can_undo ?? null,
+                count: likeAction.count ?? null,
+            }
+            : null,
+        currentReaction: post?.current_user_reaction
+            ? {
+                id: post.current_user_reaction.id ?? null,
+                canUndo: post.current_user_reaction.can_undo ?? null,
+            }
+            : null,
+    };
+};
+
+const logHarborPostAction = (event, details) => {
+    if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+        return;
+    }
+    console.warn(`[HarborPostAction] ${event}`, details);
+};
+
+const getMutationErrorDiagnostics = error => ({
+    httpStatus: error?.response?.status ?? null,
+    errorType: error?.response?.data?.error_type ?? null,
+    errors: error?.response?.data?.errors ?? null,
+    responseError: error?.response?.data?.error ?? null,
+    errorCode: error?.code ?? null,
+    requestMethod: error?.config?.method ?? null,
+    requestPath: error?.config?.url ?? null,
+});
+
 const useHarborTopicActions = ({
+    currentTrustLevel,
+    currentUsername,
     highestPostNumber,
     latestTopicRef,
     login,
@@ -90,6 +152,48 @@ const useHarborTopicActions = ({
         [t],
     );
 
+    const handleMutationFailure = useCallback(
+        async (error, context) => {
+            logHarborPostAction('request.failed', {
+                ...context,
+                ...getMutationErrorDiagnostics(error),
+            });
+            if (error?.response?.status === 403) {
+                try {
+                    const sessionValid =
+                        await validateActiveHarborSession();
+                    if (sessionValid === true) {
+                        logHarborPostAction(
+                            'session.valid_after_403',
+                            context,
+                        );
+                    } else if (sessionValid === false) {
+                        logHarborPostAction(
+                            'session.expired_after_403',
+                            context,
+                        );
+                        Toast.show(t('Harbor 登入已失效，請重新登入。'));
+                        return;
+                    } else {
+                        logHarborPostAction(
+                            'session.changed_after_403',
+                            context,
+                        );
+                    }
+                } catch (validationError) {
+                    logHarborPostAction('session.validation_failed_after_403', {
+                        ...context,
+                        validationErrorCode: validationError?.code ?? null,
+                        validationHttpStatus:
+                            validationError?.response?.status ?? null,
+                    });
+                }
+            }
+            showMutationFailure(error);
+        },
+        [showMutationFailure, t],
+    );
+
     const togglePostLike = useCallback(
         async post => {
             const key = `like:${post.id}`;
@@ -105,6 +209,18 @@ const useHarborTopicActions = ({
                 ((!liked && !likeAction?.can_act) ||
                     (liked && !likeAction?.can_undo))
             ) {
+                logHarborPostAction('blocked.client_permission', {
+                    action: liked ? 'unlike' : 'like',
+                    reason: liked
+                        ? 'like_can_undo_false_or_missing'
+                        : 'like_can_act_false_or_missing',
+                    sessionStatus: sessionStatusRef.current,
+                    ...getPostActionDiagnostics(
+                        post,
+                        currentUsername,
+                        currentTrustLevel,
+                    ),
+                });
                 finishMutation(key);
                 Toast.show(t('你目前沒有權限變更這篇帖子的讚好'));
                 return;
@@ -153,19 +269,29 @@ const useHarborTopicActions = ({
                 publishHarborTopicUpdate(topicId, {
                     likeCount: previousTopicLikeCount,
                 });
-                showMutationFailure(error);
+                await handleMutationFailure(error, {
+                    action: nextLiked ? 'like' : 'unlike',
+                    sessionStatus: sessionStatusRef.current,
+                    ...getPostActionDiagnostics(
+                        post,
+                        currentUsername,
+                        currentTrustLevel,
+                    ),
+                });
             } finally {
                 finishMutation(key);
             }
         },
         [
             beginMutation,
+            currentTrustLevel,
+            currentUsername,
             finishMutation,
             latestTopicRef,
             requireHarborSignIn,
             sessionStatusRef,
             setTopic,
-            showMutationFailure,
+            handleMutationFailure,
             t,
             topicId,
             updateTopicPost,
@@ -180,6 +306,7 @@ const useHarborTopicActions = ({
             if (!post) {
                 return;
             }
+            const wasSignedIn = sessionStatusRef.current === 'signedIn';
             if (!(await requireHarborSignIn())) {
                 return;
             }
@@ -187,7 +314,33 @@ const useHarborTopicActions = ({
                 post?.current_user_reaction &&
                 post.current_user_reaction.can_undo === false
             ) {
+                logHarborPostAction('blocked.client_permission', {
+                    action: 'reaction',
+                    reactionId,
+                    reason: 'reaction_can_undo_false',
+                    sessionStatus: sessionStatusRef.current,
+                    ...getPostActionDiagnostics(
+                        post,
+                        currentUsername,
+                        currentTrustLevel,
+                    ),
+                });
                 Toast.show(t('你目前不能取消這個回應'));
+                return;
+            }
+            if (wasSignedIn && !canUpdatePostReaction(post)) {
+                logHarborPostAction('blocked.client_permission', {
+                    action: 'reaction',
+                    reactionId,
+                    reason: 'like_can_act_false_or_missing',
+                    sessionStatus: sessionStatusRef.current,
+                    ...getPostActionDiagnostics(
+                        post,
+                        currentUsername,
+                        currentTrustLevel,
+                    ),
+                });
+                Toast.show(t('你目前沒有權限回應這篇帖子'));
                 return;
             }
 
@@ -216,18 +369,30 @@ const useHarborTopicActions = ({
                     like_count: post.like_count,
                     actions_summary: post.actions_summary,
                 }));
-                showMutationFailure(error);
+                await handleMutationFailure(error, {
+                    action: 'reaction',
+                    reactionId,
+                    sessionStatus: sessionStatusRef.current,
+                    ...getPostActionDiagnostics(
+                        post,
+                        currentUsername,
+                        currentTrustLevel,
+                    ),
+                });
             } finally {
                 finishMutation(key);
             }
         },
         [
             beginMutation,
+            currentTrustLevel,
+            currentUsername,
             finishMutation,
             latestTopicRef,
             requireHarborSignIn,
-            showMutationFailure,
+            handleMutationFailure,
             t,
+            sessionStatusRef,
             updateTopicPost,
         ],
     );

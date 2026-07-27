@@ -26,7 +26,6 @@ import styles from './styles';
 const HarborTopicHeader = memo(
     ({
         topic,
-        onCopy,
         onMarkUnread,
         onOpenNotifications,
         onOpenOriginal,
@@ -182,37 +181,6 @@ const HarborTopicHeader = memo(
                                 { color: themeColor },
                             ]}>
                             {t('查看 Web 原文')}
-                        </Text>
-                        <MaterialCommunityIcons
-                            name="open-in-new"
-                            size={scale(14)}
-                            color={themeColor}
-                        />
-                    </Pressable>
-                    <Pressable
-                        onPress={() => {
-                            trigger();
-                            onCopy();
-                        }}
-                        style={({ pressed }) => [
-                            styles.webOriginalButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="link-variant"
-                            size={scale(16)}
-                            color={themeColor}
-                        />
-                        <Text
-                            style={[
-                                styles.webOriginalText,
-                                { color: themeColor },
-                            ]}>
-                            {t('複製連結')}
                         </Text>
                     </Pressable>
                     <Pressable

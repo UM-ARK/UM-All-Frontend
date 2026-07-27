@@ -160,6 +160,7 @@ const HarborPostCard = memo(
         pendingBookmark,
         pendingLike,
         pendingReaction,
+        reactionDisabled,
         reactions,
         reactionsEnabled,
     }) => {
@@ -239,6 +240,41 @@ const HarborPostCard = memo(
             }
             return actions;
         }, [canReply, post.can_edit, t]);
+        const reactionButton = (
+            <View
+                style={[
+                    styles.postActionButton,
+                    styles.reactionMenuButton,
+                    reactionDisabled ? styles.disabledAction : null,
+                    { backgroundColor: tonal.primary15 },
+                ]}>
+                {pendingReaction ? (
+                    <ActivityIndicator
+                        size="small"
+                        color={themeColor}
+                    />
+                ) : currentReaction ? (
+                    <HarborReactionIcon
+                        name={currentReaction}
+                        size={scale(16)}
+                    />
+                ) : (
+                    <MaterialCommunityIcons
+                        name="emoticon-outline"
+                        size={scale(15)}
+                        color={themeColor}
+                    />
+                )}
+                <Text
+                    numberOfLines={1}
+                    style={[
+                        styles.postActionText,
+                        { color: themeColor },
+                    ]}>
+                    {t('回應')}
+                </Text>
+            </View>
+        );
 
         if (isDeleted || isHidden) {
             return (
@@ -537,7 +573,15 @@ const HarborPostCard = memo(
                     </View>
                 ) : null}
                 <View style={styles.postActionRow}>
-                    {reactionsEnabled ? (
+                    {reactionsEnabled && reactionDisabled ? (
+                        <View
+                            accessibilityRole="button"
+                            accessibilityLabel={t('回應')}
+                            accessibilityState={{ disabled: true }}
+                            style={styles.reactionMenuView}>
+                            {reactionButton}
+                        </View>
+                    ) : reactionsEnabled ? (
                         <MenuView
                             actions={reactionMenuActions}
                             onOpenMenu={() => trigger()}
@@ -550,38 +594,7 @@ const HarborPostCard = memo(
                             }}
                             shouldOpenOnLongPress={false}
                             style={styles.reactionMenuView}>
-                            <View
-                                style={[
-                                    styles.postActionButton,
-                                    styles.reactionMenuButton,
-                                    { backgroundColor: tonal.primary15 },
-                                ]}>
-                                {pendingReaction ? (
-                                    <ActivityIndicator
-                                        size="small"
-                                        color={themeColor}
-                                    />
-                                ) : currentReaction ? (
-                                    <HarborReactionIcon
-                                        name={currentReaction}
-                                        size={scale(16)}
-                                    />
-                                ) : (
-                                    <MaterialCommunityIcons
-                                        name="emoticon-outline"
-                                        size={scale(15)}
-                                        color={themeColor}
-                                    />
-                                )}
-                                <Text
-                                    numberOfLines={1}
-                                    style={[
-                                        styles.postActionText,
-                                        { color: themeColor },
-                                    ]}>
-                                    {t('回應')}
-                                </Text>
-                            </View>
+                            {reactionButton}
                         </MenuView>
                     ) : (
                         <Pressable

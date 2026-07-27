@@ -419,6 +419,9 @@ const styles = StyleSheet.create({
     reactionMenuButton: {
         marginRight: 0,
     },
+    disabledAction: {
+        opacity: 0.45,
+    },
     postActionButton: {
         minWidth: scale(72),
         flex: 1,

@@ -334,6 +334,7 @@
         "Harbor 暫時無法完成此操作": "Harbor cannot complete this action right now",
         "{{reason}}，已還原狀態，請重試": "{{reason}}. The previous state has been restored; please try again.",
         "你目前沒有權限變更這篇帖子的讚好": "You do not have permission to change the like on this post.",
+        "你目前沒有權限回應這篇帖子": "You do not have permission to react to this post.",
         "你目前不能取消這個回應": "You cannot remove this reaction.",
         "Harbor 沒有返回收藏狀態": "Harbor did not return the bookmark state.",
         "收藏已儲存": "Bookmark saved.",

@@ -20,10 +20,13 @@ import {
     markHarborTopicUnread,
     markHarborNotificationRead,
     saveHarborTopicTimings,
+    setActiveHarborCredentials,
+    setHarborCredentialRejectedHandler,
     setHarborTopicNotificationLevel,
     toggleHarborPostReaction,
     unlikeHarborPost,
     updateHarborBookmark,
+    validateActiveHarborSession,
 } from '../harborApi';
 
 jest.mock('../../pathMap', () => ({
@@ -46,10 +49,92 @@ describe('Harbor API 資料正規化', () => {
     });
 
     afterEach(() => {
+        setActiveHarborCredentials(null);
+        setHarborCredentialRejectedHandler(null);
         getSpy.mockRestore();
         postSpy.mockRestore();
         putSpy.mockRestore();
         deleteSpy.mockRestore();
+    });
+
+    it('輕量 Session 驗證共用進行中的請求並使用短期快取', async () => {
+        setActiveHarborCredentials({
+            userApiKey: 'session-key',
+            clientId: 'session-client',
+        });
+        getSpy.mockResolvedValue({
+            data: {
+                current_user: {
+                    id: 7,
+                    username: 'ark-user',
+                },
+            },
+        });
+
+        const firstRequest = validateActiveHarborSession();
+        const secondRequest = validateActiveHarborSession();
+
+        expect(firstRequest).toBe(secondRequest);
+        await expect(firstRequest).resolves.toBe(true);
+        await expect(validateActiveHarborSession()).resolves.toBe(true);
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith('/session/current.json', {
+            harborCredentials: {
+                userApiKey: 'session-key',
+                clientId: 'session-client',
+            },
+        });
+    });
+
+    it('輕量 Session 驗證以 403 判定憑證失效', async () => {
+        const rejectedHandler = jest.fn();
+        setActiveHarborCredentials({
+            userApiKey: 'expired-key',
+            clientId: 'session-client',
+        });
+        setHarborCredentialRejectedHandler(rejectedHandler);
+        getSpy.mockRejectedValue({
+            response: { status: 403 },
+        });
+
+        await expect(validateActiveHarborSession()).resolves.toBe(false);
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(rejectedHandler).toHaveBeenCalledWith(
+            expect.objectContaining({
+                response: { status: 403 },
+            }),
+            'expired-key',
+        );
+    });
+
+    it('輕量 Session 驗證期間切換帳號時忽略舊結果', async () => {
+        let resolveRequest;
+        setActiveHarborCredentials({
+            userApiKey: 'previous-key',
+            clientId: 'session-client',
+        });
+        getSpy.mockReturnValue(
+            new Promise(resolve => {
+                resolveRequest = resolve;
+            }),
+        );
+
+        const validationRequest = validateActiveHarborSession();
+        setActiveHarborCredentials({
+            userApiKey: 'next-key',
+            clientId: 'session-client',
+        });
+        resolveRequest({
+            data: {
+                current_user: {
+                    id: 7,
+                    username: 'ark-user',
+                },
+            },
+        });
+
+        await expect(validationRequest).resolves.toBeNull();
+        expect(getSpy).toHaveBeenCalledTimes(1);
     });
 
     it('已登入且能力資料尚未恢復時保留會員話題視圖', () => {

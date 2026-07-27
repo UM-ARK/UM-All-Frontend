@@ -18,6 +18,7 @@ const USER_ACTION_PAGE_SIZE = 30;
 const DEFAULT_TOPIC_PAGE_SIZE = 30;
 const COMPOSER_METADATA_TTL = 5 * 60 * 1000;
 const COMPOSER_SETTINGS_TTL = 30 * 60 * 1000;
+const SESSION_VALIDATION_COOLDOWN = 30 * 1000;
 const TOPIC_VIEWS = ['latest', 'top', 'new', 'unread'];
 const PUBLIC_TOPIC_VIEWS = ['latest', 'top'];
 
@@ -47,6 +48,10 @@ export const harborApi = axios.create({
 
 let activeCredentials = null;
 let credentialRejectedHandler = null;
+let sessionValidationRequest = null;
+let sessionValidationAt = 0;
+let sessionValidationResult = null;
+let sessionValidationError = null;
 let publicCategoryCache = null;
 let publicCategoryRequest = null;
 let publicCategoryCacheGeneration = 0;
@@ -97,6 +102,10 @@ export function setActiveHarborCredentials(credentials) {
     const previousCredentialKey = activeCredentials?.userApiKey;
     activeCredentials = credentials;
     if (previousCredentialKey !== credentials?.userApiKey) {
+        sessionValidationRequest = null;
+        sessionValidationAt = 0;
+        sessionValidationResult = null;
+        sessionValidationError = null;
         clearHarborComposerMetadataCache();
     }
 }
@@ -123,6 +132,59 @@ export function clearHarborComposerMetadataCache() {
 export function isHarborCredentialRejected(error, validationRequest = false) {
     const status = error?.response?.status;
     return status === 401 || (validationRequest && status === 403);
+}
+
+export function validateActiveHarborSession() {
+    const credentials = activeCredentials;
+    if (!credentials?.userApiKey) {
+        return Promise.resolve(false);
+    }
+    if (sessionValidationRequest) {
+        return sessionValidationRequest;
+    }
+    if (Date.now() - sessionValidationAt < SESSION_VALIDATION_COOLDOWN) {
+        if (sessionValidationError) {
+            return Promise.reject(sessionValidationError);
+        }
+        if (sessionValidationResult != null) {
+            return Promise.resolve(sessionValidationResult);
+        }
+    }
+
+    sessionValidationAt = Date.now();
+    sessionValidationResult = null;
+    sessionValidationError = null;
+    const credentialKey = credentials.userApiKey;
+    const request = fetchCurrentHarborSession(credentials)
+        .then(() => {
+            if (activeCredentials?.userApiKey !== credentialKey) {
+                return null;
+            }
+            sessionValidationResult = true;
+            return true;
+        })
+        .catch(error => {
+            if (activeCredentials?.userApiKey !== credentialKey) {
+                return null;
+            }
+            if (
+                isHarborCredentialRejected(error, true) ||
+                error?.code === 'INVALID_HARBOR_SESSION'
+            ) {
+                sessionValidationResult = false;
+                credentialRejectedHandler?.(error, credentialKey);
+                return false;
+            }
+            sessionValidationError = error;
+            throw error;
+        })
+        .finally(() => {
+            if (sessionValidationRequest === request) {
+                sessionValidationRequest = null;
+            }
+        });
+    sessionValidationRequest = request;
+    return request;
 }
 
 export function getHarborTopicViews(
@@ -2110,7 +2172,7 @@ export async function fetchHarborBadges(username, { signal } = {}) {
     return normalizeBadges(response.data);
 }
 
-export async function fetchCurrentHarborUser(credentials) {
+export async function fetchCurrentHarborSession(credentials) {
     const requestConfig = { harborCredentials: credentials };
     const sessionResponse = await harborApi.get(
         '/session/current.json',
@@ -2122,7 +2184,12 @@ export async function fetchCurrentHarborUser(credentials) {
         error.code = 'INVALID_HARBOR_SESSION';
         throw error;
     }
+    return currentUser;
+}
 
+export async function fetchCurrentHarborUser(credentials) {
+    const requestConfig = { harborCredentials: credentials };
+    const currentUser = await fetchCurrentHarborSession(credentials);
     const username = encodeURIComponent(currentUser.username);
     const [
         profileResult,
