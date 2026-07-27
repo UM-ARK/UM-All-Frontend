@@ -88,7 +88,12 @@ export function ARK_HARBOR_EMOJI_URL(name, emojiSet = 'twitter') {
     );
 }
 
-export const ARK_HARBOR_FEEDBACK = ARK_HARBOR + '/c/site-feedback/2';
+/** Harbor「反饋」分類（/c/site-feedback/2） */
+export const ARK_HARBOR_FEEDBACK_CATEGORY_ID = 2;
+export const ARK_HARBOR_FEEDBACK_CATEGORY_SLUG = 'site-feedback';
+export const ARK_HARBOR_FEEDBACK =
+    ARK_HARBOR +
+    `/c/${ARK_HARBOR_FEEDBACK_CATEGORY_SLUG}/${ARK_HARBOR_FEEDBACK_CATEGORY_ID}`;
 
 export const ARK_WIKI = 'https://wiki.umall.one';
 

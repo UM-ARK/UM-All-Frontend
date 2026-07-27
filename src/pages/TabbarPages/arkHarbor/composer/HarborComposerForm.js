@@ -202,7 +202,7 @@ const HarborComposerForm = ({
                             accessibilityLabel={t('話題標題')}
                             autoCapitalize="sentences"
                             onChangeText={setTitle}
-                            placeholder={t('輸入清楚的話題標題')}
+                            placeholder={t('說點什麼或提個問題')}
                             placeholderTextColor={theme.black.third}
                             style={[
                                 styles.singleLineInput,
@@ -384,7 +384,7 @@ const HarborComposerForm = ({
                         autoCapitalize="sentences"
                         multiline
                         onChangeText={setRaw}
-                        placeholder={t('分享你的想法…')}
+                        placeholder={t('分享你的想法…內容將自動儲存')}
                         placeholderTextColor={theme.black.third}
                         style={[
                             styles.bodyInput,

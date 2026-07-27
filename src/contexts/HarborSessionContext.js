@@ -351,6 +351,7 @@ export const HarborSessionProvider = ({ children }) => {
             logHarborAuthEvent('login.success', {
                 durationMs: Date.now() - startedAt,
             });
+            return true;
         } catch (authError) {
             if (authError.code === HARBOR_AUTH_ERROR.CANCELLED) {
                 logHarborAuthEvent('login.cancelled', {
@@ -361,7 +362,7 @@ export const HarborSessionProvider = ({ children }) => {
                         credentialsRef.current ? 'signedIn' : 'signedOut',
                     );
                 }
-                return;
+                return false;
             }
             logHarborAuthError('login.failed', authError, {
                 durationMs: Date.now() - startedAt,

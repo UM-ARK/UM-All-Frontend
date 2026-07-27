@@ -38,25 +38,18 @@ import { trigger } from '../../../../utils/trigger';
 import { HarborInlineRetry } from './HarborListStates';
 import HarborCategoryIcon from './HarborCategoryIcon';
 
-const PLACEHOLDER_ITEMS = [
-    { key: 'more', icon: 'dots-horizontal', label: '更多' },
-];
-
 const DrawerMenuItem = ({
     icon,
     label,
     active = false,
-    disabled = false,
     onPress,
 }) => {
     const { theme } = useTheme();
-    const { t } = useTranslation('harbor');
 
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityState={{ disabled, selected: active }}
-            disabled={disabled}
+            accessibilityState={{ selected: active }}
             onPress={() => {
                 trigger();
                 onPress?.();
@@ -70,7 +63,6 @@ const DrawerMenuItem = ({
                             ? theme.tonal.primary08
                             : theme.bg_color,
                 },
-                disabled && styles.disabledItem,
             ]}>
             <MaterialCommunityIcons
                 name={icon}
@@ -87,21 +79,6 @@ const DrawerMenuItem = ({
                 ]}>
                 {label}
             </Text>
-            {disabled ? (
-                <View
-                    style={[
-                        styles.placeholderBadge,
-                        { backgroundColor: theme.tonal.primary15 },
-                    ]}>
-                    <Text
-                        style={[
-                            styles.placeholderBadgeText,
-                            { color: theme.themeColor },
-                        ]}>
-                        {t('即將推出')}
-                    </Text>
-                </View>
-            ) : null}
         </Pressable>
     );
 };
@@ -556,14 +533,6 @@ const HarborDrawerContent = ({ navigation }) => {
                         label={t('草稿箱')}
                         onPress={() => navigateFromDrawer('HarborDrafts')}
                     />
-                    {PLACEHOLDER_ITEMS.map(item => (
-                        <DrawerMenuItem
-                            key={item.key}
-                            icon={item.icon}
-                            label={t(item.label)}
-                            disabled
-                        />
-                    ))}
                 </View>
 
                 <DrawerSectionTitle
@@ -742,9 +711,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(12),
         paddingVertical: verticalScale(7),
     },
-    disabledItem: {
-        opacity: 0.65,
-    },
     menuLabel: {
         ...uiStyle.defaultText,
         flex: 1,
@@ -752,17 +718,6 @@ const styles = StyleSheet.create({
         fontSize: scale(13),
         fontWeight: '600',
         marginLeft: scale(12),
-    },
-    placeholderBadge: {
-        borderRadius: scale(8),
-        paddingHorizontal: scale(7),
-        paddingVertical: verticalScale(3),
-        marginLeft: scale(6),
-    },
-    placeholderBadgeText: {
-        ...uiStyle.defaultText,
-        fontSize: scale(8),
-        fontWeight: '700',
     },
     sectionTitle: {
         minHeight: verticalScale(40),
