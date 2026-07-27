@@ -139,12 +139,6 @@ const HarborDashboard = ({ user, navigation }) => {
             route: 'HarborDrafts',
             badge: draftCount,
         },
-        {
-            key: 'activity',
-            label: t('所有活動'),
-            icon: 'pulse-outline',
-            kind: 'all',
-        },
     ];
 
     const handleActionPress = action => {
@@ -178,13 +172,7 @@ const HarborDashboard = ({ user, navigation }) => {
                 onPress={() => navigation.navigate('HarborAccountSettings')}
             />
 
-            <HarborSectionHeader
-                title={t('我的 Harbor')}
-                actionLabel={t('所有活動')}
-                onAction={() =>
-                    navigation.navigate('HarborActivity', { kind: 'all' })
-                }
-            />
+            <HarborSectionHeader title={t('我的 Harbor')} />
             <View
                 style={[
                     styles.actionsCard,
