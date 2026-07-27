@@ -65,6 +65,7 @@ import { useCoursePlan } from '../../context/CoursePlanContext';
 import { getSlotKey } from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
+import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
 
 const converter = OpenCC.Converter({ from: 'cn', to: 'tw' }); // 簡體轉繁體
@@ -2460,6 +2461,9 @@ E11-0000
                 bottom={tabBarHeight + verticalScale(10)}
                 visible={!hasOpenCourseSearch}
                 onAddPress={openCourseSearch}
+                onSearchPress={() =>
+                    navigation.navigate(COURSE_SEARCH_SEGMENT)
+                }
                 onClearPress={handleClearPlan}
                 canClear={planList.length > 0}
             />

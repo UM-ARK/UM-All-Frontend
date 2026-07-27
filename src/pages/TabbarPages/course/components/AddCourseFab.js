@@ -20,13 +20,15 @@ import TouchableScale from '../../../../components/TouchableScale';
 const FAB_FADE_MS = 220;
 
 /**
- * 課表段落右下角浮動操作列：加課在上、清空（有排課時）在下。
+ * 課表段落右下角浮動操作列：加課 → 搵課 → 清空（有排課時）。
  *
  * 清空從頂欄 ⋯ 選單遷出，與加課同區，避免次要操作藏太深；
+ * 搵課切到隔壁段落，與搵課頁底部課表膠囊對稱；
  * sheet 展開時由呼叫端以 visible=false 淡出（會被 sheet 蓋住）。
  *
  * @param {number} bottom 距底部距離（呼叫端需扣掉 Tab Bar 高度）
  * @param {Function} onAddPress 開啟加課 sheet
+ * @param {Function} [onSearchPress] 跳轉到搵課段落
  * @param {Function} [onClearPress] 清空模擬課表（含確認對話框由呼叫端處理）
  * @param {boolean} [canClear] 是否已有排課（無排課時不顯示清空）
  * @param {boolean} [visible] 是否可見（關閉時淡出，不卸載以保留動畫）
@@ -34,6 +36,7 @@ const FAB_FADE_MS = 220;
 const AddCourseFab = ({
     bottom,
     onAddPress,
+    onSearchPress,
     onClearPress,
     canClear = false,
     visible = true,
@@ -108,6 +111,29 @@ const AddCourseFab = ({
                     <Ionicons name="add" size={scale(18)} color={themeColor} />
                     <Text style={styles.label(themeColor)}>
                         {t('加課', { ns: 'timetable' })}
+                    </Text>
+                </LiquidGlassView>
+            </TouchableScale>
+
+            <TouchableScale
+                onPress={() => {
+                    trigger();
+                    onSearchPress?.();
+                }}
+                hitSlop={scale(8)}>
+                <LiquidGlassView
+                    interactive
+                    hover={
+                        isLiquidGlassSupported ? { effect: 'highlight' } : null
+                    }
+                    style={styles.pill}>
+                    <Ionicons
+                        name="search-outline"
+                        size={scale(16)}
+                        color={themeColor}
+                    />
+                    <Text style={styles.label(themeColor)}>
+                        {t('搵課')}
                     </Text>
                 </LiquidGlassView>
             </TouchableScale>
