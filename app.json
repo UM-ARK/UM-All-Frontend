@@ -3,7 +3,7 @@
     "name": "ARK ALL",
     "slug": "arkall",
     "scheme": "one.umall",
-    "version": "26.5.0",
+    "version": "26.8.0",
     "icon": "./src/static/img/logo.png",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -12,7 +12,7 @@
       "icon": "./src/static/img/logo.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "one.umall",
-      "buildNumber": "26.5.0",
+      "buildNumber": "26.8.0",
       "associatedDomains": [
         "applinks:umall.one",
         "webcredentials:umall.one"
