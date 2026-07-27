@@ -132,9 +132,9 @@ export function useHarborDraft({
             (isEditingFirstPost &&
                 title.trim() !== String(originalTitle).trim())
         : Boolean(
-            title.trim() ||
             raw.trim() ||
-            images.length > 0,
+            images.length > 0 ||
+            (mode === 'newTopic' && title.trim()),
         );
 
     const buildDraftRecord = useCallback(() => {
@@ -653,12 +653,34 @@ export function useHarborDraft({
         await discardCurrentDraft();
     }, [discardCurrentDraft]);
 
+    const discardDraftAndExit = useCallback(async () => {
+        completedRef.current = true;
+        clearTimeout(autosaveTimerRef.current);
+        clearTimeout(remoteAutosaveTimerRef.current);
+        try {
+            await discardCurrentDraft();
+            allowNextRemovalRef.current = true;
+            navigation.goBack();
+        } catch (error) {
+            completedRef.current = false;
+            throw error;
+        }
+    }, [discardCurrentDraft, navigation]);
+
     return useMemo(
         () => ({
             clearDraftAfterPublish,
+            discardDraftAndExit,
             draftKey,
+            hasDraftContent,
             isDraftLoading,
         }),
-        [clearDraftAfterPublish, draftKey, isDraftLoading],
+        [
+            clearDraftAfterPublish,
+            discardDraftAndExit,
+            draftKey,
+            hasDraftContent,
+            isDraftLoading,
+        ],
     );
 }

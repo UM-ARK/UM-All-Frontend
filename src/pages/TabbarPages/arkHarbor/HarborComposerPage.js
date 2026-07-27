@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Keyboard,
     Pressable,
     StyleSheet,
@@ -82,16 +83,6 @@ const HarborComposerPage = ({route, navigation}) => {
         visibleTextLength,
     } = useHarborComposer({route, t});
 
-    useEffect(() => {
-        navigation.setOptions({
-            headerTitle: isNewTopic
-                ? t('建立話題')
-                : isReply
-                    ? t('回覆話題')
-                    : t('編輯貼文'),
-        });
-    }, [isNewTopic, isReply, navigation, t]);
-
     const {
         images,
         hasReachedImageLimit,
@@ -106,7 +97,9 @@ const HarborComposerPage = ({route, navigation}) => {
 
     const {
         clearDraftAfterPublish,
+        discardDraftAndExit,
         draftKey,
+        hasDraftContent,
         isDraftLoading,
     } = useHarborDraft({
         categories,
@@ -134,6 +127,85 @@ const HarborComposerPage = ({route, navigation}) => {
         title,
         user,
     });
+
+    const handleDiscard = useCallback(() => {
+        trigger();
+        Alert.alert(
+            t('捨棄這次修改？'),
+            t('這次修改不會保存。'),
+            [
+                {
+                    text: t('取消'),
+                    style: 'cancel',
+                    onPress: trigger,
+                },
+                {
+                    text: t('捨棄'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        trigger();
+                        try {
+                            await discardDraftAndExit();
+                            Toast.show(t('草稿已放棄。'));
+                        } catch {
+                            Toast.show(
+                                t('草稿放棄失敗，請稍後再試。'),
+                            );
+                        }
+                    },
+                },
+            ],
+        );
+    }, [discardDraftAndExit, t]);
+
+    useEffect(() => {
+        const shouldShowDiscard =
+            sessionStatus === 'signedIn' &&
+            !isLoading &&
+            !isDraftLoading &&
+            !loadError &&
+            hasDraftContent;
+        navigation.setOptions({
+            headerTitle: isNewTopic
+                ? t('建立話題')
+                : isReply
+                    ? t('回覆話題')
+                    : t('編輯貼文'),
+            headerRight: shouldShowDiscard
+                ? () => (
+                    <Pressable
+                        accessibilityLabel={t('捨棄這次修改')}
+                        accessibilityRole="button"
+                        hitSlop={scale(8)}
+                        onPress={handleDiscard}
+                        style={({pressed}) => [
+                            styles.discardButton,
+                            pressed && {opacity: 0.6},
+                        ]}>
+                        <Text
+                            style={[
+                                styles.discardButtonText,
+                                {color: theme.unread},
+                            ]}>
+                            {t('捨棄')}
+                        </Text>
+                    </Pressable>
+                )
+                : undefined,
+        });
+    }, [
+        handleDiscard,
+        hasDraftContent,
+        isDraftLoading,
+        isLoading,
+        isNewTopic,
+        isReply,
+        loadError,
+        navigation,
+        sessionStatus,
+        t,
+        theme.unread,
+    ]);
 
     const handleOpenWebComposer = useCallback(() => {
         trigger();
@@ -517,6 +589,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: scale(28),
+    },
+    discardButton: {
+        paddingHorizontal: scale(6),
+        paddingVertical: verticalScale(6),
+    },
+    discardButtonText: {
+        fontSize: scale(14),
+        fontWeight: '600',
     },
     inlineErrorText: {
         flex: 1,
