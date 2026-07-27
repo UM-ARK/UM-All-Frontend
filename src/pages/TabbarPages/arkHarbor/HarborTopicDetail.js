@@ -31,7 +31,10 @@ import { openLink } from '../../../utils/browser';
 import {
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
 } from '../../../utils/harbor/harborApi';
-import { parseHarborUrl } from '../../../utils/harbor/harborNavigation';
+import {
+    openHarborComposer,
+    parseHarborUrl,
+} from '../../../utils/harbor/harborNavigation';
 import {
     ARK_HARBOR,
     ARK_HARBOR_TOPIC_URL,
@@ -350,7 +353,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     }, [copyPostPermalink, currentPostNumber]);
 
     const openTopicReplyComposer = useCallback(() => {
-        navigation.navigate('HarborComposer', {
+        openHarborComposer(navigation, {
             mode: 'reply',
             topicId,
             topicTitle: topic?.title || initialTopicTitle,
@@ -366,7 +369,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const openPostReplyComposer = useCallback(
         post => {
-            navigation.navigate('HarborComposer', {
+            openHarborComposer(navigation, {
                 mode: 'reply',
                 topicId,
                 topicTitle: topic?.title || initialTopicTitle,
@@ -395,7 +398,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             const quoteRaw =
                 `[quote="${username}, post:${post.post_number}, topic:${topicId}"]\n` +
                 `${quoteText}\n[/quote]\n\n`;
-            navigation.navigate('HarborComposer', {
+            openHarborComposer(navigation, {
                 mode: 'reply',
                 topicId,
                 topicTitle: topic?.title || initialTopicTitle,
@@ -415,7 +418,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
 
     const openPostEditComposer = useCallback(
         post => {
-            navigation.navigate('HarborComposer', {
+            openHarborComposer(navigation, {
                 mode: 'edit',
                 postId: post.id,
                 postNumber: post.post_number,

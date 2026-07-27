@@ -34,6 +34,7 @@ const HarborComposerForm = ({
     onOpenMarkdownGuide,
     onOpenTagSheet,
     onOpenWebComposer,
+    onPressContext,
     onSelectCategory,
     route,
     submit,
@@ -116,11 +117,16 @@ const HarborComposerForm = ({
                     isLiquidGlassSupported ? {top: headerHeight} : undefined
                 }>
                 {!isNewTopic ? (
-                    <View
-                        style={[
+                    <Pressable
+                        accessibilityLabel={t('查看原帖')}
+                        accessibilityRole="button"
+                        onPress={onPressContext}
+                        style={({pressed}) => [
                             styles.contextCard,
                             {
-                                backgroundColor: theme.tonal.primary08,
+                                backgroundColor: pressed
+                                    ? theme.tonal.primary15
+                                    : theme.tonal.primary08,
                                 borderColor: theme.themeColorUltraLight,
                             },
                         ]}>
@@ -160,7 +166,12 @@ const HarborComposerForm = ({
                                         : t('回覆這個話題')}
                             </Text>
                         </View>
-                    </View>
+                        <MaterialCommunityIcons
+                            name="chevron-right"
+                            size={scale(20)}
+                            color={theme.black.third}
+                        />
+                    </Pressable>
                 ) : null}
 
                 {isNewTopic || isEditingFirstPost ? (

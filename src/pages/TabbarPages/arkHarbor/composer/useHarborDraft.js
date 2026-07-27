@@ -374,12 +374,14 @@ export function useHarborDraft({
     }, [accountId, draftKey]);
 
     useEffect(() => {
-        if (
-            isComposerLoading ||
-            sessionStatus !== 'signedIn' ||
-            !draftKey
-        ) {
+        if (sessionStatus !== 'signedIn' || !draftKey) {
             setIsDraftLoading(false);
+            return;
+        }
+
+        // Composer 尚未就緒時維持 loading，避免中間露出空白表單造成閃爍
+        if (isComposerLoading) {
+            setIsDraftLoading(true);
             return;
         }
 

@@ -1,6 +1,125 @@
-import {parseHarborUrl} from '../harborNavigation';
+import {
+    isSameHarborComposerTarget,
+    openHarborComposer,
+    parseHarborUrl,
+} from '../harborNavigation';
 
 const HARBOR_BASE_URL = 'https://harbor.umall.one';
+
+describe('isSameHarborComposerTarget', () => {
+    it('比對同一話題與同一回覆樓層', () => {
+        expect(
+            isSameHarborComposerTarget(
+                {
+                    mode: 'reply',
+                    topicId: 12,
+                    replyToPostNumber: 4,
+                    draftKey: 'topic_12',
+                },
+                {
+                    mode: 'reply',
+                    topicId: 12,
+                    replyToPostNumber: 4,
+                },
+            ),
+        ).toBe(true);
+    });
+
+    it('不同樓層不算同一目標', () => {
+        expect(
+            isSameHarborComposerTarget(
+                {mode: 'reply', topicId: 12, replyToPostNumber: 4},
+                {mode: 'reply', topicId: 12, replyToPostNumber: 5},
+            ),
+        ).toBe(false);
+    });
+
+    it('編輯模式以 postId 比對', () => {
+        expect(
+            isSameHarborComposerTarget(
+                {mode: 'edit', topicId: 12, postId: 99},
+                {mode: 'edit', topicId: 12, postId: 99},
+            ),
+        ).toBe(true);
+        expect(
+            isSameHarborComposerTarget(
+                {mode: 'edit', topicId: 12, postId: 99},
+                {mode: 'edit', topicId: 12, postId: 100},
+            ),
+        ).toBe(false);
+    });
+});
+
+describe('openHarborComposer', () => {
+    it('stack 已有同一回覆目標時 pop 回去，不另開新頁', () => {
+        const pop = jest.fn();
+        const navigate = jest.fn();
+        const navigation = {
+            pop,
+            navigate,
+            getState: () => ({
+                index: 2,
+                routes: [
+                    {name: 'HarborDrafts'},
+                    {
+                        name: 'HarborComposer',
+                        params: {
+                            mode: 'reply',
+                            topicId: 12,
+                            replyToPostNumber: 4,
+                            draftKey: 'topic_12',
+                            fromDraftBox: true,
+                        },
+                    },
+                    {name: 'HarborTopicDetail', params: {topicId: 12}},
+                ],
+            }),
+        };
+
+        openHarborComposer(navigation, {
+            mode: 'reply',
+            topicId: 12,
+            replyToPostNumber: 4,
+        });
+
+        expect(pop).toHaveBeenCalledWith(1);
+        expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it('目標不同時仍 navigate 新 Composer', () => {
+        const pop = jest.fn();
+        const navigate = jest.fn();
+        const params = {
+            mode: 'reply',
+            topicId: 12,
+            replyToPostNumber: 5,
+        };
+        const navigation = {
+            pop,
+            navigate,
+            getState: () => ({
+                index: 2,
+                routes: [
+                    {name: 'HarborDrafts'},
+                    {
+                        name: 'HarborComposer',
+                        params: {
+                            mode: 'reply',
+                            topicId: 12,
+                            replyToPostNumber: 4,
+                        },
+                    },
+                    {name: 'HarborTopicDetail', params: {topicId: 12}},
+                ],
+            }),
+        };
+
+        openHarborComposer(navigation, params);
+
+        expect(pop).not.toHaveBeenCalled();
+        expect(navigate).toHaveBeenCalledWith('HarborComposer', params);
+    });
+});
 
 describe('parseHarborUrl', () => {
     it.each([

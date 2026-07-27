@@ -1,6 +1,7 @@
 import React, {
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -13,6 +14,8 @@ import {
     View,
 } from 'react-native';
 
+import {isLiquidGlassSupported} from '@callstack/liquid-glass';
+import {useHeaderHeight} from '@react-navigation/elements';
 import {FlashList} from '@shopify/flash-list';
 import {useFocusEffect} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -77,6 +80,7 @@ const getDraftContext = draft => {
 const HarborDraftsPage = ({navigation}) => {
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
+    const headerHeight = useHeaderHeight();
     const {
         login,
         status: sessionStatus,
@@ -92,6 +96,18 @@ const HarborDraftsPage = ({navigation}) => {
     useEffect(() => {
         navigation.setOptions({headerTitle: t('草稿箱')});
     }, [navigation, t]);
+
+    // iOS 26 液態玻璃透明導覽列：內容需手動避開 header
+    const pageStyle = useMemo(
+        () => [
+            styles.container,
+            {
+                backgroundColor: theme.bg_color,
+                paddingTop: isLiquidGlassSupported ? headerHeight : 0,
+            },
+        ],
+        [headerHeight, theme.bg_color],
+    );
 
     const loadDrafts = useCallback(async ({refreshing = false} = {}) => {
         if (sessionStatus !== 'signedIn') {
@@ -420,11 +436,7 @@ const HarborDraftsPage = ({navigation}) => {
     }
 
     return (
-        <View
-            style={[
-                styles.container,
-                {backgroundColor: theme.bg_color},
-            ]}>
+        <View style={pageStyle}>
             {loadError ? (
                 <View
                     style={[
@@ -448,6 +460,9 @@ const HarborDraftsPage = ({navigation}) => {
                 keyExtractor={item => item.draftKey}
                 renderItem={renderDraft}
                 contentContainerStyle={styles.listContent}
+                contentInsetAdjustmentBehavior={
+                    isLiquidGlassSupported ? 'never' : 'automatic'
+                }
                 refreshing={isRefreshing}
                 onRefresh={() => loadDrafts({refreshing: true})}
                 showsVerticalScrollIndicator={false}

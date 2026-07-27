@@ -147,6 +147,50 @@ const HarborComposerPage = ({route, navigation}) => {
         });
     }, []);
 
+    // 點擊回覆／編輯上下文：從話題詳情進入則返回；從草稿箱進入則跳到對應樓層
+    const handlePressContext = useCallback(() => {
+        trigger();
+        if (!route.params?.fromDraftBox) {
+            if (navigation.canGoBack()) {
+                navigation.goBack();
+            }
+            return;
+        }
+
+        const topicId = Number(route.params?.topicId);
+        if (!Number.isInteger(topicId) || topicId <= 0) {
+            return;
+        }
+
+        const targetPostNumber = isEdit
+            ? Number(
+                editMetadata.postNumber ??
+                editMetadata.post_number ??
+                routePostNumber,
+            )
+            : Number(route.params?.replyToPostNumber);
+
+        navigation.navigate('HarborTopicDetail', {
+            topicId,
+            topicTitle: route.params?.topicTitle || title,
+            ...(Number.isInteger(targetPostNumber) &&
+            targetPostNumber > 0
+                ? {postNumber: targetPostNumber}
+                : null),
+        });
+    }, [
+        editMetadata.postNumber,
+        editMetadata.post_number,
+        isEdit,
+        navigation,
+        route.params?.fromDraftBox,
+        route.params?.replyToPostNumber,
+        route.params?.topicId,
+        route.params?.topicTitle,
+        routePostNumber,
+        title,
+    ]);
+
     const handleLogin = useCallback(async () => {
         trigger();
         setLoadError('');
@@ -448,6 +492,7 @@ const HarborComposerPage = ({route, navigation}) => {
             onOpenMarkdownGuide={handleOpenMarkdownGuide}
             onOpenTagSheet={openTagSheet}
             onOpenWebComposer={handleOpenWebComposer}
+            onPressContext={handlePressContext}
             onSelectCategory={handleSelectCategory}
             route={route}
             submit={{
