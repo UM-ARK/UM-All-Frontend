@@ -26,6 +26,7 @@ import {
 import {trigger} from '../../../utils/trigger';
 import HarborComposerForm from './composer/HarborComposerForm';
 import {useHarborComposer} from './composer/useHarborComposer';
+import {useHarborDraft} from './composer/useHarborDraft';
 import {useHarborComposerImages} from './composer/useHarborComposerImages';
 import {useHarborComposerSubmit} from './composer/useHarborComposerSubmit';
 
@@ -35,6 +36,8 @@ const HarborComposerPage = ({route, navigation}) => {
     const categorySheetRef = useRef(null);
     const tagSheetRef = useRef(null);
     const {
+        allTags,
+        areSelectedTagsAllowed,
         categories,
         categoryId,
         composerSettings,
@@ -55,7 +58,9 @@ const HarborComposerPage = ({route, navigation}) => {
         minimumPostLength,
         minimumTagCount,
         minimumTitleLength,
+        mode,
         originalText,
+        publishRestriction,
         raw,
         requiresCategory,
         routePostNumber,
@@ -72,6 +77,7 @@ const HarborComposerPage = ({route, navigation}) => {
         tags,
         title,
         titleLength,
+        user,
         visibleTextLength,
     } = useHarborComposer({route, t});
 
@@ -94,7 +100,39 @@ const HarborComposerPage = ({route, navigation}) => {
         handleRetryImage,
         isPreparingImages,
         isUploadingImages,
+        restoreDraftImages,
     } = useHarborComposerImages({composerSettings, t});
+
+    const {
+        clearDraftAfterPublish,
+        draftKey,
+        isDraftLoading,
+    } = useHarborDraft({
+        categories,
+        categoryId,
+        editMetadata,
+        images,
+        isComposerLoading: isLoading,
+        isEditingFirstPost,
+        mode,
+        navigation,
+        originalText,
+        raw,
+        requiresCategory,
+        restoreDraftImages,
+        route,
+        selectedTags,
+        sessionStatus,
+        setCategoryId,
+        setRaw,
+        setSelectedTags,
+        setTitle,
+        supportsImages,
+        t,
+        tags: allTags,
+        title,
+        user,
+    });
 
     const handleOpenWebComposer = useCallback(() => {
         trigger();
@@ -161,6 +199,7 @@ const HarborComposerPage = ({route, navigation}) => {
         rawLength,
         submitError,
     } = useHarborComposerSubmit({
+        areSelectedTagsAllowed,
         categoryId,
         editMetadata,
         hasUnreadyImages,
@@ -179,8 +218,10 @@ const HarborComposerPage = ({route, navigation}) => {
         minimumTitleLength,
         onLogin: handleLogin,
         onPending: handlePending,
+        onPublished: clearDraftAfterPublish,
         onSuccess: showTopicResult,
         originalText,
+        publishRestriction,
         raw,
         requiresCategory,
         route,
@@ -190,6 +231,7 @@ const HarborComposerPage = ({route, navigation}) => {
         t,
         title,
         titleLength,
+        draftKey,
     });
 
     const handleSelectCategory = useCallback(item => {
@@ -289,7 +331,7 @@ const HarborComposerPage = ({route, navigation}) => {
         );
     }
 
-    if (isLoading) {
+    if (isLoading || isDraftLoading) {
         return (
             <View
                 style={[

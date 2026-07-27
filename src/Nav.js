@@ -32,6 +32,7 @@ import {
 import HarborSearchPage from './pages/TabbarPages/arkHarbor/HarborSearchPage';
 import HarborTopicListPage from './pages/TabbarPages/arkHarbor/HarborTopicListPage';
 import HarborComposerPage from './pages/TabbarPages/arkHarbor/HarborComposerPage';
+import HarborDraftsPage from './pages/TabbarPages/arkHarbor/HarborDraftsPage';
 import HarborAccountSettingsPage from './pages/TabbarPages/my/pages/HarborAccountSettingsPage';
 import HarborActivityPage from './pages/TabbarPages/my/pages/HarborActivityPage';
 import HarborBadgesPage from './pages/TabbarPages/my/pages/HarborBadgesPage';
@@ -292,6 +293,10 @@ const Nav = () => {
                     <Stack.Screen
                         name="HarborComposer"
                         component={HarborComposerPage}
+                    />
+                    <Stack.Screen
+                        name="HarborDrafts"
+                        component={HarborDraftsPage}
                     />
                     <Stack.Screen name="AllEvents" component={AllEvents} />
 

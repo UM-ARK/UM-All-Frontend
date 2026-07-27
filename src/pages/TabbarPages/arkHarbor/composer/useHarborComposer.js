@@ -12,6 +12,7 @@ import {
     fetchHarborComposerSettings,
     fetchHarborPostForEdit,
     fetchHarborTags,
+    fetchHarborTopic,
 } from '../../../../utils/harbor/harborApi';
 import {getComposerErrorMessage} from './harborComposerErrors';
 import {
@@ -20,7 +21,11 @@ import {
 } from './harborComposerModels';
 
 export function useHarborComposer({route, t}) {
-    const {login, status: sessionStatus} = useHarborSession();
+    const {
+        login,
+        status: sessionStatus,
+        user,
+    } = useHarborSession();
     const loadControllerRef = useRef(null);
     const routeMode = route.params?.mode;
     const mode = COMPOSER_MODES.has(routeMode) ? routeMode : 'newTopic';
@@ -49,6 +54,7 @@ export function useHarborComposer({route, t}) {
         isEdit || supportsImages,
     );
     const [loadError, setLoadError] = useState('');
+    const [publishRestriction, setPublishRestriction] = useState('');
     const [editMetadata, setEditMetadata] = useState({});
     const isEditingFirstPost =
         isEdit &&
@@ -67,6 +73,7 @@ export function useHarborComposer({route, t}) {
         const controller = new AbortController();
         loadControllerRef.current = controller;
         setLoadError('');
+        setPublishRestriction('');
         setIsLoading(true);
 
         try {
@@ -92,8 +99,13 @@ export function useHarborComposer({route, t}) {
                 );
                 setComposerSettings(settingsResult);
                 setCategoryId(currentCategoryId => {
-                    if (currentCategoryId != null) {
-                        return currentCategoryId;
+                    const currentCategory = categoryItems.find(
+                        category =>
+                            Number(category.id) ===
+                            Number(currentCategoryId),
+                    );
+                    if (currentCategory) {
+                        return currentCategory.id;
                     }
                     const defaultCategory = categoryItems.find(
                         category =>
@@ -106,14 +118,42 @@ export function useHarborComposer({route, t}) {
             }
 
             if (isReply) {
-                const settingsResult =
-                    await fetchHarborComposerSettings({
+                const [
+                    settingsResult,
+                    topicResult,
+                ] = await Promise.all([
+                    fetchHarborComposerSettings({
                         signal: controller.signal,
-                    });
+                    }),
+                    route.params?.fromDraftBox
+                        ? fetchHarborTopic(
+                            route.params?.topicId,
+                            {signal: controller.signal},
+                        ).catch(() => null)
+                        : Promise.resolve(null),
+                ]);
                 if (controller.signal.aborted) {
                     return;
                 }
                 setComposerSettings(settingsResult);
+                if (
+                    topicResult?.closed ||
+                    topicResult?.archived
+                ) {
+                    setPublishRestriction(
+                        topicResult.closed
+                            ? t('此話題已關閉，暫時無法發布回覆。')
+                            : t('此話題已封存，暫時無法發布回覆。'),
+                    );
+                } else if (
+                    topicResult &&
+                    (topicResult.can_create_post === false ||
+                        topicResult.details?.can_create_post === false)
+                ) {
+                    setPublishRestriction(
+                        t('你目前沒有權限回覆這個話題。'),
+                    );
+                }
                 return;
             }
 
@@ -155,6 +195,8 @@ export function useHarborComposer({route, t}) {
         isNewTopic,
         isReply,
         route.params?.postId,
+        route.params?.fromDraftBox,
+        route.params?.topicId,
         route.params?.topicTitle,
         sessionStatus,
         t,
@@ -174,6 +216,17 @@ export function useHarborComposer({route, t}) {
     const selectedTagNames = useMemo(
         () => selectedTags.map(tag => tag.name).filter(Boolean),
         [selectedTags],
+    );
+    const selectableTags = useMemo(() => {
+        const allowedTags = selectedCategory?.allowedTags;
+        if (!Array.isArray(allowedTags) || allowedTags.length === 0) {
+            return tags;
+        }
+        const allowedTagNames = new Set(allowedTags);
+        return tags.filter(tag => allowedTagNames.has(tag.name));
+    }, [selectedCategory?.allowedTags, tags]);
+    const areSelectedTagsAllowed = selectedTags.every(selectedTag =>
+        selectableTags.some(tag => tag.name === selectedTag.name),
     );
     const titleLength = title.trim().length;
     const visibleTextLength = raw.trim().length;
@@ -199,6 +252,8 @@ export function useHarborComposer({route, t}) {
             selectedTags.length <= maximumTagCount);
 
     return {
+        allTags: tags,
+        areSelectedTagsAllowed,
         categories,
         categoryId,
         composerSettings,
@@ -219,7 +274,9 @@ export function useHarborComposer({route, t}) {
         minimumPostLength,
         minimumTagCount,
         minimumTitleLength,
+        mode,
         originalText,
+        publishRestriction,
         raw,
         requiresCategory,
         routePostNumber,
@@ -233,9 +290,10 @@ export function useHarborComposer({route, t}) {
         setSelectedTags,
         setTitle,
         supportsImages,
-        tags,
+        tags: selectableTags,
         title,
         titleLength,
+        user,
         visibleTextLength,
     };
 }

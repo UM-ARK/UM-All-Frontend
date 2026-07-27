@@ -1,9 +1,13 @@
 import {
     createHarborPost,
+    deleteHarborDraft,
     fetchHarborCategories,
     fetchHarborComposerSettings,
+    fetchHarborDraft,
+    fetchHarborDrafts,
     fetchHarborPostForEdit,
     harborApi,
+    saveHarborDraft,
     uploadHarborComposerImage,
     updateHarborPost,
 } from '../harborApi';
@@ -15,17 +19,20 @@ jest.mock('../../pathMap', () => ({
 
 describe('Harbor Composer API', () => {
     let getSpy;
+    let deleteSpy;
     let postSpy;
     let putSpy;
 
     beforeEach(() => {
         getSpy = jest.spyOn(harborApi, 'get');
+        deleteSpy = jest.spyOn(harborApi, 'delete');
         postSpy = jest.spyOn(harborApi, 'post');
         putSpy = jest.spyOn(harborApi, 'put');
     });
 
     afterEach(() => {
         getSpy.mockRestore();
+        deleteSpy.mockRestore();
         postSpy.mockRestore();
         putSpy.mockRestore();
     });
@@ -99,6 +106,83 @@ describe('Harbor Composer API', () => {
                 },
             ],
         });
+    });
+
+    it('依官方端點列出、載入、保存及刪除草稿', async () => {
+        const signal = {aborted: false};
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    drafts: [{draft_key: 'new_topic'}],
+                    categories: [{id: 4}],
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    draft: '{"reply":"草稿內容","action":"createTopic"}',
+                    draft_sequence: 3,
+                },
+            });
+        postSpy.mockResolvedValue({
+            data: {success: 'OK', draft_sequence: 4},
+        });
+        deleteSpy.mockResolvedValue({data: {success: 'OK'}});
+
+        await expect(
+            fetchHarborDrafts({signal}),
+        ).resolves.toEqual({
+            items: [{draft_key: 'new_topic'}],
+            categories: [{id: 4}],
+        });
+        await expect(
+            fetchHarborDraft('new_topic', {signal}),
+        ).resolves.toEqual({
+            data: '{"reply":"草稿內容","action":"createTopic"}',
+            sequence: 3,
+        });
+        await expect(
+            saveHarborDraft('new_topic', {
+                data: {
+                    reply: '更新內容',
+                    action: 'createTopic',
+                },
+                sequence: 3,
+                signal,
+            }),
+        ).resolves.toEqual({
+            sequence: 4,
+            conflictUser: null,
+        });
+        await deleteHarborDraft('new_topic', 4, {signal});
+
+        expect(getSpy).toHaveBeenNthCalledWith(1, '/drafts.json', {
+            params: {limit: 50, offset: 0},
+            signal,
+        });
+        expect(getSpy).toHaveBeenNthCalledWith(
+            2,
+            '/drafts/new_topic.json',
+            {signal},
+        );
+        expect(postSpy).toHaveBeenCalledWith(
+            '/drafts.json',
+            {
+                draft_key: 'new_topic',
+                sequence: 3,
+                data: '{"reply":"更新內容","action":"createTopic"}',
+            },
+            {signal},
+        );
+        expect(deleteSpy).toHaveBeenCalledWith(
+            '/drafts/new_topic.json',
+            {
+                data: {
+                    draft_key: 'new_topic',
+                    sequence: 4,
+                },
+                signal,
+            },
+        );
     });
 
     it('建立含分類、標籤及草稿 key 的新話題', async () => {
@@ -186,7 +270,11 @@ describe('Harbor Composer API', () => {
         const signal = {aborted: false};
         const onUploadProgress = jest.fn();
         postSpy.mockResolvedValue({
-            data: {id: '91', short_url: 'upload://abc123.jpeg'},
+            data: {
+                id: '91',
+                short_url: 'upload://abc123.jpeg',
+                url: '/uploads/default/original/abc123.jpeg',
+            },
         });
 
         await expect(
@@ -201,6 +289,8 @@ describe('Harbor Composer API', () => {
         ).resolves.toEqual({
             id: 91,
             shortUrl: 'upload://abc123.jpeg',
+            remoteUrl:
+                'https://harbor.example.com/uploads/default/original/abc123.jpeg',
         });
 
         expect(postSpy).toHaveBeenCalledWith(

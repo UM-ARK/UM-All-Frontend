@@ -103,6 +103,7 @@ export function useHarborComposerImages({composerSettings, t}) {
                             ...item,
                             uploadId: upload.id,
                             shortUrl: upload.shortUrl,
+                            remoteUrl: upload.remoteUrl,
                             progress: 1,
                             status: 'uploaded',
                         }
@@ -319,6 +320,49 @@ export function useHarborComposerImages({composerSettings, t}) {
         enqueueImages([image]);
     }, [enqueueImages]);
 
+    const restoreDraftImages = useCallback(draftImages => {
+        const restoredImages = (
+            Array.isArray(draftImages) ? draftImages : []
+        )
+            .map((image, index) => {
+                if (!image || typeof image !== 'object') {
+                    return null;
+                }
+                const localUri =
+                    typeof image.localUri === 'string'
+                        ? image.localUri
+                        : '';
+                const remoteUrl =
+                    typeof image.remoteUrl === 'string'
+                        ? image.remoteUrl
+                        : '';
+                const shortUrl =
+                    typeof image.shortUrl === 'string'
+                        ? image.shortUrl
+                        : '';
+                if (!localUri && !remoteUrl && !shortUrl) {
+                    return null;
+                }
+                return {
+                    ...image,
+                    id:
+                        typeof image.id === 'string' && image.id
+                            ? image.id
+                            : `draft-image-${Date.now()}-${index}`,
+                    localUri: localUri || remoteUrl,
+                    remoteUrl,
+                    shortUrl,
+                    progress: shortUrl ? 1 : 0,
+                    status: shortUrl ? 'uploaded' : 'pending',
+                };
+            })
+            .filter(Boolean);
+        setImages(restoredImages);
+        enqueueImages(
+            restoredImages.filter(image => image.status === 'pending'),
+        );
+    }, [enqueueImages]);
+
     return {
         images,
         hasReachedImageLimit,
@@ -328,5 +372,6 @@ export function useHarborComposerImages({composerSettings, t}) {
         handleRetryImage,
         isPreparingImages,
         isUploadingImages,
+        restoreDraftImages,
     };
 }

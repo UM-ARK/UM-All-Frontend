@@ -45,6 +45,12 @@ const HarborDashboard = ({user, navigation}) => {
             kind: 'likes',
         },
         {
+            key: 'drafts',
+            label: t('草稿箱'),
+            icon: 'document-text-outline',
+            route: 'HarborDrafts',
+        },
+        {
             key: 'messages',
             label: t('站內訊息'),
             icon: 'mail-outline',

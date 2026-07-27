@@ -1557,6 +1557,122 @@ function normalizeHarborComposerTags(tags, label) {
     });
 }
 
+function normalizeHarborDraftKey(value) {
+    const draftKey = normalizeHarborComposerText(value, 'draft key').trim();
+    if (draftKey.length > 40) {
+        throw new TypeError('Invalid Harbor draft key');
+    }
+    return draftKey;
+}
+
+function normalizeHarborDraftSequence(value) {
+    const sequence = Number(value);
+    if (!Number.isInteger(sequence) || sequence < 0) {
+        throw new TypeError('Invalid Harbor draft sequence');
+    }
+    return sequence;
+}
+
+export async function fetchHarborDrafts({
+    limit = 50,
+    offset = 0,
+    signal,
+} = {}) {
+    const normalizedLimit = Math.min(
+        50,
+        Math.max(1, Number.isInteger(Number(limit)) ? Number(limit) : 50),
+    );
+    const normalizedOffset = Math.max(
+        0,
+        Number.isInteger(Number(offset)) ? Number(offset) : 0,
+    );
+    const response = await harborApi.get('/drafts.json', {
+        params: {
+            limit: normalizedLimit,
+            offset: normalizedOffset,
+        },
+        signal,
+    });
+    return {
+        items: Array.isArray(response.data?.drafts)
+            ? response.data.drafts
+            : [],
+        categories: Array.isArray(response.data?.categories)
+            ? response.data.categories
+            : [],
+    };
+}
+
+export async function fetchHarborDraft(draftKey, {signal} = {}) {
+    const key = normalizeHarborDraftKey(draftKey);
+    const response = await harborApi.get(
+        `/drafts/${encodeURIComponent(key)}.json`,
+        {signal},
+    );
+    return {
+        data: response.data?.draft ?? null,
+        sequence: normalizeHarborDraftSequence(
+            response.data?.draft_sequence ?? 0,
+        ),
+    };
+}
+
+export async function saveHarborDraft(
+    draftKey,
+    {
+        data,
+        sequence = 0,
+        owner,
+        forceSave = false,
+        signal,
+    } = {},
+) {
+    const key = normalizeHarborDraftKey(draftKey);
+    const normalizedSequence = normalizeHarborDraftSequence(sequence);
+    const serializedData =
+        typeof data === 'string' ? data : JSON.stringify(data);
+    if (typeof serializedData !== 'string' || !serializedData.trim()) {
+        throw new TypeError('Invalid Harbor draft data');
+    }
+    const payload = {
+        draft_key: key,
+        sequence: normalizedSequence,
+        data: serializedData,
+    };
+    if (typeof owner === 'string' && owner.trim()) {
+        payload.owner = owner.trim();
+    }
+    if (forceSave) {
+        payload.force_save = true;
+    }
+
+    const response = await harborApi.post('/drafts.json', payload, {signal});
+    return {
+        sequence: normalizeHarborDraftSequence(
+            response.data?.draft_sequence ?? normalizedSequence,
+        ),
+        conflictUser: response.data?.conflict_user || null,
+    };
+}
+
+export async function deleteHarborDraft(
+    draftKey,
+    sequence,
+    {signal} = {},
+) {
+    const key = normalizeHarborDraftKey(draftKey);
+    await harborApi.delete(
+        `/drafts/${encodeURIComponent(key)}.json`,
+        {
+            data: {
+                draft_key: key,
+                sequence: normalizeHarborDraftSequence(sequence),
+            },
+            signal,
+        },
+    );
+}
+
 export async function createHarborPost({
     raw,
     title,
@@ -1647,6 +1763,7 @@ export async function uploadHarborComposerImage(
     });
     const upload = response.data?.upload || response.data;
     const shortUrl = upload?.short_url || upload?.shortUrl;
+    const remoteUrl = upload?.url || upload?.original_url;
 
     if (typeof shortUrl !== 'string' || !shortUrl.trim()) {
         throw new Error('Invalid Harbor upload response');
@@ -1655,6 +1772,14 @@ export async function uploadHarborComposerImage(
     return {
         id: toNumberOrNull(upload.id),
         shortUrl: shortUrl.trim(),
+        ...(typeof remoteUrl === 'string' && remoteUrl.trim()
+            ? {
+                remoteUrl: new URL(
+                    remoteUrl.trim(),
+                    ARK_HARBOR,
+                ).toString(),
+            }
+            : {}),
     };
 }
 

@@ -19,7 +19,9 @@ import {
 import {getComposerErrorMessage} from './harborComposerErrors';
 
 export function useHarborComposerSubmit({
+    areSelectedTagsAllowed,
     categoryId,
+    draftKey,
     editMetadata,
     hasUnreadyImages,
     images,
@@ -37,8 +39,10 @@ export function useHarborComposerSubmit({
     minimumTitleLength,
     onLogin,
     onPending,
+    onPublished,
     onSuccess,
     originalText,
+    publishRestriction,
     raw,
     requiresCategory,
     route,
@@ -65,6 +69,9 @@ export function useHarborComposerSubmit({
         isUploadingImages;
 
     const validateForm = useCallback(() => {
+        if (publishRestriction) {
+            return publishRestriction;
+        }
         if (supportsImages && hasUnreadyImages) {
             return t('請等待圖片上傳完成，或移除上傳失敗的圖片。');
         }
@@ -93,6 +100,9 @@ export function useHarborComposerSubmit({
                 count: minimumTagCount,
             });
         }
+        if (isNewTopic && !areSelectedTagsAllowed) {
+            return t('此分類不接受已選擇的部分標籤，請重新選擇。');
+        }
         if (
             isNewTopic &&
             maximumTagCount != null &&
@@ -117,6 +127,7 @@ export function useHarborComposerSubmit({
         }
         return '';
     }, [
+        areSelectedTagsAllowed,
         categoryId,
         hasUnreadyImages,
         isEditingFirstPost,
@@ -127,6 +138,7 @@ export function useHarborComposerSubmit({
         minimumPostLength,
         minimumTagCount,
         minimumTitleLength,
+        publishRestriction,
         rawLength,
         requiresCategory,
         selectedTags.length,
@@ -177,6 +189,7 @@ export function useHarborComposerSubmit({
                 })
                 : await createHarborPost({
                     raw: composedRaw,
+                    draftKey,
                     ...(isNewTopic
                         ? {
                             title: title.trim(),
@@ -196,6 +209,7 @@ export function useHarborComposerSubmit({
                 });
             const composerResult = getHarborComposerResult(result);
             if (composerResult.pending) {
+                await onPublished();
                 Toast.show(
                     t('內容已送交審核，通過後會顯示在 Harbor。'),
                 );
@@ -230,6 +244,7 @@ export function useHarborComposerSubmit({
             }
 
             publishHarborTopicUpdate(resultTopicId, {reloadLists: true});
+            await onPublished();
             Toast.show(
                 isEdit
                     ? t('貼文已更新。')
@@ -258,6 +273,7 @@ export function useHarborComposerSubmit({
                         route.params?.postNumber,
                     );
                 publishHarborTopicUpdate(resultTopicId, {reloadLists: true});
+                await onPublished();
                 Toast.show(
                     t('貼文正文已更新，但話題標題更新失敗，請重新載入確認。'),
                 );
@@ -274,6 +290,7 @@ export function useHarborComposerSubmit({
     }, [
         categoryId,
         composedRaw,
+        draftKey,
         editMetadata,
         isEdit,
         isEditingFirstPost,
@@ -281,6 +298,7 @@ export function useHarborComposerSubmit({
         isReply,
         onLogin,
         onPending,
+        onPublished,
         onSuccess,
         originalText,
         raw,

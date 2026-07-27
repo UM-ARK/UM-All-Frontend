@@ -551,6 +551,11 @@ const HarborDrawerContent = ({ navigation }) => {
                         label={t('個人中心')}
                         onPress={handleMyPress}
                     />
+                    <DrawerMenuItem
+                        icon="file-document-edit-outline"
+                        label={t('草稿箱')}
+                        onPress={() => navigateFromDrawer('HarborDrafts')}
+                    />
                     {PLACEHOLDER_ITEMS.map(item => (
                         <DrawerMenuItem
                             key={item.key}
