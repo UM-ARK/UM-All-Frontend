@@ -1,25 +1,113 @@
 import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import {Image} from 'expo-image';
-import {useTranslation} from 'react-i18next';
+import { Image } from 'expo-image';
+import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {scale, verticalScale} from 'react-native-size-matters';
+import { scale, verticalScale } from 'react-native-size-matters';
 
-import {uiStyle, useTheme} from '../../../../components/ThemeContext';
+import { uiStyle, useTheme } from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
-import {trigger} from '../../../../utils/trigger';
+import { fetchHarborDrafts } from '../../../../utils/harbor/harborApi';
+import {
+    getHarborDraftAccountId,
+    getLocalHarborDrafts,
+    getPendingHarborDraftDeletes,
+    mergeHarborDrafts,
+} from '../../../../utils/harbor/harborDrafts';
+import { trigger } from '../../../../utils/trigger';
 import HarborActivityRow from './HarborActivityRow';
 import HarborProfileCard from './HarborProfileCard';
 import HarborSectionHeader from './HarborSectionHeader';
 import HarborStatsCard from './HarborStatsCard';
 
-const HarborDashboard = ({user, navigation}) => {
-    const {theme} = useTheme();
-    const {t} = useTranslation('my');
+const HarborDashboard = ({ user, navigation }) => {
+    const { theme } = useTheme();
+    const { t } = useTranslation('my');
+    const [draftCount, setDraftCount] = React.useState(0);
+
+    // 進入「我的」頁時刷新草稿數量，供草稿箱角標顯示
+    useFocusEffect(
+        React.useCallback(() => {
+            const accountId = getHarborDraftAccountId(user);
+            if (!accountId) {
+                setDraftCount(0);
+                return undefined;
+            }
+
+            const controller = new AbortController();
+            let cancelled = false;
+
+            const loadDraftCount = async () => {
+                try {
+                    const [localDrafts, pendingDeletes] = await Promise.all([
+                        getLocalHarborDrafts(accountId),
+                        getPendingHarborDraftDeletes(accountId),
+                    ]);
+                    // 先以本機草稿即時顯示角標，再嘗試合併遠端
+                    if (!cancelled) {
+                        setDraftCount(
+                            mergeHarborDrafts(
+                                localDrafts,
+                                [],
+                                pendingDeletes,
+                            ).length,
+                        );
+                    }
+
+                    let remoteDrafts = [];
+                    try {
+                        const result = await fetchHarborDrafts({
+                            signal: controller.signal,
+                        });
+                        remoteDrafts = result.items;
+                    } catch {
+                        // 遠端失敗時保留本機計數即可
+                    }
+                    if (!cancelled && !controller.signal.aborted) {
+                        setDraftCount(
+                            mergeHarborDrafts(
+                                localDrafts,
+                                remoteDrafts,
+                                pendingDeletes,
+                            ).length,
+                        );
+                    }
+                } catch {
+                    if (!cancelled) {
+                        setDraftCount(0);
+                    }
+                }
+            };
+
+            loadDraftCount();
+            return () => {
+                cancelled = true;
+                controller.abort();
+            };
+        }, [user]),
+    );
+
+    const unreadNotifications = Number(user.unreadNotifications) || 0;
+    const unreadMessages = Number(user.unreadMessages) || 0;
+    const inboxBadge = unreadNotifications + unreadMessages;
+    // 有未讀通知優先開通知分頁，否則開站內訊息
+    const inboxInitialTab =
+        unreadNotifications > 0 || unreadMessages === 0
+            ? 'notifications'
+            : 'messages';
 
     const actions = [
+        {
+            key: 'inbox',
+            label: t('收件匣'),
+            icon: 'notifications-outline',
+            route: 'HarborInbox',
+            params: { initialTab: inboxInitialTab },
+            badge: inboxBadge,
+        },
         {
             key: 'topics',
             label: t('我的話題'),
@@ -49,14 +137,7 @@ const HarborDashboard = ({user, navigation}) => {
             label: t('草稿箱'),
             icon: 'document-text-outline',
             route: 'HarborDrafts',
-        },
-        {
-            key: 'messages',
-            label: t('站內訊息'),
-            icon: 'mail-outline',
-            route: 'HarborInbox',
-            params: {initialTab: 'messages'},
-            badge: user.unreadMessages,
+            badge: draftCount,
         },
         {
             key: 'activity',
@@ -87,27 +168,8 @@ const HarborDashboard = ({user, navigation}) => {
             });
             return;
         }
-        navigation.navigate('HarborActivity', {kind: 'all'});
+        navigation.navigate('HarborActivity', { kind: 'all' });
     };
-
-    const attentionItems = [
-        {
-            key: 'notifications',
-            label: t('新通知'),
-            description: t('查看回覆、提及與互動'),
-            icon: 'notifications-outline',
-            value: user.unreadNotifications || 0,
-            initialTab: 'notifications',
-        },
-        {
-            key: 'messages',
-            label: t('站內訊息'),
-            description: t('查看 Harbor 私人對話'),
-            icon: 'mail-unread-outline',
-            value: user.unreadMessages || 0,
-            initialTab: 'messages',
-        },
-    ];
 
     return (
         <View style={styles.container}>
@@ -116,95 +178,35 @@ const HarborDashboard = ({user, navigation}) => {
                 onPress={() => navigation.navigate('HarborAccountSettings')}
             />
 
-            <HarborSectionHeader title={t('需要處理')} />
-            <View style={styles.attentionGrid}>
-                {attentionItems.map(item => (
-                    <TouchableScale
-                        key={item.key}
-                        accessibilityRole="button"
-                        accessibilityLabel={`${item.value} ${item.label}`}
-                        activeScale={0.97}
-                        style={[
-                            styles.attentionCard,
-                            {backgroundColor: theme.white},
-                            theme.viewShadow,
-                        ]}
-                        onPress={() => {
-                            trigger();
-                            navigation.navigate('HarborInbox', {
-                                initialTab: item.initialTab,
-                            });
-                        }}>
-                        <View style={styles.attentionTopRow}>
-                            <View
-                                style={[
-                                    styles.attentionIcon,
-                                    {
-                                        backgroundColor: theme.tonal.primary15,
-                                    },
-                                ]}>
-                                <Ionicons
-                                    name={item.icon}
-                                    size={scale(20)}
-                                    color={theme.themeColor}
-                                />
-                            </View>
-                            <Text
-                                style={[
-                                    styles.attentionValue,
-                                    {
-                                        color: item.value
-                                            ? theme.unread
-                                            : theme.black.main,
-                                    },
-                                ]}>
-                                {item.value}
-                            </Text>
-                        </View>
-                        <Text
-                            style={[
-                                styles.attentionLabel,
-                                {color: theme.black.main},
-                            ]}>
-                            {item.label}
-                        </Text>
-                        <Text
-                            numberOfLines={2}
-                            style={[
-                                styles.attentionDescription,
-                                {color: theme.black.third},
-                            ]}>
-                            {item.description}
-                        </Text>
-                    </TouchableScale>
-                ))}
-            </View>
-
             <HarborSectionHeader
                 title={t('我的 Harbor')}
                 actionLabel={t('所有活動')}
                 onAction={() =>
-                    navigation.navigate('HarborActivity', {kind: 'all'})
+                    navigation.navigate('HarborActivity', { kind: 'all' })
                 }
             />
             <View
                 style={[
                     styles.actionsCard,
-                    {backgroundColor: theme.white},
+                    { backgroundColor: theme.white },
                     theme.viewShadow,
                 ]}>
                 {actions.map(action => (
                     <TouchableScale
                         key={action.key}
                         accessibilityRole="button"
-                        accessibilityLabel={action.label}
+                        accessibilityLabel={
+                            action.badge
+                                ? `${action.badge} ${action.label}`
+                                : action.label
+                        }
                         activeScale={0.94}
                         style={styles.actionItem}
                         onPress={() => handleActionPress(action)}>
                         <View
                             style={[
                                 styles.actionIcon,
-                                {backgroundColor: theme.tonal.primary15},
+                                { backgroundColor: theme.tonal.primary15 },
                             ]}>
                             <Ionicons
                                 name={action.icon}
@@ -215,12 +217,12 @@ const HarborDashboard = ({user, navigation}) => {
                                 <View
                                     style={[
                                         styles.actionBadge,
-                                        {backgroundColor: theme.unread},
+                                        { backgroundColor: theme.unread },
                                     ]}>
                                     <Text
                                         style={[
                                             styles.actionBadgeText,
-                                            {color: theme.trueWhite},
+                                            { color: theme.trueWhite },
                                         ]}>
                                         {action.badge > 99
                                             ? '99+'
@@ -233,7 +235,7 @@ const HarborDashboard = ({user, navigation}) => {
                             numberOfLines={1}
                             style={[
                                 styles.actionLabel,
-                                {color: theme.black.second},
+                                { color: theme.black.second },
                             ]}>
                             {action.label}
                         </Text>
@@ -245,13 +247,13 @@ const HarborDashboard = ({user, navigation}) => {
                 title={t('最近活動')}
                 actionLabel={t('全部')}
                 onAction={() =>
-                    navigation.navigate('HarborActivity', {kind: 'all'})
+                    navigation.navigate('HarborActivity', { kind: 'all' })
                 }
             />
             <View
                 style={[
                     styles.activityCard,
-                    {backgroundColor: theme.white},
+                    { backgroundColor: theme.white },
                     theme.viewShadow,
                 ]}>
                 {user.activity?.length ? (
@@ -268,7 +270,7 @@ const HarborDashboard = ({user, navigation}) => {
                         <Text
                             style={[
                                 styles.compactEmptyText,
-                                {color: theme.black.third},
+                                { color: theme.black.third },
                             ]}>
                             {t('暫時沒有最近活動')}
                         </Text>
@@ -286,11 +288,11 @@ const HarborDashboard = ({user, navigation}) => {
             />
             <Pressable
                 accessibilityRole="button"
-                style={({pressed}) => [
+                style={({ pressed }) => [
                     styles.badgesCard,
-                    {backgroundColor: theme.white},
+                    { backgroundColor: theme.white },
                     theme.viewShadow,
-                    pressed && {backgroundColor: theme.tonal.primary08},
+                    pressed && { backgroundColor: theme.tonal.primary08 },
                 ]}
                 onPress={() => {
                     trigger();
@@ -309,7 +311,7 @@ const HarborDashboard = ({user, navigation}) => {
                                 ]}>
                                 {badge.imageUrl ? (
                                     <Image
-                                        source={{uri: badge.imageUrl}}
+                                        source={{ uri: badge.imageUrl }}
                                         style={styles.badgeImage}
                                         contentFit="contain"
                                     />
@@ -325,7 +327,7 @@ const HarborDashboard = ({user, navigation}) => {
                                 numberOfLines={2}
                                 style={[
                                     styles.badgeName,
-                                    {color: theme.black.second},
+                                    { color: theme.black.second },
                                 ]}>
                                 {badge.name}
                             </Text>
@@ -341,7 +343,7 @@ const HarborDashboard = ({user, navigation}) => {
                         <Text
                             style={[
                                 styles.compactEmptyText,
-                                {color: theme.black.third},
+                                { color: theme.black.third },
                             ]}>
                             {t('繼續參與社群即可解鎖徽章')}
                         </Text>
@@ -358,45 +360,6 @@ const HarborDashboard = ({user, navigation}) => {
 const styles = StyleSheet.create({
     container: {
         gap: verticalScale(12),
-    },
-    attentionGrid: {
-        flexDirection: 'row',
-        gap: scale(10),
-    },
-    attentionCard: {
-        flex: 1,
-        minHeight: verticalScale(122),
-        borderRadius: scale(20),
-        padding: scale(15),
-    },
-    attentionTopRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: verticalScale(10),
-    },
-    attentionIcon: {
-        width: scale(39),
-        height: scale(39),
-        borderRadius: scale(13),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    attentionValue: {
-        ...uiStyle.defaultText,
-        fontSize: scale(22),
-        fontWeight: '780',
-    },
-    attentionLabel: {
-        ...uiStyle.defaultText,
-        fontSize: scale(13),
-        fontWeight: '700',
-    },
-    attentionDescription: {
-        ...uiStyle.defaultText,
-        fontSize: scale(10),
-        lineHeight: verticalScale(14),
-        marginTop: verticalScale(4),
     },
     actionsCard: {
         borderRadius: scale(20),
