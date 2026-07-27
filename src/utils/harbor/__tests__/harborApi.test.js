@@ -2,6 +2,7 @@ import {
     clearHarborDiscoveryCache,
     createHarborPostBookmark,
     deleteHarborBookmark,
+    deleteHarborPost,
     fetchHarborBadges,
     fetchHarborCategories,
     fetchHarborMessages,
@@ -539,6 +540,20 @@ describe('Harbor API 資料正規化', () => {
         expect(deleteSpy).toHaveBeenCalledWith('/post_actions/12.json', {
             data: {post_action_type_id: 2},
         });
+    });
+
+    it('透過 Discourse Core API 刪除帖子', async () => {
+        const signal = new AbortController().signal;
+        deleteSpy.mockResolvedValue({data: {success: 'OK'}});
+
+        await expect(
+            deleteHarborPost(12, {signal}),
+        ).resolves.toEqual({success: 'OK'});
+
+        expect(deleteSpy).toHaveBeenCalledWith('/posts/12.json', {signal});
+        await expect(deleteHarborPost(0)).rejects.toThrow(
+            'Invalid Harbor post id',
+        );
     });
 
     it('僅透過 Reactions 插件端點切換有效 Reaction', async () => {

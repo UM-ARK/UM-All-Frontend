@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Pressable,
     RefreshControl,
     Share,
@@ -275,6 +276,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const {
         bookmarkEditor,
         changeNotificationLevel,
+        deletePost,
         explainPostReactionDisabled,
         isBookmarkReminderVisible,
         isNotificationVisible,
@@ -549,6 +551,39 @@ const HarborTopicDetail = ({ route, navigation }) => {
         ],
     );
 
+    const confirmDeletePost = useCallback(
+        post => {
+            const isFirstPost = Number(post.post_number) === 1;
+            Alert.alert(
+                isFirstPost
+                    ? t('刪除整個話題？')
+                    : t('刪除這篇帖子？'),
+                isFirstPost
+                    ? t('刪除後，這個話題將無法再瀏覽。')
+                    : t('刪除後，其他人將無法再看到這篇帖子。'),
+                [
+                    {
+                        text: t('取消'),
+                        style: 'cancel',
+                        onPress: trigger,
+                    },
+                    {
+                        text: t('刪除'),
+                        style: 'destructive',
+                        onPress: async () => {
+                            trigger();
+                            const deleted = await deletePost(post);
+                            if (deleted && isFirstPost) {
+                                navigation.goBack();
+                            }
+                        },
+                    },
+                ],
+            );
+        },
+        [deletePost, navigation, t],
+    );
+
     const openRelatedTopic = useCallback(
         relatedTopic => {
             navigation.push('HarborTopicDetail', {
@@ -655,6 +690,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressBookmark={openBookmarkEditor}
                         onPressComposeReply={openPostReplyComposer}
                         onPressCopy={copyPostPermalink}
+                        onPressDelete={confirmDeletePost}
                         onPressEdit={openPostEditComposer}
                         onPressLike={togglePostLike}
                         onPressLink={openHarborLink}
@@ -693,6 +729,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         pendingBookmark={
                             pendingMutations[`bookmark:${item.id}`]
                         }
+                        pendingDelete={
+                            pendingMutations[`delete:${item.id}`]
+                        }
                         pendingLike={pendingMutations[`like:${item.id}`]}
                         pendingReaction={
                             pendingMutations[`reaction:${item.id}`]
@@ -713,6 +752,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             imageUrls,
             isLoadingPrevious,
             copyPostPermalink,
+            confirmDeletePost,
             explainPostReactionDisabled,
             markTopicUnread,
             openAuthor,

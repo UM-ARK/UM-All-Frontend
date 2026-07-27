@@ -35,6 +35,7 @@ const HarborComposerForm = ({
     onOpenTagSheet,
     onOpenWebComposer,
     onPressContext,
+    onPressDelete,
     onSelectCategory,
     route,
     submit,
@@ -82,6 +83,7 @@ const HarborComposerForm = ({
     } = imagesState;
     const {
         handleSubmit,
+        isDeleting,
         isPostLengthValid,
         isSubmitDisabled,
         isSubmitting,
@@ -670,6 +672,50 @@ const HarborComposerForm = ({
                                         : t('建立話題')}
                     </Text>
                 </Pressable>
+                {isEdit && editMetadata.canDelete ? (
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{
+                            disabled: isDeleting || isSubmitting,
+                        }}
+                        disabled={isDeleting || isSubmitting}
+                        onPress={onPressDelete}
+                        style={({pressed}) => [
+                            styles.deleteButton,
+                            {
+                                backgroundColor: pressed
+                                    ? theme.tonal.unread15
+                                    : theme.white,
+                                borderColor: theme.unread,
+                                opacity:
+                                    isDeleting || isSubmitting ? 0.5 : 1,
+                            },
+                        ]}>
+                        {isDeleting ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={theme.unread}
+                            />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name="delete-outline"
+                                size={scale(20)}
+                                color={theme.unread}
+                            />
+                        )}
+                        <Text
+                            style={[
+                                styles.deleteButtonText,
+                                {color: theme.unread},
+                            ]}>
+                            {isDeleting
+                                ? t('正在刪除…')
+                                : isEditingFirstPost
+                                    ? t('刪除話題')
+                                    : t('刪除帖子')}
+                        </Text>
+                    </Pressable>
+                ) : null}
             </KeyboardAwareScrollView>
 
             <KeyboardToolbar />
@@ -703,6 +749,20 @@ const styles = StyleSheet.create({
         minHeight: verticalScale(46),
         paddingHorizontal: scale(14),
         paddingVertical: verticalScale(10),
+    },
+    deleteButton: {
+        alignItems: 'center',
+        borderRadius: scale(12),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: 'row',
+        gap: scale(8),
+        justifyContent: 'center',
+        marginTop: verticalScale(10),
+        paddingVertical: verticalScale(12),
+    },
+    deleteButtonText: {
+        fontSize: scale(14),
+        fontWeight: '700',
     },
     addImageText: {
         fontSize: scale(14),

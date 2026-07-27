@@ -2070,6 +2070,7 @@ export async function fetchHarborPostForEdit(postId, { signal } = {}) {
         tags: Array.isArray(post.tags)
             ? normalizeHarborComposerTags(post.tags, 'post tags')
             : null,
+        canDelete: Boolean(post.can_delete),
         canEdit: Boolean(post.can_edit),
     };
 }
@@ -2171,6 +2172,12 @@ export async function updateHarborPost(
         }
     }
 
+    return response.data;
+}
+
+export async function deleteHarborPost(postId, { signal } = {}) {
+    const id = normalizeHarborMutationId(postId, 'post id');
+    const response = await harborApi.delete(`/posts/${id}.json`, { signal });
     return response.data;
 }
 

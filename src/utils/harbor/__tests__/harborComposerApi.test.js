@@ -384,6 +384,7 @@ describe('Harbor Composer API', () => {
                     {id: '7', name: '校園'},
                     ' 活動 ',
                 ],
+                can_delete: 1,
                 can_edit: 1,
             },
         });
@@ -401,6 +402,7 @@ describe('Harbor Composer API', () => {
                 {id: 7, name: '校園'},
                 {name: '活動'},
             ],
+            canDelete: true,
             canEdit: true,
         });
         expect(getSpy).toHaveBeenCalledWith('/posts/81.json', {signal});

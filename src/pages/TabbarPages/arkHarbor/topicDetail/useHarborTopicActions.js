@@ -9,6 +9,7 @@ import Toast from 'react-native-simple-toast';
 import {
     createHarborPostBookmark,
     deleteHarborBookmark,
+    deleteHarborPost,
     HARBOR_TOPIC_NOTIFICATION_LEVELS,
     likeHarborPost,
     markHarborTopicUnread,
@@ -138,22 +139,24 @@ const useHarborTopicActions = ({
     }, [login, sessionStatusRef, t]);
 
     const showMutationFailure = useCallback(
-        error => {
+        (error, { rolledBack = true } = {}) => {
             const reason = getHarborMutationError(
                 error,
                 t('Harbor 暫時無法完成此操作'),
             );
             Toast.show(
-                t('{{reason}}，已還原狀態，請重試', {
-                    reason,
-                }),
+                rolledBack
+                    ? t('{{reason}}，已還原狀態，請重試', {
+                        reason,
+                    })
+                    : t('{{reason}}，請重試', { reason }),
             );
         },
         [t],
     );
 
     const handleMutationFailure = useCallback(
-        async (error, context) => {
+        async (error, context, options) => {
             logHarborPostAction('request.failed', {
                 ...context,
                 ...getMutationErrorDiagnostics(error),
@@ -189,9 +192,96 @@ const useHarborTopicActions = ({
                     });
                 }
             }
-            showMutationFailure(error);
+            showMutationFailure(error, options);
         },
         [showMutationFailure, t],
+    );
+
+    const deletePost = useCallback(
+        async post => {
+            if (!(await requireHarborSignIn())) {
+                return false;
+            }
+            if (!post?.can_delete) {
+                Toast.show(t('你目前沒有權限刪除這篇帖子'));
+                return false;
+            }
+
+            const key = `delete:${post.id}`;
+            if (!beginMutation(key)) {
+                return false;
+            }
+
+            try {
+                const deletedPost = await deleteHarborPost(post.id);
+                const isFirstPost = Number(post.post_number) === 1;
+                if (isFirstPost) {
+                    publishHarborTopicUpdate(topicId, {
+                        reloadLists: true,
+                        removeFromLists: true,
+                    });
+                    Toast.show(t('話題已刪除'));
+                    return true;
+                }
+
+                const previousPostsCount = Number(
+                    latestTopicRef.current?.posts_count || 0,
+                );
+                updateTopicPost(post.id, current => ({
+                    ...current,
+                    ...(deletedPost?.id ? deletedPost : {}),
+                    can_delete: false,
+                    can_edit: false,
+                    deleted_at:
+                        deletedPost?.deleted_at || new Date().toISOString(),
+                    user_deleted: deletedPost?.user_deleted ?? true,
+                }));
+                setTopic(current => ({
+                    ...current,
+                    posts_count: Math.max(
+                        Number(current?.posts_count || 0) - 1,
+                        1,
+                    ),
+                }));
+                publishHarborTopicUpdate(topicId, {
+                    reloadLists: true,
+                    replyCount: Math.max(previousPostsCount - 2, 0),
+                });
+                Toast.show(t('帖子已刪除'));
+                return true;
+            } catch (error) {
+                await handleMutationFailure(
+                    error,
+                    {
+                        action: 'delete',
+                        sessionStatus: sessionStatusRef.current,
+                        ...getPostActionDiagnostics(
+                            post,
+                            currentUsername,
+                            currentTrustLevel,
+                        ),
+                    },
+                    { rolledBack: false },
+                );
+                return false;
+            } finally {
+                finishMutation(key);
+            }
+        },
+        [
+            beginMutation,
+            currentTrustLevel,
+            currentUsername,
+            finishMutation,
+            handleMutationFailure,
+            latestTopicRef,
+            requireHarborSignIn,
+            sessionStatusRef,
+            setTopic,
+            t,
+            topicId,
+            updateTopicPost,
+        ],
     );
 
     const togglePostLike = useCallback(
@@ -695,6 +785,7 @@ const useHarborTopicActions = ({
     return {
         bookmarkEditor,
         changeNotificationLevel,
+        deletePost,
         explainPostReactionDisabled,
         isBookmarkReminderVisible,
         isNotificationVisible,

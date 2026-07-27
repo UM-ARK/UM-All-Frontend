@@ -2,6 +2,7 @@ import React, {
     useCallback,
     useEffect,
     useRef,
+    useState,
 } from 'react';
 import {
     ActivityIndicator,
@@ -20,6 +21,8 @@ import {useTranslation} from 'react-i18next';
 
 import {useTheme} from '../../../components/ThemeContext';
 import {openLink} from '../../../utils/browser';
+import {deleteHarborPost} from '../../../utils/harbor/harborApi';
+import {publishHarborTopicUpdate} from '../../../utils/harbor/harborTopicUpdates';
 import {
     ARK_HARBOR_NEW_TOPIC,
     MARKDOWN_BASIC_SYNTAX_URL,
@@ -36,6 +39,8 @@ const HarborComposerPage = ({route, navigation}) => {
     const {t} = useTranslation('harbor');
     const categorySheetRef = useRef(null);
     const tagSheetRef = useRef(null);
+    const deletingRef = useRef(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const {
         allTags,
         areSelectedTagsAllowed,
@@ -308,6 +313,125 @@ const HarborComposerPage = ({route, navigation}) => {
         navigation.goBack();
     }, [navigation]);
 
+    const handleDeletePost = useCallback(() => {
+        trigger();
+        const postNumber = Number(
+            editMetadata.postNumber ??
+            editMetadata.post_number ??
+            route.params?.postNumber,
+        );
+        const topicId = Number(
+            editMetadata.topicId ??
+            editMetadata.topic_id ??
+            route.params?.topicId,
+        );
+        const isFirstPost = postNumber === 1;
+        Alert.alert(
+            isFirstPost
+                ? t('刪除整個話題？')
+                : t('刪除這篇帖子？'),
+            isFirstPost
+                ? t('刪除後，這個話題將無法再瀏覽。')
+                : t('刪除後，其他人將無法再看到這篇帖子。'),
+            [
+                {
+                    text: t('取消'),
+                    style: 'cancel',
+                    onPress: trigger,
+                },
+                {
+                    text: t('刪除'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        trigger();
+                        if (deletingRef.current) {
+                            return;
+                        }
+                        deletingRef.current = true;
+                        setIsDeleting(true);
+                        try {
+                            await deleteHarborPost(route.params?.postId);
+                            publishHarborTopicUpdate(topicId, {
+                                reloadLists: true,
+                                ...(isFirstPost
+                                    ? {removeFromLists: true}
+                                    : {}),
+                            });
+                            await clearDraftAfterPublish().catch(() => null);
+                            Toast.show(
+                                isFirstPost
+                                    ? t('話題已刪除')
+                                    : t('帖子已刪除'),
+                            );
+                            if (isFirstPost) {
+                                if (
+                                    !route.params?.fromDraftBox &&
+                                    typeof navigation.pop === 'function'
+                                ) {
+                                    navigation.pop(2);
+                                } else {
+                                    navigation.goBack();
+                                }
+                                return;
+                            }
+                            const params = {
+                                topicId,
+                                topicTitle:
+                                    title || route.params?.topicTitle,
+                                postNumber: Math.max(postNumber - 1, 1),
+                                composerRefreshAt: Date.now(),
+                            };
+                            if (route.params?.fromDraftBox) {
+                                navigation.replace(
+                                    'HarborTopicDetail',
+                                    params,
+                                );
+                            } else {
+                                navigation.popTo(
+                                    'HarborTopicDetail',
+                                    params,
+                                    {merge: true},
+                                );
+                            }
+                        } catch (error) {
+                            const serverErrors =
+                                error?.response?.data?.errors;
+                            const serverMessage = Array.isArray(serverErrors)
+                                ? serverErrors.join(' ')
+                                : serverErrors ||
+                                error?.response?.data?.error;
+                            Toast.show(
+                                serverMessage ||
+                                (error?.response?.status === 403
+                                    ? t(
+                                        '你目前沒有權限刪除這篇帖子。',
+                                    )
+                                    : t('刪除失敗，請稍後再試。')),
+                            );
+                        } finally {
+                            deletingRef.current = false;
+                            setIsDeleting(false);
+                        }
+                    },
+                },
+            ],
+        );
+    }, [
+        clearDraftAfterPublish,
+        editMetadata.postNumber,
+        editMetadata.post_number,
+        editMetadata.topicId,
+        editMetadata.topic_id,
+        navigation,
+        route.params?.fromDraftBox,
+        route.params?.postId,
+        route.params?.postNumber,
+        route.params?.topicId,
+        route.params?.topicTitle,
+        t,
+        title,
+    ]);
+
     const {
         handleSubmit,
         isPostLengthValid,
@@ -568,12 +692,14 @@ const HarborComposerPage = ({route, navigation}) => {
             onOpenTagSheet={openTagSheet}
             onOpenWebComposer={handleOpenWebComposer}
             onPressContext={handlePressContext}
+            onPressDelete={handleDeletePost}
             onSelectCategory={handleSelectCategory}
             route={route}
             submit={{
                 handleSubmit,
                 isPostLengthValid,
-                isSubmitDisabled,
+                isDeleting,
+                isSubmitDisabled: isSubmitDisabled || isDeleting,
                 isSubmitting,
                 rawLength,
                 submitError,

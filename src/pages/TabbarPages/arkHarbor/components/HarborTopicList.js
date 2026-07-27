@@ -346,11 +346,13 @@ const HarborTopicList = ({
 
     useEffect(() => {
         return subscribeHarborTopicUpdates((topicId, patch) => {
-            const { reloadLists, ...itemPatch } = patch;
+            const { reloadLists, removeFromLists, ...itemPatch } = patch;
             const updateItems = currentItems =>
-                currentItems.map(item =>
-                    item.id === topicId ? { ...item, ...itemPatch } : item,
-                );
+                removeFromLists
+                    ? currentItems.filter(item => item.id !== topicId)
+                    : currentItems.map(item =>
+                        item.id === topicId ? { ...item, ...itemPatch } : item,
+                    );
             replaceItems(updateItems(itemsRef.current));
             topicListCache.forEach((cachedResult, cachedKey) => {
                 topicListCache.set(cachedKey, {

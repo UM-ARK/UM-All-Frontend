@@ -181,6 +181,7 @@ const HarborPostCard = memo(
         onPressBookmark,
         onPressComposeReply,
         onPressCopy,
+        onPressDelete,
         onPressDisabledReaction,
         onPressEdit,
         onPressLike,
@@ -198,6 +199,7 @@ const HarborPostCard = memo(
         nestedReplyCount,
         nestedVisibleReplyCount,
         pendingBookmark,
+        pendingDelete,
         pendingLike,
         pendingReaction,
         reactionDisabled,
@@ -211,6 +213,7 @@ const HarborPostCard = memo(
             themeColor,
             themeColorUltraLight,
             tonal,
+            unread,
             white,
         } = theme;
         const nestedIndent = Math.min(
@@ -318,6 +321,22 @@ const HarborPostCard = memo(
                     titleColor: black.third,
                 });
             }
+            if (post.can_delete) {
+                actions.push({
+                    id: 'delete',
+                    title: t('刪除'),
+                    image: Platform.select({
+                        ios: 'trash',
+                        android: 'ic_menu_delete',
+                    }),
+                    imageColor: unread,
+                    titleColor: unread,
+                    attributes: {
+                        destructive: true,
+                        disabled: Boolean(pendingDelete),
+                    },
+                });
+            }
             actions.push({
                 id: 'bookmark',
                 title: post.bookmarked ? t('已收藏') : t('收藏'),
@@ -356,9 +375,12 @@ const HarborPostCard = memo(
             black.third,
             canReply,
             pendingBookmark,
+            pendingDelete,
             post.bookmarked,
+            post.can_delete,
             post.can_edit,
             t,
+            unread,
         ]);
         const reactionButton = (
             <View
@@ -822,6 +844,10 @@ const HarborPostCard = memo(
                             }
                             if (actionId === 'quote') {
                                 onPressQuote(post);
+                                return;
+                            }
+                            if (actionId === 'delete') {
+                                onPressDelete(post);
                                 return;
                             }
                             if (actionId === 'bookmark') {
