@@ -366,7 +366,8 @@ const EventPage = forwardRef((props, ref) => {
             width: '100%',
             backgroundColor: bg_color,
             alignItems: 'flex-start',
-            justifyContent: 'space-between',
+            // 以內容寬度置中，避免 flex:1 把多餘空白擠到兩欄中間
+            justifyContent: 'center',
         },
         loadMore: {
             alignItems: 'center',
@@ -598,7 +599,7 @@ const EventPage = forwardRef((props, ref) => {
         return (
             <View style={s.waterFlowContainer}>
                 {columnsToRender.map((col, idx) => (
-                    <View key={`water-col-${idx}`} style={{ flex: 1, alignItems: 'center' }}>
+                    <View key={`water-col-${idx}`} style={{ alignItems: 'center' }}>
                         {col.length > 0 ? (
                             renderOneList(col)
                         ) : null}
@@ -618,7 +619,7 @@ const EventPage = forwardRef((props, ref) => {
                 return (
                     <View
                         key={`skeleton-col-${columnIndex}`}
-                        style={{ flex: 1, alignItems: 'center' }}>
+                        style={{ alignItems: 'center' }}>
                         {variants.map((item, itemIndex) =>
                             item.kind === 'harbor' ? (
                                 <HarborSkeletonCard
