@@ -15,6 +15,7 @@ import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {scale, verticalScale} from 'react-native-size-matters';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
@@ -23,7 +24,6 @@ import {trigger} from '../../../../utils/trigger';
 const HarborTagPickerSheet = React.forwardRef(
     function HarborTagPickerSheet(
         {
-            bottomInset,
             maximumTagCount,
             onChange,
             selectedTags,
@@ -33,6 +33,7 @@ const HarborTagPickerSheet = React.forwardRef(
     ) {
         const {theme} = useTheme();
         const {t} = useTranslation('harbor');
+        const insets = useSafeAreaInsets();
         const sheetRef = useRef(null);
 
         useImperativeHandle(ref, () => ({
@@ -121,7 +122,8 @@ const HarborTagPickerSheet = React.forwardRef(
         return (
             <CustomBottomSheet
                 ref={sheetRef}
-                bottomInset={bottomInset}
+                // Stack 頁無 Tab Bar；bottomInset>0 會讓 sheet 懸空並露出下方表單
+                bottomInset={0}
                 enablePanDownToClose
                 page="harborComposer">
                 <View
@@ -162,13 +164,20 @@ const HarborTagPickerSheet = React.forwardRef(
                 </View>
                 {tags.length > 0 ? (
                     <BottomSheetFlatList
+                        contentContainerStyle={{
+                            paddingBottom: insets.bottom,
+                        }}
                         data={tags}
                         keyExtractor={item => String(item.name)}
                         keyboardShouldPersistTaps="handled"
                         renderItem={renderTagItem}
                     />
                 ) : (
-                    <View style={styles.modalEmptyState}>
+                    <View
+                        style={[
+                            styles.modalEmptyState,
+                            {paddingBottom: insets.bottom},
+                        ]}>
                         <Text
                             style={[
                                 styles.secondaryText,

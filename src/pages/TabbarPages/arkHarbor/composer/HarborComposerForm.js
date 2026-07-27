@@ -17,7 +17,6 @@ import {
 } from 'react-native-keyboard-controller';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {scale, verticalScale} from 'react-native-size-matters';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 
 import {useTheme} from '../../../../components/ThemeContext';
@@ -43,7 +42,6 @@ const HarborComposerForm = ({
     const {theme} = useTheme();
     const {t} = useTranslation('harbor');
     const headerHeight = useHeaderHeight();
-    const insets = useSafeAreaInsets();
     const {
         categories,
         categoryId,
@@ -667,7 +665,6 @@ const HarborComposerForm = ({
 
             <HarborCategoryPickerSheet
                 ref={categorySheetRef}
-                bottomInset={insets.bottom}
                 categories={categories}
                 onSelect={onSelectCategory}
                 selectedCategoryId={categoryId}
@@ -675,7 +672,6 @@ const HarborComposerForm = ({
 
             <HarborTagPickerSheet
                 ref={tagSheetRef}
-                bottomInset={insets.bottom}
                 maximumTagCount={maximumTagCount}
                 onChange={setSelectedTags}
                 selectedTags={selectedTags}

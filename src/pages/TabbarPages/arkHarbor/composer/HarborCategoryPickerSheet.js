@@ -16,6 +16,7 @@ import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useTranslation} from 'react-i18next';
 import {scale, verticalScale} from 'react-native-size-matters';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '../../../../components/ThemeContext';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
@@ -29,7 +30,6 @@ import HarborCategoryIcon from '../components/HarborCategoryIcon';
 const HarborCategoryPickerSheet = React.forwardRef(
     function HarborCategoryPickerSheet(
         {
-            bottomInset,
             categories,
             onSelect,
             selectedCategoryId,
@@ -38,6 +38,7 @@ const HarborCategoryPickerSheet = React.forwardRef(
     ) {
         const {theme} = useTheme();
         const {t} = useTranslation('harbor');
+        const insets = useSafeAreaInsets();
         const sheetRef = useRef(null);
         const [collapsedCategoryIds, setCollapsedCategoryIds] = useState(
             () => new Set(),
@@ -184,7 +185,8 @@ const HarborCategoryPickerSheet = React.forwardRef(
         return (
             <CustomBottomSheet
                 ref={sheetRef}
-                bottomInset={bottomInset}
+                // Stack 頁無 Tab Bar；bottomInset>0 會讓 sheet 懸空並露出下方表單
+                bottomInset={0}
                 enablePanDownToClose
                 page="harborComposer">
                 <View
@@ -225,13 +227,20 @@ const HarborCategoryPickerSheet = React.forwardRef(
                 </View>
                 {categoryRows.length > 0 ? (
                     <BottomSheetFlatList
+                        contentContainerStyle={{
+                            paddingBottom: insets.bottom,
+                        }}
                         data={categoryRows}
                         keyExtractor={item => String(item.id ?? item.name)}
                         keyboardShouldPersistTaps="handled"
                         renderItem={renderCategoryItem}
                     />
                 ) : (
-                    <View style={styles.modalEmptyState}>
+                    <View
+                        style={[
+                            styles.modalEmptyState,
+                            {paddingBottom: insets.bottom},
+                        ]}>
                         <Text
                             style={[
                                 styles.secondaryText,
