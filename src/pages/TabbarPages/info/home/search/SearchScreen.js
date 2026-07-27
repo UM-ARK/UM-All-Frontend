@@ -29,6 +29,7 @@ import {
     getSearchHistory,
     removeSearchHistory,
 } from '../../../../../utils/searchHistory';
+import { recordFeatureUsage } from '../../../../../utils/featureRecentUsage';
 import { trigger } from '../../../../../utils/trigger';
 import {
     COURSE_TAB_ROUTE,
@@ -202,6 +203,8 @@ const SearchScreen = ({ navigation }) => {
                 funcName: 'searchBar_features',
                 searchBarDetail: `${capturedQuery}-${item.fn_name}`,
             });
+            // 同步寫入服務頁常用紀錄
+            recordFeatureUsage(item.key_name || item.fn_name);
 
             if (item.go_where === 'Webview' || item.go_where === 'Linking') {
                 if (item.webview_param?.url) {

@@ -18,7 +18,12 @@ const PLACEHOLDER_TEXTS = [
     '失物認領',
 ];
 
-const SearchBar = ({ navigation }) => {
+const SearchBar = ({
+    navigation,
+    // 允許服務頁等入口覆寫事件名，預設維持首頁
+    entryFuncName = 'home_search_entry',
+    style,
+}) => {
     const { theme } = useTheme();
     const { black, white } = theme;
     const { t } = useTranslation(['common', 'features']);
@@ -48,12 +53,12 @@ const SearchBar = ({ navigation }) => {
 
     const handlePress = () => {
         trigger();
-        logToFirebase('funcUse', { funcName: 'home_search_entry' });
+        logToFirebase('funcUse', { funcName: entryFuncName });
         navigation.navigate('Search');
     };
 
     return (
-        <View style={styles.root}>
+        <View style={[styles.root, style]}>
             <Pressable
                 onPress={handlePress}
                 accessibilityRole="button"
