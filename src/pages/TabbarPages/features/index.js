@@ -333,7 +333,7 @@ function Index({ navigation }) {
                             {t('常用服務', { ns: 'features' })}
                         </Text>
                         <FlatGrid
-                            maxItemsPerRow={5}
+                            maxItemsPerRow={4}
                             itemDimension={scale(50)}
                             spacing={scale(10)}
                             itemContainerStyle={{

@@ -40,6 +40,7 @@ import { logToFirebase } from '../../../../utils/firebaseAnalytics.js';
 import { openLink } from '../../../../utils/browser.js';
 import { getLocalStorage } from '../../../../utils/storageKits.js';
 import { navigateToCourseTab } from '../../../../utils/courseNavigation.js';
+import { recordFeatureUsage } from '../../../../utils/featureRecentUsage';
 import { toastTextArr, toastKaomojiArr } from '../../../../static/UMARK_Assets/EasterEgg.js';
 import CustomBottomSheet from '../../../../utils/BottomSheet';
 import HyperlinkText from '../../../../components/HyperlinkText.js';
@@ -111,6 +112,8 @@ const HomeScreen = ({ navigation }) => {
             function_name: t('校園巴士', { ns: 'home' }),
             func: () => {
                 trigger();
+                // 與服務頁共用常用紀錄（key_name 對齊 FeatureList）
+                recordFeatureUsage('校園巴士');
                 navigation.navigate('Bus');
             },
         },
@@ -121,6 +124,7 @@ const HomeScreen = ({ navigation }) => {
             func: () => {
                 trigger();
                 logToFirebase('openPage', { page: 'moodle' });
+                recordFeatureUsage('Moodle');
                 openLink(UM_Moodle);
             },
         },

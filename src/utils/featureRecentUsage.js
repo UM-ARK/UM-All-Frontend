@@ -2,7 +2,7 @@ import {getLocalStorage, setLocalStorage} from './storageKits';
 
 export const FEATURE_RECENT_USAGE_STORAGE_KEY = 'ARK_Features_Recent_Usage';
 export const FEATURE_RECENT_USAGE_LIMIT = 20;
-export const FREQUENT_FEATURES_DISPLAY_LIMIT = 8;
+export const FREQUENT_FEATURES_DISPLAY_LIMIT = 4;
 
 // 預設高頻入口（以 FeatureList key_name 為準）
 export const DEFAULT_FREQUENT_FEATURE_KEYS = [
@@ -10,10 +10,6 @@ export const DEFAULT_FREQUENT_FEATURE_KEYS = [
     '校曆',
     '圖書館',
     '打印餘額',
-    '失物認領',
-    '課表模擬',
-    '選咩課',
-    '飯堂排隊',
 ];
 
 const normalizeTimestamp = usedAt =>

@@ -110,10 +110,6 @@ describe('服務頁常用功能紀錄', () => {
             '校曆',
             '校園巴士',
             '圖書館',
-            '打印餘額',
-            '失物認領',
-            '課表模擬',
-            '選咩課',
         ]);
         expect(result).toHaveLength(FREQUENT_FEATURES_DISPLAY_LIMIT);
     });
