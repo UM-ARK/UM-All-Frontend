@@ -758,7 +758,11 @@ const HarborTopicList = ({
             actionDisabled={firstPageRateLimited && cooldownActive}
             onAction={
                 needsLogin
-                    ? () => login().catch(() => { })
+                    ? () =>
+                        login({
+                            routeName: 'Tabbar',
+                            params: {screen: 'ForumTabbar'},
+                        }).catch(() => { })
                     : () => loadFirstPage()
             }
         />

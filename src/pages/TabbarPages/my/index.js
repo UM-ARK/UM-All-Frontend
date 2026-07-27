@@ -94,7 +94,16 @@ const MyScreen = ({ navigation }) => {
                             onPress: async () => {
                                 trigger();
                                 try {
-                                    const signedIn = await login();
+                                    const signedIn = await login({
+                                        routeName: 'HarborComposer',
+                                        params: {
+                                            mode: 'newTopic',
+                                            categoryId:
+                                                ARK_HARBOR_FEEDBACK_CATEGORY_ID,
+                                            categorySlug:
+                                                ARK_HARBOR_FEEDBACK_CATEGORY_SLUG,
+                                        },
+                                    });
                                     if (signedIn) {
                                         openHarborFeedbackComposer();
                                     }
@@ -119,7 +128,10 @@ const MyScreen = ({ navigation }) => {
 
     const handleLogin = async () => {
         try {
-            await login();
+            await login({
+                routeName: 'Tabbar',
+                params: { screen: 'MyTabbar' },
+            });
         } catch (sessionError) {
             presentHarborError(sessionError);
         }

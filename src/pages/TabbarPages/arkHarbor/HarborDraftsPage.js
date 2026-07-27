@@ -390,7 +390,9 @@ const HarborDraftsPage = ({navigation}) => {
                     accessibilityRole="button"
                     onPress={() => {
                         trigger();
-                        login().catch(() => {
+                        login({
+                            routeName: 'HarborDrafts',
+                        }).catch(() => {
                             Toast.show(
                                 t('Harbor 登入失敗，請稍後再試。'),
                             );

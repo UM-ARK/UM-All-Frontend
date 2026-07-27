@@ -48,6 +48,7 @@ import EatingSchedule from './pages/Features/EatingSchedule';
 import UMOrg from './pages/Features/UMOrg';
 import SettingPage from './pages/Features/SettingPage';
 import { useTheme } from './components/ThemeContext';
+import { useHarborSession } from './contexts/HarborSessionContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,9 +56,14 @@ const Nav = () => {
     const { theme } = useTheme();
     const { black } = theme;
     const { t } = useTranslation(['common', 'features', 'event', 'home']);
+    const {
+        consumeLoginIntent,
+        pendingLoginIntent,
+    } = useHarborSession();
     const navigationRef = useNavigationContainerRef();
     // 冷啟動：首 render 就暫存 initial，避免 onReady 早於 useEffect 而漏導航
     const pendingQuickActionRef = useRef(QuickActions.initial ?? null);
+    const handledLoginIntentRef = useRef(null);
 
     // 與 ThemeContext 對齊，否則透明標題列下會透出 Navigation 預設淺色底（深色模式頂部出現白條）
     const navigationTheme = useMemo(() => {
@@ -113,6 +119,30 @@ const Nav = () => {
         });
     }, [handleQuickAction, navigationRef]);
 
+    const flushPendingLoginIntent = useCallback(() => {
+        if (!pendingLoginIntent || !navigationRef.isReady()) {
+            return;
+        }
+
+        const intentId = `${pendingLoginIntent.createdAt}:${pendingLoginIntent.routeName}`;
+        if (handledLoginIntentRef.current === intentId) {
+            return;
+        }
+        handledLoginIntentRef.current = intentId;
+        requestAnimationFrame(() => {
+            navigationRef.navigate(
+                pendingLoginIntent.routeName,
+                pendingLoginIntent.params,
+            );
+            consumeLoginIntent().catch(() => { });
+        });
+    }, [consumeLoginIntent, navigationRef, pendingLoginIntent]);
+
+    const handleNavigationReady = useCallback(() => {
+        flushPendingQuickAction();
+        flushPendingLoginIntent();
+    }, [flushPendingLoginIntent, flushPendingQuickAction]);
+
     useEffect(() => {
         const configureQuickActions = async () => {
             const supported = await QuickActions.isSupported();
@@ -152,11 +182,15 @@ const Nav = () => {
         };
     }, [flushPendingQuickAction, handleQuickAction, t]);
 
+    useEffect(() => {
+        flushPendingLoginIntent();
+    }, [flushPendingLoginIntent]);
+
     return (
         <NavigationContainer
             ref={navigationRef}
             theme={navigationTheme}
-            onReady={flushPendingQuickAction}>
+            onReady={handleNavigationReady}>
             <Stack.Navigator
                 initialRouteName="Tabbar"
                 screenOptions={{

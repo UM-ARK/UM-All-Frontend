@@ -47,7 +47,9 @@ const HarborAccountSettingsPage = ({navigation}) => {
     const handleReauthorize = async () => {
         trigger();
         try {
-            await login();
+            await login({
+                routeName: 'HarborAccountSettings',
+            });
         } catch (error) {
             showOperationError();
         }

@@ -5,6 +5,7 @@ import {
     deleteHarborPost,
     fetchHarborBadges,
     fetchHarborCategories,
+    fetchCurrentHarborUser,
     fetchHarborMessages,
     fetchHarborNestedPostChildren,
     fetchHarborNotifications,
@@ -158,6 +159,116 @@ describe('Harbor API 資料正規化', () => {
                 unavailable: true,
             }),
         ).toEqual(['latest', 'top']);
+    });
+
+    it('Secondary profile API 失敗時保留同帳號上次成功資料', async () => {
+        const previousUser = {
+            username: 'ark-user',
+            displayName: 'ARK User',
+            role: 'Harbor 會員',
+            joinedAt: '2025-07',
+            contributions: [
+                {key: 'topicsCreated', value: '12'},
+                {key: 'postsCreated', value: '34'},
+                {key: 'likesReceived', value: '56'},
+                {key: 'badges', value: '7'},
+            ],
+            stats: [
+                {key: 'daysVisited', value: '90'},
+                {key: 'readTime', value: '120'},
+                {key: 'topicsRead', value: '45'},
+                {key: 'postsRead', value: '678'},
+            ],
+            activity: [{id: 'activity-1'}],
+            badges: [{id: 'badge-1'}],
+        };
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'ark-user',
+                        unread_notifications: 2,
+                    },
+                },
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user: {
+                        username: 'ark-user',
+                        name: 'ARK User',
+                    },
+                },
+            })
+            .mockRejectedValueOnce(new Error('summary unavailable'))
+            .mockResolvedValueOnce({data: {notifications: []}})
+            .mockRejectedValueOnce(new Error('activity unavailable'))
+            .mockRejectedValueOnce(new Error('badges unavailable'));
+
+        const result = await fetchCurrentHarborUser(
+            {userApiKey: 'key', clientId: 'client'},
+            previousUser,
+        );
+
+        expect(result.contributions.map(item => item.value)).toEqual([
+            '12',
+            '34',
+            '56',
+            '7',
+        ]);
+        expect(result.stats.map(item => item.value)).toEqual([
+            '90',
+            '120',
+            '45',
+            '678',
+        ]);
+        expect(result.activity).toEqual(previousUser.activity);
+        expect(result.badges).toEqual(previousUser.badges);
+        expect(result.partialProfile).toBe(true);
+        expect(result.usedPreviousProfileData).toBe(true);
+        expect(result.unavailableProfileSections).toEqual([
+            'summary',
+            'activity',
+            'badges',
+        ]);
+    });
+
+    it('沒有上次資料時以未知狀態取代 Secondary API 的假 0', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: {
+                    current_user: {
+                        username: 'new-user',
+                    },
+                },
+            })
+            .mockRejectedValue(new Error('secondary unavailable'));
+
+        const result = await fetchCurrentHarborUser(
+            {
+                userApiKey: 'key',
+                clientId: 'client',
+            },
+            {
+                username: 'other-user',
+                contributions: [{key: 'topicsCreated', value: '99'}],
+                stats: [{key: 'daysVisited', value: '99'}],
+            },
+        );
+
+        expect(result.contributions.map(item => item.value)).toEqual([
+            '—',
+            '—',
+            '—',
+            '—',
+        ]);
+        expect(result.stats.map(item => item.value)).toEqual([
+            '—',
+            '—',
+            '—',
+            '—',
+        ]);
+        expect(result.partialProfile).toBe(true);
+        expect(result.usedPreviousProfileData).toBe(false);
     });
 
     it('將 User Actions 轉為 App 活動項目', async () => {

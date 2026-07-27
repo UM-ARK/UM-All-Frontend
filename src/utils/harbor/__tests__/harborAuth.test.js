@@ -141,8 +141,8 @@ describe('Harbor User API Key 授權工具', () => {
         expect(parsedUrl.searchParams.get('nonce')).toBe('nonce-value');
     });
 
-    it('網站關聯檔部署前使用可可靠返回 App 的 custom scheme', () => {
-        expect(getHarborAuthRedirect()).toBe('one.umall://auth/discourse');
+    it('Android 使用已部署網站關聯檔的 HTTPS callback', () => {
+        expect(getHarborAuthRedirect()).toBe('https://umall.one/auth/discourse');
     });
 
     it('只接受 ARK ALL 的 HTTPS 或 custom scheme callback', () => {

@@ -1107,10 +1107,14 @@ function normalizeProfile(
     notificationData,
     actionData,
     badgeData,
+    availability,
+    previousUser,
 ) {
     const profile = profileData?.user || {};
     const summary = summaryData?.user_summary || {};
     const username = currentUser.username || profile.username;
+    const matchingPreviousUser =
+        previousUser?.username === username ? previousUser : null;
     const avatarTemplate =
         currentUser.avatar_template || profile.avatar_template || '';
     const createdAt = profile.created_at ? new Date(profile.created_at) : null;
@@ -1119,9 +1123,13 @@ function normalizeProfile(
             ? `${createdAt.getFullYear()}-${String(
                 createdAt.getMonth() + 1,
             ).padStart(2, '0')}`
-            : '';
+            : matchingPreviousUser?.joinedAt || '';
 
-    let role = profile.title || profile.primary_group_name || '';
+    let role =
+        profile.title ||
+        profile.primary_group_name ||
+        matchingPreviousUser?.role ||
+        '';
     if (currentUser.admin || profile.admin) {
         role = '管理員';
     } else if (currentUser.moderator || profile.moderator) {
@@ -1130,82 +1138,151 @@ function normalizeProfile(
         role = 'Harbor 會員';
     }
 
-    const notifications = (notificationData?.notifications || []).map(
-        normalizeNotification,
-    );
-    const recentActivity = (actionData?.user_actions || [])
-        .map(normalizeAction)
-        .filter(action => action.topicId)
-        .slice(0, 3);
-    const badges = normalizeBadges(badgeData);
+    const notifications = availability.notifications
+        ? (notificationData?.notifications || []).map(normalizeNotification)
+        : [];
+    const recentActivity = availability.activity
+        ? (actionData?.user_actions || [])
+            .map(normalizeAction)
+            .filter(action => action.topicId)
+            .slice(0, 3)
+        : matchingPreviousUser?.activity || [];
+    const badges = availability.badges
+        ? normalizeBadges(badgeData)
+        : matchingPreviousUser?.badges || [];
     const unreadNotificationCount = notifications.filter(
         notification => !notification.isRead,
     ).length;
+    const previousMetric = (collection, key) =>
+        matchingPreviousUser?.[collection]?.find(item => item.key === key)
+            ?.value;
+    const summaryMetric = (collection, key, value, transform = item => item) =>
+        availability.summary
+            ? String(transform(value ?? 0))
+            : previousMetric(collection, key) ?? '—';
+    const badgeCount =
+        availability.profile && profile.badge_count != null
+            ? String(profile.badge_count)
+            : availability.badges
+            ? String(badges.length)
+            : previousMetric('contributions', 'badges') ?? '—';
+    const unavailableProfileSections = Object.entries(availability)
+        .filter(([, available]) => !available)
+        .map(([section]) => section);
+    const currentUnreadNotifications = toNumberOrNull(
+        currentUser.unread_notifications,
+    );
+    const currentUnreadMessages = toNumberOrNull(
+        currentUser.unread_private_messages,
+    );
 
     return {
-        displayName: currentUser.name || profile.name || username,
+        displayName:
+            currentUser.name ||
+            profile.name ||
+            matchingPreviousUser?.displayName ||
+            username,
         username,
         role,
-        trustLevel: Number(profile.trust_level ?? currentUser.trust_level ?? 0),
-        joinedAt,
-        unreadNotifications: Number(
-            currentUser.unread_notifications ?? unreadNotificationCount,
+        trustLevel: Number(
+            profile.trust_level ??
+            currentUser.trust_level ??
+            matchingPreviousUser?.trustLevel ??
+            0,
         ),
-        unreadMessages: Number(currentUser.unread_private_messages || 0),
+        joinedAt,
+        unreadNotifications: currentUnreadNotifications != null
+            ? currentUnreadNotifications
+            : availability.notifications
+                ? unreadNotificationCount
+                : Number(matchingPreviousUser?.unreadNotifications || 0),
+        unreadMessages: currentUnreadMessages != null
+            ? currentUnreadMessages
+            : Number(matchingPreviousUser?.unreadMessages || 0),
         avatarUrl: avatarTemplate
             ? ARK_HARBOR_AVATAR_TEMPLATE(avatarTemplate, 144)
-            : null,
+            : matchingPreviousUser?.avatarUrl || null,
         contributions: [
             {
                 key: 'topicsCreated',
-                value: String(summary.topic_count || 0),
+                value: summaryMetric(
+                    'contributions',
+                    'topicsCreated',
+                    summary.topic_count,
+                ),
                 label: '建立話題',
             },
             {
                 key: 'postsCreated',
-                value: String(summary.post_count || 0),
+                value: summaryMetric(
+                    'contributions',
+                    'postsCreated',
+                    summary.post_count,
+                ),
                 label: '發布貼文',
             },
             {
                 key: 'likesReceived',
-                value: String(summary.likes_received || 0),
+                value: summaryMetric(
+                    'contributions',
+                    'likesReceived',
+                    summary.likes_received,
+                ),
                 label: '收到的讚',
             },
             {
                 key: 'badges',
-                value: String(profile.badge_count ?? badges.length),
+                value: badgeCount,
                 label: '徽章',
             },
         ],
         stats: [
             {
                 key: 'daysVisited',
-                value: String(summary.days_visited || 0),
+                value: summaryMetric(
+                    'stats',
+                    'daysVisited',
+                    summary.days_visited,
+                ),
                 label: '活躍天數',
             },
             {
                 key: 'readTime',
-                value: String(
-                    Math.max(
-                        0,
-                        Math.round(Number(summary.time_read || 0) / 60),
-                    ),
+                value: summaryMetric(
+                    'stats',
+                    'readTime',
+                    summary.time_read,
+                    value =>
+                        Math.max(0, Math.round(Number(value || 0) / 60)),
                 ),
                 label: '閱讀時間（分鐘）',
             },
             {
                 key: 'topicsRead',
-                value: String(summary.topics_entered || 0),
+                value: summaryMetric(
+                    'stats',
+                    'topicsRead',
+                    summary.topics_entered,
+                ),
                 label: '瀏覽話題',
             },
             {
                 key: 'postsRead',
-                value: String(summary.posts_read_count || 0),
+                value: summaryMetric(
+                    'stats',
+                    'postsRead',
+                    summary.posts_read_count,
+                ),
                 label: '已讀貼文',
             },
         ],
         activity: recentActivity,
         badges,
+        partialProfile: unavailableProfileSections.length > 0,
+        usedPreviousProfileData: Boolean(
+            matchingPreviousUser && unavailableProfileSections.length > 0,
+        ),
+        unavailableProfileSections,
     };
 }
 
@@ -2287,7 +2364,7 @@ export async function fetchCurrentHarborSession(credentials) {
     return currentUser;
 }
 
-export async function fetchCurrentHarborUser(credentials) {
+export async function fetchCurrentHarborUser(credentials, previousUser = null) {
     const requestConfig = { harborCredentials: credentials };
     const currentUser = await fetchCurrentHarborSession(credentials);
     const username = encodeURIComponent(currentUser.username);
@@ -2311,16 +2388,25 @@ export async function fetchCurrentHarborUser(credentials) {
         }),
         harborApi.get(`/user-badges/${username}.json`, requestConfig),
     ]);
+    const availability = {
+        profile: profileResult.status === 'fulfilled',
+        summary: summaryResult.status === 'fulfilled',
+        notifications: notificationResult.status === 'fulfilled',
+        activity: actionResult.status === 'fulfilled',
+        badges: badgeResult.status === 'fulfilled',
+    };
 
     return normalizeProfile(
         currentUser,
-        profileResult.status === 'fulfilled' ? profileResult.value.data : null,
-        summaryResult.status === 'fulfilled' ? summaryResult.value.data : null,
-        notificationResult.status === 'fulfilled'
+        availability.profile ? profileResult.value.data : null,
+        availability.summary ? summaryResult.value.data : null,
+        availability.notifications
             ? notificationResult.value.data
             : null,
-        actionResult.status === 'fulfilled' ? actionResult.value.data : null,
-        badgeResult.status === 'fulfilled' ? badgeResult.value.data : null,
+        availability.activity ? actionResult.value.data : null,
+        availability.badges ? badgeResult.value.data : null,
+        availability,
+        previousUser,
     );
 }
 

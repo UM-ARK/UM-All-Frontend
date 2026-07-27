@@ -171,6 +171,23 @@ const HarborDashboard = ({ user, navigation }) => {
                 user={user}
                 onPress={() => navigation.navigate('HarborAccountSettings')}
             />
+            {user.partialProfile ? (
+                <View
+                    style={[
+                        styles.partialProfile,
+                        { backgroundColor: theme.tonal.secondary15 },
+                    ]}>
+                    <Text
+                        style={[
+                            styles.partialProfileText,
+                            { color: theme.black.second },
+                        ]}>
+                        {user.usedPreviousProfileData
+                            ? t('部分資料暫時無法更新，已保留上次成功資料。')
+                            : t('部分資料暫時無法更新，未知統計暫不顯示。')}
+                    </Text>
+                </View>
+            ) : null}
 
             <HarborSectionHeader title={t('我的 Harbor')} />
             <View
@@ -348,6 +365,17 @@ const HarborDashboard = ({ user, navigation }) => {
 const styles = StyleSheet.create({
     container: {
         gap: verticalScale(12),
+    },
+    partialProfile: {
+        borderRadius: scale(12),
+        paddingHorizontal: scale(14),
+        paddingVertical: verticalScale(9),
+    },
+    partialProfileText: {
+        ...uiStyle.defaultText,
+        fontSize: scale(10),
+        lineHeight: verticalScale(14),
+        textAlign: 'center',
     },
     actionsCard: {
         borderRadius: scale(20),

@@ -35,6 +35,11 @@ import {
     logHarborAuthError,
     logHarborAuthEvent,
 } from '../utils/harbor/harborLogger';
+import {
+    clearHarborLoginIntent,
+    loadHarborLoginIntent,
+    saveHarborLoginIntent,
+} from '../utils/harbor/harborLoginIntent';
 import { getLocalStorage, setLocalStorage } from '../utils/storageKits';
 
 const PROFILE_CACHE_KEY = 'harbor_profile_cache';
@@ -70,12 +75,18 @@ export const HarborSessionProvider = ({ children }) => {
     const [status, setStatus] = useState('restoring');
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
+    const [pendingLoginIntent, setPendingLoginIntent] = useState(null);
     const credentialsRef = useRef(null);
+    const userRef = useRef(null);
     const mountedRef = useRef(true);
     const lastValidationRef = useRef(0);
     const lastValidationAttemptRef = useRef(0);
     const validationInFlightRef = useRef(null);
     const sessionGenerationRef = useRef(0);
+
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
 
     const applySignedOutState = useCallback((nextStatus = 'signedOut') => {
         sessionGenerationRef.current += 1;
@@ -136,9 +147,17 @@ export const HarborSessionProvider = ({ children }) => {
             lastValidationAttemptRef.current = startedAt;
             logHarborAuthEvent('profile.refresh.start');
             const credentialCacheId = await getCredentialCacheId(credentials);
+            const cachedProfile = await getLocalStorage(PROFILE_CACHE_KEY);
+            const cachedUser =
+                cachedProfile?.credentialCacheId === credentialCacheId
+                    ? cachedProfile.user
+                    : null;
 
             try {
-                const nextUser = await fetchCurrentHarborUser(credentials);
+                const nextUser = await fetchCurrentHarborUser(
+                    credentials,
+                    cachedUser || userRef.current,
+                );
                 if (!isCurrentSession(credentials, generation)) {
                     return null;
                 }
@@ -173,15 +192,10 @@ export const HarborSessionProvider = ({ children }) => {
                     throw requestError;
                 }
 
-                const cachedProfile = await getLocalStorage(PROFILE_CACHE_KEY);
                 if (!isCurrentSession(credentials, generation)) {
                     return null;
                 }
 
-                const cachedUser =
-                    cachedProfile?.credentialCacheId === credentialCacheId
-                        ? cachedProfile.user
-                        : null;
                 setUser(cachedUser || createFallbackUser());
                 setError(requestError);
                 setStatus('signedIn');
@@ -268,6 +282,10 @@ export const HarborSessionProvider = ({ children }) => {
 
                 const generation = activateSession(credentials);
                 await refreshProfile(credentials, generation);
+                const loginIntent = await loadHarborLoginIntent();
+                if (mountedRef.current && loginIntent) {
+                    setPendingLoginIntent(loginIntent);
+                }
             } catch (restoreError) {
                 logHarborAuthError('session.restore.failed', restoreError);
                 if (
@@ -326,13 +344,18 @@ export const HarborSessionProvider = ({ children }) => {
         return () => subscription.remove();
     }, [refreshProfile]);
 
-    const login = useCallback(async () => {
+    const login = useCallback(async intent => {
         const startedAt = Date.now();
         logHarborAuthEvent('login.start');
         setStatus('authorizing');
         setError(null);
 
         try {
+            if (intent) {
+                await saveHarborLoginIntent(intent);
+            } else {
+                await clearHarborLoginIntent();
+            }
             const { remainingCount } = await retryPendingRevocation();
             if (remainingCount > 0) {
                 const pendingError = new Error(
@@ -342,8 +365,6 @@ export const HarborSessionProvider = ({ children }) => {
                 throw pendingError;
             }
 
-            await setLocalStorage(PROFILE_CACHE_KEY, null);
-            logHarborAuthEvent('login.profile_cache.cleared');
             const credentials = await startHarborAuthorization();
             logHarborAuthEvent('login.credentials.ready');
             const generation = activateSession(credentials);
@@ -351,8 +372,10 @@ export const HarborSessionProvider = ({ children }) => {
             logHarborAuthEvent('login.success', {
                 durationMs: Date.now() - startedAt,
             });
+            await clearHarborLoginIntent();
             return true;
         } catch (authError) {
+            await clearHarborLoginIntent();
             if (authError.code === HARBOR_AUTH_ERROR.CANCELLED) {
                 logHarborAuthEvent('login.cancelled', {
                     durationMs: Date.now() - startedAt,
@@ -385,6 +408,8 @@ export const HarborSessionProvider = ({ children }) => {
         }
 
         applySignedOutState();
+        setPendingLoginIntent(null);
+        await clearHarborLoginIntent();
         await clearHarborCredentials();
         await setLocalStorage(PROFILE_CACHE_KEY, null);
 
@@ -400,6 +425,11 @@ export const HarborSessionProvider = ({ children }) => {
         }
     }, [applySignedOutState]);
 
+    const consumeLoginIntent = useCallback(async () => {
+        setPendingLoginIntent(null);
+        await clearHarborLoginIntent();
+    }, []);
+
     const value = useMemo(
         () => ({
             status,
@@ -407,6 +437,8 @@ export const HarborSessionProvider = ({ children }) => {
             error,
             login,
             logout,
+            pendingLoginIntent,
+            consumeLoginIntent,
             refresh: () =>
                 credentialsRef.current
                     ? refreshProfile(
@@ -415,7 +447,16 @@ export const HarborSessionProvider = ({ children }) => {
                     )
                     : Promise.resolve(null),
         }),
-        [error, login, logout, refreshProfile, status, user],
+        [
+            consumeLoginIntent,
+            error,
+            login,
+            logout,
+            pendingLoginIntent,
+            refreshProfile,
+            status,
+            user,
+        ],
     );
 
     return (

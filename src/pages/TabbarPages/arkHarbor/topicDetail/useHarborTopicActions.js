@@ -125,18 +125,27 @@ const useHarborTopicActions = ({
         });
     }, []);
 
-    const requireHarborSignIn = useCallback(async () => {
+    const requireHarborSignIn = useCallback(async targetPostNumber => {
         if (sessionStatusRef.current === 'signedIn') {
             return true;
         }
         try {
-            await login();
-            return true;
+            const postNumber = Number(targetPostNumber);
+            return await login({
+                routeName: 'HarborTopicDetail',
+                params: {
+                    topicId,
+                    topicTitle: latestTopicRef.current?.title,
+                    ...(Number.isInteger(postNumber) && postNumber > 0
+                        ? {postNumber}
+                        : null),
+                },
+            });
         } catch (error) {
             Toast.show(t('需要登入 Harbor 才能完成此操作'));
             return false;
         }
-    }, [login, sessionStatusRef, t]);
+    }, [latestTopicRef, login, sessionStatusRef, t, topicId]);
 
     const showMutationFailure = useCallback(
         (error, { rolledBack = true } = {}) => {
@@ -199,7 +208,7 @@ const useHarborTopicActions = ({
 
     const deletePost = useCallback(
         async post => {
-            if (!(await requireHarborSignIn())) {
+            if (!(await requireHarborSignIn(post?.post_number))) {
                 return false;
             }
             if (!post?.can_delete) {
@@ -288,7 +297,10 @@ const useHarborTopicActions = ({
         async post => {
             const key = `like:${post.id}`;
             const wasSignedIn = sessionStatusRef.current === 'signedIn';
-            if (!(await requireHarborSignIn()) || !beginMutation(key)) {
+            if (
+                !(await requireHarborSignIn(post?.post_number)) ||
+                !beginMutation(key)
+            ) {
                 return;
             }
 
@@ -437,7 +449,7 @@ const useHarborTopicActions = ({
                 return;
             }
             const wasSignedIn = sessionStatusRef.current === 'signedIn';
-            if (!(await requireHarborSignIn())) {
+            if (!(await requireHarborSignIn(post?.post_number))) {
                 return;
             }
             if (
@@ -529,7 +541,7 @@ const useHarborTopicActions = ({
 
     const openBookmarkEditor = useCallback(
         async post => {
-            if (!(await requireHarborSignIn())) {
+            if (!(await requireHarborSignIn(post?.post_number))) {
                 return;
             }
             setBookmarkEditor({

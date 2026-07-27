@@ -387,7 +387,10 @@ const ForumPage = ({ navigation }) => {
             return;
         }
         try {
-            await login();
+            await login({
+                routeName: 'Tabbar',
+                params: {screen: 'ForumTabbar'},
+            });
         } catch (error) {
             Alert.alert(
                 t('Harbor 登入失敗'),

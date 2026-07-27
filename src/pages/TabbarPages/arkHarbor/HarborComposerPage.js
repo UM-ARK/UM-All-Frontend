@@ -273,13 +273,16 @@ const HarborComposerPage = ({route, navigation}) => {
         trigger();
         setLoadError('');
         try {
-            await login();
+            await login({
+                routeName: 'HarborComposer',
+                params: route.params,
+            });
         } catch {
             const message = t('Harbor 登入失敗，請稍後再試。');
             setLoadError(message);
             Toast.show(message);
         }
-    }, [login, setLoadError, t]);
+    }, [login, route.params, setLoadError, t]);
 
     const showTopicResult = useCallback(
         (resultTopicId, resultPostNumber) => {

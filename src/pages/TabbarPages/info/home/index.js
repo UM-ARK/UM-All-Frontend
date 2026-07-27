@@ -26,7 +26,6 @@ import {
     ARK_WIKI,
     UM_Moodle,
     ARK_HARBOR,
-    ARK_HARBOR_LOGIN,
     ARK_WIKI_DONATE_RANK,
     AFD_UMACARK,
 } from '../../../../utils/pathMap.js';
@@ -59,6 +58,7 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheetScrollView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import ScrollToTopButton from '../../../../components/ScrollToTopButton';
 import TouchableScale from '../../../../components/TouchableScale';
+import { useHarborSession } from '../../../../contexts/HarborSessionContext';
 
 const MIN_REFRESH_DURATION = 800;
 const DONATE_PROBE_TIMEOUT_MS = 2500;
@@ -101,6 +101,7 @@ const HomeScreen = ({ navigation }) => {
     const { theme } = useTheme();
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t } = useTranslation(['common', 'home']);
+    const { login, status: harborSessionStatus } = useHarborSession();
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -155,13 +156,36 @@ const HomeScreen = ({ navigation }) => {
             icon_name: 'log-in',
             icon_type: iconTypes.ionicons,
             function_name: t('論壇登入', { ns: 'home' }),
-            func: () => {
+            func: async () => {
                 trigger();
                 logToFirebase('funcUse', { funcName: 'harbor_login' });
-                openLink(ARK_HARBOR_LOGIN);
+                if (harborSessionStatus === 'signedIn') {
+                    navigation.navigate('MyTabbar');
+                    return;
+                }
+                if (
+                    harborSessionStatus === 'restoring' ||
+                    harborSessionStatus === 'authorizing'
+                ) {
+                    return;
+                }
+                try {
+                    const signedIn = await login({
+                        routeName: 'Tabbar',
+                        params: { screen: 'MyTabbar' },
+                    });
+                    if (signedIn) {
+                        navigation.navigate('MyTabbar');
+                    }
+                } catch {
+                    Alert.alert(
+                        t('Harbor 登入失敗'),
+                        t('Harbor 登入失敗，請稍後再試。'),
+                    );
+                }
             },
         },
-    ]);
+    ], [harborSessionStatus, login, navigation, t]);
     const [calRefreshKey, setCalRefreshKey] = useState(0);
     const [isShowModal, setIsShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
