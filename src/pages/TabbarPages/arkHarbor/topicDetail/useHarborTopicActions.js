@@ -298,6 +298,46 @@ const useHarborTopicActions = ({
         ],
     );
 
+    const explainPostReactionDisabled = useCallback(
+        postId => {
+            const post = latestTopicRef.current?.post_stream?.posts?.find(
+                item => Number(item.id) === Number(postId),
+            );
+            if (!post) {
+                return;
+            }
+            const diagnostics = getPostActionDiagnostics(
+                post,
+                currentUsername,
+                currentTrustLevel,
+            );
+            logHarborPostAction('blocked.user_feedback', {
+                action: 'reaction',
+                reason: diagnostics.isOwnPost
+                    ? 'own_post'
+                    : 'post_permission',
+                sessionStatus: sessionStatusRef.current,
+                ...diagnostics,
+            });
+            if (diagnostics.isOwnPost) {
+                Toast.show(t('你不能回應自己的帖子'));
+                return;
+            }
+            if (post.current_user_reaction?.can_undo === false) {
+                Toast.show(t('你目前不能取消這個回應'));
+                return;
+            }
+            Toast.show(t('你目前沒有權限回應這篇帖子'));
+        },
+        [
+            currentTrustLevel,
+            currentUsername,
+            latestTopicRef,
+            sessionStatusRef,
+            t,
+        ],
+    );
+
     const selectPostReaction = useCallback(
         async (postId, reactionId) => {
             const post = latestTopicRef.current?.post_stream?.posts?.find(
@@ -655,6 +695,7 @@ const useHarborTopicActions = ({
     return {
         bookmarkEditor,
         changeNotificationLevel,
+        explainPostReactionDisabled,
         isBookmarkReminderVisible,
         isNotificationVisible,
         markTopicUnread,

@@ -273,6 +273,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     const {
         bookmarkEditor,
         changeNotificationLevel,
+        explainPostReactionDisabled,
         isBookmarkReminderVisible,
         isNotificationVisible,
         markTopicUnread,
@@ -650,6 +651,9 @@ const HarborTopicDetail = ({ route, navigation }) => {
                         onPressQuote={openPostQuoteComposer}
                         onPressReply={scrollToPost}
                         onPressShare={sharePost}
+                        onPressDisabledReaction={
+                            explainPostReactionDisabled
+                        }
                         onSelectReaction={selectPostReaction}
                         canReply={canReplyToTopic}
                         pendingBookmark={
@@ -675,6 +679,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
             imageUrls,
             isLoadingPrevious,
             copyPostPermalink,
+            explainPostReactionDisabled,
             markTopicUnread,
             openAuthor,
             openBookmarkEditor,

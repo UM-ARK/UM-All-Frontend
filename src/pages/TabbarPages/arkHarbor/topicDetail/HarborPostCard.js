@@ -149,6 +149,7 @@ const HarborPostCard = memo(
         onPressBookmark,
         onPressComposeReply,
         onPressCopy,
+        onPressDisabledReaction,
         onPressEdit,
         onPressLike,
         onPressLink,
@@ -574,13 +575,16 @@ const HarborPostCard = memo(
                 ) : null}
                 <View style={styles.postActionRow}>
                     {reactionsEnabled && reactionDisabled ? (
-                        <View
+                        <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={t('回應')}
-                            accessibilityState={{ disabled: true }}
+                            onPress={() => {
+                                trigger();
+                                onPressDisabledReaction(post.id);
+                            }}
                             style={styles.reactionMenuView}>
                             {reactionButton}
-                        </View>
+                        </Pressable>
                     ) : reactionsEnabled ? (
                         <MenuView
                             actions={reactionMenuActions}
