@@ -66,6 +66,7 @@ import { useCoursePlan } from '../../context/CoursePlanContext';
 import { getSlotKey } from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
+import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
 
@@ -375,24 +376,6 @@ function CourseSim({ route, navigation }) {
             paddingVertical: verticalScale(2),
             borderRadius: verticalScale(5),
             marginHorizontal: scale(2.5),
-        },
-        viewSwitcher: {
-            alignSelf: 'center',
-            flexDirection: 'row',
-            backgroundColor: tonal.primary15,
-            borderRadius: scale(10),
-            padding: scale(3),
-            marginVertical: verticalScale(6),
-        },
-        viewSwitcherButton: {
-            paddingHorizontal: scale(18),
-            paddingVertical: verticalScale(6),
-            borderRadius: scale(8),
-        },
-        viewSwitcherText: {
-            ...uiStyle.defaultText,
-            fontSize: scale(14),
-            fontWeight: '600',
         },
         searchResultText: {
             ...uiStyle.defaultText,
@@ -2481,6 +2464,7 @@ E11-0000
         );
     }
 
+    /** 底部具體／概覽切換；絕對定位並扣掉 Tab Bar，避免被遮擋。 */
     const renderViewSwitcher = () => {
         const viewOptions = [
             { key: 'detail', label: t('具體', { ns: 'timetable' }) },
@@ -2488,43 +2472,28 @@ E11-0000
         ];
 
         return (
-            <View style={s.viewSwitcher}>
-                {viewOptions.map(option => {
-                    const isSelected = timetableView === option.key;
-
-                    return (
-                        <Pressable
-                            key={option.key}
-                            accessibilityRole="button"
-                            accessibilityState={{ selected: isSelected }}
-                            onPress={() => {
-                                trigger();
-                                setTimetableView(option.key);
-                            }}
-                            style={({ pressed }) => [
-                                s.viewSwitcherButton,
-                                {
-                                    backgroundColor: isSelected
-                                        ? white
-                                        : pressed
-                                            ? tonal.primary30
-                                            : null,
-                                },
-                            ]}>
-                            <Text
-                                style={[
-                                    s.viewSwitcherText,
-                                    {
-                                        color: isSelected
-                                            ? themeColor
-                                            : black.third,
-                                    },
-                                ]}>
-                                {option.label}
-                            </Text>
-                        </Pressable>
-                    );
-                })}
+            <View
+                style={{
+                    position: 'absolute',
+                    bottom: tabBarHeight + verticalScale(10),
+                    alignSelf: 'center',
+                    zIndex: 10,
+                }}>
+                <SegmentControl
+                    options={viewOptions}
+                    selectedIndex={timetableView === 'overview' ? 1 : 0}
+                    onChange={index => {
+                        setTimetableView(index === 0 ? 'detail' : 'overview');
+                    }}
+                    trackBackgroundColor={white}
+                    style={{
+                        shadowColor: black.main,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 3,
+                    }}
+                />
             </View>
         );
     };
@@ -2721,12 +2690,14 @@ E11-0000
                 ref={verScroll}
                 keyboardDismissMode="on-drag"
                 contentInsetAdjustmentBehavior="never"
-                contentContainerStyle={{ paddingBottom: tabBarHeight }}>
+                contentContainerStyle={{
+                    // 預留底部 SegmentControl + Tab Bar，避免最後一列被擋住
+                    paddingBottom: tabBarHeight + verticalScale(50),
+                }}>
                 {/* 渲染課表或首次使用提示 */}
                 <View style={{ flex: 1 }}>
                     {planSlots.length > 0 ? (
                         <>
-                            {renderViewSwitcher()}
                             {timetableView === 'overview' ? (
                                 renderOverview()
                             ) : (
@@ -2743,6 +2714,11 @@ E11-0000
                     )}
                 </View>
             </ScrollView>
+
+            {/* 有排課時才顯示具體／概覽切換；與 FAB 同層，bottom 扣掉 Tab Bar */}
+            {planSlots.length > 0 && !hasOpenCourseSearch
+                ? renderViewSwitcher()
+                : null}
 
             {/* sheet 展開時淡出 FAB；關閉動畫開始即淡入，避免等 onClose 才突然出現 */}
             <AddCourseFab
