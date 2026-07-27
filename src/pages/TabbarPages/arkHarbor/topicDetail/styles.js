@@ -8,6 +8,30 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
     },
+    headerAuthor: {
+        maxWidth: scale(190),
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    headerAvatar: {
+        width: scale(30),
+        height: scale(30),
+        borderRadius: scale(15),
+        marginRight: scale(8),
+    },
+    headerAuthorId: {
+        ...uiStyle.defaultText,
+        flexShrink: 1,
+        fontSize: scale(14),
+        fontWeight: '600',
+    },
+    headerShareButton: {
+        width: scale(36),
+        height: scale(36),
+        borderRadius: scale(18),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     centeredPage: {
         flex: 1,
         alignItems: 'center',
@@ -15,13 +39,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(28),
     },
     topicHeader: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(16),
-        marginHorizontal: scale(12),
-        marginTop: verticalScale(12),
-        marginBottom: verticalScale(0),
-        paddingHorizontal: scale(14),
-        paddingVertical: verticalScale(14),
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(16),
     },
     topicTitle: {
         ...uiStyle.defaultText,
@@ -156,12 +176,9 @@ const styles = StyleSheet.create({
         marginHorizontal: scale(6),
     },
     postCard: {
-        borderWidth: StyleSheet.hairlineWidth,
-        borderRadius: scale(14),
-        marginHorizontal: scale(12),
-        marginVertical: verticalScale(6),
-        paddingHorizontal: scale(12),
-        paddingTop: verticalScale(12),
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingHorizontal: scale(16),
+        paddingTop: verticalScale(16),
         overflow: 'hidden',
     },
     postStateCard: {

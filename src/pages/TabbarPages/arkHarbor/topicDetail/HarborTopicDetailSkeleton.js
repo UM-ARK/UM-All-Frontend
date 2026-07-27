@@ -98,7 +98,6 @@ const HarborPostSkeleton = ({ theme, compact = false }) => {
 
 const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
     const {
-        bg_color,
         themeColorUltraLight,
         tonal,
         white,
@@ -109,7 +108,7 @@ const HarborTopicDetailSkeleton = ({ headerHeight, insets, theme }) => {
     };
 
     return (
-        <View style={[styles.page, { backgroundColor: bg_color }]}>
+        <View style={[styles.page, { backgroundColor: white }]}>
             <View
                 style={[
                     styles.skeletonContent,

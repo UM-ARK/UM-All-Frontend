@@ -30,7 +30,6 @@ const HarborTopicHeader = memo(
         onMarkUnread,
         onOpenNotifications,
         onOpenOriginal,
-        onShare,
         onPressCategory,
         onPressTag,
         pendingMarkUnread,
@@ -44,7 +43,6 @@ const HarborTopicHeader = memo(
             themeColorUltraLight,
             tonal,
             white,
-            viewShadow,
         } = theme;
         const tags = Array.isArray(topic.tags)
             ? topic.tags.map(getTagLabel).filter(Boolean)
@@ -58,7 +56,6 @@ const HarborTopicHeader = memo(
                 style={[
                     styles.topicHeader,
                     { backgroundColor: white, borderColor: themeColorUltraLight },
-                    viewShadow,
                 ]}>
                 <Text
                     selectable
@@ -216,32 +213,6 @@ const HarborTopicHeader = memo(
                                 { color: themeColor },
                             ]}>
                             {t('複製連結')}
-                        </Text>
-                    </Pressable>
-                    <Pressable
-                        onPress={() => {
-                            trigger();
-                            onShare();
-                        }}
-                        style={({ pressed }) => [
-                            styles.webOriginalButton,
-                            {
-                                backgroundColor: pressed
-                                    ? tonal.primary30
-                                    : tonal.primary15,
-                            },
-                        ]}>
-                        <MaterialCommunityIcons
-                            name="share-variant-outline"
-                            size={scale(16)}
-                            color={themeColor}
-                        />
-                        <Text
-                            style={[
-                                styles.webOriginalText,
-                                { color: themeColor },
-                            ]}>
-                            {t('分享')}
                         </Text>
                     </Pressable>
                     <Pressable

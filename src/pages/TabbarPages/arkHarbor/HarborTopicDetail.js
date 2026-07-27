@@ -1,6 +1,5 @@
 import React, {
     useCallback,
-    useEffect,
     useLayoutEffect,
     useMemo,
     useRef,
@@ -19,6 +18,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { FlashList } from '@shopify/flash-list';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { Image } from 'expo-image';
 import Toast from 'react-native-simple-toast';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -37,6 +37,7 @@ import {
 } from '../../../utils/harbor/harborNavigation';
 import {
     ARK_HARBOR,
+    ARK_HARBOR_AVATAR_TEMPLATE,
     ARK_HARBOR_TOPIC_URL,
 } from '../../../utils/pathMap';
 import { trigger } from '../../../utils/trigger';
@@ -92,6 +93,83 @@ const TOPIC_NOTIFICATION_OPTIONS = [
     },
 ];
 
+const HarborTopicNavigationTitle = ({
+    authorId,
+    avatarUrl,
+    blackMain,
+    imagePlaceholder,
+    onPress,
+    tonalPrimary15,
+}) => (
+    <Pressable
+        disabled={!onPress}
+        onPress={() => {
+            trigger();
+            onPress?.();
+        }}
+        style={({ pressed }) => [
+            styles.headerAuthor,
+            pressed ? styles.pressedLink : null,
+        ]}>
+        {avatarUrl ? (
+            <Image
+                source={{ uri: avatarUrl }}
+                style={[
+                    styles.headerAvatar,
+                    { backgroundColor: tonalPrimary15 },
+                ]}
+                contentFit="cover"
+                placeholder={imagePlaceholder}
+                placeholderContentFit="cover"
+                transition={200}
+            />
+        ) : null}
+        <Text
+            numberOfLines={1}
+            style={[styles.headerAuthorId, { color: blackMain }]}>
+            {authorId}
+        </Text>
+    </Pressable>
+);
+
+const HarborTopicShareButton = ({
+    accessibilityLabel,
+    onPress,
+    themeColor,
+    tonalPrimary15,
+    tonalPrimary30,
+}) => (
+    <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={() => {
+            trigger();
+            onPress();
+        }}
+        style={({ pressed }) => [
+            styles.headerShareButton,
+            {
+                backgroundColor: pressed
+                    ? tonalPrimary30
+                    : tonalPrimary15,
+            },
+        ]}>
+        <MaterialCommunityIcons
+            name="share-variant-outline"
+            size={scale(20)}
+            color={themeColor}
+        />
+    </Pressable>
+);
+
+const createHarborTopicNavigationTitle = props => () => (
+    <HarborTopicNavigationTitle {...props} />
+);
+
+const createHarborTopicShareButton = props => () => (
+    <HarborTopicShareButton {...props} />
+);
+
 const HarborTopicDetail = ({ route, navigation }) => {
     const { theme } = useTheme();
     const { t } = useTranslation('harbor');
@@ -105,6 +183,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         themeColor,
         tonal,
         trueWhite,
+        white,
     } = theme;
     const topicId = Number(route.params?.topicId);
     const initialTopicTitle = route.params?.topicTitle;
@@ -222,7 +301,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
         updateTopicPost,
     });
 
-    const contentWidth = Math.max(width - scale(48), scale(220));
+    const contentWidth = Math.max(width - scale(32), scale(220));
 
     const listBottomInset = showReadingControls
         ? readingControlsDockHeight + verticalScale(8)
@@ -237,12 +316,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
         }),
         [headerHeight, listBottomInset],
     );
-
-    useEffect(() => {
-        navigation.setOptions({
-            headerTitle: topic?.title || initialTopicTitle || 'Harbor',
-        });
-    }, [initialTopicTitle, navigation, topic?.title]);
 
     const openImage = useCallback(index => {
         imageViewerRef.current?.handleOpenImage(index);
@@ -347,6 +420,50 @@ const HarborTopicDetail = ({ route, navigation }) => {
             Toast.show(t('分享失敗，請稍後再試'));
         });
     }, [currentPostNumber, t, topic?.title, topicId]);
+
+    useLayoutEffect(() => {
+        const topicAuthor =
+            posts.find(post => Number(post.post_number) === 1) || posts[0];
+        const authorId =
+            topicAuthor?.username ||
+            topicAuthor?.display_username ||
+            topicAuthor?.name ||
+            'Harbor';
+        const avatarUrl = topicAuthor?.avatar_template
+            ? ARK_HARBOR_AVATAR_TEMPLATE(topicAuthor.avatar_template, 72)
+            : null;
+
+        navigation.setOptions({
+            headerTitle: createHarborTopicNavigationTitle({
+                authorId,
+                avatarUrl,
+                blackMain: black.main,
+                imagePlaceholder: theme.imagePlaceholder,
+                onPress: topicAuthor?.username
+                    ? () => openAuthor(topicAuthor.username)
+                    : null,
+                tonalPrimary15: tonal.primary15,
+            }),
+            headerRight: createHarborTopicShareButton({
+                accessibilityLabel: t('分享'),
+                onPress: shareCurrentPost,
+                themeColor,
+                tonalPrimary15: tonal.primary15,
+                tonalPrimary30: tonal.primary30,
+            }),
+        });
+    }, [
+        black.main,
+        navigation,
+        openAuthor,
+        posts,
+        shareCurrentPost,
+        t,
+        theme.imagePlaceholder,
+        themeColor,
+        tonal.primary15,
+        tonal.primary30,
+    ]);
 
     const copyCurrentPost = useCallback(() => {
         copyPostPermalink({ post_number: currentPostNumber });
@@ -470,7 +587,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
                             onMarkUnread={markTopicUnread}
                             onOpenNotifications={openNotificationLevels}
                             onOpenOriginal={openOriginalTopic}
-                            onShare={shareCurrentPost}
                             onPressCategory={openCategory}
                             onPressTag={openTag}
                             pendingMarkUnread={
@@ -581,7 +697,6 @@ const HarborTopicDetail = ({ route, navigation }) => {
             scrollToPost,
             selectPostReaction,
             sharePost,
-            shareCurrentPost,
             t,
             themeColor,
             togglePostLike,
@@ -665,7 +780,7 @@ const HarborTopicDetail = ({ route, navigation }) => {
     }
 
     return (
-        <View style={[styles.page, { backgroundColor: bg_color }]}>
+        <View style={[styles.page, { backgroundColor: white }]}>
             <FlashList
                 ref={listRef}
                 data={listData}

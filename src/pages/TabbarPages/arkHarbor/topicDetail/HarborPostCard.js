@@ -171,7 +171,6 @@ const HarborPostCard = memo(
             themeColorUltraLight,
             tonal,
             white,
-            viewShadow,
         } = theme;
         const reactionCount = getReactionCount(post);
         const likeAction = getLikeAction(post);
@@ -331,7 +330,6 @@ const HarborPostCard = memo(
                 style={[
                     styles.postCard,
                     { backgroundColor: white, borderColor: themeColorUltraLight },
-                    viewShadow,
                 ]}>
                 <View style={styles.postHeader}>
                     <Pressable
