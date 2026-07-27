@@ -1,10 +1,18 @@
 import {
+    clearHarborRateLimitCooldown,
+    createHarborRateLimitCooldownError,
     getHarborRateLimitDelayMs,
+    getHarborRateLimitRemainingMs,
     HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS,
     isHarborRateLimited,
+    recordHarborRateLimit,
 } from '../harborRateLimit';
 
 describe('Harbor rate limit helpers', () => {
+    beforeEach(() => {
+        clearHarborRateLimitCooldown();
+    });
+
     it('recognizes HTTP 429 errors', () => {
         expect(isHarborRateLimited({response: {status: 429}})).toBe(true);
         expect(isHarborRateLimited({response: {status: 503}})).toBe(false);
@@ -53,5 +61,29 @@ describe('Harbor rate limit helpers', () => {
             HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS,
         );
         expect(getHarborRateLimitDelayMs({response: {status: 500}})).toBe(0);
+    });
+
+    it('在伺服器指定的等待時間內建立本機冷卻錯誤', () => {
+        const now = Date.parse('2026-07-27T10:00:00.000Z');
+        recordHarborRateLimit({
+            response: {
+                status: 429,
+                data: {extras: {wait_seconds: 12}},
+            },
+        }, now);
+
+        expect(getHarborRateLimitRemainingMs(now + 2000)).toBe(10000);
+        expect(
+            createHarborRateLimitCooldownError(now + 2000),
+        ).toMatchObject({
+            code: 'HARBOR_RATE_LIMIT_COOLDOWN',
+            response: {
+                status: 429,
+                data: {extras: {wait_seconds: 10}},
+            },
+        });
+        expect(
+            createHarborRateLimitCooldownError(now + 12000),
+        ).toBeNull();
     });
 });

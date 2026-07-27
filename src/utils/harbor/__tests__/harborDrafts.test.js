@@ -20,6 +20,7 @@ import {
     saveHarborDraft,
 } from '../harborApi';
 import {
+    clearHarborDraftRemoteCheckCache,
     deleteHarborDraftAtLatestSequence,
     getHarborComposerDraftKey,
     getHarborDraftAccountId,
@@ -37,6 +38,7 @@ import {
 describe('Harbor 草稿', () => {
     beforeEach(() => {
         mockStorageValue = undefined;
+        clearHarborDraftRemoteCheckCache();
         jest.clearAllMocks();
     });
 
@@ -220,6 +222,32 @@ describe('Harbor 草稿', () => {
             sequence: 2,
             data: {reply: '新內容'},
         });
+    });
+
+    it('短時間重新進入 Composer 時不重抓遠端草稿', async () => {
+        const accountId = 'id:7';
+        await saveLocalHarborDraft(accountId, {
+            draftKey: 'new_topic',
+            sequence: 2,
+            mode: 'newTopic',
+            data: {
+                reply: '本機內容',
+                action: 'createTopic',
+            },
+            syncStatus: 'synced',
+        });
+        fetchHarborDraft.mockResolvedValue({
+            data: JSON.stringify({
+                reply: '本機內容',
+                action: 'createTopic',
+            }),
+            sequence: 2,
+        });
+
+        await loadHarborComposerDraft(accountId, 'new_topic');
+        await loadHarborComposerDraft(accountId, 'new_topic');
+
+        expect(fetchHarborDraft).toHaveBeenCalledTimes(1);
     });
 
     it('本機未同步內容優先於遠端草稿', async () => {

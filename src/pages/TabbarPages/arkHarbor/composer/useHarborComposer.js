@@ -8,12 +8,15 @@ import {
 
 import {useHarborSession} from '../../../../contexts/HarborSessionContext';
 import {
-    fetchHarborCategories,
-    fetchHarborComposerSettings,
+    fetchCachedHarborComposerSettings,
+    fetchHarborComposerMetadata,
     fetchHarborPostForEdit,
-    fetchHarborTags,
     fetchHarborTopic,
 } from '../../../../utils/harbor/harborApi';
+import {
+    getHarborRateLimitDelayMs,
+    isHarborRateLimited,
+} from '../../../../utils/harbor/harborRateLimit';
 import {getComposerErrorMessage} from './harborComposerErrors';
 import {
     COMPOSER_MODES,
@@ -27,6 +30,7 @@ export function useHarborComposer({route, t}) {
         user,
     } = useHarborSession();
     const loadControllerRef = useRef(null);
+    const retryTimerRef = useRef(null);
     const routeMode = route.params?.mode;
     const mode = COMPOSER_MODES.has(routeMode) ? routeMode : 'newTopic';
     const isNewTopic = mode === 'newTopic';
@@ -54,6 +58,7 @@ export function useHarborComposer({route, t}) {
         isEdit || supportsImages,
     );
     const [loadError, setLoadError] = useState('');
+    const [isRetryBlocked, setIsRetryBlocked] = useState(false);
     const [publishRestriction, setPublishRestriction] = useState('');
     const [editMetadata, setEditMetadata] = useState({});
     const isEditingFirstPost =
@@ -64,7 +69,9 @@ export function useHarborComposer({route, t}) {
             routePostNumber,
         ) === 1;
 
-    const loadComposerData = useCallback(async () => {
+    const loadComposerData = useCallback(async ({
+        forceRefresh = false,
+    } = {}) => {
         if (sessionStatus !== 'signedIn') {
             return;
         }
@@ -78,17 +85,11 @@ export function useHarborComposer({route, t}) {
 
         try {
             if (isNewTopic) {
-                const [
-                    categoryResult,
-                    tagResult,
-                    settingsResult,
-                ] = await Promise.all([
-                    fetchHarborCategories({signal: controller.signal}),
-                    fetchHarborTags({signal: controller.signal}),
-                    fetchHarborComposerSettings({
-                        signal: controller.signal,
-                    }),
-                ]);
+                const {
+                    categories: categoryResult,
+                    tags: tagResult,
+                    settings: settingsResult,
+                } = await fetchHarborComposerMetadata({forceRefresh});
                 if (controller.signal.aborted) {
                     return;
                 }
@@ -122,8 +123,8 @@ export function useHarborComposer({route, t}) {
                     settingsResult,
                     topicResult,
                 ] = await Promise.all([
-                    fetchHarborComposerSettings({
-                        signal: controller.signal,
+                    fetchCachedHarborComposerSettings({
+                        forceRefresh,
                     }),
                     route.params?.fromDraftBox
                         ? fetchHarborTopic(
@@ -182,6 +183,14 @@ export function useHarborComposer({route, t}) {
             }
         } catch (error) {
             if (!controller.signal.aborted) {
+                if (isHarborRateLimited(error)) {
+                    clearTimeout(retryTimerRef.current);
+                    setIsRetryBlocked(true);
+                    retryTimerRef.current = setTimeout(() => {
+                        setIsRetryBlocked(false);
+                        retryTimerRef.current = null;
+                    }, getHarborRateLimitDelayMs(error));
+                }
                 setLoadError(getComposerErrorMessage(error, t));
             }
         } finally {
@@ -208,6 +217,11 @@ export function useHarborComposer({route, t}) {
             loadControllerRef.current?.abort();
         };
     }, [loadComposerData]);
+
+    useEffect(
+        () => () => clearTimeout(retryTimerRef.current),
+        [],
+    );
 
     const selectedCategory = useMemo(
         () => categories.find(item => Number(item.id) === Number(categoryId)),
@@ -263,6 +277,7 @@ export function useHarborComposer({route, t}) {
         isLoading,
         isNewTopic,
         isReply,
+        isRetryBlocked,
         isTagCountValid,
         isTitleLengthValid,
         loadComposerData,

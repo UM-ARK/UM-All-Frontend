@@ -1,7 +1,9 @@
 import {
+    clearHarborComposerMetadataCache,
     createHarborPost,
     deleteHarborDraft,
     fetchHarborCategories,
+    fetchHarborComposerMetadata,
     fetchHarborComposerSettings,
     fetchHarborDraft,
     fetchHarborDrafts,
@@ -24,6 +26,7 @@ describe('Harbor Composer API', () => {
     let putSpy;
 
     beforeEach(() => {
+        clearHarborComposerMetadataCache();
         getSpy = jest.spyOn(harborApi, 'get');
         deleteSpy = jest.spyOn(harborApi, 'delete');
         postSpy = jest.spyOn(harborApi, 'post');
@@ -69,6 +72,41 @@ describe('Harbor Composer API', () => {
             maxImageSizeKb: 5120,
         });
         expect(getSpy).toHaveBeenCalledWith('/site/settings.json', {signal});
+    });
+
+    it('短時間內共用 Composer metadata 與進行中的請求', async () => {
+        getSpy.mockImplementation(url => {
+            if (url === '/categories.json') {
+                return Promise.resolve({
+                    data: {
+                        category_list: {
+                            categories: [{id: 4, name: '校園'}],
+                        },
+                    },
+                });
+            }
+            if (url === '/tags.json') {
+                return Promise.resolve({
+                    data: {tags: [{id: 7, name: '活動'}]},
+                });
+            }
+            return Promise.resolve({
+                data: {min_topic_title_length: 3},
+            });
+        });
+
+        const firstRequest = fetchHarborComposerMetadata();
+        const secondRequest = fetchHarborComposerMetadata();
+        const [firstResult, secondResult] = await Promise.all([
+            firstRequest,
+            secondRequest,
+        ]);
+
+        expect(firstResult).toEqual(secondResult);
+        expect(getSpy).toHaveBeenCalledTimes(3);
+
+        await fetchHarborComposerMetadata();
+        expect(getSpy).toHaveBeenCalledTimes(3);
     });
 
     it('保留分類的標籤要求與 Topic template', async () => {

@@ -47,6 +47,7 @@ const HarborComposerPage = ({route, navigation}) => {
         isLoading,
         isNewTopic,
         isReply,
+        isRetryBlocked,
         isTagCountValid,
         isTitleLengthValid,
         loadComposerData,
@@ -424,6 +425,7 @@ const HarborComposerPage = ({route, navigation}) => {
                 </Text>
                 <Pressable
                     accessibilityRole="button"
+                    disabled={isRetryBlocked}
                     onPress={() => {
                         trigger();
                         loadComposerData();
@@ -434,6 +436,7 @@ const HarborComposerPage = ({route, navigation}) => {
                             backgroundColor: pressed
                                 ? theme.tonal.primary30
                                 : theme.tonal.primary15,
+                            opacity: isRetryBlocked ? 0.5 : 1,
                         },
                     ]}>
                     <Text

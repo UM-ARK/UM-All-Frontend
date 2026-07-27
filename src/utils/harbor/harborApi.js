@@ -6,11 +6,18 @@ import {
     getHarborHtmlAttribute,
     replaceHarborEmojiShortcodes,
 } from './harborHtml';
+import {
+    createHarborRateLimitCooldownError,
+    isHarborRateLimited,
+    recordHarborRateLimit,
+} from './harborRateLimit';
 
 const REQUEST_TIMEOUT = 15000;
 const TOPIC_POST_BATCH_SIZE = 20;
 const USER_ACTION_PAGE_SIZE = 30;
 const DEFAULT_TOPIC_PAGE_SIZE = 30;
+const COMPOSER_METADATA_TTL = 5 * 60 * 1000;
+const COMPOSER_SETTINGS_TTL = 30 * 60 * 1000;
 const TOPIC_VIEWS = ['latest', 'top', 'new', 'unread'];
 const PUBLIC_TOPIC_VIEWS = ['latest', 'top'];
 
@@ -43,8 +50,18 @@ let credentialRejectedHandler = null;
 let publicCategoryCache = null;
 let publicCategoryRequest = null;
 let publicCategoryCacheGeneration = 0;
+const composerMetadataCache = {
+    categories: {value: null, expiresAt: 0, request: null, generation: 0},
+    tags: {value: null, expiresAt: 0, request: null, generation: 0},
+    settings: {value: null, expiresAt: 0, request: null, generation: 0},
+};
 
 harborApi.interceptors.request.use(config => {
+    const cooldownError = createHarborRateLimitCooldownError();
+    if (cooldownError) {
+        cooldownError.config = config;
+        return Promise.reject(cooldownError);
+    }
     if (config.skipHarborCredentials) {
         return config;
     }
@@ -63,6 +80,12 @@ harborApi.interceptors.request.use(config => {
 harborApi.interceptors.response.use(
     response => response,
     error => {
+        if (
+            isHarborRateLimited(error) &&
+            error.code !== 'HARBOR_RATE_LIMIT_COOLDOWN'
+        ) {
+            recordHarborRateLimit(error);
+        }
         if (error.response?.status === 401 && credentialRejectedHandler) {
             credentialRejectedHandler(error, error.config?.harborCredentialKey);
         }
@@ -71,7 +94,11 @@ harborApi.interceptors.response.use(
 );
 
 export function setActiveHarborCredentials(credentials) {
+    const previousCredentialKey = activeCredentials?.userApiKey;
     activeCredentials = credentials;
+    if (previousCredentialKey !== credentials?.userApiKey) {
+        clearHarborComposerMetadataCache();
+    }
 }
 
 export function setHarborCredentialRejectedHandler(handler) {
@@ -82,6 +109,15 @@ export function clearHarborDiscoveryCache() {
     publicCategoryCacheGeneration += 1;
     publicCategoryCache = null;
     publicCategoryRequest = null;
+}
+
+export function clearHarborComposerMetadataCache() {
+    Object.values(composerMetadataCache).forEach(entry => {
+        entry.generation += 1;
+        entry.value = null;
+        entry.expiresAt = 0;
+        entry.request = null;
+    });
 }
 
 export function isHarborCredentialRejected(error, validationRequest = false) {
@@ -1315,6 +1351,83 @@ export async function fetchHarborComposerSettings({ signal } = {}) {
         maxImageSizeKb:
             toNumberOrNull(settings?.max_image_size_kb),
     };
+}
+
+function getCachedComposerMetadata(
+    cacheKey,
+    load,
+    ttl,
+    forceRefresh,
+) {
+    const entry = composerMetadataCache[cacheKey];
+    if (
+        !forceRefresh &&
+        entry.value &&
+        entry.expiresAt > Date.now()
+    ) {
+        return Promise.resolve(entry.value);
+    }
+    if (entry.request) {
+        return entry.request;
+    }
+
+    const requestGeneration = entry.generation;
+    const request = load()
+        .then(value => {
+            if (requestGeneration === entry.generation) {
+                entry.value = value;
+                entry.expiresAt = Date.now() + ttl;
+            }
+            return value;
+        })
+        .finally(() => {
+            if (entry.request === request) {
+                entry.request = null;
+            }
+        });
+    entry.request = request;
+    return request;
+}
+
+export async function fetchHarborComposerMetadata({
+    forceRefresh = false,
+} = {}) {
+    const [
+        categories,
+        tags,
+        settings,
+    ] = await Promise.all([
+        getCachedComposerMetadata(
+            'categories',
+            () => fetchHarborCategories(),
+            COMPOSER_METADATA_TTL,
+            forceRefresh,
+        ),
+        getCachedComposerMetadata(
+            'tags',
+            () => fetchHarborTags(),
+            COMPOSER_METADATA_TTL,
+            forceRefresh,
+        ),
+        getCachedComposerMetadata(
+            'settings',
+            () => fetchHarborComposerSettings(),
+            COMPOSER_SETTINGS_TTL,
+            forceRefresh,
+        ),
+    ]);
+    return {categories, tags, settings};
+}
+
+export function fetchCachedHarborComposerSettings({
+    forceRefresh = false,
+} = {}) {
+    return getCachedComposerMetadata(
+        'settings',
+        () => fetchHarborComposerSettings(),
+        COMPOSER_SETTINGS_TTL,
+        forceRefresh,
+    );
 }
 
 export async function fetchHarborSiteCapabilities({ signal } = {}) {

@@ -1,6 +1,8 @@
 // Harbor 429 時，若伺服器未回傳等待秒數，APP 端統一使用此時長
 export const HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS = 10 * 1000;
 
+let harborRateLimitRetryAt = 0;
+
 function getHeader(headers, name) {
     if (typeof headers?.get === 'function') {
         return headers.get(name);
@@ -54,4 +56,41 @@ export function getHarborRateLimitDelayMs(error, now = Date.now()) {
     }
 
     return HARBOR_RATE_LIMIT_DEFAULT_DELAY_MS;
+}
+
+export function recordHarborRateLimit(error, now = Date.now()) {
+    const delay = getHarborRateLimitDelayMs(error, now);
+    if (delay > 0) {
+        harborRateLimitRetryAt = Math.max(
+            harborRateLimitRetryAt,
+            now + delay,
+        );
+    }
+    return harborRateLimitRetryAt;
+}
+
+export function getHarborRateLimitRemainingMs(now = Date.now()) {
+    return Math.max(0, harborRateLimitRetryAt - now);
+}
+
+export function createHarborRateLimitCooldownError(now = Date.now()) {
+    const remainingMs = getHarborRateLimitRemainingMs(now);
+    if (remainingMs <= 0) {
+        return null;
+    }
+    const error = new Error('Harbor rate limit cooldown is active');
+    error.code = 'HARBOR_RATE_LIMIT_COOLDOWN';
+    error.response = {
+        status: 429,
+        data: {
+            extras: {
+                wait_seconds: Math.ceil(remainingMs / 1000),
+            },
+        },
+    };
+    return error;
+}
+
+export function clearHarborRateLimitCooldown() {
+    harborRateLimitRetryAt = 0;
 }

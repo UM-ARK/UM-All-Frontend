@@ -20,8 +20,10 @@ const HARBOR_DRAFT_MODES = {
     edit: 'edit',
     reply: 'reply',
 };
+const HARBOR_REMOTE_DRAFT_CHECK_TTL = 30 * 1000;
 
 let storageQueue = Promise.resolve();
+const remoteDraftCheckCache = new Map();
 
 const normalizeSequence = value => {
     const sequence = Number(value);
@@ -65,6 +67,20 @@ const normalizePendingDelete = value => {
         requestedAt: normalizeTimestamp(value?.requestedAt) || Date.now(),
     };
 };
+
+const getRemoteDraftCheckKey = (accountId, draftKey) =>
+    `${accountId || 'anonymous'}:${draftKey}`;
+
+const markRemoteDraftChecked = (accountId, draftKey) => {
+    remoteDraftCheckCache.set(
+        getRemoteDraftCheckKey(accountId, draftKey),
+        Date.now(),
+    );
+};
+
+export function clearHarborDraftRemoteCheckCache() {
+    remoteDraftCheckCache.clear();
+}
 
 const normalizeLocalDraft = value => {
     const draftKey = normalizeDraftKey(value?.draftKey);
@@ -310,6 +326,7 @@ export const syncLocalHarborDraft = async (accountId, draft, options = {}) => {
         }
         syncedDraft = await saveLocalHarborDraft(accountId, syncedDraft);
     }
+    markRemoteDraftChecked(accountId, draft.draftKey);
     return {
         draft: syncedDraft,
         conflictUser: result.conflictUser,
@@ -438,9 +455,26 @@ export const loadHarborComposerDraft = async (
     const pendingDelete = pendingDeletes.find(
         item => item.draftKey === draftKey,
     );
+    const lastRemoteCheck = remoteDraftCheckCache.get(
+        getRemoteDraftCheckKey(accountId, draftKey),
+    );
+    if (
+        lastRemoteCheck &&
+        Date.now() - lastRemoteCheck < HARBOR_REMOTE_DRAFT_CHECK_TTL
+    ) {
+        if (pendingDelete) {
+            return {
+                draftKey,
+                sequence: pendingDelete.sequence,
+                pendingDeletion: true,
+            };
+        }
+        return localDraft;
+    }
     let remoteDraft = null;
     try {
         const result = await fetchHarborDraft(draftKey, {signal});
+        markRemoteDraftChecked(accountId, draftKey);
         if (pendingDelete) {
             return {
                 draftKey,

@@ -24,6 +24,7 @@ import {
 import {buildHarborComposerRaw} from '../harborComposerText';
 
 const AUTOSAVE_DELAY = 1200;
+const REMOTE_AUTOSAVE_DELAY = 15 * 1000;
 
 const getRestoredTags = (draftTags, availableTags) => {
     if (!Array.isArray(draftTags)) {
@@ -105,7 +106,9 @@ export function useHarborDraft({
     const draftRef = useRef(null);
     const savedSignatureRef = useRef('');
     const autosaveTimerRef = useRef(null);
+    const remoteAutosaveTimerRef = useRef(null);
     const remoteSyncQueueRef = useRef(Promise.resolve());
+    const queuedRemoteSignaturesRef = useRef(new Set());
     const draftGenerationRef = useRef(0);
     const completedRef = useRef(false);
     const leavingRef = useRef(false);
@@ -230,6 +233,10 @@ export function useHarborDraft({
             savedSignatureRef.current = signature;
 
             if (syncRemote && sessionStatus === 'signedIn') {
+                if (queuedRemoteSignaturesRef.current.has(signature)) {
+                    return localDraft;
+                }
+                queuedRemoteSignaturesRef.current.add(signature);
                 remoteSyncQueueRef.current =
                     remoteSyncQueueRef.current
                         .catch(() => null)
@@ -301,6 +308,10 @@ export function useHarborDraft({
                                         ),
                                     );
                                 }
+                            } finally {
+                                queuedRemoteSignaturesRef.current.delete(
+                                    signature,
+                                );
                             }
                         });
             }
@@ -518,6 +529,7 @@ export function useHarborDraft({
 
     useEffect(() => {
         clearTimeout(autosaveTimerRef.current);
+        clearTimeout(remoteAutosaveTimerRef.current);
         if (
             isComposerLoading ||
             isDraftLoading ||
@@ -531,12 +543,21 @@ export function useHarborDraft({
                     discardCurrentDraft().catch(() => null);
                 }, AUTOSAVE_DELAY);
             }
-            return () => clearTimeout(autosaveTimerRef.current);
+            return () => {
+                clearTimeout(autosaveTimerRef.current);
+                clearTimeout(remoteAutosaveTimerRef.current);
+            };
         }
         autosaveTimerRef.current = setTimeout(() => {
-            saveCurrentDraft().catch(() => null);
+            saveCurrentDraft({syncRemote: false}).catch(() => null);
         }, AUTOSAVE_DELAY);
-        return () => clearTimeout(autosaveTimerRef.current);
+        remoteAutosaveTimerRef.current = setTimeout(() => {
+            saveCurrentDraft().catch(() => null);
+        }, REMOTE_AUTOSAVE_DELAY);
+        return () => {
+            clearTimeout(autosaveTimerRef.current);
+            clearTimeout(remoteAutosaveTimerRef.current);
+        };
     }, [
         categoryId,
         discardCurrentDraft,
@@ -560,6 +581,7 @@ export function useHarborDraft({
                     !completedRef.current
                 ) {
                     clearTimeout(autosaveTimerRef.current);
+                    clearTimeout(remoteAutosaveTimerRef.current);
                     saveCurrentDraft({syncRemote: false}).catch(() => null);
                 }
             },
@@ -600,6 +622,7 @@ export function useHarborDraft({
                 }
                 leavingRef.current = true;
                 clearTimeout(autosaveTimerRef.current);
+                clearTimeout(remoteAutosaveTimerRef.current);
                 saveCurrentDraft()
                     .then(() => {
                         Toast.show(t('草稿已自動保存。'));
@@ -626,6 +649,7 @@ export function useHarborDraft({
     const clearDraftAfterPublish = useCallback(async () => {
         completedRef.current = true;
         clearTimeout(autosaveTimerRef.current);
+        clearTimeout(remoteAutosaveTimerRef.current);
         await discardCurrentDraft();
     }, [discardCurrentDraft]);
 
