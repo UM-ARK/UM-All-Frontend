@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, LayoutAnimation, Switch, Text, View } from 'react-native';
+import { FlatList, LayoutAnimation, Switch, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import moment from 'moment';
 import { t } from 'i18next';
 import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
+import CourseTimeRangePicker from '../../../components/CourseTimeRangePicker';
+import { TIME_RANGE_PRESETS } from '../../../constants';
 import { DEFAULT_TIME_FROM, DEFAULT_TIME_TO, defaultTimeFilter } from '../constants/options';
 
 /**
@@ -42,7 +42,6 @@ const FilterPanel = ({
     const activeColor = courseMode === 'ad' ? themeColor : secondThemeColor;
     const activeBackgroundColor = `${activeColor}15`;
 
-    const [timePickerMode, setTimePickerMode] = useState('from');
     const [showTimePicker, setShowTimePicker] = useState(false);
 
     const classItmStyle = {
@@ -293,7 +292,6 @@ const FilterPanel = ({
                     }}
                     onPress={() => {
                         trigger();
-                        setTimePickerMode(mode);
                         setShowTimePicker(true);
                     }}
                 >
@@ -309,65 +307,93 @@ const FilterPanel = ({
             );
         };
 
-        const handleConfirmTime = date => {
-            const pickedTime = moment(date).format('HH:mm');
-
-            if (timePickerMode === 'from') {
-                if (moment(date).isSameOrAfter(moment(timeFilter.to, 'HH:mm'))) {
-                    Alert.alert(t('開始時間不能晚於結束時間！', { ns: 'timetable' }));
-                    return;
-                }
-                onUpdateTimeFilter({ ...timeFilter, from: pickedTime });
-            } else {
-                if (moment(date).isSameOrBefore(moment(timeFilter.from, 'HH:mm'))) {
-                    Alert.alert(t('結束時間不能早於開始時間！', { ns: 'timetable' }));
-                    return;
-                }
-                onUpdateTimeFilter({ ...timeFilter, to: pickedTime });
-            }
-
-            setShowTimePicker(false);
-        };
-
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                {isTimeRangeDefault ? null : (
-                    <TouchableScale
-                        style={{
-                            ...classItmStyle,
-                            paddingHorizontal: scale(8),
-                            paddingVertical: scale(3),
-                            backgroundColor: tonal.primary15,
-                        }}
-                        onPress={() => {
-                            trigger();
-                            onUpdateTimeFilter({
-                                ...timeFilter,
-                                from: DEFAULT_TIME_FROM,
-                                to: DEFAULT_TIME_TO,
-                            });
-                        }}
-                    >
-                        <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(12) }}>
-                            {'Clear'}
-                        </Text>
-                    </TouchableScale>
-                )}
+            <View style={{ alignItems: 'center' }}>
+                {/* 預設上午／下午／晚上 */}
+                <View style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: verticalScale(4),
+                }}>
+                    {TIME_RANGE_PRESETS.map(preset => {
+                        const isSelected =
+                            timeFilter.from === preset.from &&
+                            timeFilter.to === preset.to;
+                        return (
+                            <TouchableScale
+                                key={preset.id}
+                                style={{
+                                    ...classItmStyle,
+                                    paddingHorizontal: scale(8),
+                                    paddingVertical: scale(3),
+                                    backgroundColor: isSelected
+                                        ? tonal.primary30
+                                        : tonal.primary15,
+                                    marginHorizontal: scale(3),
+                                }}
+                                onPress={() => {
+                                    trigger();
+                                    onUpdateTimeFilter({
+                                        ...timeFilter,
+                                        from: preset.from,
+                                        to: preset.to,
+                                    });
+                                }}
+                            >
+                                <Text style={{
+                                    ...uiStyle.defaultText,
+                                    color: isSelected ? themeColor : black.third,
+                                    fontWeight: isSelected ? '900' : 'normal',
+                                    fontSize: scale(12),
+                                }}>
+                                    {t(preset.labelKey, { ns: 'timetable' })}
+                                </Text>
+                            </TouchableScale>
+                        );
+                    })}
+                </View>
 
-                {renderTimeButton('from')}
-                <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
-                    {' - '}
-                </Text>
-                {renderTimeButton('to')}
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                    {isTimeRangeDefault ? null : (
+                        <TouchableScale
+                            style={{
+                                ...classItmStyle,
+                                paddingHorizontal: scale(8),
+                                paddingVertical: scale(3),
+                                backgroundColor: tonal.primary15,
+                            }}
+                            onPress={() => {
+                                trigger();
+                                onUpdateTimeFilter({
+                                    ...timeFilter,
+                                    from: DEFAULT_TIME_FROM,
+                                    to: DEFAULT_TIME_TO,
+                                });
+                            }}
+                        >
+                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(12) }}>
+                                {t('清除', { ns: 'timetable' })}
+                            </Text>
+                        </TouchableScale>
+                    )}
 
-                <DateTimePickerModal
-                    isVisible={showTimePicker}
-                    mode="time"
-                    date={timePickerMode === 'from'
-                        ? moment(timeFilter.from, 'HH:mm').toDate()
-                        : moment(timeFilter.to, 'HH:mm').toDate()}
-                    minuteInterval={5}
-                    onConfirm={handleConfirmTime}
+                    {renderTimeButton('from')}
+                    <Text style={{ ...uiStyle.defaultText, color: black.third, fontSize: scale(12) }}>
+                        {' - '}
+                    </Text>
+                    {renderTimeButton('to')}
+                </View>
+
+                <CourseTimeRangePicker
+                    visible={showTimePicker}
+                    from={timeFilter.from}
+                    to={timeFilter.to}
+                    onConfirm={({ from, to }) => {
+                        onUpdateTimeFilter({ ...timeFilter, from, to });
+                        setShowTimePicker(false);
+                    }}
                     onCancel={() => setShowTimePicker(false)}
                 />
             </View>
