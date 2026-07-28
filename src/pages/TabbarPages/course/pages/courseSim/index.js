@@ -256,8 +256,7 @@ function CourseSim({ route, navigation }) {
 
     const insets = useSafeAreaInsets();
     const { width: windowWidth } = useWindowDimensions();
-    const tabBarHeight =
-        useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
+    const tabBarHeight = useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
 
     const s = StyleSheet.create({
         firstUseText: {
@@ -2578,72 +2577,72 @@ E11-0000
 
         return (
             <View>
-                    <View style={{ flexDirection: 'row' }}>
-                        <View style={{ width: OVERVIEW_TIME_COLUMN_WIDTH }} />
-                        {overviewDays.map(day => (
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={{ width: OVERVIEW_TIME_COLUMN_WIDTH }} />
+                    {overviewDays.map(day => (
+                        <Text
+                            key={day}
+                            style={{
+                                ...uiStyle.defaultText,
+                                width: overviewDayColumnWidth,
+                                paddingVertical: verticalScale(5),
+                                color:
+                                    todayText === day
+                                        ? themeColor
+                                        : black.third,
+                                fontSize: scale(11),
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                            }}>
+                            {day}
+                        </Text>
+                    ))}
+                </View>
+                {overviewRows.map(row => (
+                    <View
+                        key={row.start}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'stretch',
+                        }}>
+                        <View
+                            style={{
+                                width: OVERVIEW_TIME_COLUMN_WIDTH,
+                                paddingTop: verticalScale(7),
+                                borderTopWidth: StyleSheet.hairlineWidth,
+                                borderColor: themeColorUltraLight,
+                            }}>
                             <Text
-                                key={day}
                                 style={{
                                     ...uiStyle.defaultText,
-                                    width: overviewDayColumnWidth,
-                                    paddingVertical: verticalScale(5),
-                                    color:
-                                        todayText === day
-                                            ? themeColor
-                                            : black.third,
-                                    fontSize: scale(11),
-                                    fontWeight: 'bold',
+                                    color: black.third,
+                                    fontSize: scale(8),
                                     textAlign: 'center',
                                 }}>
-                                {day}
+                                {row.start === row.end
+                                    ? formatMinutes(row.start)
+                                    : `${formatMinutes(row.start)}\n–${formatMinutes(row.end)}`}
                             </Text>
-                        ))}
-                    </View>
-                    {overviewRows.map(row => (
-                        <View
-                            key={row.start}
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'stretch',
-                            }}>
+                        </View>
+                        {overviewDays.map(day => (
                             <View
+                                key={day}
                                 style={{
-                                    width: OVERVIEW_TIME_COLUMN_WIDTH,
-                                    paddingTop: verticalScale(7),
-                                    borderTopWidth: StyleSheet.hairlineWidth,
+                                    width: overviewDayColumnWidth,
+                                    minHeight: verticalScale(62),
+                                    borderTopWidth:
+                                        StyleSheet.hairlineWidth,
+                                    borderLeftWidth:
+                                        StyleSheet.hairlineWidth,
                                     borderColor: themeColorUltraLight,
                                 }}>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: black.third,
-                                        fontSize: scale(8),
-                                        textAlign: 'center',
-                                    }}>
-                                    {row.start === row.end
-                                        ? formatMinutes(row.start)
-                                        : `${formatMinutes(row.start)}\n–${formatMinutes(row.end)}`}
-                                </Text>
+                                {(row.coursesByDay[day] || []).map(course =>
+                                    renderOverviewCourse(course),
+                                )}
                             </View>
-                            {overviewDays.map(day => (
-                                <View
-                                    key={day}
-                                    style={{
-                                        width: overviewDayColumnWidth,
-                                        minHeight: verticalScale(62),
-                                        borderTopWidth:
-                                            StyleSheet.hairlineWidth,
-                                        borderLeftWidth:
-                                            StyleSheet.hairlineWidth,
-                                        borderColor: themeColorUltraLight,
-                                    }}>
-                                    {(row.coursesByDay[day] || []).map(course =>
-                                        renderOverviewCourse(course),
-                                    )}
-                                </View>
-                            ))}
-                        </View>
-                    ))}
+                        ))}
+                    </View>
+                ))}
             </View>
         );
     };
@@ -2735,6 +2734,8 @@ E11-0000
             <CustomBottomSheet
                 ref={bottomSheetRef}
                 page={'courseSim'}
+                // Tab 已隱藏，sheet 需延伸至螢幕底部
+                bottomInset={0}
                 onAnimate={(fromIndex, toIndex) => {
                     // 開始關閉時即顯示 FAB，與 sheet 下滑並行淡入
                     if (toIndex === -1 && hasOpenCourseSearch) {
