@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FlatList, LayoutAnimation, Switch, Text, View } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { t } from 'i18next';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { uiStyle } from '../../../../../../components/ThemeContext';
 import TouchableScale from '../../../../../../components/TouchableScale';
 import CourseTimeRangePicker from '../../../components/CourseTimeRangePicker';
@@ -365,9 +366,10 @@ const FilterPanel = ({
                         <TouchableScale
                             style={{
                                 ...classItmStyle,
-                                paddingHorizontal: scale(8),
+                                paddingHorizontal: scale(4),
                                 paddingVertical: scale(3),
                                 backgroundColor: tonal.primary15,
+                                marginRight: scale(4),
                             }}
                             onPress={() => {
                                 trigger();
@@ -377,10 +379,14 @@ const FilterPanel = ({
                                     to: DEFAULT_TIME_TO,
                                 });
                             }}
+                            accessibilityRole="button"
+                            accessibilityLabel={t('清除', { ns: 'timetable' })}
                         >
-                            <Text style={{ ...uiStyle.defaultText, color: themeColor, fontSize: scale(12) }}>
-                                {t('清除', { ns: 'timetable' })}
-                            </Text>
+                            <Ionicons
+                                name="close"
+                                size={scale(14)}
+                                color={themeColor}
+                            />
                         </TouchableScale>
                     )}
 

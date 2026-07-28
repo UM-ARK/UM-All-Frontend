@@ -1,13 +1,20 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     Alert,
-    Dimensions,
+    Modal,
     Pressable,
+    StyleSheet,
     Text,
     View,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
-import Modal from 'react-native-modal';
+import Animated, {
+    Easing,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from 'react-native-reanimated';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {t} from 'i18next';
@@ -21,8 +28,6 @@ import {
     TIME_RANGE_PRESETS,
 } from '../constants';
 
-const {height: PAGE_HEIGHT} = Dimensions.get('screen');
-
 const HOURS = Array.from({length: 24}, (_, i) =>
     String(i).padStart(2, '0'),
 );
@@ -35,6 +40,11 @@ const ITEM_HEIGHT = 40;
 const VISIBLE_COUNT = 5;
 const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_COUNT;
 const WHEEL_PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_COUNT / 2);
+
+const OPEN_MS = 220;
+const CLOSE_MS = 200;
+const SHEET_TRANSLATE = 320;
+const BACKDROP_OPACITY = 0.45;
 
 /**
  * 將 HH:mm 對齊到 5 分鐘刻度（結束時間 23:59 視為 23:55）。
@@ -190,12 +200,72 @@ const CourseTimeRangePicker = ({
     const {themeColor, black, white, bg_color, trueBlack, tonal} = theme;
     const insets = useSafeAreaInsets();
 
+    // 自管掛載與透明度動畫，避開 react-native-modal 關閉時的黑白閃
+    const [mounted, setMounted] = useState(false);
+    const pendingActionRef = useRef(null);
+    const closingRef = useRef(false);
+    const mountedRef = useRef(false);
+    const progress = useSharedValue(0);
+
     const [fromHour, setFromHour] = useState(() => snapTimeParts(from).hour);
     const [fromMinute, setFromMinute] = useState(
         () => snapTimeParts(from).minute,
     );
     const [toHour, setToHour] = useState(() => snapTimeParts(to).hour);
     const [toMinute, setToMinute] = useState(() => snapTimeParts(to).minute);
+
+    useEffect(() => {
+        mountedRef.current = mounted;
+    }, [mounted]);
+
+    const flushPendingAction = useCallback(() => {
+        setMounted(false);
+        const action = pendingActionRef.current;
+        pendingActionRef.current = null;
+        if (action?.type === 'confirm') {
+            onConfirm?.(action.payload);
+        } else if (action?.type === 'cancel') {
+            onCancel?.();
+        }
+        closingRef.current = false;
+    }, [onCancel, onConfirm]);
+
+    const animateClose = useCallback(
+        action => {
+            if (closingRef.current) {
+                return;
+            }
+            closingRef.current = true;
+            pendingActionRef.current = action;
+            progress.value = withTiming(
+                0,
+                {duration: CLOSE_MS, easing: Easing.in(Easing.cubic)},
+                finished => {
+                    if (finished) {
+                        runOnJS(flushPendingAction)();
+                    }
+                },
+            );
+        },
+        [flushPendingAction, progress],
+    );
+
+    useEffect(() => {
+        if (visible) {
+            closingRef.current = false;
+            pendingActionRef.current = null;
+            progress.value = 0;
+            setMounted(true);
+            progress.value = withTiming(1, {
+                duration: OPEN_MS,
+                easing: Easing.out(Easing.cubic),
+            });
+            return;
+        }
+        if (mountedRef.current && !closingRef.current) {
+            animateClose(null);
+        }
+    }, [visible, animateClose, progress]);
 
     useEffect(() => {
         if (!visible) {
@@ -216,10 +286,12 @@ const CourseTimeRangePicker = ({
         trigger();
         const isActive =
             currentFrom === preset.from && currentTo === preset.to;
-        // 再次點擊已選預設 → 取消，還原全天
-        onConfirm?.({
-            from: isActive ? DEFAULT_TIME_FROM : preset.from,
-            to: isActive ? DEFAULT_TIME_TO : preset.to,
+        animateClose({
+            type: 'confirm',
+            payload: {
+                from: isActive ? DEFAULT_TIME_FROM : preset.from,
+                to: isActive ? DEFAULT_TIME_TO : preset.to,
+            },
         });
     };
 
@@ -231,13 +303,28 @@ const CourseTimeRangePicker = ({
             );
             return;
         }
-        onConfirm?.({from: currentFrom, to: currentTo});
+        animateClose({
+            type: 'confirm',
+            payload: {from: currentFrom, to: currentTo},
+        });
     };
 
     const handleCancel = () => {
         trigger();
-        onCancel?.();
+        animateClose({type: 'cancel'});
     };
+
+    const backdropStyle = useAnimatedStyle(() => ({
+        opacity: progress.value * BACKDROP_OPACITY,
+    }));
+
+    const sheetStyle = useAnimatedStyle(() => ({
+        transform: [
+            {
+                translateY: (1 - progress.value) * SHEET_TRANSLATE,
+            },
+        ],
+    }));
 
     const renderHmPair = (hour, minute, setHour, setMinute) => (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -268,203 +355,239 @@ const CourseTimeRangePicker = ({
         </View>
     );
 
+    if (!mounted) {
+        return null;
+    }
+
     return (
         <Modal
-            isVisible={visible}
+            visible
+            transparent
+            animationType="none"
+            presentationStyle="overFullScreen"
             statusBarTranslucent
-            deviceHeight={PAGE_HEIGHT}
-            backdropColor={trueBlack}
-            backdropOpacity={0.45}
-            onBackButtonPress={handleCancel}
-            onBackdropPress={handleCancel}
-            useNativeDriver
-            hideModalContentWhileAnimating
-            style={{
-                margin: 0,
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-            }}>
-            <View
-                style={{
-                    width: '100%',
-                    backgroundColor: bg_color,
-                    borderTopLeftRadius: scale(16),
-                    borderTopRightRadius: scale(16),
-                    paddingHorizontal: scale(16),
-                    paddingTop: verticalScale(14),
-                    paddingBottom: Math.max(insets.bottom, verticalScale(16)),
-                }}>
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        fontSize: scale(16),
-                        fontWeight: '700',
-                        textAlign: 'center',
-                        marginBottom: verticalScale(12),
-                    }}>
-                    {t('選擇時段', {ns: 'timetable'})}
-                </Text>
-
-                {/* 預設上午／下午／晚上 */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        marginBottom: verticalScale(12),
-                    }}>
-                    {TIME_RANGE_PRESETS.map(preset => {
-                        const isActive =
-                            currentFrom === preset.from &&
-                            currentTo === preset.to;
-                        return (
-                            <TouchableScale
-                                key={preset.id}
-                                activeScale={0.96}
-                                style={{
-                                    paddingHorizontal: scale(12),
-                                    paddingVertical: verticalScale(8),
-                                    borderRadius: scale(10),
-                                    marginHorizontal: scale(4),
-                                    marginBottom: verticalScale(6),
-                                    backgroundColor: isActive
-                                        ? tonal.primary30
-                                        : tonal.primary15,
-                                }}
-                                onPress={() => applyPreset(preset)}
-                                accessibilityRole="button"
-                                accessibilityLabel={`${t(preset.labelKey, {
-                                    ns: 'timetable',
-                                })} ${preset.from}-${preset.to}`}>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: themeColor,
-                                        fontSize: scale(13),
-                                        fontWeight: isActive ? '800' : '600',
-                                        textAlign: 'center',
-                                    }}>
-                                    {t(preset.labelKey, {ns: 'timetable'})}
-                                </Text>
-                                <Text
-                                    style={{
-                                        ...uiStyle.defaultText,
-                                        color: black.third,
-                                        fontSize: scale(11),
-                                        textAlign: 'center',
-                                        marginTop: verticalScale(2),
-                                    }}>
-                                    {`${preset.from} - ${preset.to}`}
-                                </Text>
-                            </TouchableScale>
-                        );
-                    })}
-                </View>
-
-                {/* 自訂開始／結束 */}
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-evenly',
-                        alignItems: 'flex-start',
-                        marginBottom: verticalScale(16),
-                    }}>
-                    <View style={{alignItems: 'center'}}>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.third,
-                                fontSize: scale(12),
-                                marginBottom: verticalScale(4),
-                            }}>
-                            {t('開始', {ns: 'timetable'})}
-                        </Text>
-                        {renderHmPair(
-                            fromHour,
-                            fromMinute,
-                            setFromHour,
-                            setFromMinute,
-                        )}
-                    </View>
+            onRequestClose={handleCancel}>
+            <View style={styles.root} pointerEvents="box-none">
+                <Animated.View
+                    pointerEvents="none"
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {backgroundColor: trueBlack},
+                        backdropStyle,
+                    ]}
+                />
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('取消', {ns: 'timetable'})}
+                    onPress={handleCancel}
+                    style={StyleSheet.absoluteFill}
+                />
+                <Animated.View
+                    style={[
+                        styles.sheet,
+                        {
+                            backgroundColor: bg_color,
+                            paddingBottom: Math.max(
+                                insets.bottom,
+                                verticalScale(16),
+                            ),
+                        },
+                        sheetStyle,
+                    ]}>
                     <Text
                         style={{
                             ...uiStyle.defaultText,
-                            color: black.third,
+                            color: black.main,
                             fontSize: scale(16),
-                            marginTop: verticalScale(88),
+                            fontWeight: '700',
+                            textAlign: 'center',
+                            marginBottom: verticalScale(12),
                         }}>
-                        –
+                        {t('選擇時段', {ns: 'timetable'})}
                     </Text>
-                    <View style={{alignItems: 'center'}}>
+
+                    {/* 預設上午／下午／晚上 */}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            marginBottom: verticalScale(12),
+                        }}>
+                        {TIME_RANGE_PRESETS.map(preset => {
+                            const isActive =
+                                currentFrom === preset.from &&
+                                currentTo === preset.to;
+                            return (
+                                <TouchableScale
+                                    key={preset.id}
+                                    activeScale={0.96}
+                                    style={{
+                                        paddingHorizontal: scale(12),
+                                        paddingVertical: verticalScale(8),
+                                        borderRadius: scale(10),
+                                        marginHorizontal: scale(4),
+                                        marginBottom: verticalScale(6),
+                                        backgroundColor: isActive
+                                            ? tonal.primary30
+                                            : tonal.primary15,
+                                    }}
+                                    onPress={() => applyPreset(preset)}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`${t(preset.labelKey, {
+                                        ns: 'timetable',
+                                    })} ${preset.from}-${preset.to}`}>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: themeColor,
+                                            fontSize: scale(13),
+                                            fontWeight: isActive
+                                                ? '800'
+                                                : '600',
+                                            textAlign: 'center',
+                                        }}>
+                                        {t(preset.labelKey, {ns: 'timetable'})}
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...uiStyle.defaultText,
+                                            color: black.third,
+                                            fontSize: scale(11),
+                                            textAlign: 'center',
+                                            marginTop: verticalScale(2),
+                                        }}>
+                                        {`${preset.from} - ${preset.to}`}
+                                    </Text>
+                                </TouchableScale>
+                            );
+                        })}
+                    </View>
+
+                    {/* 自訂開始／結束 */}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly',
+                            alignItems: 'flex-start',
+                            marginBottom: verticalScale(16),
+                        }}>
+                        <View style={{alignItems: 'center'}}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(12),
+                                    marginBottom: verticalScale(4),
+                                }}>
+                                {t('開始', {ns: 'timetable'})}
+                            </Text>
+                            {renderHmPair(
+                                fromHour,
+                                fromMinute,
+                                setFromHour,
+                                setFromMinute,
+                            )}
+                        </View>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 color: black.third,
-                                fontSize: scale(12),
-                                marginBottom: verticalScale(4),
+                                fontSize: scale(16),
+                                marginTop: verticalScale(88),
                             }}>
-                            {t('結束', {ns: 'timetable'})}
+                            –
                         </Text>
-                        {renderHmPair(toHour, toMinute, setToHour, setToMinute)}
+                        <View style={{alignItems: 'center'}}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.third,
+                                    fontSize: scale(12),
+                                    marginBottom: verticalScale(4),
+                                }}>
+                                {t('結束', {ns: 'timetable'})}
+                            </Text>
+                            {renderHmPair(
+                                toHour,
+                                toMinute,
+                                setToHour,
+                                setToMinute,
+                            )}
+                        </View>
                     </View>
-                </View>
 
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        gap: scale(10),
-                    }}>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('取消', {ns: 'timetable'})}
-                        onPress={handleCancel}
-                        style={({pressed}) => ({
-                            flex: 1,
-                            alignItems: 'center',
-                            paddingVertical: verticalScale(12),
-                            borderRadius: scale(12),
-                            backgroundColor: pressed
-                                ? tonal.primary30
-                                : tonal.primary15,
-                        })}>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: black.second,
-                                fontSize: scale(15),
-                                fontWeight: '600',
-                            }}>
-                            {t('取消', {ns: 'timetable'})}
-                        </Text>
-                    </Pressable>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('確認', {ns: 'timetable'})}
-                        onPress={handleConfirm}
-                        style={({pressed}) => ({
-                            flex: 1,
-                            alignItems: 'center',
-                            paddingVertical: verticalScale(12),
-                            borderRadius: scale(12),
-                            backgroundColor: themeColor,
-                            opacity: pressed ? 0.85 : 1,
-                        })}>
-                        <Text
-                            style={{
-                                ...uiStyle.defaultText,
-                                color: white,
-                                fontSize: scale(15),
-                                fontWeight: '700',
-                            }}>
-                            {t('確認', {ns: 'timetable'})}
-                        </Text>
-                    </Pressable>
-                </View>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: scale(10),
+                        }}>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('取消', {ns: 'timetable'})}
+                            onPress={handleCancel}
+                            style={({pressed}) => ({
+                                flex: 1,
+                                alignItems: 'center',
+                                paddingVertical: verticalScale(12),
+                                borderRadius: scale(12),
+                                backgroundColor: pressed
+                                    ? tonal.primary30
+                                    : tonal.primary15,
+                            })}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: black.second,
+                                    fontSize: scale(15),
+                                    fontWeight: '600',
+                                }}>
+                                {t('取消', {ns: 'timetable'})}
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('確認', {ns: 'timetable'})}
+                            onPress={handleConfirm}
+                            style={({pressed}) => ({
+                                flex: 1,
+                                alignItems: 'center',
+                                paddingVertical: verticalScale(12),
+                                borderRadius: scale(12),
+                                backgroundColor: themeColor,
+                                opacity: pressed ? 0.85 : 1,
+                            })}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: white,
+                                    fontSize: scale(15),
+                                    fontWeight: '700',
+                                }}>
+                                {t('確認', {ns: 'timetable'})}
+                            </Text>
+                        </Pressable>
+                    </View>
+                </Animated.View>
             </View>
         </Modal>
     );
 };
+
+const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'transparent',
+    },
+    sheet: {
+        width: '100%',
+        borderTopLeftRadius: scale(16),
+        borderTopRightRadius: scale(16),
+        paddingHorizontal: scale(16),
+        paddingTop: verticalScale(14),
+    },
+});
 
 export default CourseTimeRangePicker;
