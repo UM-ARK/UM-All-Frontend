@@ -1830,6 +1830,33 @@ E11-0000
                                 }}>
                                 {`${selectedCourse['Course Code']}-${item.section}`}
                             </Text>
+                            {/* CPED 各 Section 課名不同，平替列表需標出中英文標題 */}
+                            {String(
+                                selectedCourse['Course Code'] || '',
+                            ).startsWith('CPED') ? (
+                                <>
+                                    {courseInfo?.['Course Title'] ? (
+                                        <Text
+                                            style={{
+                                                ...uiStyle.defaultText,
+                                                color: black.second,
+                                                fontSize: scale(13),
+                                            }}>
+                                            {courseInfo['Course Title']}
+                                        </Text>
+                                    ) : null}
+                                    {courseInfo?.['Course Title Chi'] ? (
+                                        <Text
+                                            style={{
+                                                ...uiStyle.defaultText,
+                                                color: black.third,
+                                                fontSize: scale(12),
+                                            }}>
+                                            {courseInfo['Course Title Chi']}
+                                        </Text>
+                                    ) : null}
+                                </>
+                            ) : null}
                             <Text
                                 style={{
                                     ...uiStyle.defaultText,
