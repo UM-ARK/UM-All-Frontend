@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Alert,
     Dimensions,
@@ -6,8 +6,8 @@ import {
     Text,
     View,
 } from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
 import Modal from 'react-native-modal';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {scale, verticalScale} from 'react-native-size-matters';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {t} from 'i18next';
@@ -29,6 +29,12 @@ const HOURS = Array.from({length: 24}, (_, i) =>
 const MINUTES = Array.from({length: 12}, (_, i) =>
     String(i * 5).padStart(2, '0'),
 );
+
+/** 固定整數高度，避免 snap 與 round 因小數互搶造成閃爍 */
+const ITEM_HEIGHT = 40;
+const VISIBLE_COUNT = 5;
+const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_COUNT;
+const WHEEL_PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_COUNT / 2);
 
 /**
  * 將 HH:mm 對齊到 5 分鐘刻度（結束時間 23:59 視為 23:55）。
@@ -54,81 +60,112 @@ const snapTimeParts = time => {
 /**
  * @param {string} hour
  * @param {string} minute
+ * @param {{asEnd?: boolean}} [options]
  * @returns {string}
  */
-const joinTime = (hour, minute) => `${hour}:${minute}`;
+const joinTime = (hour, minute, options = {}) => {
+    // 結束時間滾輪最末為 23:55，對齊全天／晚上結束 23:59
+    if (options.asEnd && hour === '23' && minute === '55') {
+        return '23:59';
+    }
+    return `${hour}:${minute}`;
+};
 
 /**
- * 時／分加減選擇（避免 ScrollView snap 迴圈導致閃爍）。
+ * 可滑動的時／分滾輪（僅在慣性結束時回寫，避免 scrollTo 迴圈）。
  */
-const TimePartStepper = ({
-    values,
-    value,
-    onChange,
-    textColor,
-    iconColor,
-    accentColor,
-}) => {
-    const index = Math.max(0, values.indexOf(value));
+const TimeWheelColumn = ({values, value, onChange, textColor, accentColor}) => {
+    const scrollRef = useRef(null);
+    const suppressEndRef = useRef(true);
+    const valueRef = useRef(value);
+    const selectedIndex = Math.max(0, values.indexOf(value));
 
-    const stepBy = delta => {
-        trigger('soft');
-        const nextIndex = (index + delta + values.length) % values.length;
-        onChange(values[nextIndex]);
+    valueRef.current = value;
+
+    useEffect(() => {
+        suppressEndRef.current = true;
+        const offset = selectedIndex * ITEM_HEIGHT;
+        const frame = requestAnimationFrame(() => {
+            scrollRef.current?.scrollTo({y: offset, animated: false});
+            setTimeout(() => {
+                suppressEndRef.current = false;
+            }, 80);
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [selectedIndex]);
+
+    const resolveIndex = y =>
+        Math.min(
+            values.length - 1,
+            Math.max(0, Math.round(y / ITEM_HEIGHT)),
+        );
+
+    const handleMomentumScrollEnd = event => {
+        if (suppressEndRef.current) {
+            return;
+        }
+        const index = resolveIndex(event.nativeEvent.contentOffset.y);
+        const next = values[index];
+        if (next !== valueRef.current) {
+            onChange(next);
+        }
     };
 
     return (
-        <View style={{alignItems: 'center', width: scale(56)}}>
-            <Pressable
-                accessibilityRole="button"
-                hitSlop={scale(8)}
-                onPress={() => stepBy(-1)}
-                style={({pressed}) => ({
-                    paddingVertical: verticalScale(6),
-                    paddingHorizontal: scale(10),
-                    borderRadius: scale(8),
-                    backgroundColor: pressed ? accentColor : null,
-                })}>
-                <Ionicons
-                    name="chevron-up"
-                    size={scale(22)}
-                    color={iconColor}
-                />
-            </Pressable>
+        <View
+            style={{
+                height: WHEEL_HEIGHT,
+                width: scale(56),
+                overflow: 'hidden',
+            }}>
             <View
+                pointerEvents="none"
                 style={{
-                    minWidth: scale(48),
-                    paddingVertical: verticalScale(8),
-                    borderRadius: scale(10),
-                    backgroundColor: accentColor,
-                    alignItems: 'center',
-                }}>
-                <Text
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: textColor,
-                        fontSize: scale(20),
-                        fontWeight: '700',
-                    }}>
-                    {value}
-                </Text>
-            </View>
-            <Pressable
-                accessibilityRole="button"
-                hitSlop={scale(8)}
-                onPress={() => stepBy(1)}
-                style={({pressed}) => ({
-                    paddingVertical: verticalScale(6),
-                    paddingHorizontal: scale(10),
+                    position: 'absolute',
+                    top: WHEEL_PADDING,
+                    left: 0,
+                    right: 0,
+                    height: ITEM_HEIGHT,
                     borderRadius: scale(8),
-                    backgroundColor: pressed ? accentColor : null,
-                })}>
-                <Ionicons
-                    name="chevron-down"
-                    size={scale(22)}
-                    color={iconColor}
-                />
-            </Pressable>
+                    backgroundColor: accentColor,
+                    zIndex: 1,
+                }}
+            />
+            <ScrollView
+                ref={scrollRef}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+                snapToInterval={ITEM_HEIGHT}
+                snapToAlignment="start"
+                disableIntervalMomentum
+                decelerationRate="fast"
+                bounces={false}
+                onMomentumScrollEnd={handleMomentumScrollEnd}
+                contentContainerStyle={{paddingVertical: WHEEL_PADDING}}>
+                {values.map(item => {
+                    const isActive = item === value;
+                    return (
+                        <View
+                            key={item}
+                            style={{
+                                height: ITEM_HEIGHT,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: textColor,
+                                    fontSize: scale(isActive ? 18 : 15),
+                                    fontWeight: isActive ? '700' : '400',
+                                    opacity: isActive ? 1 : 0.4,
+                                }}>
+                                {item}
+                            </Text>
+                        </View>
+                    );
+                })}
+            </ScrollView>
         </View>
     );
 };
@@ -173,7 +210,7 @@ const CourseTimeRangePicker = ({
     }, [visible, from, to]);
 
     const currentFrom = joinTime(fromHour, fromMinute);
-    const currentTo = joinTime(toHour, toMinute);
+    const currentTo = joinTime(toHour, toMinute, {asEnd: true});
 
     const applyPreset = preset => {
         trigger();
@@ -204,12 +241,11 @@ const CourseTimeRangePicker = ({
 
     const renderHmPair = (hour, minute, setHour, setMinute) => (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TimePartStepper
+            <TimeWheelColumn
                 values={HOURS}
                 value={hour}
                 onChange={setHour}
                 textColor={themeColor}
-                iconColor={black.third}
                 accentColor={tonal.primary15}
             />
             <Text
@@ -222,12 +258,11 @@ const CourseTimeRangePicker = ({
                 }}>
                 :
             </Text>
-            <TimePartStepper
+            <TimeWheelColumn
                 values={MINUTES}
                 value={minute}
                 onChange={setMinute}
                 textColor={themeColor}
-                iconColor={black.third}
                 accentColor={tonal.primary15}
             />
         </View>
@@ -357,7 +392,7 @@ const CourseTimeRangePicker = ({
                             ...uiStyle.defaultText,
                             color: black.third,
                             fontSize: scale(16),
-                            marginTop: verticalScale(52),
+                            marginTop: verticalScale(88),
                         }}>
                         –
                     </Text>
