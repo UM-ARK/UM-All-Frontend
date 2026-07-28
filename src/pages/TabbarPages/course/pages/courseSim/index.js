@@ -79,6 +79,12 @@ const COURSE_CARD_MARGIN = scale(5);
 const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
 /** 概覽模式的時間欄寬 */
 const OVERVIEW_TIME_COLUMN_WIDTH = scale(40);
+/** 概覽模式每小時的顯示高度 */
+const OVERVIEW_HOUR_HEIGHT = verticalScale(62);
+/** 概覽模式課程卡片的最大高度 */
+const OVERVIEW_MAX_COURSE_HEIGHT = verticalScale(120);
+/** 預留頂欄、星期列、切換器及底部提示所需高度 */
+const OVERVIEW_RESERVED_HEIGHT = verticalScale(180);
 /** 開始時間相差不超過 30 分鐘的課節對齊到同一列 */
 const OVERVIEW_ALIGNMENT_MINUTES = 30;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -254,7 +260,7 @@ function CourseSim({ route, navigation }) {
     } = theme;
 
     const insets = useSafeAreaInsets();
-    const { width: windowWidth } = useWindowDimensions();
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const tabBarHeight = useContext(BottomTabBarHeightContext) ?? insets.bottom + 49;
 
     const s = StyleSheet.create({
@@ -446,6 +452,23 @@ function CourseSim({ route, navigation }) {
     }, [planSlots]);
     const overviewDayColumnWidth =
         (windowWidth - OVERVIEW_TIME_COLUMN_WIDTH) / overviewDays.length;
+    const overviewStart = overviewRows[0]?.start ?? 0;
+    const overviewEnd =
+        lodash.max(planSlots.map(course => toMinutes(course['Time To']))) ??
+        overviewStart;
+    const overviewDuration = Math.max(overviewEnd - overviewStart, 60);
+    const overviewMaxHeight = Math.max(
+        OVERVIEW_HOUR_HEIGHT,
+        windowHeight -
+            insets.top -
+            tabBarHeight -
+            OVERVIEW_RESERVED_HEIGHT,
+    );
+    const overviewHourHeight = Math.min(
+        OVERVIEW_HOUR_HEIGHT,
+        (overviewMaxHeight / overviewDuration) * 60,
+    );
+    const overviewHeight = (overviewDuration / 60) * overviewHourHeight;
 
     useEffect(() => {
         logToFirebase('openPage', { page: 'courseSim' });
@@ -1459,8 +1482,14 @@ E11-0000
                                 }}
                                 onPress={() => {
                                     trigger();
-                                    setTimeFilterFrom(preset.from);
-                                    setTimeFilterTo(preset.to);
+                                    // 再次點擊已選預設 → 取消，還原全天
+                                    if (isSelected) {
+                                        setTimeFilterFrom(timeFrom);
+                                        setTimeFilterTo(timeTo);
+                                    } else {
+                                        setTimeFilterFrom(preset.from);
+                                        setTimeFilterTo(preset.to);
+                                    }
                                 }}>
                                 <Text
                                     style={{
@@ -2535,10 +2564,28 @@ E11-0000
                 onOpen={courseMenuProps.onOpen}
                 onPressAction={courseMenuProps.onPressAction}
                 menuStyle={{
-                    alignSelf: 'stretch',
-                    margin: scale(2),
+                    position: 'absolute',
+                    top:
+                        ((toMinutes(course['Time From']) - overviewStart) /
+                            60) *
+                        overviewHourHeight,
+                    left: scale(2),
+                    right: scale(2),
+                    height: Math.min(
+                        OVERVIEW_MAX_COURSE_HEIGHT,
+                        Math.max(
+                            verticalScale(52),
+                            ((toMinutes(course['Time To']) -
+                                toMinutes(course['Time From'])) /
+                                60) *
+                                overviewHourHeight -
+                                scale(4),
+                        ),
+                    ),
+                    zIndex: 1,
                 }}
                 cardStyle={{
+                    height: '100%',
                     backgroundColor: timeWarning
                         ? unread
                         : TIME_TABLE_COLOR[
@@ -2593,7 +2640,7 @@ E11-0000
         );
     };
 
-    /** 將開始時間相差不超過 30 分鐘的各天課節排成共用時間列。 */
+    /** 依共用時間軸排列各天課節，讓開始位置與課程長度跨欄對齊。 */
     const renderOverview = () => {
         const todayText = moment()
             .format('dddd')
@@ -2623,23 +2670,23 @@ E11-0000
                         </Text>
                     ))}
                 </View>
-                {overviewRows.map(row => (
+                <View style={{ flexDirection: 'row' }}>
                     <View
-                        key={row.start}
                         style={{
-                            flexDirection: 'row',
-                            alignItems: 'stretch',
+                            width: OVERVIEW_TIME_COLUMN_WIDTH,
+                            height: overviewHeight,
                         }}>
-                        <View
-                            style={{
-                                width: OVERVIEW_TIME_COLUMN_WIDTH,
-                                paddingTop: verticalScale(7),
-                                borderTopWidth: StyleSheet.hairlineWidth,
-                                borderColor: themeColorUltraLight,
-                            }}>
+                        {overviewRows.map(row => (
                             <Text
+                                key={row.start}
                                 style={{
                                     ...uiStyle.defaultText,
+                                    position: 'absolute',
+                                    top:
+                                        ((row.start - overviewStart) / 60) *
+                                            overviewHourHeight +
+                                        verticalScale(7),
+                                    width: '100%',
                                     color: black.third,
                                     fontSize: scale(8),
                                     textAlign: 'center',
@@ -2648,26 +2695,39 @@ E11-0000
                                     ? formatMinutes(row.start)
                                     : `${formatMinutes(row.start)}\n–${formatMinutes(row.end)}`}
                             </Text>
-                        </View>
-                        {overviewDays.map(day => (
-                            <View
-                                key={day}
-                                style={{
-                                    width: overviewDayColumnWidth,
-                                    minHeight: verticalScale(62),
-                                    borderTopWidth:
-                                        StyleSheet.hairlineWidth,
-                                    borderLeftWidth:
-                                        StyleSheet.hairlineWidth,
-                                    borderColor: themeColorUltraLight,
-                                }}>
-                                {(row.coursesByDay[day] || []).map(course =>
-                                    renderOverviewCourse(course),
-                                )}
-                            </View>
                         ))}
                     </View>
-                ))}
+                    {overviewDays.map(day => (
+                        <View
+                            key={day}
+                            style={{
+                                width: overviewDayColumnWidth,
+                                height: overviewHeight,
+                                borderLeftWidth: StyleSheet.hairlineWidth,
+                                borderColor: themeColorUltraLight,
+                            }}>
+                            {overviewRows.map(row => (
+                                <View
+                                    key={row.start}
+                                    style={{
+                                        position: 'absolute',
+                                        top:
+                                            ((row.start - overviewStart) /
+                                                60) *
+                                            overviewHourHeight,
+                                        width: '100%',
+                                        borderTopWidth:
+                                            StyleSheet.hairlineWidth,
+                                        borderColor: themeColorUltraLight,
+                                    }}
+                                />
+                            ))}
+                            {(lodash.groupBy(planSlots, 'Day')[day] || []).map(
+                                course => renderOverviewCourse(course),
+                            )}
+                        </View>
+                    ))}
+                </View>
             </View>
         );
     };
