@@ -420,13 +420,12 @@ const FilterPanel = ({
             <TouchableScale
                 activeScale={0.96}
                 style={{
+                    ...classItmStyle,
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    paddingHorizontal: scale(10),
-                    paddingVertical: verticalScale(3),
-                    borderRadius: scale(20),
-                    backgroundColor: recommendationOnly ? tonal.primary15 : null,
+                    paddingHorizontal: scale(8),
+                    paddingVertical: scale(3),
                 }}
                 onPress={() => {
                     trigger();
@@ -441,23 +440,31 @@ const FilterPanel = ({
                     color: recommendationOnly ? themeColor : black.third,
                     fontWeight: recommendationOnly ? '900' : 'normal',
                     fontSize: scale(12),
-                    marginRight: scale(8),
+                    marginRight: scale(4),
                 }}>
                     {t('只看不衝突', { ns: 'catalog' })}
                 </Text>
-                {/* Switch 僅作狀態指示，點擊由外層膠囊統一處理，避免雙重觸發 */}
-                <Switch
-                    accessibilityElementsHidden
-                    importantForAccessibility="no"
-                    pointerEvents="none"
-                    ios_backgroundColor={tonal.primary15}
-                    trackColor={{
-                        false: tonal.primary15,
-                        true: themeColor,
-                    }}
-                    value={recommendationOnly}
-                    style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
-                />
+                {/* Switch 僅作狀態指示；縮小後用固定尺寸容器吃掉原生佔位 */}
+                <View
+                    style={{
+                        width: scale(36),
+                        height: scale(22),
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                    <Switch
+                        accessibilityElementsHidden
+                        importantForAccessibility="no"
+                        pointerEvents="none"
+                        ios_backgroundColor={tonal.primary15}
+                        trackColor={{
+                            false: tonal.primary15,
+                            true: themeColor,
+                        }}
+                        value={recommendationOnly}
+                        style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                    />
+                </View>
             </TouchableScale>
         </View>
     );
