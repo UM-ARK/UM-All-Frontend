@@ -39,7 +39,6 @@ import { t } from 'i18next';
 import {
     BottomSheetTextInput,
     BottomSheetScrollView,
-    BottomSheetFlatList,
     useBottomSheetScrollableCreator,
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
@@ -2050,23 +2049,23 @@ E11-0000
                 })}
 
                 <BottomSheetScrollView
-                    contentContainerStyle={{ paddingBottom: tabBarHeight }}>
+                    contentContainerStyle={{
+                        paddingBottom: tabBarHeight + verticalScale(50),
+                    }}>
                     {/* 篩選條件（星期與時間） */}
                     {renderDayFilter()}
                     {dayFilterChoice && renderTimeFilter()}
 
-                    {/* 搜索結果列表（多個課程） */}
+                    {/* 搜索結果（勿在 ScrollView 內嵌 VirtualizedList） */}
                     {haveSearchResult && filterCourseList.length > 1 && (
-                        <BottomSheetFlatList
-                            data={filterCourseList}
-                            key={`${searchText || 'search'}-cols-${filterCourseList.length}`}
-                            numColumns={filterCourseList.length}
-                            columnWrapperStyle={{ flexWrap: 'wrap' }}
+                        <View
                             style={{
                                 marginTop: scale(5),
                                 marginLeft: scale(10),
-                            }}
-                            renderItem={({ item }) => {
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                            }}>
+                            {filterCourseList.map(item => {
                                 const sectionObj =
                                     courseCodeObj[item['Course Code']];
                                 let dayInFilter = true;
@@ -2122,6 +2121,7 @@ E11-0000
 
                                 return (
                                     <TouchableOpacity
+                                        key={item['Course Code']}
                                         style={s.courseCard}
                                         onPress={() => {
                                             trigger();
@@ -2148,13 +2148,8 @@ E11-0000
                                         </Text>
                                     </TouchableOpacity>
                                 );
-                            }}
-                            ListFooterComponent={
-                                <View
-                                    style={{ marginBottom: verticalScale(50) }}
-                                />
-                            }
-                        />
+                            })}
+                        </View>
                     )}
 
                     {/* 單一課程詳細 Section 顯示 */}
@@ -2238,66 +2233,53 @@ E11-0000
                                             ...s.searchResultText,
                                             fontWeight: 'bold',
                                         }}>{`↓ ${t('選取單節', { ns: 'timetable' })}`}</Text>
-                                    <BottomSheetFlatList
-                                        data={Object.keys(sectionObj)}
+                                    <View
                                         style={{
                                             marginTop: scale(5),
                                             width: '100%',
-                                        }}
-                                        numColumns={
-                                            Object.keys(sectionObj).length
-                                        }
-                                        key={`${searchText || 'single'}-sections-${Object.keys(sectionObj).length}`}
-                                        columnWrapperStyle={
-                                            Object.keys(sectionObj).length > 1
+                                            ...(Object.keys(sectionObj)
+                                                .length > 1
                                                 ? {
+                                                    flexDirection: 'row',
                                                     flexWrap: 'wrap',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                 }
-                                                : null
-                                        }
-                                        renderItem={({ item: sectionKey }) => {
-                                            const courseInfo =
-                                                sectionObj[sectionKey][0];
-                                            const sortedSection = daySort(
-                                                sectionObj[sectionKey],
-                                            );
+                                                : null),
+                                        }}>
+                                        {Object.keys(sectionObj).map(
+                                            sectionKey => {
+                                                const courseInfo =
+                                                    sectionObj[sectionKey][0];
+                                                const sortedSection = daySort(
+                                                    sectionObj[sectionKey],
+                                                );
 
-                                            let dayInFilter = true;
-                                            if (dayFilterChoice) {
-                                                if (
-                                                    timeFilterFrom !==
-                                                    timeFrom ||
-                                                    timeFilterTo !== timeTo
-                                                ) {
-                                                    const filterStart = moment(
-                                                        timeFilterFrom,
-                                                        'HH:mm',
-                                                    );
-                                                    const filterEnd = moment(
-                                                        timeFilterTo,
-                                                        'HH:mm',
-                                                    );
-                                                    dayInFilter =
-                                                        sortedSection.some(
-                                                            course =>
-                                                                course.Day ===
-                                                                dayFilterChoice &&
-                                                                (moment(
-                                                                    course[
-                                                                    'Time From'
-                                                                    ],
-                                                                    'HH:mm',
-                                                                ).isBetween(
-                                                                    filterStart,
-                                                                    filterEnd,
-                                                                    null,
-                                                                    '[]',
-                                                                ) ||
-                                                                    moment(
+                                                let dayInFilter = true;
+                                                if (dayFilterChoice) {
+                                                    if (
+                                                        timeFilterFrom !==
+                                                        timeFrom ||
+                                                        timeFilterTo !== timeTo
+                                                    ) {
+                                                        const filterStart =
+                                                            moment(
+                                                                timeFilterFrom,
+                                                                'HH:mm',
+                                                            );
+                                                        const filterEnd =
+                                                            moment(
+                                                                timeFilterTo,
+                                                                'HH:mm',
+                                                            );
+                                                        dayInFilter =
+                                                            sortedSection.some(
+                                                                course =>
+                                                                    course.Day ===
+                                                                    dayFilterChoice &&
+                                                                    (moment(
                                                                         course[
-                                                                        'Time To'
+                                                                        'Time From'
                                                                         ],
                                                                         'HH:mm',
                                                                     ).isBetween(
@@ -2305,105 +2287,117 @@ E11-0000
                                                                         filterEnd,
                                                                         null,
                                                                         '[]',
-                                                                    )),
-                                                        );
-                                                } else {
-                                                    dayInFilter =
-                                                        sortedSection.some(
-                                                            course =>
-                                                                course.Day ===
-                                                                dayFilterChoice,
-                                                        );
+                                                                    ) ||
+                                                                        moment(
+                                                                            course[
+                                                                            'Time To'
+                                                                            ],
+                                                                            'HH:mm',
+                                                                        ).isBetween(
+                                                                            filterStart,
+                                                                            filterEnd,
+                                                                            null,
+                                                                            '[]',
+                                                                        )),
+                                                            );
+                                                    } else {
+                                                        dayInFilter =
+                                                            sortedSection.some(
+                                                                course =>
+                                                                    course.Day ===
+                                                                    dayFilterChoice,
+                                                            );
+                                                    }
                                                 }
-                                            }
 
-                                            if (!dayInFilter) {
-                                                return null;
-                                            }
+                                                if (!dayInFilter) {
+                                                    return null;
+                                                }
 
-                                            return (
-                                                <TouchableOpacity
-                                                    style={{
-                                                        ...s.courseCard,
-                                                        width: '45%',
-                                                    }}
-                                                    onPress={() => {
-                                                        trigger();
-                                                        addCourse(courseInfo);
-                                                        bottomSheetRef.current?.snapToIndex(
-                                                            0,
-                                                        );
-                                                    }}>
-                                                    {(courseInfo[
-                                                        'Course Code'
-                                                    ] === 'CPED1001' ||
-                                                        courseInfo[
-                                                        'Course Code'
-                                                        ] === 'CPED1002') && (
-                                                            <>
-                                                                <Text
-                                                                    style={
-                                                                        s.searchResultText
-                                                                    }>
-                                                                    {
-                                                                        courseInfo[
-                                                                        'Course Title'
-                                                                        ]
-                                                                    }
-                                                                </Text>
-                                                                <Text
-                                                                    style={
-                                                                        s.searchResultText
-                                                                    }>
-                                                                    {
-                                                                        courseInfo[
-                                                                        'Course Title Chi'
-                                                                        ]
-                                                                    }
-                                                                </Text>
-                                                            </>
-                                                        )}
-                                                    <Text
+                                                return (
+                                                    <TouchableOpacity
+                                                        key={sectionKey}
                                                         style={{
-                                                            ...s.searchResultText,
-                                                            color: themeColor,
-                                                            fontSize: scale(15),
-                                                            fontWeight: 'bold',
+                                                            ...s.courseCard,
+                                                            width: '45%',
+                                                        }}
+                                                        onPress={() => {
+                                                            trigger();
+                                                            addCourse(
+                                                                courseInfo,
+                                                            );
+                                                            bottomSheetRef.current?.snapToIndex(
+                                                                0,
+                                                            );
                                                         }}>
-                                                        {sectionKey}
-                                                    </Text>
-                                                    <Text
-                                                        style={{
-                                                            ...s.searchResultText,
-                                                            color: themeColor,
-                                                        }}>
-                                                        {
+                                                        {(courseInfo[
+                                                            'Course Code'
+                                                        ] === 'CPED1001' ||
                                                             courseInfo[
-                                                            'Teacher Information'
-                                                            ]
-                                                        }
-                                                    </Text>
-                                                    {sortedSection.map(itm => (
+                                                            'Course Code'
+                                                            ] ===
+                                                            'CPED1002') && (
+                                                                <>
+                                                                    <Text
+                                                                        style={
+                                                                            s.searchResultText
+                                                                        }>
+                                                                        {
+                                                                            courseInfo[
+                                                                            'Course Title'
+                                                                            ]
+                                                                        }
+                                                                    </Text>
+                                                                    <Text
+                                                                        style={
+                                                                            s.searchResultText
+                                                                        }>
+                                                                        {
+                                                                            courseInfo[
+                                                                            'Course Title Chi'
+                                                                            ]
+                                                                        }
+                                                                    </Text>
+                                                                </>
+                                                            )}
                                                         <Text
-                                                            style={
-                                                                s.searchResultText
-                                                            }>
-                                                            {`${itm.Day} ${itm['Time From']} ~ ${itm['Time To']}`}
+                                                            style={{
+                                                                ...s.searchResultText,
+                                                                color: themeColor,
+                                                                fontSize:
+                                                                    scale(15),
+                                                                fontWeight:
+                                                                    'bold',
+                                                            }}>
+                                                            {sectionKey}
                                                         </Text>
-                                                    ))}
-                                                </TouchableOpacity>
-                                            );
-                                        }}
-                                        ListFooterComponent={
-                                            <View
-                                                style={{
-                                                    marginBottom:
-                                                        verticalScale(50),
-                                                }}
-                                            />
-                                        }
-                                        scrollEnabled={false}
-                                    />
+                                                        <Text
+                                                            style={{
+                                                                ...s.searchResultText,
+                                                                color: themeColor,
+                                                            }}>
+                                                            {
+                                                                courseInfo[
+                                                                'Teacher Information'
+                                                                ]
+                                                            }
+                                                        </Text>
+                                                        {sortedSection.map(
+                                                            itm => (
+                                                                <Text
+                                                                    key={`${itm.Day}-${itm['Time From']}-${itm['Time To']}`}
+                                                                    style={
+                                                                        s.searchResultText
+                                                                    }>
+                                                                    {`${itm.Day} ${itm['Time From']} ~ ${itm['Time To']}`}
+                                                                </Text>
+                                                            ),
+                                                        )}
+                                                    </TouchableOpacity>
+                                                );
+                                            },
+                                        )}
+                                    </View>
                                 </View>
                             );
                         })}
