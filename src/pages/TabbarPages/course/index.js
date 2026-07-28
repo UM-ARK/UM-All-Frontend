@@ -32,44 +32,90 @@ import {
 const Tab = createMaterialTopTabNavigator();
 
 /**
- * 課表段落 Tab 上的衝突數角標。
+ * 課表段落 Tab 角標：
+ * - 有衝突 → 顯示衝突數
+ * - 尚未選課 → 小紅點提示去排課
  *
- * 衝突狀態掛在段落 Tab 而非底部 Tab：Provider 只包住 CourseTab，
- * 底部 Tab 在 Provider 之外讀不到；標在課表段落也更直接指向出問題的地方。
+ * 必須嵌在 tabBarLabel 上並用 absolute 疊加，不可用 tabBarBadge（會貼到 ⋯），
+ * 也不可佔 flex 寬度（會擠開「課表」與底線）。
  */
-const ConflictBadge = () => {
+const TimetableTabBadge = () => {
     const { theme } = useTheme();
     const { unread, trueWhite } = theme;
-    const { conflictCount } = useCoursePlan();
+    const { conflictCount, planList } = useCoursePlan();
 
-    if (conflictCount === 0) {
-        return null;
+    if (conflictCount > 0) {
+        return (
+            <View
+                pointerEvents="none"
+                style={{
+                    position: 'absolute',
+                    top: scale(-4),
+                    right: scale(-10),
+                    minWidth: scale(13),
+                    paddingHorizontal: scale(3),
+                    borderRadius: scale(7),
+                    backgroundColor: unread,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                <Text
+                    style={{
+                        ...uiStyle.defaultText,
+                        color: trueWhite,
+                        fontSize: scale(8),
+                        fontWeight: 'bold',
+                    }}>
+                    {conflictCount}
+                </Text>
+            </View>
+        );
     }
 
+    if (planList.length === 0) {
+        return (
+            <View
+                pointerEvents="none"
+                style={{
+                    position: 'absolute',
+                    top: scale(-2),
+                    right: scale(-6),
+                    width: scale(7),
+                    height: scale(7),
+                    borderRadius: scale(4),
+                    backgroundColor: unread,
+                }}
+            />
+        );
+    }
+
+    return null;
+};
+
+/**
+ * 「課表」標籤 + 角標（衝突數／空課表紅點）。
+ *
+ * @param {{ color: string }} props React Navigation 傳入的標籤色
+ * @returns {React.ReactElement}
+ */
+const TimetableTabLabel = ({ color }) => {
+    const { t } = useTranslation('common');
+
     return (
-        <View
-            style={{
-                minWidth: scale(13),
-                paddingHorizontal: scale(3),
-                borderRadius: scale(7),
-                backgroundColor: unread,
-                alignItems: 'center',
-                justifyContent: 'center',
-            }}>
+        <View>
             <Text
                 style={{
                     ...uiStyle.defaultText,
-                    color: trueWhite,
-                    fontSize: scale(8),
+                    color,
+                    fontSize: TAB_LABEL_FONT_SIZE,
                     fontWeight: 'bold',
                 }}>
-                {conflictCount}
+                {t('課表')}
             </Text>
+            <TimetableTabBadge />
         </View>
     );
 };
-
-const renderConflictBadge = () => <ConflictBadge />;
 
 /**
  * 選課頁內容：頂欄（段落 Tab + ⋯）+ 兩個段落。
@@ -215,7 +261,7 @@ const CourseTabContent = () => {
                         component={CourseSim}
                         options={{
                             title: t('課表'),
-                            tabBarBadge: renderConflictBadge,
+                            tabBarLabel: TimetableTabLabel,
                         }}
                         listeners={() => ({
                             tabPress: () => trigger(),
