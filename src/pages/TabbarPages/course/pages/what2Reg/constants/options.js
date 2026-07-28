@@ -1,3 +1,8 @@
+import {
+    DEFAULT_TIME_FROM,
+    DEFAULT_TIME_TO,
+} from '../../../constants';
+
 // add drop, pre enroll 中文參考
 export const adpeMap = {
     'ad': '增退選',
@@ -20,8 +25,7 @@ export const defaultFilterOptions = {
 export const CMGEList = ['CMRE', 'GE'];
 export const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-export const DEFAULT_TIME_FROM = '00:00';
-export const DEFAULT_TIME_TO = '23:59';
+export {DEFAULT_TIME_FROM, DEFAULT_TIME_TO};
 
 // 星期／時段篩選刻意獨立於 defaultFilterOptions：
 // filterOptions 會寫入 ARK_Courses_filterOptions，若記住星期會讓下次開 APP 出現無法解釋的空列表。

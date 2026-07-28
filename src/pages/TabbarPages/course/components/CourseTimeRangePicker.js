@@ -15,7 +15,11 @@ import {t} from 'i18next';
 import {useTheme, uiStyle} from '../../../../components/ThemeContext';
 import TouchableScale from '../../../../components/TouchableScale';
 import {trigger} from '../../../../utils/trigger';
-import {TIME_RANGE_PRESETS} from '../constants';
+import {
+    DEFAULT_TIME_FROM,
+    DEFAULT_TIME_TO,
+    TIME_RANGE_PRESETS,
+} from '../constants';
 
 const {height: PAGE_HEIGHT} = Dimensions.get('screen');
 
@@ -173,7 +177,13 @@ const CourseTimeRangePicker = ({
 
     const applyPreset = preset => {
         trigger();
-        onConfirm?.({from: preset.from, to: preset.to});
+        const isActive =
+            currentFrom === preset.from && currentTo === preset.to;
+        // 再次點擊已選預設 → 取消，還原全天
+        onConfirm?.({
+            from: isActive ? DEFAULT_TIME_FROM : preset.from,
+            to: isActive ? DEFAULT_TIME_TO : preset.to,
+        });
     };
 
     const handleConfirm = () => {

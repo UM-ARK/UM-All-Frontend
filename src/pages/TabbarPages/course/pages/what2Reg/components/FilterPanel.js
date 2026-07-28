@@ -335,10 +335,15 @@ const FilterPanel = ({
                                 }}
                                 onPress={() => {
                                     trigger();
+                                    // 再次點擊已選預設 → 取消，還原全天
                                     onUpdateTimeFilter({
                                         ...timeFilter,
-                                        from: preset.from,
-                                        to: preset.to,
+                                        from: isSelected
+                                            ? DEFAULT_TIME_FROM
+                                            : preset.from,
+                                        to: isSelected
+                                            ? DEFAULT_TIME_TO
+                                            : preset.to,
                                     });
                                 }}
                             >
