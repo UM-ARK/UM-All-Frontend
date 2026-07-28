@@ -1,4 +1,7 @@
-import { isCourseRecommended } from '../hooks/useCourseFiltering';
+import {
+    isCourseRecommended,
+    isSlotWithinTimeFilter,
+} from '../hooks/useCourseFiltering';
 
 const makeSlot = (courseCode, section, day, timeFrom, timeTo) => ({
     'Course Code': courseCode,
@@ -6,6 +9,28 @@ const makeSlot = (courseCode, section, day, timeFrom, timeTo) => ({
     Day: day,
     'Time From': timeFrom,
     'Time To': timeTo,
+});
+
+describe('isSlotWithinTimeFilter', () => {
+    const timeFilter = {
+        day: 'MON',
+        from: '17:50',
+        to: '23:59',
+    };
+
+    it('課節開始時間早於篩選起點時不列入', () => {
+        expect(isSlotWithinTimeFilter(
+            makeSlot('TEST1000', '001', 'MON', '17:30', '18:45'),
+            timeFilter,
+        )).toBe(false);
+    });
+
+    it('課節剛好在篩選起點開始時列入', () => {
+        expect(isSlotWithinTimeFilter(
+            makeSlot('TEST1000', '001', 'MON', '17:50', '18:45'),
+            timeFilter,
+        )).toBe(true);
+    });
 });
 
 describe('isCourseRecommended', () => {
@@ -61,5 +86,47 @@ describe('isCourseRecommended', () => {
             planCourseCodeSet: new Set(),
             planSlots,
         })).toBe(false);
+    });
+
+    it('時段與不衝突條件必須由同一個 Section 滿足', () => {
+        const courseSlots = [
+            makeSlot('TEST1000', '001', 'MON', '17:50', '18:45'),
+            makeSlot('TEST1000', '002', 'TUE', '11:30', '12:45'),
+        ];
+
+        expect(isCourseRecommended({
+            courseCode: 'TEST1000',
+            courseSlots,
+            planCourseCodeSet: new Set(),
+            planSlots: [
+                makeSlot('PLAN1000', '001', 'MON', '17:00', '18:00'),
+            ],
+            timeFilter: {
+                day: 'MON',
+                from: '17:50',
+                to: '23:59',
+            },
+        })).toBe(false);
+    });
+
+    it('相接且完整落在時段內的 Section 仍列入建議', () => {
+        const courseSlots = [
+            makeSlot('TEST1000', '001', 'MON', '17:50', '18:45'),
+            makeSlot('TEST1000', '001', 'THU', '17:50', '18:45'),
+        ];
+
+        expect(isCourseRecommended({
+            courseCode: 'TEST1000',
+            courseSlots,
+            planCourseCodeSet: new Set(),
+            planSlots: [
+                makeSlot('PLAN1000', '001', 'MON', '17:00', '17:50'),
+            ],
+            timeFilter: {
+                day: 'MON',
+                from: '17:50',
+                to: '23:59',
+            },
+        })).toBe(true);
     });
 });

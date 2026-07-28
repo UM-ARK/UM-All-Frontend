@@ -25,6 +25,35 @@ export const parseTimeToMinutes = time => {
 };
 
 /**
+ * 判斷課節是否完整落在指定星期與時段內。
+ */
+export const isSlotWithinTimeFilter = (slot, timeFilter) => {
+    if (!timeFilter?.day) {
+        return true;
+    }
+
+    if (slot?.Day !== timeFilter.day) {
+        return false;
+    }
+
+    const slotFrom = parseTimeToMinutes(slot['Time From']);
+    const slotTo = parseTimeToMinutes(slot['Time To']);
+    const filterFrom = parseTimeToMinutes(timeFilter.from);
+    const filterTo = parseTimeToMinutes(timeFilter.to);
+
+    if (
+        slotFrom === null ||
+        slotTo === null ||
+        filterFrom === null ||
+        filterTo === null
+    ) {
+        return false;
+    }
+
+    return slotFrom >= filterFrom && slotTo <= filterTo;
+};
+
+/**
  * 判斷某課程是否至少有一個可安全排入目前課表的 Section。
  * 已加入的課程，以及時間未完整公佈的 Section，均不列入建議。
  */
@@ -33,6 +62,7 @@ export const isCourseRecommended = ({
     courseSlots = [],
     planCourseCodeSet = new Set(),
     planSlots = [],
+    timeFilter = defaultTimeFilter,
 }) => {
     if (!courseCode || planCourseCodeSet.has(courseCode)) {
         return false;
@@ -56,6 +86,7 @@ export const isCourseRecommended = ({
             });
 
         return hasCompleteSchedule &&
+            sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter)) &&
             getSectionConflicts(sectionSlots, planSlots).length === 0;
     });
 };
@@ -190,20 +221,7 @@ const useCourseFiltering = ({
 
         return scopedCourseList.filter(course => {
             const slots = slotsByCourseCode[course['Course Code']] || [];
-
-            return slots.some(slot => {
-                if (slot.Day !== timeFilter.day) {
-                    return false;
-                }
-
-                const slotFrom = parseTimeToMinutes(slot['Time From']);
-                const slotTo = parseTimeToMinutes(slot['Time To']);
-                if (slotFrom === null || slotTo === null) {
-                    return false;
-                }
-
-                return slotFrom < filterTo && slotTo > filterFrom;
-            });
+            return slots.some(slot => isSlotWithinTimeFilter(slot, timeFilter));
         });
     }, [isTimeFilterActive, scopedCourseList, slotsByCourseCode, timeFilter]);
 
@@ -227,13 +245,16 @@ const useCourseFiltering = ({
                 courseSlots: slotsByCourseCode[courseCode] || [],
                 planCourseCodeSet,
                 planSlots,
+                timeFilter: isTimeFilterActive ? timeFilter : defaultTimeFilter,
             });
         });
     }, [
         isRecommendationFilterActive,
+        isTimeFilterActive,
         planCourseCodeSet,
         planSlots,
         slotsByCourseCode,
+        timeFilter,
         timeFilteredCourseList,
     ]);
 
