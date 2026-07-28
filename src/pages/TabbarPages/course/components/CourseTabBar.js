@@ -16,6 +16,8 @@ const CourseTabBar = ({
     courseVersion,
     onManualUpdate,
     onOpenSharePoint,
+    canClear,
+    onClearPress,
     ...tabBarProps
 }) => {
     const { theme } = useTheme();
@@ -49,6 +51,8 @@ const CourseTabBar = ({
                     courseVersion={courseVersion}
                     onManualUpdate={onManualUpdate}
                     onOpenSharePoint={onOpenSharePoint}
+                    canClear={canClear}
+                    onClearPress={onClearPress}
                 />
             </View>
         </View>
