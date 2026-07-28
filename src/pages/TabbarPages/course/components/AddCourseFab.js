@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react';
-import { Text } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
 import {
@@ -13,36 +12,32 @@ import Animated, {
 } from 'react-native-reanimated';
 import { t } from 'i18next';
 
-import { useTheme, uiStyle } from '../../../../components/ThemeContext';
+import { useTheme } from '../../../../components/ThemeContext';
 import { trigger } from '../../../../utils/trigger';
 import TouchableScale from '../../../../components/TouchableScale';
 
 const FAB_FADE_MS = 220;
 
 /**
- * 課表段落右下角浮動操作列：加課 → 搵課 → 清空（有排課時）。
+ * 課表段落右下角浮動操作列：加課 → 課程目錄。
  *
- * 清空從頂欄 ⋯ 選單遷出，與加課同區，避免次要操作藏太深；
- * 搵課切到隔壁段落，與搵課頁底部課表膠囊對稱；
+ * 清空收進頂欄 ⋯ 選單，避免低頻危險操作長期遮擋課表；
+ * 課程目錄切到隔壁段落，與搵課頁底部課表膠囊對稱；
  * sheet 展開時由呼叫端以 visible=false 淡出（會被 sheet 蓋住）。
  *
  * @param {number} bottom 距底部距離（呼叫端需扣掉 Tab Bar 高度）
  * @param {Function} onAddPress 開啟加課 sheet
  * @param {Function} [onSearchPress] 跳轉到搵課段落
- * @param {Function} [onClearPress] 清空模擬課表（含確認對話框由呼叫端處理）
- * @param {boolean} [canClear] 是否已有排課（無排課時不顯示清空）
  * @param {boolean} [visible] 是否可見（關閉時淡出，不卸載以保留動畫）
  */
 const AddCourseFab = ({
     bottom,
     onAddPress,
     onSearchPress,
-    onClearPress,
-    canClear = false,
     visible = true,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, black, white, unread } = theme;
+    const { themeColor, black, white } = theme;
     const opacity = useSharedValue(visible ? 1 : 0);
 
     useEffect(() => {
@@ -73,22 +68,15 @@ const AddCourseFab = ({
                 rowGap: verticalScale(4),
             },
             pill: {
-                flexDirection: 'row',
                 alignItems: 'center',
-                paddingHorizontal: scale(14),
-                paddingVertical: verticalScale(8),
+                justifyContent: 'center',
+                width: scale(44),
+                height: scale(44),
                 borderRadius: scale(22),
                 overflow: 'hidden',
                 backgroundColor: isLiquidGlassSupported ? null : white,
                 ...fallbackShadow,
             },
-            label: color => ({
-                ...uiStyle.defaultText,
-                color,
-                fontWeight: 'bold',
-                fontSize: scale(13),
-                marginLeft: scale(4),
-            }),
         };
     }, [black.main, bottom, white]);
 
@@ -101,6 +89,8 @@ const AddCourseFab = ({
                     trigger();
                     onAddPress?.();
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={t('加課', { ns: 'timetable' })}
                 hitSlop={scale(8)}>
                 <LiquidGlassView
                     interactive
@@ -108,10 +98,7 @@ const AddCourseFab = ({
                         isLiquidGlassSupported ? { effect: 'highlight' } : null
                     }
                     style={styles.pill}>
-                    <Ionicons name="add" size={scale(18)} color={themeColor} />
-                    <Text style={styles.label(themeColor)}>
-                        {t('加課', { ns: 'timetable' })}
-                    </Text>
+                    <Ionicons name="add" size={scale(24)} color={themeColor} />
                 </LiquidGlassView>
             </TouchableScale>
 
@@ -120,6 +107,8 @@ const AddCourseFab = ({
                     trigger();
                     onSearchPress?.();
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={t('搵課')}
                 hitSlop={scale(8)}>
                 <LiquidGlassView
                     interactive
@@ -128,42 +117,12 @@ const AddCourseFab = ({
                     }
                     style={styles.pill}>
                     <Ionicons
-                        name="search-outline"
-                        size={scale(16)}
+                        name="library-outline"
+                        size={scale(21)}
                         color={themeColor}
                     />
-                    <Text style={styles.label(themeColor)}>
-                        {t('搵課')}
-                    </Text>
                 </LiquidGlassView>
             </TouchableScale>
-
-            {canClear ? (
-                <TouchableScale
-                    onPress={() => {
-                        trigger();
-                        onClearPress?.();
-                    }}
-                    hitSlop={scale(8)}>
-                    <LiquidGlassView
-                        interactive
-                        hover={
-                            isLiquidGlassSupported
-                                ? { effect: 'highlight' }
-                                : null
-                        }
-                        style={styles.pill}>
-                        <Ionicons
-                            name="trash-outline"
-                            size={scale(16)}
-                            color={unread}
-                        />
-                        <Text style={styles.label(unread)}>
-                            {t('清空', { ns: 'timetable' })}
-                        </Text>
-                    </LiquidGlassView>
-                </TouchableScale>
-            ) : null}
         </Animated.View>
     );
 };

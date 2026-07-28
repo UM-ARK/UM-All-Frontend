@@ -23,7 +23,6 @@ import { scale, verticalScale } from 'react-native-size-matters';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 // 課表一次掛多張卡片：不可用 @expo/ui MenuView（SwiftUI Host matchContents
 // 會在 Tab 切換／版面提交時反寫 Fabric ShadowTree 並 abort）。
 // 改用 @react-native-menu/menu（原生 UIButton）；縮放改由 onOpenMenu/onCloseMenu 驅動。
@@ -65,6 +64,8 @@ import { useCoursePlan } from '../../context/CoursePlanContext';
 import { getSlotKey } from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
+import CourseTimeRangePicker from '../../components/CourseTimeRangePicker';
+import { TIME_RANGE_PRESETS } from '../../constants';
 import SegmentControl from '../../../../../components/SegmentControl';
 import { COURSE_SEARCH_SEGMENT } from '../../../../../utils/courseNavigation';
 import { getReplacementCourses } from './utils/replacementCourses';
@@ -210,7 +211,6 @@ function CourseSim({ route, navigation }) {
         dropAllSections,
         conflictSlotKeys,
         importFromISW,
-        clearPlan,
     } = useCoursePlan();
 
     // state
@@ -221,7 +221,6 @@ function CourseSim({ route, navigation }) {
     const [dayFilterChoice, setDayFilterChoice] = useState(null);
     const [timeFilterFrom, setTimeFilterFrom] = useState(timeFrom);
     const [timeFilterTo, setTimeFilterTo] = useState(timeTo);
-    const [timePickerMode, setTimePickerMode] = useState('from');
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [timetableView, setTimetableView] = useState('detail');
 
@@ -1021,28 +1020,6 @@ function CourseSim({ route, navigation }) {
         });
     };
 
-    const handleClearPlan = useCallback(() => {
-        Alert.alert(
-            '',
-            t('確定清空當前模擬課表？', { ns: 'timetable' }),
-            [
-                {
-                    text: t('取消', { ns: 'timetable' }),
-                    style: 'cancel',
-                },
-                {
-                    text: t('確定清空', { ns: 'timetable' }),
-                    onPress: () => {
-                        trigger();
-                        clearPlan();
-                    },
-                    style: 'destructive',
-                },
-            ],
-            { cancelable: true },
-        );
-    }, [clearPlan]);
-
     const closeCourseSearch = () => {
         trigger();
         if (Keyboard.isVisible()) {
@@ -1443,7 +1420,6 @@ E11-0000
                     }}
                     onPress={() => {
                         trigger();
-                        setTimePickerMode(mode);
                         setShowTimePicker(true);
                     }}>
                     <Text style={{ ...uiStyle.defaultText, color: textColor }}>
@@ -1454,82 +1430,93 @@ E11-0000
         };
 
         return (
-            <View
-                style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                }}>
-                {/* 還原時間篩選 */}
-                {(timeFilterFrom !== timeFrom || timeFilterTo !== timeTo) && (
-                    <TouchableOpacity
-                        style={{
-                            ...s.filterButtonContainer,
-                            backgroundColor: themeColorUltraLight,
-                        }}
-                        onPress={() => {
-                            trigger();
-                            setTimeFilterFrom(timeFrom);
-                            setTimeFilterTo(timeTo);
-                        }}>
-                        <Text
+            <View style={{ alignItems: 'center' }}>
+                {/* 預設上午／下午／晚上 */}
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: verticalScale(4),
+                    }}>
+                    {TIME_RANGE_PRESETS.map(preset => {
+                        const isSelected =
+                            timeFilterFrom === preset.from &&
+                            timeFilterTo === preset.to;
+                        return (
+                            <TouchableOpacity
+                                key={preset.id}
+                                style={{
+                                    ...s.filterButtonContainer,
+                                    backgroundColor: isSelected
+                                        ? themeColor
+                                        : null,
+                                    borderWidth: scale(1),
+                                    borderColor: themeColor,
+                                    borderRadius: scale(5),
+                                    marginHorizontal: scale(3),
+                                }}
+                                onPress={() => {
+                                    trigger();
+                                    setTimeFilterFrom(preset.from);
+                                    setTimeFilterTo(preset.to);
+                                }}>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        color: isSelected ? white : themeColor,
+                                    }}>
+                                    {t(preset.labelKey, { ns: 'timetable' })}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+
+                <View
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'row',
+                    }}>
+                    {/* 還原時間篩選 */}
+                    {(timeFilterFrom !== timeFrom || timeFilterTo !== timeTo) && (
+                        <TouchableOpacity
                             style={{
-                                ...uiStyle.defaultText,
-                                color: themeColor,
+                                ...s.filterButtonContainer,
+                                backgroundColor: themeColorUltraLight,
+                            }}
+                            onPress={() => {
+                                trigger();
+                                setTimeFilterFrom(timeFrom);
+                                setTimeFilterTo(timeTo);
                             }}>
-                            Clear
-                        </Text>
-                    </TouchableOpacity>
-                )}
+                            <Text
+                                style={{
+                                    ...uiStyle.defaultText,
+                                    color: themeColor,
+                                }}>
+                                {t('清除', { ns: 'timetable' })}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
 
-                {/* 時間選項 */}
-                {timeButton('from')}
-                <Text style={{ ...uiStyle.defaultText, color: black.third }}>
-                    {' - '}
-                </Text>
-                {timeButton('to')}
+                    {/* 時間選項 */}
+                    {timeButton('from')}
+                    <Text style={{ ...uiStyle.defaultText, color: black.third }}>
+                        {' - '}
+                    </Text>
+                    {timeButton('to')}
+                </View>
 
-                {/* 時間選擇器 */}
-                <DateTimePickerModal
-                    isVisible={showTimePicker}
-                    mode="time"
-                    date={
-                        timePickerMode === 'from'
-                            ? moment(timeFilterFrom, 'HH:mm').toDate()
-                            : moment(timeFilterTo, 'HH:mm').toDate()
-                    }
-                    minuteInterval={5}
-                    onConfirm={date => {
-                        const formattedTime = moment(date).format('HH:mm');
-                        if (timePickerMode === 'from') {
-                            if (
-                                moment(date).isSameOrAfter(
-                                    moment(timeFilterTo, 'HH:mm'),
-                                )
-                            ) {
-                                Alert.alert(
-                                    t('開始時間不能晚於結束時間！', {
-                                        ns: 'timetable',
-                                    }),
-                                );
-                                return;
-                            }
-                            setTimeFilterFrom(formattedTime);
-                        } else {
-                            if (
-                                moment(date).isSameOrBefore(
-                                    moment(timeFilterFrom, 'HH:mm'),
-                                )
-                            ) {
-                                Alert.alert(
-                                    t('結束時間不能早於開始時間！', {
-                                        ns: 'timetable',
-                                    }),
-                                );
-                                return;
-                            }
-                            setTimeFilterTo(formattedTime);
-                        }
+                <CourseTimeRangePicker
+                    visible={showTimePicker}
+                    from={timeFilterFrom}
+                    to={timeFilterTo}
+                    onConfirm={({ from, to }) => {
+                        setTimeFilterFrom(from);
+                        setTimeFilterTo(to);
                         setShowTimePicker(false);
                     }}
                     onCancel={() => setShowTimePicker(false)}
@@ -2765,8 +2752,6 @@ E11-0000
                 onSearchPress={() =>
                     navigation.navigate(COURSE_SEARCH_SEGMENT)
                 }
-                onClearPress={handleClearPlan}
-                canClear={planList.length > 0}
             />
 
             <CustomBottomSheet

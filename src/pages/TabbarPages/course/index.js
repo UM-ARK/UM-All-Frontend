@@ -132,9 +132,12 @@ const CourseTabContent = () => {
         courseVersion,
         initCourseData,
         refreshCourseData,
+        planList,
+        clearPlan,
     } = useCoursePlan();
 
     const [isUpdating, setIsUpdating] = useState(false);
+    const canClear = planList.length > 0;
     // null：尚未讀完上次段落；讀完後才掛 Navigator，避免 initialRouteName 失效閃一下
     const [initialSegment, setInitialSegment] = useState(null);
 
@@ -187,6 +190,28 @@ const CourseTabContent = () => {
         openLink(UM_PRE_ENROLMENT_EXCEL);
     }, []);
 
+    const handleClearPlan = useCallback(() => {
+        Alert.alert(
+            '',
+            t('確定清空當前模擬課表？', { ns: 'timetable' }),
+            [
+                {
+                    text: t('取消', { ns: 'timetable' }),
+                    style: 'cancel',
+                },
+                {
+                    text: t('確定清空', { ns: 'timetable' }),
+                    onPress: () => {
+                        trigger();
+                        clearPlan();
+                    },
+                    style: 'destructive',
+                },
+            ],
+            { cancelable: true },
+        );
+    }, [clearPlan, t]);
+
     // 切換段落時寫入本地，供下次進選課 Tab 使用
     const handleTopTabStateChange = useCallback(e => {
         const state = e.data.state;
@@ -203,9 +228,17 @@ const CourseTabContent = () => {
                 courseVersion={courseVersion}
                 onManualUpdate={handleManualUpdate}
                 onOpenSharePoint={handleOpenSharePoint}
+                canClear={canClear}
+                onClearPress={handleClearPlan}
             />
         ),
-        [courseVersion, handleManualUpdate, handleOpenSharePoint],
+        [
+            courseVersion,
+            handleClearPlan,
+            handleManualUpdate,
+            handleOpenSharePoint,
+            canClear,
+        ],
     );
 
     return (

@@ -14,19 +14,23 @@ import TouchableScale from '../../../../components/TouchableScale';
  *
  * 兩個段落共用同一個入口，且刻意不隨段落變化：合併前「搵課」右上是「更新」、
  * 「課表模擬」左上是垃圾桶右上是「＋」，切頁時按鈕會在兩種佈局間跳動。這裡把更新
- * 相關操作收進單一 ActionSheet；清空已遷到課表段落右下 FAB 上方。
+ * 相關操作收進單一 ActionSheet；有模擬課表時亦在此提供清空操作。
  *
  * @param {object} courseVersion 課程資料版本，形狀同 static/UMCourses/courseVersion.json
  * @param {Function} onManualUpdate 手動檢查課表數據更新
  * @param {Function} onOpenSharePoint 開啟官方 SharePoint 課表 Excel
+ * @param {boolean} canClear 是否已有模擬課表
+ * @param {Function} onClearPress 清空模擬課表
  */
 const CourseMoreMenu = ({
     courseVersion,
     onManualUpdate,
     onOpenSharePoint,
+    canClear,
+    onClearPress,
 }) => {
     const { theme } = useTheme();
-    const { themeColor, tonal, black, bg_color } = theme;
+    const { themeColor, tonal, black, bg_color, unread } = theme;
 
     const actionSheetRef = useRef(null);
     // sheet 關閉動畫結束前不可再開 WebBrowser / 另一個 sheet，否則 iOS modal 競態會卡死
@@ -146,6 +150,16 @@ const CourseMoreMenu = ({
                             {t('檢查官方SharePoint版本', { ns: 'catalog' })}
                         </Text>
                     </TouchableScale>
+
+                    {canClear ? (
+                        <TouchableScale
+                            style={styles.actionButton(tonal.unread15)}
+                            onPress={() => runAction(onClearPress)}>
+                            <Text style={styles.actionButtonText(unread)}>
+                                {t('清空模擬課表', { ns: 'timetable' })}
+                            </Text>
+                        </TouchableScale>
+                    ) : null}
 
                     <TouchableScale
                         style={styles.actionButton(tonal.primary08)}
