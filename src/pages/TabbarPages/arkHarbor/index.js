@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Alert,
+    Animated,
     AppState,
     Pressable,
     StyleSheet,
@@ -13,11 +14,10 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useIsFocused } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { scale, verticalScale } from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 
-import SegmentControl from '../../../components/SegmentControl';
 import { uiStyle, useTheme } from '../../../components/ThemeContext';
 import { useHarborSession } from '../../../contexts/HarborSessionContext';
 import { logToFirebase } from '../../../utils/firebaseAnalytics';
@@ -39,11 +39,99 @@ const VIEW_CONFIG = {
 // 對齊資訊頁 Top Tab（~30），並預留搜尋列高度
 const STICKY_TOOLBAR_HEIGHT = verticalScale(36);
 const DEFAULT_STICKY_HEADER_HEIGHT = verticalScale(74);
+const HARBOR_TAB_INDICATOR_WIDTH = moderateScale(25, 0.1);
 const Drawer = createDrawerNavigator();
+const AnimatedPagerView = Animated.createAnimatedComponent(PagerView);
+
+const HarborFeedTabs = ({ options, selectedIndex, position, onChange }) => {
+    const { theme } = useTheme();
+    const [indicatorOffsets, setIndicatorOffsets] = useState({});
+    const hasMeasuredAllOptions = options.every(
+        option => indicatorOffsets[option.key] !== undefined,
+    );
+    const indicatorInputRange =
+        options.length > 1 ? options.map((option, index) => index) : [0, 1];
+    const indicatorOutputRange =
+        options.length > 1
+            ? options.map(option => indicatorOffsets[option.key] ?? 0)
+            : [
+                indicatorOffsets[options[0]?.key] ?? 0,
+                indicatorOffsets[options[0]?.key] ?? 0,
+            ];
+    const translateX = position.interpolate({
+        inputRange: indicatorInputRange,
+        outputRange: indicatorOutputRange,
+        extrapolate: 'clamp',
+    });
+
+    const handleOptionLayout = useCallback((key, event) => {
+        const { x, width } = event.nativeEvent.layout;
+        const nextOffset = x + (width - HARBOR_TAB_INDICATOR_WIDTH) / 2;
+        setIndicatorOffsets(current =>
+            current[key] === nextOffset
+                ? current
+                : { ...current, [key]: nextOffset },
+        );
+    }, []);
+
+    return (
+        <View style={styles.feedTabs}>
+            {options.map((option, index) => {
+                const isSelected = selectedIndex === index;
+
+                return (
+                    <Pressable
+                        key={option.key}
+                        accessibilityRole="tab"
+                        accessibilityState={{ selected: isSelected }}
+                        onLayout={event => handleOptionLayout(option.key, event)}
+                        onPress={() => {
+                            trigger();
+                            onChange(index);
+                        }}
+                        style={({ pressed }) => [
+                            styles.feedTab,
+                            pressed && {
+                                backgroundColor: theme.tonal.primary15,
+                            },
+                        ]}>
+                        <Text
+                            numberOfLines={1}
+                            style={[
+                                styles.feedTabLabel,
+                                {
+                                    color: isSelected
+                                        ? theme.themeColor
+                                        : theme.black.third,
+                                },
+                                isSelected && styles.feedTabLabelSelected,
+                            ]}>
+                            {option.label}
+                        </Text>
+                    </Pressable>
+                );
+            })}
+            <Animated.View
+                pointerEvents="none"
+                style={[
+                    styles.feedTabIndicator,
+                    hasMeasuredAllOptions
+                        ? styles.feedTabIndicatorVisible
+                        : styles.feedTabIndicatorHidden,
+                    {
+                        backgroundColor: theme.themeColor,
+                        transform: [{ translateX }],
+                    },
+                ]}
+            />
+        </View>
+    );
+};
 
 const HarborStickyToolbar = ({
     segmentOptions,
     currentIndex,
+    tabPosition,
     onChange,
     status,
     sessionLabel,
@@ -85,14 +173,11 @@ const HarborStickyToolbar = ({
                     </Pressable>
                 </View>
 
-                <SegmentControl
+                <HarborFeedTabs
                     options={segmentOptions}
                     selectedIndex={currentIndex}
+                    position={tabPosition}
                     onChange={onChange}
-                    trackBackgroundColor="transparent"
-                    selectedBackgroundColor="transparent"
-                    compact
-                    style={styles.toolbarSegment}
                 />
 
                 <View style={[styles.toolbarSide, styles.toolbarRight]}>
@@ -226,6 +311,8 @@ const ForumPage = ({ navigation }) => {
     const { status, login } = useHarborSession();
     const isFocused = useIsFocused();
     const pagerRef = useRef(null);
+    const pageScrollOffset = useRef(new Animated.Value(0)).current;
+    const pageScrollPosition = useRef(new Animated.Value(0)).current;
     const currentViewRef = useRef('latest');
     const blockTopicPressUntilRef = useRef(0);
     const capabilitiesRef = useRef(null);
@@ -313,6 +400,25 @@ const ForumPage = ({ navigation }) => {
             })),
         [enabledViews, t],
     );
+    const tabPosition = useMemo(
+        () => Animated.add(pageScrollPosition, pageScrollOffset),
+        [pageScrollOffset, pageScrollPosition],
+    );
+    const handlePageScroll = useMemo(
+        () =>
+            Animated.event(
+                [
+                    {
+                        nativeEvent: {
+                            offset: pageScrollOffset,
+                            position: pageScrollPosition,
+                        },
+                    },
+                ],
+                { useNativeDriver: true },
+            ),
+        [pageScrollOffset, pageScrollPosition],
+    );
 
     const ensureMounted = useCallback(view => {
         setMountedViews(current =>
@@ -372,6 +478,8 @@ const ForumPage = ({ navigation }) => {
         if (nextIndex >= 0) {
             if (nextIndex !== currentIndex) {
                 setCurrentIndex(nextIndex);
+                pageScrollPosition.setValue(nextIndex);
+                pageScrollOffset.setValue(0);
                 pagerRef.current?.setPageWithoutAnimation(nextIndex);
             }
             return;
@@ -379,8 +487,15 @@ const ForumPage = ({ navigation }) => {
 
         currentViewRef.current = enabledViews[0] || 'latest';
         setCurrentIndex(0);
+        pageScrollPosition.setValue(0);
+        pageScrollOffset.setValue(0);
         pagerRef.current?.setPageWithoutAnimation(0);
-    }, [currentIndex, enabledViews]);
+    }, [
+        currentIndex,
+        enabledViews,
+        pageScrollOffset,
+        pageScrollPosition,
+    ]);
 
     const handleSessionPress = useCallback(async () => {
         if (status === 'restoring' || status === 'authorizing') {
@@ -437,10 +552,11 @@ const ForumPage = ({ navigation }) => {
         <SafeAreaView
             style={[styles.page, { backgroundColor: theme.bg_color }]}
             edges={{ top: true }}>
-            <PagerView
+            <AnimatedPagerView
                 ref={pagerRef}
                 style={styles.pager}
                 initialPage={0}
+                onPageScroll={handlePageScroll}
                 onPageSelected={handlePageSelected}
                 onPageScrollStateChanged={handlePageScrollStateChanged}>
                 {enabledViews.map(view => (
@@ -463,11 +579,12 @@ const ForumPage = ({ navigation }) => {
                         ) : null}
                     </View>
                 ))}
-            </PagerView>
+            </AnimatedPagerView>
             <View pointerEvents="box-none" style={styles.sharedHeader}>
                 <HarborStickyToolbar
                     segmentOptions={segmentOptions}
                     currentIndex={currentIndex}
+                    tabPosition={tabPosition}
                     onChange={selectView}
                     status={status}
                     sessionLabel={sessionLabel}
@@ -540,9 +657,41 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginLeft: scale(4),
     },
-    toolbarSegment: {
+    feedTabs: {
+        height: verticalScale(30),
+        flexDirection: 'row',
         flexShrink: 0,
         marginHorizontal: scale(2),
+        position: 'relative',
+    },
+    feedTab: {
+        minHeight: verticalScale(30),
+        borderRadius: scale(8),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: scale(8),
+    },
+    feedTabLabel: {
+        ...uiStyle.defaultText,
+        fontSize: scale(11),
+        fontWeight: '400',
+    },
+    feedTabLabelSelected: {
+        fontWeight: '600',
+    },
+    feedTabIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: HARBOR_TAB_INDICATOR_WIDTH,
+        height: verticalScale(2),
+        borderRadius: scale(1),
+    },
+    feedTabIndicatorVisible: {
+        opacity: 1,
+    },
+    feedTabIndicatorHidden: {
+        opacity: 0,
     },
     searchBarRow: {
         paddingHorizontal: scale(10),
