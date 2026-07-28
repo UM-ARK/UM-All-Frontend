@@ -251,6 +251,7 @@ function CourseSim({ route, navigation }) {
         unread,
         success,
         TIME_TABLE_COLOR,
+        isLight,
     } = theme;
 
     const insets = useSafeAreaInsets();
@@ -1539,6 +1540,7 @@ E11-0000
 
     /**
      * 一般加課與查看平替共用的 BottomSheet 搜索列。
+     * 視覺對齊 Harbor／ClubSearchBar：灰底膠囊 + 內建清除；關閉用「取消」文字避免與清除混淆。
      *
      * @param {Object} options 搜索列設定
      * @returns {React.ReactElement} 搜索列
@@ -1551,114 +1553,129 @@ E11-0000
         showBack = false,
         onBackPress,
         showClose = true,
-    }) => (
-        <View
-            style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-            }}>
+    }) => {
+        // 對齊 Harbor／ClubSearchBar／iOS UISearchBar 常見底色（ThemeContext 無對應語義 token）
+        const searchFieldBg = isLight ? '#E5E5EA' : '#3A3A3C';
+        const hasQuery = Boolean(value?.length);
+
+        return (
             <View
                 style={{
-                    flex: 1,
-                    borderColor: themeColor,
-                    backgroundColor: white,
-                    height: verticalScale(35),
-                    borderWidth: scale(1),
-                    borderRadius: scale(5),
                     flexDirection: 'row',
                     alignItems: 'center',
+                    width: '100%',
                 }}>
-                <Ionicons
-                    name="search"
-                    size={scale(20)}
-                    color={black.third}
-                    style={{
-                        opacity: 0.4,
-                        position: 'absolute',
-                        left: scale(10),
-                    }}
-                />
                 {showBack ? (
-                    <Pressable
+                    <TouchableScale
                         accessibilityRole="button"
                         accessibilityLabel={t('返回', {
                             ns: 'timetable',
                         })}
-                        style={({ pressed }) => ({
-                            borderWidth: scale(1),
-                            borderRadius: scale(5),
-                            borderColor: themeColor,
-                            backgroundColor: pressed
-                                ? tonal.primary30
-                                : white,
-                            padding: scale(3),
-                            position: 'absolute',
-                            left: scale(40),
-                            zIndex: 999,
-                        })}
+                        hitSlop={scale(8)}
+                        style={{
+                            marginRight: scale(4),
+                            padding: scale(4),
+                        }}
                         onPress={() => {
                             trigger();
                             onBackPress?.();
+                        }}>
+                        <Ionicons
+                            name="chevron-back"
+                            size={scale(20)}
+                            color={themeColor}
+                        />
+                    </TouchableScale>
+                ) : null}
+                <View
+                    style={{
+                        flex: 1,
+                        minWidth: 0,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: searchFieldBg,
+                        borderRadius: scale(9),
+                        minHeight: scale(32),
+                        paddingLeft: scale(6),
+                        paddingRight: scale(6),
+                    }}>
+                    <Ionicons
+                        name="search"
+                        size={scale(15)}
+                        color={black.third}
+                    />
+                    <BottomSheetTextInput
+                        ref={inputRef}
+                        style={{
+                            ...uiStyle.defaultText,
+                            color: black.main,
+                            fontSize: verticalScale(12),
+                            flex: 1,
+                            minWidth: 0,
+                            marginLeft: scale(4),
+                            paddingVertical: scale(6),
+                        }}
+                        onChangeText={onChangeText}
+                        value={value}
+                        selectTextOnFocus
+                        placeholder={placeholder}
+                        placeholderTextColor={black.third}
+                        returnKeyType="search"
+                        selectionColor={themeColor}
+                        blurOnSubmit
+                        onSubmitEditing={() => Keyboard.dismiss()}
+                        clearButtonMode="never"
+                        autoCapitalize="characters"
+                    />
+                    {hasQuery ? (
+                        <TouchableScale
+                            accessibilityRole="button"
+                            accessibilityLabel={t('清除搜尋內容', {
+                                ns: 'timetable',
+                            })}
+                            hitSlop={scale(8)}
+                            onPress={() => {
+                                trigger();
+                                onChangeText?.('');
+                            }}>
+                            <Ionicons
+                                name="close-circle"
+                                size={scale(17)}
+                                color={black.third}
+                            />
+                        </TouchableScale>
+                    ) : null}
+                </View>
+                {showClose ? (
+                    <TouchableScale
+                        accessibilityRole="button"
+                        accessibilityLabel={t('取消', {
+                            ns: 'timetable',
+                        })}
+                        hitSlop={scale(6)}
+                        style={{
+                            paddingVertical: scale(6),
+                            paddingLeft: scale(10),
+                            paddingRight: scale(2),
+                        }}
+                        onPress={() => {
+                            trigger();
+                            closeCourseSearch();
                         }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
                                 color: themeColor,
+                                fontSize: verticalScale(14),
+                                textAlign: 'center',
                             }}>
-                            {t('返回', { ns: 'timetable' })}
+                            {t('取消', { ns: 'timetable' })}
                         </Text>
-                    </Pressable>
+                    </TouchableScale>
                 ) : null}
-                <BottomSheetTextInput
-                    ref={inputRef}
-                    style={{
-                        ...uiStyle.defaultText,
-                        color: black.main,
-                        fontSize: scale(13),
-                        padding: scale(5),
-                        height: '100%',
-                        flex: 1,
-                        textAlign: 'center',
-                        textAlignVertical: 'center',
-                    }}
-                    onChangeText={onChangeText}
-                    value={value}
-                    selectTextOnFocus
-                    placeholder={placeholder}
-                    placeholderTextColor={black.third}
-                    returnKeyType="search"
-                    selectionColor={themeColor}
-                    blurOnSubmit
-                    onSubmitEditing={() => Keyboard.dismiss()}
-                    clearButtonMode="always"
-                    autoCapitalize="characters"
-                />
             </View>
-            {showClose ? (
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('取消', {
-                        ns: 'timetable',
-                    })}
-                    hitSlop={scale(8)}
-                    style={({ pressed }) => ({
-                        marginLeft: scale(8),
-                        backgroundColor: pressed
-                            ? tonal.primary30
-                            : tonal.primary15,
-                        borderRadius: scale(8),
-                        padding: scale(6),
-                    })}
-                    onPress={closeCourseSearch}>
-                    <Ionicons
-                        name="close"
-                        size={scale(18)}
-                        color={themeColor}
-                    />
-                </Pressable>
-            ) : null}
-        </View>
-    );
+        );
+    };
 
     /** 渲染由課程卡片開啟的平替課程列表。 */
     const renderReplacementSearch = () => {
@@ -2028,7 +2045,7 @@ E11-0000
 
         return (
             <View style={{ width: '100%', padding: scale(10) }}>
-                {/* 搜索列：輸入框 + 右側關閉（FAB 被 sheet 蓋住時的關閉入口） */}
+                {/* 搜索列：膠囊輸入 +「取消」關閉 sheet */}
                 {renderBottomSheetSearchBar({
                     inputRef: textSearchRef,
                     value: searchText,

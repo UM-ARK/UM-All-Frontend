@@ -658,7 +658,8 @@
         "替換": "Replace",
         "已替換課程": "Replaced {{fromCode}} with {{toCode}}-{{section}}",
         "導入格式錯誤": "Invalid format.\nDid you select all and copy the Timetable correctly?",
-        "取消": "Cancel"
+        "取消": "Cancel",
+        "清除搜尋內容": "Clear search text"
     },
     "features": {
         "常用服務": "Frequent Services",
