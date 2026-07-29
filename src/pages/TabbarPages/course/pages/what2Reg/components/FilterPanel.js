@@ -242,6 +242,31 @@ const FilterPanel = ({
             justifyContent: 'center',
             marginVertical: verticalScale(5),
         }}>
+            {timeFilter.day ? (
+                <TouchableScale
+                    style={{
+                        ...classItmStyle,
+                        paddingHorizontal: scale(4),
+                        paddingVertical: scale(3),
+                        backgroundColor: tonal.primary15,
+                        marginRight: scale(2),
+                    }}
+                    onPress={() => {
+                        trigger();
+                        LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+                        // 清空星期與時段，隱藏下方時段篩選列
+                        onUpdateTimeFilter(defaultTimeFilter);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('清除', { ns: 'timetable' })}
+                >
+                    <Ionicons
+                        name="close"
+                        size={scale(14)}
+                        color={themeColor}
+                    />
+                </TouchableScale>
+            ) : null}
             {dayList.map(day => {
                 const isSelected = day === timeFilter.day;
 
