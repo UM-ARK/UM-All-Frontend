@@ -34,6 +34,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 
 import { useTheme, uiStyle } from '../../../../components/ThemeContext';
+import SegmentControl from '../../../../components/SegmentControl';
 import { trigger } from '../../../../utils/trigger';
 import { useCoursePlan } from '../context/CoursePlanContext';
 import { getSlotKey } from '../hooks/useConflict';
@@ -50,6 +51,10 @@ import {
 } from '../pages/courseSim/utils/overviewConfig';
 import OverviewCourseCardContent from '../pages/courseSim/components/OverviewCourseCardContent';
 
+const DETAIL_DAY_COLUMN_WIDTH = scale(135);
+const DETAIL_COURSE_CARD_MARGIN = scale(5);
+const DETAIL_COURSE_CARD_WIDTH =
+    DETAIL_DAY_COLUMN_WIDTH - DETAIL_COURSE_CARD_MARGIN * 2;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const daySorter = {
     MON: 1,
@@ -103,6 +108,8 @@ function buildOverviewRows(planSlots) {
  * @param {Object} props.courseVersion 課程資料版本
  * @param {number} props.width 輸出寬度
  * @param {number} props.overviewMaxHeight 畫面概覽可用高度
+ * @param {'detail'|'overview'} props.mode 分享課表模式
+ * @param {Object} props.captureTargetRef 截圖內容 ref
  */
 const TimetableSharePreview = ({
     planSlots,
@@ -111,6 +118,8 @@ const TimetableSharePreview = ({
     courseVersion,
     width,
     overviewMaxHeight,
+    mode,
+    captureTargetRef,
 }) => {
     const { t } = useTranslation(['timetable', 'catalog']);
     const { theme } = useTheme();
@@ -149,6 +158,14 @@ const TimetableSharePreview = ({
         () => lodash.groupBy(planSlots, 'Day'),
         [planSlots],
     );
+    const detailDays = useMemo(
+        () => dayList.filter(day => (slotsByDay[day] || []).length > 0),
+        [slotsByDay],
+    );
+    const previewWidth =
+        mode === 'detail'
+            ? Math.max(width, detailDays.length * DETAIL_DAY_COLUMN_WIDTH)
+            : width;
     const framesByDay = useMemo(() => {
         const result = {};
         overviewDays.forEach(day => {
@@ -179,7 +196,7 @@ const TimetableSharePreview = ({
         () =>
             StyleSheet.create({
                 preview: {
-                    width,
+                    width: previewWidth,
                     backgroundColor: bg_color,
                 },
                 header: {
@@ -237,6 +254,78 @@ const TimetableSharePreview = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                 },
+                detailRow: {
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                },
+                detailDayColumn: {
+                    width: DETAIL_DAY_COLUMN_WIDTH,
+                },
+                detailDayTitle: {
+                    ...uiStyle.defaultText,
+                    color: black.third,
+                    fontSize: scale(25),
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                },
+                detailReminder: {
+                    ...uiStyle.defaultText,
+                    color: black.third,
+                    fontSize: scale(11),
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                },
+                detailCourseCard: {
+                    width: DETAIL_COURSE_CARD_WIDTH,
+                    margin: DETAIL_COURSE_CARD_MARGIN,
+                    borderRadius: scale(10),
+                    padding: scale(5),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                detailCourseCode: {
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    opacity: 0.7,
+                    fontSize: scale(20),
+                    lineHeight: scale(20),
+                    textAlign: 'center',
+                    fontWeight: '700',
+                },
+                detailCourseCodeSuffix: {
+                    fontWeight: 'bold',
+                },
+                detailSection: {
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    opacity: 0.8,
+                },
+                detailCourseTitle: {
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    textAlign: 'center',
+                    opacity: 0.4,
+                },
+                detailClassroom: {
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    fontWeight: 'bold',
+                    opacity: 0.5,
+                },
+                detailTimeRow: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignSelf: 'stretch',
+                },
+                detailTime: {
+                    ...uiStyle.defaultText,
+                    color: black.main,
+                    fontWeight: '600',
+                    opacity: 0.8,
+                },
+                detailEllipsis: {
+                    opacity: 0.4,
+                },
                 footer: {
                     paddingTop: verticalScale(8),
                     paddingBottom: verticalScale(12),
@@ -251,16 +340,17 @@ const TimetableSharePreview = ({
             }),
         [
             bg_color,
+            black.main,
             black.third,
             dayColumnWidth,
             overviewHeight,
+            previewWidth,
             themeColor,
             themeColorUltraLight,
-            width,
         ],
     );
 
-    const renderCourse = (course, frame) => {
+    const renderOverviewCourse = (course, frame) => {
         if (!frame || frame.height <= 0 || frame.width <= 0) {
             return null;
         }
@@ -299,17 +389,124 @@ const TimetableSharePreview = ({
         );
     };
 
-    return (
-        <View style={styles.preview} collapsable={false}>
-            <View style={styles.header}>
-                <Image
-                    source={require('../../../../static/img/logo.png')}
-                    style={styles.logo}
-                />
-                <Text style={styles.headerTitle}>
-                    {t('模擬課表', { ns: 'catalog' })}
-                </Text>
+    const renderDetailCourse = (course, dayCourses, index) => {
+        const hasConflict = conflictSlotKeys.has(getSlotKey(course));
+        const currentHour = Math.floor(
+            toMinutes(course['Time From']) / 60,
+        );
+        const previousHour =
+            index > 0
+                ? Math.floor(
+                      toMinutes(dayCourses[index - 1]['Time From']) / 60,
+                  )
+                : null;
+        const periodLabel =
+            currentHour > 12 &&
+            (index === 0 ||
+                (previousHour <= 12 ||
+                    (previousHour < 18 && currentHour >= 18)))
+                ? currentHour >= 18
+                    ? `🌜${t('晚上')}🌛`
+                    : `☕️${t('下午')}☕️`
+                : null;
+        let gapLabel = null;
+
+        if (hasConflict) {
+            gapLabel = `🆘${t('課程衝突')}🆘`;
+        } else if (index > 0) {
+            const minuteGap =
+                toMinutes(course['Time From']) -
+                toMinutes(dayCourses[index - 1]['Time To']);
+            const hourGap = (minuteGap / 60).toFixed(2);
+            gapLabel = `${t('休息')}${minuteGap >= 60 ? hourGap : minuteGap}${
+                minuteGap >= 60 ? t('小時後') : t('分鐘後')
+            }`;
+        }
+
+        const backgroundColor = hasConflict
+            ? unread
+            : TIME_TABLE_COLOR[
+                  lodash.indexOf(
+                      planCourseCodes,
+                      course['Course Code'],
+                  ) % TIME_TABLE_COLOR.length
+              ];
+
+        return (
+            <View key={getSlotKey(course)}>
+                {periodLabel ? (
+                    <Text style={styles.detailReminder}>{periodLabel}</Text>
+                ) : null}
+                {gapLabel ? (
+                    <Text
+                        style={[
+                            styles.detailReminder,
+                            hasConflict ? { color: unread } : null,
+                        ]}>
+                        {gapLabel}
+                    </Text>
+                ) : null}
+                <View
+                    style={[
+                        styles.detailCourseCard,
+                        { backgroundColor },
+                    ]}>
+                    <Text style={styles.detailCourseCode}>
+                        {course['Course Code'].substring(0, 4) + '\n'}
+                        <Text style={styles.detailCourseCodeSuffix}>
+                            {course['Course Code'].substring(4, 8)}
+                        </Text>
+                    </Text>
+                    <Text style={styles.detailSection}>{course.Section}</Text>
+                    <Text
+                        style={styles.detailCourseTitle}
+                        numberOfLines={4}>
+                        {course['Course Title']}
+                    </Text>
+                    <Text style={styles.detailClassroom}>
+                        {course.Classroom}
+                    </Text>
+                    <View style={styles.detailTimeRow}>
+                        <Text style={styles.detailTime}>
+                            {course['Time From']}
+                        </Text>
+                        <Ionicons
+                            name="ellipsis-horizontal"
+                            size={scale(20)}
+                            color={black.main}
+                            style={styles.detailEllipsis}
+                        />
+                        <Text style={styles.detailTime}>
+                            {course['Time To']}
+                        </Text>
+                    </View>
+                </View>
             </View>
+        );
+    };
+
+    const renderDetail = () => (
+        <View style={styles.detailRow}>
+            {detailDays.map(day => {
+                const dayCourses = lodash.sortBy(
+                    slotsByDay[day] || [],
+                    course => toMinutes(course['Time From']),
+                );
+
+                return (
+                    <View key={day} style={styles.detailDayColumn}>
+                        <Text style={styles.detailDayTitle}>{day}</Text>
+                        {dayCourses.map((course, index) =>
+                            renderDetailCourse(course, dayCourses, index),
+                        )}
+                    </View>
+                );
+            })}
+        </View>
+    );
+
+    const renderOverview = () => (
+        <>
             <View style={styles.dayRow}>
                 {overviewDays.map(day => (
                     <Text key={day} style={styles.dayText}>
@@ -339,7 +536,7 @@ const TimetableSharePreview = ({
                             />
                         ))}
                         {(slotsByDay[day] || []).map(course =>
-                            renderCourse(
+                            renderOverviewCourse(
                                 course,
                                 framesByDay[day]?.get(getSlotKey(course)),
                             ),
@@ -347,6 +544,24 @@ const TimetableSharePreview = ({
                     </View>
                 ))}
             </View>
+        </>
+    );
+
+    return (
+        <View
+            ref={captureTargetRef}
+            style={styles.preview}
+            collapsable={false}>
+            <View style={styles.header}>
+                <Image
+                    source={require('../../../../static/img/logo.png')}
+                    style={styles.logo}
+                />
+                <Text style={styles.headerTitle}>
+                    {t('模擬課表', { ns: 'catalog' })}
+                </Text>
+            </View>
+            {mode === 'detail' ? renderDetail() : renderOverview()}
             <View style={styles.footer}>
                 {courseVersion?.adddrop?.updateTime ? (
                     <Text style={styles.footerText}>
@@ -363,7 +578,7 @@ const TimetableSharePreview = ({
 /**
  * 課表分享預覽與 PNG 輸出。
  *
- * 由外層透過 ref.show() 開啟；截圖範圍只包含上方純課表 ScrollView，
+ * 由外層透過 ref.show() 開啟；截圖範圍只包含上方純課表內容，
  * 分享／儲存按鈕位於截圖範圍之外。
  */
 const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
@@ -383,9 +598,17 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
     } = theme;
 
     const actionSheetRef = useRef(null);
-    const previewScrollRef = useRef(null);
+    const previewCaptureRef = useRef(null);
     const pendingActionRef = useRef(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [shareMode, setShareMode] = useState('overview');
+    const shareModeOptions = useMemo(
+        () => [
+            { key: 'detail', label: t('具體', { ns: 'timetable' }) },
+            { key: 'overview', label: t('概覽', { ns: 'timetable' }) },
+        ],
+        [t],
+    );
     const overviewMaxHeight = Math.max(
         OVERVIEW_HOUR_HEIGHT,
         windowHeight -
@@ -410,6 +633,10 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
                     textAlign: 'center',
                     marginBottom: verticalScale(10),
                     marginHorizontal: scale(12),
+                },
+                modeSwitcher: {
+                    alignSelf: 'center',
+                    marginBottom: verticalScale(10),
                 },
                 previewScroll: {
                     maxHeight: windowHeight * 0.58,
@@ -474,11 +701,10 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
 
     const captureTimetable = useCallback(
         () =>
-            captureRef(previewScrollRef, {
+            captureRef(previewCaptureRef, {
                 format: 'png',
                 quality: 1,
                 result: 'tmpfile',
-                snapshotContentContainer: true,
             }),
         [],
     );
@@ -581,19 +807,36 @@ const TimetableShareSheet = forwardRef(({ courseVersion }, ref) => {
             <Text style={styles.heading}>
                 {t('課表分享預覽', { ns: 'timetable' })}
             </Text>
+            <SegmentControl
+                options={shareModeOptions}
+                selectedIndex={shareMode === 'overview' ? 1 : 0}
+                onChange={index =>
+                    setShareMode(index === 0 ? 'detail' : 'overview')
+                }
+                trackBackgroundColor={tonal.primary08}
+                style={styles.modeSwitcher}
+            />
             <ScrollView
-                ref={previewScrollRef}
                 style={styles.previewScroll}
                 showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
                 collapsable={false}>
-                <TimetableSharePreview
-                    planSlots={planSlots}
-                    planCourseCodes={planCourseCodes}
-                    conflictSlotKeys={conflictSlotKeys}
-                    courseVersion={courseVersion}
-                    width={windowWidth}
-                    overviewMaxHeight={overviewMaxHeight}
-                />
+                <ScrollView
+                    key={shareMode}
+                    horizontal
+                    nestedScrollEnabled
+                    showsHorizontalScrollIndicator={false}>
+                    <TimetableSharePreview
+                        planSlots={planSlots}
+                        planCourseCodes={planCourseCodes}
+                        conflictSlotKeys={conflictSlotKeys}
+                        courseVersion={courseVersion}
+                        width={windowWidth}
+                        overviewMaxHeight={overviewMaxHeight}
+                        mode={shareMode}
+                        captureTargetRef={previewCaptureRef}
+                    />
+                </ScrollView>
             </ScrollView>
             <View style={styles.actions}>
                 <Pressable
