@@ -58,6 +58,10 @@ import {
 import { getCurrentUmehHost } from '../../../../../utils/umehHost';
 import { logToFirebase } from '../../../../../utils/firebaseAnalytics';
 import { trigger } from '../../../../../utils/trigger';
+import {
+    getLocalStorage,
+    setLocalStorage,
+} from '../../../../../utils/storageKits';
 import TouchableScale from '../../../../../components/TouchableScale';
 import CustomBottomSheet from '../../../../../utils/BottomSheet';
 import { useCoursePlan } from '../../context/CoursePlanContext';
@@ -92,6 +96,7 @@ const COURSE_CARD_WIDTH = DAY_COLUMN_WIDTH - COURSE_CARD_MARGIN * 2;
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const timeFrom = '00:00';
 const timeTo = '23:59';
+const TIMETABLE_VIEW_STORAGE_KEY = 'ARK_Course_TimetableView';
 
 // 將 HH:mm 時間轉為Date對象，用於排序
 function toDateTime(time) {
@@ -118,6 +123,9 @@ const daySorter = {
 const daySort = objArr => {
     return lodash.sortBy(objArr, item => daySorter[item.Day]);
 };
+
+const isTimetableView = value =>
+    value === 'detail' || value === 'overview';
 
 /** 與 TouchableScale 預設相近的彈簧參數 */
 const COURSE_CARD_SPRING = {
@@ -230,6 +238,20 @@ function CourseSim({ route, navigation }) {
     const [replacementTarget, setReplacementTarget] = useState(null);
     const [replacementCourseCode, setReplacementCourseCode] = useState(null);
     const [replacementSearchText, setReplacementSearchText] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+
+        getLocalStorage(TIMETABLE_VIEW_STORAGE_KEY).then(storedView => {
+            if (!cancelled && isTimetableView(storedView)) {
+                setTimetableView(storedView);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     // ref
     const verScroll = useRef();
@@ -2537,6 +2559,12 @@ E11-0000
         );
     }
 
+    const handleTimetableViewChange = useCallback(index => {
+        const nextView = index === 0 ? 'detail' : 'overview';
+        setTimetableView(nextView);
+        setLocalStorage(TIMETABLE_VIEW_STORAGE_KEY, nextView);
+    }, []);
+
     /** 底部具體／概覽切換；絕對定位並扣掉 Tab Bar，避免被遮擋。 */
     const renderViewSwitcher = () => {
         const viewOptions = [
@@ -2555,9 +2583,7 @@ E11-0000
                 <SegmentControl
                     options={viewOptions}
                     selectedIndex={timetableView === 'overview' ? 1 : 0}
-                    onChange={index => {
-                        setTimetableView(index === 0 ? 'detail' : 'overview');
-                    }}
+                    onChange={handleTimetableViewChange}
                     trackBackgroundColor={white}
                     style={{
                         shadowColor: black.main,
