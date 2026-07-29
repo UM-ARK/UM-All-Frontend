@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -25,6 +25,8 @@ const FAB_GAP = verticalScale(4);
 const FAB_SIDE_MARGIN = scale(16);
 const FAB_TOP_MARGIN = verticalScale(16);
 const FAB_STACK_HEIGHT = FAB_SIZE * 2 + FAB_GAP;
+// iOS 26 UIVisualEffectView：父層 opacity 到 0 後液態玻璃會永久失效，隱藏時需留極低透明度
+const FAB_HIDDEN_OPACITY = isLiquidGlassSupported ? 0.02 : 0;
 const FAB_SPRING = {
     stiffness: 200,
     damping: 25,
@@ -53,7 +55,10 @@ const AddCourseFab = ({
 }) => {
     const { theme } = useTheme();
     const { themeColor, black, white } = theme;
-    const opacity = useSharedValue(visible ? 1 : 0);
+    // 從隱藏恢復顯示時 remount 玻璃，避免曾被 opacity:0 弄壞後無法自癒
+    const [glassKey, setGlassKey] = useState(0);
+    const wasVisibleRef = useRef(visible);
+    const opacity = useSharedValue(visible ? 1 : FAB_HIDDEN_OPACITY);
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
     const startX = useSharedValue(0);
@@ -62,7 +67,17 @@ const AddCourseFab = ({
     const containerHeight = useSharedValue(0);
 
     useEffect(() => {
-        opacity.value = withTiming(visible ? 1 : 0, { duration: FAB_FADE_MS });
+        if (
+            visible &&
+            isLiquidGlassSupported &&
+            !wasVisibleRef.current
+        ) {
+            setGlassKey(key => key + 1);
+        }
+        wasVisibleRef.current = visible;
+        opacity.value = withTiming(visible ? 1 : FAB_HIDDEN_OPACITY, {
+            duration: FAB_FADE_MS,
+        });
     }, [opacity, visible]);
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -229,6 +244,7 @@ const AddCourseFab = ({
                         accessibilityLabel={t('加課', { ns: 'timetable' })}
                         hitSlop={scale(8)}>
                         <LiquidGlassView
+                            key={`add-${glassKey}`}
                             interactive
                             hover={
                                 isLiquidGlassSupported
@@ -253,6 +269,7 @@ const AddCourseFab = ({
                         accessibilityLabel={t('搵課')}
                         hitSlop={scale(8)}>
                         <LiquidGlassView
+                            key={`search-${glassKey}`}
                             interactive
                             hover={
                                 isLiquidGlassSupported
