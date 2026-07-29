@@ -2117,6 +2117,22 @@ E11-0000
             ? handleSearchFilterCourse(searchText)
             : [];
         const haveSearchResult = searchText && filterCourseList.length > 0;
+        const matchesActiveScheduleFilter = course => {
+            if (!dayFilterChoice) {
+                return true;
+            }
+
+            const courseStart = moment(course['Time From'], 'HH:mm');
+            const courseEnd = moment(course['Time To'], 'HH:mm');
+            const filterStart = moment(timeFilterFrom, 'HH:mm');
+            const filterEnd = moment(timeFilterTo, 'HH:mm');
+
+            return (
+                course.Day === dayFilterChoice &&
+                courseStart.isBefore(filterEnd) &&
+                courseEnd.isAfter(filterStart)
+            );
+        };
 
         // 整理所有候選課程的 Section
         const courseCodeObj = {};
@@ -2179,45 +2195,10 @@ E11-0000
                                 if (dayFilterChoice) {
                                     dayInFilter = lodash.some(
                                         Object.keys(sectionObj),
-                                        key => {
-                                            const timeInFilter = lodash.some(
-                                                sectionObj[key],
-                                                course => {
-                                                    const courseStart = moment(
-                                                        course['Time From'],
-                                                        'HH:mm',
-                                                    );
-                                                    const courseEnd = moment(
-                                                        course['Time To'],
-                                                        'HH:mm',
-                                                    );
-                                                    const filterStart = moment(
-                                                        timeFilterFrom,
-                                                        'HH:mm',
-                                                    );
-                                                    const filterEnd = moment(
-                                                        timeFilterTo,
-                                                        'HH:mm',
-                                                    );
-                                                    return (
-                                                        courseStart.isBefore(
-                                                            filterEnd,
-                                                        ) &&
-                                                        courseEnd.isAfter(
-                                                            filterStart,
-                                                        )
-                                                    );
-                                                },
-                                            );
-                                            return (
-                                                timeInFilter &&
-                                                sectionObj[key].some(
-                                                    course =>
-                                                        course.Day ===
-                                                        dayFilterChoice,
-                                                )
-                                            );
-                                        },
+                                        key =>
+                                            sectionObj[key].some(
+                                                matchesActiveScheduleFilter,
+                                            ),
                                     );
                                 }
 
@@ -2363,57 +2344,10 @@ E11-0000
 
                                                 let dayInFilter = true;
                                                 if (dayFilterChoice) {
-                                                    if (
-                                                        timeFilterFrom !==
-                                                        timeFrom ||
-                                                        timeFilterTo !== timeTo
-                                                    ) {
-                                                        const filterStart =
-                                                            moment(
-                                                                timeFilterFrom,
-                                                                'HH:mm',
-                                                            );
-                                                        const filterEnd =
-                                                            moment(
-                                                                timeFilterTo,
-                                                                'HH:mm',
-                                                            );
-                                                        dayInFilter =
-                                                            sortedSection.some(
-                                                                course =>
-                                                                    course.Day ===
-                                                                    dayFilterChoice &&
-                                                                    (moment(
-                                                                        course[
-                                                                        'Time From'
-                                                                        ],
-                                                                        'HH:mm',
-                                                                    ).isBetween(
-                                                                        filterStart,
-                                                                        filterEnd,
-                                                                        null,
-                                                                        '[]',
-                                                                    ) ||
-                                                                        moment(
-                                                                            course[
-                                                                            'Time To'
-                                                                            ],
-                                                                            'HH:mm',
-                                                                        ).isBetween(
-                                                                            filterStart,
-                                                                            filterEnd,
-                                                                            null,
-                                                                            '[]',
-                                                                        )),
-                                                            );
-                                                    } else {
-                                                        dayInFilter =
-                                                            sortedSection.some(
-                                                                course =>
-                                                                    course.Day ===
-                                                                    dayFilterChoice,
-                                                            );
-                                                    }
+                                                    dayInFilter =
+                                                        sortedSection.some(
+                                                            matchesActiveScheduleFilter,
+                                                        );
                                                 }
 
                                                 if (!dayInFilter) {
