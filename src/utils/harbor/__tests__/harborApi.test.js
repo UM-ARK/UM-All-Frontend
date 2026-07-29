@@ -314,6 +314,79 @@ describe('Harbor API 資料正規化', () => {
         ]);
     });
 
+    it('贊過列表優先使用 discourse-reactions，並合併 heart 影子讚', async () => {
+        getSpy
+            .mockResolvedValueOnce({
+                data: [
+                    {
+                        id: 88,
+                        created_at: '2026-07-22T10:00:00Z',
+                        post: {
+                            topic_id: 42,
+                            topic_title: 'Reactions 話題',
+                            post_number: 2,
+                            excerpt: '<p>表情回應</p>',
+                        },
+                    },
+                ],
+            })
+            .mockResolvedValueOnce({
+                data: {
+                    user_actions: [
+                        {
+                            post_id: 15,
+                            action_type: 1,
+                            title: 'Heart 影子讚',
+                            excerpt: '<p>愛心</p>',
+                            created_at: '2026-07-22T11:00:00Z',
+                            topic_id: 43,
+                            post_number: 1,
+                        },
+                    ],
+                },
+            });
+
+        const result = await fetchHarborUserActions('ark-user', {
+            kind: 'likes',
+        });
+
+        expect(getSpy).toHaveBeenNthCalledWith(
+            1,
+            '/discourse-reactions/posts/reactions.json',
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    username: 'ark-user',
+                }),
+            }),
+        );
+        expect(getSpy).toHaveBeenNthCalledWith(
+            2,
+            '/user_actions.json',
+            expect.objectContaining({
+                params: expect.objectContaining({
+                    username: 'ark-user',
+                    filter: '1',
+                }),
+            }),
+        );
+        expect(result.items).toEqual([
+            expect.objectContaining({
+                id: '15',
+                kind: 'like',
+                title: 'Heart 影子讚',
+                topicId: 43,
+            }),
+            expect.objectContaining({
+                id: '88',
+                kind: 'like',
+                title: 'Reactions 話題',
+                excerpt: '表情回應',
+                topicId: 42,
+                postNumber: 2,
+            }),
+        ]);
+    });
+
     it('收藏列表支援分頁、名稱及提醒狀態', async () => {
         getSpy.mockResolvedValue({
             data: {

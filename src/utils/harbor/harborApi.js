@@ -15,6 +15,7 @@ import {
 const REQUEST_TIMEOUT = 15000;
 const TOPIC_POST_BATCH_SIZE = 20;
 const USER_ACTION_PAGE_SIZE = 30;
+const REACTION_GIVEN_PAGE_SIZE = 20;
 const DEFAULT_TOPIC_PAGE_SIZE = 30;
 const COMPOSER_METADATA_TTL = 5 * 60 * 1000;
 const COMPOSER_SETTINGS_TTL = 30 * 60 * 1000;
@@ -24,6 +25,7 @@ const PUBLIC_TOPIC_VIEWS = ['latest', 'top'];
 
 const USER_ACTION_FILTERS = {
     all: '1,2,3,4,5,6,7,9,11,12,13',
+    // likes 改走 discourse-reactions；此處保留給合併 heart 影子讚
     likes: '1',
     topics: '4',
     replies: '5',
@@ -1011,6 +1013,48 @@ function normalizeAction(action, index) {
     };
 }
 
+// discourse-reactions「我回應過」列表項目
+function normalizeReactionGiven(item, index) {
+    const post = item?.post || {};
+    const topic = post.topic || {};
+    const reactionId = item?.id;
+    return {
+        id: String(
+            reactionId ||
+            item?.post_id ||
+            post.id ||
+            `reaction-${index}`,
+        ),
+        kind: 'like',
+        title: post.topic_title || topic.title || '',
+        excerpt: stripHtml(post.excerpt || ''),
+        createdAt: item?.created_at || '',
+        topicId: Number(post.topic_id || topic.id) || null,
+        postNumber: Number(post.post_number) || null,
+    };
+}
+
+function mergeLikeActivityItems(primaryItems, secondaryItems) {
+    const seen = new Set();
+    const merged = [];
+    [...(primaryItems || []), ...(secondaryItems || [])].forEach(item => {
+        const dedupeKey =
+            item.topicId != null && item.postNumber != null
+                ? `${item.topicId}:${item.postNumber}`
+                : `id:${item.id}`;
+        if (seen.has(dedupeKey)) {
+            return;
+        }
+        seen.add(dedupeKey);
+        merged.push(item);
+    });
+    return merged.sort((left, right) => {
+        const leftTime = Date.parse(left.createdAt) || 0;
+        const rightTime = Date.parse(right.createdAt) || 0;
+        return rightTime - leftTime;
+    });
+}
+
 function normalizeBookmark(bookmark, index) {
     return {
         id: String(bookmark.id || `bookmark-${index}`),
@@ -1581,6 +1625,69 @@ export async function fetchHarborUserActions(
             items,
             hasMore,
             nextOffset: hasMore ? Math.max(0, Number(offset) || 0) + 1 : null,
+        };
+    }
+
+    // Harbor 啟用 discourse-reactions：表情回應在 reactions API；
+    // heart 主反應只寫 PostAction，仍可能出現在 user_actions filter=1。
+    if (kind === 'likes') {
+        const beforeReactionUserId = Math.max(0, Number(offset) || 0);
+        const reactionParams = { username };
+        if (beforeReactionUserId > 0) {
+            reactionParams.before_reaction_user_id = beforeReactionUserId;
+        }
+
+        const reactionResponse = await harborApi.get(
+            '/discourse-reactions/posts/reactions.json',
+            {
+                params: reactionParams,
+                signal,
+            },
+        );
+        const reactionRows = Array.isArray(reactionResponse.data)
+            ? reactionResponse.data
+            : reactionResponse.data?.user_reactions ||
+              reactionResponse.data?.reactions ||
+              [];
+        const reactionItems = reactionRows.map(normalizeReactionGiven);
+        const hasMoreReactions =
+            reactionItems.length >= REACTION_GIVEN_PAGE_SIZE;
+        const nextReactionOffset = hasMoreReactions
+            ? Number(reactionItems[reactionItems.length - 1]?.id) || null
+            : null;
+
+        // 首屏合併 heart 影子讚，避免只打舊 user_actions 時整頁空白
+        if (beforeReactionUserId === 0) {
+            let likeActionItems = [];
+            try {
+                const likeResponse = await harborApi.get(
+                    '/user_actions.json',
+                    {
+                        params: {
+                            offset: 0,
+                            username,
+                            filter: USER_ACTION_FILTERS.likes,
+                        },
+                        signal,
+                    },
+                );
+                likeActionItems = (likeResponse.data?.user_actions || []).map(
+                    normalizeAction,
+                );
+            } catch {
+                // reactions 已成功時，影子讚失敗不阻斷列表
+            }
+            return {
+                items: mergeLikeActivityItems(reactionItems, likeActionItems),
+                hasMore: hasMoreReactions,
+                nextOffset: nextReactionOffset,
+            };
+        }
+
+        return {
+            items: reactionItems,
+            hasMore: hasMoreReactions,
+            nextOffset: nextReactionOffset,
         };
     }
 
