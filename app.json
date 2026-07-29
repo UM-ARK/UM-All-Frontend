@@ -113,7 +113,8 @@
       "expo-status-bar",
       "expo-secure-store",
       "react-native-quick-crypto",
-      "expo-quick-actions"
+      "expo-quick-actions",
+      "expo-sharing"
     ],
     "extra": {
       "eas": {

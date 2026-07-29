@@ -249,6 +249,8 @@ PODS:
     - ExpoModulesCore
   - ExpoSecureStore (57.0.1):
     - ExpoModulesCore
+  - ExpoSharing (57.0.7):
+    - ExpoModulesCore
   - ExpoSplashScreen (57.0.5):
     - ExpoModulesCore
   - ExpoSystemUI (57.0.1):
@@ -2090,6 +2092,28 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - react-native-vector-icons-material-design-icons (13.1.2)
+  - react-native-view-shot (5.1.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-webview (13.16.1):
     - hermes-engine
     - RCTRequired
@@ -3030,6 +3054,7 @@ DEPENDENCIES:
   - ExpoModulesWorkletsAdapter (from `../node_modules/expo-modules-core`)
   - ExpoQuickActions (from `../node_modules/expo-quick-actions/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
@@ -3088,6 +3113,7 @@ DEPENDENCIES:
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
+  - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../node_modules/react-native/ReactCommon/react/networking`)
@@ -3214,6 +3240,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-quick-actions/ios"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  ExpoSharing:
+    :path: "../node_modules/expo-sharing/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   ExpoSystemUI:
@@ -3329,6 +3357,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/slider"
   react-native-vector-icons-material-design-icons:
     :path: "../node_modules/@react-native-vector-icons/material-design-icons"
+  react-native-view-shot:
+    :path: "../node_modules/react-native-view-shot"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -3462,6 +3492,7 @@ SPEC CHECKSUMS:
   ExpoModulesWorkletsAdapter: fbbef35a631ee8ae3f76e3e2133a3158f7c83e24
   ExpoQuickActions: edf2c5bc044f83dc9e9ed4dc4de7fe4a5b1b0422
   ExpoSecureStore: 94793113049a2d7478dfe1a13aa15081e9f61755
+  ExpoSharing: c13f24ffc10753e229c2e7bdcaf45cfb7287684c
   ExpoSplashScreen: 247464c0fe484f766892db0d66c3fe54f92a624e
   ExpoSystemUI: 6f2ce8968292aaa91f4aa553c23bdd8cee5cdc85
   ExpoUI: 19f2ca6e82d91240530ee9762dedccc31fc6f429
@@ -3529,6 +3560,7 @@ SPEC CHECKSUMS:
   react-native-simple-toast: e72b90b79229ed6a2744d1c9b4f23f7c51308e7f
   react-native-slider: b15258ac3d287a5951f76b11497d659ed20c0def
   react-native-vector-icons-material-design-icons: a4b6ec02814573c09203a725ee3767a7e8d5eb77
+  react-native-view-shot: 6da2aaa0404b8d617ab1689550acdb251d759af9
   react-native-webview: 2a4da2e03d3ec2c731c4d1a389cb86aaa4902167
   React-NativeModulesApple: a092d89b58f635ebfab88048b0eda9fb516819fd
   React-networking: ee8e1504d7c1c73a3655bf545ca1184bebae4c7f
