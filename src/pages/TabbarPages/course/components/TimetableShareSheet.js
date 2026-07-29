@@ -10,6 +10,7 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
+    Image,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -112,11 +113,12 @@ const TimetableSharePreview = ({
     width,
     overviewMaxHeight,
 }) => {
-    const { t } = useTranslation('timetable');
+    const { t } = useTranslation(['timetable', 'catalog']);
     const { theme } = useTheme();
     const {
         bg_color,
         black,
+        themeColor,
         themeColorUltraLight,
         unread,
         TIME_TABLE_COLOR,
@@ -181,6 +183,26 @@ const TimetableSharePreview = ({
                     width,
                     backgroundColor: bg_color,
                 },
+                header: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingTop: verticalScale(10),
+                    paddingBottom: verticalScale(8),
+                    paddingHorizontal: scale(12),
+                },
+                logo: {
+                    width: scale(22),
+                    height: scale(22),
+                    borderRadius: scale(5),
+                },
+                headerTitle: {
+                    ...uiStyle.defaultText,
+                    color: themeColor,
+                    fontSize: scale(15),
+                    fontWeight: 'bold',
+                    marginLeft: scale(6),
+                },
                 dayRow: {
                     flexDirection: 'row',
                 },
@@ -233,6 +255,7 @@ const TimetableSharePreview = ({
             black.third,
             dayColumnWidth,
             overviewHeight,
+            themeColor,
             themeColorUltraLight,
             width,
         ],
@@ -279,6 +302,15 @@ const TimetableSharePreview = ({
 
     return (
         <View style={styles.preview} collapsable={false}>
+            <View style={styles.header}>
+                <Image
+                    source={require('../../../../static/img/logo.png')}
+                    style={styles.logo}
+                />
+                <Text style={styles.headerTitle}>
+                    {t('模擬課表', { ns: 'catalog' })}
+                </Text>
+            </View>
             <View style={styles.dayRow}>
                 {overviewDays.map(day => (
                     <Text key={day} style={styles.dayText}>

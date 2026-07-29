@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actions-sheet';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -61,12 +61,31 @@ const CourseMoreMenu = ({
                 textAlign: 'center',
                 marginBottom: scale(15),
             },
+            dualRow: {
+                flexDirection: 'row',
+                gap: scale(10),
+                marginBottom: scale(10),
+            },
             actionButton: backgroundColor => ({
                 backgroundColor,
                 borderRadius: scale(8),
                 paddingVertical: verticalScale(10),
+                paddingHorizontal: scale(8),
                 alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+                gap: scale(6),
                 marginBottom: scale(10),
+            }),
+            dualButton: backgroundColor => ({
+                flex: 1,
+                backgroundColor,
+                borderRadius: scale(8),
+                paddingVertical: verticalScale(10),
+                paddingHorizontal: scale(6),
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: scale(4),
             }),
             actionButtonText: color => ({
                 ...uiStyle.defaultText,
@@ -74,9 +93,13 @@ const CourseMoreMenu = ({
                 fontWeight: 'bold',
                 fontSize: scale(15),
             }),
-            actionButtonPressed: {
-                opacity: 0.7,
-            },
+            dualButtonText: color => ({
+                ...uiStyle.defaultText,
+                color,
+                fontWeight: 'bold',
+                fontSize: scale(13),
+                textAlign: 'center',
+            }),
         }),
         [bg_color, black.third, tonal.primary15],
     );
@@ -140,9 +163,51 @@ const CourseMoreMenu = ({
                         <Text style={styles.versionText}>{versionSummary}</Text>
                     ) : null}
 
+                    {canClear ? (
+                        <View style={styles.dualRow}>
+                            <TouchableScale
+                                style={styles.dualButton(tonal.unread15)}
+                                onPress={() => runAction(onClearPress)}>
+                                <Ionicons
+                                    name="trash-outline"
+                                    size={scale(18)}
+                                    color={unread}
+                                />
+                                <Text
+                                    style={styles.dualButtonText(unread)}
+                                    numberOfLines={1}>
+                                    {t('清空模擬課表', { ns: 'timetable' })}
+                                </Text>
+                            </TouchableScale>
+                            <TouchableScale
+                                style={styles.dualButton(tonal.primary15)}
+                                onPress={() =>
+                                    runAction(() =>
+                                        shareSheetRef.current?.show(),
+                                    )
+                                }>
+                                <Ionicons
+                                    name="share-outline"
+                                    size={scale(18)}
+                                    color={themeColor}
+                                />
+                                <Text
+                                    style={styles.dualButtonText(themeColor)}
+                                    numberOfLines={1}>
+                                    {t('分享課表', { ns: 'timetable' })}
+                                </Text>
+                            </TouchableScale>
+                        </View>
+                    ) : null}
+
                     <TouchableScale
                         style={styles.actionButton(tonal.primary30)}
                         onPress={() => runAction(onManualUpdate)}>
+                        <Ionicons
+                            name="refresh-outline"
+                            size={scale(18)}
+                            color={themeColor}
+                        />
                         <Text style={styles.actionButtonText(themeColor)}>
                             {t('手動檢查課表數據更新', { ns: 'catalog' })}
                         </Text>
@@ -151,41 +216,15 @@ const CourseMoreMenu = ({
                     <TouchableScale
                         style={styles.actionButton(tonal.primary15)}
                         onPress={() => runAction(onOpenSharePoint)}>
+                        <Ionicons
+                            name="cloud-outline"
+                            size={scale(18)}
+                            color={themeColor}
+                        />
                         <Text style={styles.actionButtonText(themeColor)}>
                             {t('檢查官方SharePoint版本', { ns: 'catalog' })}
                         </Text>
                     </TouchableScale>
-
-                    {canClear ? (
-                        <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('分享課表', {
-                                ns: 'timetable',
-                            })}
-                            onPress={() =>
-                                runAction(() =>
-                                    shareSheetRef.current?.show(),
-                                )
-                            }
-                            style={({ pressed }) => [
-                                styles.actionButton(tonal.primary15),
-                                pressed && styles.actionButtonPressed,
-                            ]}>
-                            <Text style={styles.actionButtonText(themeColor)}>
-                                {t('分享課表', { ns: 'timetable' })}
-                            </Text>
-                        </Pressable>
-                    ) : null}
-
-                    {canClear ? (
-                        <TouchableScale
-                            style={styles.actionButton(tonal.unread15)}
-                            onPress={() => runAction(onClearPress)}>
-                            <Text style={styles.actionButtonText(unread)}>
-                                {t('清空模擬課表', { ns: 'timetable' })}
-                            </Text>
-                        </TouchableScale>
-                    ) : null}
 
                     <TouchableScale
                         style={styles.actionButton(tonal.primary08)}
