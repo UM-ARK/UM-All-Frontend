@@ -97,7 +97,7 @@ const HomeScreen = ({ navigation }) => {
     const { white, bg_color, black, themeColor, themeColorLight, themeColorUltraLight, viewShadow, TIME_TABLE_COLOR } = theme;
     const { t, i18n } = useTranslation(['common', 'home']);
     const isTc = i18n.language === 'tc';
-    const featureFontSize = isTc ? verticalScale(10) : verticalScale(8);
+    const featureFontSize = isTc ? verticalScale(8) : verticalScale(7);
 
     // 狀態
     const functionArray = useMemo(() => [
@@ -352,7 +352,7 @@ const HomeScreen = ({ navigation }) => {
                         fontSize: featureFontSize,
                         color: black.second,
                         textAlign: 'center',
-                        marginTop: verticalScale(4),
+                        marginTop: verticalScale(2),
                     }}>
                     {item.function_name}
                 </Text>
@@ -544,17 +544,22 @@ const HomeScreen = ({ navigation }) => {
                 <View
                     style={{
                         width: '100%',
-                        marginTop: verticalScale(5),
+                        marginTop: verticalScale(2),
                         paddingHorizontal: scale(10),
                     }}>
                     <FlatGrid
+                        style={{
+                            // FlatGrid spacing 會在上下多出一圈 padding，用負 margin 收緊
+                            marginTop: verticalScale(-4),
+                            marginBottom: verticalScale(-8),
+                        }}
                         itemContainerStyle={{
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
                         maxItemsPerRow={5}
                         itemDimension={scale(50)}
-                        spacing={scale(10)}
+                        spacing={scale(8)}
                         data={functionArray}
                         renderItem={({ item }) => renderQuickFeature(item)}
                         showsVerticalScrollIndicator={false}

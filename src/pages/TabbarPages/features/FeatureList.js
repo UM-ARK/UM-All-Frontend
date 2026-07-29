@@ -64,7 +64,7 @@ export const getFunctionArr = (t) => [
                 go_where: 'Bus', // a function
                 describe: t('查看校巴到站情況', { ns: 'features' }),
                 key_name: '校園巴士',
-                keywords: 'Bus, Shuttle, Transport, 巴士, 校巴, 接駁, 交通, 到站, 班次, 環校',
+                keywords: 'Bus, Shuttle, Transport, Loop, Campus, 巴士, 校巴, 接駁, 交通, 到站, 班次, 環校, 校園',
             },
             {
                 icon_type: iconTypes.materialCommunityIcons,
