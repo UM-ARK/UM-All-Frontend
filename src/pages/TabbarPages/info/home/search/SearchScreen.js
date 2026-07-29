@@ -366,6 +366,29 @@ const SearchScreen = ({ navigation }) => {
         </Text>
     );
 
+    // 描述未命中關鍵詞時，改展示命中的後備 keywords
+    const getResultSecondaryText = item => {
+        const describe = item.describe || '';
+        if (
+            !normalizedQuery ||
+            buildHighlightParts(describe, query).some(part => part.highlight)
+        ) {
+            return describe;
+        }
+
+        const matchedKeywords = String(item.keywords || '')
+            .split(',')
+            .map(keyword => keyword.trim())
+            .filter(Boolean)
+            .filter(keyword =>
+                normalizeSearchText(keyword).includes(normalizedQuery),
+            );
+
+        return matchedKeywords.length > 0
+            ? matchedKeywords.join(' · ')
+            : describe;
+    };
+
     const renderHistory = () => {
         if (history.length === 0) {
             return (
@@ -593,7 +616,7 @@ const SearchScreen = ({ navigation }) => {
                         ],
                     )}
                     {renderHighlightedText(
-                        item.describe,
+                        getResultSecondaryText(item),
                         [
                             uiStyle.defaultText,
                             styles.rowDescription,
