@@ -27,7 +27,9 @@ const TEACHER_LIST_SIDE_INSET = scale(10);
 /** MenuView / 卡片外圍 margin（左右各一份） */
 const TEACHER_CARD_MARGIN = scale(5);
 /** 橫滑時露出下一張卡的寬度，提示還有更多班別 */
-const TEACHER_NEXT_CARD_PEEK = scale(36);
+const TEACHER_NEXT_CARD_PEEK = scale(120);
+/** 避免窄螢幕把兩欄時段再次擠在一起 */
+const TEACHER_CARD_MIN_WIDTH = scale(220);
 
 /** 與 TouchableScale 預設相近的彈簧參數 */
 const COURSE_CARD_SPRING = {
@@ -45,17 +47,16 @@ const LocalCourseOfferingMenuCard = ({
 }) => {
     const { width: windowWidth } = useWindowDimensions();
     // Section 單卡置中：用螢幕寬扣除左右邊距
-    // Teacher 橫滑：約兩卡寬 + peek，讓下一張露出一截
+    // Teacher 橫滑：保留下一張卡的露出空間，同時確保時段不會互相擠壓
     const teacherCardWidth =
         (windowWidth -
             TEACHER_LIST_SIDE_INSET * 2 -
-            TEACHER_NEXT_CARD_PEEK) /
-            2 -
+            TEACHER_NEXT_CARD_PEEK) -
         TEACHER_CARD_MARGIN * 2;
     const cardWidth =
         variant === 'section'
             ? windowWidth - scale(40)
-            : Math.max(scale(130), teacherCardWidth);
+            : Math.max(TEACHER_CARD_MIN_WIDTH, teacherCardWidth);
     const { theme } = useTheme();
     const { baseHost } = useUmehHost();
     const { themeColor, black, white, tonal, warning } = theme;
@@ -235,9 +236,11 @@ const LocalCourseOfferingMenuCard = ({
                             ? tonal.primary08
                             : white,
                         borderRadius: scale(16),
-                        borderWidth: isHighlighted ? scale(1) : 0,
-                        borderColor: highlightColor,
-                        paddingVertical: scale(5),
+                        borderWidth: scale(1),
+                        borderColor: isHighlighted
+                            ? `${highlightColor}55`
+                            : tonal.primary15,
+                        paddingVertical: scale(6),
                         paddingHorizontal: scale(8),
                         alignItems: 'center',
                     },
@@ -249,7 +252,7 @@ const LocalCourseOfferingMenuCard = ({
                             width: '100%',
                             flexDirection: 'row',
                             alignItems: 'center',
-                            marginBottom: scale(4),
+                            marginBottom: scale(2),
                         }}>
                         <View
                             style={{
@@ -273,46 +276,81 @@ const LocalCourseOfferingMenuCard = ({
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                fontSize: scale(10),
+                                fontSize: scale(11),
                                 color: black.third,
                             }}>
                             {courseRow['Medium of Instruction']}
                         </Text>
                         {isHighlighted ? (
-                            <Text
+                            <View
                                 style={{
-                                    ...uiStyle.defaultText,
                                     marginLeft: scale(8),
-                                    fontSize: scale(10),
-                                    fontWeight: '700',
-                                    color: highlightColor,
+                                    borderRadius: scale(999),
+                                    backgroundColor: `${highlightColor}15`,
+                                    paddingHorizontal: scale(7),
+                                    paddingVertical: scale(2),
                                 }}>
-                                {highlightLabel}
-                            </Text>
+                                <Text
+                                    style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(10),
+                                        fontWeight: '700',
+                                        color: highlightColor,
+                                    }}
+                                    numberOfLines={1}>
+                                    {highlightLabel}
+                                </Text>
+                            </View>
                         ) : null}
                     </View>
                 )}
                 {variant !== 'section' && (
-                    <View style={{ flexDirection: 'row' }}>
+                    <View
+                        style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: scale(2),
+                        }}>
                         <Text
                             style={{
                                 ...uiStyle.defaultText,
-                                fontSize: scale(12),
+                                flex: 1,
+                                fontSize: scale(13),
+                                fontWeight: '700',
+                                color: black.second,
+                            }}>
+                            {courseRow.Section}
+                        </Text>
+                        <Text
+                            style={{
+                                ...uiStyle.defaultText,
+                                fontSize: scale(11),
                                 color: black.third,
                             }}>
-                            {courseRow.Section +
-                                ' - ' +
-                                courseRow['Medium of Instruction']}
-                            {isHighlighted ? (
+                            {courseRow['Medium of Instruction']}
+                        </Text>
+                        {isHighlighted ? (
+                            <View
+                                style={{
+                                    marginLeft: scale(8),
+                                    borderRadius: scale(999),
+                                    backgroundColor: `${highlightColor}15`,
+                                    paddingHorizontal: scale(7),
+                                    paddingVertical: scale(2),
+                                }}>
                                 <Text
                                     style={{
+                                        ...uiStyle.defaultText,
+                                        fontSize: scale(10),
                                         color: highlightColor,
                                         fontWeight: '700',
-                                    }}>
-                                    {` · ${highlightLabel}`}
+                                    }}
+                                    numberOfLines={1}>
+                                    {highlightLabel}
                                 </Text>
-                            ) : null}
-                        </Text>
+                            </View>
+                        ) : null}
                     </View>
                 )}
                 {isPE && (
@@ -398,7 +436,11 @@ const LocalCourseOfferingMenuCard = ({
                                         paddingVertical:
                                             variant === 'section'
                                                 ? scale(2)
-                                                : scale(5),
+                                                : scale(3),
+                                        paddingHorizontal:
+                                            variant === 'section'
+                                                ? 0
+                                                : scale(3),
                                         alignItems: 'center',
                                     }}>
                                     {variant === 'section' ? (

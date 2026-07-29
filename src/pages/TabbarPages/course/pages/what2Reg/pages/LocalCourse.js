@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, ScrollView, FlatList, Alert } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { t } from 'i18next';
 
 import { useTheme, uiStyle } from '../../../../../../components/ThemeContext';
 import SegmentControl from '../../../../../../components/SegmentControl';
@@ -302,8 +302,8 @@ const LocalCourse = (props) => {
                 flexDirection: 'row',
                 alignItems: 'center',
                 paddingHorizontal: 0,
-                paddingTop: isFirstSection ? scale(6) : scale(18),
-                paddingBottom: scale(8),
+                paddingTop: isFirstSection ? scale(4) : scale(10),
+                paddingBottom: scale(4),
                 backgroundColor: bg_color,
             }}>
             <View
@@ -320,7 +320,7 @@ const LocalCourse = (props) => {
                     ...uiStyle.defaultText,
                     flex: 1,
                     color: black.second,
-                    fontSize: verticalScale(16),
+                    fontSize: scale(15),
                     fontWeight: '700',
                     letterSpacing: -0.25,
                 }}
@@ -374,24 +374,6 @@ const LocalCourse = (props) => {
 
         return (
             <>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: scale(8),
-                    }}>
-                    <Ionicons name="swap-horizontal-outline" size={scale(16)} color={black.third} />
-                    <Text
-                        style={{
-                            ...uiStyle.defaultText,
-                            marginLeft: scale(6),
-                            fontSize: scale(11),
-                            color: black.third,
-                        }}>
-                        班別列可左右滑動瀏覽
-                    </Text>
-                </View>
                 {teacherArr.map((teacherName, index) => (
                     <View key={teacherName}>
                         {renderClubStyleSectionHeader(teacherName, index === 0)}
@@ -399,7 +381,7 @@ const LocalCourse = (props) => {
                             <FlatList
                                 data={uniqSecByTeachObj[teacherName]}
                                 horizontal={true}
-                                showsHorizontalScrollIndicator={true}
+                                showsHorizontalScrollIndicator={false}
                                 renderItem={({ item: itm }) => {
                                     const slots = daySort([...(schedulesObj[itm] ?? [])]);
                                     return (
@@ -425,8 +407,8 @@ const LocalCourse = (props) => {
     };
 
     const groupByOptions = useMemo(() => ([
-        { key: 'section', label: 'Section' },
-        { key: 'teacher', label: 'Teacher' },
+        { key: 'section', label: t('班別', { ns: 'catalog' }) },
+        { key: 'teacher', label: t('教師', { ns: 'catalog' }) },
     ]), []);
 
     return (
@@ -449,9 +431,9 @@ const LocalCourse = (props) => {
                     contentInsetAdjustmentBehavior="automatic">
                     {/* 課程基礎信息 */}
                     {courseInfo ? (
-                        <View style={{ alignItems: 'center' }}>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.main, textAlign: 'center' }}>{getCourseDisplayTitle(courseCode, courseInfo['Course Title'])}</Text>
-                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third, textAlign: 'center' }}>{getCourseDisplayTitle(courseCode, courseInfo['Course Title Chi'])}</Text>
+                        <View style={{ alignItems: 'center', paddingTop: scale(4) }}>
+                            <Text style={{ ...uiStyle.defaultText, fontSize: scale(15), fontWeight: '600', color: black.main, textAlign: 'center' }}>{getCourseDisplayTitle(courseCode, courseInfo['Course Title'])}</Text>
+                            <Text style={{ ...uiStyle.defaultText, marginTop: scale(2), fontSize: scale(12), color: black.third, textAlign: 'center' }}>{getCourseDisplayTitle(courseCode, courseInfo['Course Title Chi'])}</Text>
                             <Text style={{ ...uiStyle.defaultText, fontSize: scale(10), color: black.third }}>
                                 {courseInfo['Offering Unit']}
                                 {courseInfo['Offering Department'] ? <Text>{' - ' + courseInfo['Offering Department']}</Text> : null}
@@ -465,14 +447,14 @@ const LocalCourse = (props) => {
                         </View>
                     ) : null}
 
-                    {/* Group By Section / Teacher */}
-                    <View style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', marginVertical: scale(8) }}>
-                        <Text style={{ ...uiStyle.defaultText, fontSize: scale(13), color: black.third }}>Group By:</Text>
+                    {/* 按班別／教師切換 */}
+                    <View style={{ alignSelf: 'center', marginVertical: scale(10) }}>
                         <SegmentControl
-                            style={{ marginLeft: scale(10) }}
                             options={groupByOptions}
                             selectedIndex={groupChoice === 'section' ? 0 : 1}
                             onChange={(index) => setGroupChoice(index === 0 ? 'section' : 'teacher')}
+                            trackBackgroundColor={tonal.primary08}
+                            selectedBackgroundColor={white}
                         />
                     </View>
 
