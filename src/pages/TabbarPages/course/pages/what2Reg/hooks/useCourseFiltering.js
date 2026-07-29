@@ -1,89 +1,16 @@
 import { useMemo } from 'react';
 import lodash from 'lodash';
 import { defaultTimeFilter } from '../constants/options';
-import { getSectionConflicts } from '../../../hooks/useConflict';
+import {
+    getSectionFilterStatus,
+    isSlotWithinTimeFilter,
+    parseTimeToMinutes,
+} from '../../../hooks/useConflict';
 
-const TIME_STRING_PATTERN = /^(\d{1,2}):(\d{2})(?::\d{2})?$/;
-
-/**
- * 將 'HH:mm' 或 'HH:mm:ss' 轉為當日分鐘數；非法輸入回傳 null。
- * 時段比對每次會跑上萬筆課節，故用整數比較而非建立 moment 物件。
- */
-export const parseTimeToMinutes = time => {
-    const matched = TIME_STRING_PATTERN.exec(String(time ?? '').trim());
-    if (!matched) {
-        return null;
-    }
-
-    const hour = Number(matched[1]);
-    const minute = Number(matched[2]);
-    if (hour > 23 || minute > 59) {
-        return null;
-    }
-
-    return hour * 60 + minute;
-};
-
-/**
- * 判斷課節是否與指定星期及時段有實際重疊；僅在邊界相接不算命中。
- */
-export const isSlotWithinTimeFilter = (slot, timeFilter) => {
-    if (!timeFilter?.day) {
-        return true;
-    }
-
-    if (slot?.Day !== timeFilter.day) {
-        return false;
-    }
-
-    const slotFrom = parseTimeToMinutes(slot['Time From']);
-    const slotTo = parseTimeToMinutes(slot['Time To']);
-    const filterFrom = parseTimeToMinutes(timeFilter.from);
-    const filterTo = parseTimeToMinutes(timeFilter.to);
-
-    if (
-        slotFrom === null ||
-        slotTo === null ||
-        filterFrom === null ||
-        filterTo === null
-    ) {
-        return false;
-    }
-
-    return slotFrom < slotTo &&
-        filterFrom < filterTo &&
-        slotFrom < filterTo &&
-        filterFrom < slotTo;
-};
-
-/**
- * 取得單一 Section 在目前時段及課表下的狀態。
- */
-export const getSectionFilterStatus = ({
-    sectionSlots = [],
-    planSlots = [],
-    timeFilter = defaultTimeFilter,
-}) => {
-    const hasCompleteSchedule = sectionSlots.length > 0 &&
-        sectionSlots.every(slot => {
-            const timeFrom = parseTimeToMinutes(slot['Time From']);
-            const timeTo = parseTimeToMinutes(slot['Time To']);
-
-            return Boolean(slot.Day) &&
-                timeFrom !== null &&
-                timeTo !== null &&
-                timeFrom < timeTo;
-        });
-
-    if (!sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter))) {
-        return null;
-    }
-
-    if (getSectionConflicts(sectionSlots, planSlots).length > 0) {
-        return 'conflict';
-    }
-
-    return hasCompleteSchedule ? 'match' : 'time';
+export {
+    getSectionFilterStatus,
+    isSlotWithinTimeFilter,
+    parseTimeToMinutes,
 };
 
 /**

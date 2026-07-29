@@ -65,7 +65,10 @@ import {
 import TouchableScale from '../../../../../components/TouchableScale';
 import CustomBottomSheet from '../../../../../utils/BottomSheet';
 import { useCoursePlan } from '../../context/CoursePlanContext';
-import { getSlotKey } from '../../hooks/useConflict';
+import {
+    getSectionFilterStatus,
+    getSlotKey,
+} from '../../hooks/useConflict';
 import { normalizeImportText } from '../../utils/parseImportData';
 import AddCourseFab from '../../components/AddCourseFab';
 import CourseTimeRangePicker from '../../components/CourseTimeRangePicker';
@@ -276,6 +279,7 @@ function CourseSim({ route, navigation }) {
         bg_color,
         unread,
         success,
+        warning,
         TIME_TABLE_COLOR,
         isLight,
     } = theme;
@@ -414,6 +418,12 @@ function CourseSim({ route, navigation }) {
             backgroundColor: tonal.primary15,
             borderWidth: 1,
             borderColor: themeColorUltraLight,
+        },
+        conflictCourseCard: {
+            borderColor: warning,
+        },
+        sectionSearchCard: {
+            width: '45%',
         },
     });
 
@@ -2117,25 +2127,22 @@ E11-0000
             ? handleSearchFilterCourse(searchText)
             : [];
         const haveSearchResult = searchText && filterCourseList.length > 0;
-        const matchesActiveScheduleFilter = course => {
-            if (!dayFilterChoice) {
-                return true;
-            }
-
-            const courseStart = moment(course['Time From'], 'HH:mm');
-            const courseEnd = moment(course['Time To'], 'HH:mm');
-            const filterStart = moment(timeFilterFrom, 'HH:mm');
-            const filterEnd = moment(timeFilterTo, 'HH:mm');
-
+        const activeTimeFilter = {
+            day: dayFilterChoice,
+            from: timeFilterFrom,
+            to: timeFilterTo,
+        };
+        const allSectionsConflict = sectionStatusObj => {
+            const sectionStatuses = Object.values(sectionStatusObj);
             return (
-                course.Day === dayFilterChoice &&
-                courseStart.isBefore(filterEnd) &&
-                courseEnd.isAfter(filterStart)
+                sectionStatuses.length > 0 &&
+                sectionStatuses.every(status => status === 'conflict')
             );
         };
 
         // 整理所有候選課程的 Section
         const courseCodeObj = {};
+        const courseSectionStatusObj = {};
         if (haveSearchResult) {
             filterCourseList.forEach(i => {
                 const codeRes = courseTimeList.filter(itm =>
@@ -2145,6 +2152,15 @@ E11-0000
                 );
                 const sectionObj = lodash.groupBy(codeRes, 'Section');
                 courseCodeObj[i['Course Code']] = sectionObj;
+                courseSectionStatusObj[i['Course Code']] = lodash.mapValues(
+                    sectionObj,
+                    sectionSlots =>
+                        getSectionFilterStatus({
+                            sectionSlots,
+                            planSlots,
+                            timeFilter: activeTimeFilter,
+                        }),
+                );
             });
         }
 
@@ -2188,18 +2204,18 @@ E11-0000
                                 flexWrap: 'wrap',
                             }}>
                             {filterCourseList.map(item => {
-                                const sectionObj =
-                                    courseCodeObj[item['Course Code']];
+                                const sectionStatusObj =
+                                    courseSectionStatusObj[
+                                        item['Course Code']
+                                    ];
+                                const hasCourseConflict =
+                                    allSectionsConflict(sectionStatusObj);
                                 let dayInFilter = true;
 
                                 if (dayFilterChoice) {
-                                    dayInFilter = lodash.some(
-                                        Object.keys(sectionObj),
-                                        key =>
-                                            sectionObj[key].some(
-                                                matchesActiveScheduleFilter,
-                                            ),
-                                    );
+                                    dayInFilter = Object.values(
+                                        sectionStatusObj,
+                                    ).some(Boolean);
                                 }
 
                                 if (!dayInFilter) {
@@ -2209,7 +2225,12 @@ E11-0000
                                 return (
                                     <TouchableOpacity
                                         key={item['Course Code']}
-                                        style={s.courseCard}
+                                        style={[
+                                            s.courseCard,
+                                            hasCourseConflict
+                                                ? s.conflictCourseCard
+                                                : null,
+                                        ]}
                                         onPress={() => {
                                             trigger();
                                             setPerSearchText(searchText);
@@ -2244,6 +2265,10 @@ E11-0000
                         filterCourseList.length === 1 &&
                         filterCourseList.map(i => {
                             const sectionObj = courseCodeObj[i['Course Code']];
+                            const sectionStatusObj =
+                                courseSectionStatusObj[i['Course Code']];
+                            const hasCourseConflict =
+                                allSectionsConflict(sectionStatusObj);
                             return (
                                 <View
                                     style={{
@@ -2283,7 +2308,12 @@ E11-0000
                                         }}>{`↓ ${t('全部放入課表', { ns: 'timetable' })}`}</Text>
 
                                     <TouchableOpacity
-                                        style={s.courseCard}
+                                        style={[
+                                            s.courseCard,
+                                            hasCourseConflict
+                                                ? s.conflictCourseCard
+                                                : null,
+                                        ]}
                                         onPress={() => {
                                             trigger();
                                             bottomSheetRef.current?.snapToIndex(
@@ -2338,17 +2368,20 @@ E11-0000
                                             sectionKey => {
                                                 const courseInfo =
                                                     sectionObj[sectionKey][0];
+                                                const sectionStatus =
+                                                    sectionStatusObj[
+                                                        sectionKey
+                                                    ];
+                                                const hasSectionConflict =
+                                                    sectionStatus ===
+                                                    'conflict';
                                                 const sortedSection = daySort(
                                                     sectionObj[sectionKey],
                                                 );
 
-                                                let dayInFilter = true;
-                                                if (dayFilterChoice) {
-                                                    dayInFilter =
-                                                        sortedSection.some(
-                                                            matchesActiveScheduleFilter,
-                                                        );
-                                                }
+                                                const dayInFilter =
+                                                    !dayFilterChoice ||
+                                                    Boolean(sectionStatus);
 
                                                 if (!dayInFilter) {
                                                     return null;
@@ -2357,10 +2390,13 @@ E11-0000
                                                 return (
                                                     <TouchableOpacity
                                                         key={sectionKey}
-                                                        style={{
-                                                            ...s.courseCard,
-                                                            width: '45%',
-                                                        }}
+                                                        style={[
+                                                            s.courseCard,
+                                                            s.sectionSearchCard,
+                                                            hasSectionConflict
+                                                                ? s.conflictCourseCard
+                                                                : null,
+                                                        ]}
                                                         onPress={() => {
                                                             trigger();
                                                             addCourse(

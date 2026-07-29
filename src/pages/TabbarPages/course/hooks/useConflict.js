@@ -167,6 +167,85 @@ export const getSectionConflicts = (candidateSlots, planSlots) => {
 };
 
 /**
+ * 判斷課節是否與指定星期及時段有實際重疊。
+ *
+ * 僅在邊界相接不算命中；未指定星期時保留所有課節。
+ *
+ * @param {Object} slot 課節
+ * @param {{day: string|null, from: string, to: string}} timeFilter 時段篩選
+ * @returns {boolean} 是否符合
+ */
+export const isSlotWithinTimeFilter = (slot, timeFilter) => {
+    if (!timeFilter?.day) {
+        return true;
+    }
+
+    if (slot?.Day !== timeFilter.day) {
+        return false;
+    }
+
+    const slotFrom = parseTimeToMinutes(slot['Time From']);
+    const slotTo = parseTimeToMinutes(slot['Time To']);
+    const filterFrom = parseTimeToMinutes(timeFilter.from);
+    const filterTo = parseTimeToMinutes(timeFilter.to);
+
+    if (
+        slotFrom === null ||
+        slotTo === null ||
+        filterFrom === null ||
+        filterTo === null
+    ) {
+        return false;
+    }
+
+    return (
+        slotFrom < slotTo &&
+        filterFrom < filterTo &&
+        slotFrom < filterTo &&
+        filterFrom < slotTo
+    );
+};
+
+/**
+ * 取得單一 Section 在目前時段及課表下的狀態。
+ *
+ * @param {Object} options
+ * @param {Array<Object>} options.sectionSlots Section 的所有課節
+ * @param {Array<Object>} options.planSlots 目前課表課節
+ * @param {{day: string|null, from: string, to: string}} options.timeFilter 時段篩選
+ * @returns {'match'|'time'|'conflict'|null} Section 狀態
+ */
+export const getSectionFilterStatus = ({
+    sectionSlots = [],
+    planSlots = [],
+    timeFilter = {day: null, from: '00:00', to: '23:59'},
+}) => {
+    const hasCompleteSchedule =
+        sectionSlots.length > 0 &&
+        sectionSlots.every(slot => {
+            const slotFrom = parseTimeToMinutes(slot['Time From']);
+            const slotTo = parseTimeToMinutes(slot['Time To']);
+
+            return (
+                Boolean(slot.Day) &&
+                slotFrom !== null &&
+                slotTo !== null &&
+                slotFrom < slotTo
+            );
+        });
+
+    if (!sectionSlots.some(slot => isSlotWithinTimeFilter(slot, timeFilter))) {
+        return null;
+    }
+
+    if (getSectionConflicts(sectionSlots, planSlots).length > 0) {
+        return 'conflict';
+    }
+
+    return hasCompleteSchedule ? 'match' : 'time';
+};
+
+/**
  * 由課表課節推導衝突資訊。
  *
  * @param {Array<Object>} planSlots 目前課表的所有課節
